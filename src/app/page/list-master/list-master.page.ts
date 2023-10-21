@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -12,6 +12,7 @@ import { SpeechRecognition } from "@capacitor-community/speech-recognition";
   styleUrls: ['./list-master.page.scss'],
 })
 export class ListMasterPage implements OnInit {
+
   myMenu: any = [];
   loading: any;
   subscription: any;
@@ -27,12 +28,20 @@ export class ListMasterPage implements OnInit {
   breakdown: any = {};
   pr: any = {};
   indent: any = {};
-  slideOptsOne = {
+  option = {
+    slidesPerView:1.5,
+    centeredSlides:true,
+    loop: true,
+    spaceBetween: 10,
+    // autoplay: true
+   }
+  menuSlide = {
     initialSlide: 0,
-    slidesPerView: 1,
-    autoplay: true,
-  };
+    slidesPerView: 3.1,
+    autoplay: false,
+  }
   isInternet!: boolean;
+  bars: any;
   constructor(
     private listMaster: ListMasterService,
     private toastController: ToastController,

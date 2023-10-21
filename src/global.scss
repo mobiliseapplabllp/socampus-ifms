@@ -29,14 +29,12 @@
   --height: 93%;
   --border-radius: 5px;
   padding: 25px;
-  // --ion-background-color:red;
 }
 
 .my-modal2{
   --height: 50%;
   --border-radius: 5px;
   padding: 25px;
-  // --ion-background-color:red;
 }
 
 .center {
@@ -48,4 +46,37 @@
 body.scanner-active {
   --background: '#00000000';
   --ion-background-color: '#00000000';
+}
+
+section.inputbox {
+  padding:0px 10px !important;
+  ion-text {
+    font-size: 14px;
+    font-weight: 550;
+
+  }
+  ion-item {
+    margin: 5px 0px;
+    font-weight: bold;
+    font-size:90%;
+    background-color: rgba(227, 237, 255, 0.8);
+    border-radius: 10px;
+    ion-icon {
+      margin-right: 16px;
+    }
+    ion-input {
+      background-color:transparent !important
+    }
+    ion-select {
+      width:100%
+    }
+  }
+}
+
+ion-button.ion-color-primary, ion-toolbar.ion-color-primary {
+  --ion-color-base: linear-gradient(
+  195deg,
+  #25589c 20%,
+  var(--ion-color-primary) 100%
+  ) !important;
 }

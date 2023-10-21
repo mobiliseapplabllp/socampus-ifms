@@ -1,24 +1,101 @@
 <ion-header>
-  <ion-toolbar color="dark">
+  <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title> {{userName}} </ion-title>
-    <!-- <ion-buttons slot="end" >
-      <ion-button (click)="openPageTest('/menu-roaster')">Roaster</ion-button>
-      <ion-button (click)="openPageTest('/digital-checklist')">Digital</ion-button>
-      <ion-button (click)="openPageTest('/manuals')">Manuals</ion-button>
-      <ion-button (click)="openPageTest('/meal-checking')">Manuals</ion-button>
-    </ion-buttons> -->
+    <ion-buttons slot="end">
+      <ion-button slot="icon-only">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+      <ion-button slot="icon-only">
+        <ion-icon name="person-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 
 </ion-header>
 <ion-content>
-  <!-- <ion-button (click)="listen()">Listen</ion-button>
-  <ion-button (click)="removeListen()">Remove Listen</ion-button>
-  <ion-button (click)="permission()">Permission</ion-button> -->
-  <ion-row *ngIf="isInternet">
-    <ion-col class="ion-text-center" > <!-- (click)="speak()"-->
+  <ion-item>
+    <ion-label>
+      <h2><b>Welcome Home</b></h2>
+      <p><ion-text >{{userName}}</ion-text></p>
+    </ion-label>
+  </ion-item>
+
+  <ion-row>
+    <ion-col class="ion-padding-start">
+      <ion-text color="primary"><b>Our Services</b></ion-text>
+    </ion-col>
+  </ion-row>
+
+  <ion-slides [options]="menuSlide" pager="false" style="padding: 10px">
+    <ion-slide *ngFor="let dat of myMenu">
+      <ion-card style="margin: 5px; min-height: 80px;width:100%; box-shadow:1px 4px 10px #948a8a;border-radius: 6px;" (click)="openPage(dat)">
+        <div style="height:60px;width:100%" class="center">
+          <ion-img [src]="dat.icon_path" style="height:35px;width:35px"></ion-img>
+        </div>
+        <div style="min-height:20px;width:100%" class="center">
+          <ion-text color="primary" style="font-weight: 500;"> {{dat.smnu_desc}} </ion-text>
+        </div>
+      </ion-card>
+    </ion-slide>
+  </ion-slides>
+
+  <ion-row>
+    <ion-col class="ion-padding-start">
+      <ion-text color="primary"><b>Devices</b></ion-text>
+    </ion-col>
+  </ion-row>
+
+  <div class="dashboard">
+    <ion-slides   [options]="option">
+      <ion-slide>
+        <ion-card  class="ion-text-left ion-padding">
+          <div>
+            <ion-icon name="flame-outline" color="light" style="font-size: 40px" ></ion-icon><br>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;">Breakdown </ion-text>
+          </div>
+          <br>
+          <div>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">{{breakdown.assign}}</ion-text>
+          </div>
+        </ion-card>
+      </ion-slide>
+      <ion-slide>
+        <ion-card  class="ion-text-left ion-padding">
+          <div>
+            <ion-icon name="flame-outline" color="light" style="font-size: 40px" ></ion-icon><br>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;">PMS </ion-text>
+          </div>
+          <br>
+          <div>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">{{pr.assign}}</ion-text>
+          </div>
+        </ion-card>
+      </ion-slide>
+      <ion-slide>
+        <ion-card  class="ion-text-left ion-padding">
+          <div>
+            <ion-icon name="flame-outline" color="light" style="font-size: 40px" ></ion-icon><br>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;">Spare Part </ion-text>
+          </div>
+          <br>
+          <div>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">{{indent.inapproval}}</ion-text><!--{{indent.inapproval}}-->
+          </div>
+        </ion-card>
+      </ion-slide>
+    </ion-slides>
+  </div>
+
+
+
+
+
+
+  <!-- <ion-row *ngIf="isInternet">
+    <ion-col class="ion-text-center" >
       <ion-text color="primary"><b>Working Summary</b></ion-text>
     </ion-col>
   </ion-row>
@@ -37,7 +114,7 @@
             <ion-col size="6">
               <div>
                 <section>
-                  <ion-text color="dark">{{breakdown.assign}}</ion-text>
+                  <ion-text color="primary">{{breakdown.assign}}</ion-text>
                 </section>
                 <section class="val">
                   <span>
@@ -239,5 +316,5 @@
         </ion-card>
       </ion-col>
     </ion-row>
-  </ion-grid>
+  </ion-grid> -->
 </ion-content>
