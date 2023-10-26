@@ -122,7 +122,7 @@
     </div>
     <div *ngSwitchCase="'actionable'">
       <ion-toolbar>
-        <ion-searchbar (ionChange)="searchItem($event, 2)" debounce="1000"></ion-searchbar>
+        <ion-searchbar mode="md" (ionChange)="searchItem($event, 2)" debounce="1000"></ion-searchbar>
       </ion-toolbar>
       <ion-card class="myCard" *ngFor="let dat of actionPm; let i = index" >
         <ion-card-header color="primary" class="ion-no-padding">
@@ -190,7 +190,7 @@
     <!-- RESOLVED -->
     <div *ngSwitchCase="'closed'" class="openInner">
       <ion-toolbar>
-        <ion-searchbar (ionChange)="searchItem($event, 3)" debounce="1000"></ion-searchbar>
+        <ion-searchbar mode="md" (ionChange)="searchItem($event, 3)" debounce="1000"></ion-searchbar>
       </ion-toolbar>
       <ion-card class="myCard" *ngFor="let dat of closePm; let i = index" >
         <ion-card-header color="primary">

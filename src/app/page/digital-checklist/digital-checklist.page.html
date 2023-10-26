@@ -54,7 +54,7 @@
 
   <div [ngSwitch]='segmentStatus'>
     <div *ngSwitchCase= "'assigned'">
-      <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
+      <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
         <ion-item lines="none" color="none">
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
@@ -82,7 +82,7 @@
       </ion-item> -->
     </div>
     <div *ngSwitchCase= "'attended'">
-      <ion-card *ngFor="let dat of attendedCheckList" style="padding: 5px;">
+      <ion-card *ngFor="let dat of attendedCheckList" style="padding: 5px; margin: 5px">
         <ion-item lines="none" color="none">
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">

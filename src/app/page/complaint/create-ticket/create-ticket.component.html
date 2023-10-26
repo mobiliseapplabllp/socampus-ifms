@@ -13,7 +13,7 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <form [formGroup]="createForm">
+  <form [formGroup]="createForm" mode="md">
   <ion-card>
     <ion-card-header color="primary"> User Detail </ion-card-header>
     <ion-card-content>
@@ -157,7 +157,7 @@
       </ion-item>
       <ion-button size="small" [color]="fileName ? 'success': 'danger'" fill="outline" (click)="openCamera()">Attachment <ion-icon name="attach-outline" slot="end"></ion-icon></ion-button>
       <br>
-      <ion-button expand="block" [disabled]="createForm.invalid" (click)="submit()">Submit <ion-icon name="save-outline" slot="end"></ion-icon></ion-button>
+      <ion-button expand="block" [disabled]="createForm.invalid" (click)="submit()" color="primary">Submit <ion-icon name="save-outline" slot="end"></ion-icon></ion-button>
 
     </ion-card-content>
   </ion-card>

@@ -63,7 +63,7 @@
         </ion-item>
         <ion-row>
           <ion-col size="12" class="ion-no-padding" >
-            <ion-radio-group  [(ngModel)]="val.rspns" (ionChange)="changeResponseAction(val, $event)">
+            <ion-radio-group  [(ngModel)]="val.rspns" (ionChange)="changeResponseAction(val, $event)" mode="md">
               <ion-row>
                 <ion-col size="4" *ngFor="let opt of val.options">
                   <ion-item lines="none" [disabled]="schedule_status === 2 || schedule_status === 'attended'" >
@@ -109,6 +109,6 @@
 </ion-content>
 <ion-footer *ngIf="scheduleArr.length > 0" [hidden]="schedule_status === 2 || schedule_status === 'attended'">
   <ion-toolbar>
-    <ion-button expand="block" (click)="finalSubmit()" tappable>Submit <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
+    <ion-button expand="block" (click)="finalSubmit()" color="primary" tappable>Submit <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
   </ion-toolbar>
 </ion-footer>

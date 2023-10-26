@@ -6,14 +6,16 @@ import { ListMasterService } from 'src/app/provider/list-master/list-master.serv
 import { LoginService } from 'src/app/provider/login/login.service';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
+import Chart from 'chart.js/auto';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
   styleUrls: ['./list-master.page.scss'],
 })
 export class ListMasterPage implements OnInit {
-
   myMenu: any = [];
+  menuTemp: any = [];
+  menuNew: any = [];
   loading: any;
   subscription: any;
   counter = 0;
@@ -32,16 +34,54 @@ export class ListMasterPage implements OnInit {
     slidesPerView:1.5,
     centeredSlides:true,
     loop: true,
-    spaceBetween: 10,
-    // autoplay: true
+    spaceBetween: 5,
+    breakpoints: {
+      320: {
+        slidesPerView: 1.5,
+      },
+      480: {
+        slidesPerView: 1.6,
+      },
+      530: {
+        slidesPerView: 1.7,
+      },
+      640: {
+        slidesPerView: 1.8,
+      },
+      700: {
+        slidesPerView: 1.9,
+      },
+    }
    }
   menuSlide = {
     initialSlide: 0,
-    slidesPerView: 3.1,
+    slidesPerView: 3.8,
     autoplay: false,
+    spaceBetween: 0,
+    breakpoints: {
+      320: {
+        slidesPerView: 3.8,
+      },
+      480: {
+        slidesPerView: 3.3,
+      },
+      530: {
+        slidesPerView: 3.5,
+      },
+      640: {
+        slidesPerView: 3.9,
+      },
+      700: {
+        slidesPerView: 4.1,
+      },
+    }
   }
   isInternet!: boolean;
   bars: any;
+  title = 'ng-chart';
+  chart: any = [];
+  circleVal: any;
+  circleData = 95;
   constructor(
     private listMaster: ListMasterService,
     private toastController: ToastController,
@@ -58,6 +98,8 @@ export class ListMasterPage implements OnInit {
   }
 
   ngOnInit() {
+    this.circleVal = 722 - this.circleData * 7.22;
+
     this.common.checkInternet().then(res => {
       if (res) {
         this.isInternet = true;
@@ -69,6 +111,7 @@ export class ListMasterPage implements OnInit {
         let menu, MENU_TEMP = localStorage.getItem('home_menu');
         if (MENU_TEMP) {
           this.myMenu = JSON.parse(MENU_TEMP);
+          this.chunkedArray(this.myMenu)
           this.isInternet = false;
           console.log(menu);
         } else {
@@ -76,6 +119,75 @@ export class ListMasterPage implements OnInit {
         }
       }
     });
+
+    // this.chart = new Chart('canvas', {
+    //   type: 'bar',
+    //   data: {
+    //     labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+    //     datasets: [{
+    //       label: 'Reporting',
+    //       data: [12, 18, 3, 5, 2, 3],
+    //       borderWidth: 1,
+    //       backgroundColor: '#25589c'
+    //     }],
+    //   },
+    //   options: {
+    //     scales: {
+    //       y: {
+    //         beginAtZero: true,
+    //       },
+    //     },
+    //   },
+    // });
+    this.stackedBarChart();
+  }
+
+  stackedBarChart() {
+    this.chart = new Chart('canvas', {
+      type: 'bar',
+      data : {
+        labels: ['15 Oct','16 Oct','17 Oct','18 Oct','19 Oct','20 Oct','21 Oct',],
+        datasets: [
+          {
+            label: 'Total',
+            data: [25, 20, 15, 18, 22, 19, 23],
+            borderColor: '#25589c',
+            backgroundColor: '#25589c',
+          },
+          {
+            label: 'Resolved',
+            data: [10, 15, 13, 17, 21, 18, 23],
+            borderColor: '#93C3ED',
+            backgroundColor: '#93C3ED',
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'x',
+        // Elements options apply to all of the options unless overridden in a dataset
+        // In this case, we are setting the border of each horizontal bar to be 2px wide
+        elements: {
+          bar: {
+            borderWidth: 0.6,
+
+          }
+        },
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Reporting'
+          }
+        }
+      },
+    })
+  }
+
+  getCircleValue() {
+
   }
 
   getDashboard() {
@@ -150,12 +262,31 @@ export class ListMasterPage implements OnInit {
         this.result = data;
         if (this.result.status == true) {
           this.myMenu = this.result.data[0].submenu;
+          this.chunkedArray(this.result.data[0].submenu)
           localStorage.setItem('home_menu', JSON.stringify(this.myMenu));
         }
       }, err => {
         this.dismissloading();
       });
     });
+  }
+
+  chunkedArray(array: any) {
+    const perChunk = 2
+    const result = array.reduce((resultArray: any, item: any, index: any) => {
+      const chunkIndex = Math.floor(index/perChunk)
+      if(!resultArray[chunkIndex]) {
+        resultArray[chunkIndex] = []
+      }
+      resultArray[chunkIndex].push(item)
+      return resultArray
+    }, [])
+    this.menuTemp = [...result];
+    this.menuNew = [];
+    for (var i = 0 ; i < this.menuTemp.length; i++) {
+      this.menuNew.push({menu: this.menuTemp[i]});
+    }
+    console.log(this.menuNew);
   }
 
   async presentLoading() {
