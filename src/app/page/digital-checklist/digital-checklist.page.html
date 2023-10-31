@@ -13,21 +13,49 @@
       </ion-button>
     </ion-buttons>
 
-    <ion-popover trigger="chklist-date" >
+    <ion-popover trigger="chklist-date" mode="md">
       <ng-template>
         <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" (ionChange)="changeDateComponent($event)"></ion-datetime>
       </ng-template>
     </ion-popover>
   </ion-toolbar>
+  <ion-toolbar>
+    <ion-slides [options]="slideBanner" [hidden]="scanBarcode" style="margin-bottom:10px">
+      <ion-slide *ngFor="let dat of dateArr" style="padding:0px">
+        <div style="width:40px;height:70px;border-radius: 20px;" [ngClass]="{'black': dat.isSelect, 'medium': !dat.isSelect}" (click)="changeCalendarDate(dat)">
+          <section style="width:40px;height:35px;padding:2px !important">
+            <span class="center" style="height:35px;width:100%;border-radius: 20px;font-size:11px" [ngClass]="{'white': dat.isSelect, 'dark': !dat.isSelect}">
+              {{dat.day}}
+            </span>
+          </section>
+          <section style="width:100%;height:35px;font-size:14px" class="center" [ngClass]="{'text-white': dat.isSelect}">
+            {{dat.date}}
+          </section>
+        </div>
+      </ion-slide>
+    </ion-slides>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [(ngModel)]='segmentStatus'>
+      <ion-segment-button value="assigned">
+        <ion-label>Assigned(<ion-text color="danger">{{assignCheckList.length}}</ion-text>)</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="attended">
+        <ion-label>Attended(<ion-text color="danger">{{attendedCheckList.length}}</ion-text>)</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding-start ion-padding-end">
+
+
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
     <ion-fab-button fill="clear" color="primary" (click)="openBarcode()">
       <ion-icon name="qr-code-outline"></ion-icon>
     </ion-fab-button>
   </ion-fab>
-  <ion-row [hidden]="scanBarcode">
+  <!-- <ion-row [hidden]="scanBarcode">
     <ion-col size="4" class="ion-text-left">
       <ion-button fill="clear" (click)="changeDate('prev')">
         <ion-icon name="chevron-back-outline"></ion-icon>
@@ -41,16 +69,9 @@
         <ion-icon name="chevron-forward-outline"></ion-icon>
       </ion-button>
     </ion-col>
-  </ion-row>
+  </ion-row> -->
 
-  <ion-segment [(ngModel)]='segmentStatus' style="background-color: white">
-    <ion-segment-button value="assigned">
-      <ion-label>Assigned(<ion-text color="danger">{{assignCheckList.length}}</ion-text>)</ion-label>
-    </ion-segment-button>
-    <ion-segment-button value="attended">
-      <ion-label>Attended(<ion-text color="danger">{{attendedCheckList.length}}</ion-text>)</ion-label>
-    </ion-segment-button>
-  </ion-segment>
+
 
   <div [ngSwitch]='segmentStatus'>
     <div *ngSwitchCase= "'assigned'">

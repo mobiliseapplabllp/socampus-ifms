@@ -1,17 +1,17 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonDatetime, LoadingController, Platform } from '@ionic/angular';
+import { IonDatetime, IonSlides, LoadingController, Platform } from '@ionic/angular';
 import * as moment from 'moment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { environment } from 'src/environments/environment';
-
 @Component({
   selector: 'app-digital-checklist',
   templateUrl: './digital-checklist.page.html',
   styleUrls: ['./digital-checklist.page.scss'],
 })
 export class DigitalChecklistPage implements OnInit {
+  @ViewChild(IonSlides) slides!: IonSlides;
   @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
   segmentStatus = 'assigned';
   allChecklist: any = [];
@@ -22,6 +22,30 @@ export class DigitalChecklistPage implements OnInit {
   assignCheckList: any = [];
   attendedCheckList: any = [];
   qrType = 'null';
+  slideBanner = {
+    initialSlide: 0,
+    slidesPerView: 5,
+    autoplay: false,
+    breakpoints: {
+      320: {
+        slidesPerView: 5,
+      },
+      480: {
+        slidesPerView: 6,
+      },
+      530: {
+        slidesPerView: 7,
+      },
+      640: {
+        slidesPerView: 8,
+      },
+      700: {
+        slidesPerView: 9,
+      },
+    }
+  };
+  dateArr: any = [];
+  dateTEMP: any;
   constructor(
     private common: CommonService,
     private router: Router,
@@ -32,6 +56,33 @@ export class DigitalChecklistPage implements OnInit {
 
   ngOnInit() {
     this.common.setBarcode('');
+    let date = moment().format('YYYY-MM-DD');
+    console.log(date);
+    this.createCustomCalendar(date);
+  }
+
+  createCustomCalendar(DATE: any) {
+    let status: any, index = 0 ,end: any;
+    end = moment(DATE).endOf('month').format('DD');
+    this.dateArr = [];
+    for (let i = 1; i <= end ; i++) {
+      if (moment(DATE).format('YYYY-MM-DD') ==  moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')) {
+        status = true;
+        index = i;
+      } else {
+        status = false
+      }
+      this.dateArr.push({
+        date: moment(DATE).startOf('month').add(i - 1, 'day').format('DD'),
+        day: moment(DATE).startOf('month').add(i - 1, 'day').format('dddd')[0],
+        isSelect: status,
+        ind: i,
+        fulldate : moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')
+      })
+    }
+    setTimeout(() => {
+      this.slides.slideTo(index - 3);
+    }, 50);
   }
 
   ionViewDidLeave() {
@@ -152,7 +203,6 @@ export class DigitalChecklistPage implements OnInit {
     this.router.navigateByUrl(url);
   }
 
-
   async presentLoading(msg?: any) {
     let message;
     if(msg) {
@@ -174,14 +224,36 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   changeDateComponent(ev: any) {
-    console.log(ev.detail.value);
-    this.popoverDatetime.confirm(true);
+    // console.log(this.selectedDate + '=' + ev.target.value);
+    // return;
     this.selectedDate = moment(ev.detail.value).format('YYYY-MM-DD');
-    this.getSchedule(this.selectedDate);
+    const data = {
+      date: moment(ev.detail.value).format('DD'),
+      day: moment(ev.detail.value).format('dddd')[0],
+      fulldate: moment(ev.detail.value).format('YYYY-MM-DD'),
+      ind: parseInt(moment(ev.detail.value).format('DD'), 10),
+    }
+    this.createCustomCalendar(moment(ev.detail.value).format('YYYY-MM-DD'));
+    this.changeCalendarDate(data);
+    this.popoverDatetime.confirm(true);
   }
 
-  openFillReport(data: any) {
+  changeCalendarDate(dat: any) {
+    console.log(dat);
+    this.slides.slideTo(dat.ind - 3);
+    for (var i = 0 ; i < this.dateArr.length; i++) {
+      if (dat.date == this.dateArr[i].date) {
+        this.dateArr[i].isSelect= true;
+      } else {
+        this.dateArr[i].isSelect= false;
+      }
+    }
+    this.selectedDate = dat.fulldate;
+    this.getSchedule(dat.fulldate);
+  }
 
+
+  openFillReport(data: any) {
     if (!data.barcode || data.schedule_status === 'attended') {
       this.router.navigateByUrl('/digital-checklist/fill-report/' + data.schedule_id + '/' + this.isOnBehalf);
     } else {
@@ -223,6 +295,7 @@ export class DigitalChecklistPage implements OnInit {
       this.getSchedule(this.selectedDate);
     }
   }
+
 
   openBarcode() {
     this.allChecklist = [];

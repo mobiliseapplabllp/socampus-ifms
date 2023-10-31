@@ -16,7 +16,6 @@
 
 </ion-header>
 <ion-content>
-  <div style="min-height:70%;width:100%;">
     <ion-item>
       <ion-label>
         <h2><b><ion-text color="primary">Welcome Home</ion-text></b></h2>
@@ -57,7 +56,7 @@
               <ion-img [src]="dat.icon_path" style="height:35px;width:35px"></ion-img>
             </div>
             <div style="min-height:20px;width:100%" class="center">
-              <ion-text color="primary" style="font-weight: 500;"> {{dat.smnu_desc}} </ion-text>
+              <ion-text color="primary" style="font-weight: 500;"> {{dat.smnu_desc | substring: '10'}} </ion-text>
             </div>
           </ion-card>
         </ion-slide>
@@ -71,8 +70,8 @@
     </ion-row>
 
     <div class="dashboard">
-      <ion-slides   [options]="option">
-        <ion-slide>
+      <ion-slides #mySlider (ionSlideDidChange)="slideDidChange()" [options]="option">
+        <ion-slide >
           <ion-card  class="ion-text-left ion-padding">
             <div>
               <ion-icon name="flame-outline" color="light" style="font-size: 40px" ></ion-icon><br>
@@ -80,7 +79,7 @@
             </div>
             <br>
             <div>
-              <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">{{breakdown.assign}}</ion-text>
+              <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">{{breakdown}}</ion-text>
             </div>
           </ion-card>
         </ion-slide>
@@ -92,7 +91,7 @@
             </div>
             <br>
             <div>
-              <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">{{pr.assign}}</ion-text>
+              <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">{{pr}}</ion-text>
             </div>
           </ion-card>
         </ion-slide>
@@ -104,55 +103,77 @@
             </div>
             <br>
             <div>
-              <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">{{indent.inapproval}}</ion-text><!--{{indent.inapproval}}-->
+              <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">{{indent}}</ion-text><!--{{indent.inapproval}}-->
             </div>
           </ion-card>
         </ion-slide>
       </ion-slides>
     </div>
-    <ion-item lines="none">
-      <ion-button slot="start" fill="clear"></ion-button>
-      <ion-label class="ion-text-center"><b>12-December-2023</b></ion-label>
-      <ion-button slot="end" fill="outline">Date <ion-icon name="calendar-outline" slot="end"></ion-icon> </ion-button>
-    </ion-item>
+    <ion-row>
+      <ion-col size="4" class="ion-text-right">
+        <ion-button fill="clear" >
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </ion-button>
+      </ion-col>
+      <ion-col size="4" class="ion-text-center center">
+        <b>12 Oct 2023</b>
+      </ion-col>
+      <ion-col size="2" class="ion-text-left" >
+        <ion-button fill="clear" >
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </ion-button>
+      </ion-col>
+      <ion-col size="2" class="ion-text-left">
+        <ion-button id="home-circle-date" fill="clear" color="primary" class="ion-text-capitalize">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </ion-button>
+        <ion-popover trigger="home-circle-date" mode="md">
+          <ng-template>
+            <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover"  (ionChange)="changeDateComponent($event)"></ion-datetime>
+          </ng-template>
+        </ion-popover>
+      </ion-col>
+    </ion-row>
 
     <div style="width: 100% !important; display: flex;align-items: center; justify-content: center;">
-      <section>
+      <section *ngFor="let dat of circleDashboard">
         <svg width="120" height="120" viewBox="-31.25 -31.25 312.5 312.5" version="1.1"xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
           <circle r="115" cx="125" cy="125" fill="transparent" stroke="#e0e0e0" stroke-width="17" stroke-dasharray="722px" stroke-dashoffset="0"></circle>
-          <circle r="115" cx="125" cy="125" stroke="#FE9004" stroke-width="23" stroke-linecap="round" [attr.stroke-dashoffset]="circleVal" fill="transparent" stroke-dasharray="722"></circle>
-          <text x="102px" y="137px" fill="#013B91" font-size="40px" font-weight="normal" style="transform:rotate(90deg) translate(-7px, -246px)">{{circleData}}%</text>
+          <circle r="115" cx="125" cy="125" [attr.stroke]="dat.color" stroke-width="23" stroke-linecap="round" [attr.stroke-dashoffset]="dat.newval" fill="transparent" stroke-dasharray="722"></circle>
+          <text x="102px" y="137px" fill="#013B91" font-size="40px" font-weight="normal" style="transform:rotate(90deg) translate(-7px, -246px)">{{dat.per}}%</text>
         </svg><br>
         <div class="ion-text-center">
-          <ion-text color="primary"><b>Checklist</b></ion-text>
-        </div>
-
-      </section>
-
-      <section>
-        <svg width="120" height="120" viewBox="-31.25 -31.25 312.5 312.5" version="1.1"xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
-          <circle r="115" cx="125" cy="125" fill="transparent" stroke="#e0e0e0" stroke-width="17" stroke-dasharray="722px" stroke-dashoffset="0"></circle>
-          <circle r="115" cx="125" cy="125" stroke="#0472FE" stroke-width="23" stroke-linecap="round" [attr.stroke-dashoffset]="221" fill="transparent" stroke-dasharray="722"></circle>
-          <text x="102px" y="137px" fill="#013B91" font-size="40px" font-weight="normal" style="transform:rotate(90deg) translate(-7px, -246px)">74%</text>
-        </svg><br>
-        <div class="ion-text-center">
-          <ion-text color="primary"><b>Preventive</b></ion-text>
+          <ion-text color="primary"><b>{{dat.desc}}</b></ion-text>
         </div>
       </section>
-
-      <section>
-        <svg width="120" height="120" viewBox="-31.25 -31.25 312.5 312.5" version="1.1"xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
-          <circle r="115" cx="125" cy="125" fill="transparent" stroke="#e0e0e0" stroke-width="17" stroke-dasharray="722px" stroke-dashoffset="0"></circle>
-          <circle r="115" cx="125" cy="125" stroke="#01A208" stroke-width="23" stroke-linecap="round" [attr.stroke-dashoffset]="270" fill="transparent" stroke-dasharray="722"></circle>
-          <text x="102px" y="137px" fill="#013B91" font-size="40px" font-weight="normal" style="transform:rotate(90deg) translate(-7px, -246px)">63%</text>
-        </svg><br>
-        <div class="ion-text-center">
-          <ion-text color="primary"><b>Reading</b></ion-text>
-        </div>
-      </section>
-
     </div>
-  </div>
+
+
+  <ion-row>
+    <ion-col size="4" class="ion-text-right">
+      <ion-button fill="clear" >
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-col>
+    <ion-col size="4" class="ion-text-center center">
+      <b>12 Oct 2023</b>
+    </ion-col>
+    <ion-col size="2">
+      <ion-button fill="clear" >
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+    </ion-col>
+    <ion-col size="2" class="ion-text-left">
+      <ion-button id="home-pipe-date" fill="clear" color="primary" class="ion-text-capitalize">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </ion-button>
+      <ion-popover trigger="home-pipe-date" mode="md">
+        <ng-template>
+          <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover"  (ionChange)="changeDateComponent($event)"></ion-datetime>
+        </ng-template>
+      </ion-popover>
+    </ion-col>
+  </ion-row>
 
   <div style="width:100%;">
     <canvas id="canvas" style="width:100%;">{{chart}}</canvas>

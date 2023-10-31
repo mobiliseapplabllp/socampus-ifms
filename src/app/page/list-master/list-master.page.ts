@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController, ModalController, ToastController } from '@ionic/angular';
+import { IonDatetime, IonSlides, LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ListMasterService } from 'src/app/provider/list-master/list-master.service';
 import { LoginService } from 'src/app/provider/login/login.service';
@@ -13,6 +13,8 @@ import Chart from 'chart.js/auto';
   styleUrls: ['./list-master.page.scss'],
 })
 export class ListMasterPage implements OnInit {
+  @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
+  @ViewChild('mySlider', { static: true }) slides!: IonSlides;
   myMenu: any = [];
   menuTemp: any = [];
   menuNew: any = [];
@@ -27,9 +29,9 @@ export class ListMasterPage implements OnInit {
   userData: any = [];
   result: any = [];
   userName!: string;
-  breakdown: any = {};
-  pr: any = {};
-  indent: any = {};
+  breakdown = '10';
+  pr = '11';
+  indent = '12';
   option = {
     slidesPerView:1.5,
     centeredSlides:true,
@@ -82,6 +84,20 @@ export class ListMasterPage implements OnInit {
   chart: any = [];
   circleVal: any;
   circleData = 95;
+  circleDashboard: any = [{
+    desc: 'Checklist',
+    color: '#FE9004',
+    per: 95
+  },{
+    desc: 'Preventive',
+    color: '#0472FE',
+    per: 50
+  },{
+    desc: 'Reading',
+    color: '#01A208',
+    per: 80
+  }]
+
   constructor(
     private listMaster: ListMasterService,
     private toastController: ToastController,
@@ -119,27 +135,8 @@ export class ListMasterPage implements OnInit {
         }
       }
     });
-
-    // this.chart = new Chart('canvas', {
-    //   type: 'bar',
-    //   data: {
-    //     labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-    //     datasets: [{
-    //       label: 'Reporting',
-    //       data: [12, 18, 3, 5, 2, 3],
-    //       borderWidth: 1,
-    //       backgroundColor: '#25589c'
-    //     }],
-    //   },
-    //   options: {
-    //     scales: {
-    //       y: {
-    //         beginAtZero: true,
-    //       },
-    //     },
-    //   },
-    // });
     this.stackedBarChart();
+    this.getCircleValue();
   }
 
   stackedBarChart() {
@@ -164,8 +161,6 @@ export class ListMasterPage implements OnInit {
       },
       options: {
         indexAxis: 'x',
-        // Elements options apply to all of the options unless overridden in a dataset
-        // In this case, we are setting the border of each horizontal bar to be 2px wide
         elements: {
           bar: {
             borderWidth: 0.6,
@@ -187,16 +182,21 @@ export class ListMasterPage implements OnInit {
   }
 
   getCircleValue() {
-
+    for (var i = 0 ; i < this.circleDashboard.length;i++) {
+      let val = this.circleDashboard[i].per;
+      this.circleDashboard[i].newval = 722 - this.circleDashboard[i].per * 7.22;
+    }
+    console.log(this.circleDashboard);
   }
 
   getDashboard() {
     this.listMaster.getDashboard().subscribe(data => {
       console.log(data);
       if (data.status) {
-        this.breakdown = data.data.breakdown;
-        this.pr = data.data.pms;
-        this.indent = data.data.indent
+        this.breakdown =  data.data.breakdown.assign.toString();
+        this.pr = data.data.pms.assign.toString();
+        this.indent = data.data.indent.assign.toString()
+
       }
     });
   }
@@ -321,6 +321,21 @@ export class ListMasterPage implements OnInit {
         }
       }
     })
+  }
 
+  changeDateComponent(ev: any) {
+    console.log(ev.detail.value);
+    this.popoverDatetime.confirm(true);
+
+  }
+
+  slideDidChange(){
+    this.slides.getActiveIndex().then(index => {
+      console.log('Active slide index:', index);
+      if (index == 5) {
+        this.breakdown = '';
+        this.breakdown = '90';
+      }
+    });
   }
 }

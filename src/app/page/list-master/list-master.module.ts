@@ -7,6 +7,8 @@ import { IonicModule } from '@ionic/angular';
 import { ListMasterPageRoutingModule } from './list-master-routing.module';
 
 import { ListMasterPage } from './list-master.page';
+import { SubstringPipe } from 'src/app/pipes/substring.pipe';
+// import { SharedModule } from 'src/app/shared/shared.module';
 // import { SharedModule } from 'src/app/shared/shared.module';
 
 @NgModule({
@@ -16,7 +18,8 @@ import { ListMasterPage } from './list-master.page';
     IonicModule,
     ListMasterPageRoutingModule,
     // SharedModule
+
   ],
-  declarations: [ListMasterPage]
+  declarations: [ListMasterPage, SubstringPipe]
 })
 export class ListMasterPageModule {}

@@ -11,6 +11,7 @@ import { QuerySubCatComponent } from './query-sub-cat/query-sub-cat.component';
 import { QuerySubCat2Component } from './query-sub-cat2/query-sub-cat2.component';
 import { BarcodeComponent } from './barcode/barcode.component';
 import { AssetPlantComponent } from '../page/add-asset/asset-plant/asset-plant.component';
+// import { SubstringPipe } from '../pipes/substring.pipe';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -20,7 +21,8 @@ import { AssetPlantComponent } from '../page/add-asset/asset-plant/asset-plant.c
     QuerySubCatComponent,
     QuerySubCat2Component,
     BarcodeComponent,
-    AssetPlantComponent
+    AssetPlantComponent,
+    // SubstringPipe
   ],
   imports: [
     CommonModule,
@@ -38,6 +40,9 @@ import { AssetPlantComponent } from '../page/add-asset/asset-plant/asset-plant.c
     QuerySubCat2Component,
     BarcodeComponent,
     AssetPlantComponent
+  ],
+  exports: [
+    // SubstringPipe
   ]
 })
 export class SharedModule { }
