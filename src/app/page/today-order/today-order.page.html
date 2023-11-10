@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Today Order</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="orderReceived()">Order Received</ion-button>
+      <ion-button (click)="history()">History</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card *ngFor="let dat of todayOrder" style="box-shadow: none;background-color:#0D1F9A0D;border-radius: 10px;margin: 10px">
+    <ion-item lines="none" color="none">
+      <div style="width:5px;height:60px;background-color:black;border-radius: 20px; margin:5px" slot="start"></div>
+      <ion-label slot="start" class="ion-text-wrap">
+        <p><ion-text>{{dat.order_id}}</ion-text></p>
+        <p><ion-text>Pick Time: {{dat.pick_time}}</ion-text></p>
+        <p><ion-text>Delivery Time: {{dat.delivery_time}}</ion-text></p>
+        <p><ion-text>No of Boxes: {{dat.box}}</ion-text></p>
+      </ion-label>
+      <ion-label slot="end" class="ion-text-wrap">
+        <p><ion-text>PC: {{dat.pc}}</ion-text></p>
+        <p><ion-text>{{dat.location}}</ion-text> <ion-icon name="location-outline" color="danger"></ion-icon> </p>
+        <ion-button [color]="dat.color" class="ion-text-capitalize" (click)="viewBox()">View Box</ion-button>
+      </ion-label>
+    </ion-item>
+  </ion-card>
+
+</ion-content>

@@ -3,11 +3,11 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { BarcodeComponent } from './shared/barcode/barcode.component';
 
 const routes: Routes = [
-  // {
-  //   path: '',
-  //   redirectTo: '/login',
-  //   pathMatch: 'full'
-  // },
+  {
+    path: '',
+    redirectTo: '/login',
+    pathMatch: 'full'
+  },
   {
     path: 'login',
     loadChildren: () => import('./page/login/login.module').then(m => m.LoginPageModule)
@@ -71,6 +71,14 @@ const routes: Routes = [
   {
     path: 'digital-checklist-offline',
     loadChildren: () => import('./page/digital-checklist-offline/digital-checklist-offline.module').then( m => m.DigitalChecklistOfflinePageModule)
+  },
+  // {
+  //   path: 'today-order/:id',
+  //   loadChildren: () => import('./page/today-order/today-order.module').then( m => m.TodayOrderPageModule)
+  // },
+  {
+    path: 'today-order',
+    loadChildren: () => import('./page/today-order/today-order.module').then( m => m.TodayOrderPageModule)
   },
 ];
 

@@ -194,6 +194,9 @@ export class ListMasterPage implements OnInit {
         }
       }
     })
+  }
 
+  openPageTest(url: string) {
+    this.router.navigateByUrl(url);
   }
 }

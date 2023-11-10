@@ -1,0 +1,26 @@
+.black {
+  background-color: var(--ion-color-primary);
+}
+
+.medium {
+  background-color: #F5F5F5;
+}
+
+.white {
+  background-color: white;
+}
+
+.text-white {
+  color: white;
+}
+
+.dark {
+  background-color: rgba(0, 0, 0, 0.10);
+}
+
+p {
+  margin:0px;
+  font-size:12px;
+  font-weight: 500;
+  line-height: 14px;
+}

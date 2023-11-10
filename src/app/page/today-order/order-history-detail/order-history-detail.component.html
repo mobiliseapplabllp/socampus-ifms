@@ -1,0 +1,42 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Order Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+
+  <ion-card style="box-shadow: none;background-color: #B10000B2;border-radius: 10px;margin: 10px; color:white">
+    <ion-item lines="none" color="none">
+      <ion-label slot="start" class="ion-text-wrap">
+        <p><ion-text color="light">OD192</ion-text></p>
+        <p><ion-text color="light">Pick Time: 11:00</ion-text></p>
+        <p><ion-text color="light">Delivery Time: 12:00</ion-text></p>
+        <p><ion-text color="light">No of Boxes: 125/05</ion-text></p>
+      </ion-label>
+      <ion-label slot="end" class="ion-text-wrap">
+        <p><ion-text color="light">PC: 1000045</ion-text></p>
+        <p><ion-text color="light">GOOGLE CAMPUS</ion-text></p>
+        <ion-button color="dark" class="ion-text-capitalize" slot="end">125/05</ion-button>
+      </ion-label>
+    </ion-item>
+  </ion-card>
+
+  <ion-item *ngFor="let dat of order_details;let i = index">
+    <ion-avatar class="center">
+      <b>{{i}}</b>
+    </ion-avatar>
+    <ion-label>
+      <p>{{dat.item_code}}</p>
+      <p>{{dat.item_name}}</p>
+      <p>{{dat.item_qty}} <img [src]="dat.cat_img" style="height:10px;width:10px"> </p>
+    </ion-label>
+    <ion-button slot="end" [color]="dat.status === 'completed' ? 'success': 'danger'" class="ion-text-capitalize custom-btn" >
+      {{dat.status}}
+    </ion-button>
+  </ion-item>
+
+
+</ion-content>

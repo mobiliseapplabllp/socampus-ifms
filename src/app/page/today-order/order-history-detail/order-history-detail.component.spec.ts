@@ -1,0 +1,24 @@
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { IonicModule } from '@ionic/angular';
+
+import { OrderHistoryDetailComponent } from './order-history-detail.component';
+
+describe('OrderHistoryDetailComponent', () => {
+  let component: OrderHistoryDetailComponent;
+  let fixture: ComponentFixture<OrderHistoryDetailComponent>;
+
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [ OrderHistoryDetailComponent ],
+      imports: [IonicModule.forRoot()]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(OrderHistoryDetailComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  }));
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
