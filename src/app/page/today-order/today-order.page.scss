@@ -2,5 +2,11 @@ p {
   margin:0px;
   font-size:12px;
   font-weight: 500;
-  line-height: 14px;
+  line-height: 14px !important;
+  color:#040E51 !important;
+  font-style: normal;
+  line-height: normal;
+  // ion-text {
+  //   font-weight: 500;
+  // }
 }

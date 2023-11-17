@@ -9,36 +9,37 @@
 <ion-content>
   <ion-card style="box-shadow: none;background-color: #B10000B2;border-radius: 10px;margin: 10px; color:white">
     <ion-item lines="none" color="none">
-      <ion-label slot="start" class="ion-text-wrap">
-        <p><ion-text color="light">OD192</ion-text></p>
-        <p><ion-text color="light">Pick Time: 11:00</ion-text></p>
-        <p><ion-text color="light">Delivery Time: 12:00</ion-text></p>
-        <p><ion-text color="light">No of Boxes: 125/05</ion-text></p>
+      <ion-label slot="start" class="ion-text-wrap" style="color:white">
+        <p><ion-text color="light"><b>ORD ID:</b></ion-text> {{requestedData.order_id}}</p>
+        <p><ion-text><b>PC Name: </b></ion-text> {{requestedData.pc_desc}}<ion-icon name="location-outline" color="danger"></ion-icon> </p>
+        <!-- <p><ion-text><b>No of Boxes:</b> </ion-text> {{requestedData.total_camro_box}}</p> -->
       </ion-label>
-      <ion-label slot="end" class="ion-text-wrap">
-        <p><ion-text color="light">PC: 1000045</ion-text></p>
-        <p><ion-text color="light">GOOGLE CAMPUS</ion-text></p>
-        <ion-button color="dark" class="ion-text-capitalize" slot="end">125/05</ion-button>
+      <ion-label slot="end" class="ion-text-wrap" style="color:white">
+        <p><ion-text><b>PC Code:</b> </ion-text> {{requestedData.pc_ext_id}}</p>
+        <p><ion-text><b>No of Boxes:</b> </ion-text> {{requestedData.total_camro_box}}</p>
       </ion-label>
     </ion-item>
   </ion-card>
 
   <ion-item *ngFor="let dat of order_details;let i = index">
     <ion-avatar class="center">
-      <b>{{i}}</b>
+      <b>{{i+1}}</b>
     </ion-avatar>
     <ion-label>
-      <p>{{dat.item_code}}</p>
-      <p>{{dat.item_name}}</p>
-      <p>{{dat.item_qty}} <img [src]="dat.cat_img" style="height:10px;width:10px"> </p>
+      <p><ion-text color="dark"><b>{{dat.subgrp_desc}}</b></ion-text></p>
+      <p><ion-text color="dark"><b>{{dat.item_name}}</b></ion-text></p>
+      <p><ion-text color="dark"><b>Qty: {{dat.order_qty}}</b> </ion-text> <img src="assets/meal/veg.png" style="height:10px;width:10px"> </p>
+
     </ion-label>
-      <ion-button slot="end" *ngIf="dat.status === 'pending'" fill="clear" size="large">
-        <ion-icon name="barcode-outline"></ion-icon>
-      </ion-button>
-      <!-- <ion-text color="dark" *ngIf="dat.status === 'picked'"><b>Picked</b></ion-text> -->
-      <ion-button slot="end" *ngIf="dat.status === 'picked'" class="ion-text-capitalize" >
-        Picked
-      </ion-button>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="!dat.isPick" (click)="pick(dat)" color="danger">Pick</ion-button>
+      <ion-button *ngIf="dat.isPick" color="success">Picked</ion-button>
+    </ion-buttons>
   </ion-item>
 
 </ion-content>
+<ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <ion-button expand="block" [disabled]="!isAllFull" (click)="dispatchOrder()">Submit</ion-button>
+  </ion-toolbar>
+</ion-footer>

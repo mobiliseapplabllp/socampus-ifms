@@ -1,4 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { LoadingController } from '@ionic/angular';
+import { CommonService } from 'src/app/provider/common/common.service';
+import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-order-history-detail',
@@ -62,9 +67,17 @@ export class OrderHistoryDetailComponent  implements OnInit {
     cat: 'veg',
     status: 'completed',
     cat_img: 'assets/meal/non-veg.png'
-  }]
-  constructor() { }
+  }];
+  loading: any;
+  requestedData: any = [];
+  constructor(
+    private activeRoute: ActivatedRoute,
+    private loadingController: LoadingController,
+    private httpTo: TodayOrderService,
+    private common: CommonService
+  ) { }
 
   ngOnInit() {}
+
 
 }

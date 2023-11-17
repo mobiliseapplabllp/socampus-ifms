@@ -5,28 +5,35 @@
     </ion-buttons>
     <ion-title>Today Order</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="orderReceived()">Order Received</ion-button>
       <ion-button (click)="history()">History</ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-card *ngFor="let dat of todayOrder" style="box-shadow: none;background-color:#0D1F9A0D;border-radius: 10px;margin: 10px">
-    <ion-item lines="none" color="none">
-      <div style="width:5px;height:60px;background-color:black;border-radius: 20px; margin:5px" slot="start"></div>
+  <ion-card *ngFor="let dat of todayOrder" style="box-shadow: none;background-color:#0D1F9A0D;border-radius: 10px;margin: 10px;padding:10px">
+    <ion-item lines="none" color="none" class="ion-no-padding">
+      <div style="width:4px;height:71px;background-color:#040E51;;border-radius: 21px; margin:0px 5px" slot="start"></div>
       <ion-label slot="start" class="ion-text-wrap">
-        <p><ion-text>{{dat.order_id}}</ion-text></p>
-        <p><ion-text>Pick Time: {{dat.pick_time}}</ion-text></p>
-        <p><ion-text>Delivery Time: {{dat.delivery_time}}</ion-text></p>
-        <p><ion-text>No of Boxes: {{dat.box}}</ion-text></p>
+        <p>ORD ID: {{dat.order_id}}</p>
+        <p>PC Name: {{dat.pc_desc}}<ion-icon name="location-outline" color="danger"></ion-icon> </p>
+        <p>No of Cambro Boxes:{{dat.total_camro_box}} / <span style="color:green">05</span> </p>
       </ion-label>
       <ion-label slot="end" class="ion-text-wrap">
-        <p><ion-text>PC: {{dat.pc}}</ion-text></p>
-        <p><ion-text>{{dat.location}}</ion-text> <ion-icon name="location-outline" color="danger"></ion-icon> </p>
-        <ion-button [color]="dat.color" class="ion-text-capitalize" (click)="viewBox()">View Box</ion-button>
+        <p>PC Code: {{dat.pc_ext_id}}</p>
+        <ion-button class="ion-text-capitalize" (click)="viewBox(dat)" style=" --border-radius: 10px;--background:rgba(177, 0, 0, 0.70)">View Box</ion-button>
       </ion-label>
     </ion-item>
+  </ion-card>
+
+  <ion-card *ngFor="let dat of todayOrder" style="box-shadow: none;background-color:#0D1F9A0D;border-radius: 10px;margin: 10px;padding:10px">
+    <ion-row>
+      <ion-col size="1">
+
+      </ion-col>
+      <ion-col size="5"></ion-col>
+      <ion-col size="6"></ion-col>
+    </ion-row>
   </ion-card>
 
 </ion-content>

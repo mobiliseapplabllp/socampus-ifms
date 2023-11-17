@@ -160,20 +160,42 @@ export class FillReportComponent  implements OnInit {
   }
 
   listen(val: any) {
+    var listen;
+    if (val.isRemark) {
+      listen = val.q_desc_temp;
+    } else {
+      listen = val.q_desc;
+    }
     console.log(val);
     SpeechRecognition.start({
       language: this.selectedLanguage,
       maxResults: 2,
-      prompt: val.q_desc,
+      prompt: listen,
       partialResults: true,
       popup: true,
     }).then(res => {
       console.log(res);
-      let respns, voiceResponse, obj, option = val.options.filter((ops: any) => ops.optn_desc === 'Yes')[0];
+      let respns, voiceResponse, obj, option
       voiceResponse = res.matches[0].toLocaleLowerCase();
+      if (val.isRemark) {
+        val.remark = voiceResponse;
+        const obj = {
+          wo_id:this.schedule_id,
+          remark: val.remark,
+          q_id: val.q_id,
+          rspns_source: environment.source,
+          on_behalf : this.on_behalf,
+          optn_id: val.rspns
+        }
+        console.log(obj);
+        this.submitRemark(obj);
+        return;
+      }
       if (voiceResponse === 'yes' || voiceResponse === 'yess' || voiceResponse === 'yeees' || voiceResponse === 'yaaa' || voiceResponse === 'ha') {
+        respns = option = val.options.filter((ops: any) => ops.optn_desc === 'Yes')[0];
         respns = option.optn_id;
       } else if (voiceResponse === 'no' || voiceResponse === 'nooo' || voiceResponse === 'naaa' || voiceResponse === 'na' || voiceResponse === 'nhi') {
+        respns = option = val.options.filter((ops: any) => ops.optn_desc === 'No')[0];
         respns = option.optn_id;
       } else {
         return;
@@ -187,7 +209,8 @@ export class FillReportComponent  implements OnInit {
         q_type:val.q_type,
         q_max_score:val.q_max_score,
         rspns_source: environment.source,
-        on_behalf : this.on_behalf
+        on_behalf : this.on_behalf,
+        listen: true
       }
       this.submitResponseAction(obj, val);
       // val.remark = res.matches[0];
@@ -207,7 +230,8 @@ export class FillReportComponent  implements OnInit {
       q_type:val.q_type,
       q_max_score:val.q_max_score,
       rspns_source: environment.source,
-      on_behalf : this.on_behalf
+      on_behalf : this.on_behalf,
+      listen: false
     }
     this.submitResponseAction(obj, val);
   }
@@ -222,6 +246,11 @@ export class FillReportComponent  implements OnInit {
             val.response.optn_id = val.rspns;
             val.isRemarkMandatory = obj.is_rmrk_mandatory;
             val.isDocMandatory = obj.is_doc_mandatory;
+            if (obj.listen && val.isRemarkMandatory) {
+              val.isRemark = true,
+              val.q_desc_temp = 'Please Enter Remark'
+              this.listen(val);
+            }
           } else if(data.status == false) {
             this.common.presentToast(data.msg, 'warning');
           } else {
@@ -250,6 +279,10 @@ export class FillReportComponent  implements OnInit {
       optn_id: val.rspns
     }
     console.log(obj);
+    this.submitRemark(obj);
+  }
+
+  submitRemark(obj: any) {
     this.presentLoading().then(preLoad => {
       this.httpDigital.schuleRemarkAction(obj).subscribe({
         next:(data) => {

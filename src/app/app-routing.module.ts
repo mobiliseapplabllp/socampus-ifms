@@ -72,10 +72,10 @@ const routes: Routes = [
     path: 'digital-checklist-offline',
     loadChildren: () => import('./page/digital-checklist-offline/digital-checklist-offline.module').then( m => m.DigitalChecklistOfflinePageModule)
   },
-  // {
-  //   path: 'today-order/:id',
-  //   loadChildren: () => import('./page/today-order/today-order.module').then( m => m.TodayOrderPageModule)
-  // },
+  {
+    path: 't-order/:id',
+    loadChildren: () => import('./page/today-order/today-order.module').then( m => m.TodayOrderPageModule)
+  },
   {
     path: 'today-order',
     loadChildren: () => import('./page/today-order/today-order.module').then( m => m.TodayOrderPageModule)
