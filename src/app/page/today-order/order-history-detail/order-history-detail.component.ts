@@ -70,6 +70,7 @@ export class OrderHistoryDetailComponent  implements OnInit {
   }];
   loading: any;
   requestedData: any = [];
+  myData: any = [];
   constructor(
     private activeRoute: ActivatedRoute,
     private loadingController: LoadingController,
@@ -77,7 +78,51 @@ export class OrderHistoryDetailComponent  implements OnInit {
     private common: CommonService
   ) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.activeRoute.queryParams.subscribe((res) => {
+      this.requestedData = JSON.parse(res['data']);
+      console.log(this.requestedData);
+      this.getOrderHistoryDetail();
+    });
+  }
+
+  getOrderHistoryDetail() {
+    this.presentLoading().then(preLoad => {
+      this.httpTo.getOrderDetailView(this.requestedData.order_id).subscribe({
+        next:(data) => {
+          console.log(data);
+          if (data.status) {
+            this.myData = data.data;
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+
+  }
+
+  async presentLoading(msg?: any) {
+    this.loading = await this.loadingController.create({
+      cssClass: 'my-custom-class',
+      message: 'Please Wait...',
+    });
+    await this.loading.present();
+  }
+
+  async dismissloading() {
+    if (this.loading) {
+      this.loading.dismiss();
+    }
+  }
+
 
 
 }

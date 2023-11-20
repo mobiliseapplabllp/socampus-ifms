@@ -431,7 +431,8 @@ export class TicketTypeComponent  implements OnInit {
     this.dismissloading();
     this.loading = await this.loadingController.create({
       cssClass: 'my-custom-class',
-      message: 'Please wait...'
+      message: 'Please wait...',
+      duration: 8000
     });
     await this.loading.present();
   }

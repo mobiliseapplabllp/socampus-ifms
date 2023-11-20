@@ -1,8 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Route, Router } from '@angular/router';
-import { IonSlides } from '@ionic/angular';
+import { IonSlides, LoadingController } from '@ionic/angular';
 import * as moment from 'moment';
+import { CommonService } from 'src/app/provider/common/common.service';
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-order-history',
@@ -109,9 +111,12 @@ export class OrderHistoryComponent  implements OnInit {
   //   color: 'success'
   // }];
   id!: string;
+  loading: any;
   constructor(
     private router: Router,
-    private httpTo: TodayOrderService
+    private httpTo: TodayOrderService,
+    private loadingController: LoadingController,
+    private common: CommonService
   ) { }
 
   ngOnInit() {
@@ -136,7 +141,7 @@ export class OrderHistoryComponent  implements OnInit {
     setTimeout(() => {
       this.slides.slideTo(index - 3);
     }, 50);
-    this.getOrderHistory();
+    this.getOrderHistory(moment().format('YYYY-MM-DD'));
   }
 
   changeDate(dat: any) {
@@ -144,6 +149,8 @@ export class OrderHistoryComponent  implements OnInit {
     for (var i = 0 ; i < this.dateArr.length; i++) {
       if (dat.date == this.dateArr[i].date) {
         this.dateArr[i].isSelect= true
+        console.log(this.dateArr[i]);
+        this.getOrderHistory(this.dateArr[i].fulldate);
       } else {
         this.dateArr[i].isSelect= false
       }
@@ -154,25 +161,51 @@ export class OrderHistoryComponent  implements OnInit {
 
   }
 
-  getOrderHistory() {
-    this.httpTo.getTodayOrderDriver('3', moment().format('YYYY-MM-DD')).subscribe({
-      next:(data) => {
-        console.log(data);
-        if (data.status) {
-          this.history = data.data;
+  getOrderHistory(date: string) {
+    const data = {
+      sdate: date,
+      edate: date
+    }
+    this.presentLoading().then(preLoad => {
+      this.httpTo.getOrderHistory(data).subscribe({
+        next:(data) => {
+          console.log(date);
+          if (data.status) {
+            this.history = data.data.data
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.dismissloading();
+        },complete:() => {
+          this.dismissloading();
         }
-      },
-      error:() => {
-
-      },
-      complete:() => {
-
-      }
+      });
     })
+
   }
 
-  orderDetails() {
-    this.router.navigateByUrl('/today-order/order-history-detail');
+  async presentLoading(msg?: any) {
+    this.loading = await this.loadingController.create({
+      cssClass: 'my-custom-class',
+      message: 'Please Wait...',
+    });
+    await this.loading.present();
+  }
+
+  async dismissloading() {
+    if (this.loading) {
+      this.loading.dismiss();
+    }
+  }
+
+  orderDetails(data: any) {
+    this.router.navigate(['/today-order/order-history-detail'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
   }
 
 }

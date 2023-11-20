@@ -11,20 +11,51 @@
   <ion-card style="box-shadow: none;background-color: #B10000B2;border-radius: 10px;margin: 10px; color:white">
     <ion-item lines="none" color="none">
       <ion-label slot="start" class="ion-text-wrap">
-        <p><ion-text color="light">OD192</ion-text></p>
-        <p><ion-text color="light">Pick Time: 11:00</ion-text></p>
-        <p><ion-text color="light">Delivery Time: 12:00</ion-text></p>
-        <p><ion-text color="light">No of Boxes: 125/05</ion-text></p>
+        <p><ion-text color="light">ORD ID: {{requestedData.order_id}}</ion-text></p>
+        <p><ion-text color="light">PC Name: {{requestedData.pc_name}}</ion-text></p>
       </ion-label>
       <ion-label slot="end" class="ion-text-wrap">
-        <p><ion-text color="light">PC: 1000045</ion-text></p>
-        <p><ion-text color="light">GOOGLE CAMPUS</ion-text></p>
-        <ion-button color="dark" class="ion-text-capitalize" slot="end">125/05</ion-button>
+        <p><ion-text color="light">Amount:  {{requestedData.order_amt}}</ion-text></p>
+        <p><ion-text color="light">Type: {{requestedData.type_desc}}</ion-text></p>
       </ion-label>
     </ion-item>
   </ion-card>
 
-  <ion-item *ngFor="let dat of order_details;let i = index">
+  <div *ngFor="let dat of myData">
+    <ion-item  (click)="dat.isView = !dat.isView">
+      <ion-label>
+        <ion-text color="primary">Item Name</ion-text> : <ion-text color="medium">{{dat.item_name}}</ion-text> <br>
+        <ion-text color="primary">Order Portion</ion-text> : <ion-text color="medium">{{dat.total_portion}}</ion-text> <br>
+        <ion-text color="primary">Total Receive</ion-text> : <ion-text color="medium">{{dat.order_qty}}{{dat.uom}}</ion-text> <br>
+      </ion-label>
+      <ion-button slot="end" fill="clear" >
+        <ion-icon [name]="!dat.isView ? 'chevron-forward-outline': 'chevron-down-outline'"></ion-icon>
+      </ion-button>
+    </ion-item>
+    <div *ngIf="dat.isView">
+      <ion-card *ngFor="let val of dat.cambro_dtl">
+        <ion-row>
+          <ion-col size="6">
+            <ion-text color="primary">Cambro Id</ion-text><br>
+            <ion-text color="medium">#{{val.camro_box_id}}/{{val.ext_asset_id}}</ion-text>
+          </ion-col>
+          <ion-col size="6">
+            <ion-text color="primary">Dispatch Qty</ion-text><br>
+            <ion-text color="medium">{{val.dispatch_qty}}</ion-text>
+          </ion-col>
+          <ion-col size="6">
+            <ion-text color="primary">Received_qty Qty</ion-text><br>
+            <ion-text color="medium">{{val.received_qty}}</ion-text>
+          </ion-col>
+        </ion-row>
+      </ion-card>
+    </div>
+  </div>
+
+
+
+
+  <!-- <ion-item *ngFor="let dat of order_details;let i = index">
     <ion-avatar class="center">
       <b>{{i+1}}</b>
     </ion-avatar>
@@ -36,7 +67,7 @@
     <ion-button slot="end" [color]="dat.status === 'completed' ? 'success': 'danger'" class="ion-text-capitalize custom-btn" >
       {{dat.status}}
     </ion-button>
-  </ion-item>
+  </ion-item> -->
 
 
 </ion-content>

@@ -26,8 +26,25 @@ export class TodayOrderService {
     return this.https.get(url);
   }
 
+  getOrderHistory(data: any): Observable<any> {
+    const obj = {
+      page: 1,
+      limit: 20,
+      tab: 'pending',
+      main_sec: 'orderwise',
+      sdate: data.sdate,
+      edate: data.edate,
+    }
+    return this.https.get(environment.url + 'meal/order/history/orderwise?limit=20&page=1&sdate=' + data.sdate + '&edate=' + data.edate + '&tab=pending&main_sec=orderwise')
+    // return this.https.post(environment.url + 'meal/order/history/orderwise', obj);
+  }
+
   getTodayOrderDetail(ord_id: any): Observable<any> {
     return this.https.get(environment.url + 'meal/order/get_order_cambro_dtl?order_id='+ ord_id)
+  }
+
+  getOrderDetailView(ord_id: any): Observable<any> {
+    return this.https.get(environment.url + 'meal/order/getOrderDetailsView?order_id=' + ord_id)
   }
 
   orderDispatch(ord_id: any): Observable<any> {
