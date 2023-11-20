@@ -1,0 +1,43 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Driver Detail</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal(null, false)">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" class="ion-text-center">
+        <img [src]="requestedData.driver_img" style="height:100px;width:100px;border-radius: 10%;" onError="src = 'assets/img/person_img.png'">
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Name</ion-text><br>
+        <ion-text color="medium">{{requestedData.driver_fname}} {{requestedData.driver_lname}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Mobile</ion-text><br>
+        <a href="tel:8586993044">{{requestedData.driver_mobile}}</a>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Vechile Detail</ion-text><br>
+        <ion-text color="medium">{{requestedData.driver_vehicle_no}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Email</ion-text><br>
+        <ion-text color="medium">{{requestedData.driver_email}}</ion-text>
+      </ion-col>
+      <!-- <ion-col size="6">
+        <ion-button shape="round" (click)="getEncodedUrl()">Get Location <ion-icon name="location-outline" slot="end"></ion-icon></ion-button>
+      </ion-col>
+      <ion-col class="center">
+        <ion-text color="danger">{{totalTime}}</ion-text>
+      </ion-col> -->
+    </ion-row>
+  </ion-grid>
+
+  <img [src]="myurl" *ngIf="myurl">
+</ion-content>

@@ -1,12 +1,13 @@
 p {
-  margin:0px;
-  font-size:12px;
-  font-weight: 500;
-  line-height: 14px !important;
-  color:#040E51 !important;
+  margin:1px 0px;
+  color: #040E51 !important;
+  font-size: 14px;
   font-style: normal;
+  font-weight: 510;
   line-height: normal;
-  // ion-text {
-  //   font-weight: 500;
-  // }
+}
+
+.custom-btn {
+  --border-radius: 20px !important;
+
 }

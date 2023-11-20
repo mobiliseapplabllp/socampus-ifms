@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController, ModalController, NavController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 import { environment } from 'src/environments/environment';
+import { DriverDetailComponent } from './driver-detail/driver-detail.component';
+import { LaunchNavigator } from '@awesome-cordova-plugins/launch-navigator/ngx';
 
 @Component({
   selector: 'app-today-order',
@@ -92,7 +94,10 @@ export class TodayOrderPage implements OnInit {
     private activeRoute: ActivatedRoute,
     private httpTo: TodayOrderService,
     private loadingController: LoadingController,
-    private common: CommonService
+    private common: CommonService,
+    private modalCtrl: ModalController,
+    private launchNavigator: LaunchNavigator,
+    private navCtrl: NavController
   ) { }
 
   ngOnInit() {
@@ -125,8 +130,31 @@ export class TodayOrderPage implements OnInit {
         }
       })
     })
-
   }
+
+  async openDriverModal(dat: any) {
+    console.log('my site');
+    const modal = await this.modalCtrl.create({
+      component: DriverDetailComponent,
+      cssClass: 'my-modal2',
+      componentProps: { requestedData: dat }
+    });
+    modal.present();
+  }
+
+  openGoogleMap(lat: any, lng: any) {
+    console.log(lat);
+    if (!lat || !lng) {
+      alert('Latitude and Longitude not availabe');
+      return;
+    }
+    this.launchNavigator.navigate([parseFloat(lat), parseFloat(lng)], {
+      start: [28.65137795955116, 77.27685944140623]
+    }).catch(err => {
+      alert(JSON.stringify(err));
+    });
+  }
+
 
   async presentLoading(msg?: any) {
     this.loading = await this.loadingController.create({
@@ -140,6 +168,34 @@ export class TodayOrderPage implements OnInit {
     if (this.loading) {
       this.loading.dismiss();
     }
+  }
+
+  orderReached(data: any) {
+    if (data.ord_status === 9) {
+      this.common.presentToast('Order Already Reached on site', 'warning');
+      return;
+    }
+    this.presentLoading().then(preLoad => {
+      this.httpTo.orderReached(data.order_id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.common.presentToast(data.msg,'success');
+            data.ord_status = 9;
+            data.order_status_label = 'Reached on site';
+          } else {
+            this.common.presentToast(data.msg, 'warning')
+          }
+        },
+        error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.dismissloading();
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+
   }
 
 

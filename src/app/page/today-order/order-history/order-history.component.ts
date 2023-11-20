@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Route, Router } from '@angular/router';
 import { IonSlides } from '@ionic/angular';
 import * as moment from 'moment';
+import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 
 @Component({
   selector: 'app-order-history',
@@ -33,81 +34,84 @@ export class OrderHistoryComponent  implements OnInit {
     }
   };
   dateArr: any = [];
-  history: any = [{
-    order_id: 'OD1982',
-    pick_time: '11:00',
-    delivery_time: '12:30',
-    box: '125/05',
-    pc: '100023',
-    location: 'Google Campus',
-    color: 'danger'
-  },{
-    order_id: 'OD1982',
-    pick_time: '11:00',
-    delivery_time: '12:30',
-    box: '125/05',
-    pc: '100023',
-    location: 'Google Campus',
-    color: 'danger'
-  },{
-    order_id: 'OD1982',
-    pick_time: '11:00',
-    delivery_time: '12:30',
-    box: '125/05',
-    pc: '100023',
-    location: 'Google Campus',
-    color: 'success'
-  },{
-    order_id: 'OD1982',
-    pick_time: '11:00',
-    delivery_time: '12:30',
-    box: '125/05',
-    pc: '100023',
-    location: 'Google Campus',
-    color: 'success'
-  },{
-    order_id: 'OD1982',
-    pick_time: '11:00',
-    delivery_time: '12:30',
-    box: '125/05',
-    pc: '100023',
-    location: 'Google Campus',
-    color: 'danger'
-  },{
-    order_id: 'OD1982',
-    pick_time: '11:00',
-    delivery_time: '12:30',
-    box: '125/05',
-    pc: '100023',
-    location: 'Google Campus',
-    color: 'success'
-  },{
-    order_id: 'OD1982',
-    pick_time: '11:00',
-    delivery_time: '12:30',
-    box: '125/05',
-    pc: '100023',
-    location: 'Google Campus',
-    color: 'danger'
-  },{
-    order_id: 'OD1982',
-    pick_time: '11:00',
-    delivery_time: '12:30',
-    box: '125/05',
-    pc: '100023',
-    location: 'Google Campus',
-    color: 'danger'
-  },{
-    order_id: 'OD1982',
-    pick_time: '11:00',
-    delivery_time: '12:30',
-    box: '125/05',
-    pc: '100023',
-    location: 'Google Campus',
-    color: 'success'
-  }];
+  history: any = [];
+  // history: any = [{
+  //   order_id: 'OD1982',
+  //   pick_time: '11:00',
+  //   delivery_time: '12:30',
+  //   box: '125/05',
+  //   pc: '100023',
+  //   location: 'Google Campus',
+  //   color: 'danger'
+  // },{
+  //   order_id: 'OD1982',
+  //   pick_time: '11:00',
+  //   delivery_time: '12:30',
+  //   box: '125/05',
+  //   pc: '100023',
+  //   location: 'Google Campus',
+  //   color: 'danger'
+  // },{
+  //   order_id: 'OD1982',
+  //   pick_time: '11:00',
+  //   delivery_time: '12:30',
+  //   box: '125/05',
+  //   pc: '100023',
+  //   location: 'Google Campus',
+  //   color: 'success'
+  // },{
+  //   order_id: 'OD1982',
+  //   pick_time: '11:00',
+  //   delivery_time: '12:30',
+  //   box: '125/05',
+  //   pc: '100023',
+  //   location: 'Google Campus',
+  //   color: 'success'
+  // },{
+  //   order_id: 'OD1982',
+  //   pick_time: '11:00',
+  //   delivery_time: '12:30',
+  //   box: '125/05',
+  //   pc: '100023',
+  //   location: 'Google Campus',
+  //   color: 'danger'
+  // },{
+  //   order_id: 'OD1982',
+  //   pick_time: '11:00',
+  //   delivery_time: '12:30',
+  //   box: '125/05',
+  //   pc: '100023',
+  //   location: 'Google Campus',
+  //   color: 'success'
+  // },{
+  //   order_id: 'OD1982',
+  //   pick_time: '11:00',
+  //   delivery_time: '12:30',
+  //   box: '125/05',
+  //   pc: '100023',
+  //   location: 'Google Campus',
+  //   color: 'danger'
+  // },{
+  //   order_id: 'OD1982',
+  //   pick_time: '11:00',
+  //   delivery_time: '12:30',
+  //   box: '125/05',
+  //   pc: '100023',
+  //   location: 'Google Campus',
+  //   color: 'danger'
+  // },{
+  //   order_id: 'OD1982',
+  //   pick_time: '11:00',
+  //   delivery_time: '12:30',
+  //   box: '125/05',
+  //   pc: '100023',
+  //   location: 'Google Campus',
+  //   color: 'success'
+  // }];
+  id!: string;
   constructor(
-    private router: Router
+    private router: Router,
+    private httpTo: TodayOrderService
   ) { }
 
   ngOnInit() {
@@ -132,6 +136,7 @@ export class OrderHistoryComponent  implements OnInit {
     setTimeout(() => {
       this.slides.slideTo(index - 3);
     }, 50);
+    this.getOrderHistory();
   }
 
   changeDate(dat: any) {
@@ -147,6 +152,23 @@ export class OrderHistoryComponent  implements OnInit {
 
   status() {
 
+  }
+
+  getOrderHistory() {
+    this.httpTo.getTodayOrderDriver('3', moment().format('YYYY-MM-DD')).subscribe({
+      next:(data) => {
+        console.log(data);
+        if (data.status) {
+          this.history = data.data;
+        }
+      },
+      error:() => {
+
+      },
+      complete:() => {
+
+      }
+    })
   }
 
   orderDetails() {

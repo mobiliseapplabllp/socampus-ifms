@@ -10,7 +10,7 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertController, Platform } from '@ionic/angular';
 import { App } from '@capacitor/app';
 
 @Injectable()
@@ -18,7 +18,8 @@ export class TokenInterceptor implements HttpInterceptor {
 
   constructor(
     private router: Router,
-    public alertController: AlertController) {
+    public alertController: AlertController,
+    private platform: Platform) {
     }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -35,7 +36,12 @@ export class TokenInterceptor implements HttpInterceptor {
             return;
             }
             alert('Your Session is timeout please login again');
-            App.exitApp();
+            if (this.platform.is('android')) {
+              App.exitApp();
+            } else {
+              this.router.navigateByUrl('/login');
+            }
+
           }
         }));
       } else {
@@ -48,7 +54,11 @@ export class TokenInterceptor implements HttpInterceptor {
             return;
             }
             alert('Your Session is timeout please login again');
-            App.exitApp();
+            if (this.platform.is('android')) {
+              App.exitApp();
+            } else {
+              this.router.navigateByUrl('/login');
+            }
           }
         }));
       }

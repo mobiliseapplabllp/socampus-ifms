@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { LoadingController, NavController } from '@ionic/angular';
+import { ActivatedRoute, Router } from '@angular/router';
+import { LoadingController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 import { environment } from 'src/environments/environment';
@@ -12,80 +12,53 @@ import { environment } from 'src/environments/environment';
 })
 export class OrderDetailComponent  implements OnInit {
   requestedData: any = [];
-  // order_details: any = [{
-  //   item_code: 'Cambro - 442626',
-  //   item_name: 'Shahi Paneer',
-  //   item_qty: '15kg',
-  //   cat: 'veg',
-  //   status: 'pending',
-  //   cat_img: 'assets/meal/veg.png'
-  // },{
-  //   item_code: 'Cambro - 442627',
-  //   item_name: 'Shahi Paneer',
-  //   item_qty: '15kg',
-  //   cat: 'veg',
-  //   status: 'picked',
-  //   cat_img: 'assets/meal/non-veg.png'
-  // },{
-  //   item_code: 'Cambro - 442626',
-  //   item_name: 'Shahi Paneer',
-  //   item_qty: '15kg',
-  //   cat: 'veg',
-  //   status: 'pending',
-  //   cat_img: 'assets/meal/veg.png'
-  // },{
-  //   item_code: 'Cambro - 442626',
-  //   item_name: 'Shahi Paneer',
-  //   item_qty: '15kg',
-  //   cat: 'veg',
-  //   status: 'picked',
-  //   cat_img: 'assets/meal/non-veg.png'
-  // },{
-  //   item_code: 'Cambro - 442626',
-  //   item_name: 'Shahi Paneer',
-  //   item_qty: '15kg',
-  //   cat: 'veg',
-  //   status: 'pending',
-  //   cat_img: 'assets/meal/veg.png'
-  // },{
-  //   item_code: 'Cambro - 442627',
-  //   item_name: 'Shahi Paneer',
-  //   item_qty: '15kg',
-  //   cat: 'veg',
-  //   status: 'picked',
-  //   cat_img: 'assets/meal/non-veg.png'
-  // },{
-  //   item_code: 'Cambro - 442626',
-  //   item_name: 'Shahi Paneer',
-  //   item_qty: '15kg',
-  //   cat: 'veg',
-  //   status: 'pending',
-  //   cat_img: 'assets/meal/veg.png'
-  // },{
-  //   item_code: 'Cambro - 442626',
-  //   item_name: 'Shahi Paneer',
-  //   item_qty: '15kg',
-  //   cat: 'veg',
-  //   status: 'picked',
-  //   cat_img: 'assets/meal/non-veg.png'
-  // }]
   order_details: any = [];
-  isAllFull!: boolean;
   loading: any;
+  index: any;
   constructor(
     private activeRoute: ActivatedRoute,
     private httpTo: TodayOrderService,
     private loadingController: LoadingController,
     private common: CommonService,
-    private navCtrl: NavController
+    private navCtrl: NavController,
+    private router: Router,
+    private platform: Platform
   ) { }
 
   ngOnInit() {
+    this.common.setBarcode('');
     this.activeRoute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
       console.log(this.requestedData);
     });
     this.getOrderDetail();
+  }
+
+  ionViewDidEnter() {
+    let bar = this.common.getBarcode();
+    if (bar) {
+      if (this.platform.is('capacitor')) {
+        if (this.order_details[this.index].qr_value === bar) {
+          this.order_details[this.index].isPack = true;
+        } else {
+          this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
+        }
+      } else {
+        this.order_details[this.index].isPack = true;
+        this.order_details[this.index].showErr = false;
+      }
+
+      console.log(this.order_details[this.index]);
+
+      // console.log(this.order_details[this.index]);
+      // console.log(this.index + ' Your Barcode is ' + bar);
+      // if (this.order_details[this.index].id === bar) {
+      //   this.order_details[this.index].isBarcodeMatch = true;
+      // } else {
+      //   this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
+      // }
+      this.common.setBarcode('');
+    }
   }
 
   getOrderDetail() {
@@ -111,19 +84,24 @@ export class OrderDetailComponent  implements OnInit {
 
   }
 
-  pick(dat: any) {
-    let result = 0;
-    dat.isPick = true;
-    for (var i = 0 ; i < this.order_details.length; i++) {
-      if (!this.order_details[i].isPick) {
-        result = result + 1;
-      }
-    }
-    if (result > 0) {
-      this.isAllFull = false;
-    } else {
-      this.isAllFull = true;
-    }
+  // pick(dat: any) {
+  //   let result = 0;
+  //   dat.isPick = true;
+  //   for (var i = 0 ; i < this.order_details.length; i++) {
+  //     if (!this.order_details[i].isPick) {
+  //       result = result + 1;
+  //     }
+  //   }
+  //   if (result > 0) {
+  //     this.isAllFull = false;
+  //   } else {
+  //     this.isAllFull = true;
+  //   }
+  // }
+
+  scanBarcode(ind: any) {
+    this.index = ind;
+    this.router.navigateByUrl('/barcode');
   }
 
   async presentLoading(msg?: any) {
@@ -141,6 +119,23 @@ export class OrderDetailComponent  implements OnInit {
   }
 
   dispatchOrder() {
+    if (this.order_details.length === 0) {
+      this.common.presentToast('No Data Found', 'warning');
+      return;
+    }
+    let result = 0;
+    for (var i = 0;i < this.order_details.length; i++) {
+      if (!this.order_details[i].isPack) {
+        this.order_details[i].showErr = true;
+        result = result + 1;
+      } else {
+        this.order_details[i].showErr = false;
+      }
+    }
+    if (result > 0) {
+      this.common.presentToast('Please Pick All Cambro Box', 'warning');
+      return;
+    }
     this.presentLoading().then(preLoad => {
       this.httpTo.orderDispatch(this.requestedData.order_id).subscribe({
         next:(data) => {
