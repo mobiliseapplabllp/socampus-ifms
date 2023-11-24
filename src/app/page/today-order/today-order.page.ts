@@ -177,13 +177,13 @@ export class TodayOrderPage implements OnInit {
     }
     this.presentLoading().then(preLoad => {
       this.httpTo.orderReached(data.order_id).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.common.presentToast(data.msg,'success');
+        next:(res) => {
+          if (res.status) {
+            this.common.presentToast(res.msg,'success');
             data.ord_status = 9;
             data.order_status_label = 'Reached on site';
           } else {
-            this.common.presentToast(data.msg, 'warning')
+            this.common.presentToast(res.msg, 'warning')
           }
         },
         error:() => {

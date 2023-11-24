@@ -46,6 +46,7 @@ export class ListMasterPage implements OnInit {
     if (user) {
       this.userData = JSON.parse(user);
       this.userName = this.userData.user_name
+      console.log(this.userData);
     }
   }
 
@@ -154,6 +155,23 @@ export class ListMasterPage implements OnInit {
         this.result = data;
         if (this.result.status == true) {
           this.myMenu = this.result.data[0].submenu;
+          if (this.userData.user_type === 'Driver') {
+            const obj1 = {
+              icon_path: 'assets/meal/i1.png',
+              smnu_desc: 'Order Dispatch',
+              link: '/t-order/1'
+            }
+            this.myMenu.push(obj1);
+          } else {
+            const obj = {
+              icon_path: 'assets/meal/i2.png',
+              smnu_desc: 'Order Received',
+              link: '/t-order/2'
+            }
+            this.myMenu.push(obj);
+          }
+
+
           localStorage.setItem('home_menu', JSON.stringify(this.myMenu));
         }
       }, err => {
