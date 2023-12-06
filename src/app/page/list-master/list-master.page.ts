@@ -136,11 +136,12 @@ export class ListMasterPage implements OnInit {
       }
     });
     this.stackedBarChart();
-    this.getCircleValue();
+    // this.getCircleValue();
+    this.lineBarChart();
   }
 
   stackedBarChart() {
-    this.chart = new Chart('canvas', {
+    new Chart('canvas', {
       type: 'bar',
       data : {
         labels: ['15 Oct','16 Oct','17 Oct','18 Oct','19 Oct','20 Oct','21 Oct',],
@@ -175,6 +176,53 @@ export class ListMasterPage implements OnInit {
           title: {
             display: true,
             text: 'Reporting'
+          }
+        }
+      },
+    })
+  }
+
+  lineBarChart() {
+    new Chart('canvas1', {
+      type: 'line',
+      data : {
+        labels: ['15 Oct','16 Oct','17 Oct','18 Oct','19 Oct','20 Oct','21 Oct',],
+        datasets: [
+          {
+            label: 'Second Line',
+            data: [30, 50, 21, 25, 22, 40, 25],
+            fill: false,
+            borderColor: 'blue',
+            backgroundColor: 'blue',
+            tension: 0.4,
+            borderJoinStyle: 'round',
+          },
+          {
+            label: 'Second Line',
+            data: [25, 42, 10, 40, 20, 42, 19],
+            fill: false,
+            borderColor: 'orange',
+            backgroundColor: 'orange',
+            tension: 0.4,
+            borderJoinStyle: 'round',
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'x',
+        elements: {
+          bar: {
+            borderWidth: 0.1,
+          }
+        },
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Digital Checklist'
           }
         }
       },

@@ -135,7 +135,11 @@
       </ion-col>
     </ion-row>
 
-    <div style="width: 100% !important; display: flex;align-items: center; justify-content: center;">
+    <div style="width:100%;">
+      <canvas id="canvas1" style="width:100%;"></canvas>
+    </div>
+
+    <!-- <div style="width: 100% !important; display: flex;align-items: center; justify-content: center;">
       <section *ngFor="let dat of circleDashboard">
         <svg width="120" height="120" viewBox="-31.25 -31.25 312.5 312.5" version="1.1"xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
           <circle r="115" cx="125" cy="125" fill="transparent" stroke="#e0e0e0" stroke-width="17" stroke-dasharray="722px" stroke-dashoffset="0"></circle>
@@ -146,8 +150,7 @@
           <ion-text color="primary"><b>{{dat.desc}}</b></ion-text>
         </div>
       </section>
-    </div>
-
+    </div> -->
 
   <ion-row>
     <ion-col size="4" class="ion-text-right">
@@ -176,7 +179,7 @@
   </ion-row>
 
   <div style="width:100%;">
-    <canvas id="canvas" style="width:100%;">{{chart}}</canvas>
+    <canvas id="canvas" style="width:100%;"></canvas>
   </div>
 
   <!-- <ion-row *ngIf="isInternet">
