@@ -153,15 +153,23 @@
     </div> -->
 
   <ion-row>
-    <ion-col size="4" class="ion-text-right">
-      <ion-button fill="clear" >
+    <ion-col size="4">
+      <ion-select interface="popover" placeholder="Select Type" [(ngModel)]="cat_id" (ionChange)="changeCat($event)">
+        <ion-select-option *ngFor="let dat of category" [value]="dat.id">{{dat.label}}</ion-select-option>
+      </ion-select>
+      <!-- <ion-button fill="clear" >
         <ion-icon name="chevron-back-outline"></ion-icon>
-      </ion-button>
+      </ion-button> -->
     </ion-col>
     <ion-col size="4" class="ion-text-center center">
       <b>12 Oct 2023</b>
     </ion-col>
-    <ion-col size="2">
+    <ion-col size="4" *ngIf="cat_id ===1 || cat_id === 3">
+      <ion-select interface="popover" placeholder="Select Category" [(ngModel)]="sub_cat_id" (ionChang)="changeSubCat($event)">
+        <ion-select-option *ngFor="let dat of subCat" [value]="dat.id">{{dat.label}}</ion-select-option>
+      </ion-select>
+    </ion-col>
+    <!-- <ion-col size="2">
       <ion-button fill="clear" >
         <ion-icon name="chevron-forward-outline"></ion-icon>
       </ion-button>
@@ -175,12 +183,14 @@
           <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover"  (ionChange)="changeDateComponent($event)"></ion-datetime>
         </ng-template>
       </ion-popover>
-    </ion-col>
+    </ion-col> -->
   </ion-row>
 
   <div style="width:100%;">
     <canvas id="canvas" style="width:100%;"></canvas>
+    <!-- <canvas id="canvas" style="width:100%;" [hidden]="check1"></canvas> -->
   </div>
+
 
   <!-- <ion-row *ngIf="isInternet">
     <ion-col class="ion-text-center" >
