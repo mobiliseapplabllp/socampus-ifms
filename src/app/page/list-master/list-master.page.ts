@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonDatetime, IonSlides, LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -15,6 +15,7 @@ import Chart from 'chart.js/auto';
 export class ListMasterPage implements OnInit {
   @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
   @ViewChild('mySlider', { static: true }) slides!: IonSlides;
+  @ViewChild('canvas') canvas!: ElementRef;
   myMenu: any = [];
   menuTemp: any = [];
   menuNew: any = [];
@@ -130,6 +131,7 @@ export class ListMasterPage implements OnInit {
   // res: any = [];
   // total: any = [];
   check1 = true;
+  stackedChart: any;
   constructor(
     private listMaster: ListMasterService,
     private toastController: ToastController,
@@ -170,49 +172,28 @@ export class ListMasterPage implements OnInit {
       }
     });
     this.stackedBarChart();
-    // this.getCircleValue();
     this.lineBarChart();
-    // const randomIntArrayInRange = (min: any, max: any, n = 1) => Array.from( { length: n }, () => Math.floor(Math.random() * (max - min + 1)) + min);
-    console.log(this.randomIntArrayInRange(12, 35, 7));
   }
 
   randomIntArrayInRange = (min: any, max: any, n = 1) => Array.from( { length: n }, () => Math.floor(Math.random() * (max - min + 1)) + min)
 
 
   stackedBarChart() {
-    // const canvas = <HTMLCanvasElement> document.getElementById('myChart');
-    // const ctx = canvas.getContext('2d');
-
-    new Chart('canvas', {
+    this.stackedChart = new Chart('canvas', {
       type: 'bar',
       data : {
         labels: ['15 Oct','16 Oct','17 Oct','18 Oct','19 Oct','20 Oct','21 Oct',],
         datasets: [
         {
-          label: 'Resolved',
+          label: 'Assign',
           data: this.res,
           backgroundColor: 'blue',
         },
         {
-          label: 'Assign',
+          label: 'Resolved',
           data: this.total,
           backgroundColor: 'orange',
-        },
-  ]
-        // datasets: [
-        //   {
-        //     label: 'Total',
-        //     data: [25, 20, 15, 18, 22, 19, 23],
-        //     borderColor: '#25589c',
-        //     backgroundColor: '#25589c',
-        //   },
-        //   {
-        //     label: 'Resolved',
-        //     data: [10, 15, 13, 17, 21, 18, 23],
-        //     borderColor: '#93C3ED',
-        //     backgroundColor: '#93C3ED',
-        //   }
-        // ]
+        }]
       },
       options: {
         plugins: {
@@ -231,37 +212,26 @@ export class ListMasterPage implements OnInit {
           }
         }
       }
-      // options: {
-      //   indexAxis: 'x',
-      //   elements: {
-      //     bar: {
-      //       borderWidth: 0.6,
+    });
+  }
 
-      //     }
-      //   },
-      //   responsive: true,
-      //   plugins: {
-      //     legend: {
-      //       position: 'top',
-      //     },
-      //     title: {
-      //       display: true,
-      //       text: 'Reporting'
-      //     }
-      //   }
-      // },
-    })
+  updateStackedChart() {
+    console.log('abc');
+    const newDataValues = this.randomIntArrayInRange(12, 35, 7);
+    console.log(newDataValues);
+    this.stackedChart.data.datasets[0].data = this.randomIntArrayInRange(12, 35, 7);
+    this.stackedChart.data.datasets[1].data = this.randomIntArrayInRange(12, 35, 7);
+    this.stackedChart.update();
   }
 
   lineBarChart() {
-
     new Chart('canvas1', {
       type: 'line',
       data : {
         labels: ['15 Oct','16 Oct','17 Oct','18 Oct','19 Oct','20 Oct','21 Oct',],
         datasets: [
           {
-            label: 'Second Line',
+            label: 'Assign',
             data: this.randomIntArrayInRange(12, 35, 7),
             fill: false,
             borderColor: 'blue',
@@ -270,7 +240,7 @@ export class ListMasterPage implements OnInit {
             borderJoinStyle: 'round',
           },
           {
-            label: 'Second Line',
+            label: 'Resolve',
             data: this.randomIntArrayInRange(12, 35, 7),
             fill: false,
             borderColor: 'orange',
@@ -282,13 +252,6 @@ export class ListMasterPage implements OnInit {
       },
       options: {
         indexAxis: 'x',
-        // animations: {
-        //   radius: {
-        //     duration: 400,
-        //     easing: 'linear',
-        //     loop: (context) => context.active
-        //   }
-        // },
         elements: {
           bar: {
             borderWidth: 0.1,
@@ -343,7 +306,6 @@ export class ListMasterPage implements OnInit {
   }
 
   changeCat(ev: any) {
-    // this.check1 = false;
     console.log(ev.target.value);
     this.sub_cat_id = 0;
     this.subCat = [];
@@ -351,28 +313,13 @@ export class ListMasterPage implements OnInit {
       this.subCat = this.digitalCat;
     } else if (ev.target.value === 3) {
       this.subCat = this.meterCat;
+    } else {
+      this.updateStackedChart();
     }
-    this.res = [1,2,3,4,5,6,7];
-    this.total = [4,5,6,7,8,9,10];
-    // this.check1 = false;
-    // var myChart = new Chart('canvas', { type: 'bar', data: {labels: [], datasets: []}, options: {} });
-    // myChart.destroy();
-
-    // setTimeout(() => {
-    //   this.stackedBarChart();
-    // }, 100);
-
-    // setTimeout(() => {
-    //   console.log('call');
-    //   this.check1 = !this.check1;
-    //   this.res = this.randomIntArrayInRange(12, 35, 7);
-    //   this.total = this.randomIntArrayInRange(12, 35, 7);
-    //   this.stackedBarChart();
-    // }, 200);
   }
 
   changeSubCat(ev: any) {
-
+    this.updateStackedChart();
   }
 
   stopSpeak() {

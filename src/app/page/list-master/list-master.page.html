@@ -47,8 +47,6 @@
           </ion-grid>
         </ion-slide>
       </ion-slides> -->
-
-
       <ion-slides [options]="menuSlide" pager="false" style="padding: 10px">
         <ion-slide *ngFor="let dat of myMenu"   style="margin:0px !important;padding:0px !important">
           <ion-card style="margin:5px; min-height: 80px;width:100%; box-shadow:1px 1px 8px #26589c;border-radius: 10px;" (click)="openPage(dat)">
@@ -157,38 +155,19 @@
       <ion-select interface="popover" placeholder="Select Type" [(ngModel)]="cat_id" (ionChange)="changeCat($event)">
         <ion-select-option *ngFor="let dat of category" [value]="dat.id">{{dat.label}}</ion-select-option>
       </ion-select>
-      <!-- <ion-button fill="clear" >
-        <ion-icon name="chevron-back-outline"></ion-icon>
-      </ion-button> -->
     </ion-col>
     <ion-col size="4" class="ion-text-center center">
       <b>12 Oct 2023</b>
     </ion-col>
     <ion-col size="4" *ngIf="cat_id ===1 || cat_id === 3">
-      <ion-select interface="popover" placeholder="Select Category" [(ngModel)]="sub_cat_id" (ionChang)="changeSubCat($event)">
+      <ion-select interface="popover" placeholder="Select Category" [(ngModel)]="sub_cat_id" (ionChange)="changeSubCat($event)">
         <ion-select-option *ngFor="let dat of subCat" [value]="dat.id">{{dat.label}}</ion-select-option>
       </ion-select>
     </ion-col>
-    <!-- <ion-col size="2">
-      <ion-button fill="clear" >
-        <ion-icon name="chevron-forward-outline"></ion-icon>
-      </ion-button>
-    </ion-col>
-    <ion-col size="2" class="ion-text-left">
-      <ion-button id="home-pipe-date" fill="clear" color="primary" class="ion-text-capitalize">
-        <ion-icon name="calendar-outline"></ion-icon>
-      </ion-button>
-      <ion-popover trigger="home-pipe-date" mode="md">
-        <ng-template>
-          <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover"  (ionChange)="changeDateComponent($event)"></ion-datetime>
-        </ng-template>
-      </ion-popover>
-    </ion-col> -->
   </ion-row>
 
   <div style="width:100%;">
     <canvas id="canvas" style="width:100%;"></canvas>
-    <!-- <canvas id="canvas" style="width:100%;" [hidden]="check1"></canvas> -->
   </div>
 
 
