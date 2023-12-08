@@ -1,6 +1,6 @@
 {
-	"appId": "com.socampuseng.mbl",
-	"appName": "SoCampus Service",
+	"appId": "com.socampusengTemp.mbl",
+	"appName": "SoCampus Design",
 	"webDir": "www",
 	"bundledWebRuntime": false
 }
