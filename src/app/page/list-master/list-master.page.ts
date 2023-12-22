@@ -132,6 +132,96 @@ export class ListMasterPage implements OnInit {
   // total: any = [];
   check1 = true;
   stackedChart: any;
+  pendingTask = true;
+  segments = 'helpdesk';
+  pendingTicket: any = [{
+    ticket_id: 1211,
+    status:'WIP',
+    facility_type: 'Qualcom Hyderadabad CMZ',
+    barcode: '12002002',
+    item_name: 'Plumbing General Issue',
+    datetime: '12-12-2022'
+  },{
+    ticket_id: 1211,
+    status:'WIP',
+    facility_type: 'Qualcom Hyderadabad CMZ',
+    barcode: '12002002',
+    item_name: 'Door Not Working',
+    datetime: '10-12-2022'
+  },{
+    ticket_id: 1211,
+    status:'WIP',
+    facility_type: 'Qualcom Hyderadabad CMZ',
+    barcode: '12002002',
+    item_name: 'Flush Issue',
+    datetime: '08-12-2022'
+  }];
+  assignCheckList: any = [{
+    schedule_unique_id: 'CHK003907',
+    chk_cat_name: 'CHILLER',
+    schedule_time: '19:00:00',
+    location_desc: 'UPS PAC ROOM',
+    barcode: '101026990',
+    backgroundColor: 'red'
+  },{
+    schedule_unique_id: 'CHK003908',
+    chk_cat_name: 'CHILLER',
+    schedule_time: '20:00:00',
+    location_desc: 'UPS PAC ROOM',
+    barcode: '101026990',
+    backgroundColor: 'red'
+  },{
+    schedule_unique_id: 'CHK003909',
+    chk_cat_name: 'CHILLER',
+    schedule_time: '21:00:00',
+    location_desc: 'UPS PAC ROOM',
+    barcode: '101026990',
+    backgroundColor: 'red'
+  },{
+    schedule_unique_id: 'CHK003910',
+    chk_cat_name: 'CHILLER',
+    schedule_time: '22:00:00',
+    location_desc: 'UPS PAC ROOM',
+    barcode: '101026990',
+    backgroundColor: 'red'
+  }]
+  pmsList: any = [{
+    facility_name:'Qualcomm Hyderabad CMZ',
+    wo: '2/2023/10',
+    date: '22 Dec, 23',
+    asset_id: '1010109090'
+  },{
+    facility_name:'Qualcomm Hyderabad CMZ',
+    wo: '2/2023/11',
+    date: '22 Dec, 23',
+    asset_id: '1010109091'
+  },{
+    facility_name:'Qualcomm Hyderabad CMZ',
+    wo: '2/2023/12',
+    date: '22 Dec, 23',
+    asset_id: '1010109092'
+  },{
+    facility_name:'Qualcomm Hyderabad CMZ',
+    wo: '2/2023/13',
+    date: '22 Dec, 23',
+    asset_id: '1010109093'
+  }];
+  meterInfo: any = [{
+    make: "This is a Electric Meter test1",
+    ext_id: "101100001101",
+    sch_datetime: "2023-12-22 10:43:00",
+    wo_id: 715
+  },{
+    make: "This is a Electric Meter test2",
+    ext_id: "101100001102",
+    sch_datetime: "2023-12-23 10:43:00",
+    wo_id: 716
+  },{
+    make: "This is a Electric Meter test3",
+    ext_id: "101100001103",
+    sch_datetime: "2023-12-24 10:43:00",
+    wo_id: 717
+  }]
   constructor(
     private listMaster: ListMasterService,
     private toastController: ToastController,
@@ -148,8 +238,6 @@ export class ListMasterPage implements OnInit {
   }
 
   ngOnInit() {
-    // this.res = this.randomIntArrayInRange(12, 40, 7);
-    // this.total = this.randomIntArrayInRange(12, 40, 7);
     this.circleVal = 722 - this.circleData * 7.22;
 
     this.common.checkInternet().then(res => {
@@ -171,8 +259,8 @@ export class ListMasterPage implements OnInit {
         }
       }
     });
-    this.stackedBarChart();
-    this.lineBarChart();
+    // this.stackedBarChart();
+    // this.lineBarChart();
   }
 
   randomIntArrayInRange = (min: any, max: any, n = 1) => Array.from( { length: n }, () => Math.floor(Math.random() * (max - min + 1)) + min)
@@ -190,7 +278,7 @@ export class ListMasterPage implements OnInit {
           backgroundColor: 'blue',
         },
         {
-          label: 'Resolved',
+          label: 'Attend',
           data: this.total,
           backgroundColor: 'orange',
         }]
@@ -203,6 +291,7 @@ export class ListMasterPage implements OnInit {
           },
         },
         responsive: true,
+        maintainAspectRatio: false,
         scales: {
           x: {
             stacked: true,
@@ -258,17 +347,30 @@ export class ListMasterPage implements OnInit {
           }
         },
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: {
             position: 'top',
           },
           title: {
             display: true,
-            text: 'Digital Checklist'
+            text: 'Helpdesk',
           }
         }
       },
     })
+  }
+
+  changePendingTask() {
+    this.pendingTask = !this.pendingTask;
+    if (this.pendingTask) {
+      this.stackedChart = null;
+    } else {
+      setTimeout(() => {
+        this.stackedBarChart();
+        this.lineBarChart();
+      }, 10);
+    }
   }
 
   getCircleValue() {
