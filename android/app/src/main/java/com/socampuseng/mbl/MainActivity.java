@@ -1,4 +1,4 @@
-package com.socampusengTemp.mbl;
+package com.socampuseng.mbl;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">SoCampus Design</string>
     <string name="title_activity_main">SoCampus Design</string>
-    <string name="package_name">com.socampusengTemp.mbl</string>
-    <string name="custom_url_scheme">com.socampusengTemp.mbl</string>
+    <string name="package_name">com.socampuseng.mbl</string>
+    <string name="custom_url_scheme">com.socampuseng.mbl</string>
 </resources>

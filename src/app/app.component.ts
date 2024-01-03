@@ -36,8 +36,8 @@ export class AppComponent {
   initApp() {
     if (this.platform.is('capacitor')) {
       StatusBar.setOverlaysWebView({overlay: false});
-      StatusBar.setStyle({ style: Style.Dark })
-      StatusBar.setBackgroundColor({'color': '#222428'})
+      // StatusBar.setStyle({ style: Style.Dark })
+      StatusBar.setBackgroundColor({'color': '#040E51'})
     }
     this.initIdle();
     const isLogin = localStorage.getItem('isAlreadyLogin');
