@@ -1011,6 +1011,7 @@ export class AddAssetPage implements OnInit {
 
 
   changeDate(val?: string) {
+    console.log('change');
     if (val === 'from') {
       this.addAsset.get('warranty_end_date')?.setValue('');
     }

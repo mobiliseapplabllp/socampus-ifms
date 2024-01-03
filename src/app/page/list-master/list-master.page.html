@@ -1,243 +1,290 @@
 <ion-header>
-  <ion-toolbar color="dark">
+  <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title (click)="listen()"> {{userName}} </ion-title>
-    <!-- <ion-buttons slot="end" >
-      <ion-button (click)="openPageTest('/menu-roaster')">Roaster</ion-button>
-      <ion-button (click)="openPageTest('/digital-checklist')">Digital</ion-button>
-      <ion-button (click)="openPageTest('/manuals')">Manuals</ion-button>
-      <ion-button (click)="openPageTest('/meal-checking')">Manuals</ion-button>
-    </ion-buttons> -->
+    <ion-title> {{userName}} </ion-title>
+    <ion-buttons slot="end">
+      <ion-button slot="icon-only">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+      <ion-button slot="icon-only">
+        <ion-icon name="person-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
-
 </ion-header>
 <ion-content>
-  <!-- <ion-button (click)="listen()">Listen</ion-button>
-  <ion-button (click)="removeListen()">Remove Listen</ion-button>
-  <ion-button (click)="permission()">Permission</ion-button> -->
-  <ion-row *ngIf="isInternet">
-    <ion-col class="ion-text-center" > <!-- (click)="speak()"-->
-      <ion-text color="primary"><b>Working Summary</b></ion-text>
+  <ion-item>
+    <ion-label>
+      <h1><b><ion-text color="primary">Welcome Home</ion-text></b></h1>
+      <p style="font-size:18px"><ion-text>{{userName}}</ion-text></p>
+    </ion-label>
+  </ion-item>
+
+  <ion-row>
+    <ion-col class="ion-padding-start">
+      <ion-text color="primary"><b>Service Dashboard</b></ion-text>
     </ion-col>
   </ion-row>
 
-  <ion-slides *ngIf="isInternet" [options]="slideOptsOne" pager="true" class="custom_slide">
-    <ion-slide >
-      <ion-row >
-        <ion-col size="5" class="left">
-          <div >
-            <section><b>BreakDown</b></section>
-            <img src="assets/home_banner/img1.png">
+  <div class="dashboard">
+    <ion-slides #mySlider (ionSlideDidChange)="slideDidChange()" [options]="option">
+      <ion-slide >
+        <ion-card  class="ion-text-left ion-padding">
+          <div>
+            <!-- <ion-icon src="assets/home_banner1/helpdesk.svg" color="light" style="font-size: 40px" ></ion-icon><br> -->
+            <img src="assets/home_banner1/helpdesk.png" style="height:40px;width:40px"><br>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;">Helpdesk </ion-text>
           </div>
-        </ion-col>
-        <ion-col size="7" class="right">
-          <ion-row >
-            <ion-col size="6">
-              <div>
-                <section>
-                  <ion-text color="dark">{{breakdown.assign}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">Assigned</ion-text>
-                  </span>
-                </section>
-              </div>
-            </ion-col>
-            <ion-col size="6">
-              <div>
-                <section>
-                  <ion-text color="dark">{{breakdown.wip}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">WIP</ion-text>
-                  </span>
-                </section>
-              </div>
-            </ion-col>
-          </ion-row>
-          <ion-row >
-            <ion-col size="6">
-              <div>
-                <section >
-                  <ion-text color="dark">{{breakdown.reopen}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">Re-open</ion-text>
-                  </span>
-                </section>
-              </div>
-            </ion-col>
-            <ion-col size="6">
-              <div>
-                <section>
-                  <ion-text color="dark">{{breakdown.closed}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">Close</ion-text>
-                  </span>
-                </section>
-              </div>
-            </ion-col>
-          </ion-row>
-        </ion-col>
-      </ion-row>
-    </ion-slide>
-    <ion-slide >
-      <ion-row >
-        <ion-col size="5" class="left">
-          <div >
-            <section><b>PM</b></section>
-            <img src="assets/home_banner/img2.png">
+          <br>
+          <div>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">3</ion-text>
           </div>
-        </ion-col>
-        <ion-col size="7" class="right" style="height:260px">
-          <ion-row class="top">
-            <ion-col size="6">
-              <div>
-                <section >
-                  <ion-text color="dark">{{pr.assign}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">Assigned</ion-text>
-                  </span>
-                </section>
-              </div>
-            </ion-col>
-            <ion-col size="6">
-              <div>
-                <section>
-                  <ion-text color="dark">{{pr.visited}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">Visited</ion-text>
-                  </span>
-
-                </section>
-              </div>
-            </ion-col>
-          </ion-row>
-          <ion-row >
-            <ion-col size="6">
-              <div>
-                <section >
-                  <ion-text color="dark">{{pr.attended}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">Attended</ion-text>
-                  </span>
-
-                </section>
-              </div>
-            </ion-col>
-            <ion-col size="6">
-              <div>
-                <section>
-                  <ion-text color="dark">{{pr.closed}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">Closed</ion-text>
-                  </span>
-                </section>
-              </div>
-            </ion-col>
-          </ion-row>
-        </ion-col>
-      </ion-row>
-    </ion-slide>
-    <ion-slide >
-      <ion-row >
-        <ion-col size="5" class="left">
-          <div >
-            <section><b>Spare Part</b></section>
-            <img src="assets/home_banner/img3.png">
+        </ion-card>
+      </ion-slide>
+      <ion-slide>
+        <ion-card  class="ion-text-left ion-padding">
+          <div>
+            <img src="assets/home_banner1/checklist.png" style="height:40px;width:40px"><br>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;">Digital </ion-text>
           </div>
-        </ion-col>
-        <ion-col size="7" class="right" style="height:260px">
-          <ion-row class="top">
-            <ion-col size="6">
-              <div>
-                <section >
-                  <ion-text color="dark">{{indent.inapproval}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">Pending</ion-text>
-                  </span>
-                </section>
-              </div>
-            </ion-col>
-            <ion-col size="6">
-              <div>
-                <section>
-                  <ion-text color="dark">{{indent.approved}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">Approved</ion-text>
-                  </span>
-                </section>
-              </div>
-            </ion-col>
-          </ion-row>
-          <ion-row >
-            <ion-col size="6">
-              <div>
-                <section >
-                  <ion-text color="dark">{{indent.rejected}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">Reject</ion-text>
-                  </span>
-                </section>
-              </div>
-            </ion-col>
-            <ion-col size="6">
-              <div>
-                <section>
-                  <ion-text color="dark">{{indent.closed}}</ion-text>
-                </section>
-                <section class="val">
-                  <span>
-                    <ion-text color="light">Closed</ion-text>
-                  </span>
-                </section>
-              </div>
-            </ion-col>
-          </ion-row>
-        </ion-col>
-      </ion-row>
-    </ion-slide>
-  </ion-slides>
+          <br>
+          <div>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">4</ion-text>
+          </div>
+        </ion-card>
+      </ion-slide>
+      <ion-slide>
+        <ion-card  class="ion-text-left ion-padding">
+          <div>
+            <img src="assets/home_banner1/pms.png" style="height:40px;width:40px"><br>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;">PMS </ion-text>
+          </div>
+          <br>
+          <div>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">4</ion-text><!--{{indent.inapproval}}-->
+          </div>
+        </ion-card>
+      </ion-slide>
+      <ion-slide>
+        <ion-card  class="ion-text-left ion-padding">
+          <div>
+            <img src="assets/home_banner1/meter.png" style="height:40px;width:40px"><br>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;">Meter </ion-text>
+          </div>
+          <br>
+          <div>
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">3</ion-text><!--{{indent.inapproval}}-->
+          </div>
+        </ion-card>
+      </ion-slide>
+    </ion-slides>
+  </div>
 
-  <ion-grid class="myGrid">
-    <ion-row class="ion-no-padding">
-      <ion-col style=" padding-left: 3px;padding-top:0px !important">
-        <b>Menu</b>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col *ngFor="let dat of myMenu" size="4" size-sm="4" size-md="3" size-xl="2" (click)="openPage(dat)">
-        <ion-card  style="margin: 0;background-color:white;border:1px solid black" mode="ios">
-          <ion-img [src]="dat.icon_path" *ngIf="isInternet"></ion-img>
-          <ion-img src="assets/imgs/leave_approval.svg" *ngIf="!isInternet"></ion-img>
+  <ion-row>
+    <ion-col class="ion-padding-start">
+      <ion-text color="primary"><b>Our Services</b></ion-text>
+    </ion-col>
+  </ion-row>
+  <section >
+    <ion-slides [options]="menuSlide" pager="false" style="padding: 10px">
+      <ion-slide *ngFor="let dat of menuNew" style="margin:0px !important;padding:0px !important">
+        <ion-grid style="padding:0px !important" >
+          <ion-row  style="padding:2px;margin:0px !important;">
+            <ion-col *ngFor="let val of dat.menu" size="12" style="margin:3px 0px">
+              <ion-card style="margin:0px; min-height: 80px;width:100%; box-shadow:1px 1px 8px #26589c;border-radius: 10px;" (click)="openPage(val)">
+                <div style="height:60px;width:100%" class="center">
+                  <ion-img [src]="val.icon_path" style="height:35px;width:35px"></ion-img>
+                </div>
+                <div style="min-height:20px;width:100%" class="center">
+                  <ion-text color="primary" style="font-weight: 500;"> {{val.smnu_desc}} </ion-text>
+                </div>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-slide>
+    </ion-slides>
+  </section>
+
+  <ion-item lines="none">
+    <ion-buttons slot="start">
+      <ion-button></ion-button>
+    </ion-buttons>
+    <ion-label class="ion-text-center"><b>My Pending Task</b></ion-label>
+    <ion-button slot="end" (click)="changePendingTask()" fill="clear">
+      <ion-text *ngIf="pendingTask"><ion-icon src="assets/home_banner1/pie-chart.svg" style="height:20px;width:20px;"></ion-icon></ion-text>
+      <ion-text *ngIf="!pendingTask"><ion-icon src="assets/home_banner1/engineer.svg" style="height:20px;width:20px;"></ion-icon></ion-text>
+    </ion-button>
+  </ion-item>
+
+  <div *ngIf="pendingTask">
+    <ion-segment  [(ngModel)]='segments' scroll="true">
+      <ion-segment-button value="helpdesk">
+        <ion-label>Helpdesk(<ion-text color="danger">3</ion-text>)</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="digital">
+        <ion-label>Digital(<ion-text color="danger">4</ion-text>) </ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pms">
+        <ion-label>PMS (<ion-text color="danger">4</ion-text>)</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="meter">
+        <ion-label>Meter (<ion-text color="danger">3</ion-text>)</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <div [ngSwitch]='segments'>
+      <div *ngSwitchCase= "'helpdesk'">
+        <ion-card *ngFor="let dat of pendingTicket" style="margin: 10px;">
           <ion-row>
-            <ion-col class="ion-text-center">
-              <span style="color:white; background-color:black;border-radius:6px;padding:2px"><b>{{dat.smnu_desc}}</b></span>
+            <ion-col size="4" style="display: flex; align-items: center; justify-content: center;background:linear-gradient(
+              195deg,
+              #25589c 20%,
+              var(--ion-color-primary) 100%
+              ) !important; color:white">
+              <div class="ion-text-center">
+                <span><b>#{{dat.ticket_id}}</b></span><br>
+                <span>{{dat.status}}</span>
+              </div>
+            </ion-col>
+            <ion-col>
+              <ion-item lines="none">
+                <ion-label class="ion-text-wrap">
+                  <ion-text>
+                    <h3><b>{{dat.facility_type }}</b></h3>
+                  </ion-text>
+                  <p>{{dat.barcode}}</p>
+                  <p>{{dat.item_name}}</p>
+                  <p>{{dat.datetime}}</p>
+                </ion-label>
+              </ion-item>
             </ion-col>
           </ion-row>
         </ion-card>
+      </div>
+      <div *ngSwitchCase= "'digital'">
+        <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
+          <ion-item lines="none" color="none">
+            <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
+            <ion-label class="ion-text-wrap">
+              <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
+              <p><b>{{dat.schedule_time}}</b></p>
+              <p><b>{{dat.location_desc}}</b></p>
+              <p><b>{{dat.barcode}}</b></p>
+            </ion-label>
+            <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize">Fill</ion-button>
+          </ion-item>
+        </ion-card>
+      </div>
+      <div *ngSwitchCase= "'pms'">
+        <ion-card *ngFor="let dat of pmsList" style="padding: 5px;margin:5px" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
+          <ion-item lines="none" color="none">
+            <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
+            <ion-label class="ion-text-wrap">
+              <h2><b>{{dat.facility_name}}</b></h2>
+              <p><b>{{dat.wo}}</b></p>
+              <p><b>{{dat.date}}</b></p>
+              <p><b>{{dat.asset_id}}</b></p>
+            </ion-label>
+            <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize">Fill</ion-button>
+          </ion-item>
+        </ion-card>
+      </div>
+      <div *ngSwitchCase= "'meter'">
+        <ion-card  *ngFor="let dat of meterInfo;let i = index" style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}">
+          <ion-item>
+            <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
+            <ion-label class="ion-text-wrap">
+              <h2> <span style="height:20px;width:20px;border-radius: 50%;background-color:green"></span> <b> {{dat.make}}</b></h2>
+              <p><b>{{dat.ext_id}}</b></p>
+              <p><b>{{dat.sch_datetime}}</b></p>
+              <p><b>Wo No: {{dat.wo_id}}</b></p>
+            </ion-label>
+            <ion-buttons  slot="end" >
+              <ion-button fill="clear" class="ion-text-capitalize" (click)="dat.isMore = !dat.isMore">
+                <ion-icon name="search-outline"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" class="ion-text-capitalize">
+                <ion-icon name="time-outline"></ion-icon>
+              </ion-button>
+            </ion-buttons>
+          </ion-item>
+
+          <ion-item style="border:2px solid var(--ion-color-dark); margin:5px;border-radius:5px" >
+            <ion-input type="number" placeholder="Consumption Reading" [(ngModel)]="dat.consumption_reading"></ion-input>
+            <ion-buttons slot="end" class="ion-no-margin">
+              <ion-button class="ion-text-capitalize" shape="round" [fill]="!dat.isConsumptionImg ? 'clear': 'solid'">
+                <ion-icon name="camera-outline"></ion-icon>
+                <ion-icon name="checkmark-outline" slot="end" *ngIf="dat.isConsumptionImg"></ion-icon>
+                <ion-text *ngIf="dat.is_img_req === 1">*</ion-text> </ion-button>
+              </ion-buttons>
+          </ion-item>
+
+          <ion-item style="border:2px solid var(--ion-color-dark); margin:5px;border-radius:5px">
+            <ion-input type="number" placeholder="Generating Reading" [(ngModel)]="dat.generate_reading"></ion-input>
+            <ion-buttons slot="end" class="ion-no-margin">
+              <ion-button class="ion-text-capitalize" shape="round" [fill]="!dat.isGenerationImg ? 'clear': 'solid'" >
+                <ion-icon name="camera-outline"></ion-icon>
+                <ion-icon name="checkmark-outline" slot="end" *ngIf="dat.isGenerationImg"></ion-icon>
+                <ion-text *ngIf="dat.is_img_req === 1">*</ion-text> </ion-button>
+              </ion-buttons>
+          </ion-item>
+          <ion-button expand="block">Submit <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
+        </ion-card>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="!pendingTask">
+    <ion-row>
+      <ion-col size="4" class="ion-text-right">
+        <ion-button fill="clear" >
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </ion-button>
+      </ion-col>
+      <ion-col size="4" class="ion-text-center center">
+        <b>12 Oct 2023</b>
+      </ion-col>
+      <ion-col size="2" class="ion-text-left" >
+        <ion-button fill="clear" >
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </ion-button>
+      </ion-col>
+      <ion-col size="2" class="ion-text-left">
+        <ion-button id="home-circle-date" fill="clear" color="primary" class="ion-text-capitalize">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </ion-button>
+        <ion-popover trigger="home-circle-date" mode="md">
+          <ng-template>
+            <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover"  (ionChange)="changeDateComponent($event)"></ion-datetime>
+          </ng-template>
+        </ion-popover>
       </ion-col>
     </ion-row>
-  </ion-grid>
+
+    <div style="width:100%;">
+      <canvas id="canvas1" style="width:100%;"></canvas>
+    </div>
+
+    <ion-row>
+      <ion-col size="4">
+        <ion-select interface="popover" placeholder="Select Type" [(ngModel)]="cat_id" (ionChange)="changeCat($event)">
+          <ion-select-option *ngFor="let dat of category" [value]="dat.id">{{dat.label}}</ion-select-option>
+        </ion-select>
+      </ion-col>
+      <ion-col size="4" class="ion-text-center center">
+        <b>12 Oct 2023</b>
+      </ion-col>
+      <ion-col size="4" *ngIf="cat_id ===1 || cat_id === 3">
+        <ion-select interface="popover" placeholder="Select Category" [(ngModel)]="sub_cat_id" (ionChange)="changeSubCat($event)">
+          <ion-select-option *ngFor="let dat of subCat" [value]="dat.id">{{dat.label}}</ion-select-option>
+        </ion-select>
+      </ion-col>
+    </ion-row>
+
+    <div style="width:100%;">
+      <canvas id="canvas" style="width:100%;"></canvas>
+    </div>
+    <br>
+  </div>
 </ion-content>

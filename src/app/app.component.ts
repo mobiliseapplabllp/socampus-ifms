@@ -199,7 +199,12 @@ export class AppComponent {
 
   reset() {
     localStorage.clear();
-    App.exitApp();
+    if (this.platform.is('android')) {
+      App.exitApp();
+    } else {
+      this.router.navigateByUrl('/login');
+    }
+
   }
 
   openPage(data: any) {

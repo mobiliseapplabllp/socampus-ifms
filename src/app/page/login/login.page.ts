@@ -20,7 +20,7 @@ export class LoginPage implements OnInit {
   public loginForms!: FormGroup;
   loading: any;
   isLogin: any = [];
-  mypass = true;
+  isPassword = true;
   isAndroid!: boolean;
   constructor(
     private formbuilder: FormBuilder,

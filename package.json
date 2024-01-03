@@ -37,6 +37,7 @@
     "@ionic/angular": "^6.1.9",
     "angular-user-idle": "^4.0.0",
     "angular2-signaturepad": "^2.11.0",
+    "chart.js": "^4.4.0",
     "ionicons": "^6.0.3",
     "moment": "^2.29.4",
     "ng-otp-input": "^1.7.1",
