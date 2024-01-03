@@ -46,6 +46,10 @@ export class ComplaintService {
     return this.https.get(environment.url + 'complaints/get_assign_ticket_master?' + url);
   }
 
+  getPendingTicketHomePage(limit: any) {
+    return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=' + limit + '&page=1&ticket_type=not_resolved');
+  }
+
   getResolvedTicket(): Observable<any> {
     return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=40&page=1&status=4')
   }

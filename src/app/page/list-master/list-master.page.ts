@@ -7,6 +7,18 @@ import { LoginService } from 'src/app/provider/login/login.service';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import Chart from 'chart.js/auto';
+import { environment } from 'src/environments/environment';
+import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
+import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
+import * as moment from 'moment';
+import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
+import { PmAssignComponent } from '../pm-cal/pm-assign/pm-assign.component';
+import { MeterService } from 'src/app/provider/meter/meter.service';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { TicketTypeComponent } from '../complaint/ticket-type/ticket-type.component';
+import { AssignTicketComponent } from '../complaint/assign-ticket/assign-ticket.component';
+import { SiteDetailComponent } from '../complaint/site-detail/site-detail.component';
+import { TicketHistoryComponent } from '../complaint/ticket-history/ticket-history.component';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -16,6 +28,7 @@ export class ListMasterPage implements OnInit {
   @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
   @ViewChild('mySlider', { static: true }) slides!: IonSlides;
   @ViewChild('canvas') canvas!: ElementRef;
+
   myMenu: any = [];
   menuTemp: any = [];
   menuNew: any = [];
@@ -30,9 +43,9 @@ export class ListMasterPage implements OnInit {
   userData: any = [];
   result: any = [];
   userName!: string;
-  breakdown = '10';
-  pr = '11';
-  indent = '12';
+  breakdown = '';
+  pms = '';
+  indent = '';
   option = {
     slidesPerView:1.5,
     centeredSlides:true,
@@ -134,94 +147,15 @@ export class ListMasterPage implements OnInit {
   stackedChart: any;
   pendingTask = true;
   segments = 'helpdesk';
-  pendingTicket: any = [{
-    ticket_id: 1211,
-    status:'WIP',
-    facility_type: 'Qualcom Hyderadabad CMZ',
-    barcode: '12002002',
-    item_name: 'Plumbing General Issue',
-    datetime: '12-12-2022'
-  },{
-    ticket_id: 1211,
-    status:'WIP',
-    facility_type: 'Qualcom Hyderadabad CMZ',
-    barcode: '12002002',
-    item_name: 'Door Not Working',
-    datetime: '10-12-2022'
-  },{
-    ticket_id: 1211,
-    status:'WIP',
-    facility_type: 'Qualcom Hyderadabad CMZ',
-    barcode: '12002002',
-    item_name: 'Flush Issue',
-    datetime: '08-12-2022'
-  }];
-  assignCheckList: any = [{
-    schedule_unique_id: 'CHK003907',
-    chk_cat_name: 'CHILLER',
-    schedule_time: '19:00:00',
-    location_desc: 'UPS PAC ROOM',
-    barcode: '101026990',
-    backgroundColor: 'red'
-  },{
-    schedule_unique_id: 'CHK003908',
-    chk_cat_name: 'CHILLER',
-    schedule_time: '20:00:00',
-    location_desc: 'UPS PAC ROOM',
-    barcode: '101026990',
-    backgroundColor: 'red'
-  },{
-    schedule_unique_id: 'CHK003909',
-    chk_cat_name: 'CHILLER',
-    schedule_time: '21:00:00',
-    location_desc: 'UPS PAC ROOM',
-    barcode: '101026990',
-    backgroundColor: 'red'
-  },{
-    schedule_unique_id: 'CHK003910',
-    chk_cat_name: 'CHILLER',
-    schedule_time: '22:00:00',
-    location_desc: 'UPS PAC ROOM',
-    barcode: '101026990',
-    backgroundColor: 'red'
-  }]
-  pmsList: any = [{
-    facility_name:'Qualcomm Hyderabad CMZ',
-    wo: '2/2023/10',
-    date: '22 Dec, 23',
-    asset_id: '1010109090'
-  },{
-    facility_name:'Qualcomm Hyderabad CMZ',
-    wo: '2/2023/11',
-    date: '22 Dec, 23',
-    asset_id: '1010109091'
-  },{
-    facility_name:'Qualcomm Hyderabad CMZ',
-    wo: '2/2023/12',
-    date: '22 Dec, 23',
-    asset_id: '1010109092'
-  },{
-    facility_name:'Qualcomm Hyderabad CMZ',
-    wo: '2/2023/13',
-    date: '22 Dec, 23',
-    asset_id: '1010109093'
-  }];
-  meterInfo: any = [{
-    make: "This is a Electric Meter test1",
-    ext_id: "101100001101",
-    sch_datetime: "2023-12-22 10:43:00",
-    wo_id: 715
-  },{
-    make: "This is a Electric Meter test2",
-    ext_id: "101100001102",
-    sch_datetime: "2023-12-23 10:43:00",
-    wo_id: 716
-  },{
-    make: "This is a Electric Meter test3",
-    ext_id: "101100001103",
-    sch_datetime: "2023-12-24 10:43:00",
-    wo_id: 717
-  }]
+
+  pendingTicket: any = [];
+  allChecklist: any = [];
+  assignCheckList: any = [];
+  attendedCheckList: any = [];
+  pmsList: any = [];
+  meterInfo: any = [];
+  formData = new FormData();
+
   constructor(
     private listMaster: ListMasterService,
     private toastController: ToastController,
@@ -229,7 +163,12 @@ export class ListMasterPage implements OnInit {
     private loadingController: LoadingController,
     private common: CommonService,
     private router: Router,
-    private platform: Platform
+    private platform: Platform,
+    private httpCompalint: ComplaintService,
+    private httpDigital: DigitalChecklistService,
+    private httpPm: PmCalService,
+    private modalCtrl: ModalController,
+    private httpMeter: MeterService
   ) {
     const user = localStorage.getItem('user');
     if (user) {
@@ -254,6 +193,7 @@ export class ListMasterPage implements OnInit {
         this.userData = this.loginPro.getLoginUserValue();
         this.getMenuDetail();
         this.getDashboard();
+        this.getPendingTicket();
       } else {
         let menu, MENU_TEMP = localStorage.getItem('home_menu');
         if (MENU_TEMP) {
@@ -393,12 +333,397 @@ export class ListMasterPage implements OnInit {
       console.log(data);
       if (data.status) {
         this.breakdown =  data.data.breakdown.assign.toString();
-        this.pr = data.data.pms.assign.toString();
-        this.indent = data.data.indent.assign.toString()
-
+        this.pms = data.data.pms.assign.toString();
+        this.indent = data.data.indent.assign.toString();
       }
     });
   }
+
+  getPendingTicket() {
+    this.httpCompalint.getPendingTicketHomePage(60).subscribe({
+      next:(data: any) => {
+        if (data.status) {
+          this.pendingTicket = data.data.data;
+        } else {
+          this.common.presentToast(data.msg, 'warning');
+        }
+      },
+      error:() => {
+        this.dismissloading();
+        this.common.presentToast(environment.errMsg, 'warning');
+      },
+      complete:() => {
+        this.dismissloading();
+      }
+    });
+  }
+
+  async work_now(allData: any) {
+    this.presentLoading().then(preLoad => {
+      this.httpCompalint.checkTicketConfirm(allData.tkts_id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.openTicketWork(allData);
+          } else {
+            this.openTicketTypeModal(allData, data.locations, data.data);
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    });
+  }
+
+  openTicketWork(data: any) {
+    this.router.navigate(['complaint/ticket-work'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
+  }
+
+  async openTicketTypeModal(allData: any, locations: any, data: any) {
+    console.log(data);
+    const modal = await this.modalCtrl.create({
+      component: TicketTypeComponent,
+      cssClass: 'my-modal',
+      componentProps: { allData:  allData, locations: locations, requestData1: data }
+    });
+    modal.onWillDismiss().then(disModal => {
+      console.log(disModal);
+      if (disModal.role) {
+        // this.greetEvent.emit(true);
+      }
+    });
+    modal.present();
+  }
+
+  async openSite(data:any) {
+    console.log('my site');
+    const modal = await this.modalCtrl.create({
+      component: SiteDetailComponent,
+      cssClass: 'my-modal2',
+      componentProps: { ticketData: data }
+    });
+    modal.present();
+  }
+
+  async history(tkts_id: any) {
+    const modal = await this.modalCtrl.create({
+      component: TicketHistoryComponent,
+      cssClass: 'my-modal',
+      componentProps: { ticket_id: tkts_id }
+    });
+    modal.present();
+  }
+
+  fsr(ticket_id: number) {}
+
+  async assignTicket(ticket_id: any,  data: any) {
+    const modal = await this.modalCtrl.create({
+      component: AssignTicketComponent,
+      cssClass: 'my-modal',
+      componentProps: {
+        ticket_id: ticket_id,
+        allData: data
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      console.log(disModal);
+      if (disModal.role) {
+        this.getPendingTicket();
+      }
+    });
+    modal.present();
+  }
+
+  changeSegmentHeaders(ev: any) {
+    console.log(ev.target.value);
+    if (ev.target.value === 'digital' && this.assignCheckList.length === 0) {
+      this.getSchedule(moment().format('YYYY-MM-DD'));
+    } else if (ev.target.value === 'pms' && this.pmsList.length === 0) {
+      this.getPendingPms();
+    } else if (ev.target.value === 'meter' && this.meterInfo.length === 0) {
+      this.getPendingMeter();
+    }
+  }
+
+  getSchedule(date: any) {
+    this.allChecklist = [];
+    this.assignCheckList = [];
+    this.attendedCheckList = [];
+    this.presentLoading().then(preLoad => {
+      this.httpDigital.getScheduleHistory(date).subscribe({
+        next:(data) => {
+          console.log(data);
+          if (data.status) {
+            this.allChecklist = data.data;
+            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
+            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended');
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger')
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+  }
+
+  openFillReport(data: any) {
+    this.router.navigateByUrl('/digital-checklist/fill-report/' + data.schedule_id + '/' + 0);
+    return;
+    if (this.platform.is('capacitor')) {
+      if (!data.barcode  || data.schedule_status === 'attended') {
+        this.router.navigateByUrl('/digital-checklist/fill-report/' + data.schedule_id + '/' + 0);
+      }
+      // else {
+      //   this.qrType = data.schedule_id;
+      //   this.router.navigateByUrl('/barcode');
+      // }
+    } else {
+      this.router.navigateByUrl('/digital-checklist/fill-report/' + data.schedule_id + '/' + 0);
+    }
+  }
+
+  getPendingPms(){
+    this.presentLoading().then(() => {
+      this.httpPm.getPm(1, 1).subscribe({
+        next:(dat) => {
+          if (dat.status) {
+            this.pmsList = dat.data.data;
+            this.pmsList = this.pmsList.filter((val: any) => val.stage_id === 1);
+          } else {
+            this.pmsList = [];
+            this.common.presentToast(dat.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'warning');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    });
+  }
+
+  uploadPtw(dat: any) {}
+
+  async pmAssign(dat: any) {
+    const modal = await this.modalCtrl.create({
+      component: PmAssignComponent,
+      cssClass: 'my-modal',
+      componentProps: { data: dat }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        console.log('ff');
+        this.pmsList = this.pmsList.filter((val:any) => val.wo_id !== dat.wo_id);
+      }
+    });
+    modal.present();
+  }
+
+  viewAttachment(url: string) {
+    this.common.openDoc(url);
+  }
+
+  openFillReportPms(dat: any) {
+    this.router.navigate(['/pm-calibration/pm-report'], {
+      queryParams: {
+        data: JSON.stringify(dat),
+      }
+    });
+  }
+
+  getPendingMeter() {
+    this.presentLoading().then(preLoad => {
+      this.httpMeter.getPendingWo().subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.meterInfo = data.data;
+          } else {
+            this.common.presentToast(data.info, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+  }
+
+  checkPhotoCondition(dat: any, type: any) {
+    if (dat.is_gllry_upld_allwd == 1) {
+      this.presentActionSheet(1, dat , type);
+    } else if (dat.is_gllry_upld_allwd == 0) {
+      this.presentActionSheet(0, dat , type);
+    } else {
+      alert('Gallery is Undefined ' + dat.is_gllry_upld_allwd);
+    }
+  }
+
+  async presentActionSheet(val: any, data: any, type: any) {
+    const takePicture = async () => {
+      var obj: any = {};
+      if (val === 1) {
+        obj = {
+          quality: 80,
+          allowEditing: false,
+          resultType: CameraResultType.Uri,
+        }
+      } else {
+        obj = {
+          quality: 80,
+          allowEditing: false,
+          source: CameraSource.Camera,
+          resultType: CameraResultType.Uri,
+        }
+      }
+      const image = await Camera.getPhoto(obj);
+      this.readImg(image, data ,type)
+    };
+    takePicture();
+  }
+
+  async readImg(photo: any, data: any,type: any) {
+    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+    const response = await fetch(photo.webPath);
+    const blob = await response.blob();
+    if (type == 'consumption') {
+        this.formData.delete('img1');
+        this.formData.append('img1', blob, random);
+        data.isConsumptionImg = true;
+        for (var i = 0; i < this.meterInfo.length;i++) {
+          if (data.wo_id !== this.meterInfo[i].wo_id) {
+            this.meterInfo[i].isConsumptionImg = false;
+          }
+        }
+      } else if (type == 'generate_reading') {
+        this.formData.delete('img2');
+        this.formData.append('img2', blob, random);
+        data.isGenerationImg = true;
+        for (var i = 0; i < this.meterInfo.length;i++) {
+          if (data.wo_id !== this.meterInfo[i].wo_id) {
+            this.meterInfo[i].isGenerationImg = false;
+          }
+        }
+      }
+      this.presentLoading().then(preLoad => {
+        setTimeout(() => {
+          this.dismissloading();
+        }, 500)
+      })
+  }
+
+  updateReading(dat: any, type: any) {
+    if (type === 'consumption' ) {
+      if (this.checkConsumptionCondition(dat)) {
+        const obj = {
+          wo_id: dat.wo_id,
+          consume_reading: dat.consumption_reading,
+        }
+        this.save(obj, dat);
+      }
+    } else if (type === 'generation') {
+      if (this.checkGenertionCondition(dat)) {
+        const obj = {
+          wo_id: dat.wo_id,
+          gen_reading: dat.generate_reading
+        }
+        this.save(obj, dat);
+      }
+    } else if (type === 'both') {
+      if (this.checkConsumptionCondition(dat) && this.checkGenertionCondition(dat) && this.checkOtherCondition(dat)) {
+        const obj = {
+          wo_id: dat.wo_id,
+          consume_reading: dat.consumption_reading,
+          gen_reading: dat.generate_reading,
+          new_oth_reading: dat.other_reading
+        }
+        this.save(obj, dat);
+      }
+    }
+  }
+
+  checkConsumptionCondition(dat: any) {
+    if (!dat.consumption_reading) {
+      alert('Please Enter Consumption Reading');
+      return false;
+    } else if (dat.is_img_req == 1 && !dat.isConsumptionImg) {
+      alert('Consumption Image is Required');
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  checkGenertionCondition(dat: any) {
+    if (!dat.generate_reading) {
+      alert('Please Enter Generate Reading');
+      return false;
+    } else if (dat.is_img_req == 1 && !dat.isGenerationImg) {
+      alert('Generation Image is Required');
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  checkOtherCondition(dat: any) {
+    if (!dat.other_reading && dat.oth_read == 1) {
+      alert('Other Reading is Required');
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  save(obj: any, dat: any) {
+    for (let key in obj) {
+      this.formData.delete(key);
+      this.formData.append(key, obj[key]);
+    }
+    this.presentLoading().then(preLoad => {
+      this.httpMeter.updateReading(this.formData).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            dat.isRemove = true
+            setTimeout(() => {
+              this.meterInfo = this.meterInfo.filter((val: any) => val.wo_id !== obj.wo_id);
+            }, 500);
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.dismissloading();
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+  }
+
 
   speak() {
     const speak = async () => {
@@ -554,12 +879,22 @@ export class ListMasterPage implements OnInit {
   }
 
   slideDidChange(){
-    this.slides.getActiveIndex().then(index => {
-      console.log('Active slide index:', index);
-      if (index == 5) {
-        this.breakdown = '';
-        this.breakdown = '90';
-      }
-    });
+    console.log('abc');
+    if (this.menuNew.length > 0) {
+      this.slides.getActiveIndex().then(index => {
+          if (index === 6) {
+            this.slides.slideTo(2);
+          }
+      });
+    }
+  }
+
+
+  slideTransitionEnd(event: any) {
+    // const slides = event.target;
+    // const currentIndex = slides.getActiveIndex();
+    // const realIndex = currentIndex === slides.length() ? 0 : currentIndex;
+
+    // console.log('Real Active Index:', realIndex);
   }
 }
