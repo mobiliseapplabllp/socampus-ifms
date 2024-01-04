@@ -19,6 +19,7 @@ import { TicketTypeComponent } from '../complaint/ticket-type/ticket-type.compon
 import { AssignTicketComponent } from '../complaint/assign-ticket/assign-ticket.component';
 import { SiteDetailComponent } from '../complaint/site-detail/site-detail.component';
 import { TicketHistoryComponent } from '../complaint/ticket-history/ticket-history.component';
+import { BehaviorSubject } from 'rxjs';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -155,7 +156,7 @@ export class ListMasterPage implements OnInit {
   pmsList: any = [];
   meterInfo: any = [];
   formData = new FormData();
-
+  TEMP_VAL = new BehaviorSubject('');
   constructor(
     private listMaster: ListMasterService,
     private toastController: ToastController,
@@ -168,8 +169,7 @@ export class ListMasterPage implements OnInit {
     private httpDigital: DigitalChecklistService,
     private httpPm: PmCalService,
     private modalCtrl: ModalController,
-    private httpMeter: MeterService
-  ) {
+    private httpMeter: MeterService) {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
@@ -198,6 +198,11 @@ export class ListMasterPage implements OnInit {
         }
       }
     });
+
+    this.TEMP_VAL.subscribe(data => {
+      console.log(data);
+      this.breakdown = data;
+    })
   }
 
   ionViewDidEnter() {
@@ -212,8 +217,6 @@ export class ListMasterPage implements OnInit {
       this.getPendingMeter();
     }
   }
-
-
 
   changePendingTask() {
     this.presentLoading().then(preLoad => {
@@ -243,9 +246,13 @@ export class ListMasterPage implements OnInit {
     this.listMaster.getDashboard().subscribe(data => {
       console.log(data);
       if (data.status) {
-        this.breakdown =  data.data.breakdown.assign.toString();
+        // this.breakdown =  data.data.breakdown.assign.toString();
         this.pms = data.data.pms.assign.toString();
         this.indent = data.data.indent.assign.toString();
+        this.TEMP_VAL.next(data.data.breakdown.assign.toString());
+        setTimeout(() => {
+          this.TEMP_VAL.next('100');
+        }, 5000);
       }
     });
   }

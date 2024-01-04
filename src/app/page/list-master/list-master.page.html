@@ -31,51 +31,50 @@
   <div class="dashboard">
     <ion-slides #mySlider (ionSlideDidChange)="slideDidChange()" (ionSlideTransitionEnd)="slideTransitionEnd($event)" [options]="option">
       <ion-slide >
-        <ion-card  class="ion-text-left ion-padding">
+        <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:auto">
           <div>
-            <!-- <ion-icon src="assets/home_banner1/helpdesk.svg" color="light" style="font-size: 40px" ></ion-icon><br> -->
             <img src="assets/home_banner1/helpdesk.png" style="height:40px;width:40px"><br>
             <ion-text color="light" style="margin-left:5px;font-weight: 550;">Helpdesk </ion-text>
           </div>
           <br>
           <div class="ion-text-right">
-            <ion-text color="light" style="font-weight: 550;font-size:22px">{{breakdown}}</ion-text>
+            <ion-text color="light" style="font-weight: 550;font-size:35px">{{breakdown}}</ion-text>
           </div>
         </ion-card>
       </ion-slide>
       <ion-slide>
-        <ion-card  class="ion-text-left ion-padding">
+        <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:auto">
           <div>
             <img src="assets/home_banner1/checklist.png" style="height:40px;width:40px"><br>
             <ion-text color="light" style="margin-left:5px;font-weight: 550;">Digital </ion-text>
           </div>
           <br>
           <div class="ion-text-right">
-            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:22px">4</ion-text>
+            <ion-text color="light" style="font-weight: 550;font-size:35px">4</ion-text>
           </div>
         </ion-card>
       </ion-slide>
       <ion-slide>
-        <ion-card  class="ion-text-left ion-padding">
+        <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:auto">
           <div>
             <img src="assets/home_banner1/pms.png" style="height:40px;width:40px"><br>
             <ion-text color="light" style="margin-left:5px;font-weight: 550;">PMS </ion-text>
           </div>
           <br>
           <div class="ion-text-right">
-            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:22px">{{pms}}</ion-text><!--{{indent.inapproval}}-->
+            <ion-text color="light" style="font-weight: 550;font-size:35px">{{pms}}</ion-text><!--{{indent.inapproval}}-->
           </div>
         </ion-card>
       </ion-slide>
       <ion-slide>
-        <ion-card  class="ion-text-left ion-padding">
+        <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:auto">
           <div>
             <img src="assets/home_banner1/meter.png" style="height:40px;width:40px"><br>
             <ion-text color="light" style="margin-left:5px;font-weight: 550;">Meter </ion-text>
           </div>
           <br>
           <div class="ion-text-right">
-            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:22px">3</ion-text><!--{{indent.inapproval}}-->
+            <ion-text color="light" style="font-weight: 550;font-size:35px">3</ion-text><!--{{indent.inapproval}}-->
           </div>
         </ion-card>
       </ion-slide>
@@ -120,7 +119,7 @@
   </ion-item>
 
   <div *ngIf="pendingTask">
-    <ion-row>
+    <ion-row style="background-color: rgb(226, 225, 225);">
       <ion-col size="3">
         <ion-button expand="block" [color]="segments === 'helpdesk'? 'primary':'medium'" (click)="clickCustomSegment('helpdesk')">Helpdesk</ion-button>
       </ion-col>
