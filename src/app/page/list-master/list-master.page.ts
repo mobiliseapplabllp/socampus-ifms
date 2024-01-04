@@ -178,14 +178,6 @@ export class ListMasterPage implements OnInit {
   }
 
   ngOnInit() {
-    // setTimeout(() => {
-    //   this.listMaster.sendMessage('pizza').subscribe({
-    //     next:() => {},
-    //     error:() => {},
-    //     complete:() => {}
-    //   });
-    // }, 3000);
-
     this.common.checkInternet().then(res => {
       if (res) {
         this.isInternet = true;
@@ -206,118 +198,37 @@ export class ListMasterPage implements OnInit {
         }
       }
     });
-    // this.stackedBarChart();
-    // this.lineBarChart();
   }
 
-  randomIntArrayInRange = (min: any, max: any, n = 1) => Array.from( { length: n }, () => Math.floor(Math.random() * (max - min + 1)) + min)
-
-
-  stackedBarChart() {
-    this.stackedChart = new Chart('canvas', {
-      type: 'bar',
-      data : {
-        labels: ['15 Oct','16 Oct','17 Oct','18 Oct','19 Oct','20 Oct','21 Oct',],
-        datasets: [
-        {
-          label: 'Assign',
-          data: this.res,
-          backgroundColor: 'blue',
-        },
-        {
-          label: 'Attend',
-          data: this.total,
-          backgroundColor: 'orange',
-        }]
-      },
-      options: {
-        plugins: {
-          title: {
-            display: true,
-            text: 'Reporting'
-          },
-        },
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            stacked: true,
-          },
-          y: {
-            stacked: true
-          }
-        }
-      }
-    });
+  ionViewDidEnter() {
+    console.log(this.segments);
+    if (this.segments === 'helpdesk') {
+      this.getPendingTicket();
+    } else if (this.segments === 'digital') {
+      this.getSchedule(moment().format('YYYY-MM-DD'));
+    } else if (this.segments === 'pms') {
+      this.getPendingPms();
+    } else if (this.segments === 'meter') {
+      this.getPendingMeter();
+    }
   }
 
-  updateStackedChart() {
-    console.log('abc');
-    const newDataValues = this.randomIntArrayInRange(12, 35, 7);
-    console.log(newDataValues);
-    this.stackedChart.data.datasets[0].data = this.randomIntArrayInRange(12, 35, 7);
-    this.stackedChart.data.datasets[1].data = this.randomIntArrayInRange(12, 35, 7);
-    this.stackedChart.update();
-  }
 
-  lineBarChart() {
-    new Chart('canvas1', {
-      type: 'line',
-      data : {
-        labels: ['15 Oct','16 Oct','17 Oct','18 Oct','19 Oct','20 Oct','21 Oct',],
-        datasets: [
-          {
-            label: 'Assign',
-            data: this.randomIntArrayInRange(12, 35, 7),
-            fill: false,
-            borderColor: 'blue',
-            backgroundColor: 'blue',
-            tension: 0.4,
-            borderJoinStyle: 'round',
-          },
-          {
-            label: 'Resolve',
-            data: this.randomIntArrayInRange(12, 35, 7),
-            fill: false,
-            borderColor: 'orange',
-            backgroundColor: 'orange',
-            tension: 0.4,
-            borderJoinStyle: 'round',
-          }
-        ]
-      },
-      options: {
-        indexAxis: 'x',
-        elements: {
-          bar: {
-            borderWidth: 0.1,
-          }
-        },
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-          title: {
-            display: true,
-            text: 'Helpdesk',
-          }
-        }
-      },
-    })
-  }
 
   changePendingTask() {
-    this.pendingTask = !this.pendingTask;
-    if (this.pendingTask) {
-      this.stackedChart = null;
-    } else {
-      setTimeout(() => {
-        this.stackedBarChart();
-        this.lineBarChart();
-      }, 10);
-    }
+    this.presentLoading().then(preLoad => {
+      this.pendingTask = !this.pendingTask;
+      if (this.pendingTask) {
+        this.stackedChart = null;
+      } else {
+        setTimeout(() => {
+          this.stackedBarChart();
+          this.lineBarChart();
+        }, 10);
+      }
+      this.dismissloading();
+    })
+
   }
 
   getCircleValue() {
@@ -440,6 +351,19 @@ export class ListMasterPage implements OnInit {
       }
     });
     modal.present();
+  }
+
+  clickCustomSegment(val: string) {
+    this.segments = val;
+    if (val === 'helpesk' && this.pendingTicket.length === 0) {
+      this.getPendingTicket();
+    } else if (val === 'digital' && this.assignCheckList.length === 0) {
+      this.getSchedule(moment().format('YYYY-MM-DD'));
+    } else if (val === 'pms' && this.pmsList.length === 0) {
+      this.getPendingPms();
+    } else if (val === 'meter' && this.meterInfo.length === 0) {
+      this.getPendingMeter();
+    }
   }
 
   changeSegmentHeaders(ev: any) {
@@ -776,15 +700,6 @@ export class ListMasterPage implements OnInit {
     }).then(res => {
       console.log(res);
     })
-    // SpeechRecognition.addListener("partialResults", (data: any) => {
-    //   console.log("partialResults was fired", data.matches);
-    //   // if (data.matches[0] == 'open asset tagging') {
-    //   //   const data = {
-    //   //     link: '/add-asset'
-    //   //   }
-    //   //   this.openPage(data);
-    //   // }
-    // });
   }
 
   removeListen() {
@@ -880,13 +795,13 @@ export class ListMasterPage implements OnInit {
 
   slideDidChange(){
     console.log('abc');
-    if (this.menuNew.length > 0) {
-      this.slides.getActiveIndex().then(index => {
-          if (index === 6) {
-            this.slides.slideTo(2);
-          }
-      });
-    }
+    // if (this.menuNew.length > 0) {
+    //   this.slides.getActiveIndex().then(index => {
+    //       if (index === 6) {
+    //         this.slides.slideTo(2);
+    //       }
+    //   });
+    // }
   }
 
 
@@ -896,5 +811,102 @@ export class ListMasterPage implements OnInit {
     // const realIndex = currentIndex === slides.length() ? 0 : currentIndex;
 
     // console.log('Real Active Index:', realIndex);
+  }
+
+  randomIntArrayInRange = (min: any, max: any, n = 1) => Array.from( { length: n }, () => Math.floor(Math.random() * (max - min + 1)) + min)
+
+  stackedBarChart() {
+    this.stackedChart = new Chart('canvas', {
+      type: 'bar',
+      data : {
+        labels: ['15 Oct','16 Oct','17 Oct','18 Oct','19 Oct','20 Oct','21 Oct',],
+        datasets: [
+        {
+          label: 'Assign',
+          data: this.res,
+          backgroundColor: 'blue',
+        },
+        {
+          label: 'Attend',
+          data: this.total,
+          backgroundColor: 'orange',
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Reporting'
+          },
+        },
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            stacked: true,
+          },
+          y: {
+            stacked: true
+          }
+        }
+      }
+    });
+  }
+
+  updateStackedChart() {
+    console.log('abc');
+    const newDataValues = this.randomIntArrayInRange(12, 35, 7);
+    console.log(newDataValues);
+    this.stackedChart.data.datasets[0].data = this.randomIntArrayInRange(12, 35, 7);
+    this.stackedChart.data.datasets[1].data = this.randomIntArrayInRange(12, 35, 7);
+    this.stackedChart.update();
+  }
+
+  lineBarChart() {
+    new Chart('canvas1', {
+      type: 'line',
+      data : {
+        labels: ['15 Oct','16 Oct','17 Oct','18 Oct','19 Oct','20 Oct','21 Oct',],
+        datasets: [
+          {
+            label: 'Assign',
+            data: this.randomIntArrayInRange(12, 35, 7),
+            fill: false,
+            borderColor: 'blue',
+            backgroundColor: 'blue',
+            tension: 0.4,
+            borderJoinStyle: 'round',
+          },
+          {
+            label: 'Resolve',
+            data: this.randomIntArrayInRange(12, 35, 7),
+            fill: false,
+            borderColor: 'orange',
+            backgroundColor: 'orange',
+            tension: 0.4,
+            borderJoinStyle: 'round',
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'x',
+        elements: {
+          bar: {
+            borderWidth: 0.1,
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Helpdesk',
+          }
+        }
+      },
+    })
   }
 }

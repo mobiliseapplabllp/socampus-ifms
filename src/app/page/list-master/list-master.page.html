@@ -38,8 +38,8 @@
             <ion-text color="light" style="margin-left:5px;font-weight: 550;">Helpdesk </ion-text>
           </div>
           <br>
-          <div>
-            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">{{breakdown}}</ion-text>
+          <div class="ion-text-right">
+            <ion-text color="light" style="font-weight: 550;font-size:22px">{{breakdown}}</ion-text>
           </div>
         </ion-card>
       </ion-slide>
@@ -50,8 +50,8 @@
             <ion-text color="light" style="margin-left:5px;font-weight: 550;">Digital </ion-text>
           </div>
           <br>
-          <div>
-            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">4</ion-text>
+          <div class="ion-text-right">
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:22px">4</ion-text>
           </div>
         </ion-card>
       </ion-slide>
@@ -62,8 +62,8 @@
             <ion-text color="light" style="margin-left:5px;font-weight: 550;">PMS </ion-text>
           </div>
           <br>
-          <div>
-            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">{{pms}}</ion-text><!--{{indent.inapproval}}-->
+          <div class="ion-text-right">
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:22px">{{pms}}</ion-text><!--{{indent.inapproval}}-->
           </div>
         </ion-card>
       </ion-slide>
@@ -74,8 +74,8 @@
             <ion-text color="light" style="margin-left:5px;font-weight: 550;">Meter </ion-text>
           </div>
           <br>
-          <div>
-            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:18px">3</ion-text><!--{{indent.inapproval}}-->
+          <div class="ion-text-right">
+            <ion-text color="light" style="margin-left:5px;font-weight: 550;font-size:22px">3</ion-text><!--{{indent.inapproval}}-->
           </div>
         </ion-card>
       </ion-slide>
@@ -120,7 +120,21 @@
   </ion-item>
 
   <div *ngIf="pendingTask">
-    <ion-segment  [(ngModel)]='segments' scroll="true" (ionChange)="changeSegmentHeaders($event)">
+    <ion-row>
+      <ion-col size="3">
+        <ion-button expand="block" [color]="segments === 'helpdesk'? 'primary':'medium'" (click)="clickCustomSegment('helpdesk')">Helpdesk</ion-button>
+      </ion-col>
+      <ion-col size="3">
+        <ion-button expand="block" [color]="segments === 'digital'? 'primary':'medium'" (click)="clickCustomSegment('digital')">Digital</ion-button>
+      </ion-col>
+      <ion-col size="3">
+        <ion-button expand="block" [color]="segments === 'pms'? 'primary':'medium'" (click)="clickCustomSegment('pms')">PMS</ion-button>
+      </ion-col>
+      <ion-col size="3">
+        <ion-button expand="block" [color]="segments === 'meter'? 'primary':'medium'" (click)="clickCustomSegment('meter')">Meter</ion-button>
+      </ion-col>
+    </ion-row>
+    <!-- <ion-segment  [(ngModel)]='segments' scroll="true" (ionChange)="changeSegmentHeaders($event)">
       <ion-segment-button value="helpdesk">
         <ion-label>Helpdesk(<ion-text color="danger">{{pendingTicket.length}}</ion-text>)</ion-label>
       </ion-segment-button>
@@ -133,10 +147,135 @@
       <ion-segment-button value="meter">
         <ion-label>Meter (<ion-text color="danger">{{meterInfo.length}}</ion-text>)</ion-label>
       </ion-segment-button>
-    </ion-segment>
+    </ion-segment> -->
     <div [ngSwitch]='segments'>
       <div *ngSwitchCase= "'helpdesk'">
-        <ion-card *ngFor="let dat of pendingTicket" style="margin: 10px;">
+        <ion-card class="myCards" *ngFor="let data of pendingTicket" [ngClass]="{'wip': data.status === 'work in progress', 'assign': data.status === 'assigned', 'resolve': data.status === 'resolved'}">
+          <div style="background-color:var(--ion-color-primary)">
+            <ion-row>
+              <ion-col>
+                <ion-text color="light" class="head">Ticket Id: {{data.tkts_id}}({{data.req_type_desc}})</ion-text>
+              </ion-col>
+              <ion-col>
+                <ion-text color="light" class="head">{{data.log_date | date: 'dd/MMM/yyyy H:mm:ss'}}</ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>
+                <ion-text class="head" [ngStyle]="{'color': data.attend_remark}">Attend: {{data.remain_attend}}</ion-text>
+              </ion-col>
+              <ion-col>
+                <ion-text class="head" [ngStyle]="{'color': data.resolve_remark}">Resolved: {{data.remain_resolve}}</ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>
+                <ion-text color="light" class="head">{{data.stage_desc}} ({{data.issue_desc}})</ion-text>
+              </ion-col>
+              <ion-col>
+                <ion-text color="light" class="head" *ngIf="data.rslv_date === '0000-00-00 00:00:00'"> Ticket Ageing: {{data.totalDelay}}</ion-text>
+                <ion-text color="light" class="head" *ngIf="data.rslv_date !== '0000-00-00 00:00:00'">Resolved Date: {{data.rslv_date}}</ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>
+                <ion-text color="light" class="head">Assigned To: {{data.assignedTo}}</ion-text>
+              </ion-col>
+            </ion-row>
+          </div>
+          <div>
+            <ion-row>
+              <ion-col>
+                <ion-text  class="medium">Site</ion-text><br>
+                <ion-text color="dark">{{data.pc_ext_id}} {{data.pc_desc}}</ion-text>
+              </ion-col>
+            </ion-row>
+            <section *ngIf="data.issue_desc === 'Service'">
+              <ion-row>
+                <ion-col>
+                  <ion-text class="medium">Category</ion-text><br>
+                  <ion-text color="dark">{{data.cat_desc}} </ion-text>
+                </ion-col>
+                <ion-col>
+                  <ion-text class="medium">Sub Category</ion-text><br>
+                  <ion-text color="dark">{{data.subcat1_desc}}</ion-text>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col *ngIf="data.subcat2_desc">
+                  <ion-text class="medium">Sub Category2</ion-text><br>
+                  <ion-text color="dark">{{data.subcat2_desc}}</ion-text>
+                </ion-col>
+                <ion-col>
+                  <ion-text class="medium">Log By</ion-text><br>
+                  <ion-text color="dark">{{data.logged_by_name}} </ion-text>
+                </ion-col>
+              </ion-row>
+            </section>
+            <section *ngIf="data.issue_desc === 'Assets'">
+              <ion-row>
+                <ion-col>
+                  <ion-text class="medium">Barcode</ion-text><br>
+                  <ion-text color="dark">{{data.ext_asset_id}} </ion-text>
+                </ion-col>
+                <ion-col>
+                  <ion-text class="medium">Device Name</ion-text><br>
+                  <ion-text color="dark">{{data.grp_desc}}</ion-text>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>
+                  <ion-text class="medium">Manufacturer</ion-text><br>
+                  <ion-text color="dark">{{data.mnfctrer_desc}}</ion-text>
+                </ion-col>
+                <ion-col>
+                  <ion-text class="medium">Warranty Status</ion-text><br>
+                  <ion-text color="dark">{{data.warranty_status}}</ion-text>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>
+                  <ion-text class="medium">Purchase Value</ion-text><br>
+                  <ion-text color="dark">{{data.pur_value}} </ion-text>
+                </ion-col>
+                <ion-col>
+                  <ion-text class="medium">Log By</ion-text><br>
+                  <ion-text color="dark">{{data.user}} </ion-text>
+                </ion-col>
+              </ion-row>
+            </section>
+            <ion-row>
+              <ion-col>
+                <ion-text class="medium">Remark</ion-text><br>
+                <ion-text color="dark">{{data.remark}} </ion-text>
+              </ion-col>
+            </ion-row>
+          </div>
+            <ion-grid class="grid1">
+              <ion-row>
+                <ion-col class="ion-text-center" >
+                  <ion-button style="width:80%;font-size:xx-small;" color="secondary" (click)="openSite(data)">Details</ion-button>
+                </ion-col>
+                <ion-col class="ion-text-center">
+                  <ion-button style="width:80%;font-size:xx-small;" color="medium" (click)="history(data.tkts_id)">History </ion-button>
+                </ion-col>
+                <ion-col class="ion-text-center" *ngIf="data.canWork" >
+                  <ion-button *ngIf="data.stage_id === 4 || data.stage_id === 6; else worknow" style="width:80%;font-size:xx-small;" color="success" (click)="fsr(data.tkts_id)">EFSR</ion-button>
+                  <ng-template #worknow>
+                    <ion-button style="width:80%;font-size:xx-small;" color="warning" (click)="work_now(data)">Work Now</ion-button>
+                  </ng-template>
+                </ion-col>
+                <ion-col class="ion-text-center"  *ngIf="!data.canWork" [hidden]="data.stage_id === 4 || data.stage_id === 6 ">
+                  <ion-button style="width:80%;font-size:xx-small;" color="success" (click)="assignTicket(data.tkts_id, data)">Assign</ion-button>
+                </ion-col>
+                <ion-col class="ion-text-center"  *ngIf="(data.stage_id === 4 || data.stage_id === 6) && !data.canWork ">
+                  <ion-button style="width:80%;font-size:xx-small;" color="success" (click)="fsr(data.tkts_id)">EFSR</ion-button>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+        </ion-card>
+
+        <!-- <ion-card *ngFor="let dat of pendingTicket" style="margin: 10px;">
           <ion-row>
             <ion-col size="4" style="display: flex; align-items: center; justify-content: center;background:linear-gradient(
               195deg,
@@ -181,7 +320,7 @@
               <ion-button style="width:80%;font-size:xx-small;" color="success" (click)="fsr(dat.tkts_id)">EFSR</ion-button>
             </ion-col>
           </ion-row>
-        </ion-card>
+        </ion-card> -->
       </div>
       <div *ngSwitchCase= "'digital'">
         <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">

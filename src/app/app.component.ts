@@ -39,7 +39,7 @@ export class AppComponent {
       // StatusBar.setStyle({ style: Style.Dark })
       StatusBar.setBackgroundColor({'color': '#040E51'})
     }
-    this.initIdle();
+    // this.initIdle();
     const isLogin = localStorage.getItem('isAlreadyLogin');
     if (!isLogin) {
       this.router.navigateByUrl('/login', { replaceUrl: true });
