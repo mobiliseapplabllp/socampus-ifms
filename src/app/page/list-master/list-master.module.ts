@@ -10,6 +10,7 @@ import { ListMasterPage } from './list-master.page';
 import { SubstringPipe } from 'src/app/pipes/substring.pipe';
 // import { SharedModule } from 'src/app/shared/shared.module';
 // import { SharedModule } from 'src/app/shared/shared.module';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 @NgModule({
   imports: [
@@ -20,6 +21,7 @@ import { SubstringPipe } from 'src/app/pipes/substring.pipe';
     // SharedModule
 
   ],
-  declarations: [ListMasterPage, SubstringPipe]
+  declarations: [ListMasterPage, SubstringPipe],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ListMasterPageModule {}

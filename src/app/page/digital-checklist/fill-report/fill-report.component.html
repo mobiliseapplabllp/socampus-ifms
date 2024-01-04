@@ -96,7 +96,7 @@
             <ion-radio-group  [(ngModel)]="val.rspns" (ionChange)="changeResponseAction(val)" color="none" mode="md">
               <ion-row>
                 <ion-col size="4" *ngFor="let opt of val.options">
-                  <ion-item lines="none" [disabled]="schedule_status === 2 || schedule_status === 'attended'" >
+                  <ion-item lines="none" [disabled]="schedule_status === 2 || schedule_status === 'attended' || schedule_status === 'closed'" >
                     <ion-label>{{opt.optn_desc}}</ion-label>
                     <ion-radio slot="start" [value]="opt.optn_id" style="margin-right:3px"></ion-radio>
                   </ion-item>
@@ -106,7 +106,7 @@
           </ion-col>
         </ion-row>
         <ion-item [ngClass]="{redBorder: val.isRemarkMandatory === 1 && !val.remark }">
-          <ion-input type="text" [(ngModel)]="val.remark" placeholder="Enter Remark" (change)="changeRemark(val)" [disabled]="schedule_status === 2 || schedule_status === 'attended' || !val.rspns"></ion-input>
+          <ion-input type="text" [(ngModel)]="val.remark" placeholder="Enter Remark" (change)="changeRemark(val)" [disabled]="schedule_status === 2 || schedule_status === 'attended' || schedule_status === 'closed' || !val.rspns"></ion-input>
           <ion-buttons slot="end" [hidden]="schedule_status === 2 || schedule_status === 'attended'">
             <ion-button slot="icon-only" (click)="listenCondition(val)">
               <ion-icon name="mic-outline"></ion-icon>
@@ -115,7 +115,7 @@
         </ion-item>
         <ion-row>
           <ion-col size="6" class="ion-no-padding" >
-            <div [hidden]="schedule_status === 2 || schedule_status === 'attended'" >
+            <div [hidden]="schedule_status === 2 || schedule_status === 'attended' || schedule_status === 'closed'" >
               <ion-button size="small" [color]="!val.imagename ? 'primary': 'success'" [fill]="!val.imagename ? 'outline' : 'solid' " (click)="presentActionSheet(val, 1)" [ngClass]="{redBorder: val.isDocMandatory === 1 &&  !val.imagename}">
                 IMG
                 <ion-icon name="attach-outline" slot="end" *ngIf="!val.imagename"></ion-icon>
@@ -134,7 +134,7 @@
   </div>
   <ion-item [ngClass]="{fullborder: remarkErr && !remark}">
     <ion-label position="floating">Remark</ion-label>
-    <ion-input type="text" [(ngModel)]="remark" [disabled]="schedule_status === 2 || schedule_status === 'attended' "></ion-input>
+    <ion-input type="text" [(ngModel)]="remark" [disabled]="schedule_status === 2 || schedule_status === 'attended' || schedule_status === 'closed' "></ion-input>
   </ion-item>
   <img [src]="sign_attachment" style="width:200px;height:200px;" *ngIf="sign_attachment" style="border:1px solid black">
   <ion-item lines="none" [hidden]="schedule_status === 2 || schedule_status === 'attended'">

@@ -104,7 +104,7 @@
     </div>
     <div *ngSwitchCase= "'attended'">
       <ion-card *ngFor="let dat of attendedCheckList" style="padding: 5px; margin: 5px">
-        <ion-item lines="none" color="none">
+        <ion-item lines="none" color="none"  (click)="openFillReport(dat)">
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
             <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
@@ -112,7 +112,7 @@
             <p><b>{{dat.location_desc}}</b></p>
             <p><b>{{dat.barcode}}</b></p>
           </ion-label>
-          <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize" (click)="openFillReport(dat)">View</ion-button>
+          <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize">View</ion-button>
         </ion-item>
       </ion-card>
       <!-- <ion-item *ngFor="let dat of attendedCheckList" lines="full" color="none" (click)="openFillReport(dat)" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">

@@ -156,7 +156,7 @@ export class ListMasterPage implements OnInit {
   pmsList: any = [];
   meterInfo: any = [];
   formData = new FormData();
-  TEMP_VAL = new BehaviorSubject('');
+  // TEMP_VAL = new BehaviorSubject('');
   constructor(
     private listMaster: ListMasterService,
     private toastController: ToastController,
@@ -199,10 +199,10 @@ export class ListMasterPage implements OnInit {
       }
     });
 
-    this.TEMP_VAL.subscribe(data => {
-      console.log(data);
-      this.breakdown = data;
-    })
+    // this.TEMP_VAL.subscribe(data => {
+    //   console.log(data);
+    //   this.breakdown = data;
+    // })
   }
 
   ionViewDidEnter() {
@@ -246,13 +246,10 @@ export class ListMasterPage implements OnInit {
     this.listMaster.getDashboard().subscribe(data => {
       console.log(data);
       if (data.status) {
-        // this.breakdown =  data.data.breakdown.assign.toString();
+        this.breakdown =  data.data.breakdown.assign.toString();
         this.pms = data.data.pms.assign.toString();
         this.indent = data.data.indent.assign.toString();
-        this.TEMP_VAL.next(data.data.breakdown.assign.toString());
-        setTimeout(() => {
-          this.TEMP_VAL.next('100');
-        }, 5000);
+        // this.TEMP_VAL.next(data.data.breakdown.assign.toString());
       }
     });
   }

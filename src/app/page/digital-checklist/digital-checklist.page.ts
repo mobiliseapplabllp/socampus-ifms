@@ -137,7 +137,7 @@ export class DigitalChecklistPage implements OnInit {
           if (data.status) {
             this.allChecklist = data.data;
             this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended');
+            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
             this.isOnBehalf = 0;
           } else {
             this.common.presentToast(data.msg, 'warning');
