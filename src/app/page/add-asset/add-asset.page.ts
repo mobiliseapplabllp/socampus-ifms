@@ -935,14 +935,13 @@ export class AddAssetPage implements OnInit {
   stopRequest() {
     this.clrTime();
     this.clrTiimeOut = setTimeout(() => {
-      console.log('clear timeout');
       if (this.pendingApi) {
-        this.httpCommon.presentToastWithOk('Session Timeout... Please Submit Data Again', 'danger');
+        this.httpCommon.presentToastWithOk('Due to poor internet connectivity, your data submission failed. Please try again when your internet is stronger.', 'warning');
         this.pendingApi.unsubscribe();
         this.dismissloading();
       }
       this.clrTime();
-    }, 30000);
+    }, 90000);
   }
 
   clrTime() {

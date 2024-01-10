@@ -16,7 +16,7 @@ import { provideUserIdleConfig } from 'angular-user-idle';
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    // provideUserIdleConfig({ idle:2, timeout: 10000, ping: 1 })
+    provideUserIdleConfig({ idle:2, timeout: 10000, ping: 1 })
   ],
   bootstrap: [AppComponent],
 })

@@ -37,6 +37,7 @@ export class ComplaintService {
 
 
   getTicketMaster(status: any, page: any): Observable<any> {
+    console.log('hit api');
     let url;
     if (!status) {
       url = 'limit=10&page=' + page + '&ticket_type=not_resolved';

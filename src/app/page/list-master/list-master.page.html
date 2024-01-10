@@ -280,6 +280,10 @@
             </ion-grid>
         </ion-card>
 
+        <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)" *ngIf="pendingTicket.length > 0">
+          <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
+        </ion-infinite-scroll>
+
         <!-- <ion-card *ngFor="let dat of pendingTicket" style="margin: 10px;">
           <ion-row>
             <ion-col size="4" style="display: flex; align-items: center; justify-content: center;background:linear-gradient(

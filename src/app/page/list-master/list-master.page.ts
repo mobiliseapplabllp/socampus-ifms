@@ -72,24 +72,24 @@ export class ListMasterPage implements OnInit {
    }
   menuSlide = {
     initialSlide: 0,
-    slidesPerView: 3.8,
+    slidesPerView: 3.5,
     autoplay: false,
     spaceBetween: 0,
     breakpoints: {
       320: {
-        slidesPerView: 3.8,
+        slidesPerView: 3.2,
       },
       480: {
-        slidesPerView: 3.3,
+        slidesPerView: 3.7,
       },
       530: {
-        slidesPerView: 3.5,
-      },
-      640: {
         slidesPerView: 3.9,
       },
-      700: {
+      640: {
         slidesPerView: 4.1,
+      },
+      700: {
+        slidesPerView: 4.2,
       },
     }
   }
@@ -156,6 +156,7 @@ export class ListMasterPage implements OnInit {
   pmsList: any = [];
   meterInfo: any = [];
   formData = new FormData();
+  page = 1;
   // TEMP_VAL = new BehaviorSubject('');
   constructor(
     private listMaster: ListMasterService,
@@ -185,7 +186,7 @@ export class ListMasterPage implements OnInit {
         this.userData = this.loginPro.getLoginUserValue();
         this.getMenuDetail();
         this.getDashboard();
-        this.getPendingTicket();
+        // this.getPendingTicket();
       } else {
         let menu, MENU_TEMP = localStorage.getItem('home_menu');
         if (MENU_TEMP) {
@@ -208,6 +209,8 @@ export class ListMasterPage implements OnInit {
   ionViewDidEnter() {
     console.log(this.segments);
     if (this.segments === 'helpdesk') {
+      this.page = 1;
+      this.pendingTicket = [];
       this.getPendingTicket();
     } else if (this.segments === 'digital') {
       this.getSchedule(moment().format('YYYY-MM-DD'));
@@ -255,10 +258,28 @@ export class ListMasterPage implements OnInit {
   }
 
   getPendingTicket() {
-    this.httpCompalint.getPendingTicketHomePage(60).subscribe({
-      next:(data: any) => {
+    // this.httpCompalint.getPendingTicketHomePage(60).subscribe({
+    //   next:(data: any) => {
+    //     if (data.status) {
+    //       this.pendingTicket = data.data.data;
+    //     } else {
+    //       this.common.presentToast(data.msg, 'warning');
+    //     }
+    //   },
+    //   error:() => {
+    //     this.dismissloading();
+    //     this.common.presentToast(environment.errMsg, 'warning');
+    //   },
+    //   complete:() => {
+    //     this.dismissloading();
+    //   }
+    // });
+    console.log('pending ticket');
+    this.httpCompalint.getTicketMaster(null, this.page).subscribe({
+      next:(data) => {
         if (data.status) {
-          this.pendingTicket = data.data.data;
+          this.page = this.page + 1;
+          this.pendingTicket = [...this.pendingTicket, ...data.data.data];
         } else {
           this.common.presentToast(data.msg, 'warning');
         }
@@ -271,6 +292,13 @@ export class ListMasterPage implements OnInit {
         this.dismissloading();
       }
     });
+  }
+
+  loadData(event: any) {
+    setTimeout(() => {
+      event.target.complete();
+    }, 3000);
+    this.getPendingTicket();
   }
 
   async work_now(allData: any) {
@@ -360,6 +388,7 @@ export class ListMasterPage implements OnInit {
   clickCustomSegment(val: string) {
     this.segments = val;
     if (val === 'helpesk' && this.pendingTicket.length === 0) {
+      console.log('change seg');
       this.getPendingTicket();
     } else if (val === 'digital' && this.assignCheckList.length === 0) {
       this.getSchedule(moment().format('YYYY-MM-DD'));

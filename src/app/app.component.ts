@@ -36,15 +36,22 @@ export class AppComponent {
   initApp() {
     if (this.platform.is('capacitor')) {
       StatusBar.setOverlaysWebView({overlay: false});
-      // StatusBar.setStyle({ style: Style.Dark })
       StatusBar.setBackgroundColor({'color': '#040E51'})
     }
-    // this.initIdle();
+    this.initIdle();
     const isLogin = localStorage.getItem('isAlreadyLogin');
     if (!isLogin) {
       this.router.navigateByUrl('/login', { replaceUrl: true });
     } else {
-      this.refreshToken();
+      this.common.checkInternet().then(res => {
+        console.log(res);
+        if (res) {
+          this.refreshToken();
+        } else {
+          this.common.presentToastWithOk('You are in Offline Mode', 'warning')
+          this.router.navigateByUrl('/list-master', { replaceUrl: true });
+        }
+      });
     }
   }
 
