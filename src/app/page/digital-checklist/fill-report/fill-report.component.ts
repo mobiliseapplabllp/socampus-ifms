@@ -9,6 +9,8 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { AppDB, checklist, db } from '../../../provider/local-db/local-db.service';
+import { liveQuery } from 'dexie';
 @Component({
   selector: 'app-fill-report',
   templateUrl: './fill-report.component.html',
@@ -16,8 +18,10 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 })
 export class FillReportComponent  implements OnInit {
   @ViewChildren("a") private itemlist!: QueryList<ElementRef>;
-  schedule_id: any;
+  scheduleArr1$ = liveQuery(() => this.getScheuleFromLocal());
+  // scheduleArr1$: any;
   scheduleArr: any = [];
+  schedule_id: any;
   loading: any;
   remark: any;
   signatureBase64!: string;
@@ -49,12 +53,9 @@ export class FillReportComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    // this.schedule_id = this.activeRoute.snapshot.paramMap.get('id');
-    // this.on_behalf = this.activeRoute.snapshot.paramMap.get('behalf');
     this.activeRoute.queryParams.subscribe((res) => {
-      this.scheduleArr = [JSON.parse(res['data'])];
-      this.scheduleArr[0].isResponseShow = true;
       this.on_behalf = res['isOnBehalf'];
+      this.schedule_id = res['schedule_id'];
       console.log(this.scheduleArr);
     });
 
@@ -69,6 +70,21 @@ export class FillReportComponent  implements OnInit {
     }
     this.allData = JSON.parse(localStorage.getItem('checkListData')!);
     // this.getScheduleQuestion();
+    this.scheduleArr1$.subscribe({
+      next:(data) => {
+        console.log(data);
+        this.scheduleArr = data;
+      },
+    })
+  }
+
+  // async getScheuleFromLocal() {
+  //   console.log(this.schedule_id);
+  //   return await db.checklist.where({schedule_id: 1343}).toArray();
+  // }
+
+  async getScheuleFromLocal() {
+    return await db.checklist.where({schedule_id: parseInt(this.schedule_id, 10)}).toArray();
   }
 
   ionViewDidLeave() {
@@ -315,9 +331,13 @@ export class FillReportComponent  implements OnInit {
   }
 
   changeResponseAction(val: any) {
-    if (val.response && val.rspns == val.response.optn_id) {
+    if (val.rspns && val.rspns === val.rspns_temp) {
       return;
     }
+    // if (val.response && val.rspns == val.response.optn_id) {
+    //   return;
+    // }
+    val.rspns_temp = val.rspns;
     val.isNotFill = false;
     val.speak = false;
     val.listen = false;
@@ -332,12 +352,34 @@ export class FillReportComponent  implements OnInit {
       on_behalf : this.on_behalf
     }
     console.log(val);
-    this.saveDataInLocalDb(val, 'response');
+    this.actionUpdateChecklist(obj);
+    // this.saveDataInLocalDb(val, 'response');
     return
     this.submitResponseAction(obj, val);
   }
 
+  actionUpdateChecklist(obj: any) {
+    console.log('new data');
+    const updatedData: Partial<checklist> = this.scheduleArr[0];
+    this.updateCheckList(parseInt(this.schedule_id, 10), updatedData)
+  }
 
+  updateCheckList(scheduleUniqueId: number, updatedData: Partial<checklist>) {
+    console.log(scheduleUniqueId);
+    console.log(updatedData);
+    return db.checklist
+    .where('schedule_id')
+    .equals(scheduleUniqueId)
+    .first()
+    .then((existingRecord) => {
+      if (existingRecord) {
+        Object.assign(existingRecord, updatedData);
+        return db.checklist.put(existingRecord);
+      } else {
+        throw new Error('Record not found');
+      }
+    });
+  }
 
   submitResponseAction(obj: any, val: any) {
     this.presentLoading().then(preLoad => {
@@ -384,7 +426,8 @@ export class FillReportComponent  implements OnInit {
       on_behalf : this.on_behalf,
       optn_id: val.rspns
     }
-    this.saveDataInLocalDb(val, 'remark');
+    this.actionUpdateChecklist(obj);
+    // this.saveDataInLocalDb(val, 'remark');
     return;
     this.submitRemark(obj);
   }
@@ -466,7 +509,9 @@ export class FillReportComponent  implements OnInit {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
     const response = await fetch(photo.webPath);
     const blob = await response.blob();
-    this.blobToBase64(blob, val);
+    val.imagename = blob;
+    console.log(val);
+    this.actionUpdateChecklist('obj');
     return;
     let formData = new FormData();
     formData.append('wo_id', this.schedule_id);
@@ -575,6 +620,7 @@ export class FillReportComponent  implements OnInit {
   }
 
   finalSubmit() {
+    console.log(this.scheduleArr);
     this.remarkErr = false;
     if (!this.remark) {
       this.common.presentToast('Remark is Required', 'warning');

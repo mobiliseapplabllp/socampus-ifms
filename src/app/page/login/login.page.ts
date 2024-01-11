@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingController, MenuController, ModalController, Platform } from '@ionic/angular';
@@ -30,9 +30,7 @@ export class LoginPage implements OnInit {
     private router: Router,
     private loginPro: LoginService,
     private common: CommonService,
-
-    private httpDigi: DigitalChecklistService
-
+    private httpDigi: DigitalChecklistService,
   ) {
     this.loginForms = formbuilder.group({
       userid: ['', Validators.required],
@@ -42,25 +40,8 @@ export class LoginPage implements OnInit {
 
   ngOnInit() {
     this.common.setBarcode('');
-    const string1 = "abcd";
-    const string2 = "dcbe";
-    const similarity = this.compareString(string1, string2);
-    console.log(`String Compare Result:  ${similarity.toFixed(2)}%`);
-    if (similarity >= 70) {
-      console.log("Strings are greater than 70% similar.");
-    } else {
-      console.log("Strings are less than 70% similar.");
-    }
   }
 
-  compareString(str1: string, str2: string) {
-    const set1 = new Set(str1.toLowerCase().split(''));
-    const set2 = new Set(str2.toLowerCase().split(''));
-    const intersection = new Set([...set1].filter(x => set2.has(x)));
-    const union = new Set([...set1, ...set2]);
-    const similarity = (intersection.size / union.size) * 100;
-    return similarity;
-  }
 
   ionViewDidEnter() {
     console.log('login');
@@ -89,6 +70,10 @@ export class LoginPage implements OnInit {
     console.log(pass);
     console.log(pass.target.value);
   }
+
+  // clearDb() {
+  //   db.checklist.clear();
+  // }
 
 
   async checkInternet() {

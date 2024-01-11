@@ -5,6 +5,9 @@ import * as moment from 'moment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { environment } from 'src/environments/environment';
+import { AppDB, checklist, db } from '../../provider/local-db/local-db.service';
+import { liveQuery } from 'dexie';
+import { scheduled } from 'rxjs';
 @Component({
   selector: 'app-digital-checklist',
   templateUrl: './digital-checklist.page.html',
@@ -13,6 +16,7 @@ import { environment } from 'src/environments/environment';
 export class DigitalChecklistPage implements OnInit {
   @ViewChild(IonSlides) slides!: IonSlides;
   @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
+  assignCheckList$ = liveQuery(() => this.getCheckList());
   segmentStatus = 'assigned';
   allChecklist: any = [];
   loading: any;
@@ -129,7 +133,9 @@ export class DigitalChecklistPage implements OnInit {
       let lastCheckListDate = localStorage.getItem('lastCheckListDate');
       if (lastCheckListDate === moment().format('YYYY-MM-DD')) {
         console.log('checking');
-        this.getCheckListOffline();
+        // this.getCheckListOffline();
+        // this.assignCheckList$ = liveQuery(() => this.getCheckList());
+        console.log(this.assignCheckList$);
       } else {
         if (res) {
           this.getOfflineCheckListFromServer();
@@ -149,7 +155,8 @@ export class DigitalChecklistPage implements OnInit {
           this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
           this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
           localStorage.setItem('lastCheckListDate', moment().format('YYYY-MM-DD'));
-          localStorage.setItem('checkListData', JSON.stringify(data));
+          this.addBulkCheckList(this.allChecklist);
+          // localStorage.setItem('checkListData', JSON.stringify(data));
         },
         error:() => {
           this.dismissloading();
@@ -161,6 +168,15 @@ export class DigitalChecklistPage implements OnInit {
       })
     })
   }
+
+  async addBulkCheckList(checkListData: any) {
+    await db.checklist.bulkAdd(checkListData);
+  }
+
+  async getCheckList() {
+    return await db.checklist.toArray();
+  }
+
 
   getCheckListOffline() {
     this.allChecklist = JSON.parse(localStorage.getItem('checkListData')!);
@@ -319,8 +335,9 @@ export class DigitalChecklistPage implements OnInit {
   openPageUrl(data: any) {
     this.router.navigate(['/digital-checklist/fill-report/'], {
       queryParams: {
-        data: JSON.stringify(data),
-        isOnBehalf: this.isOnBehalf
+        // data: JSON.stringify(data),
+        isOnBehalf: this.isOnBehalf,
+        schedule_id: data.schedule_id
       }
     });
   }
