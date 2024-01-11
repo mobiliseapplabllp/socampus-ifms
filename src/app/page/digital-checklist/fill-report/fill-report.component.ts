@@ -8,6 +8,7 @@ import { environment } from 'src/environments/environment';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 @Component({
   selector: 'app-fill-report',
   templateUrl: './fill-report.component.html',
@@ -35,6 +36,7 @@ export class FillReportComponent  implements OnInit {
   index: any;
   qusList: any = [];
   loop = false;
+  allData: any = [];
   constructor(
     private activeRoute: ActivatedRoute,
     private httpDigital: DigitalChecklistService,
@@ -42,18 +44,20 @@ export class FillReportComponent  implements OnInit {
     private navCtrl: NavController,
     private loadingController: LoadingController,
     private modalCtrl: ModalController,
-    private platform: Platform
+    private platform: Platform,
+    private sanitizer: DomSanitizer
   ) { }
 
   ngOnInit() {
-    this.schedule_id = this.activeRoute.snapshot.paramMap.get('id');
-    this.on_behalf = this.activeRoute.snapshot.paramMap.get('behalf');
-    let check = this.offlineId.filter((val: any) => val === this.schedule_id);
-    if(check.length > 0) {
-      this.isAlreadySaved = true
-    } else {
-      this.isAlreadySaved = false;
-    }
+    // this.schedule_id = this.activeRoute.snapshot.paramMap.get('id');
+    // this.on_behalf = this.activeRoute.snapshot.paramMap.get('behalf');
+    this.activeRoute.queryParams.subscribe((res) => {
+      this.scheduleArr = [JSON.parse(res['data'])];
+      this.scheduleArr[0].isResponseShow = true;
+      this.on_behalf = res['isOnBehalf'];
+      console.log(this.scheduleArr);
+    });
+
     if (this.platform.is('capacitor')) {
       SpeechRecognition.checkPermissions().then(res => {
         if (res.speechRecognition === 'granted') {
@@ -63,7 +67,8 @@ export class FillReportComponent  implements OnInit {
         }
       });
     }
-    this.getScheduleQuestion();
+    this.allData = JSON.parse(localStorage.getItem('checkListData')!);
+    // this.getScheduleQuestion();
   }
 
   ionViewDidLeave() {
@@ -326,8 +331,13 @@ export class FillReportComponent  implements OnInit {
       rspns_source: environment.source,
       on_behalf : this.on_behalf
     }
+    console.log(val);
+    this.saveDataInLocalDb(val, 'response');
+    return
     this.submitResponseAction(obj, val);
   }
+
+
 
   submitResponseAction(obj: any, val: any) {
     this.presentLoading().then(preLoad => {
@@ -374,8 +384,12 @@ export class FillReportComponent  implements OnInit {
       on_behalf : this.on_behalf,
       optn_id: val.rspns
     }
+    this.saveDataInLocalDb(val, 'remark');
+    return;
     this.submitRemark(obj);
   }
+
+
 
   submitRemark(obj: any) {
     this.presentLoading().then(preLoad => {
@@ -452,6 +466,8 @@ export class FillReportComponent  implements OnInit {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
     const response = await fetch(photo.webPath);
     const blob = await response.blob();
+    this.blobToBase64(blob, val);
+    return;
     let formData = new FormData();
     formData.append('wo_id', this.schedule_id);
     formData.append('q_id',  val.q_id);
@@ -479,6 +495,83 @@ export class FillReportComponent  implements OnInit {
         }
       });
     });
+  }
+
+  blobToBase64(blob: Blob, val: any): void {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String: string = reader.result as string;
+      const safeUrl: SafeUrl = this.sanitizer.bypassSecurityTrustUrl(base64String);
+      val.imagename = base64String;
+      console.log(val);
+      this.saveDataInLocalDb(val, 'img');
+      // this.saveImageInLocalDb(val);
+    };
+    reader.readAsDataURL(blob);
+  }
+
+  saveDataInLocalDb(val: any, type: string) {
+    const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
+    if (index !== -1) {
+      if (this.allData[index].qus && this.allData[index].qus.length > 0) {
+        const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
+        if (qIndex !== -1) {
+          if (type === 'response') {
+            this.allData[index].qus[qIndex].rspns = val.rspns;
+          } else if (type === 'remark') {
+            this.allData[index].qus[qIndex].remark = val.remark;
+          } else if (type === 'img') {
+            this.allData[index].qus[qIndex].img = val.imagename;
+          }
+        }
+      }
+    }
+    localStorage.setItem('checkListData', JSON.stringify(this.allData));
+  }
+
+  saveImageInLocalDb(val: any) {
+    const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
+    if (index !== -1) {
+      if (this.allData[index].qus && this.allData[index].qus.length > 0) {
+        const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
+        if (qIndex !== -1) {
+          this.allData[index].qus[qIndex].img = val.imagename;
+        }
+      }
+    }
+    localStorage.setItem('checkListData', JSON.stringify(this.allData));
+  }
+
+  updateRemarkInDb(val: any) {
+    console.log(this.allData);
+    const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
+    console.log(index);
+    if (index !== -1) {
+      if (this.allData[index].qus && this.allData[index].qus.length > 0) {
+        const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
+        console.log(qIndex);
+        if (qIndex !== -1) {
+          this.allData[index].qus[qIndex].remark = val.remark;
+        }
+      }
+    }
+    localStorage.setItem('checkListData', JSON.stringify(this.allData));
+  }
+
+  updateResponseInDb(val: any) {
+    console.log(this.allData);
+    const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
+    console.log(index);
+    if (index !== -1) {
+      if (this.allData[index].qus && this.allData[index].qus.length > 0) {
+        const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
+        console.log(qIndex);
+        if (qIndex !== -1) {
+          this.allData[index].qus[qIndex].rspns = val.rspns;
+        }
+      }
+    }
+    localStorage.setItem('checkListData', JSON.stringify(this.allData));
   }
 
   finalSubmit() {

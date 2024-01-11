@@ -8,7 +8,6 @@
       <ion-button id="click-trigger" slot="icon-only">
         <ion-icon name="language-outline"></ion-icon>
       </ion-button>
-      <!-- <ion-button (click)="makeOffline()"  [disabled]="isAlreadySaved">Offline Save</ion-button> -->
     </ion-buttons>
     <ion-popover trigger="click-trigger" triggerAction="click" [dismissOnSelect]="true">
       <ng-template>
@@ -28,10 +27,6 @@
         </ion-content>
       </ng-template>
     </ion-popover>
-
-    <!-- <ion-buttons slot="end" >
-      <ion-button (click)="makeOffline()"  [disabled]="isAlreadySaved">Offline Save</ion-button>
-    </ion-buttons> -->
   </ion-toolbar>
 </ion-header>
 <ion-content>
@@ -40,17 +35,17 @@
       <ion-row>
         <ion-col size="6">
           <ion-text color="primary"> PC Name</ion-text><br>
-          <ion-text>{{arr.ccName}}</ion-text>
+          <ion-text>{{dat.ccName}}</ion-text>
         </ion-col>
         <ion-col size="6">
           <ion-text color="primary"> Location</ion-text><br>
-          <ion-text>{{arr.location_desc}}</ion-text>
+          <ion-text>{{dat.location_desc}}</ion-text>
         </ion-col>
       </ion-row>
       <ion-row>
         <ion-col size="6">
           <ion-text color="primary"> CheckList ID</ion-text><br>
-          <ion-text>{{arr.schedule_unique_id}}</ion-text>
+          <ion-text>{{dat.schedule_unique_id}}</ion-text>
         </ion-col>
         <ion-col size="6">
           <ion-text color="primary"> CheckList</ion-text><br>
@@ -60,7 +55,7 @@
       <ion-row>
         <ion-col size="6">
           <ion-text color="primary"> Schedule Date</ion-text><br>
-          <ion-text>{{arr.schedule_date}}</ion-text>
+          <ion-text>{{dat.schedule_date}}</ion-text>
         </ion-col>
         <ion-col size="6" *ngIf="schedule_status === 2 || schedule_status === 'attended'" >
           <ion-text color="primary"> Attended Date</ion-text><br>
@@ -70,11 +65,11 @@
       <ion-row *ngIf="schedule_status === 2 || schedule_status === 'attended'" >
         <ion-col size="6">
           <ion-text color="primary"> Review Date</ion-text><br>
-          <ion-text>{{arr.review_date}}</ion-text>
+          <ion-text>{{dat.review_date}}</ion-text>
         </ion-col>
         <ion-col size="6" >
           <ion-text color="primary"> Submit By</ion-text><br>
-          <ion-text>{{arr.user}}</ion-text>
+          <ion-text>{{dat.user}}</ion-text>
         </ion-col>
       </ion-row>
     </ion-card>

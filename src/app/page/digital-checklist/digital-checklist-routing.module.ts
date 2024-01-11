@@ -11,6 +11,9 @@ const routes: Routes = [
   }, {
     path: 'fill-report/:id/:behalf',
     component: FillReportComponent
+  }, {
+    path: 'fill-report',
+    component: FillReportComponent
   }
 ];
 

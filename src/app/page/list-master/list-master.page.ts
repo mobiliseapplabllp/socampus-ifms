@@ -186,11 +186,11 @@ export class ListMasterPage implements OnInit {
         this.userData = this.loginPro.getLoginUserValue();
         this.getMenuDetail();
         this.getDashboard();
-        // this.getPendingTicket();
       } else {
         let menu, MENU_TEMP = localStorage.getItem('home_menu');
         if (MENU_TEMP) {
           this.myMenu = JSON.parse(MENU_TEMP);
+          console.log(this.myMenu);
           this.chunkedArray(this.myMenu)
           this.isInternet = false;
           console.log(menu);
@@ -199,11 +199,6 @@ export class ListMasterPage implements OnInit {
         }
       }
     });
-
-    // this.TEMP_VAL.subscribe(data => {
-    //   console.log(data);
-    //   this.breakdown = data;
-    // })
   }
 
   ionViewDidEnter() {
@@ -234,7 +229,6 @@ export class ListMasterPage implements OnInit {
       }
       this.dismissloading();
     })
-
   }
 
   getCircleValue() {
@@ -252,29 +246,11 @@ export class ListMasterPage implements OnInit {
         this.breakdown =  data.data.breakdown.assign.toString();
         this.pms = data.data.pms.assign.toString();
         this.indent = data.data.indent.assign.toString();
-        // this.TEMP_VAL.next(data.data.breakdown.assign.toString());
       }
     });
   }
 
   getPendingTicket() {
-    // this.httpCompalint.getPendingTicketHomePage(60).subscribe({
-    //   next:(data: any) => {
-    //     if (data.status) {
-    //       this.pendingTicket = data.data.data;
-    //     } else {
-    //       this.common.presentToast(data.msg, 'warning');
-    //     }
-    //   },
-    //   error:() => {
-    //     this.dismissloading();
-    //     this.common.presentToast(environment.errMsg, 'warning');
-    //   },
-    //   complete:() => {
-    //     this.dismissloading();
-    //   }
-    // });
-    console.log('pending ticket');
     this.httpCompalint.getTicketMaster(null, this.page).subscribe({
       next:(data) => {
         if (data.status) {
@@ -388,7 +364,6 @@ export class ListMasterPage implements OnInit {
   clickCustomSegment(val: string) {
     this.segments = val;
     if (val === 'helpesk' && this.pendingTicket.length === 0) {
-      console.log('change seg');
       this.getPendingTicket();
     } else if (val === 'digital' && this.assignCheckList.length === 0) {
       this.getSchedule(moment().format('YYYY-MM-DD'));
@@ -812,7 +787,7 @@ export class ListMasterPage implements OnInit {
       } else {
         console.log(data);
         if (data.smnu_id == 403) {
-          this.router.navigateByUrl('/digital-checklist-offline');
+          this.router.navigateByUrl('/digital-checklist');
         } else {
           this.common.presentToast(data.smnu_desc + ' Not Working on Offline Mode.', 'warning')
         }

@@ -118,11 +118,55 @@ export class DigitalChecklistPage implements OnInit {
     if (this.segmentStatus == 'attended') {
       return;
     }
-    if (!this.scanBarcode) {
-      this.getSchedule(this.selectedDate);
-    } else {
-      this.getScheduleUsingBarcode(this.scanBarcode);
-    }
+
+    // if (!this.scanBarcode) {
+    //   this.getSchedule(this.selectedDate);
+    // } else {
+    //   this.getScheduleUsingBarcode(this.scanBarcode);
+    // }
+
+    this.common.checkInternet().then(res => {
+      let lastCheckListDate = localStorage.getItem('lastCheckListDate');
+      if (lastCheckListDate === moment().format('YYYY-MM-DD')) {
+        console.log('checking');
+        this.getCheckListOffline();
+      } else {
+        if (res) {
+          this.getOfflineCheckListFromServer();
+        } else {
+          this.common.presentToastWithOk('No Data Saved in Local Db Please Connect with Internet', 'warning');
+        }
+      }
+    });
+
+  }
+
+  getOfflineCheckListFromServer() {
+    this.presentLoading('Checklist save in offline. it may take time').then(preLoad => {
+      this.httpDigital.getOfflineCheckListFromServer().subscribe({
+        next:(data: any) => {
+          this.allChecklist = data;
+          this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
+          this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
+          localStorage.setItem('lastCheckListDate', moment().format('YYYY-MM-DD'));
+          localStorage.setItem('checkListData', JSON.stringify(data));
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+  }
+
+  getCheckListOffline() {
+    this.allChecklist = JSON.parse(localStorage.getItem('checkListData')!);
+    this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
+    this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
+    console.log(this.allChecklist);
   }
 
   getSchedule(date: any) {
@@ -152,24 +196,6 @@ export class DigitalChecklistPage implements OnInit {
         error:() => {
           this.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger')
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
-  }
-
-  getOfflineCheckListFromServer() {
-    this.presentLoading('Checklist save in offline. it may take time').then(preLoad => {
-      this.httpDigital.getOfflineCheckListFromServer().subscribe({
-        next:(data: any) => {
-          localStorage.setItem('lastCheckListDate', moment().format('YYYY-MM-DD'));
-          localStorage.setItem('checkListData', JSON.stringify(data));
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
         },
         complete:() => {
           this.dismissloading();
@@ -275,6 +301,9 @@ export class DigitalChecklistPage implements OnInit {
 
 
   openFillReport(data: any) {
+    console.log(data);
+    this.openPageUrl(data);
+    return;
     if (this.platform.is('capacitor')) {
       if (!data.barcode  || data.schedule_status === 'attended') {
         this.router.navigateByUrl('/digital-checklist/fill-report/' + data.schedule_id + '/' + this.isOnBehalf);
@@ -285,7 +314,15 @@ export class DigitalChecklistPage implements OnInit {
     } else {
       this.router.navigateByUrl('/digital-checklist/fill-report/' + data.schedule_id + '/' + this.isOnBehalf);
     }
+  }
 
+  openPageUrl(data: any) {
+    this.router.navigate(['/digital-checklist/fill-report/'], {
+      queryParams: {
+        data: JSON.stringify(data),
+        isOnBehalf: this.isOnBehalf
+      }
+    });
   }
 
   verifyBarcode(obj: any){
