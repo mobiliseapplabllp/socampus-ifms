@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingController, ModalController, Platform, ToastController, IonDatetime, IonSlides } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -20,6 +20,9 @@ import { AssignTicketComponent } from '../complaint/assign-ticket/assign-ticket.
 import { SiteDetailComponent } from '../complaint/site-detail/site-detail.component';
 import { TicketHistoryComponent } from '../complaint/ticket-history/ticket-history.component';
 import { BehaviorSubject } from 'rxjs';
+import { AppDB, checklist, db } from '../../provider/local-db/local-db.service';
+import { liveQuery } from 'dexie';
+import { Network } from '@capacitor/network';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -29,7 +32,7 @@ export class ListMasterPage implements OnInit {
   @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
   @ViewChild('mySlider', { static: true }) slides!: IonSlides;
   @ViewChild('canvas') canvas!: ElementRef;
-
+  // offliveSavedCheckList$ = liveQuery(() => this.getSavedChecklist());
   myMenu: any = [];
   menuTemp: any = [];
   menuNew: any = [];
@@ -170,7 +173,8 @@ export class ListMasterPage implements OnInit {
     private httpDigital: DigitalChecklistService,
     private httpPm: PmCalService,
     private modalCtrl: ModalController,
-    private httpMeter: MeterService) {
+    private httpMeter: MeterService,
+    private ngZone: NgZone) {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
@@ -179,6 +183,10 @@ export class ListMasterPage implements OnInit {
   }
 
   ngOnInit() {
+    this.getHomeLoad();
+  }
+
+  getHomeLoad() {
     this.common.checkInternet().then(res => {
       if (res) {
         this.isInternet = true;
@@ -214,6 +222,21 @@ export class ListMasterPage implements OnInit {
     } else if (this.segments === 'meter') {
       this.getPendingMeter();
     }
+    // this.changeNetwork();
+  }
+
+  changeNetwork() {
+    Network.addListener('networkStatusChange', (status) => {
+      console.log('change listernet');
+      this.ngZone.run(() => {
+        console.log(status.connected);
+        this.getHomeLoad();
+      });
+    });
+  }
+
+  ionViewDidLeave() {
+    Network.removeAllListeners();
   }
 
   changePendingTask() {
@@ -230,6 +253,10 @@ export class ListMasterPage implements OnInit {
       this.dismissloading();
     })
   }
+
+  // async getSavedChecklist() {
+  //   return await db.checklist.where({offline_save: 'true'}).toArray();
+  // }
 
   getCircleValue() {
     for (var i = 0 ; i < this.circleDashboard.length;i++) {

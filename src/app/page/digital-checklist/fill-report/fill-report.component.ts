@@ -18,6 +18,7 @@ import { liveQuery } from 'dexie';
 })
 export class FillReportComponent  implements OnInit {
   @ViewChildren("a") private itemlist!: QueryList<ElementRef>;
+  temp:any = [];
   scheduleArr1$ = liveQuery(() => this.getScheuleFromLocal());
   // scheduleArr1$: any;
   scheduleArr: any = [];
@@ -55,8 +56,7 @@ export class FillReportComponent  implements OnInit {
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
       this.on_behalf = res['isOnBehalf'];
-      this.schedule_id = res['schedule_id'];
-      console.log(this.scheduleArr);
+      this.schedule_id = parseInt(res['schedule_id'], 10) ;
     });
 
     if (this.platform.is('capacitor')) {
@@ -68,23 +68,26 @@ export class FillReportComponent  implements OnInit {
         }
       });
     }
-    this.allData = JSON.parse(localStorage.getItem('checkListData')!);
+    // this.allData = JSON.parse(localStorage.getItem('checkListData')!);
     // this.getScheduleQuestion();
-    this.scheduleArr1$.subscribe({
+    this.temp = this.scheduleArr1$.subscribe({
       next:(data) => {
-        console.log(data);
-        this.scheduleArr = data;
+        console.log('abcddd');
+        this.scheduleArr = [...data];
+        this.remark =this.scheduleArr[0].final_remark;
+        this.signatureBase64 =this.scheduleArr[0].base64_sign;
       },
-    })
+    });
+
+    setTimeout(() => {
+      setTimeout(() => {
+        this.temp.unsubscribe();
+      }, 1000);
+    }, 1000)
   }
 
-  // async getScheuleFromLocal() {
-  //   console.log(this.schedule_id);
-  //   return await db.checklist.where({schedule_id: 1343}).toArray();
-  // }
-
   async getScheuleFromLocal() {
-    return await db.checklist.where({schedule_id: parseInt(this.schedule_id, 10)}).toArray();
+    return await db.checklist.where({schedule_id: this.schedule_id}).toArray();
   }
 
   ionViewDidLeave() {
@@ -96,6 +99,7 @@ export class FillReportComponent  implements OnInit {
     stop();
   }
 
+
   removeListen() {
     SpeechRecognition.removeAllListeners();
   }
@@ -105,59 +109,59 @@ export class FillReportComponent  implements OnInit {
     })
   }
 
-  getScheduleQuestion() {
-    this.presentLoading().then(preLoad => {
-      this.httpDigital.getScheduleQuestion(this.schedule_id).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.arr = data.data;
-            this.scheduleArr = data.data.categories;
-            this.checkListUniqeId = data.data.schedule_unique_id;
-            this.schedule_status = data.data.schedule_status;
-            this.cc_desc = data.data.ccName;
-            this.pc_location = data.data.location_desc
-            if (!data.data.isUpdate) {
-              this.common.presentToastWithOk('You can not fill the checklist, before the scheduled time.', 'warning');
-              this.navCtrl.pop();
-              return;
-            }
-            if (this.schedule_status == 'attended' || this.schedule_status == '2') {
-              this.remark = data.data.sign_remark;
-              this.sign_attachment = data.data.sign_attachment
-            }
-            this.scheduleArr.forEach((element: any) => {
-              element.isResponseShow = true;
-              element.qus.forEach((el: any) => {
-                if(el.response) {
-                  el.remark = el.response.remark;
-                  el.attachment = el.response.attachment1;
-                  if(el.q_type == '226') {
-                    el.rspns = el.response.optn_id;
-                    if (el.rspns) {
-                      const obj = el.options.filter((val: any) => val.optn_id === el.rspns)[0];
-                      el.isRemarkMandatory = obj.is_rmrk_mandatory;
-                      el.isDocMandatory = obj.is_doc_mandatory;
-                    }
-                  } else {
-                    el.rspns = el.response.rspns;
-                  }
-                } else {
-                  el.response = {}
-                }
-              })
-            });
-          } else {
-            this.common.presentToast(data.msg, 'warning');
-          }
-        },error:()=> {
-          this.common.presentToast(environment.errMsg, 'danger');
-          this.dismissloading();
-        },complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
-  }
+  // getScheduleQuestion() {
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpDigital.getScheduleQuestion(this.schedule_id).subscribe({
+  //       next:(data) => {
+  //         if (data.status) {
+  //           this.arr = data.data;
+  //           this.scheduleArr = data.data.categories;
+  //           this.checkListUniqeId = data.data.schedule_unique_id;
+  //           this.schedule_status = data.data.schedule_status;
+  //           this.cc_desc = data.data.ccName;
+  //           this.pc_location = data.data.location_desc
+  //           if (!data.data.isUpdate) {
+  //             this.common.presentToastWithOk('You can not fill the checklist, before the scheduled time.', 'warning');
+  //             this.navCtrl.pop();
+  //             return;
+  //           }
+  //           if (this.schedule_status == 'attended' || this.schedule_status == '2') {
+  //             this.remark = data.data.sign_remark;
+  //             this.sign_attachment = data.data.sign_attachment
+  //           }
+  //           this.scheduleArr.forEach((element: any) => {
+  //             element.isResponseShow = true;
+  //             element.qus.forEach((el: any) => {
+  //               if(el.response) {
+  //                 el.remark = el.response.remark;
+  //                 el.attachment = el.response.attachment1;
+  //                 if(el.q_type == '226') {
+  //                   el.rspns = el.response.optn_id;
+  //                   if (el.rspns) {
+  //                     const obj = el.options.filter((val: any) => val.optn_id === el.rspns)[0];
+  //                     el.isRemarkMandatory = obj.is_rmrk_mandatory;
+  //                     el.isDocMandatory = obj.is_doc_mandatory;
+  //                   }
+  //                 } else {
+  //                   el.rspns = el.response.rspns;
+  //                 }
+  //               } else {
+  //                 el.response = {}
+  //               }
+  //             })
+  //           });
+  //         } else {
+  //           this.common.presentToast(data.msg, 'warning');
+  //         }
+  //       },error:()=> {
+  //         this.common.presentToast(environment.errMsg, 'danger');
+  //         this.dismissloading();
+  //       },complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     })
+  //   })
+  // }
 
   async presentLoading(msg?: string) {
     let message;
@@ -197,6 +201,10 @@ export class FillReportComponent  implements OnInit {
   }
 
   speakCondition(val: any, ind: any) {
+    if (!this.platform.is('capacitor')) {
+      this.listenAction(val, 'Yes');
+      return;
+    }
     this.index = ind;
     val.tempoutput = 'response';
     val.listen = false;
@@ -246,7 +254,11 @@ export class FillReportComponent  implements OnInit {
     val.listen = true
     val.tempoutput = 'remark';
     this.loop = false;
-    this.listen(val);
+    if (this.platform.is('capacitor')) {
+      this.listen(val);
+    } else {
+      this.listenAction(val, 'yes');
+    }
   }
 
   listen(val: any) {
@@ -302,66 +314,80 @@ export class FillReportComponent  implements OnInit {
         return;
       }
       val.rspns = respns;
-      val.response.optn_id = val.rspns;
+      // val.response.optn_id = val.rspns;
       val.listen = true
-      obj = {
-        wo_id: this.schedule_id,
-        rspns: val.rspns,
-        q_id: val.q_id,
-        q_type:val.q_type,
-        q_max_score:val.q_max_score,
-        rspns_source: environment.source,
-        on_behalf : this.on_behalf,
-      }
-      this.submitResponseAction(obj, val);
+      // obj = {
+      //   wo_id: this.schedule_id,
+      //   rspns: val.rspns,
+      //   q_id: val.q_id,
+      //   q_type:val.q_type,
+      //   q_max_score:val.q_max_score,
+      //   rspns_source: environment.source,
+      //   on_behalf : this.on_behalf,
+      // }
+      // this.submitResponseAction(obj, val);
+      // if (val.isRemarkMandatory && val.speak) {
+      //   val.tempoutput = 'remark';
+      //   val.q_desc_temp = 'Please Speak Remark';
+      //   this.scroll(this.index);
+      //   this.speak(val);
+      // } else if (!val.isRemarkMandatory && val.speak) {
+      //   this.repeatLoop();
+      // }
+      this.actionUpdateChecklist();
+
     } else if (val.tempoutput === 'remark') {
       val.remark = voiceResponse
-      obj = {
-        wo_id:this.schedule_id,
-        remark: val.remark,
-        q_id: val.q_id,
-        rspns_source: environment.source,
-        on_behalf : this.on_behalf,
-        optn_id: val.rspns
-      }
-      this.submitRemark(obj);
+      // obj = {
+      //   wo_id:this.schedule_id,
+      //   remark: val.remark,
+      //   q_id: val.q_id,
+      //   rspns_source: environment.source,
+      //   on_behalf : this.on_behalf,
+      //   optn_id: val.rspns
+      // }
+      // this.submitRemark(obj);
+      this.actionUpdateChecklist();
     } else if (val.tempoutput === 'document') {
       this.presentActionSheet(val, 2);
     }
   }
 
   changeResponseAction(val: any) {
+    console.log(val);
     if (val.rspns && val.rspns === val.rspns_temp) {
       return;
     }
     // if (val.response && val.rspns == val.response.optn_id) {
     //   return;
     // }
+    const obj = val.options.filter((val1: any) => val1.optn_id === val.rspns)[0];
+    console.log(obj);
+    // val.response.optn_id = val.rspns;
+    val.isRemarkMandatory = obj.is_rmrk_mandatory;
+    val.isDocMandatory = obj.is_doc_mandatory;
     val.rspns_temp = val.rspns;
     val.isNotFill = false;
     val.speak = false;
     val.listen = false;
     this.loop = false;
-    const obj = {
-      wo_id: this.schedule_id,
-      rspns: val.rspns,
-      q_id: val.q_id,
-      q_type:val.q_type,
-      q_max_score:val.q_max_score,
-      rspns_source: environment.source,
-      on_behalf : this.on_behalf
-    }
-    console.log(val);
-    this.actionUpdateChecklist(obj);
-    // this.saveDataInLocalDb(val, 'response');
-    return
-    this.submitResponseAction(obj, val);
+    // const obj = {
+    //   wo_id: this.schedule_id,
+    //   rspns: val.rspns,
+    //   q_id: val.q_id,
+    //   q_type:val.q_type,
+    //   q_max_score:val.q_max_score,
+    //   rspns_source: environment.source,
+    //   on_behalf : this.on_behalf
+    // }
+    // console.log(val);
+    this.actionUpdateChecklist();
   }
 
-  actionUpdateChecklist(obj: any) {
+  actionUpdateChecklist(obj?: any) {
     console.log('new data');
     const updatedData: Partial<checklist> = this.scheduleArr[0];
-    this.updateCheckList(parseInt(this.schedule_id, 10), updatedData)
+    this.updateCheckList(this.schedule_id, updatedData);
   }
 
   updateCheckList(scheduleUniqueId: number, updatedData: Partial<checklist>) {
@@ -418,18 +444,15 @@ export class FillReportComponent  implements OnInit {
 
   changeRemark(val: any) {
     this.loop = false;
-    const obj = {
-      wo_id:this.schedule_id,
-      remark: val.remark,
-      q_id: val.q_id,
-      rspns_source: environment.source,
-      on_behalf : this.on_behalf,
-      optn_id: val.rspns
-    }
-    this.actionUpdateChecklist(obj);
-    // this.saveDataInLocalDb(val, 'remark');
-    return;
-    this.submitRemark(obj);
+    // const obj = {
+    //   wo_id:this.schedule_id,
+    //   remark: val.remark,
+    //   q_id: val.q_id,
+    //   rspns_source: environment.source,
+    //   on_behalf : this.on_behalf,
+    //   optn_id: val.rspns
+    // }
+    this.actionUpdateChecklist();
   }
 
 
@@ -483,24 +506,17 @@ export class FillReportComponent  implements OnInit {
   }
 
   async presentActionSheet(val: any, ind: any) {
-    var obj: any = {}
-    if (ind === 1) {
-      obj = {
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      }
-    } else {
-      obj = {
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera,
-      }
+    var obj: any = {
+      quality: 80,
+      allowEditing: false,
+      resultType: CameraResultType.Uri,
+    }
+    if (ind !== 1) {
+      obj.source = CameraSource.Camera
     }
     const takePicture = async () => {
-      const image = await Camera.getPhoto(obj);
-      this.readImg(image, val)
+    const image = await Camera.getPhoto(obj);
+    this.readImg(image, val)
     };
     takePicture();
   }
@@ -511,7 +527,7 @@ export class FillReportComponent  implements OnInit {
     const blob = await response.blob();
     val.imagename = blob;
     console.log(val);
-    this.actionUpdateChecklist('obj');
+    this.actionUpdateChecklist();
     return;
     let formData = new FormData();
     formData.append('wo_id', this.schedule_id);
@@ -542,85 +558,129 @@ export class FillReportComponent  implements OnInit {
     });
   }
 
-  blobToBase64(blob: Blob, val: any): void {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String: string = reader.result as string;
-      const safeUrl: SafeUrl = this.sanitizer.bypassSecurityTrustUrl(base64String);
-      val.imagename = base64String;
-      console.log(val);
-      this.saveDataInLocalDb(val, 'img');
-      // this.saveImageInLocalDb(val);
-    };
-    reader.readAsDataURL(blob);
-  }
+  // blobToBase64(blob: Blob, val: any): void {
+  //   const reader = new FileReader();
+  //   reader.onloadend = () => {
+  //     const base64String: string = reader.result as string;
+  //     const safeUrl: SafeUrl = this.sanitizer.bypassSecurityTrustUrl(base64String);
+  //     val.imagename = base64String;
+  //     console.log(val);
+  //     this.saveDataInLocalDb(val, 'img');
+  //     // this.saveImageInLocalDb(val);
+  //   };
+  //   reader.readAsDataURL(blob);
+  // }
 
-  saveDataInLocalDb(val: any, type: string) {
-    const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
-    if (index !== -1) {
-      if (this.allData[index].qus && this.allData[index].qus.length > 0) {
-        const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
-        if (qIndex !== -1) {
-          if (type === 'response') {
-            this.allData[index].qus[qIndex].rspns = val.rspns;
-          } else if (type === 'remark') {
-            this.allData[index].qus[qIndex].remark = val.remark;
-          } else if (type === 'img') {
-            this.allData[index].qus[qIndex].img = val.imagename;
-          }
+  // saveDataInLocalDb(val: any, type: string) {
+  //   const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
+  //   if (index !== -1) {
+  //     if (this.allData[index].qus && this.allData[index].qus.length > 0) {
+  //       const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
+  //       if (qIndex !== -1) {
+  //         if (type === 'response') {
+  //           this.allData[index].qus[qIndex].rspns = val.rspns;
+  //         } else if (type === 'remark') {
+  //           this.allData[index].qus[qIndex].remark = val.remark;
+  //         } else if (type === 'img') {
+  //           this.allData[index].qus[qIndex].img = val.imagename;
+  //         }
+  //       }
+  //     }
+  //   }
+  //   localStorage.setItem('checkListData', JSON.stringify(this.allData));
+  // }
+
+  // saveImageInLocalDb(val: any) {
+  //   const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
+  //   if (index !== -1) {
+  //     if (this.allData[index].qus && this.allData[index].qus.length > 0) {
+  //       const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
+  //       if (qIndex !== -1) {
+  //         this.allData[index].qus[qIndex].img = val.imagename;
+  //       }
+  //     }
+  //   }
+  //   localStorage.setItem('checkListData', JSON.stringify(this.allData));
+  // }
+
+  // updateRemarkInDb(val: any) {
+  //   console.log(this.allData);
+  //   const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
+  //   console.log(index);
+  //   if (index !== -1) {
+  //     if (this.allData[index].qus && this.allData[index].qus.length > 0) {
+  //       const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
+  //       console.log(qIndex);
+  //       if (qIndex !== -1) {
+  //         this.allData[index].qus[qIndex].remark = val.remark;
+  //       }
+  //     }
+  //   }
+  //   localStorage.setItem('checkListData', JSON.stringify(this.allData));
+  // }
+
+  // updateResponseInDb(val: any) {
+  //   console.log(this.allData);
+  //   const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
+  //   console.log(index);
+  //   if (index !== -1) {
+  //     if (this.allData[index].qus && this.allData[index].qus.length > 0) {
+  //       const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
+  //       console.log(qIndex);
+  //       if (qIndex !== -1) {
+  //         this.allData[index].qus[qIndex].rspns = val.rspns;
+  //       }
+  //     }
+  //   }
+  //   localStorage.setItem('checkListData', JSON.stringify(this.allData));
+  // }
+
+  convertToFormData(data: any, formData?: FormData, parentKey?: string): FormData {
+    formData = formData || new FormData();
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        const value = data[key];
+        const currentKey = parentKey ? `${parentKey}[${key}]` : key;
+        if (value instanceof File || (value instanceof Blob && typeof value !== 'string')) {
+          formData.append(currentKey, value, 'blob');
+        } else if (Array.isArray(value)) {
+          value.forEach((arrayItem, index) => {
+            const arrayItemKey = `${currentKey}[${index}]`;
+            this.convertToFormData(arrayItem, formData, arrayItemKey);
+          });
+        } else if (typeof value === 'object' && value !== null) {
+          this.convertToFormData(value, formData, currentKey);
+        } else {
+          formData.append(currentKey, value);
         }
       }
     }
-    localStorage.setItem('checkListData', JSON.stringify(this.allData));
+    return formData;
   }
 
-  saveImageInLocalDb(val: any) {
-    const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
-    if (index !== -1) {
-      if (this.allData[index].qus && this.allData[index].qus.length > 0) {
-        const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
-        if (qIndex !== -1) {
-          this.allData[index].qus[qIndex].img = val.imagename;
+  testSubmit() {
+    console.log(this.scheduleArr[0]);
+    this.presentLoading().then(preLoad => {
+      const formData = this.convertToFormData(this.scheduleArr[0]);
+      this.httpDigital.finalSubmitCheckList(formData).subscribe({
+        next:(data) => {
+          // this.scheduleArr[0].schedule_status = 'attended',
+          this.scheduleArr[0].schedule_status = 'attended'
+          this.actionUpdateChecklist();
+          this.navCtrl.pop();
+        },
+        error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
         }
-      }
-    }
-    localStorage.setItem('checkListData', JSON.stringify(this.allData));
-  }
+      });
+    })
 
-  updateRemarkInDb(val: any) {
-    console.log(this.allData);
-    const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
-    console.log(index);
-    if (index !== -1) {
-      if (this.allData[index].qus && this.allData[index].qus.length > 0) {
-        const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
-        console.log(qIndex);
-        if (qIndex !== -1) {
-          this.allData[index].qus[qIndex].remark = val.remark;
-        }
-      }
-    }
-    localStorage.setItem('checkListData', JSON.stringify(this.allData));
-  }
-
-  updateResponseInDb(val: any) {
-    console.log(this.allData);
-    const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
-    console.log(index);
-    if (index !== -1) {
-      if (this.allData[index].qus && this.allData[index].qus.length > 0) {
-        const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
-        console.log(qIndex);
-        if (qIndex !== -1) {
-          this.allData[index].qus[qIndex].rspns = val.rspns;
-        }
-      }
-    }
-    localStorage.setItem('checkListData', JSON.stringify(this.allData));
   }
 
   finalSubmit() {
-    console.log(this.scheduleArr);
     this.remarkErr = false;
     if (!this.remark) {
       this.common.presentToast('Remark is Required', 'warning');
@@ -631,6 +691,33 @@ export class FillReportComponent  implements OnInit {
       this.common.presentToast('Please Write Signature', 'warning');
       return;
     }
+    console.log(this.scheduleArr);
+    for (let i = 0; i < this.scheduleArr.length; i++) {
+      for (let j = 0; j < this.scheduleArr[i].qus.length; j++) {
+        if (!this.scheduleArr[i].qus[j].rspns) {
+          this.common.presentToastWithOk(`Please add Response for Question No ${ j + 1} from Category ${ this.scheduleArr[i].cat_desc }`, 'warning');
+          this.scheduleArr[i].qus[j].isNotFill = true;
+          this.scroll(j);
+          return
+        } else {
+          this.scheduleArr[i].qus[j].isNotFill = false;
+        }
+      }
+    }
+    this.scheduleArr[0].final_remark = this.remark;
+    this.scheduleArr[0].base64_sign = this.signatureBase64
+    this.common.checkInternet().then(res => {
+      if (res) {
+        this.testSubmit()
+      } else {
+        this.common.presentToastWithOk('Internet not Working Your Checklist Saved in Local Db', 'tertiary');
+        this.scheduleArr[0].offline_save = 'true'
+        this.actionUpdateChecklist();
+        this.navCtrl.pop();
+      }
+    });
+    return;
+
     const obj = {
       status: 2,
       wo_id: this.schedule_id,

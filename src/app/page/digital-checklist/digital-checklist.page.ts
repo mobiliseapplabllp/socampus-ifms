@@ -16,6 +16,7 @@ import { scheduled } from 'rxjs';
 export class DigitalChecklistPage implements OnInit {
   @ViewChild(IonSlides) slides!: IonSlides;
   @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
+  temp: any = [];
   assignCheckList$ = liveQuery(() => this.getCheckList());
   segmentStatus = 'assigned';
   allChecklist: any = [];
@@ -50,7 +51,6 @@ export class DigitalChecklistPage implements OnInit {
     }
   };
   dateArr: any = [];
-  dateTEMP: any;
   constructor(
     private common: CommonService,
     private router: Router,
@@ -62,41 +62,18 @@ export class DigitalChecklistPage implements OnInit {
   ngOnInit() {
     this.common.setBarcode('');
     let date = moment().format('YYYY-MM-DD');
-    console.log(date);
     this.createCustomCalendar(date);
-  }
-
-  createCustomCalendar(DATE: any) {
-    let status: any, index = 0 ,end: any;
-    end = moment(DATE).endOf('month').format('DD');
-    this.dateArr = [];
-    for (let i = 1; i <= end ; i++) {
-      if (moment(DATE).format('YYYY-MM-DD') ==  moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')) {
-        status = true;
-        index = i;
-      } else {
-        status = false
-      }
-      this.dateArr.push({
-        date: moment(DATE).startOf('month').add(i - 1, 'day').format('DD'),
-        day: moment(DATE).startOf('month').add(i - 1, 'day').format('dddd')[0],
-        isSelect: status,
-        ind: i,
-        fulldate : moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')
-      })
-    }
-    setTimeout(() => {
-      this.slides.slideTo(index - 3);
-    }, 50);
   }
 
   ionViewDidLeave() {
     this.common.setBarcode('');
+    this.temp.unsubscribe();
     this.dismissloading();
   }
 
   ionViewDidEnter() {
     let bar = this.common.getBarcode();
+    this.getDataFromLocal();
     if (bar) {
       this.common.setBarcode('');
       if (this.qrType == 'otherbarcode') {
@@ -128,13 +105,10 @@ export class DigitalChecklistPage implements OnInit {
     // } else {
     //   this.getScheduleUsingBarcode(this.scanBarcode);
     // }
-
     this.common.checkInternet().then(res => {
       let lastCheckListDate = localStorage.getItem('lastCheckListDate');
       if (lastCheckListDate === moment().format('YYYY-MM-DD')) {
         console.log('checking');
-        // this.getCheckListOffline();
-        // this.assignCheckList$ = liveQuery(() => this.getCheckList());
         console.log(this.assignCheckList$);
       } else {
         if (res) {
@@ -144,10 +118,23 @@ export class DigitalChecklistPage implements OnInit {
         }
       }
     });
+  }
 
+  getDataFromLocal() {
+    this.temp = this.assignCheckList$.subscribe({
+      next:(data) => {
+        this.allChecklist = data;
+        this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned');
+        this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned');
+        console.log(this.allChecklist);
+        console.log(this.assignCheckList);
+        console.log(this.attendedCheckList);
+      }
+    });
   }
 
   getOfflineCheckListFromServer() {
+    this.clearChecList();
     this.presentLoading('Checklist save in offline. it may take time').then(preLoad => {
       this.httpDigital.getOfflineCheckListFromServer().subscribe({
         next:(data: any) => {
@@ -156,7 +143,6 @@ export class DigitalChecklistPage implements OnInit {
           this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
           localStorage.setItem('lastCheckListDate', moment().format('YYYY-MM-DD'));
           this.addBulkCheckList(this.allChecklist);
-          // localStorage.setItem('checkListData', JSON.stringify(data));
         },
         error:() => {
           this.dismissloading();
@@ -177,48 +163,46 @@ export class DigitalChecklistPage implements OnInit {
     return await db.checklist.toArray();
   }
 
-
-  getCheckListOffline() {
-    this.allChecklist = JSON.parse(localStorage.getItem('checkListData')!);
-    this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-    this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
-    console.log(this.allChecklist);
+  async clearChecList() {
+    return await db.checklist.clear();
   }
 
-  getSchedule(date: any) {
-    this.allChecklist = [];
-    this.assignCheckList = [];
-    this.attendedCheckList = [];
-    this.isOnBehalf = 0;
-    this.presentLoading().then(preLoad => {
-      this.httpDigital.getScheduleHistory(date).subscribe({
-        next:(data) => {
-          console.log(data);
-          if (data.status) {
-            this.allChecklist = data.data;
-            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
-            this.isOnBehalf = 0;
-          } else {
-            this.common.presentToast(data.msg, 'warning');
-          }
-          // let todayDate = moment().format('YYYY-MM-DD'), lastCheckListDate = localStorage.getItem('lastCheckListDate');
-          // if (lastCheckListDate != todayDate) {
-          //   localStorage.setItem('lastCheckListDate', '');
-          //   localStorage.setItem('checkListData', '');
-          //   this.getOfflineCheckListFromServer();
-          // }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger')
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
-  }
+
+  // getCheckListOffline() {
+  //   this.allChecklist = JSON.parse(localStorage.getItem('checkListData')!);
+  //   this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
+  //   this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
+  //   console.log(this.allChecklist);
+  // }
+
+  // getSchedule(date: any) {
+  //   this.allChecklist = [];
+  //   this.assignCheckList = [];
+  //   this.attendedCheckList = [];
+  //   this.isOnBehalf = 0;
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpDigital.getScheduleHistory(date).subscribe({
+  //       next:(data) => {
+  //         console.log(data);
+  //         if (data.status) {
+  //           this.allChecklist = data.data;
+  //           this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
+  //           this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
+  //           this.isOnBehalf = 0;
+  //         } else {
+  //           this.common.presentToast(data.msg, 'warning');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.common.presentToast(environment.errMsg, 'danger')
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     })
+  //   })
+  // }
 
   getScheduleUsingBarcode(loc_id: any) {
     this.isOnBehalf = 0;
@@ -312,7 +296,7 @@ export class DigitalChecklistPage implements OnInit {
       }
     }
     this.selectedDate = dat.fulldate;
-    this.getSchedule(dat.fulldate);
+    // this.getSchedule(dat.fulldate);
   }
 
 
@@ -367,12 +351,12 @@ export class DigitalChecklistPage implements OnInit {
       console.log('nx');
       let next = moment(this.selectedDate).add(1, 'day').format('YYYY-MM-DD');
       this.selectedDate = next;
-      this.getSchedule(this.selectedDate);
+      // this.getSchedule(this.selectedDate);
     } else {
       console.log('pre');
       let prev = moment(this.selectedDate).subtract(1, 'day').format('YYYY-MM-DD');
       this.selectedDate = prev;
-      this.getSchedule(this.selectedDate);
+      // this.getSchedule(this.selectedDate);
     }
   }
 
@@ -381,5 +365,29 @@ export class DigitalChecklistPage implements OnInit {
     this.allChecklist = [];
     this.qrType = 'otherbarcode';
     this.router.navigateByUrl('/barcode');
+  }
+
+  createCustomCalendar(DATE: any) {
+    let status: any, index = 0 ,end: any;
+    end = moment(DATE).endOf('month').format('DD');
+    this.dateArr = [];
+    for (let i = 1; i <= end ; i++) {
+      if (moment(DATE).format('YYYY-MM-DD') ==  moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')) {
+        status = true;
+        index = i;
+      } else {
+        status = false
+      }
+      this.dateArr.push({
+        date: moment(DATE).startOf('month').add(i - 1, 'day').format('DD'),
+        day: moment(DATE).startOf('month').add(i - 1, 'day').format('dddd')[0],
+        isSelect: status,
+        ind: i,
+        fulldate : moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')
+      })
+    }
+    setTimeout(() => {
+      this.slides.slideTo(index - 3);
+    }, 50);
   }
 }

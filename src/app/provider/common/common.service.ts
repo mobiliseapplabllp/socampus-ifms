@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { Network } from '@capacitor/network';
+import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
@@ -67,4 +68,5 @@ export class CommonService {
       resolve(status.connected);
     });
   }
+
 }

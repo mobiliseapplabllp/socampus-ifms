@@ -11,6 +11,7 @@ export interface checklist {
   location_desc: string,
   barcode: string,
   backgroundColor: string,
+  offline_save: string
   qus:[{
     q_desc?: string,
     critical_desc?: string,
@@ -37,7 +38,7 @@ export class AppDB extends Dexie {
   constructor() {
     super('ngdexieliveQuery');
     this.version(4).stores({
-      checklist: '++unique_id, schedule_id, schedule_unique_id,schedule_status, schedule_date, chk_cat_name, device_name,location_desc, barcode, backgroundColor, qus'
+      checklist: '++unique_id, schedule_id, schedule_unique_id,schedule_status, schedule_date, chk_cat_name, device_name,location_desc, barcode, backgroundColor, offline_save, qus'
     });
   }
 
@@ -45,7 +46,5 @@ export class AppDB extends Dexie {
     return db.checklist.clear();
   }
 }
-
-
 
 export const db = new AppDB();
