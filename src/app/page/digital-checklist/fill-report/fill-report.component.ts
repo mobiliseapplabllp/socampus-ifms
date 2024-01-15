@@ -238,7 +238,7 @@ export class FillReportComponent  implements OnInit {
     }).then(res => {
       let voiceResponse, voiceResponseTemp: any;
       voiceResponseTemp = res.matches[0];
-      if (this.selectedLanguage == 'en') {
+      if (this.selectedLanguage == 'en' || val.tempoutput === 'remark') {
         voiceResponse = res.matches[0].toLocaleLowerCase();
         this.listenAction(val, voiceResponse);
       } else {
