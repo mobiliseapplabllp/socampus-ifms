@@ -194,6 +194,7 @@ export class ListMasterPage implements OnInit {
         this.userData = this.loginPro.getLoginUserValue();
         this.getMenuDetail();
         this.getDashboard();
+        this.getOffLineCheckList();
       } else {
         let menu, MENU_TEMP = localStorage.getItem('home_menu');
         if (MENU_TEMP) {
@@ -209,7 +210,60 @@ export class ListMasterPage implements OnInit {
     });
   }
 
+  async getOffLineCheckList() {
+    const friendsObservable = liveQuery (() => db.checklist.where({offline_save: "true"}).toArray());
+    const sub = friendsObservable.subscribe({
+      next:(data) => {
+        console.log(data);
+        let output, allData = data;
+        if (allData.length > 0) {
+          output = allData.map((item: any) => ({
+            method: 'POST',
+            url: 'https://mobilise.pr.com/submitchecklist',
+            data: this.convertToFormData(item)
+          }));
+          this.httpDigital.postDynamicData(output).subscribe({
+            next:(data) => {
+              console.log(data);
+            },
+            error:() => {},
+            complete:() => {}
+          })
+        }
+        setTimeout(() => {
+          sub.unsubscribe();
+        }, 1000);
+      }
+    });
+  }
+
+  convertToFormData(data: any, formData?: FormData, parentKey?: string): FormData {
+    formData = formData || new FormData();
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        const value = data[key];
+        const currentKey = parentKey ? `${parentKey}[${key}]` : key;
+        if (value instanceof File || (value instanceof Blob && typeof value !== 'string')) {
+          formData.append(currentKey, value, 'blob');
+        } else if (Array.isArray(value)) {
+          value.forEach((arrayItem, index) => {
+            const arrayItemKey = `${currentKey}[${index}]`;
+            this.convertToFormData(arrayItem, formData, arrayItemKey);
+          });
+        } else if (typeof value === 'object' && value !== null) {
+          this.convertToFormData(value, formData, currentKey);
+        } else {
+          formData.append(currentKey, value);
+        }
+      }
+    }
+    return formData;
+  }
+
   ionViewDidEnter() {
+    if (!this.isInternet) {
+      return;
+    }
     console.log(this.segments);
     if (this.segments === 'helpdesk') {
       this.page = 1;
@@ -253,10 +307,6 @@ export class ListMasterPage implements OnInit {
       this.dismissloading();
     })
   }
-
-  // async getSavedChecklist() {
-  //   return await db.checklist.where({offline_save: 'true'}).toArray();
-  // }
 
   getCircleValue() {
     for (var i = 0 ; i < this.circleDashboard.length;i++) {

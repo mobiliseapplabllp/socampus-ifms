@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { forkJoin, Observable } from 'rxjs';
+import { delay, forkJoin, mergeMap, Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
@@ -84,11 +84,40 @@ export class DigitalChecklistService {
     const observables = apiRequests.map(request => {
       const { method, url, data } = request;
       if (method.toLowerCase() === 'post') {
-        return this.http.post(url, data);
+        return this.http.post(url, data)
       } else {
-        return this.http.get(url);
+        return this.http.get(url)
       }
     });
     return forkJoin(observables);
   }
+
+  // postDynamicData(apiRequests: any[]): Observable<any[]> {
+  //   const observables = apiRequests.map(request => {
+  //     const { method, url, data, delayTime, id } = request;
+
+  //     // Check if a delayTime is provided and if it's for the specific id
+  //     const delayObservable = url === 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/dash/mobile_app_engineer_dashboard'
+  //       ? of(null).pipe(delay(10000))
+  //       : of(null);
+
+  //     const apiRequestObservable = this.makeApiRequest(method, url, data);
+
+  //     // Use mergeMap to merge the delay and the actual API request
+  //     return delayObservable.pipe(
+  //       mergeMap(() => apiRequestObservable)
+  //     );
+  //   });
+
+  //   return forkJoin(observables);
+  // }
+
+  // private makeApiRequest(method: string, url: string, data: any): Observable<any> {
+  //   if (method.toLowerCase() === 'post') {
+  //     return this.http.post(url, data);
+  //   } else {
+  //     return this.http.get(url);
+  //   }
+  // }
+
 }

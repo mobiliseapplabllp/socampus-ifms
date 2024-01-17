@@ -78,23 +78,28 @@ export class DigitalChecklistPage implements OnInit {
     let data: any, output: any
     data = [{
       schedule_id:1,
-      name: 'abc'
+      name: 'abc',
+      url: 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/setups/app-menu/get_mobile_app_mnu',
     },{
       schedule_id:2,
-      name: 'def'
+      name: 'def',
+      url: 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/get_assign_ticket_master?limit=10&page=1&ticket_type=not_resolved'
     },{
       schedule_id:3,
-      name: 'ghi'
+      name: 'ghi',
+      url: 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/dash/mobile_app_engineer_dashboard'
     }]
 
     output = data.map((item: any) => ({
-      method: 'POST',
-      url: 'https://api.example.com/dummy',
-      data: { ...item }
+      method: 'get',
+      url: item.url,
+      data: {...item}
     }));
 
     this.httpDigital.postDynamicData(output).subscribe({
-      next:(data) => {},
+      next:(data) => {
+        console.log(data);
+      },
       error:() => {},
       complete:() => {}
     })

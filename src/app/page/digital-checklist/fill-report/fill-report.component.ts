@@ -514,6 +514,7 @@ export class FillReportComponent  implements OnInit {
   testSubmit() {
     console.log(this.scheduleArr[0]);
     this.presentLoading().then(preLoad => {
+      this.scheduleArr[0].offline_save = 'false'
       const formData = this.convertToFormData(this.scheduleArr[0]);
       this.httpDigital.finalSubmitCheckList(formData).subscribe({
         next:(data) => {
