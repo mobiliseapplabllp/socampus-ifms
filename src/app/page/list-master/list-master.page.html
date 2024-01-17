@@ -29,59 +29,7 @@
       </ion-col>
     </ion-row>
 
-
-    <div class="dashboard">
-      <ion-slides #mySlider (ionSlideDidChange)="slideDidChange()" (ionSlideTransitionEnd)="slideTransitionEnd($event)" [options]="option">
-        <ion-slide >
-          <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:auto">
-            <div>
-              <img src="assets/home_banner1/helpdesk.png" style="height:40px;width:40px"><br>
-              <ion-text color="light" style="margin-left:5px;font-weight: 550;">Helpdesk </ion-text>
-            </div>
-            <br>
-            <div class="ion-text-right">
-              <ion-text color="light" style="font-weight: 550;font-size:35px">{{breakdown}}</ion-text>
-            </div>
-          </ion-card>
-        </ion-slide>
-        <ion-slide>
-          <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:auto">
-            <div>
-              <img src="assets/home_banner1/checklist.png" style="height:40px;width:40px"><br>
-              <ion-text color="light" style="margin-left:5px;font-weight: 550;">Digital </ion-text>
-            </div>
-            <br>
-            <div class="ion-text-right">
-              <ion-text color="light" style="font-weight: 550;font-size:35px">4</ion-text>
-            </div>
-          </ion-card>
-        </ion-slide>
-        <ion-slide>
-          <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:auto">
-            <div>
-              <img src="assets/home_banner1/pms.png" style="height:40px;width:40px"><br>
-              <ion-text color="light" style="margin-left:5px;font-weight: 550;">PMS </ion-text>
-            </div>
-            <br>
-            <div class="ion-text-right">
-              <ion-text color="light" style="font-weight: 550;font-size:35px">{{pms}}</ion-text><!--{{indent.inapproval}}-->
-            </div>
-          </ion-card>
-        </ion-slide>
-        <ion-slide>
-          <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:auto">
-            <div>
-              <img src="assets/home_banner1/meter.png" style="height:40px;width:40px"><br>
-              <ion-text color="light" style="margin-left:5px;font-weight: 550;">Meter </ion-text>
-            </div>
-            <br>
-            <div class="ion-text-right">
-              <ion-text color="light" style="font-weight: 550;font-size:35px">3</ion-text><!--{{indent.inapproval}}-->
-            </div>
-          </ion-card>
-        </ion-slide>
-      </ion-slides>
-    </div>
+    <app-dashboard></app-dashboard>
 
     <ion-row>
       <ion-col class="ion-padding-start">

@@ -92,6 +92,10 @@ export class DigitalChecklistService {
     return forkJoin(observables);
   }
 
+  submitDummyApi(data: any): Observable<any> {
+    return this.http.post('https://aovsshdashboard.com/Webservices/test_image.php', data)
+  }
+
   // postDynamicData(apiRequests: any[]): Observable<any[]> {
   //   const observables = apiRequests.map(request => {
   //     const { method, url, data, delayTime, id } = request;

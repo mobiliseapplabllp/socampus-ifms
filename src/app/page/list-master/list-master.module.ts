@@ -11,6 +11,8 @@ import { SubstringPipe } from 'src/app/pipes/substring.pipe';
 // import { SharedModule } from 'src/app/shared/shared.module';
 // import { SharedModule } from 'src/app/shared/shared.module';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { OfflineDataComponent } from './offline-data/offline-data.component';
 
 @NgModule({
   imports: [
@@ -19,9 +21,12 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
     IonicModule,
     ListMasterPageRoutingModule,
     // SharedModule
-
   ],
-  declarations: [ListMasterPage, SubstringPipe],
+  declarations: [
+    ListMasterPage,
+    SubstringPipe,
+    DashboardComponent,
+    OfflineDataComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ListMasterPageModule {}

@@ -1,6 +1,6 @@
 import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController, ModalController, Platform, ToastController, IonDatetime, IonSlides } from '@ionic/angular';
+import { LoadingController, ModalController, Platform, ToastController, IonDatetime, IonSlides, AlertController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ListMasterService } from 'src/app/provider/list-master/list-master.service';
 import { LoginService } from 'src/app/provider/login/login.service';
@@ -19,8 +19,7 @@ import { TicketTypeComponent } from '../complaint/ticket-type/ticket-type.compon
 import { AssignTicketComponent } from '../complaint/assign-ticket/assign-ticket.component';
 import { SiteDetailComponent } from '../complaint/site-detail/site-detail.component';
 import { TicketHistoryComponent } from '../complaint/ticket-history/ticket-history.component';
-import { BehaviorSubject } from 'rxjs';
-import { AppDB, checklist, db } from '../../provider/local-db/local-db.service';
+import { db } from '../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
 import { Network } from '@capacitor/network';
 @Component({
@@ -47,32 +46,10 @@ export class ListMasterPage implements OnInit {
   userData: any = [];
   result: any = [];
   userName!: string;
-  breakdown = '';
-  pms = '';
-  indent = '';
-  option = {
-    slidesPerView:1.5,
-    centeredSlides:true,
-    loop: true,
-    spaceBetween: 5,
-    breakpoints: {
-      320: {
-        slidesPerView: 1.5,
-      },
-      480: {
-        slidesPerView: 1.6,
-      },
-      530: {
-        slidesPerView: 1.7,
-      },
-      640: {
-        slidesPerView: 1.8,
-      },
-      700: {
-        slidesPerView: 1.9,
-      },
-    }
-   }
+  // breakdown = '';
+  // pms = '';
+  // indent = '';
+
   menuSlide = {
     initialSlide: 0,
     slidesPerView: 3.5,
@@ -174,7 +151,8 @@ export class ListMasterPage implements OnInit {
     private httpPm: PmCalService,
     private modalCtrl: ModalController,
     private httpMeter: MeterService,
-    private ngZone: NgZone) {
+    private ngZone: NgZone,
+    private alertController: AlertController) {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
@@ -193,7 +171,6 @@ export class ListMasterPage implements OnInit {
         this.common.setBarcode('');
         this.userData = this.loginPro.getLoginUserValue();
         this.getMenuDetail();
-        this.getDashboard();
         this.getOffLineCheckList();
       } else {
         let menu, MENU_TEMP = localStorage.getItem('home_menu');
@@ -217,24 +194,46 @@ export class ListMasterPage implements OnInit {
         console.log(data);
         let output, allData = data;
         if (allData.length > 0) {
-          output = allData.map((item: any) => ({
-            method: 'POST',
-            url: 'https://mobilise.pr.com/submitchecklist',
-            data: this.convertToFormData(item)
-          }));
-          this.httpDigital.postDynamicData(output).subscribe({
-            next:(data) => {
-              console.log(data);
-            },
-            error:() => {},
-            complete:() => {}
-          })
+          this.presentAlertConfirm();
+          // output = allData.map((item: any) => ({
+          //   method: 'POST',
+          //   url: 'https://mobilise.pr.com/submitchecklist',
+          //   data: this.convertToFormData(item)
+          // }));
+          // this.httpDigital.postDynamicData(output).subscribe({
+          //   next:(data) => {
+          //     console.log(data);
+          //   },
+          //   error:() => {},
+          //   complete:() => {}
+          // })
         }
         setTimeout(() => {
           sub.unsubscribe();
         }, 1000);
       }
     });
+  }
+
+  async presentAlertConfirm() {
+    const alert = await this.alertController.create({
+      cssClass: 'my-custom-class',
+      header: 'Offline Data',
+      message: 'You have some offline Data Save, do you want to push to server',
+      mode: 'ios',
+      buttons: [{
+        text: 'Cancel',
+          handler: (data) => {
+            console.log("Cancel");
+          }
+        },{
+          text: 'YES',
+          handler: (data) => {
+            this.router.navigateByUrl('/list-master/offline-data');
+          }
+        }]
+    });
+    await alert.present();
   }
 
   convertToFormData(data: any, formData?: FormData, parentKey?: string): FormData {
@@ -316,16 +315,7 @@ export class ListMasterPage implements OnInit {
     console.log(this.circleDashboard);
   }
 
-  getDashboard() {
-    this.listMaster.getDashboard().subscribe(data => {
-      console.log(data);
-      if (data.status) {
-        this.breakdown =  data.data.breakdown.assign.toString();
-        this.pms = data.data.pms.assign.toString();
-        this.indent = data.data.indent.assign.toString();
-      }
-    });
-  }
+
 
   getPendingTicket() {
     this.httpCompalint.getTicketMaster(null, this.page).subscribe({
@@ -878,25 +868,7 @@ export class ListMasterPage implements OnInit {
 
   }
 
-  slideDidChange(){
-    console.log('abc');
-    // if (this.menuNew.length > 0) {
-    //   this.slides.getActiveIndex().then(index => {
-    //       if (index === 6) {
-    //         this.slides.slideTo(2);
-    //       }
-    //   });
-    // }
-  }
 
-
-  slideTransitionEnd(event: any) {
-    // const slides = event.target;
-    // const currentIndex = slides.getActiveIndex();
-    // const realIndex = currentIndex === slides.length() ? 0 : currentIndex;
-
-    // console.log('Real Active Index:', realIndex);
-  }
 
   randomIntArrayInRange = (min: any, max: any, n = 1) => Array.from( { length: n }, () => Math.floor(Math.random() * (max - min + 1)) + min)
 
