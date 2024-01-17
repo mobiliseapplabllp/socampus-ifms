@@ -5,9 +5,8 @@ import * as moment from 'moment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { environment } from 'src/environments/environment';
-import { AppDB, checklist, db } from '../../provider/local-db/local-db.service';
+import { db } from '../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
-import { scheduled } from 'rxjs';
 @Component({
   selector: 'app-digital-checklist',
   templateUrl: './digital-checklist.page.html',
@@ -17,12 +16,11 @@ export class DigitalChecklistPage implements OnInit {
   @ViewChild(IonSlides) slides!: IonSlides;
   @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
   temp: any = [];
-  assignCheckList$ = liveQuery(() => this.getCheckList());
+  assignCheckList$: any;
   segmentStatus = 'assigned';
   allChecklist: any = [];
   loading: any;
   selectedDate = moment().format('YYYY-MM-DD');
-  // selectedDate = '2023-11-08';
   scanBarcode: any;
   isOnBehalf = 0;
   assignCheckList: any = [];
@@ -51,6 +49,7 @@ export class DigitalChecklistPage implements OnInit {
     }
   };
   dateArr: any = [];
+  isInternet!: boolean;
   constructor(
     private common: CommonService,
     private router: Router,
@@ -60,20 +59,55 @@ export class DigitalChecklistPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.common.setBarcode('');
+    this.common.checkInternet().then(res => {
+      if (res) {
+        this.isInternet = true;
+      } else {
+        this.isInternet = false;
+      }
+    });
     let date = moment().format('YYYY-MM-DD');
+    this.common.setBarcode('');
+    this.deleteCheckList(moment().subtract(7, 'day').format('YYYY-MM-DD'));
+
     this.createCustomCalendar(date);
+    // this.getForkData();
+  }
+
+  getForkData() {
+    let data: any, output: any
+    data = [{
+      schedule_id:1,
+      name: 'abc'
+    },{
+      schedule_id:2,
+      name: 'def'
+    },{
+      schedule_id:3,
+      name: 'ghi'
+    }]
+
+    output = data.map((item: any) => ({
+      method: 'POST',
+      url: 'https://api.example.com/dummy',
+      data: { ...item }
+    }));
+
+    this.httpDigital.postDynamicData(output).subscribe({
+      next:(data) => {},
+      error:() => {},
+      complete:() => {}
+    })
   }
 
   ionViewDidLeave() {
     this.common.setBarcode('');
-    this.temp.unsubscribe();
     this.dismissloading();
   }
 
   ionViewDidEnter() {
+    this.getCheckListCurrentDate(this.selectedDate);
     let bar = this.common.getBarcode();
-    this.getDataFromLocal();
     if (bar) {
       this.common.setBarcode('');
       if (this.qrType == 'otherbarcode') {
@@ -99,49 +133,51 @@ export class DigitalChecklistPage implements OnInit {
     if (this.segmentStatus == 'attended') {
       return;
     }
-
     // if (!this.scanBarcode) {
     //   this.getSchedule(this.selectedDate);
     // } else {
     //   this.getScheduleUsingBarcode(this.scanBarcode);
     // }
-    this.common.checkInternet().then(res => {
-      let lastCheckListDate = localStorage.getItem('lastCheckListDate');
-      if (lastCheckListDate === moment().format('YYYY-MM-DD')) {
-        console.log('checking');
-        console.log(this.assignCheckList$);
-      } else {
-        if (res) {
-          this.getOfflineCheckListFromServer();
-        } else {
-          this.common.presentToastWithOk('No Data Saved in Local Db Please Connect with Internet', 'warning');
-        }
-      }
-    });
   }
 
-  getDataFromLocal() {
-    this.temp = this.assignCheckList$.subscribe({
+  sync() {
+    console.log(this.selectedDate);
+    this.assignCheckList = [];
+    this.attendedCheckList = [];
+    this.deleteCheckList(this.selectedDate);
+    setTimeout(() => {
+      this.getCheckListCurrentDate(this.selectedDate);
+    },500);
+
+  }
+
+  async getCheckListCurrentDate(date: string) {
+    const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).toArray());
+    const sub = friendsObservable.subscribe({
       next:(data) => {
         this.allChecklist = data;
         this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned');
         this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned');
-        console.log(this.allChecklist);
-        console.log(this.assignCheckList);
-        console.log(this.attendedCheckList);
+        console.log(this.allChecklist.length + '=' + this.isInternet);
+        if (this.allChecklist.length === 0 && this.isInternet) {
+          this.getOfflineCheckListFromServer(date);
+        }
+        setTimeout(() => {
+          sub.unsubscribe();
+        }, 1000);
       }
     });
+
+
   }
 
-  getOfflineCheckListFromServer() {
-    this.clearChecList();
-    this.presentLoading('Checklist save in offline. it may take time').then(preLoad => {
-      this.httpDigital.getOfflineCheckListFromServer().subscribe({
+  getOfflineCheckListFromServer(date: string) {
+    this.presentLoading('Checklist Save in offline. it may take time').then(preLoad => {
+      this.httpDigital.getOfflineCheckListFromServer(date).subscribe({
         next:(data: any) => {
           this.allChecklist = data;
           this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
           this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
-          localStorage.setItem('lastCheckListDate', moment().format('YYYY-MM-DD'));
           this.addBulkCheckList(this.allChecklist);
         },
         error:() => {
@@ -159,50 +195,15 @@ export class DigitalChecklistPage implements OnInit {
     await db.checklist.bulkAdd(checkListData);
   }
 
-  async getCheckList() {
-    return await db.checklist.toArray();
+
+  async deleteCheckList(date: any) {
+    let newDate = moment(date).add(1, 'day').format('YYYY-MM-DD');
+    await db.checklist.where("schedule_date").below(newDate).delete();
   }
 
   async clearChecList() {
     return await db.checklist.clear();
   }
-
-
-  // getCheckListOffline() {
-  //   this.allChecklist = JSON.parse(localStorage.getItem('checkListData')!);
-  //   this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-  //   this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
-  //   console.log(this.allChecklist);
-  // }
-
-  // getSchedule(date: any) {
-  //   this.allChecklist = [];
-  //   this.assignCheckList = [];
-  //   this.attendedCheckList = [];
-  //   this.isOnBehalf = 0;
-  //   this.presentLoading().then(preLoad => {
-  //     this.httpDigital.getScheduleHistory(date).subscribe({
-  //       next:(data) => {
-  //         console.log(data);
-  //         if (data.status) {
-  //           this.allChecklist = data.data;
-  //           this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-  //           this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
-  //           this.isOnBehalf = 0;
-  //         } else {
-  //           this.common.presentToast(data.msg, 'warning');
-  //         }
-  //       },
-  //       error:() => {
-  //         this.dismissloading();
-  //         this.common.presentToast(environment.errMsg, 'danger')
-  //       },
-  //       complete:() => {
-  //         this.dismissloading();
-  //       }
-  //     })
-  //   })
-  // }
 
   getScheduleUsingBarcode(loc_id: any) {
     this.isOnBehalf = 0;
@@ -227,22 +228,7 @@ export class DigitalChecklistPage implements OnInit {
         complete:() => {
           this.dismissloading();
         }
-      }
-      //   data => {
-      //   console.log(data);
-      //   this.dismissloading();
-      //   if (data.status) {
-      //     this.isOnBehalf = 1;
-      //     this.allChecklist = data.data;
-      //     this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-      //     this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended');
-      //   } else {
-      //     this.common.presentToast(data.msg, 'warning');
-      //   }
-      // }, err => {
-      //   this.dismissloading();
-      // }
-      )
+      });
     })
   }
 
@@ -271,8 +257,6 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   changeDateComponent(ev: any) {
-    // console.log(this.selectedDate + '=' + ev.target.value);
-    // return;
     this.selectedDate = moment(ev.detail.value).format('YYYY-MM-DD');
     const data = {
       date: moment(ev.detail.value).format('DD'),
@@ -296,7 +280,10 @@ export class DigitalChecklistPage implements OnInit {
       }
     }
     this.selectedDate = dat.fulldate;
-    // this.getSchedule(dat.fulldate);
+    console.log(this.selectedDate);
+    this.assignCheckList = [];
+    this.attendedCheckList = [];
+    this.getCheckListCurrentDate(this.selectedDate);
   }
 
 
@@ -348,18 +335,13 @@ export class DigitalChecklistPage implements OnInit {
 
   changeDate(action: any) {
     if (action == 'next') {
-      console.log('nx');
       let next = moment(this.selectedDate).add(1, 'day').format('YYYY-MM-DD');
       this.selectedDate = next;
-      // this.getSchedule(this.selectedDate);
     } else {
-      console.log('pre');
       let prev = moment(this.selectedDate).subtract(1, 'day').format('YYYY-MM-DD');
       this.selectedDate = prev;
-      // this.getSchedule(this.selectedDate);
     }
   }
-
 
   openBarcode() {
     this.allChecklist = [];

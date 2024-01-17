@@ -8,8 +8,7 @@ import { environment } from 'src/environments/environment';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { AppDB, checklist, db } from '../../../provider/local-db/local-db.service';
+import { checklist, db } from '../../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
 @Component({
   selector: 'app-fill-report',
@@ -26,22 +25,22 @@ export class FillReportComponent  implements OnInit {
   loading: any;
   remark: any;
   signatureBase64!: string;
-  checkListUniqeId!: string;
+  // checkListUniqeId!: string;
   schedule_status: any;
   sign_attachment: any;
-  cc_desc: any;
-  pc_location: any;
+  // cc_desc: any;
+  // pc_location: any;
   // on_behalf=1
   on_behalf: any;
   remarkErr = false;
   arr: any = [];
-  offlineId: any = [];
-  isAlreadySaved!: boolean;
+  // offlineId: any = [];
+  // isAlreadySaved!: boolean;
   selectedLanguage =  'en';
   index: any;
-  qusList: any = [];
+  // qusList: any = [];
   loop = false;
-  allData: any = [];
+  // allData: any = [];
   constructor(
     private activeRoute: ActivatedRoute,
     private httpDigital: DigitalChecklistService,
@@ -50,10 +49,10 @@ export class FillReportComponent  implements OnInit {
     private loadingController: LoadingController,
     private modalCtrl: ModalController,
     private platform: Platform,
-    private sanitizer: DomSanitizer
   ) { }
 
   ngOnInit() {
+    this.selectedLanguage = 'en';
     this.activeRoute.queryParams.subscribe((res) => {
       this.on_behalf = res['isOnBehalf'];
       this.schedule_id = parseInt(res['schedule_id'], 10) ;
@@ -68,11 +67,9 @@ export class FillReportComponent  implements OnInit {
         }
       });
     }
-    // this.allData = JSON.parse(localStorage.getItem('checkListData')!);
-    // this.getScheduleQuestion();
+
     this.temp = this.scheduleArr1$.subscribe({
       next:(data) => {
-        console.log('abcddd');
         this.scheduleArr = [...data];
         this.remark =this.scheduleArr[0].final_remark;
         this.signatureBase64 =this.scheduleArr[0].base64_sign;
@@ -80,9 +77,7 @@ export class FillReportComponent  implements OnInit {
     });
 
     setTimeout(() => {
-      setTimeout(() => {
-        this.temp.unsubscribe();
-      }, 1000);
+      this.temp.unsubscribe();
     }, 1000)
   }
 
@@ -98,7 +93,6 @@ export class FillReportComponent  implements OnInit {
     };
     stop();
   }
-
 
   removeListen() {
     SpeechRecognition.removeAllListeners();
@@ -163,56 +157,17 @@ export class FillReportComponent  implements OnInit {
   //   })
   // }
 
-  async presentLoading(msg?: string) {
-    let message;
-    if (!msg) {
-      message = 'Please Wait...';
-    } else {
-      message = msg
-    }
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: message,
-      duration: 8000
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
-  }
-
-  viewDocs(url: any) {
-    this.common.openDoc(url);
-  }
-
-  changeBackground(ind: any) {
-    for (var i = 0; i < this.scheduleArr.length;i++) {
-      for (var j = 0 ; j < this.scheduleArr[i].qus.length;j++) {
-        if (ind == j) {
-          this.scheduleArr[i].qus[j].bgcolor = true;
-        } else {
-          this.scheduleArr[i].qus[j].bgcolor = false;
-        }
-      }
-    }
-  }
-
   speakCondition(val: any, ind: any) {
-    if (!this.platform.is('capacitor')) {
-      this.listenAction(val, 'Yes');
-      return;
-    }
     this.index = ind;
     val.tempoutput = 'response';
-    val.listen = false;
     this.loop = true;
     val.bgcolor = true;
-    if (!val.tempoutput || val.tempoutput === 'response') {
-      val.q_desc_temp = val.q_desc
+    val.q_desc_temp = val.q_desc
+    if (!this.platform.is('capacitor')) {
+      this.listenAction(val, 'No');
+      return;
     }
+
     const isLanguageSupported = async (lang: string) => {
       const isSupported = await TextToSpeech.isLanguageSupported({ lang });
       if (isSupported.supported === false) {
@@ -242,7 +197,11 @@ export class FillReportComponent  implements OnInit {
         } else if (val.tempoutput === 'final') {
           return;
         } else {
-          this.listen(val);
+          if (this.platform.is('capacitor')) {
+            this.listen(val);
+          } else {
+            this.listenAction(val, 'No');
+          }
         }
       });
     };
@@ -251,13 +210,12 @@ export class FillReportComponent  implements OnInit {
 
   listenCondition(val: any) {
     val.speak = false;
-    val.listen = true
     val.tempoutput = 'remark';
     this.loop = false;
     if (this.platform.is('capacitor')) {
       this.listen(val);
     } else {
-      this.listenAction(val, 'yes');
+      this.listenAction(val, 'No');
     }
   }
 
@@ -271,7 +229,7 @@ export class FillReportComponent  implements OnInit {
     }).then(res => {
       let voiceResponse, voiceResponseTemp: any;
       voiceResponseTemp = res.matches[0];
-      if (this.selectedLanguage == 'en') {
+      if (this.selectedLanguage == 'en' || val.tempoutput === 'remark') {
         voiceResponse = res.matches[0].toLocaleLowerCase();
         this.listenAction(val, voiceResponse);
       } else {
@@ -295,7 +253,7 @@ export class FillReportComponent  implements OnInit {
   }
 
   listenAction(val: any, voiceResponseTemp: any) {
-    let respns, obj, option: any, voiceResponse;
+    let respns, option: any, voiceResponse;
     voiceResponse = voiceResponseTemp.toLocaleLowerCase();
     if (!val.tempoutput || val.tempoutput === 'response') {
       if (voiceResponse === 'yes' || voiceResponse === 'yess' || voiceResponse === 'yeees' || voiceResponse === 'yaaa' || voiceResponse === 'ha') {
@@ -313,40 +271,34 @@ export class FillReportComponent  implements OnInit {
         this.speak(val);
         return;
       }
+      val.isRemarkMandatory = option.is_rmrk_mandatory;
+      val.isDocMandatory = option.is_doc_mandatory;
       val.rspns = respns;
-      // val.response.optn_id = val.rspns;
-      val.listen = true
-      // obj = {
-      //   wo_id: this.schedule_id,
-      //   rspns: val.rspns,
-      //   q_id: val.q_id,
-      //   q_type:val.q_type,
-      //   q_max_score:val.q_max_score,
-      //   rspns_source: environment.source,
-      //   on_behalf : this.on_behalf,
-      // }
-      // this.submitResponseAction(obj, val);
-      // if (val.isRemarkMandatory && val.speak) {
-      //   val.tempoutput = 'remark';
-      //   val.q_desc_temp = 'Please Speak Remark';
-      //   this.scroll(this.index);
-      //   this.speak(val);
-      // } else if (!val.isRemarkMandatory && val.speak) {
-      //   this.repeatLoop();
-      // }
+      val.rspns_temp = respns;
+      val.isNotFill = false;
+      val.speak = true;
+      val.bgcolor = false
+      this.loop = true;
+      if (val.isRemarkMandatory && val.speak) {
+        val.tempoutput = 'remark';
+        val.q_desc_temp = 'Please Speak Remark';
+        this.scroll(this.index);
+        this.speak(val);
+      } else if (!val.isRemarkMandatory && val.speak) {
+        this.repeatLoop();
+      }
       this.actionUpdateChecklist();
-
     } else if (val.tempoutput === 'remark') {
       val.remark = voiceResponse
-      // obj = {
-      //   wo_id:this.schedule_id,
-      //   remark: val.remark,
-      //   q_id: val.q_id,
-      //   rspns_source: environment.source,
-      //   on_behalf : this.on_behalf,
-      //   optn_id: val.rspns
-      // }
-      // this.submitRemark(obj);
+      const tmp = this.scheduleArr[0].qus[this.index];
+      if (tmp.isDocMandatory) {
+        tmp.tempoutput = 'document';
+        tmp.q_desc_temp = 'Please Upload Photo';
+        this.scroll(this.index);
+        this.speak(tmp);
+      } else {
+        this.repeatLoop();
+      }
       this.actionUpdateChecklist();
     } else if (val.tempoutput === 'document') {
       this.presentActionSheet(val, 2);
@@ -358,29 +310,15 @@ export class FillReportComponent  implements OnInit {
     if (val.rspns && val.rspns === val.rspns_temp) {
       return;
     }
-    // if (val.response && val.rspns == val.response.optn_id) {
-    //   return;
-    // }
     const obj = val.options.filter((val1: any) => val1.optn_id === val.rspns)[0];
     console.log(obj);
-    // val.response.optn_id = val.rspns;
     val.isRemarkMandatory = obj.is_rmrk_mandatory;
     val.isDocMandatory = obj.is_doc_mandatory;
     val.rspns_temp = val.rspns;
     val.isNotFill = false;
     val.speak = false;
-    val.listen = false;
+    val.bgcolor = false;
     this.loop = false;
-    // const obj = {
-    //   wo_id: this.schedule_id,
-    //   rspns: val.rspns,
-    //   q_id: val.q_id,
-    //   q_type:val.q_type,
-    //   q_max_score:val.q_max_score,
-    //   rspns_source: environment.source,
-    //   on_behalf : this.on_behalf
-    // }
-    // console.log(val);
     this.actionUpdateChecklist();
   }
 
@@ -395,6 +333,7 @@ export class FillReportComponent  implements OnInit {
     console.log(updatedData);
     return db.checklist
     .where('schedule_id')
+
     .equals(scheduleUniqueId)
     .first()
     .then((existingRecord) => {
@@ -407,89 +346,79 @@ export class FillReportComponent  implements OnInit {
     });
   }
 
-  submitResponseAction(obj: any, val: any) {
-    this.presentLoading().then(preLoad => {
-      this.httpDigital.scheduleResponseAction(obj).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.common.presentToast(data.msg, 'success');
-            const obj = val.options.filter((val1: any) => val1.optn_id === val.rspns)[0];
-            val.response.optn_id = val.rspns;
-            val.isRemarkMandatory = obj.is_rmrk_mandatory;
-            val.isDocMandatory = obj.is_doc_mandatory;
-            if (val.isRemarkMandatory && val.speak) {
-              val.tempoutput = 'remark';
-              val.q_desc_temp = 'Please Speak Remark';
-              this.scroll(this.index);
-              this.speak(val);
-            } else if (!val.isRemarkMandatory && val.speak) {
-              this.repeatLoop();
-            }
-          } else if(data.status == false) {
-            this.common.presentToast(data.msg, 'warning');
-          } else {
-            this.common.presentToast('Unknown Response From Server', 'dark');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
-  }
+  // submitResponseAction(obj: any, val: any) {
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpDigital.scheduleResponseAction(obj).subscribe({
+  //       next:(data) => {
+  //         if (data.status) {
+  //           this.common.presentToast(data.msg, 'success');
+  //           const obj = val.options.filter((val1: any) => val1.optn_id === val.rspns)[0];
+  //           val.response.optn_id = val.rspns;
+  //           val.isRemarkMandatory = obj.is_rmrk_mandatory;
+  //           val.isDocMandatory = obj.is_doc_mandatory;
+  //           if (val.isRemarkMandatory && val.speak) {
+  //             val.tempoutput = 'remark';
+  //             val.q_desc_temp = 'Please Speak Remark';
+  //             this.scroll(this.index);
+  //             this.speak(val);
+  //           } else if (!val.isRemarkMandatory && val.speak) {
+  //             this.repeatLoop();
+  //           }
+  //         } else if(data.status == false) {
+  //           this.common.presentToast(data.msg, 'warning');
+  //         } else {
+  //           this.common.presentToast('Unknown Response From Server', 'dark');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.common.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     })
+  //   })
+  // }
 
   changeRemark(val: any) {
     this.loop = false;
-    // const obj = {
-    //   wo_id:this.schedule_id,
-    //   remark: val.remark,
-    //   q_id: val.q_id,
-    //   rspns_source: environment.source,
-    //   on_behalf : this.on_behalf,
-    //   optn_id: val.rspns
-    // }
     this.actionUpdateChecklist();
   }
 
-
-
-  submitRemark(obj: any) {
-    this.presentLoading().then(preLoad => {
-      this.httpDigital.schuleRemarkAction(obj).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.common.presentToast(data.msg , 'success');
-            if (this.loop) {
-              const tmp = this.scheduleArr[0].qus[this.index];
-              if (tmp.isDocMandatory) {
-                tmp.tempoutput = 'document';
-                tmp.q_desc_temp = 'Please Upload Photo';
-                this.scroll(this.index);
-                this.speak(tmp);
-              } else {
-                this.repeatLoop();
-              }
-            }
-          } else if (data.status == false){
-            this.common.presentToast(data.msg , 'warning');
-          } else {
-            this.common.presentToast('Unknown Response From Server' , 'dark');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    });
-  }
+  // submitRemark(obj: any) {
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpDigital.schuleRemarkAction(obj).subscribe({
+  //       next:(data) => {
+  //         if (data.status) {
+  //           this.common.presentToast(data.msg , 'success');
+  //           if (this.loop) {
+  //             const tmp = this.scheduleArr[0].qus[this.index];
+  //             if (tmp.isDocMandatory) {
+  //               tmp.tempoutput = 'document';
+  //               tmp.q_desc_temp = 'Please Upload Photo';
+  //               this.scroll(this.index);
+  //               this.speak(tmp);
+  //             } else {
+  //               this.repeatLoop();
+  //             }
+  //           }
+  //         } else if (data.status == false){
+  //           this.common.presentToast(data.msg , 'warning');
+  //         } else {
+  //           this.common.presentToast('Unknown Response From Server' , 'dark');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.common.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     })
+  //   });
+  // }
 
   repeatLoop() {
     let ind = this.index+1;
@@ -528,6 +457,7 @@ export class FillReportComponent  implements OnInit {
     val.imagename = blob;
     console.log(val);
     this.actionUpdateChecklist();
+    this.repeatLoop();
     return;
     let formData = new FormData();
     formData.append('wo_id', this.schedule_id);
@@ -558,83 +488,6 @@ export class FillReportComponent  implements OnInit {
     });
   }
 
-  // blobToBase64(blob: Blob, val: any): void {
-  //   const reader = new FileReader();
-  //   reader.onloadend = () => {
-  //     const base64String: string = reader.result as string;
-  //     const safeUrl: SafeUrl = this.sanitizer.bypassSecurityTrustUrl(base64String);
-  //     val.imagename = base64String;
-  //     console.log(val);
-  //     this.saveDataInLocalDb(val, 'img');
-  //     // this.saveImageInLocalDb(val);
-  //   };
-  //   reader.readAsDataURL(blob);
-  // }
-
-  // saveDataInLocalDb(val: any, type: string) {
-  //   const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
-  //   if (index !== -1) {
-  //     if (this.allData[index].qus && this.allData[index].qus.length > 0) {
-  //       const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
-  //       if (qIndex !== -1) {
-  //         if (type === 'response') {
-  //           this.allData[index].qus[qIndex].rspns = val.rspns;
-  //         } else if (type === 'remark') {
-  //           this.allData[index].qus[qIndex].remark = val.remark;
-  //         } else if (type === 'img') {
-  //           this.allData[index].qus[qIndex].img = val.imagename;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   localStorage.setItem('checkListData', JSON.stringify(this.allData));
-  // }
-
-  // saveImageInLocalDb(val: any) {
-  //   const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
-  //   if (index !== -1) {
-  //     if (this.allData[index].qus && this.allData[index].qus.length > 0) {
-  //       const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
-  //       if (qIndex !== -1) {
-  //         this.allData[index].qus[qIndex].img = val.imagename;
-  //       }
-  //     }
-  //   }
-  //   localStorage.setItem('checkListData', JSON.stringify(this.allData));
-  // }
-
-  // updateRemarkInDb(val: any) {
-  //   console.log(this.allData);
-  //   const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
-  //   console.log(index);
-  //   if (index !== -1) {
-  //     if (this.allData[index].qus && this.allData[index].qus.length > 0) {
-  //       const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
-  //       console.log(qIndex);
-  //       if (qIndex !== -1) {
-  //         this.allData[index].qus[qIndex].remark = val.remark;
-  //       }
-  //     }
-  //   }
-  //   localStorage.setItem('checkListData', JSON.stringify(this.allData));
-  // }
-
-  // updateResponseInDb(val: any) {
-  //   console.log(this.allData);
-  //   const index = this.allData.findIndex((item: any) => item.schedule_id === this.scheduleArr[0].schedule_id);
-  //   console.log(index);
-  //   if (index !== -1) {
-  //     if (this.allData[index].qus && this.allData[index].qus.length > 0) {
-  //       const qIndex = this.allData[index].qus.findIndex((qItem: any) => qItem.q_id === val.q_id);
-  //       console.log(qIndex);
-  //       if (qIndex !== -1) {
-  //         this.allData[index].qus[qIndex].rspns = val.rspns;
-  //       }
-  //     }
-  //   }
-  //   localStorage.setItem('checkListData', JSON.stringify(this.allData));
-  // }
-
   convertToFormData(data: any, formData?: FormData, parentKey?: string): FormData {
     formData = formData || new FormData();
     for (const key in data) {
@@ -664,7 +517,6 @@ export class FillReportComponent  implements OnInit {
       const formData = this.convertToFormData(this.scheduleArr[0]);
       this.httpDigital.finalSubmitCheckList(formData).subscribe({
         next:(data) => {
-          // this.scheduleArr[0].schedule_status = 'attended',
           this.scheduleArr[0].schedule_status = 'attended'
           this.actionUpdateChecklist();
           this.navCtrl.pop();
@@ -835,5 +687,42 @@ export class FillReportComponent  implements OnInit {
         }
       })
     });
+  }
+
+  async presentLoading(msg?: string) {
+    let message;
+    if (!msg) {
+      message = 'Please Wait...';
+    } else {
+      message = msg
+    }
+    this.loading = await this.loadingController.create({
+      cssClass: 'my-custom-class',
+      message: message,
+      duration: 8000
+    });
+    await this.loading.present();
+  }
+
+  async dismissloading() {
+    if (this.loading) {
+      this.loading.dismiss();
+    }
+  }
+
+  viewDocs(url: any) {
+    this.common.openDoc(url);
+  }
+
+  changeBackground(ind: any) {
+    for (var i = 0; i < this.scheduleArr.length;i++) {
+      for (var j = 0 ; j < this.scheduleArr[i].qus.length;j++) {
+        if (ind == j) {
+          this.scheduleArr[i].qus[j].bgcolor = true;
+        } else {
+          this.scheduleArr[i].qus[j].bgcolor = false;
+        }
+      }
+    }
   }
 }

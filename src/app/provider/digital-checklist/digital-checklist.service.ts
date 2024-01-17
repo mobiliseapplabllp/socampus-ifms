@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
@@ -11,8 +11,8 @@ export class DigitalChecklistService {
     private http: HttpClient
   ) { }
 
-  getOfflineCheckListFromServer(): Observable<any> {
-    return this.http.get('assets/data/offline_checklist.json');
+  getOfflineCheckListFromServer(date: string): Observable<any> {
+    return this.http.get('assets/data/offline_checklist' + date + '.json');
   }
 
   getSchedule(): Observable<any> {
@@ -56,5 +56,39 @@ export class DigitalChecklistService {
       "q": data,
       "target": lang
     });
+  }
+
+  getMultipleData(data: any): Observable<any[]> {
+    const forkData: any = [];
+    for (var i = 0 ; i < data.length; i++) {
+      forkData.push(
+        this.http.post('https://api.example.com/data1', data[i])
+      )
+    }
+    console.log(forkData);
+    const apiUrl1 = 'https://api.example.com/data1';
+    const apiUrl2 = 'https://api.example.com/data2';
+
+    return forkJoin([
+      this.http.get(apiUrl1),
+      this.http.get(apiUrl2)
+    ]);
+  }
+
+  getDynamicData(apiEndpoints: string[]): Observable<any[]> {
+    const observables = apiEndpoints.map(endpoint => this.http.get(endpoint));
+    return forkJoin(observables);
+  }
+
+  postDynamicData(apiRequests: any[]): Observable<any[]> {
+    const observables = apiRequests.map(request => {
+      const { method, url, data } = request;
+      if (method.toLowerCase() === 'post') {
+        return this.http.post(url, data);
+      } else {
+        return this.http.get(url);
+      }
+    });
+    return forkJoin(observables);
   }
 }

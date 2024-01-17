@@ -3,11 +3,11 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>Digital Checklist</ion-title>
+    <ion-title >Digital Checklist</ion-title>
     <ion-buttons slot="end">
-      <!-- <ion-button fill="clear" color="light" (click)="openPage('/digital-checklist-offline')">
-        <ion-icon name="cloud-upload-outline"></ion-icon>
-      </ion-button> -->
+      <ion-button fill="clear" color="light" (click)="sync()">
+        <ion-icon name="sync-outline"></ion-icon>
+      </ion-button>
       <ion-button id="chklist-date" fill="clear" color="light" class="ion-text-capitalize" [hidden]="scanBarcode">
         <ion-icon name="calendar-outline"></ion-icon>
       </ion-button>
