@@ -139,20 +139,6 @@
         <ion-button expand="block" [color]="segments === 'meter'? 'primary':'medium'" (click)="clickCustomSegment('meter')">Meter</ion-button>
       </ion-col>
     </ion-row>
-    <!-- <ion-segment  [(ngModel)]='segments' scroll="true" (ionChange)="changeSegmentHeaders($event)">
-      <ion-segment-button value="helpdesk">
-        <ion-label>Helpdesk(<ion-text color="danger">{{pendingTicket.length}}</ion-text>)</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="digital">
-        <ion-label>Digital(<ion-text color="danger">{{assignCheckList.length}}</ion-text>) </ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="pms">
-        <ion-label>PMS (<ion-text color="danger">{{pmsList.length}}</ion-text>)</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="meter">
-        <ion-label>Meter (<ion-text color="danger">{{meterInfo.length}}</ion-text>)</ion-label>
-      </ion-segment-button>
-    </ion-segment> -->
     <div [ngSwitch]='segments'>
       <div *ngSwitchCase= "'helpdesk'">
         <ion-card class="myCards" *ngFor="let data of pendingTicket" [ngClass]="{'wip': data.status === 'work in progress', 'assign': data.status === 'assigned', 'resolve': data.status === 'resolved'}">
@@ -283,53 +269,6 @@
         <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)" *ngIf="pendingTicket.length > 0">
           <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
         </ion-infinite-scroll>
-
-        <!-- <ion-card *ngFor="let dat of pendingTicket" style="margin: 10px;">
-          <ion-row>
-            <ion-col size="4" style="display: flex; align-items: center; justify-content: center;background:linear-gradient(
-              195deg,
-              #25589c 20%,
-              var(--ion-color-primary) 100%
-              ) !important; color:white">
-              <div class="ion-text-center">
-                <span><b>#{{dat.tkts_id}}</b></span><br>
-                <span>{{dat.stage_desc}}</span>
-              </div>
-            </ion-col>
-            <ion-col>
-              <ion-item lines="none">
-                <ion-label class="ion-text-wrap">
-                  <ion-text>
-                    <h3><b>{{dat.pc_desc }}</b></h3>
-                  </ion-text>
-                  <p>{{dat.ext_asset_id}}</p>
-                  <p>{{dat.location_desc}}</p>
-                  <p>{{dat.mobile}}</p>
-                </ion-label>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col class="ion-text-center" >
-              <ion-button style="width:80%;font-size:xx-small;" color="secondary" (click)="openSite(dat)">Details</ion-button>
-            </ion-col>
-            <ion-col class="ion-text-center">
-              <ion-button style="width:80%;font-size:xx-small;" color="medium" (click)="history(dat.tkts_id)">History </ion-button>
-            </ion-col>
-            <ion-col class="ion-text-center" *ngIf="dat.canWork" >
-              <ion-button *ngIf="dat.stage_id === 4 || dat.stage_id === 6; else worknow" style="width:80%;font-size:xx-small;" color="success" (click)="fsr(dat.tkts_id)">EFSR</ion-button>
-              <ng-template #worknow>
-                <ion-button style="width:80%;font-size:xx-small;" color="warning" (click)="work_now(dat)">Work Now</ion-button>
-              </ng-template>
-            </ion-col>
-            <ion-col class="ion-text-center"  *ngIf="!dat.canWork" [hidden]="dat.stage_id === 4 || dat.stage_id === 6 ">
-              <ion-button style="width:80%;font-size:xx-small;" color="success" (click)="assignTicket(dat.tkts_id, dat)">Assign</ion-button>
-            </ion-col>
-            <ion-col class="ion-text-center"  *ngIf="(dat.stage_id === 4 || dat.stage_id === 6) && !dat.canWork ">
-              <ion-button style="width:80%;font-size:xx-small;" color="success" (click)="fsr(dat.tkts_id)">EFSR</ion-button>
-            </ion-col>
-          </ion-row>
-        </ion-card> -->
       </div>
       <div *ngSwitchCase= "'digital'">
         <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">

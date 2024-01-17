@@ -888,8 +888,8 @@ export class ListMasterPage implements OnInit {
 
   updateStackedChart() {
     console.log('abc');
-    const newDataValues = this.randomIntArrayInRange(12, 35, 7);
-    console.log(newDataValues);
+    // const newDataValues = this.randomIntArrayInRange(12, 35, 7);
+    // console.log(newDataValues);
     this.stackedChart.data.datasets[0].data = this.randomIntArrayInRange(12, 35, 7);
     this.stackedChart.data.datasets[1].data = this.randomIntArrayInRange(12, 35, 7);
     this.stackedChart.update();
