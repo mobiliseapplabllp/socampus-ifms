@@ -197,7 +197,7 @@ export class ListMasterPage implements OnInit {
           this.presentAlertConfirm();
           // output = allData.map((item: any) => ({
           //   method: 'POST',
-          //   url: 'https://mobilise.pr.com/submitchecklist',
+          //   url: 'https://aovsshdashboard.com/Webservices/test_image.php',
           //   data: this.convertToFormData(item)
           // }));
           // this.httpDigital.postDynamicData(output).subscribe({

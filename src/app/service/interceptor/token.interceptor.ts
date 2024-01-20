@@ -26,9 +26,9 @@ export class TokenInterceptor implements HttpInterceptor {
       return next.handle(request);
     } else {
       console.log(request.url);
-      if (request.url != 'https://translate.googleapis.com/language/translate/v2?key=AIzaSyDJjHphpheVQM7CRYNqHHdJqMqAgt0IY70') {
+      if (request.url == "https://translate.googleapis.com/language/translate/v2?key=AIzaSyDJjHphpheVQM7CRYNqHHdJqMqAgt0IY70" || request.url == "https://aovsshdashboard.com/Webservices/test_image.php") {
         const userToken = localStorage.getItem('token1');
-        const modifiedReq = request.clone({headers: request.headers.set('Authorization', `Bearer ${userToken}`).set('Accept', 'application/json')});
+        const modifiedReq = request.clone({headers: request.headers.set('Accept', 'application/json')});
         return next.handle(modifiedReq).pipe(tap(() => {},
           (err: any) => {
           if (err instanceof HttpErrorResponse) {
@@ -41,7 +41,7 @@ export class TokenInterceptor implements HttpInterceptor {
         }));
       } else {
         const userToken = localStorage.getItem('token1');
-        const modifiedReq = request.clone({headers: request.headers.set('Accept', 'application/json')});
+        const modifiedReq = request.clone({headers: request.headers.set('Authorization', `Bearer ${userToken}`).set('Accept', 'application/json')});
         return next.handle(modifiedReq).pipe(tap(() => {},
           (err: any) => {
           if (err instanceof HttpErrorResponse) {

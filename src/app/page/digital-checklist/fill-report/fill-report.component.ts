@@ -333,7 +333,6 @@ export class FillReportComponent  implements OnInit {
     console.log(updatedData);
     return db.checklist
     .where('schedule_id')
-
     .equals(scheduleUniqueId)
     .first()
     .then((existingRecord) => {

@@ -93,7 +93,10 @@ export class DigitalChecklistService {
   }
 
   submitDummyApi(data: any): Observable<any> {
-    return this.http.post('https://aovsshdashboard.com/Webservices/test_image.php', data)
+    console.log(data);
+    const formData = new FormData();
+    formData.append('a','1222');
+    return this.http.get('https://aovsshdashboard.com/Webservices/test_image.php' , {params: data})
   }
 
   // postDynamicData(apiRequests: any[]): Observable<any[]> {
