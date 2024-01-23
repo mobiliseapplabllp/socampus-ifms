@@ -33,15 +33,16 @@ export class ComplaintCardsComponent  implements OnInit {
     private loadingController: LoadingController,
     private alertController: AlertController,
     private navCtrl: NavController
-  ) { }
+  ) {
+
+  }
 
   ngOnInit() {
-    console.log(this.ticketType);
-    // const user = localStorage.getItem('user');
-    // if (user) {
-    //   this.userData = JSON.parse(user);
-    //   console.log(this.userData);
-    // }
+    const user = localStorage.getItem('user');
+    if (user) {
+      this.userData = JSON.parse(user);
+      console.log(this.userData);
+    }
   }
 
   isHidden(data: any) {

@@ -4,6 +4,9 @@ import { Routes, RouterModule } from '@angular/router';
 import { ListMasterPage } from './list-master.page';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { OfflineDataComponent } from './offline-data/offline-data.component';
+import { MenuComponent } from './menu/menu.component';
+import { PendingTaskComponent } from './pending-task/pending-task.component';
+import { ComplaintCardsComponent } from '../complaint/complaint-cards/complaint-cards.component';
 
 const routes: Routes = [
   {
@@ -15,7 +18,16 @@ const routes: Routes = [
   }, {
     path: 'offline-data',
     component: OfflineDataComponent
-  }
+  }, {
+    path: 'menu',
+    component: MenuComponent
+  }, {
+    path: 'pending-task',
+    component: PendingTaskComponent
+  }, {
+    path: 'complaint-card',
+    component: ComplaintCardsComponent
+  },
 ];
 
 @NgModule({

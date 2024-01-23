@@ -14,7 +14,7 @@ export class OfflineDataComponent  implements OnInit {
   checkListSelect: any = [];
   constructor(
     private common: CommonService,
-    private httpDigi: DigitalChecklistService
+    private httpDigi: DigitalChecklistService,
   ) { }
 
   ngOnInit() {
@@ -59,6 +59,7 @@ export class OfflineDataComponent  implements OnInit {
 
       }
     });
+    this.common.presentToast('Checklist Save to Server Successfully','success');
   }
 
   convertToFormData(data: any, formData?: FormData, parentKey?: string): FormData {
@@ -110,11 +111,7 @@ export class OfflineDataComponent  implements OnInit {
     schedule_id = selectedChecklist[0].schedule_id;
     schedule_obj = selectedChecklist[0]
     this.actionUpdateChecklist(schedule_id, schedule_obj);
-    console.log(output);
-    // this.checkList = this.checkList.filter((val: any) => !val.isSelect);
-    // this.changeDc();
-    // this.common.presentToast('Checklist Saved to server Successfully', 'success');
-
+    this.common.presentToast('Checklist Save to Server Successfully','success');
   }
 
   actionUpdateChecklist(schedule_id: any, schedule_obj: any) {

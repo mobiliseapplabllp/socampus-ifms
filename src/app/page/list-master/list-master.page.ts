@@ -50,29 +50,7 @@ export class ListMasterPage implements OnInit {
   // pms = '';
   // indent = '';
 
-  menuSlide = {
-    initialSlide: 0,
-    slidesPerView: 3.5,
-    autoplay: false,
-    spaceBetween: 0,
-    breakpoints: {
-      320: {
-        slidesPerView: 3.2,
-      },
-      480: {
-        slidesPerView: 3.7,
-      },
-      530: {
-        slidesPerView: 3.9,
-      },
-      640: {
-        slidesPerView: 4.1,
-      },
-      700: {
-        slidesPerView: 4.2,
-      },
-    }
-  }
+
   isInternet!: boolean;
   bars: any;
   title = 'ng-chart';
@@ -170,14 +148,12 @@ export class ListMasterPage implements OnInit {
         this.isInternet = true;
         this.common.setBarcode('');
         this.userData = this.loginPro.getLoginUserValue();
-        this.getMenuDetail();
         this.getOffLineCheckList();
       } else {
         let menu, MENU_TEMP = localStorage.getItem('home_menu');
         if (MENU_TEMP) {
           this.myMenu = JSON.parse(MENU_TEMP);
           console.log(this.myMenu);
-          this.chunkedArray(this.myMenu)
           this.isInternet = false;
           console.log(menu);
         } else {
@@ -195,18 +171,6 @@ export class ListMasterPage implements OnInit {
         let output, allData = data;
         if (allData.length > 0) {
           this.presentAlertConfirm();
-          // output = allData.map((item: any) => ({
-          //   method: 'POST',
-          //   url: 'https://aovsshdashboard.com/Webservices/test_image.php',
-          //   data: this.convertToFormData(item)
-          // }));
-          // this.httpDigital.postDynamicData(output).subscribe({
-          //   next:(data) => {
-          //     console.log(data);
-          //   },
-          //   error:() => {},
-          //   complete:() => {}
-          // })
         }
         setTimeout(() => {
           sub.unsubscribe();
@@ -292,21 +256,6 @@ export class ListMasterPage implements OnInit {
     Network.removeAllListeners();
   }
 
-  changePendingTask() {
-    this.presentLoading().then(preLoad => {
-      this.pendingTask = !this.pendingTask;
-      if (this.pendingTask) {
-        this.stackedChart = null;
-      } else {
-        setTimeout(() => {
-          this.stackedBarChart();
-          this.lineBarChart();
-        }, 10);
-      }
-      this.dismissloading();
-    })
-  }
-
   getCircleValue() {
     for (var i = 0 ; i < this.circleDashboard.length;i++) {
       let val = this.circleDashboard[i].per;
@@ -314,8 +263,6 @@ export class ListMasterPage implements OnInit {
     }
     console.log(this.circleDashboard);
   }
-
-
 
   getPendingTicket() {
     this.httpCompalint.getTicketMaster(null, this.page).subscribe({
@@ -426,19 +373,6 @@ export class ListMasterPage implements OnInit {
       }
     });
     modal.present();
-  }
-
-  clickCustomSegment(val: string) {
-    this.segments = val;
-    if (val === 'helpesk' && this.pendingTicket.length === 0) {
-      this.getPendingTicket();
-    } else if (val === 'digital' && this.assignCheckList.length === 0) {
-      this.getSchedule(moment().format('YYYY-MM-DD'));
-    } else if (val === 'pms' && this.pmsList.length === 0) {
-      this.getPendingPms();
-    } else if (val === 'meter' && this.meterInfo.length === 0) {
-      this.getPendingMeter();
-    }
   }
 
   changeSegmentHeaders(ev: any) {
@@ -794,39 +728,7 @@ export class ListMasterPage implements OnInit {
     toast.present();
   }
 
-  getMenuDetail() {
-    this.presentLoading().then(preLoad => {
-      this.listMaster.getMenuDetail().then(data => {
-        this.dismissloading();
-        this.result = data;
-        if (this.result.status == true) {
-          this.myMenu = this.result.data[0].submenu;
-          this.chunkedArray(this.result.data[0].submenu)
-          localStorage.setItem('home_menu', JSON.stringify(this.myMenu));
-        }
-      }, err => {
-        this.dismissloading();
-      });
-    });
-  }
 
-  chunkedArray(array: any) {
-    const perChunk = 2
-    const result = array.reduce((resultArray: any, item: any, index: any) => {
-      const chunkIndex = Math.floor(index/perChunk)
-      if(!resultArray[chunkIndex]) {
-        resultArray[chunkIndex] = []
-      }
-      resultArray[chunkIndex].push(item)
-      return resultArray
-    }, [])
-    this.menuTemp = [...result];
-    this.menuNew = [];
-    for (var i = 0 ; i < this.menuTemp.length; i++) {
-      this.menuNew.push({menu: this.menuTemp[i]});
-    }
-    console.log(this.menuNew);
-  }
 
   async presentLoading() {
     this.loading = await this.loadingController.create({

@@ -13,6 +13,10 @@ import { SubstringPipe } from 'src/app/pipes/substring.pipe';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { OfflineDataComponent } from './offline-data/offline-data.component';
+import { MenuComponent } from './menu/menu.component';
+import { PendingTaskComponent } from './pending-task/pending-task.component';
+import { SharedModule } from 'src/app/shared/shared.module';
+import { ComplaintPageModule } from '../complaint/complaint.module';
 
 @NgModule({
   imports: [
@@ -20,13 +24,17 @@ import { OfflineDataComponent } from './offline-data/offline-data.component';
     FormsModule,
     IonicModule,
     ListMasterPageRoutingModule,
-    // SharedModule
+    SharedModule,
+    ComplaintPageModule
   ],
   declarations: [
     ListMasterPage,
     SubstringPipe,
     DashboardComponent,
-    OfflineDataComponent],
+    OfflineDataComponent,
+    MenuComponent,
+    PendingTaskComponent
+  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ListMasterPageModule {}
