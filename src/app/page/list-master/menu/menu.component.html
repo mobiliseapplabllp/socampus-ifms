@@ -1,0 +1,23 @@
+<ion-row>
+  <ion-col class="ion-padding-start">
+    <ion-text color="primary"><b>Our Services</b></ion-text>
+  </ion-col>
+</ion-row>
+<ion-slides [options]="menuSlide" pager="false" style="padding: 10px">
+  <ion-slide *ngFor="let dat of menuNew" style="margin:0px !important;padding:0px !important">
+    <ion-grid style="padding:0px !important" >
+      <ion-row  style="padding:2px;margin:0px !important;">
+        <ion-col *ngFor="let val of dat.menu" size="12" style="margin:3px 0px">
+          <ion-card style="margin:0px; min-height: 80px;width:100%; box-shadow:1px 1px 8px #26589c;border-radius: 10px;" (click)="openPage(val)">
+            <div style="height:60px;width:100%" class="center">
+              <ion-img [src]="val.icon_path" style="height:35px;width:35px"></ion-img>
+            </div>
+            <div style="min-height:20px;width:100%" class="center">
+              <ion-text color="primary" style="font-weight: 500;"> {{val.smnu_desc}} </ion-text>
+            </div>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-slide>
+</ion-slides>

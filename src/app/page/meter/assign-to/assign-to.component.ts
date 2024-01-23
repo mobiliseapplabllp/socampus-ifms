@@ -21,7 +21,6 @@ export class AssignToComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.site_id);
     this.getPcUser();
   }
 
@@ -65,7 +64,6 @@ export class AssignToComponent  implements OnInit {
   }
 
   submit() {
-    console.log(this.userList);
     var selectedArr = this.userList.filter((val: any) => val.isSelect).map((res: any) => res.id);
     if (selectedArr.length === 0) {
       alert('Please Select At least one Employee');

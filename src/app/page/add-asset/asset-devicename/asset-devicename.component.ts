@@ -19,7 +19,6 @@ export class AssetDevicenameComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.grp_id);
     this.getDeviceName();
   }
 
@@ -63,7 +62,6 @@ export class AssetDevicenameComponent  implements OnInit {
 
   search(ev: any) {
     let val: any;
-    console.log(ev.target.value);
     val = ev.target.value;
     this.myDeviceName = this.myDeviceNameCopy;
     if (val && val.trim() !== '') {

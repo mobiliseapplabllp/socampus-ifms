@@ -44,7 +44,6 @@ export class AppComponent {
       this.router.navigateByUrl('/login', { replaceUrl: true });
     } else {
       this.common.checkInternet().then(res => {
-        console.log(res);
         if (res) {
           this.refreshToken();
         } else {
@@ -117,7 +116,6 @@ export class AppComponent {
     this.userIdle.startWatching();
     this.userIdle.onTimerStart().subscribe();
     this.userIdle.onTimeout().subscribe(() => {
-      console.log('time up');
       this.stop();
       this.stopWatching();
       this.presentAlertConfirm();
@@ -133,7 +131,6 @@ export class AppComponent {
       buttons: [{
         text: 'RESET',
           handler: (data) => {
-            console.log("Cancel");
             this.cleanDb();
           }
         },{
@@ -160,9 +157,7 @@ export class AppComponent {
       mode: 'ios',
       buttons: [{
         text: 'Cancel',
-          handler: (data) => {
-            console.log("Cancel");
-          }
+          handler: (data) => { }
         },{
           text: 'YES',
           handler: (data) => {
@@ -176,7 +171,6 @@ export class AppComponent {
   }
 
   stop() {
-    console.log('stop !!');
     this.userIdle.stopTimer();
   }
 
@@ -189,14 +183,12 @@ export class AppComponent {
   }
 
   restart() {
-    console.log('restart !!');
     this.userIdle.resetTimer();
   }
 
   getUserData() {
     this.loginPro.getUserDataObs().subscribe((dat: any) => {
       this.userInfo = dat;
-      console.log(this.userInfo);
     });
 
     this.listMaster.getData().subscribe((val: any) => {

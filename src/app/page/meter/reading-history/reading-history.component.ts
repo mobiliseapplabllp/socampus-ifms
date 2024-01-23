@@ -28,7 +28,6 @@ export class ReadingHistoryComponent implements OnInit {
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
-      console.log(this.requestedData);
     });
   }
 

@@ -34,7 +34,6 @@ export class MeterPage implements OnInit {
     if (bar) {
       this.meterInfo = [];
       this.meterInfoCopy = [];
-      console.log(bar);
       this.getPendingWOusingBarcode(bar);
     }
   }
@@ -85,7 +84,6 @@ export class MeterPage implements OnInit {
   }
 
   async addReading() {
-    console.log('my site');
     const modal = await this.modalCtrl.create({
       component: AddReadingComponent,
       cssClass: 'my-modal',

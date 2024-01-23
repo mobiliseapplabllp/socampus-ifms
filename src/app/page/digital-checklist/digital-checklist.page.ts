@@ -58,7 +58,6 @@ export class DigitalChecklistPage implements OnInit {
   ngOnInit() {
     this.common.setBarcode('');
     let date = moment().format('YYYY-MM-DD');
-    console.log(date);
     this.createCustomCalendar(date);
   }
 
@@ -133,7 +132,6 @@ export class DigitalChecklistPage implements OnInit {
     this.presentLoading().then(preLoad => {
       this.httpDigital.getScheduleHistory(date).subscribe({
         next:(data) => {
-          console.log(data);
           if (data.status) {
             this.allChecklist = data.data;
             this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
@@ -142,12 +140,6 @@ export class DigitalChecklistPage implements OnInit {
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
-          // let todayDate = moment().format('YYYY-MM-DD'), lastCheckListDate = localStorage.getItem('lastCheckListDate');
-          // if (lastCheckListDate != todayDate) {
-          //   localStorage.setItem('lastCheckListDate', '');
-          //   localStorage.setItem('checkListData', '');
-          //   this.getOfflineCheckListFromServer();
-          // }
         },
         error:() => {
           this.dismissloading();
@@ -201,22 +193,7 @@ export class DigitalChecklistPage implements OnInit {
         complete:() => {
           this.dismissloading();
         }
-      }
-      //   data => {
-      //   console.log(data);
-      //   this.dismissloading();
-      //   if (data.status) {
-      //     this.isOnBehalf = 1;
-      //     this.allChecklist = data.data;
-      //     this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-      //     this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended');
-      //   } else {
-      //     this.common.presentToast(data.msg, 'warning');
-      //   }
-      // }, err => {
-      //   this.dismissloading();
-      // }
-      )
+      })
     })
   }
 
@@ -245,8 +222,6 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   changeDateComponent(ev: any) {
-    // console.log(this.selectedDate + '=' + ev.target.value);
-    // return;
     this.selectedDate = moment(ev.detail.value).format('YYYY-MM-DD');
     const data = {
       date: moment(ev.detail.value).format('DD'),
@@ -260,7 +235,6 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   changeCalendarDate(dat: any) {
-    console.log(dat);
     this.slides.slideTo(dat.ind - 3);
     for (var i = 0 ; i < this.dateArr.length; i++) {
       if (dat.date == this.dateArr[i].date) {
@@ -310,12 +284,10 @@ export class DigitalChecklistPage implements OnInit {
 
   changeDate(action: any) {
     if (action == 'next') {
-      console.log('nx');
       let next = moment(this.selectedDate).add(1, 'day').format('YYYY-MM-DD');
       this.selectedDate = next;
       this.getSchedule(this.selectedDate);
     } else {
-      console.log('pre');
       let prev = moment(this.selectedDate).subtract(1, 'day').format('YYYY-MM-DD');
       this.selectedDate = prev;
       this.getSchedule(this.selectedDate);

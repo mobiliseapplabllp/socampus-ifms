@@ -60,7 +60,6 @@ export class CreateTicketComponent  implements OnInit {
     if(temp) {
       this.userData = JSON.parse(temp);
     }
-    console.log(this.userData);
     this.userName = this.userData.user_name;
     this.getEmpDetail();
     this.initializeForm();
@@ -102,14 +101,12 @@ export class CreateTicketComponent  implements OnInit {
       token = localStorage.getItem('token1');
       fullurl = bar + '?token=' + token;
       this.httpCommon.setBarcode('');
-      console.log(fullurl);
       this.httpCommon.openDoc(fullurl);
     }
   }
 
   getEmpDetail() {
     this.httpComp.getEmpDetail().subscribe(data => {
-      console.log(data);
       if (data.status) {
         this.createForm.get('mobile')?.setValue(data.data.mobile);
         this.createForm.get('email')?.setValue(data.data.email);
@@ -120,11 +117,9 @@ export class CreateTicketComponent  implements OnInit {
   getIssueType() {
     this.presentLoading().then(preLoad => {
       this.httpComp.getIssueType().subscribe(data => {
-        console.log(data);
         this.dismissloading();
         if (data.status) {
           this.allIssueType = data.data;
-          console.log(this.allIssueType);
         }
       });
     });
@@ -158,7 +153,6 @@ export class CreateTicketComponent  implements OnInit {
 
   getCategory() {
     this.httpComp.getCategory().subscribe(data => {
-      console.log(data);
       if (data.status) {
         this.myCategory = data.data
       } else {
@@ -169,7 +163,6 @@ export class CreateTicketComponent  implements OnInit {
 
   getCostCenter() {
     this.httpComp.getCostCenter().subscribe(data => {
-      console.log(data);
       if (data.status) {
         this.allRoName = data.data;
       }
@@ -190,7 +183,6 @@ export class CreateTicketComponent  implements OnInit {
       }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.createForm.get('category_desc')?.setValue(disModal.data.label);
         this.createForm.get('category')?.setValue(disModal.data.value);
@@ -230,7 +222,6 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   changeIssue(ev: any) {
-    console.log(ev.target.value);
     this.createForm.get('pc_id')?.setValue('');
     this.createForm.get('pc_id_desc')?.setValue('');
     this.createForm.get('bldg_id')?.setValue('');
@@ -268,7 +259,6 @@ export class CreateTicketComponent  implements OnInit {
       }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.createForm.get('subcat1_id_desc')?.setValue(disModal.data.label);
         this.createForm.get('subcat1_id')?.setValue(disModal.data.value);
@@ -290,7 +280,6 @@ export class CreateTicketComponent  implements OnInit {
     this.presentLoading().then(preLoad => {
       this.httpComp.getQuerySubCat1(ev).subscribe(data => {
         this.dismissloading();
-        console.log(data);
         if (data.status) {
           this.allSubCat1 = data.data;
         }
@@ -312,7 +301,6 @@ export class CreateTicketComponent  implements OnInit {
       }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.createForm.get('subcat2_id_desc')?.setValue(disModal.data.label);
         this.createForm.get('subcat2_id')?.setValue(disModal.data.value);
@@ -424,7 +412,6 @@ export class CreateTicketComponent  implements OnInit {
       componentProps : {data: JSON.stringify(data)}
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       this.navCtrl.pop();
       if (disModal.data) { }
     });
@@ -460,7 +447,6 @@ export class CreateTicketComponent  implements OnInit {
     if (event.target.files.length > 0) {
       let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
       const file = event.target.files[0];
-      console.log(file);
       this.formData.delete('img[]');
       this.formData.append('img[]', file, random);
       this.fileName = 'a.png';
@@ -505,7 +491,6 @@ export class CreateTicketComponent  implements OnInit {
     this.presentLoading().then(preLoad => {
       this.httpComp.getBuildingList(id).subscribe({
         next:(data: any) => {
-          console.log(data);
           if (data.status) {
             this.buildingArr = data.data;
           } else {
@@ -582,7 +567,6 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   searchBarcode() {
-    console.log(this.createForm.value.barcode);
     this.presentLoading().then(preLoad => {
       this.httpComp.getClientIdBarcode(this.createForm.value.barcode).subscribe({
         next:(data) => {
@@ -599,30 +583,15 @@ export class CreateTicketComponent  implements OnInit {
         complete:() => {
           this.dismissloading();
         }
-      }
-      //   data => {
-      //   console.log(data);
-      //   this.dismissloading();
-      //   if (data.status) {
-      //     this.barcodeList = data.data;
-      //   } else {
-      //     this.httpCommon.presentToast(data.msg, 'warning');
-      //   }
-      // }, err => {
-      //   this.dismissloading();
-      //   this.httpCommon.presentToast(environment.errMsg, 'danger');
-      // }
-      );
+      });
     })
   }
 
   submitTest() {
-    console.log(this.barcodeList);
     for (var i =0; i < this.barcodeList.length; i++) {
       if (this.barcodeList[i].isSelected) {
         this.formData.append('barcodes[]', this.barcodeList[i].ext_asset_id);
       }
-      console.log(this.barcodeList[i].isSelected);
     }
   }
 

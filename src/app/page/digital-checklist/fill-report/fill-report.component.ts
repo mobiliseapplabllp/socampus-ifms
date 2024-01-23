@@ -526,7 +526,7 @@ export class FillReportComponent  implements OnInit {
             if (data.cat_head && data.cat_ques) {
               // this.scrollCategory(data);
             } else {
-              console.log('cat not found');
+
             }
           }
         },
@@ -547,7 +547,6 @@ export class FillReportComponent  implements OnInit {
       userToScrollOn[indexFound].nativeElement.scrollIntoView({
         behavior: 'smooth'
       }, (err: any) => {
-        console.log(err);
       });
     }, 500);
   }

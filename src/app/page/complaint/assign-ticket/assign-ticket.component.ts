@@ -25,8 +25,6 @@ export class AssignTicketComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.ticket_id);
-    console.log(this.allData);
     this.getTeamsMember();
   }
 
@@ -59,7 +57,6 @@ export class AssignTicketComponent  implements OnInit {
 
   search(ev: any) {
     let val: any;
-    console.log(ev.target.value);
     val = ev.target.value;
     this.empList = this.empListCopy;
     if (val && val.trim() !== '') {
@@ -96,9 +93,7 @@ export class AssignTicketComponent  implements OnInit {
           this.dismissLoading();
         }
       });
-    })
-
-    console.log(obj);
+    });
   }
 
   async presentLoading() {

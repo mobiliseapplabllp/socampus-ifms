@@ -63,7 +63,6 @@ export class ComplaintPage implements OnInit {
   }
 
   changeTickeType(ev:  any) {
-    console.log(ev.target.value);
     this.page = 1;
     this.tickets = [];
     this.getTicketMaster(ev.target.value , this.page);
@@ -94,7 +93,6 @@ export class ComplaintPage implements OnInit {
   }
 
   openTicketPage(data: any, ticket_type: any) {
-    console.log(data);
     this.router.navigate(['/complaint/ticket-work'], {
       queryParams: {
         data: JSON.stringify(data),
@@ -110,7 +108,6 @@ export class ComplaintPage implements OnInit {
     }
     this.presentLoading().then(preLoad => {
       this.httpCompalint.searchTicketFromServer(this.searchBy, this.searchValue).subscribe(data => {
-        console.log(data);
         this.dismissloading();
         if (data.status) {
           this.page = this.page + 1;
@@ -137,7 +134,6 @@ export class ComplaintPage implements OnInit {
         ticket_arr = data.data.data;
         length = ticket_arr.length;
         for (var i = 0 ; i < length; i++) {
-          console.log(ticket_arr[i]);
           this.tickets.push(ticket_arr[i]);
         }
         this.page = this.page + 1;
@@ -157,7 +153,6 @@ export class ComplaintPage implements OnInit {
     this.loading.dismiss();
   }
   changeSegment(ev: any) {
-    console.log(ev.target.value);
     if (ev.target.value == 'resolved') {
       this.presentLoading().then(preLoad => {
         this.resolveTicket = [];
@@ -207,7 +202,6 @@ export class ComplaintPage implements OnInit {
 
   changeMyTickt(ev: any) {
     this.myTicket = this.myTicketCopy;
-    console.log(this.tickets);
     if (ev.target.value && ev.target.value.trim() !== '') {
       this.myTicket = this.myTicket.filter((dat: any) => {
         if ((dat.tkts_id.toString().toLowerCase().indexOf(ev.target.value.toLowerCase()) > -1)) {
@@ -224,7 +218,6 @@ export class ComplaintPage implements OnInit {
 
   searchItem(ev: any) {
     this.tickets = this.ticketsCopy;
-    console.log(this.tickets);
     if (ev.target.value && ev.target.value.trim() !== '') {
       this.tickets = this.tickets.filter((dat: any) => {
         if ((dat.tkts_id.toString().toLowerCase().indexOf(ev.target.value.toLowerCase()) > -1)) {
@@ -250,7 +243,6 @@ export class ComplaintPage implements OnInit {
       componentProps : { }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.searchValueDesc = disModal.data.label;
         this.searchValue = disModal.data.value;

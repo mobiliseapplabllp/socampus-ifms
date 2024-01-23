@@ -14,7 +14,6 @@ export class ResponseModalComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(JSON.parse(this.data));
     this.dataView = JSON.parse(this.data);
   }
 

@@ -36,12 +36,6 @@ export class ComplaintCardsComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.ticketType);
-    // const user = localStorage.getItem('user');
-    // if (user) {
-    //   this.userData = JSON.parse(user);
-    //   console.log(this.userData);
-    // }
   }
 
   isHidden(data: any) {
@@ -49,7 +43,6 @@ export class ComplaintCardsComponent  implements OnInit {
   }
 
   async openSite() {
-    console.log('my site');
     const modal = await this.modalCtrl.create({
       component: SiteDetailComponent,
       cssClass: 'my-modal2',
@@ -89,14 +82,12 @@ export class ComplaintCardsComponent  implements OnInit {
   }
 
   async openTicketTypeModal(locations: any, data: any) {
-    console.log(data);
     const modal = await this.modalCtrl.create({
       component: TicketTypeComponent,
       cssClass: 'my-modal',
       componentProps: { allData:  this.data, locations: locations, requestData1: data }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.greetEvent.emit(true);
       }
@@ -168,7 +159,6 @@ export class ComplaintCardsComponent  implements OnInit {
       buttons: [{
         text: 'Cancel',
           handler: (data) => {
-            console.log("Cancel");
           }
         },{
           text: 'YES',
@@ -249,7 +239,6 @@ export class ComplaintCardsComponent  implements OnInit {
       }
     });
     modal.onWillDismiss().then(async disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.greetEvent.emit(true);
       }

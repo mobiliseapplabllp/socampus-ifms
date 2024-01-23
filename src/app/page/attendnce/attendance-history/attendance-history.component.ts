@@ -98,7 +98,6 @@ export class AttendanceHistoryComponent  implements OnInit {
       componentProps : { }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.costCenter = disModal.data.label;
         this.pc_id = disModal.data.value;

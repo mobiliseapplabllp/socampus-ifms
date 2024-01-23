@@ -5,7 +5,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MeterService } from 'src/app/provider/meter/meter.service';
-import { AssetPlantComponent } from '../../add-asset/asset-plant/asset-plant.component';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { DaysComponent } from '../days/days.component';
 import * as moment from 'moment';
@@ -96,7 +95,6 @@ export class AddMeterComponent implements OnInit {
       oth_read: ['', Validators.required],
       oth_min: [''],
       oth_max: [''],
-
       mult_fact: ['', Validators.required],
       mult_fact_val: [''],
       inc: ['', Validators.required],
@@ -107,15 +105,7 @@ export class AddMeterComponent implements OnInit {
       img_req: ['', Validators.required],
       remark_req: ['', Validators.required],
       can_upld_gallery: ['', Validators.required],
-      // fromDate: ['', Validators.required],
-      // toDate: ['', Validators.required],
-
-      // from_date: [''],
-      // from_date_temp: [''],
-      // to_date: [''],
-      // to_date_temp: [''],
       source: [environment.source]
-
     });
   }
 
@@ -123,7 +113,6 @@ export class AddMeterComponent implements OnInit {
     this.presentLoading().then(preLoad => {
       this.httpAsset.getFacilityType().subscribe({
         next:(data) => {
-          console.log(data);
           if (data.status) {
             this.facilityTypeArr = data.data;
           }
@@ -139,17 +128,12 @@ export class AddMeterComponent implements OnInit {
   }
 
   async openSiteModal() {
-    // if (!this.addAsset.value.faciity_type) {
-    //   alert('Please Select Facilty Type');
-    //   return;
-    // }
     const modal = await this.modalController.create({
       component: CostCenterComponent,
       cssClass: 'my-modal',
       componentProps : { faciity_type: this.addAsset.value.faciity_type}
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.data) {
         let prefix = 'M'+disModal.data.barcode_prefix;
         this.addAsset.get('site_id_description')?.setValue(disModal.data.pc_desc);
@@ -179,7 +163,6 @@ export class AddMeterComponent implements OnInit {
   }
 
   changeFromDate(index: any, type: string) {
-    console.log(index);
     if (type === 'from') {
       let date = moment(this.timeArr[index].from_date).format('H:mm');
       this.timeArr[index].from_date_temp = date;
@@ -192,7 +175,6 @@ export class AddMeterComponent implements OnInit {
         this.timeArr[index].to_date_temp = null;
       }
     }
-    console.log(this.timeArr);
   }
 
   addMoreSlot() {
@@ -211,7 +193,6 @@ export class AddMeterComponent implements OnInit {
 
   getMeterType() {
     this.httpMeter.getMeterType().subscribe(data => {
-      console.log(data);
       if (data.status) {
         this.meterType = data.data.data
       } else {
@@ -231,7 +212,6 @@ export class AddMeterComponent implements OnInit {
   }
 
   changeBlock(ev: any) {
-    console.log(ev.target.value);
     this.presentLoading().then(preLoad => {
       this.httpAsset.getBuildingList(ev.target.value).subscribe({
         next:(data) => {
@@ -295,7 +275,6 @@ export class AddMeterComponent implements OnInit {
 
   getEquipStatus() {
     this.httpAsset.getEquipmentStatus().subscribe(data => {
-      console.log(data);
       if (data.status) {
         this.myEquipStatus = data.data
       }
@@ -308,7 +287,6 @@ export class AddMeterComponent implements OnInit {
 
   searchParentId() {
     var length = this.addAsset.value.parent_asset_id.length;
-    console.log(length);
     if (length !== 10) {
       alert('Parent Id Should be 10 Digit');
       return;
@@ -349,7 +327,6 @@ export class AddMeterComponent implements OnInit {
   }
 
   changeMeterId() {
-    console.log('abc');
     let prefix = this.addAsset.value.ext_asset_id;
     let id = this.addAsset.value.ext_id_temp;
     this.addAsset.get('ext_id')?.setValue(prefix + id);
@@ -429,7 +406,6 @@ export class AddMeterComponent implements OnInit {
   }
 
   addMeter() {
-    console.log(this.timeArr);
     if (this.addAsset.value.is_child_asset == '1' && !this.parentAssetObj.isExists) {
       this.httpCommon.presentToast('Please Verify Parent Asset Id', 'warning');
       return;
@@ -535,25 +511,19 @@ export class AddMeterComponent implements OnInit {
         this.formData.delete('photo3');
         this.formData.append('photo3' , file, random)
       }
-      console.log(file);
     }
   }
 
   async openDays() {
-    console.log('my site');
     const modal = await this.modalCtrl.create({
       component: DaysComponent,
       cssClass: 'my-modal2',
       componentProps: { }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
-
         this.days = disModal.data;
         this.daysLength = this.days.filter((val: any) => val.selected);
-        console.log(this.daysLength);
-        // this.greetEvent.emit(true);
       }
     });
     modal.present();
@@ -572,7 +542,6 @@ export class AddMeterComponent implements OnInit {
       }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.usr = disModal.data;
       }
@@ -593,7 +562,6 @@ export class AddMeterComponent implements OnInit {
       }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.escalate_to = disModal.data;
       }

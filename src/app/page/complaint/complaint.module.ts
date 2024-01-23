@@ -39,6 +39,10 @@ import { InstructionModalComponent } from './instruction-modal/instruction-modal
     TicketTypeComponent,
     TicketWorkComponent,
     AssignTicketComponent,
-    InstructionModalComponent]
+    InstructionModalComponent,
+  ],
+  exports: [
+    ComplaintCardsComponent
+  ]
 })
 export class ComplaintPageModule {}

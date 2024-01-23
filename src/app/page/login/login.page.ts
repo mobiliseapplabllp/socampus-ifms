@@ -42,58 +42,31 @@ export class LoginPage implements OnInit {
 
   ngOnInit() {
     this.common.setBarcode('');
-    const string1 = "abcd";
-    const string2 = "dcbe";
-    const similarity = this.compareString(string1, string2);
-    console.log(`String Compare Result:  ${similarity.toFixed(2)}%`);
-    if (similarity >= 70) {
-      console.log("Strings are greater than 70% similar.");
-    } else {
-      console.log("Strings are less than 70% similar.");
-    }
-  }
-
-  compareString(str1: string, str2: string) {
-    const set1 = new Set(str1.toLowerCase().split(''));
-    const set2 = new Set(str2.toLowerCase().split(''));
-    const intersection = new Set([...set1].filter(x => set2.has(x)));
-    const union = new Set([...set1, ...set2]);
-    const similarity = (intersection.size / union.size) * 100;
-    return similarity;
   }
 
   ionViewDidEnter() {
-    console.log('login');
     if (this.platform.is('android')) {
       this.isAndroid = true;
     }
     this.menu.enable(false);
     if (localStorage.getItem('loginvalue')) {
       const isLogin = localStorage.getItem('loginvalue');
-      console.log(isLogin);
       if (isLogin) {
-        console.log(JSON.parse(isLogin));
         const decrypt = JSON.parse(isLogin);
         this.login.userid = decrypt.userid;
         this.login.password = decrypt.password;
       }
-    } else {
-      console.log('not data');
     }
   }
   ionViewDidLeave() {
     this.menu.enable(true);
   }
 
-  changePass(pass: any) {
-    console.log(pass);
-    console.log(pass.target.value);
-  }
+  changePass(pass: any) { }
 
 
   async checkInternet() {
     this.common.checkInternet().then(res => {
-      console.log(res);
       if (res) {
         this.onLogin();
       } else {
@@ -109,7 +82,6 @@ export class LoginPage implements OnInit {
       setTimeout(() => {
         this.isHidden = true;
       }, 1000);
-      console.log(data);
       this.userValue = data;
       if (this.userValue === false) {
         this.common.presentToast(environment.errMsg, 'danger');

@@ -1,0 +1,472 @@
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { LoadingController, ModalController } from '@ionic/angular';
+import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
+import { environment } from 'src/environments/environment';
+import { CommonService } from 'src/app/provider/common/common.service';
+import * as moment from 'moment';
+import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
+import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
+import { MeterService } from 'src/app/provider/meter/meter.service';
+import { AssignTicketComponent } from '../../complaint/assign-ticket/assign-ticket.component';
+import { PmAssignComponent } from '../../pm-cal/pm-assign/pm-assign.component';
+import { SiteDetailComponent } from '../../complaint/site-detail/site-detail.component';
+import { TicketHistoryComponent } from '../../complaint/ticket-history/ticket-history.component';
+import { TicketTypeComponent } from '../../complaint/ticket-type/ticket-type.component';
+import { Router } from '@angular/router';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+
+@Component({
+  selector: 'app-pending-task',
+  templateUrl: './pending-task.component.html',
+  styleUrls: ['./pending-task.component.scss'],
+})
+export class PendingTaskComponent  implements OnInit {
+  @Input() eventChange: any
+  loading: any;
+  pendingTask = true;
+  segments = 'helpdesk';
+  page = 1;
+  pendingTicket: any = [];
+  allChecklist: any = [];
+  assignCheckList: any = [];
+  attendedCheckList: any = [];
+  pmsList: any = [];
+  meterInfo: any = [];
+  formData = new FormData();
+  constructor(
+    private loadingController: LoadingController,
+    private httpCompalint: ComplaintService,
+    private common: CommonService,
+    private httpDigital: DigitalChecklistService,
+    private httpPm: PmCalService,
+    private modalCtrl: ModalController,
+    private httpMeter: MeterService,
+    private router: Router
+  ) { }
+
+  ngOnInit() {}
+
+  ngOnChanges() {
+    if (this.eventChange) {
+      this.getData();
+    }
+  }
+
+  getData() {
+    if (this.segments === 'helpdesk') {
+      this.page = 1;
+      this.pendingTicket = [];
+      this.getPendingTicket();
+    } else if (this.segments === 'digital') {
+      this.getSchedule(moment().format('YYYY-MM-DD'));
+    } else if (this.segments === 'pms') {
+      this.getPendingPms();
+    } else if (this.segments === 'meter') {
+      this.getPendingMeter();
+    }
+  }
+
+  myCustom(ev: any) {
+    this.page = 1;
+    this.pendingTicket = [];
+    this.getPendingTicket();
+  }
+
+  clickCustomSegment(val: string) {
+    this.segments = val;
+    if (val === 'helpdesk' && this.pendingTicket.length === 0) {
+      this.getPendingTicket();
+    } else if (val === 'digital' && this.assignCheckList.length === 0) {
+      this.getSchedule(moment().format('YYYY-MM-DD'));
+    } else if (val === 'pms' && this.pmsList.length === 0) {
+      this.getPendingPms();
+    } else if (val === 'meter' && this.meterInfo.length === 0) {
+      this.getPendingMeter();
+    }
+  }
+
+  getPendingTicket() {
+    this.httpCompalint.getTicketMaster(null, this.page).subscribe({
+      next:(data) => {
+        if (data.status) {
+          this.page = this.page + 1;
+          this.pendingTicket = [...this.pendingTicket, ...data.data.data];
+        } else {
+          this.common.presentToast(data.msg, 'warning');
+        }
+      },
+      error:() => {
+        this.dismissloading();
+        this.common.presentToast(environment.errMsg, 'warning');
+      },
+      complete:() => {
+        this.dismissloading();
+      }
+    });
+  }
+
+  async openSite(data:any) {
+    const modal = await this.modalCtrl.create({
+      component: SiteDetailComponent,
+      cssClass: 'my-modal2',
+      componentProps: { ticketData: data }
+    });
+    modal.present();
+  }
+
+  async history(tkts_id: any) {
+    const modal = await this.modalCtrl.create({
+      component: TicketHistoryComponent,
+      cssClass: 'my-modal',
+      componentProps: { ticket_id: tkts_id }
+    });
+    modal.present();
+  }
+
+  fsr(ticket_id: number) {}
+
+  async work_now(allData: any) {
+    this.presentLoading().then(preLoad => {
+      this.httpCompalint.checkTicketConfirm(allData.tkts_id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.openTicketWork(allData);
+          } else {
+            this.openTicketTypeModal(allData, data.locations, data.data);
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    });
+  }
+
+  openTicketWork(data: any) {
+    this.router.navigate(['complaint/ticket-work'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
+  }
+
+  async openTicketTypeModal(allData: any, locations: any, data: any) {
+    const modal = await this.modalCtrl.create({
+      component: TicketTypeComponent,
+      cssClass: 'my-modal',
+      componentProps: { allData:  allData, locations: locations, requestData1: data }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        // this.greetEvent.emit(true);
+      }
+    });
+    modal.present();
+  }
+
+  loadData(event: any) {
+    setTimeout(() => {
+      event.target.complete();
+    }, 3000);
+    this.getPendingTicket();
+  }
+
+  getSchedule(date: any) {
+    this.allChecklist = [];
+    this.assignCheckList = [];
+    this.attendedCheckList = [];
+    this.presentLoading().then(preLoad => {
+      this.httpDigital.getScheduleHistory(date).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.allChecklist = data.data;
+            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
+            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended');
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger')
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+  }
+
+  getPendingPms(){
+    this.presentLoading().then(() => {
+      this.httpPm.getPm(1, 1).subscribe({
+        next:(dat) => {
+          if (dat.status) {
+            this.pmsList = dat.data.data;
+            this.pmsList = this.pmsList.filter((val: any) => val.stage_id === 1);
+          } else {
+            this.pmsList = [];
+            this.common.presentToast(dat.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'warning');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    });
+  }
+
+  openFillReportPms(dat: any) {
+    this.router.navigate(['/pm-calibration/pm-report'], {
+      queryParams: {
+        data: JSON.stringify(dat),
+      }
+    });
+  }
+
+  openFillReport(data: any) {
+    this.router.navigateByUrl('/digital-checklist/fill-report/' + data.schedule_id + '/' + 0);
+  }
+
+  uploadPtw(dat: any) {}
+
+  viewAttachment(url: string) {
+    this.common.openDoc(url);
+  }
+
+  getPendingMeter() {
+    this.presentLoading().then(preLoad => {
+      this.httpMeter.getPendingWo().subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.meterInfo = data.data;
+          } else {
+            this.common.presentToast(data.info, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+  }
+
+  checkPhotoCondition(dat: any, type: any) {
+    if (dat.is_gllry_upld_allwd == 1) {
+      this.presentActionSheet(1, dat , type);
+    } else if (dat.is_gllry_upld_allwd == 0) {
+      this.presentActionSheet(0, dat , type);
+    } else {
+      alert('Gallery is Undefined ' + dat.is_gllry_upld_allwd);
+    }
+  }
+
+  async presentActionSheet(val: any, data: any, type: any) {
+    const takePicture = async () => {
+      var obj: any = {};
+      if (val === 1) {
+        obj = {
+          quality: 80,
+          allowEditing: false,
+          resultType: CameraResultType.Uri,
+        }
+      } else {
+        obj = {
+          quality: 80,
+          allowEditing: false,
+          source: CameraSource.Camera,
+          resultType: CameraResultType.Uri,
+        }
+      }
+      const image = await Camera.getPhoto(obj);
+      this.readImg(image, data ,type)
+    };
+    takePicture();
+  }
+
+  async readImg(photo: any, data: any,type: any) {
+    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+    const response = await fetch(photo.webPath);
+    const blob = await response.blob();
+    if (type == 'consumption') {
+      this.formData.delete('img1');
+      this.formData.append('img1', blob, random);
+      data.isConsumptionImg = true;
+      for (var i = 0; i < this.meterInfo.length;i++) {
+        if (data.wo_id !== this.meterInfo[i].wo_id) {
+          this.meterInfo[i].isConsumptionImg = false;
+        }
+      }
+    } else if (type == 'generate_reading') {
+      this.formData.delete('img2');
+      this.formData.append('img2', blob, random);
+      data.isGenerationImg = true;
+      for (var i = 0; i < this.meterInfo.length;i++) {
+        if (data.wo_id !== this.meterInfo[i].wo_id) {
+          this.meterInfo[i].isGenerationImg = false;
+        }
+      }
+    }
+    this.presentLoading().then(preLoad => {
+      setTimeout(() => {
+        this.dismissloading();
+      }, 500)
+    })
+  }
+
+  updateReading(dat: any, type: any) {
+    if (type === 'consumption' ) {
+      if (this.checkConsumptionCondition(dat)) {
+        const obj = {
+          wo_id: dat.wo_id,
+          consume_reading: dat.consumption_reading,
+        }
+        this.save(obj, dat);
+      }
+    } else if (type === 'generation') {
+      if (this.checkGenertionCondition(dat)) {
+        const obj = {
+          wo_id: dat.wo_id,
+          gen_reading: dat.generate_reading
+        }
+        this.save(obj, dat);
+      }
+    } else if (type === 'both') {
+      if (this.checkConsumptionCondition(dat) && this.checkGenertionCondition(dat) && this.checkOtherCondition(dat)) {
+        const obj = {
+          wo_id: dat.wo_id,
+          consume_reading: dat.consumption_reading,
+          gen_reading: dat.generate_reading,
+          new_oth_reading: dat.other_reading
+        }
+        this.save(obj, dat);
+      }
+    }
+  }
+
+  checkConsumptionCondition(dat: any) {
+    if (!dat.consumption_reading) {
+      alert('Please Enter Consumption Reading');
+      return false;
+    } else if (dat.is_img_req == 1 && !dat.isConsumptionImg) {
+      alert('Consumption Image is Required');
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  checkGenertionCondition(dat: any) {
+    if (!dat.generate_reading) {
+      alert('Please Enter Generate Reading');
+      return false;
+    } else if (dat.is_img_req == 1 && !dat.isGenerationImg) {
+      alert('Generation Image is Required');
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  checkOtherCondition(dat: any) {
+    if (!dat.other_reading && dat.oth_read == 1) {
+      alert('Other Reading is Required');
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  save(obj: any, dat: any) {
+    for (let key in obj) {
+      this.formData.delete(key);
+      this.formData.append(key, obj[key]);
+    }
+    this.presentLoading().then(preLoad => {
+      this.httpMeter.updateReading(this.formData).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            dat.isRemove = true
+            setTimeout(() => {
+              this.meterInfo = this.meterInfo.filter((val: any) => val.wo_id !== obj.wo_id);
+            }, 500);
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.dismissloading();
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+  }
+
+  changePendingTask() {
+    this.presentLoading().then(preLoad => {
+      this.pendingTask = !this.pendingTask;
+      this.dismissloading();
+    })
+  }
+
+  async assignTicket(ticket_id: any,  data: any) {
+    const modal = await this.modalCtrl.create({
+      component: AssignTicketComponent,
+      cssClass: 'my-modal',
+      componentProps: {
+        ticket_id: ticket_id,
+        allData: data
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {
+        this.getPendingTicket();
+      }
+    });
+    modal.present();
+  }
+
+  async pmAssign(dat: any) {
+    const modal = await this.modalCtrl.create({
+      component: PmAssignComponent,
+      cssClass: 'my-modal',
+      componentProps: { data: dat }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        this.pmsList = this.pmsList.filter((val:any) => val.wo_id !== dat.wo_id);
+      }
+    });
+    modal.present();
+  }
+
+  async presentLoading() {
+    this.loading = await this.loadingController.create({
+      cssClass: 'my-custom-class',
+      message: 'Please wait...',
+    });
+    await this.loading.present();
+  }
+
+  async dismissloading() {
+    if (this.loading) {
+      this.loading.dismiss();
+    }
+  }
+}

@@ -36,9 +36,6 @@ export class TicketTypeComponent  implements OnInit {
     private loadingController: LoadingController,
     public navParam: NavParams) {
       this.allData = this.navParam.get('allData');
-      console.log(this.allData);
-      console.log(this.locations);
-
       this.ticket = this.allData.tkts_id;
       if ((this.allData.tkts_issue_id == 2) || this.allData.tkts_issue_id == 1 && !this.allData.ext_asset_id) {
         this.isShowBuilding = true;
@@ -50,7 +47,6 @@ export class TicketTypeComponent  implements OnInit {
   ngOnInit() {
     this.initForm();
     this.getPriority();
-    console.log(this.requestData1);
   }
 
   getRequestType(id: any) {
@@ -99,7 +95,6 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   changeRadio() {
-    console.log('change radio')
     this.ticketForm.get('bldg_id')?.setValue('');
     this.ticketForm.get('floor_id')?.setValue('');
     this.ticketForm.get('loc_code')?.setValue('');
@@ -123,7 +118,6 @@ export class TicketTypeComponent  implements OnInit {
   getBuilding(id: any) {
     this.httpComplaint.getBuildingList(id).subscribe({
       next:(data) => {
-        console.log(data);
         if (data.status) {
           this.buildingArr = data.data;
           if (this.locations.length > 0) {
@@ -338,10 +332,8 @@ export class TicketTypeComponent  implements OnInit {
             if (this.allData.ext_asset_id) {
               let obj, asset_id;
               obj = this.barcodeList.filter((val: any) => val.ext_asset_id === this.allData.ext_asset_id);
-              console.log(obj);
               if (obj.length > 0) {
                 asset_id = obj[0].asset_id;
-                console.log(asset_id);
                 this.ticketForm.get('barcode_id')?.setValue(asset_id);
               }
             }
@@ -356,15 +348,12 @@ export class TicketTypeComponent  implements OnInit {
         }
       });
     });
-    console.log(this.ticketForm.value.barcode);
-
   }
   dismiss(data: any, status: any) {
     this.modalCtrl.dismiss(data, status);
   }
 
   saveData() {
-    console.log(this.ticketForm.value);
     this.presentLoading().then(preLoad => {
       this.httpComplaint.complaintTypeConfirm(this.ticketForm.value).subscribe({
         next:(data) => {
@@ -403,34 +392,10 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   changePriority(ev: any) {
-    console.log(ev.target.value);
     this.selectPriorityObj = this.ticketPriority.filter((val: any) => val.id == ev.target.value)[0];
-    console.log(this.selectPriorityObj);
   }
 
-  verify() {
-    // if (!this.barcode) {
-    //   this.presentToast('Enter Barcode No');
-    // } else {
-    //   this.presentLoading().then(loadres => {
-    //     this.myAsset.verifyAsset(this.barcode, this.ticket).then(res => {
-    //       this.dismissloading();
-    //       if (res === false) {
-    //         console.log('something went wrong');
-    //       } else {
-    //         this.getBarcodeResponse = res;
-    //         if (this.getBarcodeResponse.status === false) {
-    //           Swal.fire('OOPS....', this.getBarcodeResponse.info, 'info');
-    //         } else if (this.getBarcodeResponse.status === true) {
-    //           Swal.fire('Success', this.getBarcodeResponse.info, 'success').then(subres => {
-    //             this.modalCtrl.dismiss(true);
-    //           });
-    //         }
-    //       }
-    //     });
-    //   });
-    // }
-  }
+  verify() { }
 
   async presentLoading() {
     this.dismissloading();

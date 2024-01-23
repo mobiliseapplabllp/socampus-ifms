@@ -12,18 +12,11 @@ export class SiteDetailComponent  implements OnInit {
     public modalCtrl: ModalController) { }
 
   ngOnInit() {
-    console.log(this.ticketData);
   }
 
   closeModal() {
     this.modalCtrl.dismiss({ dismiss : true});
   }
 
-  calling() {
-    // this.callNumber.callNumber(this.ticketData.contact, true) .then(res => {
-    //   console.log('calling');
-    // } , err => {
-    //   alert(JSON.stringify(err));
-    // });
-  }
+  calling() {}
 }

@@ -107,7 +107,6 @@ export class TicketWorkComponent  implements OnInit {
       this.presentLoading().then(preLoad => {
         this.dismissLoading();
       });
-      console.log(file);
     }
   }
 
@@ -132,7 +131,6 @@ export class TicketWorkComponent  implements OnInit {
             if (this.isPtwMandatory) {
               if ((this.arr.hasWIP == 0 || this.arr.ptwApproved == 0)) {
                 this.ticketStages = this.ticketStages.filter((val: any) => val.stage_id != 4);
-                console.log(this.ticketStages);
               }
             } else {
               if ((this.arr.hasWIP == 0)) {
@@ -165,14 +163,11 @@ export class TicketWorkComponent  implements OnInit {
       message: 'Are you Sure want to Confirm',
       buttons: [{
         text: 'Disagree',
-        handler: () => {
-          console.log('Disagree clicked');
-        }
+        handler: () => {}
       }, {
         text: 'Agree',
         handler: () => {
           this.changePriority(ev)
-          console.log('Agree clicked');
         }
       }]
     });
@@ -180,7 +175,6 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   changePriority(ev: any) {
-    console.log(ev.target.value);
     const obj = {
       id: ev.target.value,
       ticket_id: this.ticket_id,
@@ -241,10 +235,7 @@ export class TicketWorkComponent  implements OnInit {
     })
   }
   segmentChanged(ev: any) {
-    console.log(ev.target.value);
-    if(ev.target.value === 'asset') {
-
-    }
+    if(ev.target.value === 'asset') { }
   }
 
   checkHasWip() {
@@ -265,7 +256,6 @@ export class TicketWorkComponent  implements OnInit {
       componentProps: { }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role == 'true') {
         this.submitTicket();
       }
@@ -341,7 +331,6 @@ export class TicketWorkComponent  implements OnInit {
       }
     });
     modal.onWillDismiss().then(async disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.navCtrl.pop();
       }
@@ -498,7 +487,6 @@ export class TicketWorkComponent  implements OnInit {
         let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
         if (data === 'engineer') {
           this.engSigImg = 'Uploaded';
-          console.log(disModal.data);
           this.engineerBase64 = disModal.data;
           const base64Response = await fetch(disModal.data);
           const blob = await base64Response.blob();
@@ -531,7 +519,6 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   resetVariable() {
-    console.log('abc');
     this.countTime = this.defaultCountTime;
     this.isOtpSent = false;
     this.isVerifyOtp = false;
@@ -540,7 +527,6 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   changeNgOtp(ev: any) {
-    console.log(ev);
     this.workSpace.get('otp')?.setValue(ev);
   }
 

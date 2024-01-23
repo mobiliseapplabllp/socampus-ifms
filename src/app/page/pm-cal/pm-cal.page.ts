@@ -150,17 +150,13 @@ export class PmCalPage implements OnInit {
   }
 
   multiAssign() {
-    console.log(this.openPm);
     const obj =this.openPm.filter((val: any) => val.isSelect == true);
-    console.log(obj);
     this.pmAssign(obj);
   }
 
   changeCheckbox(val: any) {
-    console.log(val);
     setTimeout(() => {
       this.selectedPms = this.openPm.filter((val: any) => val.isSelect == true);
-      console.log(this.selectedPms);
     }, 500);
   }
 
@@ -172,9 +168,7 @@ export class PmCalPage implements OnInit {
     });
     modal.onWillDismiss().then(disModal => {
       if (disModal.role) {
-        console.log('ff');
         this.httpPms.getData().subscribe((data: any) => {
-          console.log(data);
           for (var i = 0; i < data.length; i++) {
             this.openPm = this.openPm.filter((val: any) => val.wo_id !== data[i].wo_id);
           }
@@ -184,9 +178,7 @@ export class PmCalPage implements OnInit {
     modal.present();
   }
 
-  cretePM() {
-    // this.router.navigateByUrl('/pm-calibration/create-pm');
-  }
+  cretePM() { }
 
   viewAttachment(url: string) {
     this.common.openDoc(url);
@@ -220,7 +212,6 @@ export class PmCalPage implements OnInit {
       componentProps : { }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.searchValueDesc = disModal.data.label;
         this.searchValue = disModal.data.value;
@@ -238,9 +229,7 @@ export class PmCalPage implements OnInit {
       }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
-        console.log(disModal.data.ptw_attach);
         dat.ptw_attach = disModal.data.ptw_attach
       }
     });
@@ -295,7 +284,6 @@ export class PmCalPage implements OnInit {
   }
 
   changeSeg(ev: any) {
-    console.log(ev.target.value);
     if (ev.target.value == 'open') {
       this.lastSegment = 1;
       this.getPm(this.lastSegment);
@@ -305,9 +293,7 @@ export class PmCalPage implements OnInit {
     } else if (ev.target.value == 'closed') {
       this.lastSegment = 3;
       this.getPm(this.lastSegment);
-    } else if (ev.target.value == 'mywo') {
-      console.log('mywo');
-    }
+    } else if (ev.target.value == 'mywo') {}
   }
 
   async presentActionSheet(data: any) {
@@ -333,7 +319,6 @@ export class PmCalPage implements OnInit {
       data.docname_tmp = '';
       this.presentLoading().then(preLoad => {
         this.httpPms.uploadPtw(formData).subscribe(res => {
-          console.log(data);
           this.dismissloading();
           if (res.status) {
             this.common.presentToast(res.msg, 'success');
@@ -353,8 +338,6 @@ export class PmCalPage implements OnInit {
 
   changeFile(fileChangeEvent: any, data: any){
     const photo = fileChangeEvent.target.files[0];
-    console.log(photo);
-    console.log(data);
     let formData = new FormData();
       formData.append('attach', photo, photo.name);
       formData.append('id', data.id)
@@ -363,7 +346,6 @@ export class PmCalPage implements OnInit {
       this.presentLoading().then(preLoad => {
         this.httpPms.uploadPtw(formData).subscribe(res => {
           this.dismissloading();
-          console.log(res);
           if (res.status) {
             this.common.presentToast(res.msg, 'success');
             data.ptw_attach = res.ptw_attach
@@ -415,7 +397,6 @@ export class PmCalPage implements OnInit {
   }
 
   searchItem(ev: any, val: any) {
-    console.log(ev.target.value);
     if (val == 1) {
       this.openPm = this.openPmCopy;
       this.openPm = this.openPm.filter((data: any) => {

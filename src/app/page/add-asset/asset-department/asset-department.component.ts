@@ -40,7 +40,6 @@ export class AssetDepartmentComponent  implements OnInit {
 
   search(ev: any) {
     let val: any;
-    console.log(ev.target.value);
     val = ev.target.value;
     this.myDepartment = this.myDepartmentCopy;
     if (val && val.trim() !== '') {

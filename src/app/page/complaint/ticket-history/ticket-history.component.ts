@@ -22,7 +22,6 @@ export class TicketHistoryComponent  implements OnInit {
 
   ngOnInit() {
     this.ticket_id = this.navParam.get('ticket_id');
-    console.log(this.ticket_id);
     this.getSpecificTicket();
   }
 
@@ -33,7 +32,6 @@ export class TicketHistoryComponent  implements OnInit {
   getSpecificTicket() {
     this.presentLoading().then(preLoad => {
       this.complaint.getSpecificTicket(this.ticket_id).subscribe(data => {
-        console.log(data);
         this.dismissloading();
         if (data.status) {
           this.history = data.data.trans;

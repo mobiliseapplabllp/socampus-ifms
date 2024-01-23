@@ -18,10 +18,7 @@ export class IndentCardComponent implements OnInit {
     private loadingController: LoadingController
   ) { }
 
-  ngOnInit() {
-    console.log(this.data);
-    console.log(this.type);
-  }
+  ngOnInit() {}
 
   openDoc(url: string) {
     this.common.openDoc(url);
@@ -30,10 +27,8 @@ export class IndentCardComponent implements OnInit {
   cancel(data: any) {
     let arr: any = [];
     arr.push(data);
-    console.log(arr);
     this.presentLoading().then(preLoad => {
       this.httpIndent.cancelIndent(arr).subscribe(data=> {
-        console.log(data);
         this.dismissloading();
         if (data.status) {
           this.common.presentToast(data.msg, 'success');
@@ -54,7 +49,9 @@ export class IndentCardComponent implements OnInit {
   }
 
   async dismissloading() {
-    this.loading.dismiss();
+    if (this.loading) {
+      this.loading.dismiss();
+    }
   }
 
 }

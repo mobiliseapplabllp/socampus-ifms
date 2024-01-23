@@ -21,7 +21,6 @@ export class AssetPlantComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.faciity_type);
     this.getValueFromPlant();
   }
 
@@ -37,7 +36,6 @@ export class AssetPlantComponent  implements OnInit {
     this.presentLoading().then(preload => {
       this.httpAsset.getPlantByCategory(this.faciity_type).subscribe(data => {
         this.dismissloading();
-        console.log(data);
         if (data.status) {
           this.plantName = data.data;
           this.plantNameCopy = data.data
@@ -61,7 +59,6 @@ export class AssetPlantComponent  implements OnInit {
   }
 
   search(ev: any) {
-    console.log(ev.target.value);
     this.plantName = this.plantNameCopy;
     if (ev.target.value != '') {
       this.plantName = this.plantName.filter((data: any) => {

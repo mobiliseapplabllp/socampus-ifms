@@ -29,7 +29,6 @@ export class FillReportOfflineComponent  implements OnInit {
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
       this.allData = JSON.parse(res['data']);
-      console.log(this.allData);
       setTimeout(() => {
         this.remark = this.allData.remark;
         this.signatureBase64 = this.allData.signatureBase64;
@@ -66,7 +65,6 @@ export class FillReportOfflineComponent  implements OnInit {
     }
 
     const arr = [this.allDataNew];
-    console.log(arr);
   }
 
   async presentActionSheet(val: any) {
@@ -82,7 +80,6 @@ export class FillReportOfflineComponent  implements OnInit {
   }
 
   async readImg(val: any, photo: any) {
-    console.log(photo);
     val.attachment2 = 'data:image/png;base64,' + photo.base64String;
     return
   }
@@ -167,7 +164,6 @@ export class FillReportOfflineComponent  implements OnInit {
       userToScrollOn[indexFound].nativeElement.scrollIntoView({
         behavior: 'smooth'
       }, (err: any) => {
-        console.log(err);
       });
     }, 500);
   }

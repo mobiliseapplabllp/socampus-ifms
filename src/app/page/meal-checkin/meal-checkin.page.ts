@@ -37,7 +37,6 @@ export class MealCheckinPage implements OnInit {
   ionViewDidEnter() {
     let bar = this.common.getBarcode();
     if (bar) {
-      console.log(bar);
       this.submit(bar);
       this.common.setBarcode('');
     }
@@ -95,7 +94,6 @@ export class MealCheckinPage implements OnInit {
   }
 
   changeLocation(ev: any) {
-    console.log(ev.target.value);
     this.httpMeal.mealLocation(8, ev.target.value).subscribe({
       next:(data) => {
         if (data.status) {
@@ -111,17 +109,7 @@ export class MealCheckinPage implements OnInit {
       complete:() => {
         this.dismissloading();
       }
-    }
-    //   data => {
-    //   if (data.status) {
-    //     this.allRoaster = data.data;
-    //   } else {
-    //     this.common.presentToast(data.msg, 'warning');
-    //   }
-    // }, err => {
-    //   this.common.presentToast(environment.errMsg, 'danger');
-    // }
-    );
+    });
   }
 
   changeRoster(ev: any) {
@@ -142,21 +130,6 @@ export class MealCheckinPage implements OnInit {
 
   openQrScanner() {
     this.router.navigateByUrl('/barcode');
-    // this.barcodeScanner.scan().then(barcodeData => {
-    //   console.log('Barcode data', barcodeData);
-    //   // this.barcode = barcodeData.text;
-    //   if (barcodeData.text) {
-    //     this.submit(barcodeData.text);
-    //   }
-
-    // }, err => {
-    //   let msg = JSON.stringify(err);
-    //   if (msg == 'Illegal access') {
-    //     this.common.presentToast('You Need to allow the Permission', 'warning');
-    //   } else {
-    //     this.common.presentToast(JSON.stringify(err), 'warning');
-    //   }
-    // })
   }
 
   submit(encryptionId: any) {
@@ -171,7 +144,6 @@ export class MealCheckinPage implements OnInit {
     }
     this.presentLoading().then(preLoad => {
       this.httpMeal.checkInMeal(obj, encryptionId).subscribe(data => {
-        console.log(data);
         this.dismissloading();
         if (data.status) {
           this.common.presentToast(data.msg, 'success');

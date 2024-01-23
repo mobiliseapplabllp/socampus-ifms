@@ -30,7 +30,6 @@ export class DigitalChecklistOfflinePage implements OnInit {
     let temp = localStorage.getItem('checkListData');
     if (temp) {
       this.allData = JSON.parse(temp);
-      console.log(this.allData);
     }
   }
 
@@ -39,7 +38,6 @@ export class DigitalChecklistOfflinePage implements OnInit {
   }
 
   openTran(dat: any) {
-    console.log(dat);
     this.router.navigate(['digital-checklist-offline/fill-report-offline'], {
       queryParams: {
         data: JSON.stringify(dat),
@@ -71,7 +69,6 @@ export class DigitalChecklistOfflinePage implements OnInit {
     if (this.allDataNew.length == 0) {
       this.common.presentToast('Please Save at least one Checklist to Save to server', 'warning');
     } else {
-      console.log(this.allDataNew);
     }
   }
 }
