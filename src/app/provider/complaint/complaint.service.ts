@@ -51,6 +51,14 @@ export class ComplaintService {
     return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=' + limit + '&page=1&ticket_type=not_resolved');
   }
 
+  getTicketDashboard() {
+    return this.https.get('assets/data/ticket_dashboard.json');
+  }
+
+  getScheduleDashboard() {
+    return this.https.get('assets/data/schedule_dashboard.json')
+  }
+
   getResolvedTicket(): Observable<any> {
     return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=40&page=1&status=4')
   }

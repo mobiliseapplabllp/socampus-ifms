@@ -157,6 +157,7 @@ export class ListMasterPage implements OnInit {
   meterInfo: any = [];
   formData = new FormData();
   page = 1;
+  scheduleDashboard: any = [];
   // TEMP_VAL = new BehaviorSubject('');
   constructor(
     private listMaster: ListMasterService,
@@ -228,14 +229,41 @@ export class ListMasterPage implements OnInit {
         this.stackedChart = null;
       } else {
         setTimeout(() => {
-          this.stackedBarChart();
-          this.lineBarChart();
+          this.getTicketDashboard();
+          this.getScheduleDashboard();
         }, 10);
       }
       this.dismissloading();
     })
-
   }
+
+  getTicketDashboard() {
+    this.httpCompalint.getTicketDashboard().subscribe({
+      next:(data) => {
+        console.log(data);
+
+        this.lineBarChart(data);
+      },
+      error:() => {
+
+      }
+    })
+  }
+
+  getScheduleDashboard() {
+    this.httpCompalint.getScheduleDashboard().subscribe({
+      next:(data) => {
+        this.scheduleDashboard = data;
+        console.log(this.scheduleDashboard);
+        this.stackedBarChart(this.scheduleDashboard.label, this.scheduleDashboard.digital.hard);
+      },
+      error:() => {
+
+      }
+    })
+  }
+
+
 
   getCircleValue() {
     for (var i = 0 ; i < this.circleDashboard.length;i++) {
@@ -705,12 +733,25 @@ export class ListMasterPage implements OnInit {
     } else if (ev.target.value === 3) {
       this.subCat = this.meterCat;
     } else {
-      this.updateStackedChart();
+      this.updateStackedChart(this.scheduleDashboard.pms);
     }
   }
 
   changeSubCat(ev: any) {
-    this.updateStackedChart();
+    console.log(this.cat_id + '=' + ev.target.value);
+    if (this.cat_id === 1) {
+      if (ev.target.value === 1) {
+        this.updateStackedChart(this.scheduleDashboard.digital.hard);
+      } else if (ev.target.value === 2) {
+        this.updateStackedChart(this.scheduleDashboard.digital.soft);
+      }
+    } else if (this.cat_id === 3) {
+      if (ev.target.value === 1) {
+        this.updateStackedChart(this.scheduleDashboard.meter.consumption);
+      } else if (ev.target.value === 2) {
+        this.updateStackedChart(this.scheduleDashboard.meter.generation);
+      }
+    }
   }
 
   stopSpeak() {
@@ -848,20 +889,20 @@ export class ListMasterPage implements OnInit {
 
   randomIntArrayInRange = (min: any, max: any, n = 1) => Array.from( { length: n }, () => Math.floor(Math.random() * (max - min + 1)) + min)
 
-  stackedBarChart() {
+  stackedBarChart(label: any, data: any) {
     this.stackedChart = new Chart('canvas', {
       type: 'bar',
       data : {
-        labels: ['15 Oct','16 Oct','17 Oct','18 Oct','19 Oct','20 Oct','21 Oct',],
+        labels: label,
         datasets: [
         {
           label: 'Assign',
-          data: this.res,
+          data: data.assign,
           backgroundColor: 'blue',
         },
         {
           label: 'Attend',
-          data: this.total,
+          data: data.attend,
           backgroundColor: 'orange',
         }]
       },
@@ -886,24 +927,24 @@ export class ListMasterPage implements OnInit {
     });
   }
 
-  updateStackedChart() {
+  updateStackedChart(data: any) {
     console.log('abc');
     // const newDataValues = this.randomIntArrayInRange(12, 35, 7);
     // console.log(newDataValues);
-    this.stackedChart.data.datasets[0].data = this.randomIntArrayInRange(12, 35, 7);
-    this.stackedChart.data.datasets[1].data = this.randomIntArrayInRange(12, 35, 7);
+    this.stackedChart.data.datasets[0].data = data.assign;
+    this.stackedChart.data.datasets[1].data = data.attend;
     this.stackedChart.update();
   }
 
-  lineBarChart() {
+  lineBarChart(data: any) {
     new Chart('canvas1', {
       type: 'line',
       data : {
-        labels: ['15 Oct','16 Oct','17 Oct','18 Oct','19 Oct','20 Oct','21 Oct',],
+        labels: data.label,
         datasets: [
           {
             label: 'Assign',
-            data: this.randomIntArrayInRange(12, 35, 7),
+            data: data.assign_ticket,
             fill: false,
             borderColor: 'blue',
             backgroundColor: 'blue',
@@ -912,7 +953,7 @@ export class ListMasterPage implements OnInit {
           },
           {
             label: 'Resolve',
-            data: this.randomIntArrayInRange(12, 35, 7),
+            data: data.resolve_ticket,
             fill: false,
             borderColor: 'orange',
             backgroundColor: 'orange',
