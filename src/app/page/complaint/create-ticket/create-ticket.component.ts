@@ -345,7 +345,6 @@ export class CreateTicketComponent  implements OnInit {
         this.formData.delete(key);
         this.formData.append(key, this.createForm.value[key]);
       }
-
     }
     if (this.createForm.value.is_barcode == '1') {
       this.multiBarcodeTicketAction();
