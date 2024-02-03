@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
+import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 import { environment } from 'src/environments/environment';
 
@@ -22,7 +23,8 @@ export class OrderReceivedComponent  implements OnInit {
     private common: CommonService,
     private navCtrl: NavController,
     private router: Router,
-    private platform: Platform
+    private platform: Platform,
+    private httpAsset: MyAssetGetService
 
   ) { }
 
@@ -38,16 +40,10 @@ export class OrderReceivedComponent  implements OnInit {
   ionViewDidEnter() {
     let bar = this.common.getBarcode();
     if (bar) {
+      // this.getDecBarcode(bar);
+      // return;
       if (this.platform.is('capacitor')) {
-        if (this.order_details[this.index].qr_value === bar) {
-          this.order_details[this.index].isReceivedEnable = true;
-          this.order_details[this.index].showErr = false;
-          setTimeout(() => {
-            this.order_details[this.index].isAutoFocus = true;
-          }, 100);
-        } else {
-          this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
-        }
+        this.getDecBarcode(bar)
       } else {
         this.order_details[this.index].isReceivedEnable = true;
         this.order_details[this.index].showErr = false;
@@ -58,6 +54,69 @@ export class OrderReceivedComponent  implements OnInit {
       this.common.setBarcode('');
     }
   }
+
+
+  // ionViewDidEnter() {
+  //   let bar = this.common.getBarcode();
+  //   if (bar) {
+  //     if (this.platform.is('capacitor')) {
+  //       if (this.order_details[this.index].qr_value === bar) {
+  //         this.order_details[this.index].isReceivedEnable = true;
+  //         this.order_details[this.index].showErr = false;
+  //         setTimeout(() => {
+  //           this.order_details[this.index].isAutoFocus = true;
+  //         }, 100);
+  //       } else {
+  //         this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
+  //       }
+  //     } else {
+  //       this.order_details[this.index].isReceivedEnable = true;
+  //       this.order_details[this.index].showErr = false;
+  //       setTimeout(() => {
+  //         this.order_details[this.index].isAutoFocus = true;
+  //       }, 100);
+  //     }
+  //     this.common.setBarcode('');
+  //   }
+  // }
+
+  getDecBarcode(enc_barcode: string) {
+    this.presentLoading().then(preLoad => {
+      this.httpAsset.getDecBarcode(enc_barcode).subscribe({
+        next:(data) => {
+          console.log(data);
+          if (data.status) {
+            let barcode = data.data.text;
+            if (barcode === this.order_details[this.index].ext_asset_id) {
+              this.order_details[this.index].isReceivedEnable = true;
+              this.order_details[this.index].showErr = false;
+              setTimeout(() => {
+                this.order_details[this.index].isAutoFocus = true;
+              }, 100);
+            } else {
+              this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
+            }
+            // let temp, firstDigit,lastDigit;
+            // temp = data.data.text;
+            // firstDigit = temp.slice(0, 4);
+            // lastDigit = temp.slice(-6);
+
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+
+  }
+
 
   ScanBarcode(dat: any, ind: any){
     if (this.requestedData.ord_status === 9) {
