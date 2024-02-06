@@ -22,6 +22,7 @@ export class LoginPage implements OnInit {
   isLogin: any = [];
   isPassword = true;
   isAndroid!: boolean;
+  mypass = true;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
