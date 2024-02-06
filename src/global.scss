@@ -73,20 +73,20 @@ section.inputbox {
   }
 }
 
-ion-button.ion-color-primary, ion-toolbar.ion-color-primary {
-  --ion-color-base: linear-gradient(
-  195deg,
-  #25589c 20%,
-  var(--ion-color-primary) 100%
-  ) !important;
-}
+// ion-button.ion-color-primary, ion-toolbar.ion-color-primary {
+//   --ion-color-base: linear-gradient(
+//   195deg,
+//   #25589c 20%,
+//   var(--ion-color-primary) 100%
+//   ) !important;
+// }
 
-ion-card {
-  ion-card-header.ion-color-primary {
-    --ion-color-base: linear-gradient(
-  195deg,
-  #25589c 20%,
-  var(--ion-color-primary) 100%
-  ) !important;
-  }
-}
+// ion-card {
+//   ion-card-header.ion-color-primary {
+//     --ion-color-base: linear-gradient(
+//   195deg,
+//   #25589c 20%,
+//   var(--ion-color-primary) 100%
+//   ) !important;
+//   }
+// }
