@@ -26,7 +26,7 @@
           </ion-col>
           <ion-col size="12">
             <ion-item >
-              <ion-label color="primary" position="floating">Blocks</ion-label>
+              <ion-label color="primary" position="floating">Blocks  <ion-text color="danger">*</ion-text></ion-label>
               <ion-select interface="action-sheet"  mode="ios" formControlName="block_id" (ionChange)="changeBlock($event)">
                 <ion-select-option *ngFor="let dat of myBlocks" [value]="dat.value">{{dat.label}}</ion-select-option>
               </ion-select>
