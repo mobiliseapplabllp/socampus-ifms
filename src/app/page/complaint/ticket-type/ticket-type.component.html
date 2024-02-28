@@ -1,11 +1,9 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Ticket Type</ion-title>
-     <ion-buttons slot="end" (click)="dismiss(null, false)">
-      <ion-button>
-        <ion-icon slot="icon-only" name="close"></ion-icon>
-      </ion-button>
+    <ion-buttons slot="start"  (click)="dismiss(null, false)">
+      <ion-button><ion-icon  name="chevron-back-outline"></ion-icon> Back</ion-button>
     </ion-buttons>
+    <ion-title>Ticket Type</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -111,13 +109,56 @@
     </ion-item>
 
     <ion-row *ngIf="ticketForm.value.tkt_priority">
-      <ion-col>
+      <ion-col class="ion-padding-start">
         <ion-text color="primary"><b>Attend Time</b></ion-text><br>
         <ion-text>{{selectPriorityObj.attend_time}}</ion-text>
       </ion-col>
       <ion-col>
         <ion-text color="primary"><b>Resolve Time</b></ion-text><br>
         <ion-text>{{selectPriorityObj.resolve_time}}</ion-text>
+      </ion-col>
+    </ion-row>
+    <h3 class="ion-padding-start">HSE Detail</h3>
+    <ion-row>
+      <ion-col size="6">
+        <ion-item>
+          <ion-label position="floating">PTW Required</ion-label>
+          <ion-select interface="action-sheet" mode="ios" formControlName="is_ptw_required">
+            <ion-select-option>YES</ion-select-option>
+            <ion-select-option>NO</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+      <ion-col size="6">
+        <ion-item>
+          <ion-label position="floating">PPE Kit Required</ion-label>
+          <ion-select interface="action-sheet" mode="ios" formControlName="is_ppt_kit_required">
+            <ion-select-option>YES</ion-select-option>
+            <ion-select-option>NO</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+      <ion-col size="6">
+        <ion-item id="open-modal">
+          <ion-label position="floating">Assign To</ion-label>
+          <ion-input type="text" readonly formControlName="is_assign_to"></ion-input>
+        </ion-item>
+        <ion-note *ngIf="assignUserSelect.user" color="danger" class="ion-margin-start">{{assignUserSelect.user}} {{assignUserSelect.status}} {{assignUserSelect.distance}}km</ion-note>
+      </ion-col>
+      <ion-col size="6">
+        <ion-item>
+          <ion-label position="floating">Buddy Required</ion-label>
+          <ion-select interface="action-sheet" mode="ios" formControlName="is_buddy">
+            <ion-select-option value="yes">YES</ion-select-option>
+            <ion-select-option value="no">NO</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+      <ion-col size="6" *ngIf="ticketForm.value.is_buddy === 'yes'">
+        <ion-item (click)="assignTicket()">
+          <ion-label position="floating">Buddy Assign</ion-label>
+          <ion-input type="text" readonly></ion-input>
+        </ion-item>
       </ion-col>
     </ion-row>
     <ion-row>
@@ -127,3 +168,32 @@
     </ion-row>
   </form>
 </ion-content>
+<ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Assign To</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cancel()">Cancel</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-item>
+        <ion-input type="text" placeholder="Searcy By..." (ionInput)="search($event)"> </ion-input>
+        <ion-button slot="end" class="ion-text-capitalize" (click)="sortArr()"> SORT <ion-icon [name]="isAscending ? 'chevron-up-sharp':'chevron-down-sharp' "></ion-icon> </ion-button>
+      </ion-item>
+      <ion-radio-group (ionChange)="changeRadioUser($event)" mode="md">
+        <ion-item *ngFor="let dat of assignUser">
+          <ion-radio slot="start" [(ngModel)]="dat.user_id" [value]="dat.isSelect" ></ion-radio>
+          <ion-label>
+            <h2>{{dat.user}}</h2>
+            <p>{{dat.status}}</p>
+            <p>Ticket: <ion-text color="danger"><b>{{dat.ticket}}</b></ion-text></p>
+          </ion-label>
+          <ion-text slot="end">{{dat.distance}}Km</ion-text>
+        </ion-item>
+      </ion-radio-group>
+    </ion-content>
+  </ng-template>
+</ion-modal>

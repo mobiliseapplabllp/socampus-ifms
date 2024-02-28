@@ -1,0 +1,13 @@
+.camera-button {
+  position:relative;
+  width:50px;
+  height:50px;
+  border-radius: 50%;
+  background-color:white;
+  font-size:20px;
+  padding:5px;
+  border:1px solid grey;
+  button {
+    position:absolute;right:0px;top:0px;border-radius:50%;height:15px;width:15px;background-color:var(--ion-color-medium);padding:1px;font-size:9px;color:white
+  }
+}

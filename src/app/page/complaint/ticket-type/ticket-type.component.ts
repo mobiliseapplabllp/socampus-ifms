@@ -1,15 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController, ModalController, NavParams } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
+import { IonModal } from '@ionic/angular';
+import { OverlayEventDetail } from '@ionic/core/components';
+import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 @Component({
   selector: 'app-ticket-type',
   templateUrl: './ticket-type.component.html',
   styleUrls: ['./ticket-type.component.scss'],
 })
 export class TicketTypeComponent  implements OnInit {
+  @ViewChild(IonModal) modal!: IonModal;
   loading: any;
   public ticketForm!: FormGroup;
   barcodeList: any = [];
@@ -28,6 +32,46 @@ export class TicketTypeComponent  implements OnInit {
   locationArr: any = [];
   isShowBuilding = false;
   locations: any = [];
+  assignUserSelect: any = {};
+  assignUserCopy: any = [];
+  assignUser: any = [{
+    user: 'Admin',
+    distance: '28',
+    status: 'Online(2h ago)',
+    ticket: 3,
+    user_id:1,
+  },{
+    user: 'SD0099334',
+    distance: '10',
+    status: 'Online(1h ago)',
+    ticket: 1,
+    user_id:2,
+  },{
+    user: 'H99883',
+    distance: '5',
+    status: 'Online(1h ago)',
+    ticket: 6,
+    user_id:3,
+  },{
+    user: 'K9900d',
+    distance: '23',
+    status: 'Online(1.2h ago)',
+    ticket: 12,
+    user_id:4,
+  },{
+    user: 'Q99883',
+    distance: '4',
+    status: 'Online(1.8h ago)',
+    ticket: 0,
+    user_id:5,
+  },{
+    user: 'M990d9',
+    distance: '15',
+    status: 'Online(2.1h ago)',
+    ticket: 8,
+    user_id:6,
+  }]
+  isAscending!: boolean;
   constructor(
     public formbuilder: FormBuilder,
     private httpComplaint: ComplaintService,
@@ -45,6 +89,7 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   ngOnInit() {
+    this.assignUserCopy = this.assignUser;
     this.initForm();
     this.getPriority();
   }
@@ -85,7 +130,11 @@ export class TicketTypeComponent  implements OnInit {
       subcat2_id: [''],
       barcode_id: [''],
       ticketId: [''],
-      tkt_priority: ['', Validators.required]
+      tkt_priority: ['', Validators.required],
+      is_ptw_required: [''],
+      is_ppt_kit_required: [''],
+      is_assign_to: [''],
+      is_buddy: [''],
     });
     setTimeout(() => {
       this.ticketForm.get('ticketId')?.setValue(this.ticket);
@@ -100,6 +149,8 @@ export class TicketTypeComponent  implements OnInit {
     this.ticketForm.get('loc_code')?.setValue('');
     this.isShowBuilding = false
   }
+
+
 
   changeIsBarcode(ev: any) {
     this.ticketForm.get('barcode')?.setValue('');
@@ -411,6 +462,70 @@ export class TicketTypeComponent  implements OnInit {
     if (this.loading) {
       this.loading.dismiss();
     }
+  }
+
+  cancel() {
+    this.modal.dismiss(null, 'cancel');
+  }
+
+  confirm() {
+    this.modal.dismiss('this.name', 'confirm');
+  }
+
+  onWillDismiss(event: Event) {
+    const ev = event as CustomEvent<OverlayEventDetail<string>>;
+    if (ev.detail.role === 'confirm') {
+      console.log('confirm', ev.detail.data);
+      this.assignUserSelect = this.assignUser.filter((val: any) => val.user_id === ev.detail.data)[0];
+      console.log(this.assignUserSelect);
+      // this.message = `Hello, ${ev.detail.data}!`;
+    }
+  }
+
+  changeRadioUser(ev: any) {
+    console.log(ev.target.value);
+    this.modal.dismiss(ev.target.value, 'confirm');
+
+  }
+
+  search(ev: any) {
+    let val: any;
+    val = ev.target.value;
+    this.assignUser = this.assignUserCopy;
+    if (val && val.trim() !== '') {
+      this.assignUser = this.assignUser.filter((dat: any) => {
+        if ((dat.user.toLowerCase().indexOf(val.toLowerCase()) > -1)) {
+          return (dat.user.toLowerCase().indexOf(val.toLowerCase()) > -1);
+        }
+        return
+      });
+    }
+  }
+
+  sortArr() {
+    if (!this.isAscending) {
+      this.assignUser.sort((a: any, b: any) => a.distance - b.distance);
+    } else {
+      this.assignUser.sort((a: any, b: any) => b.distance - a.distance);
+    }
+    this.isAscending = !this.isAscending;
+  }
+
+  async assignTicket() {
+    const modal = await this.modalCtrl.create({
+      component: AssignTicketComponent,
+      // cssClass: 'my-modal',
+      componentProps: {
+        ticket_id: this.ticket,
+        allData: this.allData
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {
+        // this.greetEvent.emit(true);
+      }
+    });
+    modal.present();
   }
 
 }

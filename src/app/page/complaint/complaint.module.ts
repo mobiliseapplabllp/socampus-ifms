@@ -19,6 +19,7 @@ import { NgOtpInputModule } from  'ng-otp-input';
 import { AssignTicketComponent } from './assign-ticket/assign-ticket.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { InstructionModalComponent } from './instruction-modal/instruction-modal.component';
+import { TravelDetailComponent } from './travel-detail/travel-detail.component';
 @NgModule({
   imports: [
     CommonModule,
@@ -40,6 +41,7 @@ import { InstructionModalComponent } from './instruction-modal/instruction-modal
     TicketWorkComponent,
     AssignTicketComponent,
     InstructionModalComponent,
+    TravelDetailComponent
   ],
   exports: [
     ComplaintCardsComponent

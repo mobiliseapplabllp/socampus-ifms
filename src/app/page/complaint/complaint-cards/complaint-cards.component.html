@@ -111,6 +111,7 @@
           <ion-button *ngIf="data.stage_id === 4 || data.stage_id === 6; else worknow" style="width:80%;font-size:xx-small;" color="success" (click)="fsr(data.tkts_id)">EFSR</ion-button>
           <ng-template #worknow>
             <ion-button style="width:80%;font-size:xx-small;" color="warning" (click)="work_now()">Work Now</ion-button>
+            <ion-button style="width:80%;font-size:xx-small;" color="warning" (click)="travel(data)">Travel</ion-button>
           </ng-template>
         </ion-col>
         <ion-col class="ion-text-center"  *ngIf="data.canAssign">

@@ -8,6 +8,7 @@ import { SiteDetailComponent } from '../site-detail/site-detail.component';
 import { TicketHistoryComponent } from '../ticket-history/ticket-history.component';
 import { TicketTypeComponent } from '../ticket-type/ticket-type.component';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
+import { TravelDetailComponent } from '../travel-detail/travel-detail.component';
 @Component({
   selector: 'app-complaint-cards',
   templateUrl: './complaint-cards.component.html',
@@ -84,7 +85,7 @@ export class ComplaintCardsComponent  implements OnInit {
   async openTicketTypeModal(locations: any, data: any) {
     const modal = await this.modalCtrl.create({
       component: TicketTypeComponent,
-      cssClass: 'my-modal',
+      // cssClass: 'my-modal',//
       componentProps: { allData:  this.data, locations: locations, requestData1: data }
     });
     modal.onWillDismiss().then(disModal => {
@@ -235,6 +236,22 @@ export class ComplaintCardsComponent  implements OnInit {
       cssClass: 'my-modal',
       componentProps: {
         ticket_id: ticket_id,
+        allData: data
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {
+        this.greetEvent.emit(true);
+      }
+    });
+    modal.present();
+  }
+
+  async travel(data: any) {
+    const modal = await this.modalCtrl.create({
+      component: TravelDetailComponent,
+      cssClass: 'my-modal2',
+      componentProps: {
         allData: data
       }
     });
