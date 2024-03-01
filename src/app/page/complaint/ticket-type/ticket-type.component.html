@@ -120,45 +120,46 @@
     </ion-row>
     <h3 class="ion-padding-start">HSE Detail</h3>
     <ion-row>
-      <ion-col size="6">
+      <ion-col size="6" *ngIf="pc_hse_conf.ptw_allow === 1">
         <ion-item>
           <ion-label position="floating">PTW Required</ion-label>
-          <ion-select interface="action-sheet" mode="ios" formControlName="is_ptw_required">
-            <ion-select-option>YES</ion-select-option>
-            <ion-select-option>NO</ion-select-option>
+          <ion-select interface="action-sheet" mode="ios" formControlName="ptw_req">
+            <ion-select-option value="1">YES</ion-select-option>
+            <ion-select-option value="0">NO</ion-select-option>
           </ion-select>
         </ion-item>
       </ion-col>
-      <ion-col size="6">
+      <ion-col size="6" *ngIf="pc_hse_conf.ppekit_allow === 1">
         <ion-item>
           <ion-label position="floating">PPE Kit Required</ion-label>
-          <ion-select interface="action-sheet" mode="ios" formControlName="is_ppt_kit_required">
-            <ion-select-option>YES</ion-select-option>
-            <ion-select-option>NO</ion-select-option>
+          <ion-select interface="action-sheet" mode="ios" formControlName="ppe_kit_req">
+            <ion-select-option value="1">YES</ion-select-option>
+            <ion-select-option value="0">NO</ion-select-option>
           </ion-select>
         </ion-item>
       </ion-col>
       <ion-col size="6">
-        <ion-item id="open-modal">
+        <ion-item id="open-modal" (click)="hseAssign('assign')">
           <ion-label position="floating">Assign To</ion-label>
-          <ion-input type="text" readonly formControlName="is_assign_to"></ion-input>
+          <ion-input type="text" readonly formControlName="assignToName"></ion-input>
         </ion-item>
-        <ion-note *ngIf="assignUserSelect.user" color="danger" class="ion-margin-start">{{assignUserSelect.user}} {{assignUserSelect.status}} {{assignUserSelect.distance}}km</ion-note>
+        <ion-note *ngIf="assignUserSelect.label" color="danger" class="ion-margin-start">{{assignUserSelect.label}} {{assignUserSelect.status}} {{assignUserSelect.distance}}</ion-note>
       </ion-col>
-      <ion-col size="6">
+      <ion-col size="6" *ngIf="pc_hse_conf.buddy_allow === 1">
         <ion-item>
           <ion-label position="floating">Buddy Required</ion-label>
-          <ion-select interface="action-sheet" mode="ios" formControlName="is_buddy">
-            <ion-select-option value="yes">YES</ion-select-option>
-            <ion-select-option value="no">NO</ion-select-option>
+          <ion-select interface="action-sheet" mode="ios" formControlName="buddy_req">
+            <ion-select-option value="1">YES</ion-select-option>
+            <ion-select-option value="0">NO</ion-select-option>
           </ion-select>
         </ion-item>
       </ion-col>
-      <ion-col size="6" *ngIf="ticketForm.value.is_buddy === 'yes'">
-        <ion-item (click)="assignTicket()">
+      <ion-col size="6" *ngIf="ticketForm.value.buddy_req === '1'">
+        <ion-item (click)="hseAssign('buddy')">
           <ion-label position="floating">Buddy Assign</ion-label>
           <ion-input type="text" readonly></ion-input>
         </ion-item>
+        <ion-note *ngIf="buddyUserSelect.label" color="danger" class="ion-margin-start">{{buddyUserSelect.label}} {{buddyUserSelect.status}} {{buddyUserSelect.distance}}</ion-note>
       </ion-col>
     </ion-row>
     <ion-row>
@@ -168,7 +169,7 @@
     </ion-row>
   </form>
 </ion-content>
-<ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
+<!-- <ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
   <ng-template>
     <ion-header>
       <ion-toolbar color="primary">
@@ -187,13 +188,13 @@
         <ion-item *ngFor="let dat of assignUser">
           <ion-radio slot="start" [(ngModel)]="dat.user_id" [value]="dat.isSelect" ></ion-radio>
           <ion-label>
-            <h2>{{dat.user}}</h2>
-            <p>{{dat.status}}</p>
-            <p>Ticket: <ion-text color="danger"><b>{{dat.ticket}}</b></ion-text></p>
+            <h2>{{dat.label}}</h2>
+            <p *ngIf="pc_hse_conf.gps_allow === 1">{{dat.gpsData?.status_label}}</p>
+            <p>Ticket: <ion-text color="danger"><b>{{dat.gpsData?.tkt_in_bucket}}</b></ion-text></p>
           </ion-label>
-          <ion-text slot="end">{{dat.distance}}Km</ion-text>
+          <ion-text slot="end" *ngIf="pc_hse_conf.gps_allow === 1">{{dat.gpsData?.distance}}</ion-text>
         </ion-item>
       </ion-radio-group>
     </ion-content>
   </ng-template>
-</ion-modal>
+</ion-modal> -->

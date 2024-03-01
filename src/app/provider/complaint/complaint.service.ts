@@ -81,10 +81,8 @@ export class ComplaintService {
     return this.https.post(environment.url + 'complaints/submit_transaction', formData);
   }
 
-  getTeam(pc_id: any): Observable<any> {
-    // setups/teams/get_site_team_members/{pcId}
-    return this.https.get(environment.url + 'setups/teams/get_site_team_members/' + pc_id);
-    // return this.https.get(environment.url + 'setups/teams/get_team_members');
+  getTeam(pc_id: any, with_gps?: any): Observable<any> {
+    return this.https.get(environment.url + 'setups/teams/get_site_team_members/' + pc_id + '?with_gps=' + with_gps);
   }
 
   assignedTicket(formData: any): Observable<any> {

@@ -13,6 +13,7 @@ import { TicketWorkComponent } from './ticket-work/ticket-work.component';
 import { AssignTicketComponent } from './assign-ticket/assign-ticket.component';
 import { InstructionModalComponent } from './instruction-modal/instruction-modal.component';
 import { TravelDetailComponent } from './travel-detail/travel-detail.component';
+import { HseAssignComponent } from './hse-assign/hse-assign.component';
 
 const routes: Routes = [
   {
@@ -62,6 +63,10 @@ const routes: Routes = [
   {
     path: 'travel-detail',
     component: TravelDetailComponent
+  },
+  {
+    path: 'hse-assign',
+    component: HseAssignComponent
   }
 ];
 

@@ -7,6 +7,7 @@ import { environment } from 'src/environments/environment';
 import { IonModal } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core/components';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
+import { HseAssignComponent } from '../hse-assign/hse-assign.component';
 @Component({
   selector: 'app-ticket-type',
   templateUrl: './ticket-type.component.html',
@@ -33,44 +34,47 @@ export class TicketTypeComponent  implements OnInit {
   isShowBuilding = false;
   locations: any = [];
   assignUserSelect: any = {};
-  assignUserCopy: any = [];
-  assignUser: any = [{
-    user: 'Admin',
-    distance: '28',
-    status: 'Online(2h ago)',
-    ticket: 3,
-    user_id:1,
-  },{
-    user: 'SD0099334',
-    distance: '10',
-    status: 'Online(1h ago)',
-    ticket: 1,
-    user_id:2,
-  },{
-    user: 'H99883',
-    distance: '5',
-    status: 'Online(1h ago)',
-    ticket: 6,
-    user_id:3,
-  },{
-    user: 'K9900d',
-    distance: '23',
-    status: 'Online(1.2h ago)',
-    ticket: 12,
-    user_id:4,
-  },{
-    user: 'Q99883',
-    distance: '4',
-    status: 'Online(1.8h ago)',
-    ticket: 0,
-    user_id:5,
-  },{
-    user: 'M990d9',
-    distance: '15',
-    status: 'Online(2.1h ago)',
-    ticket: 8,
-    user_id:6,
-  }]
+  buddyUserSelect: any = {};
+  // assignUserCopy: any = [];
+  pc_hse_conf: any = [];
+  // assignUser: any = [];
+  // assignUser: any = [{
+  //   user: 'Admin',
+  //   distance: '28',
+  //   status: 'Online(2h ago)',
+  //   ticket: 3,
+  //   user_id:1,
+  // },{
+  //   user: 'SD0099334',
+  //   distance: '10',
+  //   status: 'Online(1h ago)',
+  //   ticket: 1,
+  //   user_id:2,
+  // },{
+  //   user: 'H99883',
+  //   distance: '5',
+  //   status: 'Online(1h ago)',
+  //   ticket: 6,
+  //   user_id:3,
+  // },{
+  //   user: 'K9900d',
+  //   distance: '23',
+  //   status: 'Online(1.2h ago)',
+  //   ticket: 12,
+  //   user_id:4,
+  // },{
+  //   user: 'Q99883',
+  //   distance: '4',
+  //   status: 'Online(1.8h ago)',
+  //   ticket: 0,
+  //   user_id:5,
+  // },{
+  //   user: 'M990d9',
+  //   distance: '15',
+  //   status: 'Online(2.1h ago)',
+  //   ticket: 8,
+  //   user_id:6,
+  // }]
   isAscending!: boolean;
   constructor(
     public formbuilder: FormBuilder,
@@ -86,10 +90,11 @@ export class TicketTypeComponent  implements OnInit {
       }
       this.getBuilding(this.allData.pc_id);
       this.getRequestType(this.allData.tkts_issue_id);
+      this.getSpecificTicket();
   }
 
   ngOnInit() {
-    this.assignUserCopy = this.assignUser;
+    // this.assignUserCopy = this.assignUser;
     this.initForm();
     this.getPriority();
   }
@@ -131,10 +136,10 @@ export class TicketTypeComponent  implements OnInit {
       barcode_id: [''],
       ticketId: [''],
       tkt_priority: ['', Validators.required],
-      is_ptw_required: [''],
-      is_ppt_kit_required: [''],
-      is_assign_to: [''],
-      is_buddy: [''],
+      ptw_req: [''],
+      ppe_kit_req: [''],
+      assignToName: [''],
+      buddy_req: [''],
     });
     setTimeout(() => {
       this.ticketForm.get('ticketId')?.setValue(this.ticket);
@@ -464,52 +469,28 @@ export class TicketTypeComponent  implements OnInit {
     }
   }
 
-  cancel() {
-    this.modal.dismiss(null, 'cancel');
-  }
+  // cancel() {
+  //   this.modal.dismiss(null, 'cancel');
+  // }
 
-  confirm() {
-    this.modal.dismiss('this.name', 'confirm');
-  }
+  // confirm() {
+  //   this.modal.dismiss('this.name', 'confirm');
+  // }
 
-  onWillDismiss(event: Event) {
-    const ev = event as CustomEvent<OverlayEventDetail<string>>;
-    if (ev.detail.role === 'confirm') {
-      console.log('confirm', ev.detail.data);
-      this.assignUserSelect = this.assignUser.filter((val: any) => val.user_id === ev.detail.data)[0];
-      console.log(this.assignUserSelect);
-      // this.message = `Hello, ${ev.detail.data}!`;
-    }
-  }
+  // onWillDismiss(event: Event) {
+  //   const ev = event as CustomEvent<OverlayEventDetail<string>>;
+  //   if (ev.detail.role === 'confirm') {
+  //     console.log('confirm', ev.detail.data);
+  //     this.assignUserSelect = this.assignUser.filter((val: any) => val.user_id === ev.detail.data)[0];
+  //     console.log(this.assignUserSelect);
+  //     // this.message = `Hello, ${ev.detail.data}!`;
+  //   }
+  // }
 
-  changeRadioUser(ev: any) {
-    console.log(ev.target.value);
-    this.modal.dismiss(ev.target.value, 'confirm');
 
-  }
 
-  search(ev: any) {
-    let val: any;
-    val = ev.target.value;
-    this.assignUser = this.assignUserCopy;
-    if (val && val.trim() !== '') {
-      this.assignUser = this.assignUser.filter((dat: any) => {
-        if ((dat.user.toLowerCase().indexOf(val.toLowerCase()) > -1)) {
-          return (dat.user.toLowerCase().indexOf(val.toLowerCase()) > -1);
-        }
-        return
-      });
-    }
-  }
 
-  sortArr() {
-    if (!this.isAscending) {
-      this.assignUser.sort((a: any, b: any) => a.distance - b.distance);
-    } else {
-      this.assignUser.sort((a: any, b: any) => b.distance - a.distance);
-    }
-    this.isAscending = !this.isAscending;
-  }
+
 
   async assignTicket() {
     const modal = await this.modalCtrl.create({
@@ -526,6 +507,45 @@ export class TicketTypeComponent  implements OnInit {
       }
     });
     modal.present();
+  }
+
+  async hseAssign(val: string) {
+    const modal = await this.modalCtrl.create({
+      component: HseAssignComponent,
+      componentProps: {
+        allData: this.allData,
+        pc_hse_conf: this.pc_hse_conf,
+        val: val
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {
+        console.log(disModal);
+        if (val === 'assign') {
+          this.assignUserSelect = disModal.data
+        } else if (val === 'buddy') {
+          this.buddyUserSelect = disModal.data
+        }
+        // this.greetEvent.emit(true);
+      }
+    });
+    modal.present();
+  }
+
+  getSpecificTicket() {
+    this.httpComplaint.getSpecificTicket(this.ticket).subscribe({
+      next:(data) => {
+        console.log(data);
+        // pc_hse_conf
+        if (data.status) {
+          this.pc_hse_conf = data.data.pc_hse_conf;
+          console.log(this.pc_hse_conf);
+        }
+      },
+      error:() => {
+
+      }
+    })
   }
 
 }

@@ -20,6 +20,7 @@ import { AssignTicketComponent } from './assign-ticket/assign-ticket.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { InstructionModalComponent } from './instruction-modal/instruction-modal.component';
 import { TravelDetailComponent } from './travel-detail/travel-detail.component';
+import { HseAssignComponent } from './hse-assign/hse-assign.component';
 @NgModule({
   imports: [
     CommonModule,
@@ -41,7 +42,8 @@ import { TravelDetailComponent } from './travel-detail/travel-detail.component';
     TicketWorkComponent,
     AssignTicketComponent,
     InstructionModalComponent,
-    TravelDetailComponent
+    TravelDetailComponent,
+    HseAssignComponent
   ],
   exports: [
     ComplaintCardsComponent
