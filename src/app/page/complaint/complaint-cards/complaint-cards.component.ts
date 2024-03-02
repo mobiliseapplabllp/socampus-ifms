@@ -70,9 +70,9 @@ export class ComplaintCardsComponent  implements OnInit {
             if (data.data.complaint_type_cfrm === 0 && data.data.canDoTktConfirmationWork) {
               this.openTicketTypeModal(data);
             } else if (data.data?.pc_hse_conf.travel_allow === 1 && !data.data?.pc_hse_conf.travel_data && data.data.canWork) {
-              alert('travel page');
+              this.travelModal();
             } else {
-              alert('work now page');
+              this.openTicketWork();
             }
           } else {
             this.common.presentToast(data.msg, 'warning');
@@ -270,17 +270,18 @@ export class ComplaintCardsComponent  implements OnInit {
     modal.present();
   }
 
-  async travel(data: any) {
+  async travelModal() {
     const modal = await this.modalCtrl.create({
       component: TravelDetailComponent,
       cssClass: 'my-modal2',
       componentProps: {
-        allData: data
+        tkts_id: this.data.tkts_id
       }
     });
     modal.onWillDismiss().then(async disModal => {
+      console.log(disModal);
       if (disModal.role) {
-        this.greetEvent.emit(true);
+        // this.greetEvent.emit(true);
       }
     });
     modal.present();

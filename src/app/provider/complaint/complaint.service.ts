@@ -161,6 +161,10 @@ export class ComplaintService {
     return this.https.post(environment.url + 'complaints/complaint_type_cfrm', form)
   }
 
+  getTravelType(tkt_id: any): Observable<any> {
+    return this.https.get(environment.url + 'complaints/get_distance_travel_type_info?tkts_id=' + tkt_id);
+  }
+
   otpSend(form: any): Observable<any> {
     return this.https.post(environment.url + 'complaints/send_res_otp', form)
   }
@@ -231,7 +235,9 @@ export class ComplaintService {
     });
   }
 
-
+  submitTravelInfo(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'complaints/save_travel_info', formData);
+  }
 
   resolveTicket(data: any) {
     return new Promise(resolve => {

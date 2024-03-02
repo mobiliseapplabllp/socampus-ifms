@@ -9,7 +9,6 @@ import { Camera, CameraResultType } from '@capacitor/camera';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { SignatureComponent } from 'src/app/shared/signature/signature.component';
 import { InstructionModalComponent } from '../instruction-modal/instruction-modal.component';
-
 @Component({
   selector: 'app-ticket-work',
   templateUrl: './ticket-work.component.html',

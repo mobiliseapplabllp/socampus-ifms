@@ -145,7 +145,7 @@ export class TicketTypeComponent  implements OnInit {
       tkt_priority: ['', Validators.required],
       ptw_req: [''],
       ppe_kit_req: [''],
-      assignToName: [''],
+      assignToName: ['', Validators.required],
       assignTo: [''],
       buddy_req: [''],
       buddyId: [''],
@@ -430,6 +430,8 @@ export class TicketTypeComponent  implements OnInit {
       this.httpCommon.presentToast('Please Select PPE Kit', 'warning');
     } else if (this.pc_hse_conf.buddy_allow == 1 && !this.ticketForm.value.buddy_req) {
       this.httpCommon.presentToast('Please Select Buddy', 'warning');
+    } else if (this.ticketForm.value.buddy_req == '1' && !this.ticketForm.value.buddyName) {
+      this.httpCommon.presentToast('Please Select Buddy Name', 'warning');
     } else {
       this.presentLoading().then(preLoad => {
         this.httpComplaint.complaintTypeConfirm(this.ticketForm.value).subscribe({

@@ -118,6 +118,11 @@
         <ion-text>{{selectPriorityObj.resolve_time}}</ion-text>
       </ion-col>
     </ion-row>
+    <ion-item id="open-modal" (click)="hseAssign('assign')">
+      <ion-label position="floating">Assign To <ion-text color="danger">*</ion-text> </ion-label>
+      <ion-input type="text" readonly formControlName="assignToName"></ion-input>
+    </ion-item>
+    <ion-note *ngIf="assignUserSelect.label" color="danger" class="ion-margin-start">{{assignUserSelect.label}} {{assignUserSelect.status}} {{assignUserSelect.distance}}</ion-note>
     <h3 class="ion-padding-start">HSE Detail</h3>
     <ion-row>
       <ion-col size="6" *ngIf="pc_hse_conf.ptw_allow === 1">
@@ -138,16 +143,9 @@
           </ion-select>
         </ion-item>
       </ion-col>
-      <ion-col size="6">
-        <ion-item id="open-modal" (click)="hseAssign('assign')">
-          <ion-label position="floating">Assign To <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="text" readonly formControlName="assignToName"></ion-input>
-        </ion-item>
-        <ion-note *ngIf="assignUserSelect.label" color="danger" class="ion-margin-start">{{assignUserSelect.label}} {{assignUserSelect.status}} {{assignUserSelect.distance}}</ion-note>
-      </ion-col>
       <ion-col size="6" *ngIf="pc_hse_conf.buddy_allow === 1">
         <ion-item>
-          <ion-label position="floating">Buddy Required</ion-label>
+          <ion-label position="floating">Buddy Required <ion-text color="danger">*</ion-text></ion-label>
           <ion-select interface="action-sheet" mode="ios" formControlName="buddy_req">
             <ion-select-option value="1">YES</ion-select-option>
             <ion-select-option value="0">NO</ion-select-option>
@@ -156,7 +154,7 @@
       </ion-col>
       <ion-col size="6" *ngIf="ticketForm.value.buddy_req === '1'">
         <ion-item (click)="hseAssign('buddy')">
-          <ion-label position="floating">Buddy Assign</ion-label>
+          <ion-label position="floating">Buddy Assign <ion-text color="danger">*</ion-text></ion-label>
           <ion-input type="text" formControlName="buddyName" readonly></ion-input>
         </ion-item>
         <ion-note *ngIf="buddyUserSelect.label" color="danger" class="ion-margin-start">{{buddyUserSelect.label}} {{buddyUserSelect.status}} {{buddyUserSelect.distance}}</ion-note>
