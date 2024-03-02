@@ -72,7 +72,7 @@ export class ComplaintCardsComponent  implements OnInit {
             } else if (data.data?.pc_hse_conf.travel_allow === 1 && !data.data?.pc_hse_conf.travel_data && data.data.canWork) {
               this.travelModal();
             } else {
-              this.openTicketWork();
+              this.openTicketWork(data);
             }
           } else {
             this.common.presentToast(data.msg, 'warning');
@@ -108,7 +108,6 @@ export class ComplaintCardsComponent  implements OnInit {
   async openTicketTypeModal(data: any) {
     const modal = await this.modalCtrl.create({
       component: TicketTypeComponent,
-      // componentProps: { allData:  this.data, locations: locations, requestData1: data }
       componentProps: { requestedData: data }
     });
     modal.onWillDismiss().then(disModal => {
@@ -119,10 +118,10 @@ export class ComplaintCardsComponent  implements OnInit {
     modal.present();
   }
 
-  openTicketWork() {
+  openTicketWork(data: any) {
     this.router.navigate(['complaint/ticket-work'], {
       queryParams: {
-        data: JSON.stringify(this.data),
+        data: JSON.stringify(data),
       }
     });
   }
