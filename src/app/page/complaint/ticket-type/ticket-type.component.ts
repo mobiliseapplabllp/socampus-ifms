@@ -24,6 +24,7 @@ export class TicketTypeComponent  implements OnInit {
   query: any = [];
   subCategory: any = [];
   subCategory2: any = [];
+  requestedData: any = [];
   allData: any;
   ticketPriority: any = [];
   selectPriorityObj: any = {};
@@ -83,14 +84,20 @@ export class TicketTypeComponent  implements OnInit {
     private modalCtrl: ModalController,
     private loadingController: LoadingController,
     public navParam: NavParams) {
-      this.allData = this.navParam.get('allData');
+      this.requestedData = this.navParam.get('requestedData');
+      console.log(this.requestedData);
+      this.ticketPriority = this.requestedData.priority_list;
+      this.allData = this.requestedData.data;
+      this.pc_hse_conf = this.requestedData.data.pc_hse_conf;
+      console.log(this.pc_hse_conf);
+      // this.allData = this.navParam.get('allData');
       this.ticket = this.allData.tkts_id;
       if ((this.allData.tkts_issue_id == 2) || this.allData.tkts_issue_id == 1 && !this.allData.ext_asset_id) {
         this.isShowBuilding = true;
       }
       this.getBuilding(this.allData.pc_id);
       this.getRequestType(this.allData.tkts_issue_id);
-      this.getSpecificTicket();
+      // this.getSpecificTicket();
   }
 
   ngOnInit() {
@@ -139,11 +146,14 @@ export class TicketTypeComponent  implements OnInit {
       ptw_req: [''],
       ppe_kit_req: [''],
       assignToName: [''],
+      assignTo: [''],
       buddy_req: [''],
+      buddyId: [''],
+      buddyName: ['']
     });
     setTimeout(() => {
       this.ticketForm.get('ticketId')?.setValue(this.ticket);
-      this.ticketForm.get('tkt_tag')?.setValue(this.requestData1.tkt_tag.toString())
+      this.ticketForm.get('tkt_tag')?.setValue(this.allData.tkt_tag.toString())
     });
     this.getIssueType();
   }
@@ -165,7 +175,7 @@ export class TicketTypeComponent  implements OnInit {
       this.isShowBuilding = true;
       setTimeout(() => {
         if (this.locations.length > 0) {
-          this.ticketForm.get('bldg_id')?.setValue(this.locations[0].building_id)
+          this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id)
         }
       }, 100);
     }
@@ -178,7 +188,7 @@ export class TicketTypeComponent  implements OnInit {
           this.buildingArr = data.data;
           if (this.locations.length > 0) {
             setTimeout(() => {
-              this.ticketForm.get('bldg_id')?.setValue(this.locations[0].building_id)
+              this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id)
             }, 100);
           }
         } else {
@@ -210,7 +220,7 @@ export class TicketTypeComponent  implements OnInit {
             this.floorArr = data.data;
             if (this.locations.length > 0) {
               setTimeout(() => {
-                this.ticketForm.get('floor_id')?.setValue(this.locations[0].floor_id);
+                this.ticketForm.get('floor_id')?.setValue(this.allData.floor_id);
               }, 100);
             }
           } else {
@@ -245,7 +255,7 @@ export class TicketTypeComponent  implements OnInit {
             this.locationArr = data.data;
             setTimeout(() => {
               if (this.locations.length > 0) {
-                this.ticketForm.get('loc_code')?.setValue(this.locations[0].id)
+                this.ticketForm.get('loc_code')?.setValue(this.allData.loc_id)
               }
             }, 100)
           } else {
@@ -272,7 +282,11 @@ export class TicketTypeComponent  implements OnInit {
     this.ticketForm.get('subcat2_id')?.setValue('');
     this.barcodeList = [];
     if (this.ticketForm.value.issue_type == 2) {
-      this.getQueryCat();
+      // this.getQueryCat();
+      this.query = this.allData.cateList;
+      setTimeout(() => {
+        this.ticketForm.get('category')?.setValue(this.allData.cat_id);
+      }, 100)
     }
   }
 
@@ -410,32 +424,40 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   saveData() {
-    this.presentLoading().then(preLoad => {
-      this.httpComplaint.complaintTypeConfirm(this.ticketForm.value).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.httpCommon.presentToast(data.msg, 'success');
-            this.dismiss(data, true);
-          } else {
-            this.httpCommon.presentToast(data.msg, 'warning');
+    if (this.pc_hse_conf.ptw_allow == 1 && !this.ticketForm.value.ptw_req) {
+      this.httpCommon.presentToast('Please Select PTW Required', 'warning');
+    } else if (this.pc_hse_conf.ppekit_allow == 1 && !this.ticketForm.value.ppe_kit_req) {
+      this.httpCommon.presentToast('Please Select PPE Kit', 'warning');
+    } else if (this.pc_hse_conf.buddy_allow == 1 && !this.ticketForm.value.buddy_req) {
+      this.httpCommon.presentToast('Please Select Buddy', 'warning');
+    } else {
+      this.presentLoading().then(preLoad => {
+        this.httpComplaint.complaintTypeConfirm(this.ticketForm.value).subscribe({
+          next:(data) => {
+            if (data.status) {
+              this.httpCommon.presentToast(data.msg, 'success');
+              this.dismiss(data, true);
+            } else {
+              this.httpCommon.presentToast(data.msg, 'warning');
+            }
+          },
+          error:() => {
+            this.dismissloading();
+            this.httpCommon.presentToast(environment.errMsg, 'danger');
+          },
+          complete:() => {
+            this.dismissloading();
           }
-        },
-        error:() => {
-          this.dismissloading();
-          this.httpCommon.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      });
-    })
+        });
+      })
+    }
   }
 
   getPriority() {
-    this.httpComplaint.getTicketPriority(this.ticket).subscribe({
+    this.httpComplaint.getTicketPriority(this.requestedData.data.tkts_id).subscribe({
       next:(data) => {
         if (data.status) {
-          this.ticketPriority = data.data;
+          // this.ticketPriority = data.data;
         }
       },
       error:() => {
@@ -522,11 +544,14 @@ export class TicketTypeComponent  implements OnInit {
       if (disModal.role) {
         console.log(disModal);
         if (val === 'assign') {
-          this.assignUserSelect = disModal.data
+          this.assignUserSelect = disModal.data;
+          this.ticketForm.get('assignToName')?.setValue(this.assignUserSelect.label);
+          this.ticketForm.get('assignTo')?.setValue(this.assignUserSelect.value + '-' + this.assignUserSelect.team_id);
         } else if (val === 'buddy') {
           this.buddyUserSelect = disModal.data
+          this.ticketForm.get('buddyName')?.setValue(this.buddyUserSelect.label);
+          this.ticketForm.get('buddyId')?.setValue(this.buddyUserSelect.value + '-' + this.buddyUserSelect.team_id);
         }
-        // this.greetEvent.emit(true);
       }
     });
     modal.present();

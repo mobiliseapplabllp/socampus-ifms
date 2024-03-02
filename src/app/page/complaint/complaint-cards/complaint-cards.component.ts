@@ -63,12 +63,19 @@ export class ComplaintCardsComponent  implements OnInit {
 
   async work_now() {
     this.presentLoading().then(preLoad => {
-      this.httpComplaint.checkTicketConfirm(this.data.tkts_id).subscribe({
+      this.httpComplaint.getSpecificTicket(this.data.tkts_id).subscribe({
         next:(data) => {
+          console.log(data);
           if (data.status) {
-            this.openTicketWork();
+            if (data.data.complaint_type_cfrm === 0 && data.data.canDoTktConfirmationWork) {
+              this.openTicketTypeModal(data);
+            } else if (data.data?.pc_hse_conf.travel_allow === 1 && !data.data?.pc_hse_conf.travel_data && data.data.canWork) {
+              alert('travel page');
+            } else {
+              alert('work now page');
+            }
           } else {
-            this.openTicketTypeModal(data.locations, data.data);
+            this.common.presentToast(data.msg, 'warning');
           }
         },
         error:() => {
@@ -78,15 +85,31 @@ export class ComplaintCardsComponent  implements OnInit {
         complete:() => {
           this.dismissLoading();
         }
-      });
+      })
+      // this.httpComplaint.checkTicketConfirm(this.data.tkts_id).subscribe({
+      //   next:(data) => {
+      //     if (data.status) {
+      //       this.openTicketWork();
+      //     } else {
+      //       this.openTicketTypeModal(data.locations, data.data);
+      //     }
+      //   },
+      //   error:() => {
+      //     this.dismissLoading();
+      //     this.common.presentToast(environment.errMsg, 'danger');
+      //   },
+      //   complete:() => {
+      //     this.dismissLoading();
+      //   }
+      // });
     });
   }
 
-  async openTicketTypeModal(locations: any, data: any) {
+  async openTicketTypeModal(data: any) {
     const modal = await this.modalCtrl.create({
       component: TicketTypeComponent,
-      // cssClass: 'my-modal',//
-      componentProps: { allData:  this.data, locations: locations, requestData1: data }
+      // componentProps: { allData:  this.data, locations: locations, requestData1: data }
+      componentProps: { requestedData: data }
     });
     modal.onWillDismiss().then(disModal => {
       if (disModal.role) {
