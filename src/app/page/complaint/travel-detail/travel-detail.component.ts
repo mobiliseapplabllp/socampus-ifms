@@ -21,6 +21,7 @@ export class TravelDetailComponent  implements OnInit {
   formData = new FormData();
   img1: any;
   img2: any;
+  canDoTravel = 0;
   constructor(
     private modalCtrl: ModalController,
     private httpComplaint: ComplaintService,
@@ -41,6 +42,9 @@ export class TravelDetailComponent  implements OnInit {
           if (data.status) {
             this.travelNote = data.data?.travelInfo.remarkNote
             this.travelMode = data.data?.travelType;
+            this.canDoTravel = data.data?.travelInfo.canDoTravel
+          } else {
+            this.common.presentToast(data.msg, 'warning');
           }
         },
         error:() => {
