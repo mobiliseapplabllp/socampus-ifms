@@ -81,10 +81,8 @@ export class ComplaintService {
     return this.https.post(environment.url + 'complaints/submit_transaction', formData);
   }
 
-  getTeam(pc_id: any): Observable<any> {
-    // setups/teams/get_site_team_members/{pcId}
-    return this.https.get(environment.url + 'setups/teams/get_site_team_members/' + pc_id);
-    // return this.https.get(environment.url + 'setups/teams/get_team_members');
+  getTeam(pc_id: any, with_gps?: any): Observable<any> {
+    return this.https.get(environment.url + 'setups/teams/get_site_team_members/' + pc_id + '?with_gps=' + with_gps);
   }
 
   assignedTicket(formData: any): Observable<any> {
@@ -163,6 +161,10 @@ export class ComplaintService {
     return this.https.post(environment.url + 'complaints/complaint_type_cfrm', form)
   }
 
+  getTravelType(tkt_id: any): Observable<any> {
+    return this.https.get(environment.url + 'complaints/get_distance_travel_type_info?tkts_id=' + tkt_id);
+  }
+
   otpSend(form: any): Observable<any> {
     return this.https.post(environment.url + 'complaints/send_res_otp', form)
   }
@@ -233,7 +235,9 @@ export class ComplaintService {
     });
   }
 
-
+  submitTravelInfo(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'complaints/save_travel_info', formData);
+  }
 
   resolveTicket(data: any) {
     return new Promise(resolve => {

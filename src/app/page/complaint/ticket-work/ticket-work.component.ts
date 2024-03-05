@@ -9,7 +9,6 @@ import { Camera, CameraResultType } from '@capacitor/camera';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { SignatureComponent } from 'src/app/shared/signature/signature.component';
 import { InstructionModalComponent } from '../instruction-modal/instruction-modal.component';
-
 @Component({
   selector: 'app-ticket-work',
   templateUrl: './ticket-work.component.html',
@@ -23,6 +22,7 @@ export class TicketWorkComponent  implements OnInit {
   loading: any;
   formData:any = new FormData();
   fileName!: string;
+  ppeFileName!: string;
   isSpinner!: boolean;
   isImageUpload!: boolean;
   ticket_id: any;
@@ -30,6 +30,7 @@ export class TicketWorkComponent  implements OnInit {
   isOtpSent!: boolean;
   isVerifyOtp = false;
   requestedData: any = [];
+  requestedData_TEMP: any = [];
   mobile: any;
   hasWip: any;
   // ptwApproved: any;
@@ -68,7 +69,9 @@ export class TicketWorkComponent  implements OnInit {
 
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
-      this.requestedData = JSON.parse(res['data']);
+      this.requestedData_TEMP = JSON.parse(res['data']);
+      console.log(this.requestedData_TEMP)
+      this.requestedData = this.requestedData_TEMP.data;
       this.ticket_id = this.requestedData.tkts_id;
       this.mobile = this.requestedData.mobile
       this.initForm();
@@ -226,11 +229,38 @@ export class TicketWorkComponent  implements OnInit {
         this.dismissLoading();
         if (data.status) {
           this.ticketStages = data.data;
+
+          this.arr = this.requestedData;
+          this.isPriority = this.requestedData_TEMP.can_priority;
+          this.isPtwMandatory = this.requestedData.ptw_mandatory;
+          this.ticketPriority = this.requestedData_TEMP.priority_list;
+          this.formData.delete('ptwApproved');
+          this.formData.append('ptwApproved', this.requestedData.ptwApproved);
+          this.formData.delete('pc_id');
+          this.formData.append('pc_id', this.requestedData.pc_id);
+          if (this.arr.hasWIP == 1 && this.arr.ptwApproved == 0 && this.arr.ptwPending == true ) {
+            this.isFormDisabled = true;
+          } else {
+            this.isFormDisabled = false;
+          }
+          if (this.isPtwMandatory) {
+            if ((this.arr.hasWIP == 0 || this.arr.ptwApproved == 0)) {
+              this.ticketStages = this.ticketStages.filter((val: any) => val.stage_id != 4);
+            }
+          } else {
+            if ((this.arr.hasWIP == 0)) {
+              this.ticketStages = this.ticketStages.filter((val: any) => val.stage_id != 4);
+            }
+          }
+          if (this.arr.assets) {
+            this.assetInfo = data.data.assets;
+          }
+
           setTimeout(() => {
             this.workSpace.get('status')?.setValue(3);
           }, 1000);
         }
-        this.getSpecificTicket(this.ticket_id);
+        // this.getSpecificTicket(this.ticket_id);
       });
     })
   }
@@ -239,8 +269,8 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   checkHasWip() {
-    this.openInstructionModal();
-    return;
+    // this.openInstructionModal();
+    // return;
     if (this.arr.hasWIP == 0) {
       this.openInstructionModal();
     } else {
@@ -268,6 +298,19 @@ export class TicketWorkComponent  implements OnInit {
       this.formData.delete(key);
       this.formData.append(key, this.workSpace.value[key]);
     }
+
+    this.formData.delete('ptwApproved')
+    this.formData.delete('ptwPending')
+    this.formData.delete('ptw_mandatory')
+    this.formData.delete('ppekitFilled')
+    this.formData.delete('ppekit_mandatory')
+
+    this.formData.append('ptwApproved', this.requestedData.ptwApproved)
+    this.formData.append('ptwPending', this.requestedData.ptwPending)
+    this.formData.append('ptw_mandatory', this.requestedData.ptw_mandatory)
+    this.formData.append('ppekitFilled', this.requestedData.ppekitFilled)
+    this.formData.append('ppekit_mandatory', this.requestedData.ppekit_mandatory)
+
     if (this.workSpace.value.status == 4) {
       if (this.arr.tkts_issue_id == 1 && !this.isVerifyOtp) {
         this.httpCommon.presentToast('OTP is Mandatory for Asset Ticket', 'warning');
@@ -295,8 +338,14 @@ export class TicketWorkComponent  implements OnInit {
       this.formData.append('otpVerify', this.isVerifyOtp);
     }
 
+
     if(this.workSpace.value.status == 3 && !this.fileName && this.arr.hasWIP == 0 && this.isPtwMandatory) {
       alert('Please Add Attachment');
+      return;
+    }
+
+    if (this.workSpace.value.status === 3 && this.requestedData.ptw_mandatory && this.requestedData.ptwApproved === 0 && !this.ppeFileName) {
+      alert('Please Add PPE Kit Photo');
       return;
     }
 
@@ -379,25 +428,32 @@ export class TicketWorkComponent  implements OnInit {
   changeEmp(ev: any) {
   }
 
-  async presentActionSheet() {
+  async presentActionSheet(val: string) {
     const takePicture = async () => {
       const image = await Camera.getPhoto({
         quality: 80,
         allowEditing: false,
         resultType: CameraResultType.Uri,
       });
-      this.readImg(image)
+      this.readImg(image, val)
     };
     takePicture();
   }
 
-  async readImg(photo: any) {
+  async readImg(photo: any, val: string) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
     const response = await fetch(photo.webPath);
     const blob = await response.blob();
-    this.formData.delete('img[]');
-    this.formData.append('img[]', blob, random);
-    this.fileName = random;
+    if (val === 'image') {
+      this.formData.delete('img[]');
+      this.formData.append('img[]', blob, random);
+      this.fileName = random;
+    } else if (val === 'ppe') {
+      this.formData.delete('ppeKitAttach');
+      this.formData.append('ppeKitAttach', blob, random);
+      this.ppeFileName = random;
+    }
+
     this.presentLoading().then(preLoad => {
       this.dismissLoading();
     })

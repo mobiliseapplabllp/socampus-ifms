@@ -113,7 +113,7 @@
             <ion-button style="width:80%;font-size:xx-small;" color="warning" (click)="work_now()">Work Now</ion-button>
           </ng-template>
         </ion-col>
-        <ion-col class="ion-text-center"  *ngIf="!data.canWork" [hidden]="data.stage_id === 4 || data.stage_id === 6 ">
+        <ion-col class="ion-text-center"  *ngIf="data.canAssign && (!(data.stage_id === 4 || data.stage_id === 6))">
           <ion-button style="width:80%;font-size:xx-small;" color="success" (click)="assignTicket(data.tkts_id, data)">Assign</ion-button>
         </ion-col>
         <ion-col class="ion-text-center"  *ngIf="(data.stage_id === 4 || data.stage_id === 6) && !data.canWork ">

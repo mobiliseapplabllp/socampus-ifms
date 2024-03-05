@@ -1,15 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController, ModalController, NavParams } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
+import { IonModal } from '@ionic/angular';
+import { OverlayEventDetail } from '@ionic/core/components';
+import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
+import { HseAssignComponent } from '../hse-assign/hse-assign.component';
 @Component({
   selector: 'app-ticket-type',
   templateUrl: './ticket-type.component.html',
   styleUrls: ['./ticket-type.component.scss'],
 })
 export class TicketTypeComponent  implements OnInit {
+  @ViewChild(IonModal) modal!: IonModal;
   loading: any;
   public ticketForm!: FormGroup;
   barcodeList: any = [];
@@ -19,6 +24,7 @@ export class TicketTypeComponent  implements OnInit {
   query: any = [];
   subCategory: any = [];
   subCategory2: any = [];
+  requestedData: any = [];
   allData: any;
   ticketPriority: any = [];
   selectPriorityObj: any = {};
@@ -28,6 +34,49 @@ export class TicketTypeComponent  implements OnInit {
   locationArr: any = [];
   isShowBuilding = false;
   locations: any = [];
+  assignUserSelect: any = {};
+  buddyUserSelect: any = {};
+  // assignUserCopy: any = [];
+  pc_hse_conf: any = [];
+  // assignUser: any = [];
+  // assignUser: any = [{
+  //   user: 'Admin',
+  //   distance: '28',
+  //   status: 'Online(2h ago)',
+  //   ticket: 3,
+  //   user_id:1,
+  // },{
+  //   user: 'SD0099334',
+  //   distance: '10',
+  //   status: 'Online(1h ago)',
+  //   ticket: 1,
+  //   user_id:2,
+  // },{
+  //   user: 'H99883',
+  //   distance: '5',
+  //   status: 'Online(1h ago)',
+  //   ticket: 6,
+  //   user_id:3,
+  // },{
+  //   user: 'K9900d',
+  //   distance: '23',
+  //   status: 'Online(1.2h ago)',
+  //   ticket: 12,
+  //   user_id:4,
+  // },{
+  //   user: 'Q99883',
+  //   distance: '4',
+  //   status: 'Online(1.8h ago)',
+  //   ticket: 0,
+  //   user_id:5,
+  // },{
+  //   user: 'M990d9',
+  //   distance: '15',
+  //   status: 'Online(2.1h ago)',
+  //   ticket: 8,
+  //   user_id:6,
+  // }]
+  isAscending!: boolean;
   constructor(
     public formbuilder: FormBuilder,
     private httpComplaint: ComplaintService,
@@ -35,16 +84,24 @@ export class TicketTypeComponent  implements OnInit {
     private modalCtrl: ModalController,
     private loadingController: LoadingController,
     public navParam: NavParams) {
-      this.allData = this.navParam.get('allData');
+      this.requestedData = this.navParam.get('requestedData');
+      console.log(this.requestedData);
+      this.ticketPriority = this.requestedData.priority_list;
+      this.allData = this.requestedData.data;
+      this.pc_hse_conf = this.requestedData.data.pc_hse_conf;
+      console.log(this.pc_hse_conf);
+      // this.allData = this.navParam.get('allData');
       this.ticket = this.allData.tkts_id;
       if ((this.allData.tkts_issue_id == 2) || this.allData.tkts_issue_id == 1 && !this.allData.ext_asset_id) {
         this.isShowBuilding = true;
       }
       this.getBuilding(this.allData.pc_id);
       this.getRequestType(this.allData.tkts_issue_id);
+      // this.getSpecificTicket();
   }
 
   ngOnInit() {
+    // this.assignUserCopy = this.assignUser;
     this.initForm();
     this.getPriority();
   }
@@ -85,11 +142,18 @@ export class TicketTypeComponent  implements OnInit {
       subcat2_id: [''],
       barcode_id: [''],
       ticketId: [''],
-      tkt_priority: ['', Validators.required]
+      tkt_priority: ['', Validators.required],
+      ptw_req: [''],
+      ppe_kit_req: [''],
+      assignToName: ['', Validators.required],
+      assignTo: [''],
+      buddy_req: [''],
+      buddyId: [''],
+      buddyName: ['']
     });
     setTimeout(() => {
       this.ticketForm.get('ticketId')?.setValue(this.ticket);
-      this.ticketForm.get('tkt_tag')?.setValue(this.requestData1.tkt_tag.toString())
+      this.ticketForm.get('tkt_tag')?.setValue(this.allData.tkt_tag.toString())
     });
     this.getIssueType();
   }
@@ -101,6 +165,8 @@ export class TicketTypeComponent  implements OnInit {
     this.isShowBuilding = false
   }
 
+
+
   changeIsBarcode(ev: any) {
     this.ticketForm.get('barcode')?.setValue('');
     this.ticketForm.get('barcode_id')?.setValue('');
@@ -109,7 +175,7 @@ export class TicketTypeComponent  implements OnInit {
       this.isShowBuilding = true;
       setTimeout(() => {
         if (this.locations.length > 0) {
-          this.ticketForm.get('bldg_id')?.setValue(this.locations[0].building_id)
+          this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id)
         }
       }, 100);
     }
@@ -122,7 +188,7 @@ export class TicketTypeComponent  implements OnInit {
           this.buildingArr = data.data;
           if (this.locations.length > 0) {
             setTimeout(() => {
-              this.ticketForm.get('bldg_id')?.setValue(this.locations[0].building_id)
+              this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id)
             }, 100);
           }
         } else {
@@ -154,7 +220,7 @@ export class TicketTypeComponent  implements OnInit {
             this.floorArr = data.data;
             if (this.locations.length > 0) {
               setTimeout(() => {
-                this.ticketForm.get('floor_id')?.setValue(this.locations[0].floor_id);
+                this.ticketForm.get('floor_id')?.setValue(this.allData.floor_id);
               }, 100);
             }
           } else {
@@ -189,7 +255,7 @@ export class TicketTypeComponent  implements OnInit {
             this.locationArr = data.data;
             setTimeout(() => {
               if (this.locations.length > 0) {
-                this.ticketForm.get('loc_code')?.setValue(this.locations[0].id)
+                this.ticketForm.get('loc_code')?.setValue(this.allData.loc_id)
               }
             }, 100)
           } else {
@@ -216,7 +282,11 @@ export class TicketTypeComponent  implements OnInit {
     this.ticketForm.get('subcat2_id')?.setValue('');
     this.barcodeList = [];
     if (this.ticketForm.value.issue_type == 2) {
-      this.getQueryCat();
+      // this.getQueryCat();
+      this.query = this.allData.cateList;
+      setTimeout(() => {
+        this.ticketForm.get('category')?.setValue(this.allData.cat_id);
+      }, 100)
     }
   }
 
@@ -354,32 +424,42 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   saveData() {
-    this.presentLoading().then(preLoad => {
-      this.httpComplaint.complaintTypeConfirm(this.ticketForm.value).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.httpCommon.presentToast(data.msg, 'success');
-            this.dismiss(data, true);
-          } else {
-            this.httpCommon.presentToast(data.msg, 'warning');
+    if (this.pc_hse_conf.ptw_allow == 1 && !this.ticketForm.value.ptw_req) {
+      this.httpCommon.presentToast('Please Select PTW Required', 'warning');
+    } else if (this.pc_hse_conf.ppekit_allow == 1 && !this.ticketForm.value.ppe_kit_req) {
+      this.httpCommon.presentToast('Please Select PPE Kit', 'warning');
+    } else if (this.pc_hse_conf.buddy_allow == 1 && !this.ticketForm.value.buddy_req) {
+      this.httpCommon.presentToast('Please Select Buddy', 'warning');
+    } else if (this.ticketForm.value.buddy_req == '1' && !this.ticketForm.value.buddyName) {
+      this.httpCommon.presentToast('Please Select Buddy Name', 'warning');
+    } else {
+      this.presentLoading().then(preLoad => {
+        this.httpComplaint.complaintTypeConfirm(this.ticketForm.value).subscribe({
+          next:(data) => {
+            if (data.status) {
+              this.httpCommon.presentToast(data.msg, 'success');
+              this.dismiss(data, true);
+            } else {
+              this.httpCommon.presentToast(data.msg, 'warning');
+            }
+          },
+          error:() => {
+            this.dismissloading();
+            this.httpCommon.presentToast(environment.errMsg, 'danger');
+          },
+          complete:() => {
+            this.dismissloading();
           }
-        },
-        error:() => {
-          this.dismissloading();
-          this.httpCommon.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      });
-    })
+        });
+      })
+    }
   }
 
   getPriority() {
-    this.httpComplaint.getTicketPriority(this.ticket).subscribe({
+    this.httpComplaint.getTicketPriority(this.requestedData.data.tkts_id).subscribe({
       next:(data) => {
         if (data.status) {
-          this.ticketPriority = data.data;
+          // this.ticketPriority = data.data;
         }
       },
       error:() => {
@@ -411,6 +491,88 @@ export class TicketTypeComponent  implements OnInit {
     if (this.loading) {
       this.loading.dismiss();
     }
+  }
+
+  // cancel() {
+  //   this.modal.dismiss(null, 'cancel');
+  // }
+
+  // confirm() {
+  //   this.modal.dismiss('this.name', 'confirm');
+  // }
+
+  // onWillDismiss(event: Event) {
+  //   const ev = event as CustomEvent<OverlayEventDetail<string>>;
+  //   if (ev.detail.role === 'confirm') {
+  //     console.log('confirm', ev.detail.data);
+  //     this.assignUserSelect = this.assignUser.filter((val: any) => val.user_id === ev.detail.data)[0];
+  //     console.log(this.assignUserSelect);
+  //     // this.message = `Hello, ${ev.detail.data}!`;
+  //   }
+  // }
+
+
+
+
+
+
+  async assignTicket() {
+    const modal = await this.modalCtrl.create({
+      component: AssignTicketComponent,
+      // cssClass: 'my-modal',
+      componentProps: {
+        ticket_id: this.ticket,
+        allData: this.allData
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {
+        // this.greetEvent.emit(true);
+      }
+    });
+    modal.present();
+  }
+
+  async hseAssign(val: string) {
+    const modal = await this.modalCtrl.create({
+      component: HseAssignComponent,
+      componentProps: {
+        allData: this.allData,
+        pc_hse_conf: this.pc_hse_conf,
+        val: val
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {
+        console.log(disModal);
+        if (val === 'assign') {
+          this.assignUserSelect = disModal.data;
+          this.ticketForm.get('assignToName')?.setValue(this.assignUserSelect.label);
+          this.ticketForm.get('assignTo')?.setValue(this.assignUserSelect.value + '-' + this.assignUserSelect.team_id);
+        } else if (val === 'buddy') {
+          this.buddyUserSelect = disModal.data
+          this.ticketForm.get('buddyName')?.setValue(this.buddyUserSelect.label);
+          this.ticketForm.get('buddyId')?.setValue(this.buddyUserSelect.value + '-' + this.buddyUserSelect.team_id);
+        }
+      }
+    });
+    modal.present();
+  }
+
+  getSpecificTicket() {
+    this.httpComplaint.getSpecificTicket(this.ticket).subscribe({
+      next:(data) => {
+        console.log(data);
+        // pc_hse_conf
+        if (data.status) {
+          this.pc_hse_conf = data.data.pc_hse_conf;
+          console.log(this.pc_hse_conf);
+        }
+      },
+      error:() => {
+
+      }
+    })
   }
 
 }

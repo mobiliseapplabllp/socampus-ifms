@@ -8,6 +8,7 @@ import { SiteDetailComponent } from '../site-detail/site-detail.component';
 import { TicketHistoryComponent } from '../ticket-history/ticket-history.component';
 import { TicketTypeComponent } from '../ticket-type/ticket-type.component';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
+import { TravelDetailComponent } from '../travel-detail/travel-detail.component';
 @Component({
   selector: 'app-complaint-cards',
   templateUrl: './complaint-cards.component.html',
@@ -62,12 +63,19 @@ export class ComplaintCardsComponent  implements OnInit {
 
   async work_now() {
     this.presentLoading().then(preLoad => {
-      this.httpComplaint.checkTicketConfirm(this.data.tkts_id).subscribe({
+      this.httpComplaint.getSpecificTicket(this.data.tkts_id).subscribe({
         next:(data) => {
+          console.log(data);
           if (data.status) {
-            this.openTicketWork();
+            if (data.data.complaint_type_cfrm === 0 && data.data.canDoTktConfirmationWork) {
+              this.openTicketTypeModal(data);
+            } else if (data.data?.pc_hse_conf.travel_allow === 1 && !data.data?.pc_hse_conf.travel_data && data.data.canWork) {
+              this.travelModal();
+            } else {
+              this.openTicketWork(data);
+            }
           } else {
-            this.openTicketTypeModal(data.locations, data.data);
+            this.common.presentToast(data.msg, 'warning');
           }
         },
         error:() => {
@@ -77,15 +85,30 @@ export class ComplaintCardsComponent  implements OnInit {
         complete:() => {
           this.dismissLoading();
         }
-      });
+      })
+      // this.httpComplaint.checkTicketConfirm(this.data.tkts_id).subscribe({
+      //   next:(data) => {
+      //     if (data.status) {
+      //       this.openTicketWork();
+      //     } else {
+      //       this.openTicketTypeModal(data.locations, data.data);
+      //     }
+      //   },
+      //   error:() => {
+      //     this.dismissLoading();
+      //     this.common.presentToast(environment.errMsg, 'danger');
+      //   },
+      //   complete:() => {
+      //     this.dismissLoading();
+      //   }
+      // });
     });
   }
 
-  async openTicketTypeModal(locations: any, data: any) {
+  async openTicketTypeModal(data: any) {
     const modal = await this.modalCtrl.create({
       component: TicketTypeComponent,
-      cssClass: 'my-modal',
-      componentProps: { allData:  this.data, locations: locations, requestData1: data }
+      componentProps: { requestedData: data }
     });
     modal.onWillDismiss().then(disModal => {
       if (disModal.role) {
@@ -95,10 +118,10 @@ export class ComplaintCardsComponent  implements OnInit {
     modal.present();
   }
 
-  openTicketWork() {
+  openTicketWork(data: any) {
     this.router.navigate(['complaint/ticket-work'], {
       queryParams: {
-        data: JSON.stringify(this.data),
+        data: JSON.stringify(data),
       }
     });
   }
@@ -241,6 +264,23 @@ export class ComplaintCardsComponent  implements OnInit {
     modal.onWillDismiss().then(async disModal => {
       if (disModal.role) {
         this.greetEvent.emit(true);
+      }
+    });
+    modal.present();
+  }
+
+  async travelModal() {
+    const modal = await this.modalCtrl.create({
+      component: TravelDetailComponent,
+      cssClass: 'my-modal2',
+      componentProps: {
+        tkts_id: this.data.tkts_id
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      console.log(disModal);
+      if (disModal.role) {
+        // this.greetEvent.emit(true);
       }
     });
     modal.present();
