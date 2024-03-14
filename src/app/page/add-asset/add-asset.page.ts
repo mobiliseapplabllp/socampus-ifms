@@ -120,6 +120,8 @@ export class AddAssetPage implements OnInit {
       warranty_id: [''],
       warranty_start_date: [''],
       warranty_end_date: [''],
+      is_pms: ['', Validators.required],
+      pms_freq: [''],
       vend_code: [''],
       is_insured: [''],
       remark: [''],
@@ -737,13 +739,22 @@ export class AddAssetPage implements OnInit {
     return
   }
 
+  checkPmsCondition() {
+    if (this.addAsset.value.is_pms === '1' && !this.addAsset.value.pms_freq) {
+      alert('Please Enter PMS Frequency');
+      return false;
+    } else {
+      return true
+    }
+  }
+
   changeWarranty() {
     this.addAsset.get('warranty_start_date')?.setValue('');
     this.addAsset.get('warranty_end_date')?.setValue('');
   }
 
   saveAsset() {
-    if (this.checkWarrantyCondition() && this.checkParentCondition()) {
+    if (this.checkWarrantyCondition() && this.checkParentCondition() && this.checkPmsCondition()) {
       this.submitAsset();
     }
   }

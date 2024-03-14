@@ -377,6 +377,23 @@
         <ion-row>
           <ion-col>
             <ion-item>
+              <ion-label color="primary" position="floating">Is PMS  <ion-text color="danger">*</ion-text></ion-label>
+              <ion-select interface="action-sheet" mode="ios" formControlName="is_pms">
+                <ion-select-option value="1">YES</ion-select-option>
+                <ion-select-option value="0">NO</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+          <ion-col size="6" *ngIf="addAsset.value.is_pms === '1'">
+            <ion-item>
+              <ion-label color="primary" position="floating">PMS Frequency(Month)</ion-label>
+              <ion-input type="number" formControlName="pms_freq"></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <ion-item>
               <ion-label color="primary" position="floating">Vendor Name</ion-label>
               <ion-input type="text" formControlName="vend_code"></ion-input>
             </ion-item>
