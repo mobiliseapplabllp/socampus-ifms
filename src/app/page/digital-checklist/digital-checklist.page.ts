@@ -181,10 +181,15 @@ export class DigitalChecklistPage implements OnInit {
     this.presentLoading('Checklist Save in offline. it may take time').then(preLoad => {
       this.httpDigital.getOfflineCheckListFromServer(date).subscribe({
         next:(data: any) => {
-          this.allChecklist = data;
-          this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-          this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
-          this.addBulkCheckList(this.allChecklist);
+          if (data.status) {
+            this.allChecklist = data.data;
+            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
+            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
+            this.addBulkCheckList(this.allChecklist);
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+
         },
         error:() => {
           this.dismissloading();
@@ -198,6 +203,7 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   async addBulkCheckList(checkListData: any) {
+    console.log(checkListData);
     await db.checklist.bulkAdd(checkListData);
   }
 

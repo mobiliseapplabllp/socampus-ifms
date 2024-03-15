@@ -12,7 +12,8 @@ export class DigitalChecklistService {
   ) { }
 
   getOfflineCheckListFromServer(date: string): Observable<any> {
-    return this.http.get('assets/data/offline_checklist' + date + '.json');
+    // return this.http.get('assets/data/offline_checklist' + date + '.json');
+    return this.http.get(this.baseurl + 'digicheck/offlineapp/getAllPendingChecklist?date=' + date);
   }
 
   getSchedule(): Observable<any> {
@@ -48,7 +49,8 @@ export class DigitalChecklistService {
   }
 
   finalSubmitCheckList(formData: any): Observable<any> {
-    return this.http.post(this.baseurl + 'digicheck/update_schedule_status', formData)
+    return this.http.post('https://aovsshdashboard.com/Webservices/test_image.php', formData);
+    // return this.http.post(this.baseurl + 'digicheck/update_schedule_status', formData)
   }
 
   googleTranslate(data: any, lang: string): Observable<any> {
