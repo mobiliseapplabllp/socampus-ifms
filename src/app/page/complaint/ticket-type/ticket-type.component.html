@@ -123,7 +123,7 @@
       <ion-input type="text" readonly formControlName="assignToName"></ion-input>
     </ion-item>
     <ion-note *ngIf="assignUserSelect.label" color="danger" class="ion-margin-start">{{assignUserSelect.label}} {{assignUserSelect.status}} {{assignUserSelect.distance}}</ion-note>
-    <h3 class="ion-padding-start">HSE Detail</h3>
+    <h3 [hidden]="pc_hse_conf.ptw_allow === 0 && pc_hse_conf.ppekit_allow === 0 && pc_hse_conf.buddy_allow === 0" class="ion-padding-start">HSE Detail</h3>
     <ion-row>
       <ion-col size="6" *ngIf="pc_hse_conf.ptw_allow === 1">
         <ion-item>
@@ -167,32 +167,3 @@
     </ion-row>
   </form>
 </ion-content>
-<!-- <ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
-  <ng-template>
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-title>Assign To</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="cancel()">Cancel</ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <ion-item>
-        <ion-input type="text" placeholder="Searcy By..." (ionInput)="search($event)"> </ion-input>
-        <ion-button slot="end" class="ion-text-capitalize" (click)="sortArr()"> SORT <ion-icon [name]="isAscending ? 'chevron-up-sharp':'chevron-down-sharp' "></ion-icon> </ion-button>
-      </ion-item>
-      <ion-radio-group (ionChange)="changeRadioUser($event)" mode="md">
-        <ion-item *ngFor="let dat of assignUser">
-          <ion-radio slot="start" [(ngModel)]="dat.user_id" [value]="dat.isSelect" ></ion-radio>
-          <ion-label>
-            <h2>{{dat.label}}</h2>
-            <p *ngIf="pc_hse_conf.gps_allow === 1">{{dat.gpsData?.status_label}}</p>
-            <p>Ticket: <ion-text color="danger"><b>{{dat.gpsData?.tkt_in_bucket}}</b></ion-text></p>
-          </ion-label>
-          <ion-text slot="end" *ngIf="pc_hse_conf.gps_allow === 1">{{dat.gpsData?.distance}}</ion-text>
-        </ion-item>
-      </ion-radio-group>
-    </ion-content>
-  </ng-template>
-</ion-modal> -->

@@ -534,12 +534,19 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   async hseAssign(val: string) {
+    console.log(this.assignUserSelect);
+    if (val === 'buddy' && !this.assignUserSelect.value) {
+      console.log(this.assignUserSelect);
+      this.httpCommon.presentToast('Please Select Assign To User First', 'warning');
+      return
+    }
     const modal = await this.modalCtrl.create({
       component: HseAssignComponent,
       componentProps: {
         allData: this.allData,
         pc_hse_conf: this.pc_hse_conf,
-        val: val
+        val: val,
+        assignTo: this.assignUserSelect.value
       }
     });
     modal.onWillDismiss().then(async disModal => {
@@ -549,6 +556,9 @@ export class TicketTypeComponent  implements OnInit {
           this.assignUserSelect = disModal.data;
           this.ticketForm.get('assignToName')?.setValue(this.assignUserSelect.label);
           this.ticketForm.get('assignTo')?.setValue(this.assignUserSelect.value + '-' + this.assignUserSelect.team_id);
+          this.buddyUserSelect = [];
+          this.ticketForm.get('buddyName')?.setValue('');
+          this.ticketForm.get('buddyId')?.setValue('');
         } else if (val === 'buddy') {
           this.buddyUserSelect = disModal.data
           this.ticketForm.get('buddyName')?.setValue(this.buddyUserSelect.label);

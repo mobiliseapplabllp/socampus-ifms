@@ -40,9 +40,10 @@ export class TravelDetailComponent  implements OnInit {
         next:(data) => {
           console.log(data);
           if (data.status) {
-            this.travelNote = data.data?.travelInfo.remarkNote
+            this.travelNote = data.data?.travelInfo.remarkNote;
             this.travelMode = data.data?.travelType;
-            this.canDoTravel = data.data?.travelInfo.canDoTravel
+            this.canDoTravel = data.data?.travelInfo.canDoTravel;
+            this.formData.append('dist_from_site', data.data?.travelInfo.distance_in_km);
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

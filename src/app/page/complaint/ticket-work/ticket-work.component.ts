@@ -340,12 +340,12 @@ export class TicketWorkComponent  implements OnInit {
 
 
     if(this.workSpace.value.status == 3 && !this.fileName && this.arr.hasWIP == 0 && this.isPtwMandatory) {
-      alert('Please Add Attachment');
+      alert('Opps you have not attached PTW document');
       return;
     }
 
     if (this.workSpace.value.status === 3 && this.requestedData.ptw_mandatory && this.requestedData.ptwApproved === 0 && !this.ppeFileName) {
-      alert('Please Add PPE Kit Photo');
+      alert('Opps you have not attached PPE kit selfie.');
       return;
     }
 

@@ -9,6 +9,7 @@ import { TicketHistoryComponent } from '../ticket-history/ticket-history.compone
 import { TicketTypeComponent } from '../ticket-type/ticket-type.component';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { TravelDetailComponent } from '../travel-detail/travel-detail.component';
+import { InstructionModalComponent } from '../instruction-modal/instruction-modal.component';
 @Component({
   selector: 'app-complaint-cards',
   templateUrl: './complaint-cards.component.html',
@@ -281,6 +282,21 @@ export class ComplaintCardsComponent  implements OnInit {
       console.log(disModal);
       if (disModal.role) {
         // this.greetEvent.emit(true);
+      }
+    });
+    modal.present();
+  }
+
+  async openInstructionModal() {
+    const modal = await this.modalCtrl.create({
+      component: InstructionModalComponent,
+      cssClass: 'my-modal',
+      backdropDismiss:false,
+      componentProps: { }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role == 'true') {
+
       }
     });
     modal.present();

@@ -34,7 +34,7 @@ export class AssignTicketComponent  implements OnInit {
 
   getTeamsMember() {
     this.presentLoading().then(preLoad => {
-      this.httpComplaint.getTeam(this.allData.pc_id).subscribe({
+      this.httpComplaint.getTeam(this.allData.pc_id, 1).subscribe({
         next:(data) => {
           if (data.status) {
             this.empList = data.data;

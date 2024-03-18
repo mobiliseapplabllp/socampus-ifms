@@ -15,23 +15,11 @@
   <ion-virtual-scroll [items]="empList" approxItemHeight="320px">
     <ion-item *virtualItem="let item; let itemBounds = bounds;">
       <ion-label class="ion-text-wrap">
-        {{item.label}}
+        <h3>{{item.label}}</h3>
+        <p>Ticket: <ion-text color="danger"><b>{{item.gpsData?.tkt_in_bucket}}</b></ion-text></p>
+        <p [hidden]="item.gpsData?.distance_in_m === 0">Distance: <ion-text color="danger" ><b>{{item.gpsData?.distance}}</b></ion-text></p>
       </ion-label>
       <ion-button slot="end" (click)="assign(item)">Assign</ion-button>
     </ion-item>
   </ion-virtual-scroll>
-  <!-- <ion-card>
-    <ion-item>
-      <ion-label position="floating">Select Employee</ion-label>
-      <ion-select interface="action-sheet" [(ngModel)]="emp">
-        <ion-select-option *ngFor="let dat of empList" [value]="dat"> {{dat.label}}</ion-select-option>
-      </ion-select>
-    </ion-item>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <ion-button shape="round" (click)="assign()">Assign</ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-card> -->
-
 </ion-content>

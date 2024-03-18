@@ -1,11 +1,16 @@
 
 <ion-content>
-  <img [src]="url" style="width:100%;height:50%;" onError="src = 'assets/img/safety_inst_err.jpeg'">
-  <ion-item>
+  <img [src]="url" style="width:90%;height:70%;margin-left:5% !important;" onError="src = 'assets/img/safety_inst_err.jpeg'">
+  <ion-row>
+    <ion-col class="ion-text-center">
+      <ion-button expand="block" shape="round" color="success" (click)="closeModal(null, 'true')">I Agree</ion-button>
+    </ion-col>
+  </ion-row>
+  <!-- <ion-item>
     <ion-checkbox slot="start" (ionChange)="changeCheckBox($event)"></ion-checkbox>
     <ion-label class="ion-text-wrap">
       I agree
     </ion-label>
-  </ion-item>
+  </ion-item> -->
 
 </ion-content>

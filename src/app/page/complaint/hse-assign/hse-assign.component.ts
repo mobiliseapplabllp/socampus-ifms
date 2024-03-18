@@ -17,6 +17,7 @@ export class HseAssignComponent  implements OnInit {
   allData: any = [];
   isAscending!: boolean;
   val!: string;
+  assignTo: any;
   constructor(
     private modal: ModalController,
     private loadingController: LoadingController,
@@ -48,6 +49,10 @@ export class HseAssignComponent  implements OnInit {
           if (data.status) {
             this.assignUser = data.data;
             this.assignUserCopy = data.data;
+            if (this.val === 'buddy') {
+              this.assignUser = this.assignUser.filter((val: any) => val.value != this.assignTo);
+              this.assignUserCopy = this.assignUserCopy.filter((val: any) => val.value != this.assignTo);
+            }
           } else {
             this.httpCommon.presentToast(data.msg, 'warning');
           }
