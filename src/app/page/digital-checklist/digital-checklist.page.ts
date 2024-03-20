@@ -70,41 +70,40 @@ export class DigitalChecklistPage implements OnInit {
     let date = moment().format('YYYY-MM-DD');
     this.common.setBarcode('');
     this.deleteCheckList(moment().subtract(7, 'day').format('YYYY-MM-DD'));
-
     this.createCustomCalendar(date);
     // this.getForkData();
   }
 
-  getForkData() {
-    let data: any, output: any
-    data = [{
-      schedule_id:1,
-      name: 'abc',
-      url: 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/setups/app-menu/get_mobile_app_mnu',
-    },{
-      schedule_id:2,
-      name: 'def',
-      url: 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/get_assign_ticket_master?limit=10&page=1&ticket_type=not_resolved'
-    },{
-      schedule_id:3,
-      name: 'ghi',
-      url: 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/dash/mobile_app_engineer_dashboard'
-    }]
+  // getForkData() {
+  //   let data: any, output: any
+  //   data = [{
+  //     schedule_id:1,
+  //     name: 'abc',
+  //     url: 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/setups/app-menu/get_mobile_app_mnu',
+  //   },{
+  //     schedule_id:2,
+  //     name: 'def',
+  //     url: 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/get_assign_ticket_master?limit=10&page=1&ticket_type=not_resolved'
+  //   },{
+  //     schedule_id:3,
+  //     name: 'ghi',
+  //     url: 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/dash/mobile_app_engineer_dashboard'
+  //   }]
 
-    output = data.map((item: any) => ({
-      method: 'get',
-      url: item.url,
-      data: {...item}
-    }));
+  //   output = data.map((item: any) => ({
+  //     method: 'get',
+  //     url: item.url,
+  //     data: {...item}
+  //   }));
 
-    this.httpDigital.postDynamicData(output).subscribe({
-      next:(data) => {
-        console.log(data);
-      },
-      error:() => {},
-      complete:() => {}
-    })
-  }
+  //   this.httpDigital.postDynamicData(output).subscribe({
+  //     next:(data) => {
+  //       console.log(data);
+  //     },
+  //     error:() => {},
+  //     complete:() => {}
+  //   })
+  // }
 
   ionViewDidLeave() {
     this.common.setBarcode('');
@@ -164,7 +163,7 @@ export class DigitalChecklistPage implements OnInit {
         this.allChecklist = data;
         this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned');
         this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned');
-        console.log(this.allChecklist.length + '=' + this.isInternet);
+        console.log(this.assignCheckList);
         if (this.allChecklist.length === 0 && this.isInternet) {
           this.getOfflineCheckListFromServer(date);
         }
@@ -173,8 +172,6 @@ export class DigitalChecklistPage implements OnInit {
         }, 1000);
       }
     });
-
-
   }
 
   getOfflineCheckListFromServer(date: string) {
@@ -183,13 +180,12 @@ export class DigitalChecklistPage implements OnInit {
         next:(data: any) => {
           if (data.status) {
             this.allChecklist = data.data;
-            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
+            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned');
+            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned');
             this.addBulkCheckList(this.allChecklist);
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
-
         },
         error:() => {
           this.dismissloading();
@@ -206,7 +202,6 @@ export class DigitalChecklistPage implements OnInit {
     console.log(checkListData);
     await db.checklist.bulkAdd(checkListData);
   }
-
 
   async deleteCheckList(date: any) {
     let newDate = moment(date).add(1, 'day').format('YYYY-MM-DD');
@@ -282,7 +277,6 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   changeCalendarDate(dat: any) {
-    console.log(dat);
     this.slides.slideTo(dat.ind - 3);
     for (var i = 0 ; i < this.dateArr.length; i++) {
       if (dat.date == this.dateArr[i].date) {
@@ -292,7 +286,6 @@ export class DigitalChecklistPage implements OnInit {
       }
     }
     this.selectedDate = dat.fulldate;
-    console.log(this.selectedDate);
     this.assignCheckList = [];
     this.attendedCheckList = [];
     this.getCheckListCurrentDate(this.selectedDate);
@@ -300,7 +293,19 @@ export class DigitalChecklistPage implements OnInit {
 
 
   openFillReport(data: any) {
-    console.log(data);
+    const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
+    const currentDate = moment(moment().format('YYYY-MM-DD'));
+    if (!currentDate.isSame(pastDate)) {
+      this.common.presentToast('You can fill only Current Date Checklist', 'warning');
+      return;
+    }
+    const pastDateTime = moment(data.sch_dateTime);
+    const currentDateTime = moment();
+    const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
+    if (!isCurrentDatetimeBigger) {
+      this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
+      return;
+    }
     this.openPageUrl(data);
     return;
     if (this.platform.is('capacitor')) {
@@ -356,6 +361,10 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   openBarcode() {
+    if (!this.isInternet) {
+      this.common.presentToast('Internet Not Working', 'warning');
+      return
+    }
     this.allChecklist = [];
     this.qrType = 'otherbarcode';
     this.router.navigateByUrl('/barcode');

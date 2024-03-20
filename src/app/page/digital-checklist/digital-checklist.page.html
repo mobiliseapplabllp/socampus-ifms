@@ -59,8 +59,8 @@
         <ion-item lines="none" color="none">
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
-            <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}-{{dat.offline_save}}</b></h2>
-            <p><b>{{dat.schedule_time}}</b></p>
+            <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
+            <p><b>{{dat.sch_dateTime}}</b></p>
             <p><b>{{dat.location_desc}}</b></p>
             <p><b>{{dat.barcode}}</b></p>
           </ion-label>
@@ -73,7 +73,7 @@
         <ion-item lines="none" color="none"  (click)="openFillReport(dat)">
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
-            <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}-{{dat.offline_save}}</b></h2>
+            <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
             <p><b>{{dat.schedule_time}}</b></p>
             <p><b>{{dat.location_desc}}</b></p>
             <p><b>{{dat.barcode}}</b></p>

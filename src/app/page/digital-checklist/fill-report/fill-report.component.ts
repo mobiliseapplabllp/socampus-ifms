@@ -10,6 +10,7 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { checklist, db } from '../../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
+import * as moment from 'moment';
 @Component({
   selector: 'app-fill-report',
   templateUrl: './fill-report.component.html',
@@ -19,28 +20,20 @@ export class FillReportComponent  implements OnInit {
   @ViewChildren("a") private itemlist!: QueryList<ElementRef>;
   temp:any = [];
   scheduleArr1$ = liveQuery(() => this.getScheuleFromLocal());
-  // scheduleArr1$: any;
   scheduleArr: any = [];
   schedule_id: any;
   loading: any;
   remark: any;
   signatureBase64!: string;
-  // checkListUniqeId!: string;
   schedule_status: any;
   sign_attachment: any;
-  // cc_desc: any;
-  // pc_location: any;
-  // on_behalf=1
   on_behalf: any;
   remarkErr = false;
   arr: any = [];
-  // offlineId: any = [];
-  // isAlreadySaved!: boolean;
   selectedLanguage =  'en';
   index: any;
-  // qusList: any = [];
   loop = false;
-  // allData: any = [];
+  isInternet!:boolean;
   constructor(
     private activeRoute: ActivatedRoute,
     private httpDigital: DigitalChecklistService,
@@ -52,6 +45,14 @@ export class FillReportComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
+    console.log(moment().format('YYYY-MM-DD H:mm:ss'));
+    this.common.checkInternet().then(res => {
+      if (res) {
+        this.isInternet = true;
+      } else {
+        this.isInternet = false;
+      }
+    });
     this.selectedLanguage = 'en';
     this.activeRoute.queryParams.subscribe((res) => {
       this.on_behalf = res['isOnBehalf'];
@@ -71,6 +72,7 @@ export class FillReportComponent  implements OnInit {
     this.temp = this.scheduleArr1$.subscribe({
       next:(data) => {
         this.scheduleArr = [...data];
+        this.schedule_status = this.scheduleArr[0].schedule_status
         this.remark =this.scheduleArr[0].final_remark;
         this.signatureBase64 =this.scheduleArr[0].base64_sign;
       },
@@ -163,10 +165,10 @@ export class FillReportComponent  implements OnInit {
     this.loop = true;
     val.bgcolor = true;
     val.q_desc_temp = val.q_desc
-    if (!this.platform.is('capacitor')) {
-      this.listenAction(val, 'No');
-      return;
-    }
+    // if (!this.platform.is('capacitor')) {
+    //   this.listenAction(val, 'No');
+    //   return;
+    // }
 
     const isLanguageSupported = async (lang: string) => {
       const isSupported = await TextToSpeech.isLanguageSupported({ lang });
@@ -178,7 +180,14 @@ export class FillReportComponent  implements OnInit {
         this.speak(val);
       }
     };
-    isLanguageSupported(this.selectedLanguage);
+    if (this.platform.is('capacitor')) {
+      isLanguageSupported(this.selectedLanguage);
+    } else {
+      this.changeBackground(ind);
+      this.scroll(ind);
+      this.speak(val);
+    }
+
   }
 
   async speak(val: any) {
@@ -191,6 +200,9 @@ export class FillReportComponent  implements OnInit {
         volume: 1.0,
         category: 'ambient',
       }).finally(() => {
+        if (!this.isInternet) {
+          return;
+        }
         val.speak = true;
         if (val.tempoutput === 'document') {
           this.presentActionSheet(val, 2);
@@ -306,12 +318,10 @@ export class FillReportComponent  implements OnInit {
   }
 
   changeResponseAction(val: any) {
-    console.log(val);
     if (val.rspns && val.rspns === val.rspns_temp) {
       return;
     }
     const obj = val.options.filter((val1: any) => val1.optn_id === val.rspns)[0];
-    console.log(obj);
     val.isRemarkMandatory = obj.is_rmrk_mandatory;
     val.isDocMandatory = obj.is_doc_mandatory;
     val.rspns_temp = val.rspns;
@@ -323,14 +333,11 @@ export class FillReportComponent  implements OnInit {
   }
 
   actionUpdateChecklist(obj?: any) {
-    console.log('new data');
     const updatedData: Partial<checklist> = this.scheduleArr[0];
     this.updateCheckList(this.schedule_id, updatedData);
   }
 
   updateCheckList(scheduleUniqueId: number, updatedData: Partial<checklist>) {
-    console.log(scheduleUniqueId);
-    console.log(updatedData);
     return db.checklist
     .where('schedule_id')
     .equals(scheduleUniqueId)
@@ -454,7 +461,6 @@ export class FillReportComponent  implements OnInit {
     const response = await fetch(photo.webPath);
     const blob = await response.blob();
     val.imagename = blob;
-    console.log(val);
     this.actionUpdateChecklist();
     this.repeatLoop();
     return;
@@ -493,8 +499,9 @@ export class FillReportComponent  implements OnInit {
       if (data.hasOwnProperty(key)) {
         const value = data[key];
         const currentKey = parentKey ? `${parentKey}[${key}]` : key;
+        let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
         if (value instanceof File || (value instanceof Blob && typeof value !== 'string')) {
-          formData.append(currentKey, value, 'blob');
+          formData.append(currentKey, value, random);
         } else if (Array.isArray(value)) {
           value.forEach((arrayItem, index) => {
             const arrayItemKey = `${currentKey}[${index}]`;
@@ -511,17 +518,22 @@ export class FillReportComponent  implements OnInit {
   }
 
   testSubmit() {
-    console.log(this.scheduleArr[0]);
+    this.scheduleArr[0].offline_save = 'false'
+    const formData = this.convertToFormData(this.scheduleArr[0]);
     this.presentLoading().then(preLoad => {
-      this.scheduleArr[0].offline_save = 'false'
-      const formData = this.convertToFormData(this.scheduleArr[0]);
       this.httpDigital.finalSubmitCheckList(formData).subscribe({
         next:(data) => {
-          this.scheduleArr[0].schedule_status = 'attended'
-          this.actionUpdateChecklist();
-          this.navCtrl.pop();
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            this.scheduleArr[0].schedule_status = 'attended'
+            this.actionUpdateChecklist();
+            this.navCtrl.pop();
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
         },
         error:() => {
+          this.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
@@ -529,7 +541,6 @@ export class FillReportComponent  implements OnInit {
         }
       });
     })
-
   }
 
   finalSubmit() {
@@ -543,16 +554,27 @@ export class FillReportComponent  implements OnInit {
       this.common.presentToast('Please Write Signature', 'warning');
       return;
     }
-    console.log(this.scheduleArr);
     for (let i = 0; i < this.scheduleArr.length; i++) {
       for (let j = 0; j < this.scheduleArr[i].qus.length; j++) {
         if (!this.scheduleArr[i].qus[j].rspns) {
-          this.common.presentToastWithOk(`Please add Response for Question No ${ j + 1} from Category ${ this.scheduleArr[i].cat_desc }`, 'warning');
+          this.common.presentToastWithOk(`Please add Response for Question No ${ j + 1}`, 'warning');
           this.scheduleArr[i].qus[j].isNotFill = true;
           this.scroll(j);
           return
         } else {
-          this.scheduleArr[i].qus[j].isNotFill = false;
+          if (this.scheduleArr[i].qus[j].isRemarkMandatory == 1 && !this.scheduleArr[i].qus[j].remark) {
+            this.common.presentToast(`Please Add Remark for Question No ${j+1}`, 'warning');
+            this.scheduleArr[i].qus[j].isNotFill = true;
+            this.scroll(j);
+            return;
+          } else if(this.scheduleArr[i].qus[j].isDocMandatory == 1 && !this.scheduleArr[i].qus[j].imagename) {
+            this.common.presentToast(`Please Add Attachment for Question No ${j+1}`, 'warning');
+            this.scheduleArr[i].qus[j].isNotFill = true;
+            this.scroll(j);
+            return;
+          } else {
+            this.scheduleArr[i].qus[j].isNotFill = false;
+          }
         }
       }
     }
@@ -562,7 +584,8 @@ export class FillReportComponent  implements OnInit {
       if (res) {
         this.testSubmit()
       } else {
-        this.common.presentToastWithOk('Internet not Working Your Checklist Saved in Local Db', 'tertiary');
+        this.common.presentToast('Internet not Working Your Checklist Saved in Local Db', 'tertiary');
+        this.scheduleArr[0].fill_date_time = moment().format('YYYY-MM-DD H:mm:ss');
         this.scheduleArr[0].offline_save = 'true'
         this.actionUpdateChecklist();
         this.navCtrl.pop();
@@ -699,7 +722,7 @@ export class FillReportComponent  implements OnInit {
     this.loading = await this.loadingController.create({
       cssClass: 'my-custom-class',
       message: message,
-      duration: 8000
+      duration: 20000
     });
     await this.loading.present();
   }

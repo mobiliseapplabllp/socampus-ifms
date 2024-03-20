@@ -48,7 +48,7 @@ export class AppComponent {
         if (res) {
           this.refreshToken();
         } else {
-          this.common.presentToastWithOk('You are in Offline Mode', 'warning')
+          this.common.presentToast('You are in Offline Mode', 'warning')
           this.router.navigateByUrl('/list-master', { replaceUrl: true });
         }
       });

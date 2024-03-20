@@ -4,7 +4,7 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title >Fill Reports</ion-title>
-    <ion-buttons slot="end">
+    <ion-buttons slot="end" [hidden]="!isInternet" >
       <ion-button id="click-trigger" slot="icon-only">
         <ion-icon name="language-outline"></ion-icon>
       </ion-button>
@@ -108,14 +108,14 @@
         </ion-row>
         <ion-item [ngClass]="{redBorder: val.isRemarkMandatory === 1 && !val.remark }">
           <ion-input type="text" [(ngModel)]="val.remark" placeholder="Enter Remark" (change)="changeRemark(val)" [disabled]="dat.schedule_status === 2 || dat.schedule_status === 'attended' || dat.schedule_status === 'closed' || !val.rspns"></ion-input>
-          <ion-buttons slot="end" [hidden]="dat.schedule_status === 2 || dat.schedule_status === 'attended'">
+          <ion-buttons slot="end" [hidden]="dat.schedule_status === 2 || dat.schedule_status === 'attended'" *ngIf="isInternet">
             <ion-button slot="icon-only" (click)="listenCondition(val)">
               <ion-icon name="mic-outline"></ion-icon>
             </ion-button>
           </ion-buttons>
         </ion-item>
         <ion-row>
-          <ion-col size="6" class="ion-no-padding" >
+          <ion-col size="6" class="ion-padding-start" >
             <div [hidden]="dat.schedule_status === 2 || dat.schedule_status === 'attended' || dat.schedule_status === 'closed'" >
               <ion-button size="small" [color]="!val.imagename ? 'primary': 'success'" [fill]="!val.imagename ? 'outline' : 'solid' " (click)="presentActionSheet(val, 1)" [ngClass]="{redBorder: val.isDocMandatory === 1 &&  !val.imagename}">
                 IMG
@@ -137,7 +137,7 @@
     <ion-label position="floating">Remark</ion-label>
     <ion-input type="text" [(ngModel)]="remark" [disabled]="schedule_status === 2 || schedule_status === 'attended' || schedule_status === 'closed' "></ion-input>
   </ion-item>
-  <img [src]="sign_attachment" style="width:200px;height:200px;" *ngIf="sign_attachment" style="border:1px solid black">
+  <img [src]="signatureBase64" style="width:200px;height:200px;" *ngIf="signatureBase64" style="border:1px solid black">
   <ion-item lines="none" [hidden]="schedule_status === 2 || schedule_status === 'attended'">
     <ion-button (click)="openSign()" [fill]="signatureBase64 ? 'solid':'outline'">Signature <ion-icon name="checkmark-done-outline" slot="end" *ngIf="signatureBase64"></ion-icon></ion-button>
     <img [src]="signatureBase64" style="height:30px;width:30px;border:1px solid black" slot="end" *ngIf="signatureBase64">

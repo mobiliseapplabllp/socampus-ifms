@@ -13,7 +13,8 @@ export interface checklist {
   schedule_id: number,
   schedule_status: string,
   schedule_unique_id: string,
-  offline_save: string
+  offline_save: string,
+  fill_date_time: string,
   qus:[{
     cat_id: number,
     critical_desc: string,
@@ -60,7 +61,7 @@ export class AppDB extends Dexie {
   constructor() {
     super('ngdexieliveQuery');
     this.version(4).stores({
-      checklist: '++unique_id, barcode, checklist_cat_id,chk_cat_name,device_name,location_desc,sch_dateTime,sch_endDateTime,schedule_date,schedule_id,schedule_status,schedule_unique_id,offline_save,qus'
+      checklist: '++unique_id, barcode, checklist_cat_id,chk_cat_name,device_name,location_desc,sch_dateTime,sch_endDateTime,schedule_date,schedule_id,schedule_status,schedule_unique_id,offline_save,fill_date_time,qus'
     });
   }
 

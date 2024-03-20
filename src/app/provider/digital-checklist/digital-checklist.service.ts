@@ -49,8 +49,7 @@ export class DigitalChecklistService {
   }
 
   finalSubmitCheckList(formData: any): Observable<any> {
-    return this.http.post('https://aovsshdashboard.com/Webservices/test_image.php', formData);
-    // return this.http.post(this.baseurl + 'digicheck/update_schedule_status', formData)
+    return this.http.post(this.baseurl + 'digicheck/offlineapp/saveAllPendingChecklist', formData);
   }
 
   googleTranslate(data: any, lang: string): Observable<any> {
