@@ -734,6 +734,7 @@ export class FillReportComponent  implements OnInit {
   }
 
   viewDocs(url: any) {
+    console.log(url);
     this.common.openDoc(url);
   }
 

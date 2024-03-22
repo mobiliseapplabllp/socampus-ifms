@@ -21,7 +21,7 @@ export class BarcodeComponent  implements OnInit {
     if (this.platform.is('capacitor')) {
       this.startScan();
     } else {
-      let random = 'https://ifmsuat.mobilisepro.com/backend/api/meter/ifms/meter-schedule-by-qrcode/eyJpdiI6IkZtcGxHR0x6TXNaZUk5UnF5bHdvbkE9PSIsInZhbHVlIjoidFU0cW9tV0ZwRElta3k3K2U3a2UySmpXSzRoem5rcDdqUVBsZFdxTk5FYz0iLCJtYWMiOiJlZTEwZTgxOWRjYzFkZGU4NmZlMjAyMzAwNmU5YjI3M2M1ZTZlNTdhNDZlNzVmZTkyNWE1NzNjZWU3MzZjZGFmIn0%3D';
+      let random = 'https://ifmsuat.mobilisepro.com/#/complaint-qr-code/eyJpdiI6Ik5vK0lmejRkbVdncHlrSXE4NzdzUEE9PSIsInZhbHVlIjoiN3h0U0x2dWorSS9YNzI3dXFaVHJsUT09IiwibWFjIjoiYzM0MDk5NGM4OWEyZmUzMmQ0NTA1MGJkYWJjMmRjZjBjNWU1NjdjMWQ5YjE3NzY2MDU0NDdkZDJjNGE5OTAyZSJ9';
       this.barcodeNo = random;
       setTimeout(() => {
         this.common.setBarcode(this.barcodeNo);

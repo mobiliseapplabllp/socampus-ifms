@@ -12,5 +12,6 @@ export const environment = {
   db: 'socampuseng.db',
   db_location: 'default',
   errMsg: 'Internal Server Error Please try again!!!',
-  source: 'Mobile'
+  source: 'Mobile',
+  LARAVEL_KEY: '8+Fjns9RCg2HJfhHCirTe6FE3NCHSq+W3014tuKBZH4='
 };

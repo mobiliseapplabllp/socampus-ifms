@@ -41,7 +41,7 @@ export class ComplaintCardsComponent  implements OnInit {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
-      console.log(this.userData);
+
     }
   }
 
@@ -50,7 +50,6 @@ export class ComplaintCardsComponent  implements OnInit {
   }
 
   async openSite() {
-    console.log('my site');
     const modal = await this.modalCtrl.create({
       component: SiteDetailComponent,
       cssClass: 'my-modal2',

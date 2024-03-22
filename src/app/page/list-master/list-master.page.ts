@@ -22,6 +22,7 @@ import { TicketHistoryComponent } from '../complaint/ticket-history/ticket-histo
 import { db } from '../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
 import { Network } from '@capacitor/network';
+// import * as CryptoJS from 'crypto-js';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -140,6 +141,12 @@ export class ListMasterPage implements OnInit {
 
   ngOnInit() {
     this.getHomeLoad();
+    // let val = this.common.decryptValue('eyJpdiI6ImxHTUh5VDExN0tESU5wZU9jSkRmK1E9PSIsInZhbHVlIjoiU1Bud1p6dFA0SFFCMjA1U0RjYi9IaWtWd0w0WU83bW5WdjF6MDF3WUFLZz0iLCJtYWMiOiI2ZDgxNDlkMzEzOTk1NDI2YjdjNWM0MWZhYzc2ZWZkMjE5NjI4ODM4M2U4NTk0MTg1NDAyZGIyNDY3N2RlMjJlIn0=');
+    // if (val) {
+    //   console.log(val);
+    // } else {
+    //   console.log('Invalid Encryption');
+    // }
   }
 
   getHomeLoad() {

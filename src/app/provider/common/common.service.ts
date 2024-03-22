@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { Network } from '@capacitor/network';
 import { Observable } from 'rxjs';
+import * as CryptoJS from 'crypto-js';
+import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
@@ -64,9 +66,31 @@ export class CommonService {
   async checkInternet() {
     return new Promise(async resolve => {
       const status = await Network.getStatus();
-      console.log('Network status:', status.connected);
       resolve(status.connected);
     });
+  }
+
+  decryptValue(encryptedValue: string) {
+    var encrypted: any, iv, value, key, key1, decrypted,decrypted1,regex,matches,extractedString
+    encrypted = decodeURIComponent(encryptedValue);
+    try {
+      encrypted = atob(encrypted);
+      encrypted = JSON.parse(encrypted);
+      iv = CryptoJS.enc.Base64.parse(encrypted.iv);
+      value = encrypted.value;
+      key = environment.LARAVEL_KEY;
+      key1 = CryptoJS.enc.Base64.parse(key);
+      decrypted = CryptoJS.AES.decrypt(value, key1, {
+        iv: iv
+      });
+      decrypted1 = decrypted.toString(CryptoJS.enc.Utf8);
+      regex = /"([^"]+)"/;
+      matches = decrypted1.match(regex);
+      extractedString = matches ? matches[1] : null;
+      return extractedString;
+    } catch {
+      return '';
+    }
   }
 
 }
