@@ -63,7 +63,7 @@
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
             <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
-            <p><b>{{dat.sch_dateTime}}</b></p>
+            <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
             <p><b>({{dat.loc_id}}){{dat.location_desc}}</b></p>
             <p><b>{{dat.barcode}}</b></p>
             <p><b>{{dat.assign_to}}</b></p>
@@ -78,7 +78,7 @@
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
             <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
-            <p><b>{{dat.sch_dateTime}}</b></p>
+            <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
             <p><b>({{dat.loc_id}}){{dat.location_desc}}</b></p>
             <p><b>{{dat.barcode}}</b></p>
             <p><b>{{dat.assign_to}}</b></p>

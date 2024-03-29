@@ -4,7 +4,7 @@ import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { checklist, db } from '../../../provider/local-db/local-db.service';
 import { environment } from 'src/environments/environment';
-import { LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController, NavController } from '@ionic/angular';
 @Component({
   selector: 'app-offline-data',
   templateUrl: './offline-data.component.html',
@@ -19,7 +19,9 @@ export class OfflineDataComponent  implements OnInit {
     private common: CommonService,
     private httpDigi: DigitalChecklistService,
     private loadingController: LoadingController,
-    private httpDigital: DigitalChecklistService
+    private httpDigital: DigitalChecklistService,
+    private navCtrl: NavController,
+    private alertController: AlertController
   ) { }
 
   ngOnInit() {
@@ -68,6 +70,34 @@ export class OfflineDataComponent  implements OnInit {
     });
   }
 
+  async presentAlertConfirm() {
+    const alert = await this.alertController.create({
+      cssClass: 'my-custom-class',
+      header: 'Danger',
+      message: 'If you have clean DB your submitted checklist will destroy please make sure your all Local submitted checklist uploaded to server',
+      mode: 'ios',
+      buttons: [{
+        text: 'Cancel',
+          handler: (data) => {
+            console.log("Cancel");
+          }
+        },{
+          text: 'YES',
+          handler: (data) => {
+            this.cleanDb();
+          }
+        }]
+    });
+    await alert.present();
+  }
+
+
+  cleanDb() {
+    this.common.presentToast('Digital Checklist is Reset', 'success');
+    db.checklist.clear();
+    this.navCtrl.pop();
+  }
+
 
   changeDc() {
     this.checkListSelect = this.checkList.filter((val: any) => val.isSelect);
@@ -106,7 +136,6 @@ export class OfflineDataComponent  implements OnInit {
   }
 
   actionUpdateChecklist(dat: any) {
-    console.log(dat);
     const updatedData: Partial<checklist> = dat;
     this.updateCheckList(dat.schedule_id, updatedData);
   }

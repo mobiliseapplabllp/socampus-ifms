@@ -76,7 +76,6 @@ export class ComplaintPage implements OnInit {
           if (data.status) {
             this.page = this.page + 1;
             this.tickets = data.data.data;
-            console.log(this.tickets);
             this.ticketsCopy = data.data.data;
             this.ticketStatus = status;
           } else {

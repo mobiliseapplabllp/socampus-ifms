@@ -63,6 +63,7 @@ export class PendingTaskComponent  implements OnInit {
 
 
   getPendingTicket() {
+    console.log('hit apis');
     this.httpCompalint.getTicketMaster(null, this.page).subscribe({
       next:(data) => {
         if (data.status) {

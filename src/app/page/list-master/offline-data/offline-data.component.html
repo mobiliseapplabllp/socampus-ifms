@@ -5,7 +5,7 @@
     </ion-buttons>
     <ion-title>Offline Data</ion-title>
     <ion-buttons slot="end">
-      <ion-button>Clean</ion-button>
+      <ion-button (click)="presentAlertConfirm()" color="danger" >Reset</ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -36,7 +36,7 @@
           <ion-checkbox slot="start" [(ngModel)]="dat.isSelect" (ionChange)="changeDc()"></ion-checkbox>
           <ion-label class="ion-text-wrap">
             <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
-            <p><b>{{dat.sch_dateTime}}</b></p>
+            <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
             <p><b>({{dat.loc_id}}){{dat.location_desc}}</b></p>
             <p><b>{{dat.barcode}}</b></p>
             <p><b>{{dat.assign_to}}</b></p>

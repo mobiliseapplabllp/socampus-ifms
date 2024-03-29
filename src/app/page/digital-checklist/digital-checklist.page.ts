@@ -81,7 +81,7 @@ export class DigitalChecklistPage implements OnInit {
     }
     let date = moment().format('YYYY-MM-DD');
     this.common.setBarcode('');
-    this.deleteCheckList(moment().subtract(7, 'day').format('YYYY-MM-DD'));
+    this.deleteCheckList(moment().subtract(3, 'day').format('YYYY-MM-DD'));
     this.createCustomCalendar(date);
     // this.getForkData();
   }
@@ -129,9 +129,11 @@ export class DigitalChecklistPage implements OnInit {
       this.scanBarcodeDetail.isScanBarcode = true;
       this.common.setBarcode('');
       split = bar.split('/');
+      console.log(split);
       if (split.length === 6) {
         type = split[4];
         ecn_key = split[5];
+        console.log(ecn_key);
         let val = this.common.decryptValue(ecn_key);
         console.log(val);
         this.scanBarcodeDetail.QRType = type;
@@ -147,9 +149,8 @@ export class DigitalChecklistPage implements OnInit {
     } else if(this.scanBarcodeDetail.isScanBarcode) {
       this.getCheckListByBarcode(this.scanBarcodeDetail.QRType, this.scanBarcodeDetail.QRValue);
     } else {
-      this.getCheckListCurrentDate(this.selectedDate);
+      this.checkCurrentDateDG(this.selectedDate);
     }
-
     // if (bar) {
     //   this.common.setBarcode('');
     //   if (this.qrType == 'otherbarcode') {
@@ -186,7 +187,7 @@ export class DigitalChecklistPage implements OnInit {
     this.scanBarcodeDetail.isScanBarcode = false;
     this.scanBarcodeDetail.QRType = '';
     this.scanBarcodeDetail.QRValue = '';
-    this.getCheckListCurrentDate(this.selectedDate);
+    this.checkCurrentDateDG(this.selectedDate);
   }
 
   getCheckListByBarcode(type: string, val: any) {
@@ -248,20 +249,20 @@ export class DigitalChecklistPage implements OnInit {
         this.deleteCheckList(this.selectedDate);
         setTimeout(() => {
           sub.unsubscribe();
-          this.getCheckListCurrentDate(this.selectedDate);
+          this.checkCurrentDateDG(this.selectedDate);
         },500);
       }
     });
   }
 
-  async getCheckListCurrentDate(date: string) {
-    const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date, assign_to: this.userData.id}).or('schedule_status').notEqual('assigned').toArray());
-    // const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date, assign_to: this.userData.id}).or({schedule_date: date}).toArray());
+  checkCurrentDateDG(date: string) {
+    const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).toArray());
     const sub = friendsObservable.subscribe({
       next:(data) => {
         this.allChecklist = data;
-        this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned');
-        this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned');
+        console.log(this.allChecklist);
+        this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+        this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
         if (this.allChecklist.length === 0 && this.isInternet) {
           this.getOfflineCheckListFromServer(date);
         }
@@ -271,6 +272,24 @@ export class DigitalChecklistPage implements OnInit {
       }
     });
   }
+
+  // async getCheckListCurrentDate(date: string) {
+  //   const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date, assign_to: this.userData.id}).or('schedule_status').notEqual('assigned').toArray());
+  //   // const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date, assign_to: this.userData.id}).or({schedule_date: date}).toArray());
+  //   const sub = friendsObservable.subscribe({
+  //     next:(data) => {
+  //       this.allChecklist = data;
+  //       this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned');
+  //       this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned');
+  //       if (this.allChecklist.length === 0 && this.isInternet) {
+  //         this.getOfflineCheckListFromServer(date);
+  //       }
+  //       setTimeout(() => {
+  //         sub.unsubscribe();
+  //       }, 1000);
+  //     }
+  //   });
+  // }
 
   getOfflineCheckListFromServer(date: string) {
     this.presentLoading('Checklist Save in offline. it may take time').then(preLoad => {
@@ -386,7 +405,7 @@ export class DigitalChecklistPage implements OnInit {
     this.selectedDate = dat.fulldate;
     this.assignCheckList = [];
     this.attendedCheckList = [];
-    this.getCheckListCurrentDate(this.selectedDate);
+    this.checkCurrentDateDG(this.selectedDate);
   }
 
 

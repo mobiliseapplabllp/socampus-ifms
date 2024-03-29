@@ -137,7 +137,7 @@
     <ion-label position="floating">Remark</ion-label>
     <ion-input type="text" [(ngModel)]="remark" [disabled]="schedule_status === 2 || schedule_status === 'attended' || schedule_status === 'closed' "></ion-input>
   </ion-item>
-  <img [src]="signatureBase64" style="width:200px;height:200px;" *ngIf="signatureBase64" style="border:1px solid black">
+  <img [src]="signatureBase64" style="width:200px;height:200px;" *ngIf="signatureBase64 && schedule_status === 2 || schedule_status === 'attended'" style="border:1px solid black">
   <ion-item lines="none" [hidden]="schedule_status === 2 || schedule_status === 'attended'">
     <ion-button (click)="openSign()" [fill]="signatureBase64 ? 'solid':'outline'">Signature <ion-icon name="checkmark-done-outline" slot="end" *ngIf="signatureBase64"></ion-icon></ion-button>
     <img [src]="signatureBase64" style="height:30px;width:30px;border:1px solid black" slot="end" *ngIf="signatureBase64">

@@ -21,7 +21,8 @@ export class BarcodeComponent  implements OnInit {
     if (this.platform.is('capacitor')) {
       this.startScan();
     } else {
-      let random = 'https://ifmsuat.mobilisepro.com/#/complaint-qr-code/eyJpdiI6Ik5vK0lmejRkbVdncHlrSXE4NzdzUEE9PSIsInZhbHVlIjoiN3h0U0x2dWorSS9YNzI3dXFaVHJsUT09IiwibWFjIjoiYzM0MDk5NGM4OWEyZmUzMmQ0NTA1MGJkYWJjMmRjZjBjNWU1NjdjMWQ5YjE3NzY2MDU0NDdkZDJjNGE5OTAyZSJ9';
+      // let random = 'https://ifmsuat.mobilisepro.com/#/complaint-qr-code/eyJpdiI6Ik5vK0lmejRkbVdncHlrSXE4NzdzUEE9PSIsInZhbHVlIjoiN3h0U0x2dWorSS9YNzI3dXFaVHJsUT09IiwibWFjIjoiYzM0MDk5NGM4OWEyZmUzMmQ0NTA1MGJkYWJjMmRjZjBjNWU1NjdjMWQ5YjE3NzY2MDU0NDdkZDJjNGE5OTAyZSJ9';
+      let random = 'https://ifmsuat.mobilisepro.com/#/complaint-qr-code/eyJpdiI6InZWL0ZuS01zTXNCTjgxTmx1eWluVWc9PSIsInZhbHVlIjoiT0JDNFlIL3F4ZVI1SUM3OXgrK3F0UT09IiwibWFjIjoiN2YzYzYzOWQ3Y2UxNmM4OTQ3YjdlMzAwZjFiZDQ1OWY1MDIwNDNkNTJlMjNlMGYyNDAzM2E2ZjM1MjhiYjc1YyJ9'
       this.barcodeNo = random;
       setTimeout(() => {
         this.common.setBarcode(this.barcodeNo);

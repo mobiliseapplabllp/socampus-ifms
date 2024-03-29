@@ -46,7 +46,14 @@ export class MenuComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.getMenuDetail();
+    this.common.checkInternet().then(res => {
+      if (res) {
+        this.getMenuDetail();
+      } else {
+        let menu_list = JSON.parse(localStorage.getItem('home_menu')!);
+        this.chunkedArray(menu_list);
+      }
+    });
   }
 
   getMenuDetail() {

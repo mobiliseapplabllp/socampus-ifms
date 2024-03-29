@@ -32,7 +32,6 @@ export class ListMasterPage implements OnInit {
   @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
   @ViewChild('mySlider', { static: true }) slides!: IonSlides;
   @ViewChild('canvas') canvas!: ElementRef;
-  // offliveSavedCheckList$ = liveQuery(() => this.getSavedChecklist());
   myMenu: any = [];
   menuTemp: any = [];
   menuNew: any = [];
@@ -47,11 +46,6 @@ export class ListMasterPage implements OnInit {
   userData: any = [];
   result: any = [];
   userName!: string;
-  // breakdown = '';
-  // pms = '';
-  // indent = '';
-
-
   isInternet!: boolean;
   bars: any;
   title = 'ng-chart';
@@ -141,12 +135,6 @@ export class ListMasterPage implements OnInit {
 
   ngOnInit() {
     this.getHomeLoad();
-    // let val = this.common.decryptValue('eyJpdiI6ImxHTUh5VDExN0tESU5wZU9jSkRmK1E9PSIsInZhbHVlIjoiU1Bud1p6dFA0SFFCMjA1U0RjYi9IaWtWd0w0WU83bW5WdjF6MDF3WUFLZz0iLCJtYWMiOiI2ZDgxNDlkMzEzOTk1NDI2YjdjNWM0MWZhYzc2ZWZkMjE5NjI4ODM4M2U4NTk0MTg1NDAyZGIyNDY3N2RlMjJlIn0=');
-    // if (val) {
-    //   console.log(val);
-    // } else {
-    //   console.log('Invalid Encryption');
-    // }
   }
 
   getHomeLoad() {
@@ -168,6 +156,13 @@ export class ListMasterPage implements OnInit {
         }
       }
     });
+  }
+
+  handleRefresh(event: any) {
+    setTimeout(() => {
+      event.target.complete();
+    }, 2000);
+    this.getHomeLoad();
   }
 
   async getOffLineCheckList() {
@@ -200,11 +195,16 @@ export class ListMasterPage implements OnInit {
         },{
           text: 'YES',
           handler: (data) => {
-            this.router.navigateByUrl('/list-master/offline-data');
+            // this.router.navigateByUrl('/list-master/offline-data');
+            this.openPageRoute('/list-master/offline-data')
           }
         }]
     });
     await alert.present();
+  }
+
+  openPageRoute(url: string) {
+    this.router.navigateByUrl(url);
   }
 
   convertToFormData(data: any, formData?: FormData, parentKey?: string): FormData {
@@ -234,18 +234,17 @@ export class ListMasterPage implements OnInit {
     if (!this.isInternet) {
       return;
     }
-    console.log(this.segments);
-    if (this.segments === 'helpdesk') {
-      this.page = 1;
-      this.pendingTicket = [];
-      this.getPendingTicket();
-    } else if (this.segments === 'digital') {
-      this.getSchedule(moment().format('YYYY-MM-DD'));
-    } else if (this.segments === 'pms') {
-      this.getPendingPms();
-    } else if (this.segments === 'meter') {
-      this.getPendingMeter();
-    }
+    // if (this.segments === 'helpdesk' ) {
+    //   this.page = 1;
+    //   this.pendingTicket = [];
+    //   this.getPendingTicket();
+    // } else if (this.segments === 'digital') {
+    //   this.getSchedule(moment().format('YYYY-MM-DD'));
+    // } else if (this.segments === 'pms') {
+    //   this.getPendingPms();
+    // } else if (this.segments === 'meter') {
+    //   this.getPendingMeter();
+    // }
     // this.changeNetwork();
   }
 
@@ -774,10 +773,7 @@ export class ListMasterPage implements OnInit {
   changeDateComponent(ev: any) {
     console.log(ev.detail.value);
     this.popoverDatetime.confirm(true);
-
   }
-
-
 
   randomIntArrayInRange = (min: any, max: any, n = 1) => Array.from( { length: n }, () => Math.floor(Math.random() * (max - min + 1)) + min)
 

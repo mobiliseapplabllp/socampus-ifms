@@ -5,28 +5,26 @@
     </ion-buttons>
     <ion-title> {{userName}} </ion-title>
     <ion-buttons slot="end">
-      <ion-button slot="icon-only">
-        <ion-icon name="notifications-outline"></ion-icon>
-      </ion-button>
-      <ion-button slot="icon-only">
-        <ion-icon name="person-outline"></ion-icon>
+      <ion-button slot="icon-only" *ngIf="isInternet" (click)="openPageRoute('/list-master/offline-data')">
+        Offline
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <div *ngIf="isInternet">
-    <ion-item>
-      <ion-label>
-        <h2><b><ion-text color="primary">Welcome Home</ion-text></b></h2>
-        <p style="font-size:18px"><ion-text>{{userName}}</ion-text></p>
-      </ion-label>
-    </ion-item>
-    <app-dashboard></app-dashboard>
-    <app-menu></app-menu>
-    <app-pending-task></app-pending-task>
-  </div>
-  <div *ngIf="!isInternet">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <ion-item>
+    <ion-label>
+      <h2><b><ion-text color="primary">Welcome Home</ion-text></b></h2>
+      <p style="font-size:18px"><ion-text>{{userName}}</ion-text></p>
+    </ion-label>
+  </ion-item>
+  <app-dashboard></app-dashboard>
+  <app-menu></app-menu>
+  <app-pending-task *ngIf="isInternet"></app-pending-task>
+  <!-- <div *ngIf="!isInternet">
     <ion-row>
       <ion-col size="4" *ngFor="let val of myMenu">
         <ion-card style="margin:0px; min-height: 80px;width:100%; box-shadow:1px 1px 8px #26589c;border-radius: 10px;" (click)="openPage(val)">
@@ -40,6 +38,5 @@
         </ion-card>
       </ion-col>
     </ion-row>
-  </div>
-
+  </div> -->
 </ion-content>

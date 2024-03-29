@@ -84,13 +84,28 @@ export class CommonService {
         iv: iv
       });
       decrypted1 = decrypted.toString(CryptoJS.enc.Utf8);
-      regex = /"([^"]+)"/;
-      matches = decrypted1.match(regex);
-      extractedString = matches ? matches[1] : null;
-      return extractedString;
+      console.log(decrypted1);
+      return this.extractIntegerValue(decrypted1);
     } catch {
       return '';
     }
+  }
+
+  extractIntegerValue(val: any) {
+    var regex, match, extractedString;
+    regex = /i:(\d+)/;
+    match = val.match(regex);
+    console.log(match);
+    return extractedString = match ? match[1] : this.extractStringValue(val);
+  }
+
+  extractStringValue(val: any) {
+    console.log(val);
+    var regex, match, extractedString;
+    regex = /"([^"]+)"/;
+    match = val.match(regex);
+    console.log(match);
+    return extractedString = match ? match[1] : null;
   }
 
 }
