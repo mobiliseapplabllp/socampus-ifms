@@ -1,8 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { IonDatetime } from '@ionic/angular';
+import { IonDatetime, LoadingController } from '@ionic/angular';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import Chart from 'chart.js/auto';
-
+import * as moment from 'moment';
+import { CommonService } from 'src/app/provider/common/common.service';
+import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-chart-dashboard',
   templateUrl: './chart-dashboard.component.html',
@@ -11,106 +13,151 @@ import Chart from 'chart.js/auto';
 export class ChartDashboardComponent  implements OnInit {
   @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
   scheduleDashboard: any = [];
-  cat_id = 1;
+  cat_id = 'digital';
+  sub_cat_id = 'hard';
   stackedChart: any;
+  lineChart: any;
   category = [{
     label: 'Digital',
-    id: 1
+    id: 1,
+    value: 'digital'
   },{
     label: 'PMS',
-    id: 2
+    id: 2,
+    value: 'pms'
   },{
     label: 'Meter',
-    id: 3
+    id: 3,
+    value: 'meter'
   }];
   digitalCat = [{
     label: 'Hard',
-    id:1
+    id:1,
+    value: 'hard'
   },{
     label: 'Soft',
-    id:2
+    id:2,
+    value: 'soft'
   }];
   meterCat = [{
     label: 'Consumption',
     id: 1,
+    value: 'consumption',
   },{
     label: 'Generation',
     id: 2,
+    value: 'generation',
   }];
   subCat = this.digitalCat;
-  sub_cat_id = 1;
+  helpDeskDateLabe!: string;
+  scheduleDateLabel!: string;
+
+  loading: any ;
+  todayDate = moment().format('YYYY-MM-DD');
+  scheduleDate = moment().format('YYYY-MM-DD');
   constructor(
-    private httpCompalint: ComplaintService
+    private httpCompalint: ComplaintService,
+    private loadingController: LoadingController,
+    private common: CommonService
   ) { }
 
   ngOnInit() {
-    this.getTicketDashboard();
-    this.getScheduleDashboard();
+    this.getTicketDashboard(this.todayDate);
+    this.getScheduleDashboard(this.scheduleDate,this.cat_id, this.sub_cat_id);
   }
 
   changeDateComponent(ev: any) {
     this.popoverDatetime.confirm(true);
+    let date = moment(ev.detail.value).format('YYYY-MM-DD');
+    this.todayDate = date;
+    this.getTicketDashboard(date);
   }
 
-  changeCat(ev: any) {
-    this.sub_cat_id = 0;
-    this.subCat = [];
-    if (ev.target.value === 1) {
-      this.subCat = this.digitalCat;
-    } else if (ev.target.value === 3) {
-      this.subCat = this.meterCat;
+  changeDate(type: number) {
+    if (type === 0) {
+      this.todayDate = moment(this.todayDate).subtract(1, 'day').format('YYYY-MM-DD');
+      this.getTicketDashboard(this.todayDate);
     } else {
-      this.updateStackedChart(this.scheduleDashboard.pms);
+      this.todayDate = moment(this.todayDate).add(1, 'day').format('YYYY-MM-DD');
+      this.getTicketDashboard(this.todayDate);
     }
   }
 
-  changeSubCat(ev: any) {
-    if (this.cat_id === 1) {
-      if (ev.target.value === 1) {
-        this.updateStackedChart(this.scheduleDashboard.digital.hard);
-      } else if (ev.target.value === 2) {
-        this.updateStackedChart(this.scheduleDashboard.digital.soft);
-      }
-    } else if (this.cat_id === 3) {
-      if (ev.target.value === 1) {
-        this.updateStackedChart(this.scheduleDashboard.meter.consumption);
-      } else if (ev.target.value === 2) {
-        this.updateStackedChart(this.scheduleDashboard.meter.generation);
-      }
+  changeCat() {
+    if (this.cat_id === 'pms') {
+      this.getScheduleDashboard(this.scheduleDate,this.cat_id, this.sub_cat_id);
+    } else if (this.cat_id === 'digital') {
+      this.subCat = this.digitalCat;
+    } else if (this.cat_id === 'meter') {
+      this.subCat = this.meterCat;
     }
   }
 
-  getTicketDashboard() {
-    this.httpCompalint.getTicketDashboard().subscribe({
-      next:(data) => {
-        this.lineBarChart(data);
-      },
-      error:() => {
+  changeSubCat() {
+    this.getScheduleDashboard(this.scheduleDate,this.cat_id, this.sub_cat_id);
+  }
 
-      }
+  getTicketDashboard(date: string) {
+    this.presentLoading().then(preLoad => {
+      this.httpCompalint.getTicketDashboard(date).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.lineBarChart(data.data);
+            this.helpDeskDateLabe =  moment(date).subtract(7 , 'days').format('DD MMM') + '-' + moment(date).format('DD MMM') ;
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg + ' In helpdesk-graph', 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
     })
+
   }
 
-  getScheduleDashboard() {
-    this.httpCompalint.getScheduleDashboard().subscribe({
+  async presentLoading() {
+    this.loading = await this.loadingController.create({
+      cssClass: 'my-custom-class',
+      message: 'Please wait...',
+    });
+    await this.loading.present();
+  }
+
+  async dismissloading() {
+    if (this.loading) {
+      this.loading.dismiss();
+    }
+  }
+
+  getScheduleDashboard(date: string,cat_id: string, sub_cat_id: string) {
+    this.httpCompalint.getScheduleDashboard(date,cat_id, sub_cat_id).subscribe({
       next:(data) => {
-        this.scheduleDashboard = data;
-        this.stackedBarChart(this.scheduleDashboard.label, this.scheduleDashboard.digital.hard);
+        if (data.status) {
+          this.scheduleDashboard = data.data;
+          this.scheduleDateLabel =  moment(date).subtract(7 , 'days').format('DD MMM') + '-' + moment(date).format('DD MMM') ;
+          this.stackedBarChart(data.data);
+        }
       },
       error:() => {
-
+        this.common.presentToast(environment.errMsg + ' Schedule Dashboard Error.', 'danger');
       }
     })
   }
 
   lineBarChart(data: any) {
-    new Chart('canvas1', {
+    if (this.lineChart) {
+      this.lineChart.destroy();
+    }
+    this.lineChart = new Chart('canvas1', {
       type: 'line',
       data : {
-        labels: data.label,
+        labels: data.date,
         datasets: [{
           label: 'Assign',
-          data: data.assign_ticket,
+          data: data.assigned,
           fill: false,
           borderColor: 'blue',
           backgroundColor: 'blue',
@@ -118,7 +165,7 @@ export class ChartDashboardComponent  implements OnInit {
           borderJoinStyle: 'round',
         },{
           label: 'Resolve',
-          data: data.resolve_ticket,
+          data: data.resolved,
           fill: false,
           borderColor: 'orange',
           backgroundColor: 'orange',
@@ -148,18 +195,22 @@ export class ChartDashboardComponent  implements OnInit {
     })
   }
 
-  stackedBarChart(label: any, data: any) {
+
+  stackedBarChart(data: any) {
+    if (this.stackedChart) {
+      this.stackedChart.destroy();
+    }
     this.stackedChart = new Chart('canvas', {
       type: 'bar',
       data : {
-        labels: label,
+        labels: data.date,
         datasets: [{
           label: 'Assign',
-          data: data.assign,
+          data: data.assigned,
           backgroundColor: 'blue',
         },{
           label: 'Attend',
-          data: data.attend,
+          data: data.attended,
           backgroundColor: 'orange',
         }]
       },
@@ -182,11 +233,5 @@ export class ChartDashboardComponent  implements OnInit {
         }
       }
     });
-  }
-
-  updateStackedChart(data: any) {
-    this.stackedChart.data.datasets[0].data = data.assign;
-    this.stackedChart.data.datasets[1].data = data.attend;
-    this.stackedChart.update();
   }
 }

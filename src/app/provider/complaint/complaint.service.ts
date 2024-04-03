@@ -51,12 +51,12 @@ export class ComplaintService {
     return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=' + limit + '&page=1&ticket_type=not_resolved');
   }
 
-  getTicketDashboard() {
-    return this.https.get('assets/data/ticket_dashboard.json');
+  getTicketDashboard(date: string): Observable<any> {
+    return this.https.get(environment.url + 'complaints/app/get-helpdesk-graph?date=' + date);
   }
 
-  getScheduleDashboard() {
-    return this.https.get('assets/data/schedule_dashboard.json')
+  getScheduleDashboard(date: string,cat_id: string, sub_cat_id: string): Observable<any> {
+    return this.https.get(environment.url + 'complaints/app/get-digital-pms-meter-graph?date=' + date + '&cate=' + cat_id + '&sub_cat_id=' + sub_cat_id)
   }
 
   getResolvedTicket(): Observable<any> {
