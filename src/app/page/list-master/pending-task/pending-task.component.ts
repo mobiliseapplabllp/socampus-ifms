@@ -44,11 +44,18 @@ export class PendingTaskComponent  implements OnInit {
     private router: Router
   ) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.getData();
+  }
 
   ngOnChanges() {
     if (this.eventChange) {
-      this.getData();
+      this.httpCompalint.getResolveTicket().subscribe((res: any) => {
+        console.log(res);
+        if (res.status) {
+          this.pendingTicket = this.pendingTicket.filter((val: any) => val.tkts_id !== res.ticket_id);
+        }
+      });
     }
   }
 

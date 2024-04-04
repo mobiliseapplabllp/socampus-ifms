@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { LoadingController, ModalController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
@@ -55,6 +55,7 @@ export class PmCalPage implements OnInit {
     private modalCtrl: ModalController,
     private router: Router,
     private httpDigital: DigitalChecklistService,
+    private platform: Platform
   ) { }
 
   ngOnInit() {
@@ -185,7 +186,7 @@ export class PmCalPage implements OnInit {
   }
 
   openFillReport(data: any) {
-    if (data.ext_asset_id) {
+    if (data.ext_asset_id && this.platform.is('capacitor')) {
       this.openBarcode(data)
     } else {
       this.openPage(data);

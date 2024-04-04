@@ -6,9 +6,10 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class ComplaintService {
-  public assignTickets = new BehaviorSubject('');
+  private assignTickets = new BehaviorSubject('');
+  private rslvTicket = new BehaviorSubject({});
   constructor(
-    public https: HttpClient
+    private https: HttpClient
   ) { }
 
   setData(data: any) {
@@ -17,6 +18,14 @@ export class ComplaintService {
 
   getData() {
     return this.assignTickets;
+  }
+
+  setResolveTicket(obj: any) {
+    this.rslvTicket.next(obj);
+  }
+
+  getResolveTicket() {
+    return this.rslvTicket;
   }
 
   reOpenTicket(obj: any): Observable<any> {
@@ -47,9 +56,9 @@ export class ComplaintService {
     return this.https.get(environment.url + 'complaints/get_assign_ticket_master?' + url);
   }
 
-  getPendingTicketHomePage(limit: any) {
-    return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=' + limit + '&page=1&ticket_type=not_resolved');
-  }
+  // getPendingTicketHomePage(limit: any) {
+  //   return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=' + limit + '&page=1&ticket_type=not_resolved');
+  // }
 
   getTicketDashboard(date: string): Observable<any> {
     return this.https.get(environment.url + 'complaints/app/get-helpdesk-graph?date=' + date);

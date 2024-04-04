@@ -54,17 +54,17 @@ export class TicketWorkComponent  implements OnInit {
   arr: any = [];
   scopeOfWorkArr: any = [];
   constructor(
-    public activeRoute: ActivatedRoute,
-    public formbuilder: FormBuilder,
-    public httpComplaint: ComplaintService,
-    public httpCommon: CommonService,
-    public alertCtrl: AlertController,
-    public navCtrl: NavController,
-    public modalCtrl: ModalController,
-    public actionSheetController: ActionSheetController,
-    public router: Router,
-    public loadingController: LoadingController,
-    public platform: Platform
+    private activeRoute: ActivatedRoute,
+    private formbuilder: FormBuilder,
+    private httpComplaint: ComplaintService,
+    private httpCommon: CommonService,
+    private alertCtrl: AlertController,
+    private navCtrl: NavController,
+    private modalCtrl: ModalController,
+    private actionSheetController: ActionSheetController,
+    private router: Router,
+    private loadingController: LoadingController,
+    private platform: Platform
   ) { }
 
   ngOnInit() {
@@ -77,6 +77,7 @@ export class TicketWorkComponent  implements OnInit {
       this.initForm();
     });
     this.getTicketStages();
+    // this.httpComplaint.setResolveTicket({status: true, ticket_id: 283});
   }
 
   initForm() {
@@ -338,7 +339,6 @@ export class TicketWorkComponent  implements OnInit {
       this.formData.append('otpVerify', this.isVerifyOtp);
     }
 
-
     if(this.workSpace.value.status == 3 && !this.fileName && this.arr.hasWIP == 0 && this.isPtwMandatory) {
       alert('Opps you have not attached PTW document');
       return;
@@ -353,6 +353,9 @@ export class TicketWorkComponent  implements OnInit {
       this.httpComplaint.submitTicketTransaction(this.formData).subscribe({
         next:(data) => {
           if (data.status) {
+            if (this.ticket_id && this.workSpace.value.status == 4) {
+              this.httpComplaint.setResolveTicket({status: true, ticket_id: this.ticket_id});
+            }
             this.httpCommon.presentToast(data.msg, 'success');
             this.navCtrl.pop();
           } else {

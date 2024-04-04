@@ -6,6 +6,9 @@ import { LoginService } from 'src/app/provider/login/login.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { environment } from 'src/environments/environment';
 import { Camera, CameraResultType } from '@capacitor/camera';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { ViewportScroller } from '@angular/common';
+import { settings } from 'cluster';
 @Component({
   selector: 'app-pm-report',
   templateUrl: './pm-report.component.html',
@@ -14,6 +17,7 @@ import { Camera, CameraResultType } from '@capacitor/camera';
 export class PmReportComponent  implements OnInit {
   @ViewChild(IonContent, {static: true}) content!: IonContent;
   @ViewChildren("a") private itemlist!: QueryList<ElementRef>;
+  @ViewChildren("b") private itemlist1!: QueryList<ElementRef>;
   @ViewChild('slides', {static: false}) slide!: IonSlides;
   requestedData: any = [];
   myCategory: any = [];
@@ -38,6 +42,8 @@ export class PmReportComponent  implements OnInit {
    questionAttachment: any;
    pageName!: string;
    myAssets: any = [];
+   selectedLanguage =  'en';
+  elementRef: any;
   constructor(
     private httpLogin: LoginService,
     private activeroute: ActivatedRoute,
@@ -45,9 +51,21 @@ export class PmReportComponent  implements OnInit {
     private loadingController: LoadingController,
     private httpPmCal: PmCalService,
     private httpCommon: CommonService,
-    private navCtrl: NavController
-  ) { }
+    private navCtrl: NavController,
+    private scroller: ViewportScroller
+  ) {
 
+  }
+
+  scrollToDiv(id: string) {
+    console.log(id + '=' + typeof(id));
+    const element = document.getElementById(id);
+    if (element) {
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+      }, 1000);
+    }
+  }
   ngOnInit() {
     this.userData = this.httpLogin.getLoginUserValue();
     this.activeroute.queryParams.subscribe((res) => {
@@ -200,7 +218,11 @@ export class PmReportComponent  implements OnInit {
   viewMore(dat: any, ind: any) {
     this.presentLoading('Loading...').then(preLoad => {
       dat.isResponseShow = !dat.isResponseShow;
-      this.scroll(ind);
+      console.log(dat.isResponseShow);
+      if (dat.isResponseShow) {
+        this.scrollToDiv(ind);
+      }
+      // this.scroll(ind);
       setTimeout(() => {
         this.dismissloading();
       }, 1500);
@@ -229,14 +251,15 @@ export class PmReportComponent  implements OnInit {
   }
 
   scroll(indexFound: any) {
-    setTimeout(() => {
-      const userToScrollOn = this.itemlist.toArray();
-      userToScrollOn[indexFound].nativeElement.scrollIntoView({
-        behavior: 'smooth'
-      }, (err: any) => {
-        console.log(err);
-      });
-    }, 500);
+    // setTimeout(() => {
+    //   const userToScrollOn: any = this.itemlist.toArray();
+    //   // const innerScroll: any = this.itemlist1.toArray();
+    //   userToScrollOn[indexFound].nativeElement.scrollIntoView({
+    //     behavior: 'smooth',
+    //   }, (err: any) => {
+    //     console.log(err);
+    //   })
+    // }, 500);
   }
 
   changeOptionResponse(data: any, ev: any) {
@@ -263,6 +286,7 @@ export class PmReportComponent  implements OnInit {
             this.httpCommon.presentToast(dat.msg, 'success');
             data.response.optn_id = data.rspns;
             const obj = data.options.filter((val: any) => val.optn_id === ev.target.value)[0];
+            console.log(obj);
             data.is_doc_mandatory = obj.is_doc_mandatory;
             data.is_rmrk_mandatory = obj.is_rmrk_mandatory;
             data.is_correct = obj.is_correct;
@@ -362,15 +386,22 @@ export class PmReportComponent  implements OnInit {
       wo_id: this.requestedData.wo_id,
       source: environment.source
     };
-    console.log(this.myCategory);
     for (let i = 0; i < this.myCategory.length; i++) {
+      if (!this.myCategory[i].is_applicable) {
+        this.httpCommon.presentToastWithOk(`Please Add Response for Category ${i+1} ${this.myCategory[i].cat_desc}` , 'warning');
+        this.scrollToDiv(i.toString());
+        return;
+      }
       if (this.myCategory[i].is_applicable != 3) {
         for (let j = 0; j < this.myCategory[i].qus.length; j++) {
           if (!this.myCategory[i].qus[j].rspns) {
             this.httpCommon.presentToastWithOk(`Please add Response for Question No ${ j + 1} from Category ${ this.myCategory[i].cat_desc }`, 'warning');
             this.myCategory[i].qus[j].isNotFill = true;
             this.myCategory[i].isResponseShow = true;
-            this.scroll(i);
+            let temp = i+j.toString();;
+            setTimeout(() => {
+              this.scrollToDiv(temp);
+            }, 100);
             return;
           } else {
             this.myCategory[i].isResponseShow = false;
@@ -424,6 +455,29 @@ export class PmReportComponent  implements OnInit {
     if (this.loading) {
       this.loading.dismiss();
     }
+  }
+
+  async speak(val: any) {
+    const speak = async () => {
+      await TextToSpeech.speak({
+        text: val.q_desc,
+        lang: this.selectedLanguage,
+        rate: 1.0,
+        pitch: 1.0,
+        volume: 1.0,
+        category: 'ambient',
+      }).finally(() => {
+        // val.speak = true;
+        // if (val.tempoutput === 'document') {
+        //   this.presentActionSheet(val, 2);
+        // } else if (val.tempoutput === 'final') {
+        //   return;
+        // } else {
+        //   this.listen(val);
+        // }
+      });
+    };
+    speak();
   }
 
 }
