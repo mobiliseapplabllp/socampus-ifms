@@ -48,7 +48,6 @@ export class CommonService {
       alert('Attachment Not Available');
       return;
     }
-    console.log(url);
     let brecked;
     brecked = url.split('.');
     let ext;
@@ -63,7 +62,6 @@ export class CommonService {
   async checkInternet() {
     return new Promise(async resolve => {
       const status = await Network.getStatus();
-      console.log('Network status:', status.connected);
       resolve(status.connected);
     });
   }
