@@ -37,7 +37,7 @@ export class CreateTicketComponent  implements OnInit {
   userName!: string;
   barcodeList: any = [];
   requestType: any = [];
-
+  qrType!: string;
   constructor(
     private platform: Platform,
     private formbuilder: FormBuilder,
@@ -97,12 +97,46 @@ export class CreateTicketComponent  implements OnInit {
   ionViewDidEnter() {
     let bar = this.httpCommon.getBarcode();
     if (bar) {
-      let token, fullurl;
-      token = localStorage.getItem('token1');
-      fullurl = bar + '?token=' + token;
-      this.httpCommon.setBarcode('');
-      this.httpCommon.openDoc(fullurl);
+      if (this.qrType === 'history') {
+        let token, fullurl;
+        token = localStorage.getItem('token1');
+        fullurl = bar + '?token=' + token;
+        this.httpCommon.setBarcode('');
+        this.httpCommon.openDoc(fullurl);
+      } else if (this.qrType === 'scan') {
+        console.log(bar);
+        let  type,enc_key,split = bar.split('/');
+        enc_key = split[split.length - 1];
+        type = split[split.length - 2];
+        if (type === 'complaint-qr-code') {
+          this.getLocationQrData('location', enc_key);
+        } else if(type === 'create-ticket-qr-code') {
+
+        }
+      }
     }
+  }
+
+  getLocationQrData(type: string, enc_key: string) {
+    this.httpComp.getSiteDetailUsingBarcode(type, enc_key).subscribe({
+      next:(data) => {
+        if (data.status) {
+          if (type === 'location') {
+            this.createForm.get('issue_id')?.setValue(2);
+            setTimeout(() => {
+              this.createForm.get('pc_id_desc')?.setValue(data.data.pc_desc);
+              this.createForm.get('pc_id')?.setValue(data.data.pc_id);
+            }, 1000);
+          }
+        }
+      },
+      error:() => {
+
+      },
+      complete:() => {
+
+      }
+    })
   }
 
   getEmpDetail() {
@@ -147,7 +181,8 @@ export class CreateTicketComponent  implements OnInit {
 
   }
 
-  openScanner() {
+  openScanner(qrType: string) {
+    this.qrType = qrType;
     this.router.navigateByUrl('/barcode');
   }
 

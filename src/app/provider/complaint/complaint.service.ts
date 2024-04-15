@@ -60,6 +60,13 @@ export class ComplaintService {
   //   return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=' + limit + '&page=1&ticket_type=not_resolved');
   // }
 
+  getSiteDetailUsingBarcode(type: string, enc_key: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('type',type);
+    formData.append('loc_id', enc_key);
+    return this.https.post(environment.url + 'shared/location-qrcode-scan-get-details', formData);
+  }
+
   getTicketDashboard(date: string): Observable<any> {
     return this.https.get(environment.url + 'complaints/app/get-helpdesk-graph?date=' + date);
   }
