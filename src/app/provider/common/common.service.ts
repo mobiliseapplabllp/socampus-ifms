@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { Network } from '@capacitor/network';
+import * as CryptoJS from 'crypto-js';
+import { environment } from 'src/environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -65,4 +68,43 @@ export class CommonService {
       resolve(status.connected);
     });
   }
+
+  decryptValue(encryptedValue: string) {
+    var encrypted: any, iv, value, key, key1, decrypted,decrypted1,regex,matches,extractedString
+    encrypted = decodeURIComponent(encryptedValue);
+    try {
+      encrypted = atob(encrypted);
+      encrypted = JSON.parse(encrypted);
+      iv = CryptoJS.enc.Base64.parse(encrypted.iv);
+      value = encrypted.value;
+      key = environment.LARAVEL_KEY;
+      key1 = CryptoJS.enc.Base64.parse(key);
+      decrypted = CryptoJS.AES.decrypt(value, key1, {
+        iv: iv
+      });
+      decrypted1 = decrypted.toString(CryptoJS.enc.Utf8);
+      console.log(decrypted1);
+      return this.extractIntegerValue(decrypted1);
+    } catch {
+      return '';
+    }
+  }
+
+  extractIntegerValue(val: any) {
+    var regex, match, extractedString;
+    regex = /i:(\d+)/;
+    match = val.match(regex);
+    console.log(match);
+    return extractedString = match ? match[1] : this.extractStringValue(val);
+  }
+
+  extractStringValue(val: any) {
+    console.log(val);
+    var regex, match, extractedString;
+    regex = /"([^"]+)"/;
+    match = val.match(regex);
+    console.log(match);
+    return extractedString = match ? match[1] : null;
+  }
+
 }

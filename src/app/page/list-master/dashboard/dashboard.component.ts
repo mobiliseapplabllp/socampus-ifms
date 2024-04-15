@@ -7,7 +7,7 @@ import { ListMasterService } from 'src/app/provider/list-master/list-master.serv
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent  implements OnInit {
-  @Input() ionRefresh: any
+  @Input() eventChange: any
   breakdown = '';
   pms = '';
   indent = '';
@@ -44,7 +44,7 @@ export class DashboardComponent  implements OnInit {
   }
 
   ngOnChanges() {
-    if (this.ionRefresh) {
+    if (this.eventChange) {
       this.getDashboard();
     }
   }

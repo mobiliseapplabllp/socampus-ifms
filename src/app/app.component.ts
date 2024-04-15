@@ -28,15 +28,15 @@ export class AppComponent {
     private loadingController: LoadingController,
     private common: CommonService) {
       this.platform.ready().then(res => {
-        // this.initApp();
-        // this.getUserData();
+        this.initApp();
+        this.getUserData();
       })
   }
 
   initApp() {
     if (this.platform.is('capacitor')) {
       StatusBar.setOverlaysWebView({overlay: false});
-      StatusBar.setBackgroundColor({'color': '#000000'})
+      StatusBar.setBackgroundColor({'color': '#040E51'})
     }
     this.initIdle();
     const isLogin = localStorage.getItem('isAlreadyLogin');

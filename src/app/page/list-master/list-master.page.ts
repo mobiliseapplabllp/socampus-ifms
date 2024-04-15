@@ -10,6 +10,7 @@ export class ListMasterPage implements OnInit {
   userName!: string;
   eventChange = false;
   ionRefresh = false;
+  isLoading!: boolean;
   constructor() {
     const user = localStorage.getItem('user');
     if (user) {
@@ -19,32 +20,28 @@ export class ListMasterPage implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.changeEvent();
+    this.changeEvent();
   }
 
-  // changeEvent() {
+  changeEvent() {
+    this.eventChange = true;
+    this.isLoading = true;
+    setTimeout(() => {
+      this.eventChange = false;
+      this.isLoading = false;
+    }, 1500);
+  }
+
+  // ionViewDidEnter() {
   //   this.eventChange = true;
   //   setTimeout(() => {
   //     this.eventChange = false;
   //   }, 1500);
   // }
 
-  ionViewDidEnter() {
-    this.eventChange = true;
-    setTimeout(() => {
-      this.eventChange = false;
-    }, 1500);
-  }
-
   handleRefresh(event: any) {
     event.target.complete();
-    // this.changeEvent();
-    // setTimeout(() => {
-
-    //   this.ionRefresh = true;
-    //   setTimeout(() => {
-    //     this.ionRefresh = false;
-    //   }, 1500);
-    // }, 2000);
+    this.isLoading = true;
+    this.changeEvent();
   }
 }

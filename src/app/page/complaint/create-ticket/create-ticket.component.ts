@@ -41,6 +41,7 @@ export class CreateTicketComponent  implements OnInit {
   barcodeList: any = [];
   requestType: any = [];
   qrType!: string;
+  isSearchBarcode!: boolean
   constructor(
     private platform: Platform,
     private formbuilder: FormBuilder,
@@ -117,7 +118,8 @@ export class CreateTicketComponent  implements OnInit {
         if (type === 'complaint-qr-code') {
           this.getLocationQrData('location', enc_key);
         } else if(type === 'create-ticket-qr-code') {
-
+          // this.decryptBarcode(enc_key)
+          this.getLocationQrData('asset', enc_key);
         }
       }
     }
@@ -138,6 +140,21 @@ export class CreateTicketComponent  implements OnInit {
               this.createForm.get('floor_id')?.setValue(data.data.floor_id);
               this.createForm.get('loc_code_desc')?.setValue(data.data.location_desc);
               this.createForm.get('loc_code')?.setValue(data.data.loc_id);
+            } else if (type === 'asset') {
+              this.createForm.get('issue_id')?.setValue(1);
+              this.createForm.get('is_barcode')?.setValue('1');
+              this.createForm.get('barcode')?.setValue(data.data.barcode);
+              this.createForm.get('pc_id_desc')?.setValue(data.data.pc_desc);
+              this.createForm.get('pc_id')?.setValue(data.data.pc_id);
+              this.createForm.get('bldg_id_desc')?.setValue(data.data.building_desc);
+              this.createForm.get('bldg_id')?.setValue(data.data.building_id);
+              this.createForm.get('floor_id_desc')?.setValue(data.data.floor_desc);
+              this.createForm.get('floor_id')?.setValue(data.data.floor_id);
+              this.createForm.get('loc_code_desc')?.setValue(data.data.location_desc);
+              this.createForm.get('loc_code')?.setValue(data.data.loc_id);
+              setTimeout(() => {
+                this.searchBarcode();
+              }, 100);
             } else {
               this.httpCommon.presentToast('This is Asset QR Code', 'warning');
             }
@@ -154,6 +171,17 @@ export class CreateTicketComponent  implements OnInit {
         }
       })
     });
+  }
+
+  decryptBarcode(enc_key: string) {
+    let decBarcode = this.httpCommon.decryptValue(enc_key);
+    this.createForm.get('issue_id')?.setValue(1);
+    this.createForm.get('is_barcode')?.setValue('1');
+    this.createForm.get('barcode')?.setValue(decBarcode)
+    setTimeout(() => {
+      this.searchBarcode();
+    }, 100);
+
   }
 
   getEmpDetail() {
@@ -273,17 +301,17 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   changeIssue(ev: any) {
-    this.createForm.get('pc_id')?.setValue('');
-    this.createForm.get('pc_id_desc')?.setValue('');
-    this.createForm.get('bldg_id')?.setValue('');
-    this.createForm.get('floor_id')?.setValue('');
-    this.createForm.get('loc_code')?.setValue('');
-    this.createForm.get('pc_id_desc')?.setValue('');
-    this.createForm.get('bldg_id')?.setValue('');
-    this.createForm.get('floor_id')?.setValue('');
-    this.createForm.get('category_desc')?.setValue('');
-    this.createForm.get('subcat1_id_desc')?.setValue('');
-    this.createForm.get('subcat2_id_desc')?.setValue('');
+    // this.createForm.get('pc_id')?.setValue('');
+    // this.createForm.get('pc_id_desc')?.setValue('');
+    // this.createForm.get('bldg_id')?.setValue('');
+    // this.createForm.get('floor_id')?.setValue('');
+    // this.createForm.get('loc_code')?.setValue('');
+    // this.createForm.get('pc_id_desc')?.setValue('');
+    // this.createForm.get('bldg_id')?.setValue('');
+    // this.createForm.get('floor_id')?.setValue('');
+    // this.createForm.get('category_desc')?.setValue('');
+    // this.createForm.get('subcat1_id_desc')?.setValue('');
+    // this.createForm.get('subcat2_id_desc')?.setValue('');
     this.getRequestType(ev.target.value);
   }
 
@@ -710,24 +738,25 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   searchBarcode() {
-    this.presentLoading().then(preLoad => {
-      this.httpComp.getClientIdBarcode(this.createForm.value.barcode).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.barcodeList = data.data;
-          } else {
-            this.httpCommon.presentToast(data.msg, 'warning');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.httpCommon.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
+    this.isSearchBarcode = true;
+    this.httpComp.getClientIdBarcode(this.createForm.value.barcode).subscribe({
+      next:(data) => {
+        if (data.status) {
+          this.barcodeList = data.data;
+        } else {
+          this.httpCommon.presentToast(data.msg, 'warning');
         }
-      });
-    })
+      },
+      error:() => {
+        this.isSearchBarcode = false;
+        this.dismissloading();
+        this.httpCommon.presentToast(environment.errMsg, 'danger');
+      },
+      complete:() => {
+        this.isSearchBarcode = false;
+        this.dismissloading();
+      }
+    });
   }
 
   submitTest() {
