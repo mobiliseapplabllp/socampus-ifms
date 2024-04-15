@@ -11,4 +11,12 @@
 
 <ion-content>
 
+  <ion-searchbar (ionChange)="search($event)" debounce="1000" mode="md"></ion-searchbar>
+
+  <ion-virtual-scroll [items]="buildingArr" approxItemHeight="320px">
+    <ion-item *virtualItem="let item; let itemBounds = bounds;" (click)="closeModal(item, true)">
+      {{item.label}}
+    </ion-item>
+  </ion-virtual-scroll>
+
 </ion-content>

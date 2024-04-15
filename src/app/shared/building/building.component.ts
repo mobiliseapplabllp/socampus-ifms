@@ -11,7 +11,9 @@ import { environment } from 'src/environments/environment';
 })
 export class BuildingComponent  implements OnInit {
   buildingArr: any = [];
+  buildingArrCopy: any = [];
   loading: any;
+  id: any;
   constructor(
     private modalCtrl: ModalController,
     private httpComp: ComplaintService,
@@ -19,7 +21,9 @@ export class BuildingComponent  implements OnInit {
     private loadingController: LoadingController
   ) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.getBuilding(this.id);
+  }
 
   getBuilding(id: any) {
     this.presentLoading().then(preLoad => {
@@ -27,6 +31,7 @@ export class BuildingComponent  implements OnInit {
         next:(data: any) => {
           if (data.status) {
             this.buildingArr = data.data;
+            this.buildingArrCopy = data.data;
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -58,6 +63,18 @@ export class BuildingComponent  implements OnInit {
 
   closeModal(data: any, status: any) {
     this.modalCtrl.dismiss(data, status);
+  }
+
+  search(ev: any) {
+    this.buildingArr = this.buildingArrCopy;
+    if (ev.target.value && ev.target.value.trim() !== '') {
+      this.buildingArr = this.buildingArr.filter((dat: any) => {
+        if ((dat.label.toString().toLowerCase().indexOf(ev.target.value.toLowerCase()) > -1)) {
+          return (dat.label.toString().toLowerCase().indexOf(ev.target.value.toLowerCase()) > -1);
+        }
+        return
+      });
+    }
   }
 
 }
