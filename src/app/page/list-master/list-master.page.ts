@@ -9,6 +9,7 @@ export class ListMasterPage implements OnInit {
   userData: any = [];
   userName!: string;
   eventChange = false;
+  ionRefresh = false;
   constructor() {
     const user = localStorage.getItem('user');
     if (user) {
@@ -17,12 +18,33 @@ export class ListMasterPage implements OnInit {
     }
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    // this.changeEvent();
+  }
+
+  // changeEvent() {
+  //   this.eventChange = true;
+  //   setTimeout(() => {
+  //     this.eventChange = false;
+  //   }, 1500);
+  // }
 
   ionViewDidEnter() {
     this.eventChange = true;
     setTimeout(() => {
       this.eventChange = false;
     }, 1500);
+  }
+
+  handleRefresh(event: any) {
+    event.target.complete();
+    // this.changeEvent();
+    // setTimeout(() => {
+
+    //   this.ionRefresh = true;
+    //   setTimeout(() => {
+    //     this.ionRefresh = false;
+    //   }, 1500);
+    // }, 2000);
   }
 }

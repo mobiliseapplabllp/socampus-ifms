@@ -100,7 +100,7 @@ export class FillReportComponent  implements OnInit {
               this.navCtrl.pop();
               return;
             }
-            if (this.schedule_status == 'attended' || this.schedule_status == '2') {
+            if (this.schedule_status == 'attended' || this.schedule_status == '2' || this.schedule_status === 'closed') {
               this.remark = data.data.sign_remark;
               this.sign_attachment = data.data.sign_attachment
             }

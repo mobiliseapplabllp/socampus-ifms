@@ -2,14 +2,12 @@ import { Component,OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AlertController, LoadingController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
-import { LoginService } from 'src/app/provider/login/login.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { environment } from 'src/environments/environment';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
-
 @Component({
   selector: 'app-pm-report',
   templateUrl: './pm-report.component.html',
@@ -73,7 +71,6 @@ export class PmReportComponent  implements OnInit {
     }, 1000);
   }
 
-
   getScheduleQuestion() {
     this.presentLoading('Please Wait').then(preLoad => {
       this.httpPmCal.getScheduleQuestion(this.requestedData.wo_id).subscribe({
@@ -129,53 +126,6 @@ export class PmReportComponent  implements OnInit {
     });
     await alert.present();
   }
-
-  // notApplicableAction(data: any) {
-  //   const obj = {
-  //     cat_id: data.cat_id,
-  //     is_applicable: 3,
-  //     rspns_source: environment.source,
-  //     wo_id: this.requestedData.wo_id,
-  //   };
-  //   this.presentLoading('Please Wait.').then(preLoad => {
-  //     this.httpPmCal.checkListCategoryStatus(obj).subscribe({
-  //       next:(dat) => {
-  //         if (dat.status) {
-  //           data.isAssestShow = false;
-  //           data.isResponseShow = false;
-  //           data.is_applicable = 3;
-  //           this.httpCommon.presentToast(dat.msg, 'success');
-  //           if (this.loop) {
-  //             if (this.rowIndex < this.myCategory.length - 1) {
-  //               this.rowIndex = this.rowIndex + 1;
-  //               this.colIndex = 0;
-  //               const obj = this.myCategory[this.rowIndex];
-  //               obj.cat_desc_temp = 'Please Response Next Category ' + obj.cat_desc
-  //               this.actionCategory(obj, this.rowIndex, this.colIndex);
-  //             } else {
-  //               const obj = {
-  //                 cat_desc_temp: 'All PMS Completed',
-  //                 tempoutput: 'final',
-  //               }
-  //               this.actionCategory(obj, this.rowIndex, this.colIndex);
-  //             }
-  //           }
-  //         } else {
-  //           this.httpCommon.presentToast(dat.msg, 'warning');
-  //         }
-  //       },
-  //       error:() => {
-  //         this.dismissloading();
-  //         this.httpCommon.presentToast(environment.errMsg, 'danger');
-  //       },
-  //       complete:() => {
-  //         this.dismissloading();
-  //       }
-  //     });
-  //   });
-  // }
-
-
 
   expand(data: any, ind: any) {
     this.rowIndex = ind;
@@ -254,28 +204,6 @@ export class PmReportComponent  implements OnInit {
     })
   }
 
-  // scrollCategory(data: any) {
-  //   let indexFound;
-  //   for(var i = 0 ; i < this.myCategory.length;i++) {
-  //     if (this.myCategory[i].cat_desc == data.cat_head) {
-  //       indexFound = i;
-  //       this.myCategory[i].isResponseShow = true;
-  //       for (var j = 0 ; j < this.myCategory[i].qus.length; j++) {
-  //         if (data.cat_ques == this.myCategory[i].qus[j].q_desc) {
-  //           this.myCategory[i].qus[j].isNotFill = true;
-  //           break;
-  //         } else {
-  //           this.myCategory[i].qus[j].isNotFill = false;
-  //         }
-  //       }
-  //       // this.scroll(indexFound);
-  //     } else {
-  //       this.myCategory[i].isResponseShow = false;
-  //     }
-  //   }
-  // }
-
-
   changeOptionResponse(data: any, ev: any) {
     if (!data.rspns) {
       return;
@@ -344,7 +272,7 @@ export class PmReportComponent  implements OnInit {
   }
 
   submitRemarkAction(obj1: any, data: any) {
-    this.presentLoading('Please Wait!!').then(preLoad => {
+    this.presentLoading('Please Wait..').then(preLoad => {
       this.httpPmCal.scheduleResponseActionRem(obj1).subscribe({
         next:(dat) => {
           if (dat.status) {
@@ -373,19 +301,6 @@ export class PmReportComponent  implements OnInit {
       });
     });
   }
-
-  // async presentActionSheet(data: any, index?: any) {
-  //   console.log('photo');
-  //   const takePicture = async () => {
-  //     const image = await Camera.getPhoto({
-  //       quality: 90,
-  //       allowEditing: false,
-  //       resultType: CameraResultType.Uri,
-  //     });
-  //     this.readImg(image, data)
-  //   };
-  //   takePicture();
-  // }
 
   async presentActionSheet(val: any, ind: any) {
     var obj: any = {}
@@ -420,7 +335,7 @@ export class PmReportComponent  implements OnInit {
     formData.append('rspns_source', environment.source);
     formData.append('attachment2', blob, random);
     data.imagename = '';
-    this.presentLoading('Please Wait!!!').then(preLoad => {
+    this.presentLoading('Please Wait..').then(preLoad => {
       this.httpPmCal.scheduleResponseActionDoc(formData).subscribe({
         next:(dat) => {
           if (dat.status) {
@@ -474,7 +389,7 @@ export class PmReportComponent  implements OnInit {
       }
     }
 
-    this.presentLoading('Saving Data').then(preLoad => {
+    this.presentLoading('Saving Data..').then(preLoad => {
       this.httpPmCal.finalSubmitCheckList(obj).subscribe({
         next:(data) => {
           if (data.status) {
@@ -666,6 +581,12 @@ export class PmReportComponent  implements OnInit {
       }
     }
   }
+
+  responseCondition() {}
+
+  remarkCondition() {}
+
+  categoryCondition() {}
 
   repeatLoop() {
     if (!this.loop) { return }

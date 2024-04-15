@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ListMasterService } from 'src/app/provider/list-master/list-master.service';
 
 @Component({
@@ -7,9 +7,11 @@ import { ListMasterService } from 'src/app/provider/list-master/list-master.serv
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent  implements OnInit {
+  @Input() ionRefresh: any
   breakdown = '';
   pms = '';
   indent = '';
+  meter = '';
   option = {
     slidesPerView:1.5,
     centeredSlides:true,
@@ -41,12 +43,19 @@ export class DashboardComponent  implements OnInit {
     this.getDashboard();
   }
 
+  ngOnChanges() {
+    if (this.ionRefresh) {
+      this.getDashboard();
+    }
+  }
+
   getDashboard() {
     this.httpList.getDashboard().subscribe(data => {
       if (data.status) {
         this.breakdown =  data.data.breakdown.assign.toString();
         this.pms = data.data.pms.assign.toString();
         this.indent = data.data.indent.assign.toString();
+        this.meter = data.data?.meter?.assign.toString();
       }
     });
   }

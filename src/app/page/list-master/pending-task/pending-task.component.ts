@@ -21,7 +21,8 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
   styleUrls: ['./pending-task.component.scss'],
 })
 export class PendingTaskComponent  implements OnInit {
-  @Input() eventChange: any
+  @Input() eventChange: any;
+  @Input() ionRefresh: any;
   loading: any;
   pendingTask = true;
   segments = 'helpdesk';
@@ -45,18 +46,25 @@ export class PendingTaskComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.getData();
+    // this.getData();
   }
 
   ngOnChanges() {
     if (this.eventChange) {
-      this.httpCompalint.getResolveTicket().subscribe((res: any) => {
-        console.log(res);
-        if (res.status) {
-          this.pendingTicket = this.pendingTicket.filter((val: any) => val.tkts_id !== res.ticket_id);
-        }
-      });
+      this.getData();
     }
+
+    // if (this.eventChange) {
+    //   this.httpCompalint.getResolveTicket().subscribe((res: any) => {
+    //     console.log(res);
+    //     if (res.status) {
+    //       this.pendingTicket = this.pendingTicket.filter((val: any) => val.tkts_id !== res.ticket_id);
+    //     }
+    //   });
+    // }
+    // if (this.ionRefresh) {
+    //   this.getData();
+    // }
   }
 
   getData() {

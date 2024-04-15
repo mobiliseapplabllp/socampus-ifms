@@ -5,7 +5,6 @@ import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
 import { IonModal } from '@ionic/angular';
-import { OverlayEventDetail } from '@ionic/core/components';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { HseAssignComponent } from '../hse-assign/hse-assign.component';
 @Component({
@@ -36,63 +35,21 @@ export class TicketTypeComponent  implements OnInit {
   locations: any = [];
   assignUserSelect: any = {};
   buddyUserSelect: any = {};
-  // assignUserCopy: any = [];
   pc_hse_conf: any = [];
-  // assignUser: any = [];
-  // assignUser: any = [{
-  //   user: 'Admin',
-  //   distance: '28',
-  //   status: 'Online(2h ago)',
-  //   ticket: 3,
-  //   user_id:1,
-  // },{
-  //   user: 'SD0099334',
-  //   distance: '10',
-  //   status: 'Online(1h ago)',
-  //   ticket: 1,
-  //   user_id:2,
-  // },{
-  //   user: 'H99883',
-  //   distance: '5',
-  //   status: 'Online(1h ago)',
-  //   ticket: 6,
-  //   user_id:3,
-  // },{
-  //   user: 'K9900d',
-  //   distance: '23',
-  //   status: 'Online(1.2h ago)',
-  //   ticket: 12,
-  //   user_id:4,
-  // },{
-  //   user: 'Q99883',
-  //   distance: '4',
-  //   status: 'Online(1.8h ago)',
-  //   ticket: 0,
-  //   user_id:5,
-  // },{
-  //   user: 'M990d9',
-  //   distance: '15',
-  //   status: 'Online(2.1h ago)',
-  //   ticket: 8,
-  //   user_id:6,
-  // }]
   isAscending!: boolean;
   constructor(
-    public formbuilder: FormBuilder,
+    private formbuilder: FormBuilder,
     private httpComplaint: ComplaintService,
     private httpCommon: CommonService,
     private modalCtrl: ModalController,
     private loadingController: LoadingController,
-    public navParam: NavParams) {
+    private navParam: NavParams) {
       this.requestedData = this.navParam.get('requestedData');
-      console.log(this.requestedData);
       this.ticketPriority = this.requestedData.priority_list;
       this.allData = this.requestedData.data;
       this.pc_hse_conf = this.requestedData.data.pc_hse_conf;
-      console.log(this.pc_hse_conf);
-      // this.allData = this.navParam.get('allData');
       this.ticket = this.allData.tkts_id;
-      if ((this.allData.tkts_issue_id == 2) || this.allData.tkts_issue_id == 1 && !this.allData.ext_asset_id) {
+      if (this.allData.source !== 'QRCODE') {
         this.isShowBuilding = true;
       }
       this.getBuilding(this.allData.pc_id);
@@ -101,9 +58,8 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   ngOnInit() {
-    // this.assignUserCopy = this.assignUser;
     this.initForm();
-    this.getPriority();
+    // this.getPriority();
   }
 
   getRequestType(id: any) {
@@ -186,11 +142,11 @@ export class TicketTypeComponent  implements OnInit {
       next:(data) => {
         if (data.status) {
           this.buildingArr = data.data;
-          if (this.locations.length > 0) {
-            setTimeout(() => {
-              this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id)
-            }, 100);
-          }
+          // if (this.locations.length > 0) {
+          // }
+          setTimeout(() => {
+            this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id)
+          }, 100);
         } else {
           this.httpCommon.presentToast(data.msg, 'warning');
         }
@@ -218,11 +174,11 @@ export class TicketTypeComponent  implements OnInit {
         next:(data) => {
           if (data.status) {
             this.floorArr = data.data;
-            if (this.locations.length > 0) {
-              setTimeout(() => {
-                this.ticketForm.get('floor_id')?.setValue(this.allData.floor_id);
-              }, 100);
-            }
+            // if (this.locations.length > 0) {
+            // }
+            setTimeout(() => {
+              this.ticketForm.get('floor_id')?.setValue(this.allData.floor_id);
+            }, 100);
           } else {
             this.httpCommon.presentToast(data.msg , 'warning');
           }
@@ -254,9 +210,9 @@ export class TicketTypeComponent  implements OnInit {
           if (data.status) {
             this.locationArr = data.data;
             setTimeout(() => {
-              if (this.locations.length > 0) {
-                this.ticketForm.get('loc_code')?.setValue(this.allData.loc_id)
-              }
+              // if (this.locations.length > 0) {
+              // }
+              this.ticketForm.get('loc_code')?.setValue(this.allData.loc_id)
             }, 100)
           } else {
             this.httpCommon.presentToast(data.msg, 'warning');
@@ -272,7 +228,6 @@ export class TicketTypeComponent  implements OnInit {
       })
     })
   }
-
 
   changeType() {
     this.ticketForm.get('is_barcode')?.setValue('');
@@ -455,21 +410,21 @@ export class TicketTypeComponent  implements OnInit {
     }
   }
 
-  getPriority() {
-    this.httpComplaint.getTicketPriority(this.requestedData.data.tkts_id).subscribe({
-      next:(data) => {
-        if (data.status) {
-          // this.ticketPriority = data.data;
-        }
-      },
-      error:() => {
-        this.httpCommon.presentToast(environment.errMsg, 'danger');
-      },
-      complete:() => {
+  // getPriority() {
+  //   this.httpComplaint.getTicketPriority(this.requestedData.data.tkts_id).subscribe({
+  //     next:(data) => {
+  //       if (data.status) {
+  //         // this.ticketPriority = data.data;
+  //       }
+  //     },
+  //     error:() => {
+  //       this.httpCommon.presentToast(environment.errMsg, 'danger');
+  //     },
+  //     complete:() => {
 
-      }
-    })
-  }
+  //     }
+  //   })
+  // }
 
   changePriority(ev: any) {
     this.selectPriorityObj = this.ticketPriority.filter((val: any) => val.id == ev.target.value)[0];
@@ -493,33 +448,9 @@ export class TicketTypeComponent  implements OnInit {
     }
   }
 
-  // cancel() {
-  //   this.modal.dismiss(null, 'cancel');
-  // }
-
-  // confirm() {
-  //   this.modal.dismiss('this.name', 'confirm');
-  // }
-
-  // onWillDismiss(event: Event) {
-  //   const ev = event as CustomEvent<OverlayEventDetail<string>>;
-  //   if (ev.detail.role === 'confirm') {
-  //     console.log('confirm', ev.detail.data);
-  //     this.assignUserSelect = this.assignUser.filter((val: any) => val.user_id === ev.detail.data)[0];
-  //     console.log(this.assignUserSelect);
-  //     // this.message = `Hello, ${ev.detail.data}!`;
-  //   }
-  // }
-
-
-
-
-
-
   async assignTicket() {
     const modal = await this.modalCtrl.create({
       component: AssignTicketComponent,
-      // cssClass: 'my-modal',
       componentProps: {
         ticket_id: this.ticket,
         allData: this.allData
@@ -569,20 +500,20 @@ export class TicketTypeComponent  implements OnInit {
     modal.present();
   }
 
-  getSpecificTicket() {
-    this.httpComplaint.getSpecificTicket(this.ticket).subscribe({
-      next:(data) => {
-        console.log(data);
-        // pc_hse_conf
-        if (data.status) {
-          this.pc_hse_conf = data.data.pc_hse_conf;
-          console.log(this.pc_hse_conf);
-        }
-      },
-      error:() => {
+  // getSpecificTicket() {
+  //   this.httpComplaint.getSpecificTicket(this.ticket).subscribe({
+  //     next:(data) => {
+  //       console.log(data);
+  //       // pc_hse_conf
+  //       if (data.status) {
+  //         this.pc_hse_conf = data.data.pc_hse_conf;
+  //         console.log(this.pc_hse_conf);
+  //       }
+  //     },
+  //     error:() => {
 
-      }
-    })
-  }
+  //     }
+  //   })
+  // }
 
 }

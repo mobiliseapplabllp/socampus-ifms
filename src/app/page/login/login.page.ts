@@ -31,7 +31,6 @@ export class LoginPage implements OnInit {
     private router: Router,
     private loginPro: LoginService,
     private common: CommonService,
-
     private httpDigi: DigitalChecklistService
 
   ) {
