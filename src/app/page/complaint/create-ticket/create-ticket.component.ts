@@ -132,6 +132,8 @@ export class CreateTicketComponent  implements OnInit {
           if (data.status) {
             if (type === 'location') {
               this.createForm.get('issue_id')?.setValue(2);
+              this.createForm.get('is_barcode')?.setValue('');
+              this.createForm.get('barcode')?.setValue('');
               this.createForm.get('pc_id_desc')?.setValue(data.data.pc_desc);
               this.createForm.get('pc_id')?.setValue(data.data.pc_id);
               this.createForm.get('bldg_id_desc')?.setValue(data.data.building_desc);
@@ -140,6 +142,7 @@ export class CreateTicketComponent  implements OnInit {
               this.createForm.get('floor_id')?.setValue(data.data.floor_id);
               this.createForm.get('loc_code_desc')?.setValue(data.data.location_desc);
               this.createForm.get('loc_code')?.setValue(data.data.loc_id);
+              this.barcodeList = [];
             } else if (type === 'asset') {
               this.createForm.get('issue_id')?.setValue(1);
               this.createForm.get('is_barcode')?.setValue('1');
@@ -738,6 +741,10 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   searchBarcode() {
+    if(!this.createForm.value.barcode) {
+      this.httpCommon.presentToast('Please Enter Barcode No', 'warning');
+      return;
+    }
     this.isSearchBarcode = true;
     this.httpComp.getClientIdBarcode(this.createForm.value.barcode).subscribe({
       next:(data) => {

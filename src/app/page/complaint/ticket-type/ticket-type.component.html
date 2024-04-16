@@ -1,11 +1,14 @@
 <ion-header>
   <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
     <ion-title>Ticket Type</ion-title>
-    <ion-buttons slot="end"  >
+    <!-- <ion-buttons slot="end"  >
       <ion-button (click)="dismiss(null, false)">
         <ion-icon name="close-outline"></ion-icon>
       </ion-button>
-    </ion-buttons>
+    </ion-buttons> -->
   </ion-toolbar>
 </ion-header>
 
@@ -62,44 +65,64 @@
       </section>
     </div>
     <div *ngIf="ticketForm.value.issue_type === 2">
-      <ion-item>
+      <!-- <ion-item>
         <ion-label position="floating">Query Category</ion-label>
         <ion-select interface="action-sheet" formControlName="category" (ionChange)="changeQuery($event)" mode="ios">
           <ion-select-option *ngFor="let dat of query" [value]="dat.value">{{dat.label}}</ion-select-option>
         </ion-select>
+      </ion-item> -->
+
+      <ion-item (click)="openCategory()">
+        <ion-label position="floating">Query Category  <ion-text color="danger">*</ion-text> </ion-label>
+        <ion-input type="text" formControlName="category_desc" readonly></ion-input>
       </ion-item>
-      <ion-item>
+
+      <!-- <ion-item>
         <ion-label position="floating">Query Sub Category One</ion-label>
         <ion-select interface="action-sheet" formControlName="subcat1_id" (ionChange)="changeSubCat($event)" mode="ios">
           <ion-select-option *ngFor="let dat of subCategory" [value]="dat.value">{{dat.label}}</ion-select-option>
         </ion-select>
+      </ion-item> -->
+      <ion-item (click)="openCategorySubCat()" *ngIf="subCategory.length > 0 || ticketForm.value.subcat1_id_desc">
+        <ion-label position="floating">Query Sub Category One  <ion-text color="danger">*</ion-text> </ion-label>
+        <ion-input type="text" formControlName="subcat1_id_desc" readonly></ion-input>
       </ion-item>
-      <ion-item *ngIf="subCategory2.length > 0">
+
+
+      <!-- <ion-item *ngIf="subCategory2.length > 0">
         <ion-label position="floating">Query Sub Category Two</ion-label>
         <ion-select interface="action-sheet" formControlName="subcat2_id" mode="ios">
           <ion-select-option *ngFor="let dat of subCategory2" [value]="dat.value">{{dat.label}}</ion-select-option>
         </ion-select>
+      </ion-item> -->
+
+      <ion-item (click)="openCategorySubCat2()" *ngIf="subCategory2.length > 0 || ticketForm.value.subcat2_id_desc">
+        <ion-label position="floating">Query Sub Category Two  <ion-text color="danger">*</ion-text> </ion-label>
+        <ion-input type="text" formControlName="subcat2_id_desc" readonly></ion-input>
       </ion-item>
     </div>
     <section *ngIf="((ticketForm.value.issue_type === 2) || (ticketForm.value.issue_type === 1 && ticketForm.value.is_barcode === '0')) && isShowBuilding  ">
-      <ion-item >
+      <ion-item (click)="openBuilding()">
         <ion-label position="floating">Building  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-select interface="action-sheet" mode="ios" formControlName="bldg_id" (ionChange)="changeBuilding($event)">
+        <ion-input type="text" formControlName="bldg_id_desc" readonly></ion-input>
+        <!-- <ion-select interface="action-sheet" mode="ios" formControlName="bldg_id" (ionChange)="changeBuilding($event)">
           <ion-select-option *ngFor="let dat of buildingArr" [value]="dat.value">{{dat.label}}</ion-select-option>
-        </ion-select>
+        </ion-select> -->
       </ion-item>
-      <ion-item >
+      <ion-item (click)="openFloorModal()">
         <ion-label position="floating">Floor  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-select interface="action-sheet" mode="ios" formControlName="floor_id" (ionChange)="changeFloor($event)">
+        <ion-input type="text" formControlName="floor_id_desc" readonly></ion-input>
+        <!-- <ion-select interface="action-sheet" mode="ios" formControlName="floor_id" (ionChange)="changeFloor($event)">
           <ion-select-option *ngFor="let dat of floorArr" [value]="dat.value">{{dat.label}}</ion-select-option>
-        </ion-select>
+        </ion-select> -->
       </ion-item>
 
-      <ion-item *ngIf="allData.source !== 'QRCODE' ">
+      <ion-item (click)="openLocationModal()" *ngIf="allData.source !== 'QRCODE' ">
         <ion-label position="floating">Location  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-select interface="action-sheet" mode="ios" formControlName="loc_code">
+        <ion-input type="text" formControlName="loc_code_desc" readonly></ion-input>
+        <!-- <ion-select interface="action-sheet" mode="ios" formControlName="loc_code">
           <ion-select-option *ngFor="let dat of locationArr" [value]="dat.value">{{dat.label}}</ion-select-option>
-        </ion-select>
+        </ion-select> -->
       </ion-item>
     </section>
 

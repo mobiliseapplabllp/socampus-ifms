@@ -107,16 +107,21 @@ export class ComplaintCardsComponent  implements OnInit {
   }
 
   async openTicketTypeModal(data: any) {
-    const modal = await this.modalCtrl.create({
-      component: TicketTypeComponent,
-      componentProps: { requestedData: data }
-    });
-    modal.onWillDismiss().then(disModal => {
-      if (disModal.role) {
-        this.greetEvent.emit(true);
+    this.router.navigate(['complaint/ticket-type'], {
+      queryParams: {
+        data: JSON.stringify(data),
       }
     });
-    modal.present();
+    // const modal = await this.modalCtrl.create({
+    //   component: TicketTypeComponent,
+    //   componentProps: { requestedData: data }
+    // });
+    // modal.onWillDismiss().then(disModal => {
+    //   if (disModal.role) {
+    //     this.greetEvent.emit(true);
+    //   }
+    // });
+    // modal.present();
   }
 
   openTicketWork(data: any) {

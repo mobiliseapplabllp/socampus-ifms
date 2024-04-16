@@ -1,19 +1,26 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LoadingController, ModalController, NavParams } from '@ionic/angular';
+import { LoadingController, ModalController, NavController, NavParams } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
-import { IonModal } from '@ionic/angular';
+// import { IonModal } from '@ionic/angular';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { HseAssignComponent } from '../hse-assign/hse-assign.component';
+import { ActivatedRoute } from '@angular/router';
+import { QueryCatComponent } from 'src/app/shared/query-cat/query-cat.component';
+import { QuerySubCatComponent } from 'src/app/shared/query-sub-cat/query-sub-cat.component';
+import { QuerySubCat2Component } from 'src/app/shared/query-sub-cat2/query-sub-cat2.component';
+import { BuildingComponent } from 'src/app/shared/building/building.component';
+import { FloorComponent } from 'src/app/shared/floor/floor.component';
+import { LocationComponent } from 'src/app/shared/location/location.component';
 @Component({
   selector: 'app-ticket-type',
   templateUrl: './ticket-type.component.html',
   styleUrls: ['./ticket-type.component.scss'],
 })
 export class TicketTypeComponent  implements OnInit {
-  @ViewChild(IonModal) modal!: IonModal;
+  // @ViewChild(IonModal) modal!: IonModal;
   loading: any;
   public ticketForm!: FormGroup;
   barcodeList: any = [];
@@ -43,23 +50,99 @@ export class TicketTypeComponent  implements OnInit {
     private httpCommon: CommonService,
     private modalCtrl: ModalController,
     private loadingController: LoadingController,
-    private navParam: NavParams) {
-      this.requestedData = this.navParam.get('requestedData');
-      this.ticketPriority = this.requestedData.priority_list;
-      this.allData = this.requestedData.data;
-      this.pc_hse_conf = this.requestedData.data.pc_hse_conf;
-      this.ticket = this.allData.tkts_id;
-      if (this.allData.source !== 'QRCODE') {
-        this.isShowBuilding = true;
-      }
-      this.getBuilding(this.allData.pc_id);
-      this.getRequestType(this.allData.tkts_issue_id);
+    private activeRoute: ActivatedRoute,
+    private navCtrl: NavController) {
+      // this.requestedData = this.navParam.get('requestedData');
+      // this.ticketPriority = this.requestedData?.priority_list || [];
+      // this.allData = this.requestedData?.data || [];
+      // this.pc_hse_conf = this.requestedData.data?.pc_hse_conf || [];
+      // this.ticket = this.allData?.tkts_id ;
+      // if (this.allData?.source !== 'QRCODE') {
+      //   this.isShowBuilding = true;
+      // }
+      // this.getBuilding(this.allData.pc_id);
+      // this.getRequestType(this.allData.tkts_issue_id);
       // this.getSpecificTicket();
   }
 
   ngOnInit() {
     this.initForm();
+    this.activeRoute.queryParams.subscribe((res) => {
+      // this.requestedData_TEMP = JSON.parse(res['data']);
+      // console.log(this.requestedData_TEMP)
+      // this.requestedData = this.requestedData_TEMP.data;
+      // this.ticket_id = this.requestedData.tkts_id;
+      // this.mobile = this.requestedData.mobile
+       // this.requestedData = this.navParam.get('requestedData');
+       this.requestedData = JSON.parse(res['data']);;
+       this.ticketPriority = this.requestedData?.priority_list || [];
+       this.allData = this.requestedData?.data || [];
+       this.pc_hse_conf = this.requestedData.data?.pc_hse_conf || [];
+       this.ticket = this.allData?.tkts_id;
+       if (this.allData?.source !== 'QRCODE') {
+         this.isShowBuilding = true;
+       }
+      //  this.getBuilding(this.allData.pc_id);
+       this.getRequestType(this.allData.tkts_issue_id);
+    });
     // this.getPriority();
+  }
+
+
+  initForm() {
+    this.ticketForm = this.formbuilder.group({
+      issue_type: ['', Validators.required],
+      req_type_id: [''],
+      tkt_tag: [''],
+      is_barcode: [''],
+      barcode: [''],
+      category: [''],
+      category_desc: [''],
+      bldg_id: [''],
+      bldg_id_desc: [''],
+      floor_id: [''],
+      floor_id_desc: [''],
+      loc_code: [''],
+      loc_code_desc: [''],
+      subcat1_id: [''],
+      subcat1_id_desc: [''],
+      subcat2_id: [''],
+      subcat2_id_desc: [''],
+      barcode_id: [''],
+      ticketId: [''],
+      tkt_priority: ['', Validators.required],
+      ptw_req: [''],
+      ppe_kit_req: [''],
+      assignToName: ['', Validators.required],
+      assignTo: [''],
+      buddy_req: [''],
+      buddyId: [''],
+      buddyName: ['']
+    });
+    setTimeout(() => {
+      let tkt_tag = this.allData?.tkt_tag;
+      if (tkt_tag) {
+        tkt_tag = tkt_tag.toString();
+      }
+      this.ticketForm.get('ticketId')?.setValue(this.ticket);
+      this.ticketForm.get('tkt_tag')?.setValue(tkt_tag);
+      this.ticketForm.get('category_desc')?.setValue(this.allData.cat_desc);
+      this.ticketForm.get('category')?.setValue(this.allData.cat_id);
+      this.ticketForm.get('subcat1_id_desc')?.setValue(this.allData.subcat1_desc);
+      this.ticketForm.get('subcat1_id')?.setValue(this.allData.subcat1_id);
+      this.ticketForm.get('subcat2_id_desc')?.setValue(this.allData.subcat2_desc);
+      this.ticketForm.get('subcat2_id')?.setValue(this.allData.subcat2_id);
+
+      this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id);
+      this.ticketForm.get('bldg_id_desc')?.setValue(this.allData.building_desc);
+
+      this.ticketForm.get('floor_id')?.setValue(this.allData.floor_id);
+      this.ticketForm.get('floor_id_desc')?.setValue(this.allData.floor_desc);
+      this.ticketForm.get('loc_code')?.setValue(this.allData.loc_id);
+      this.ticketForm.get('loc_code_desc')?.setValue(this.allData.location_desc);
+
+    });
+    this.getIssueType();
   }
 
   getRequestType(id: any) {
@@ -83,36 +166,6 @@ export class TicketTypeComponent  implements OnInit {
     });
   }
 
-  initForm() {
-    this.ticketForm = this.formbuilder.group({
-      issue_type: ['', Validators.required],
-      req_type_id: [''],
-      tkt_tag: [''],
-      is_barcode: [''],
-      barcode: [''],
-      category: [''],
-      bldg_id: [''],
-      floor_id: [''],
-      loc_code: [''],
-      subcat1_id: [''],
-      subcat2_id: [''],
-      barcode_id: [''],
-      ticketId: [''],
-      tkt_priority: ['', Validators.required],
-      ptw_req: [''],
-      ppe_kit_req: [''],
-      assignToName: ['', Validators.required],
-      assignTo: [''],
-      buddy_req: [''],
-      buddyId: [''],
-      buddyName: ['']
-    });
-    setTimeout(() => {
-      this.ticketForm.get('ticketId')?.setValue(this.ticket);
-      this.ticketForm.get('tkt_tag')?.setValue(this.allData.tkt_tag.toString())
-    });
-    this.getIssueType();
-  }
 
   changeRadio() {
     this.ticketForm.get('bldg_id')?.setValue('');
@@ -230,6 +283,7 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   changeType() {
+    return;
     this.ticketForm.get('is_barcode')?.setValue('');
     this.ticketForm.get('barcode')?.setValue('');
     this.ticketForm.get('category')?.setValue('');
@@ -238,7 +292,7 @@ export class TicketTypeComponent  implements OnInit {
     this.barcodeList = [];
     if (this.ticketForm.value.issue_type == 2) {
       // this.getQueryCat();
-      this.query = this.allData.cateList;
+      // this.query = this.allData.cateList;
       setTimeout(() => {
         this.ticketForm.get('category')?.setValue(this.allData.cat_id);
       }, 100)
@@ -272,42 +326,60 @@ export class TicketTypeComponent  implements OnInit {
     })
   }
 
-  getQueryCat() {
-    this.presentLoading().then(preLoad => {
-      this.httpComplaint.getQueryCategory(this.ticketForm.value.issue_type).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.query = data.data;
-            setTimeout(() => {
-              this.ticketForm.get('category')?.setValue(this.allData.cat_id);
-            }, 100)
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.httpCommon.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      });
-    })
+  // getQueryCat() {
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpComplaint.getQueryCategory(this.ticketForm.value.issue_type).subscribe({
+  //       next:(data) => {
+  //         if (data.status) {
+  //           this.query = data.data;
+  //           setTimeout(() => {
+  //             this.ticketForm.get('category')?.setValue(this.allData.cat_id);
+  //           }, 100)
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.httpCommon.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     });
+  //   })
+  // }
+
+  async openCategory() {
+    const modal = await this.modalCtrl.create({
+      component: QueryCatComponent,
+      cssClass: 'my-modal',
+      componentProps : {
+        issue_id: this.ticketForm.value.issue_id,
+        pc_id: this.ticketForm.value.pc_id,
+        data: this.allData.cateList
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        this.ticketForm.get('category_desc')?.setValue(disModal.data.label);
+        this.ticketForm.get('category')?.setValue(disModal.data.value);
+        this.ticketForm.get('subcat1_id')?.setValue('');
+        this.ticketForm.get('subcat1_id_desc')?.setValue('');
+        this.ticketForm.get('subcat2_id')?.setValue('');
+        this.ticketForm.get('subcat2_id_desc')?.setValue('');
+        this.subCategory = [];
+        this.subCategory2 = [];
+        this.changeQuery(disModal.data.value);
+      }
+    });
+    return await modal.present();
   }
 
-  changeQuery(ev: any) {
-    if (!ev.target.value) {
-      return
-    }
-    this.ticketForm.get('subcat1_id')?.setValue('');
-    this.ticketForm.get('subcat2_id')?.setValue('');
+  changeQuery(id: any) {
     this.presentLoading().then(preLoad => {
-      this.httpComplaint.getQuerySubCat1(ev.target.value).subscribe({
+      this.httpComplaint.getQuerySubCat1(id).subscribe({
         next:(data) => {
           if (data.status) {
             this.subCategory = data.data;
-            setTimeout(() => {
-              this.ticketForm.get('subcat1_id')?.setValue(this.allData.subcat1_id);
-            }, 100)
           }
         },
         error:() => {
@@ -321,19 +393,38 @@ export class TicketTypeComponent  implements OnInit {
     })
   }
 
-  changeSubCat(ev: any) {
-    if (!ev.target.value) {
+  async openCategorySubCat() {
+    if(!this.ticketForm.value.category) {
+      alert('Please Select Category');
       return;
     }
-    this.ticketForm.get('subcat2_id')?.setValue('');
+    const modal = await this.modalCtrl.create({
+      component: QuerySubCatComponent,
+      cssClass: 'my-modal',
+      componentProps : {
+        qry_id: this.ticketForm.value.category,
+        allData: this.subCategory
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        this.ticketForm.get('subcat1_id_desc')?.setValue(disModal.data.label);
+        this.ticketForm.get('subcat1_id')?.setValue(disModal.data.value);
+        this.ticketForm.get('subcat2_id_desc')?.setValue('');
+        this.ticketForm.get('subcat2_id')?.setValue('');
+        this.subCategory2 = [];
+        this.changeSubCat(disModal.data.value);
+      }
+    });
+    return await modal.present();
+  }
+
+  changeSubCat(id: any) {
     this.presentLoading().then(preLoad => {
-      this.httpComplaint.getQuerySubCat2(ev.target.value).subscribe({
+      this.httpComplaint.getQuerySubCat2(id).subscribe({
         next:(data) => {
           if (data.status) {
             this.subCategory2 = data.data;
-            setTimeout(() => {
-              this.ticketForm.get('subcat2_id')?.setValue(this.allData.subcat2_id);
-            }, 100)
           }
         },
         error:() => {
@@ -344,6 +435,108 @@ export class TicketTypeComponent  implements OnInit {
         }
       });
     })
+  }
+
+  async openCategorySubCat2() {
+    console.log(this.ticketForm.value);
+    if(!this.ticketForm.value.subcat1_id) {
+      alert('Please Select Category 1');
+      return;
+    }
+    const modal = await this.modalCtrl.create({
+      component: QuerySubCat2Component,
+      cssClass: 'my-modal',
+      componentProps : {
+        qry_id1: this.ticketForm.value.subcat1_id,
+        allData:  this.subCategory2
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        this.ticketForm.get('subcat2_id_desc')?.setValue(disModal.data.label);
+        this.ticketForm.get('subcat2_id')?.setValue(disModal.data.value);
+      }
+    });
+    return await modal.present();
+  }
+
+  async openBuilding() {
+    if (!this.allData.pc_id) {
+      this.httpCommon.presentToast('PC Id is Missing', 'warning');
+      return;
+    }
+    const modal = await this.modalCtrl.create({
+      component: BuildingComponent,
+      cssClass: 'my-modal',
+      componentProps : {
+        id: this.allData.pc_id
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        this.ticketForm.get('bldg_id_desc')?.setValue(disModal.data.label);
+        this.ticketForm.get('bldg_id')?.setValue(disModal.data.value);
+        this.ticketForm.get('floor_id_desc')?.setValue('');
+        this.ticketForm.get('floor_id')?.setValue('');
+        this.ticketForm.get('loc_code_desc')?.setValue('');
+        this.ticketForm.get('loc_code')?.setValue('');
+        // this.ticketForm.get('category_desc')?.setValue('');
+        // this.ticketForm.get('category')?.setValue('');
+        // this.ticketForm.get('subcat1_id_desc')?.setValue('');
+        // this.ticketForm.get('subcat1_id')?.setValue('');
+        // this.ticketForm.get('subcat2_id_desc')?.setValue('');
+        // this.ticketForm.get('subcat2_id')?.setValue('');
+        // this.getBuilding(disModal.data.value);
+      }
+    });
+    return await modal.present();
+  }
+
+  async openFloorModal() {
+    if (!this.ticketForm.value.bldg_id) {
+      this.httpCommon.presentToast('Please Select Building', 'warning');
+      return;
+    }
+    const modal = await this.modalCtrl.create({
+      component: FloorComponent,
+      cssClass: 'my-modal',
+      componentProps : {
+        bldg_id: this.ticketForm.value.bldg_id
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        this.ticketForm.get('floor_id_desc')?.setValue(disModal.data.label);
+        this.ticketForm.get('floor_id')?.setValue(disModal.data.value);
+        this.ticketForm.get('loc_code_desc')?.setValue('');
+        this.ticketForm.get('loc_code')?.setValue('');
+        // this.createForm.get('loc_id')?.setValue('');
+        // this.createForm.get('loc_id_desc')?.setValue('')
+      }
+    });
+    return await modal.present();
+  }
+
+  async openLocationModal() {
+    if (!this.ticketForm.value.floor_id) {
+      this.httpCommon.presentToast('Please Select Floor', 'warning');
+      return;
+    }
+    const modal = await this.modalCtrl.create({
+      component: LocationComponent,
+      cssClass: 'my-modal',
+      componentProps : {
+        floor_id: this.ticketForm.value.floor_id
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        this.ticketForm.get('loc_code_desc')?.setValue(disModal.data.label);
+        this.ticketForm.get('loc_code')?.setValue(disModal.data.value);
+      }
+
+    });
+    return await modal.present();
   }
 
   searchClientId() {
@@ -393,7 +586,8 @@ export class TicketTypeComponent  implements OnInit {
           next:(data) => {
             if (data.status) {
               this.httpCommon.presentToast(data.msg, 'success');
-              this.dismiss(data, true);
+              this.navCtrl.pop();
+              // this.dismiss(data, true);
             } else {
               this.httpCommon.presentToast(data.msg, 'warning');
             }
