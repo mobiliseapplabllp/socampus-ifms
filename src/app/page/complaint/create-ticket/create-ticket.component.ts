@@ -488,7 +488,7 @@ export class CreateTicketComponent  implements OnInit {
   async openResponseModal(data: any) {
     const modal = await this.modalController.create({
       component: ResponseModalComponent,
-      cssClass: 'my-modal',
+      cssClass: 'my-modal2',
       componentProps : {data: JSON.stringify(data)}
     });
     modal.onWillDismiss().then(disModal => {

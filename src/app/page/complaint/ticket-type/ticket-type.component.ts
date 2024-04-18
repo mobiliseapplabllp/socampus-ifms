@@ -77,6 +77,7 @@ export class TicketTypeComponent  implements OnInit {
        this.requestedData = JSON.parse(res['data']);;
        this.ticketPriority = this.requestedData?.priority_list || [];
        this.allData = this.requestedData?.data || [];
+       console.log(this.allData);
        this.pc_hse_conf = this.requestedData.data?.pc_hse_conf || [];
        this.ticket = this.allData?.tkts_id;
        if (this.allData?.source !== 'QRCODE') {
@@ -168,25 +169,25 @@ export class TicketTypeComponent  implements OnInit {
 
 
   changeRadio() {
-    this.ticketForm.get('bldg_id')?.setValue('');
-    this.ticketForm.get('floor_id')?.setValue('');
-    this.ticketForm.get('loc_code')?.setValue('');
+    // this.ticketForm.get('bldg_id')?.setValue('');
+    // this.ticketForm.get('floor_id')?.setValue('');
+    // this.ticketForm.get('loc_code')?.setValue('');
     this.isShowBuilding = false
   }
 
 
 
   changeIsBarcode(ev: any) {
-    this.ticketForm.get('barcode')?.setValue('');
-    this.ticketForm.get('barcode_id')?.setValue('');
-    this.barcodeList = [];
+    // this.ticketForm.get('barcode')?.setValue('');
+    // this.ticketForm.get('barcode_id')?.setValue('');
+    // this.barcodeList = [];
     if (ev.target.value == 0) {
       this.isShowBuilding = true;
-      setTimeout(() => {
-        if (this.locations.length > 0) {
-          this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id)
-        }
-      }, 100);
+      // setTimeout(() => {
+      //   if (this.locations.length > 0) {
+      //     this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id)
+      //   }
+      // }, 100);
     }
   }
 

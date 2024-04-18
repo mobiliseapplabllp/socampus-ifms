@@ -27,12 +27,12 @@
     <ion-buttons slot="end">
       <ion-button [disabled]="isLoading" (click)="changeEvent()" class="ion-text-capitalize" color="primary" fill="outline" shape="round">
         Reload
-        <ion-icon name="reload-outline" slot="end" *ngIf="!isLoading"></ion-icon>
+        <ion-icon  slot="end" name="reload-circle-sharp" *ngIf="!isLoading"></ion-icon>
         <ion-spinner slot="end"  name="lines-sharp" *ngIf="isLoading"></ion-spinner>
       </ion-button>
     </ion-buttons>
   </ion-item>
   <app-dashboard [eventChange]="eventChange" ></app-dashboard>
-  <app-menu></app-menu>
+  <app-menu [didEnter]="didEnter"></app-menu>
   <app-pending-task [eventChange]="eventChange"></app-pending-task>
 </ion-content>

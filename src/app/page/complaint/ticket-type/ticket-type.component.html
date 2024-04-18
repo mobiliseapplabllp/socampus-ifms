@@ -37,7 +37,7 @@
     <div *ngIf="ticketForm.value.issue_type === 1">
       <ion-item>
         <ion-label position="floating">Is Barcode</ion-label>
-        <ion-select interface="action-sheet" formControlName="is_barcode" mode="ios" (ionChange)="changeIsBarcode($event)">
+        <ion-select interface="action-sheet" formControlName="is_barcode" mode="ios" ><!--(ionChange)="changeIsBarcode($event)"-->
           <ion-select-option value="1">Yes</ion-select-option>
           <ion-select-option value="0">No</ion-select-option>
         </ion-select>
@@ -48,7 +48,7 @@
         <ion-button size="small" slot="end" fill="outline" color="red" [disabled]="!ticketForm.value.barcode" (click)="searchClientId()">Search <ion-icon name="search-outline" slot="end"></ion-icon> </ion-button>
       </ion-item>
       <section *ngIf="ticketForm.value.is_barcode === '1'">
-        <ion-radio-group formControlName="barcode_id" (ionChange)="changeRadio()">
+        <ion-radio-group formControlName="barcode_id" ><!--(ionChange)="changeRadio()"-->
           <ion-item *ngFor="let dat of barcodeList">
             <ion-radio slot="start" [value]="dat.asset_id" ></ion-radio>
             <ion-label>

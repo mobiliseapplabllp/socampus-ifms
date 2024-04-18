@@ -9,7 +9,7 @@ export class ListMasterPage implements OnInit {
   userData: any = [];
   userName!: string;
   eventChange = false;
-  ionRefresh = false;
+  didEnter = false;
   isLoading!: boolean;
   constructor() {
     const user = localStorage.getItem('user');
@@ -32,12 +32,12 @@ export class ListMasterPage implements OnInit {
     }, 1500);
   }
 
-  // ionViewDidEnter() {
-  //   this.eventChange = true;
-  //   setTimeout(() => {
-  //     this.eventChange = false;
-  //   }, 1500);
-  // }
+  ionViewDidEnter() {
+    this.didEnter = true;
+    setTimeout(() => {
+      this.didEnter = false;
+    }, 1500);
+  }
 
   handleRefresh(event: any) {
     event.target.complete();
