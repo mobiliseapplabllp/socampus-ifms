@@ -32,7 +32,7 @@
     "@capacitor/haptics": "4.1.0",
     "@capacitor/ios": "^5.3.0",
     "@capacitor/keyboard": "4.1.1",
-    "@capacitor/network": "^5.0.6",
+    "@capacitor/network": "^6.0.0",
     "@capacitor/status-bar": "4.1.1",
     "@ionic/angular": "^6.1.9",
     "angular-user-idle": "^4.0.0",

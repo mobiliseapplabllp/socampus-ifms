@@ -44,7 +44,6 @@ export class AppComponent {
       this.router.navigateByUrl('/login', { replaceUrl: true });
     } else {
       this.common.checkInternet().then(res => {
-        console.log(res);
         if (res) {
           this.refreshToken();
         } else {
