@@ -11,6 +11,9 @@ import { QueryCatComponent } from 'src/app/shared/query-cat/query-cat.component'
 import { QuerySubCatComponent } from 'src/app/shared/query-sub-cat/query-sub-cat.component';
 import { QuerySubCat2Component } from 'src/app/shared/query-sub-cat2/query-sub-cat2.component';
 import { Router } from '@angular/router';
+import { BuildingComponent } from 'src/app/shared/building/building.component';
+import { FloorComponent } from 'src/app/shared/floor/floor.component';
+import { LocationComponent } from 'src/app/shared/location/location.component';
 @Component({
   selector: 'app-create-ticket',
   templateUrl: './create-ticket.component.html',
@@ -37,7 +40,8 @@ export class CreateTicketComponent  implements OnInit {
   userName!: string;
   barcodeList: any = [];
   requestType: any = [];
-
+  qrType!: string;
+  isSearchBarcode!: boolean
   constructor(
     private platform: Platform,
     private formbuilder: FormBuilder,
@@ -78,8 +82,11 @@ export class CreateTicketComponent  implements OnInit {
       pc_id: [''],
       pc_id_desc: [''],
       bldg_id: [''],
+      bldg_id_desc: [''],
       floor_id: [''],
+      floor_id_desc: [''],
       loc_code: [''],
+      loc_code_desc: [''],
       category_desc: [''],
       category: [''],
       subcat1_id_desc: [''],
@@ -97,12 +104,87 @@ export class CreateTicketComponent  implements OnInit {
   ionViewDidEnter() {
     let bar = this.httpCommon.getBarcode();
     if (bar) {
-      let token, fullurl;
-      token = localStorage.getItem('token1');
-      fullurl = bar + '?token=' + token;
-      this.httpCommon.setBarcode('');
-      this.httpCommon.openDoc(fullurl);
+      if (this.qrType === 'history') {
+        let token, fullurl;
+        token = localStorage.getItem('token1');
+        fullurl = bar + '?token=' + token;
+        this.httpCommon.setBarcode('');
+        this.httpCommon.openDoc(fullurl);
+      } else if (this.qrType === 'scan') {
+        console.log(bar);
+        let  type,enc_key,split = bar.split('/');
+        enc_key = split[split.length - 1];
+        type = split[split.length - 2];
+        if (type === 'complaint-qr-code') {
+          this.getLocationQrData('location', enc_key);
+        } else if(type === 'create-ticket-qr-code') {
+          // this.decryptBarcode(enc_key)
+          this.getLocationQrData('asset', enc_key);
+        }
+      }
     }
+  }
+
+  getLocationQrData(type: string, enc_key: string) {
+    this.presentLoading().then(preLoad => {
+      this.httpComp.getSiteDetailUsingBarcode(type, enc_key).subscribe({
+        next:(data) => {
+          if (data.status) {
+            if (type === 'location') {
+              this.createForm.get('issue_id')?.setValue(2);
+              this.createForm.get('is_barcode')?.setValue('');
+              this.createForm.get('barcode')?.setValue('');
+              this.createForm.get('pc_id_desc')?.setValue(data.data.pc_desc);
+              this.createForm.get('pc_id')?.setValue(data.data.pc_id);
+              this.createForm.get('bldg_id_desc')?.setValue(data.data.building_desc);
+              this.createForm.get('bldg_id')?.setValue(data.data.building_id);
+              this.createForm.get('floor_id_desc')?.setValue(data.data.floor_desc);
+              this.createForm.get('floor_id')?.setValue(data.data.floor_id);
+              this.createForm.get('loc_code_desc')?.setValue(data.data.location_desc);
+              this.createForm.get('loc_code')?.setValue(data.data.loc_id);
+              this.barcodeList = [];
+            } else if (type === 'asset') {
+              this.createForm.get('issue_id')?.setValue(1);
+              this.createForm.get('is_barcode')?.setValue('1');
+              this.createForm.get('barcode')?.setValue(data.data.barcode);
+              this.createForm.get('pc_id_desc')?.setValue(data.data.pc_desc);
+              this.createForm.get('pc_id')?.setValue(data.data.pc_id);
+              this.createForm.get('bldg_id_desc')?.setValue(data.data.building_desc);
+              this.createForm.get('bldg_id')?.setValue(data.data.building_id);
+              this.createForm.get('floor_id_desc')?.setValue(data.data.floor_desc);
+              this.createForm.get('floor_id')?.setValue(data.data.floor_id);
+              this.createForm.get('loc_code_desc')?.setValue(data.data.location_desc);
+              this.createForm.get('loc_code')?.setValue(data.data.loc_id);
+              setTimeout(() => {
+                this.searchBarcode();
+              }, 100);
+            } else {
+              this.httpCommon.presentToast('This is Asset QR Code', 'warning');
+            }
+          } else {
+            this.httpCommon.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.httpCommon.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    });
+  }
+
+  decryptBarcode(enc_key: string) {
+    let decBarcode = this.httpCommon.decryptValue(enc_key);
+    this.createForm.get('issue_id')?.setValue(1);
+    this.createForm.get('is_barcode')?.setValue('1');
+    this.createForm.get('barcode')?.setValue(decBarcode)
+    setTimeout(() => {
+      this.searchBarcode();
+    }, 100);
+
   }
 
   getEmpDetail() {
@@ -143,11 +225,11 @@ export class CreateTicketComponent  implements OnInit {
           this.dismissloading();
         }
       });
-    })
-
+    });
   }
 
-  openScanner() {
+  openScanner(qrType: string) {
+    this.qrType = qrType;
     this.router.navigateByUrl('/barcode');
   }
 
@@ -222,18 +304,17 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   changeIssue(ev: any) {
-    this.createForm.get('pc_id')?.setValue('');
-    this.createForm.get('pc_id_desc')?.setValue('');
-    this.createForm.get('bldg_id')?.setValue('');
-    this.createForm.get('floor_id')?.setValue('');
-    this.createForm.get('loc_code')?.setValue('');
-
-    this.createForm.get('pc_id_desc')?.setValue('');
-    this.createForm.get('bldg_id')?.setValue('');
-    this.createForm.get('floor_id')?.setValue('');
-    this.createForm.get('category_desc')?.setValue('');
-    this.createForm.get('subcat1_id_desc')?.setValue('');
-    this.createForm.get('subcat2_id_desc')?.setValue('');
+    // this.createForm.get('pc_id')?.setValue('');
+    // this.createForm.get('pc_id_desc')?.setValue('');
+    // this.createForm.get('bldg_id')?.setValue('');
+    // this.createForm.get('floor_id')?.setValue('');
+    // this.createForm.get('loc_code')?.setValue('');
+    // this.createForm.get('pc_id_desc')?.setValue('');
+    // this.createForm.get('bldg_id')?.setValue('');
+    // this.createForm.get('floor_id')?.setValue('');
+    // this.createForm.get('category_desc')?.setValue('');
+    // this.createForm.get('subcat1_id_desc')?.setValue('');
+    // this.createForm.get('subcat2_id_desc')?.setValue('');
     this.getRequestType(ev.target.value);
   }
 
@@ -407,7 +488,7 @@ export class CreateTicketComponent  implements OnInit {
   async openResponseModal(data: any) {
     const modal = await this.modalController.create({
       component: ResponseModalComponent,
-      cssClass: 'my-modal',
+      cssClass: 'my-modal2',
       componentProps : {data: JSON.stringify(data)}
     });
     modal.onWillDismiss().then(disModal => {
@@ -474,116 +555,215 @@ export class CreateTicketComponent  implements OnInit {
       if (disModal.role) {
         this.createForm.get('pc_id_desc')?.setValue(disModal.data.label);
         this.createForm.get('pc_id')?.setValue(disModal.data.value);
+
+        this.createForm.get('bldg_id_desc')?.setValue('');
+        this.createForm.get('bldg_id')?.setValue('');
+        this.createForm.get('floor_id_desc')?.setValue('');
+        this.createForm.get('floor_id')?.setValue('');
+        this.createForm.get('loc_code_desc')?.setValue('');
+        this.createForm.get('loc_code')?.setValue('');
+
         this.createForm.get('category_desc')?.setValue('');
         this.createForm.get('category')?.setValue('');
         this.createForm.get('subcat1_id_desc')?.setValue('');
         this.createForm.get('subcat1_id')?.setValue('');
         this.createForm.get('subcat2_id_desc')?.setValue('');
         this.createForm.get('subcat2_id')?.setValue('');
-        this.getBuilding(disModal.data.value);
+        // this.getBuilding(disModal.data.value);
       }
     });
     return await modal.present();
   }
 
-  getBuilding(id: any) {
-    this.presentLoading().then(preLoad => {
-      this.httpComp.getBuildingList(id).subscribe({
-        next:(data: any) => {
-          if (data.status) {
-            this.buildingArr = data.data;
-          } else {
-            this.httpCommon.presentToast(data.msg, 'warning');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.httpCommon.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
-  }
-
-  changeBuilding(ev: any) {
-    let id = ev.target.value;
-    if(!id) {
+  async openBuilding() {
+    if (!this.createForm.value.pc_id) {
+      this.httpCommon.presentToast('Please Select Site', 'warning');
       return;
     }
-    this.getFloorList(id)
+    const modal = await this.modalController.create({
+      component: BuildingComponent,
+      cssClass: 'my-modal',
+      componentProps : {
+        id: this.createForm.value.pc_id
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        this.createForm.get('bldg_id_desc')?.setValue(disModal.data.label);
+        this.createForm.get('bldg_id')?.setValue(disModal.data.value);
+
+        this.createForm.get('floor_id_desc')?.setValue('');
+        this.createForm.get('floor_id')?.setValue('');
+        this.createForm.get('loc_code_desc')?.setValue('');
+        this.createForm.get('loc_code')?.setValue('');
+
+        this.createForm.get('category_desc')?.setValue('');
+        this.createForm.get('category')?.setValue('');
+        this.createForm.get('subcat1_id_desc')?.setValue('');
+        this.createForm.get('subcat1_id')?.setValue('');
+        this.createForm.get('subcat2_id_desc')?.setValue('');
+        this.createForm.get('subcat2_id')?.setValue('');
+        // this.getBuilding(disModal.data.value);
+      }
+    });
+    return await modal.present();
   }
 
-  getFloorList(id: any) {
-    this.presentLoading().then(preLoad => {
-      this.httpComp.getFloorList(id).subscribe({
-        next:(data: any) => {
-          if (data.status) {
-            this.floorArr = data.data;
-          } else {
-            this.httpCommon.presentToast(data.msg , 'warning');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.httpCommon.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
-  }
 
-  changeFloor(ev: any) {
-    let id = ev.target.value;
-    if (!id) {
+
+  // getBuilding(id: any) {
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpComp.getBuildingList(id).subscribe({
+  //       next:(data: any) => {
+  //         if (data.status) {
+  //           this.buildingArr = data.data;
+  //         } else {
+  //           this.httpCommon.presentToast(data.msg, 'warning');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.httpCommon.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     })
+  //   })
+  // }
+
+  // changeBuilding(ev: any) {
+  //   let id = ev.target.value;
+  //   if(!id) {
+  //     return;
+  //   }
+  //   this.getFloorList(id)
+  // }
+
+  // getFloorList(id: any) {
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpComp.getFloorList(id).subscribe({
+  //       next:(data: any) => {
+  //         if (data.status) {
+  //           this.floorArr = data.data;
+  //         } else {
+  //           this.httpCommon.presentToast(data.msg , 'warning');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.httpCommon.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     })
+  //   })
+  // }
+
+  async openFloorModal() {
+    if (!this.createForm.value.bldg_id) {
+      this.httpCommon.presentToast('Please Select Building', 'warning');
       return;
     }
-    this.getLocation(id);
+    const modal = await this.modalController.create({
+      component: FloorComponent,
+      cssClass: 'my-modal',
+      componentProps : {
+        bldg_id: this.createForm.value.bldg_id
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        this.createForm.get('floor_id_desc')?.setValue(disModal.data.label);
+        this.createForm.get('floor_id')?.setValue(disModal.data.value);
+
+        this.createForm.get('loc_code_desc')?.setValue('');
+        this.createForm.get('loc_code')?.setValue('');
+        // this.createForm.get('loc_id')?.setValue('');
+        // this.createForm.get('loc_id_desc')?.setValue('')
+      }
+
+    });
+    return await modal.present();
   }
 
-  getLocation(id: any) {
-    this.presentLoading().then(preLoad => {
-      this.httpComp.getLocationList(id).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.locationArr = data.data
-          } else {
-            this.httpCommon.presentToast(data.msg, 'warning');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.httpCommon.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
+
+  // changeFloor(ev: any) {
+  //   let id = ev.target.value;
+  //   if (!id) {
+  //     return;
+  //   }
+  //   this.getLocation(id);
+  // }
+
+  // getLocation(id: any) {
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpComp.getLocationList(id).subscribe({
+  //       next:(data) => {
+  //         if (data.status) {
+  //           this.locationArr = data.data
+  //         } else {
+  //           this.httpCommon.presentToast(data.msg, 'warning');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.httpCommon.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     })
+  //   })
+  // }
+
+  async openLocationModal() {
+    if (!this.createForm.value.floor_id) {
+      this.httpCommon.presentToast('Please Select Floor', 'warning');
+      return;
+    }
+    const modal = await this.modalController.create({
+      component: LocationComponent,
+      cssClass: 'my-modal',
+      componentProps : {
+        floor_id: this.createForm.value.floor_id
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        this.createForm.get('loc_code_desc')?.setValue(disModal.data.label);
+        this.createForm.get('loc_code')?.setValue(disModal.data.value);
+      }
+
+    });
+    return await modal.present();
   }
 
   searchBarcode() {
-    this.presentLoading().then(preLoad => {
-      this.httpComp.getClientIdBarcode(this.createForm.value.barcode).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.barcodeList = data.data;
-          } else {
-            this.httpCommon.presentToast(data.msg, 'warning');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.httpCommon.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
+    if(!this.createForm.value.barcode) {
+      this.httpCommon.presentToast('Please Enter Barcode No', 'warning');
+      return;
+    }
+    this.isSearchBarcode = true;
+    this.httpComp.getClientIdBarcode(this.createForm.value.barcode).subscribe({
+      next:(data) => {
+        if (data.status) {
+          this.barcodeList = data.data;
+        } else {
+          this.httpCommon.presentToast(data.msg, 'warning');
         }
-      });
-    })
+      },
+      error:() => {
+        this.isSearchBarcode = false;
+        this.dismissloading();
+        this.httpCommon.presentToast(environment.errMsg, 'danger');
+      },
+      complete:() => {
+        this.isSearchBarcode = false;
+        this.dismissloading();
+      }
+    });
   }
 
   submitTest() {

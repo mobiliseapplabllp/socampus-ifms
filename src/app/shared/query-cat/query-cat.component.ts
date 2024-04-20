@@ -11,6 +11,7 @@ import { environment } from 'src/environments/environment';
 export class QueryCatComponent  implements OnInit {
   issue_id: any;
   pc_id: any;
+  data: any = [];
   allQueryCat: any = [];
   allQueryCatCopy: any = [];
   loading: any;
@@ -22,7 +23,13 @@ export class QueryCatComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.getQueryCagegory();
+    console.log(this.data);
+    if (this.data.length > 0) {
+      this.allQueryCat = this.data;
+      this.allQueryCatCopy = this.data;
+    } else {
+      this.getQueryCagegory();
+    }
   }
 
   closeModal(data: any, status: any) {

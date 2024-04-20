@@ -21,7 +21,8 @@ export class BarcodeComponent  implements OnInit {
     if (this.platform.is('capacitor')) {
       this.startScan();
     } else {
-      let random = 'https://ifmsuat.mobilisepro.com/backend/api/meter/ifms/meter-schedule-by-qrcode/eyJpdiI6IkZtcGxHR0x6TXNaZUk5UnF5bHdvbkE9PSIsInZhbHVlIjoidFU0cW9tV0ZwRElta3k3K2U3a2UySmpXSzRoem5rcDdqUVBsZFdxTk5FYz0iLCJtYWMiOiJlZTEwZTgxOWRjYzFkZGU4NmZlMjAyMzAwNmU5YjI3M2M1ZTZlNTdhNDZlNzVmZTkyNWE1NzNjZWU3MzZjZGFmIn0%3D';
+      let random = 'https://ifmsuat.mobilisepro.com/#/create-ticket-qr-code/eyJpdiI6IndTRHRuY2RuZklGOEJvamZBcVd4dlE9PSIsInZhbHVlIjoieXlwQkFCR2pUKzJRVTIrOGFDTDQzYnFtNE4zaExPNjYvN3NvUjNncDlIQT0iLCJtYWMiOiIyM2UwOGI4MWEyNWUwZTkzM2MzOWRiZjRhOWUxYzEzMWYwNzk5Nzk0ZTcwYThlNDQwMWUzNTczODFkMmY3MjkwIn0%3D';
+      // let random = 'https://ifmsuat.mobilisepro.com/#/create-ticket-qr-code/eyJpdiI6Ii8xUmxlTjhyMkRFVUQ1WkVabHQvTmc9PSIsInZhbHVlIjoiVHhZUGJveXord3RqdjB0eHlYZDdjTjYwejArUXpuQ0lYMEUzdy96Wmp1ST0iLCJtYWMiOiI0ZGExYzc0MWQ3OGQ0ODU3ZjVjYjAzOGFiYTIzZDRhMTA0ZTExOTY2Yjc1NTY3ZGFjZDQ5MDFlNGQzYzlmZjk0In0%3D';
       this.barcodeNo = random;
       setTimeout(() => {
         this.common.setBarcode(this.barcodeNo);

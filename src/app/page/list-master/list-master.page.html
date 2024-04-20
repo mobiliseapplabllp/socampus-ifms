@@ -24,8 +24,15 @@
       <h2><b><ion-text color="primary">Welcome Home</ion-text></b></h2>
       <p style="font-size:18px"><ion-text>{{userName}}</ion-text></p>
     </ion-label>
+    <ion-buttons slot="end">
+      <ion-button [disabled]="isLoading" (click)="changeEvent()" class="ion-text-capitalize" color="primary" fill="outline" shape="round">
+        Reload
+        <ion-icon  slot="end" name="reload-circle-sharp" *ngIf="!isLoading"></ion-icon>
+        <ion-spinner slot="end"  name="lines-sharp" *ngIf="isLoading"></ion-spinner>
+      </ion-button>
+    </ion-buttons>
   </ion-item>
-  <app-dashboard [ionRefresh]="ionRefresh"></app-dashboard>
-  <app-menu></app-menu>
-  <app-pending-task [eventChange]="eventChange" [ionRefresh]="ionRefresh"></app-pending-task>
+  <app-dashboard [eventChange]="eventChange" ></app-dashboard>
+  <app-menu [didEnter]="didEnter"></app-menu>
+  <app-pending-task [eventChange]="eventChange"></app-pending-task>
 </ion-content>

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { CommonService } from '../common/common.service';
 @Injectable({
   providedIn: 'root'
 })
@@ -10,8 +11,13 @@ export class LoginService {
   username = new BehaviorSubject([]);
   userData: any = [];
   constructor(
-    public https: HttpClient
+    private https: HttpClient,
+    private common: CommonService
   ) { }
+
+  uploadVideo(formData: any): Observable<any> {
+    return this.https.post(environment.url1 + 'upload-video', formData);
+  }
 
   LoginAuth(login: any) {
     return new Promise(resolve => {
@@ -28,8 +34,14 @@ export class LoginService {
           }
           resolve(data);
         },
-        error:() => {
-          resolve(false);
+        error:(err) => {
+          console.log(err);
+          if (err.status === 403) {
+            this.common.presentToast(err.error.msg, 'warning');
+            resolve(null)
+          } else {
+            resolve(false);
+          }
         },
         complete:() => {
 

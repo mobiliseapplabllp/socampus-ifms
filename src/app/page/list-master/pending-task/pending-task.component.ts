@@ -50,21 +50,9 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   ngOnChanges() {
-    if (this.eventChange) {
+    if (this.eventChange || this.ionRefresh) {
       this.getData();
     }
-
-    // if (this.eventChange) {
-    //   this.httpCompalint.getResolveTicket().subscribe((res: any) => {
-    //     console.log(res);
-    //     if (res.status) {
-    //       this.pendingTicket = this.pendingTicket.filter((val: any) => val.tkts_id !== res.ticket_id);
-    //     }
-    //   });
-    // }
-    // if (this.ionRefresh) {
-    //   this.getData();
-    // }
   }
 
   getData() {
@@ -89,13 +77,13 @@ export class PendingTaskComponent  implements OnInit {
 
   clickCustomSegment(val: string) {
     this.segments = val;
-    if (val === 'helpdesk' && this.pendingTicket.length === 0) {
+    if (val === 'helpdesk') {
       this.getPendingTicket();
-    } else if (val === 'digital' && this.assignCheckList.length === 0) {
+    } else if (val === 'digital') {
       this.getSchedule(moment().format('YYYY-MM-DD'));
-    } else if (val === 'pms' && this.pmsList.length === 0) {
+    } else if (val === 'pms') {
       this.getPendingPms();
-    } else if (val === 'meter' && this.meterInfo.length === 0) {
+    } else if (val === 'meter') {
       this.getPendingMeter();
     }
   }

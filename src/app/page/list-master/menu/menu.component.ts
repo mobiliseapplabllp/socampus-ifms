@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -10,6 +10,7 @@ import { ListMasterService } from 'src/app/provider/list-master/list-master.serv
   styleUrls: ['./menu.component.scss'],
 })
 export class MenuComponent  implements OnInit {
+  @Input() didEnter: any;
   loading: any;
   menuTemp: any = [];
   menuNew: any = [];
@@ -37,15 +38,30 @@ export class MenuComponent  implements OnInit {
       },
     }
   }
+  isQrScanning = false;
   constructor(
     private loadingController: LoadingController,
     private httpList: ListMasterService,
     private router: Router,
-    private common: CommonService
+    private common: CommonService,
   ) { }
 
   ngOnInit() {
     this.getMenuDetail();
+  }
+
+  ngOnChanges() {
+    if (this.didEnter && this.isQrScanning) {
+      this.isQrScanning = false
+      let bar = this.common.getBarcode();
+      if (bar) {
+        let token, fullurl;
+        token = localStorage.getItem('token1');
+        fullurl = bar + '?token=' + token;
+        this.common.setBarcode('');
+        this.common.openDoc(fullurl);
+      }
+    }
   }
 
   getMenuDetail() {
@@ -95,6 +111,12 @@ export class MenuComponent  implements OnInit {
   }
 
   openPage(data: any) {
+    console.log(data);
+    if (data.link === 'barcode_history') {
+      this.isQrScanning = true;
+      this.router.navigateByUrl('/barcode');
+      return
+    }
     if (data.link == 'not') {
       this.common.presentToast('Not activated yet', 'warning' );
       return;

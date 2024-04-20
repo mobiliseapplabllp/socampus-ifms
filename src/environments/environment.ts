@@ -13,13 +13,14 @@ export const environment = {
   // url: 'http://192.168.1.27/ifms-backend/api/',
   // url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://ifmsuat.mobilisepro.com/',
   // url2: 'http://192.168.1.27/ifms-backend/api/',
-  // url: 'https://hr-access.herokuapp.com/https://demo.socampus.mobilisepro.com/backend/api/',
-  // url1: 'https://hr-access.herokuapp.com/https://demo.socampus.mobilisepro.com/',
-  // url2: 'https://demo.socampus.mobilisepro.com/backend/api/',
+  // url: 'https://hr-access.herokuapp.com/https://backend.demosocampus.mobilisepro.com/api/',
+  // url1: 'https://hr-access.herokuapp.com/https://backend.demosocampus.mobilisepro.com/',
+  // url2: 'https://backend.demosocampus.mobilisepro.com/api/',
   db: 'socampuseng.db',
   db_location: 'default',
   errMsg: 'Internal Server Error Please try again!!!',
-  source: 'Mobile'
+  source: 'Mobile',
+  LARAVEL_KEY: '8+Fjns9RCg2HJfhHCirTe6FE3NCHSq+W3014tuKBZH4='
 };
 
 /*
