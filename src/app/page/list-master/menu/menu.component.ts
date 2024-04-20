@@ -39,6 +39,7 @@ export class MenuComponent  implements OnInit {
     }
   }
   isQrScanning = false;
+  isInternet!: boolean;
   constructor(
     private loadingController: LoadingController,
     private httpList: ListMasterService,
@@ -47,11 +48,20 @@ export class MenuComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.getMenuDetail();
+    this.common.checkInternet().then(res => {
+      if (res) {
+        this.isInternet = true;
+        this.getMenuDetail();
+      } else {
+        let temp: any = JSON.parse(localStorage.getItem('home_menu')!);
+        console.log(temp);
+        this.chunkedArray(temp);
+      }
+    });
   }
 
   ngOnChanges() {
-    if (this.didEnter && this.isQrScanning) {
+    if (this.didEnter && this.isQrScanning && this.isInternet) {
       this.isQrScanning = false
       let bar = this.common.getBarcode();
       if (bar) {

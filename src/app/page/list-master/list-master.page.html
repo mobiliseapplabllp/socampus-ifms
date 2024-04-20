@@ -4,35 +4,29 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title> {{userName}} </ion-title>
-    <!-- <ion-buttons slot="end">
-      <ion-button slot="icon-only">
-        <ion-icon name="notifications-outline"></ion-icon>
+    <ion-buttons slot="end" *ngIf="isInternet">
+      <ion-button slot="icon-only"  (click)="openPageRoute()" style="position: relative;">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        <ion-text color="danger" *ngIf="DGArr.length > 0" style="position: absolute;top:0px;right:0px">{{DGArr.length}}</ion-text>
       </ion-button>
-      <ion-button slot="icon-only">
-        <ion-icon name="person-outline"></ion-icon>
+      <ion-button slot="icon-only" [disabled]="isLoading" (click)="changeEvent()" class="ion-text-capitalize">
+        <ion-icon  slot="end" name="reload-outline" *ngIf="!isLoading"></ion-icon>
+        <ion-spinner slot="end"  name="lines-sharp" *ngIf="isLoading"></ion-spinner>
       </ion-button>
-    </ion-buttons> -->
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content>
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
-
   <ion-item>
     <ion-label>
       <h2><b><ion-text color="primary">Welcome Home</ion-text></b></h2>
       <p style="font-size:18px"><ion-text>{{userName}}</ion-text></p>
     </ion-label>
-    <ion-buttons slot="end">
-      <ion-button [disabled]="isLoading" (click)="changeEvent()" class="ion-text-capitalize" color="primary" fill="outline" shape="round">
-        Reload
-        <ion-icon  slot="end" name="reload-circle-sharp" *ngIf="!isLoading"></ion-icon>
-        <ion-spinner slot="end"  name="lines-sharp" *ngIf="isLoading"></ion-spinner>
-      </ion-button>
-    </ion-buttons>
   </ion-item>
   <app-dashboard [eventChange]="eventChange" ></app-dashboard>
   <app-menu [didEnter]="didEnter"></app-menu>
-  <app-pending-task [eventChange]="eventChange"></app-pending-task>
+  <app-pending-task [eventChange]="eventChange" [didEnter]="didEnter" *ngIf="isInternet"></app-pending-task>
 </ion-content>

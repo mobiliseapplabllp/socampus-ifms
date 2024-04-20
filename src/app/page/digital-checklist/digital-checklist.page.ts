@@ -1,10 +1,12 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonDatetime, IonSlides, LoadingController, Platform } from '@ionic/angular';
+import { AlertController, IonDatetime, IonSlides, LoadingController, Platform } from '@ionic/angular';
 import * as moment from 'moment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { environment } from 'src/environments/environment';
+import { db } from '../../provider/local-db/local-db.service';
+import { liveQuery } from 'dexie';
 @Component({
   selector: 'app-digital-checklist',
   templateUrl: './digital-checklist.page.html',
@@ -13,16 +15,20 @@ import { environment } from 'src/environments/environment';
 export class DigitalChecklistPage implements OnInit {
   @ViewChild(IonSlides) slides!: IonSlides;
   @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
+  temp: any = [];
+  assignCheckList$: any;
   segmentStatus = 'assigned';
   allChecklist: any = [];
   loading: any;
   selectedDate = moment().format('YYYY-MM-DD');
-  // selectedDate = '2023-11-08';
-  scanBarcode: any;
+  scanBarcodeDetail: any = {
+    isScanBarcode: false,
+    QRType: '',
+    QRValue: ''
+  };
   isOnBehalf = 0;
   assignCheckList: any = [];
   attendedCheckList: any = [];
-  qrType = 'null';
   slideBanner = {
     initialSlide: 0,
     slidesPerView: 5,
@@ -46,43 +52,33 @@ export class DigitalChecklistPage implements OnInit {
     }
   };
   dateArr: any = [];
-  dateTEMP: any;
+  isInternet!: boolean;
+  userData: any = [];
   constructor(
     private common: CommonService,
     private router: Router,
     private httpDigital: DigitalChecklistService,
     private loadingController: LoadingController,
     private platform: Platform,
+    private alertController: AlertController
   ) { }
 
   ngOnInit() {
-    this.common.setBarcode('');
-    let date = moment().format('YYYY-MM-DD');
-    this.createCustomCalendar(date);
-  }
-
-  createCustomCalendar(DATE: any) {
-    let status: any, index = 0 ,end: any;
-    end = moment(DATE).endOf('month').format('DD');
-    this.dateArr = [];
-    for (let i = 1; i <= end ; i++) {
-      if (moment(DATE).format('YYYY-MM-DD') ==  moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')) {
-        status = true;
-        index = i;
+    this.common.checkInternet().then(res => {
+      if (res) {
+        this.isInternet = true;
       } else {
-        status = false
+        this.isInternet = false;
       }
-      this.dateArr.push({
-        date: moment(DATE).startOf('month').add(i - 1, 'day').format('DD'),
-        day: moment(DATE).startOf('month').add(i - 1, 'day').format('dddd')[0],
-        isSelect: status,
-        ind: i,
-        fulldate : moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')
-      })
+    });
+    const user = localStorage.getItem('user');
+    if (user) {
+      this.userData = JSON.parse(user);
     }
-    setTimeout(() => {
-      this.slides.slideTo(index - 3);
-    }, 50);
+    let date = moment().format('YYYY-MM-DD');
+    this.common.setBarcode('');
+    this.deleteCheckList(moment().subtract(3, 'day').format('YYYY-MM-DD'));
+    this.createCustomCalendar(date);
   }
 
   ionViewDidLeave() {
@@ -91,73 +87,135 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   ionViewDidEnter() {
-    let bar = this.common.getBarcode();
+    let split, type, ecn_key, bar = this.common.getBarcode();
     if (bar) {
+      this.scanBarcodeDetail.isScanBarcode = true;
       this.common.setBarcode('');
-      if (this.qrType == 'otherbarcode') {
-        console.log('Your Barcode is ' + bar);
-        let temp, temp1;
-        temp = bar;
-        temp1 = temp.split('/');
-        this.scanBarcode = temp1[5];
-      } else {
-        let temp, temp1;
-        temp = bar;
-        temp1 = temp.split('/');
-        console.log(temp1);
-        const obj = {
-          sch_id: this.qrType,
-          enc_barcode: temp1[5],
-          type: 'checklist',
+      split = bar.split('/');
+      if (split.length === 6) {
+        type = split[4];
+        ecn_key = split[5];
+        let val = this.common.decryptValue(ecn_key);
+        this.scanBarcodeDetail.QRType = type;
+        this.scanBarcodeDetail.QRValue = val;
+        if (val) {
+          this.getCheckListByBarcode(type, val);
+        } else {
+          this.common.presentToast('Invalid Encryption', 'warning');
         }
-        this.verifyBarcode(obj);
-        return;
+      } else {
+        this.common.presentToast('You are Scan Wrong QR Code', 'warning');
       }
-    }
-    if (this.segmentStatus == 'attended') {
-      return;
-    }
-    if (!this.scanBarcode) {
-      this.getSchedule(this.selectedDate);
+    } else if(this.scanBarcodeDetail.isScanBarcode) {
+      this.getCheckListByBarcode(this.scanBarcodeDetail.QRType, this.scanBarcodeDetail.QRValue);
     } else {
-      this.getScheduleUsingBarcode(this.scanBarcode);
+      this.checkCurrentDateDG(this.selectedDate);
     }
   }
 
-  getSchedule(date: any) {
-    this.allChecklist = [];
-    this.assignCheckList = [];
-    this.attendedCheckList = [];
-    this.isOnBehalf = 0;
-    this.presentLoading().then(preLoad => {
-      this.httpDigital.getScheduleHistory(date).subscribe({
-        next:(data) => {
+  myCheckList() {
+    this.scanBarcodeDetail.isScanBarcode = false;
+    this.scanBarcodeDetail.QRType = '';
+    this.scanBarcodeDetail.QRValue = '';
+    this.checkCurrentDateDG(this.selectedDate);
+  }
+
+  getCheckListByBarcode(type: string, val: any) {
+    if (type === 'complaint-qr-code') {
+      var friendsObservable = liveQuery (() => db.checklist.where({loc_id:parseInt(val, 10)}).toArray());
+    } else if (type === 'create-ticket-qr-code') {
+      var friendsObservable = liveQuery (() => db.checklist.where({barcode:val}).toArray());
+    } else {
+      return
+    }
+    const sub = friendsObservable.subscribe({
+      next:(data) => {
+        this.allChecklist = data;
+        this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned');
+        this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned');
+        setTimeout(() => {
+          sub.unsubscribe();
+        }, 1000);
+      }
+    });
+  }
+
+  async presentAlertConfirm() {
+    const alert = await this.alertController.create({
+      cssClass: 'my-custom-class',
+      header: 'REFRESH DIGITAL CHECKLIST?',
+      message: 'are you sure want to Refresh Digital Checklist?',
+      mode: 'ios',
+      buttons: [{
+        text: 'Cancel',
+          handler: (data) => {
+            console.log("Cancel");
+          }
+        },{
+          text: 'YES',
+          handler: (data) => {
+            this.checkOfflineStatus();
+          }
+        }]
+    });
+    await alert.present();
+  }
+
+  async checkOfflineStatus() {
+    const friendsObservable = liveQuery (() => db.checklist.where({offline_save: "true"}).toArray());
+    const sub = friendsObservable.subscribe({
+      next:(data) => {
+        console.log(data);
+        if (data.length > 0) {
+          setTimeout(() => {
+            sub.unsubscribe();
+          }, 500);
+          this.common.presentToastWithOk('Warning!!! You have ' + data.length + ' Digital Checklist saved in your local Db Please Submit these checklist to server otherwise your saved Checklist will destroyed ', 'danger');
+          this.router.navigateByUrl('/list-master/offline-data');
+          return;
+        }
+        this.assignCheckList = [];
+        this.attendedCheckList = [];
+        this.deleteCheckList(this.selectedDate);
+        setTimeout(() => {
+          sub.unsubscribe();
+          this.checkCurrentDateDG(this.selectedDate);
+        },500);
+      }
+    });
+  }
+
+  checkCurrentDateDG(date: string) {
+    const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).toArray());
+    const sub = friendsObservable.subscribe({
+      next:(data) => {
+        this.allChecklist = data;
+        console.log(this.allChecklist);
+        this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+        this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+        if (this.allChecklist.length === 0 && this.isInternet) {
+          this.getOfflineCheckListFromServer(date);
+        }
+        setTimeout(() => {
+          sub.unsubscribe();
+        }, 1000);
+      }
+    });
+  }
+
+  getOfflineCheckListFromServer(date: string) {
+    this.presentLoading('Checklist is save in offline. It may take time to be Please wait, data is loading if user is online').then(preLoad => {
+      this.httpDigital.getOfflineCheckListFromServer(date).subscribe({
+        next:(data: any) => {
           if (data.status) {
             this.allChecklist = data.data;
-            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended' || val.schedule_status === 'closed');
-            this.isOnBehalf = 0;
+            console.log(this.allChecklist);
+            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+            this.addBulkCheckList(this.allChecklist);
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger')
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
-  }
-
-  getOfflineCheckListFromServer() {
-    this.presentLoading('Checklist save in offline. it may take time').then(preLoad => {
-      this.httpDigital.getOfflineCheckListFromServer().subscribe({
-        next:(data: any) => {
-          localStorage.setItem('lastCheckListDate', moment().format('YYYY-MM-DD'));
-          localStorage.setItem('checkListData', JSON.stringify(data));
         },
         error:() => {
           this.dismissloading();
@@ -168,6 +226,19 @@ export class DigitalChecklistPage implements OnInit {
         }
       })
     })
+  }
+
+  async addBulkCheckList(checkListData: any) {
+    await db.checklist.bulkAdd(checkListData);
+  }
+
+  async deleteCheckList(date: any) {
+    let newDate = moment(date).add(1, 'day').format('YYYY-MM-DD');
+    await db.checklist.where("schedule_date").below(newDate).delete();
+  }
+
+  async clearChecList() {
+    return await db.checklist.clear();
   }
 
   getScheduleUsingBarcode(loc_id: any) {
@@ -193,7 +264,7 @@ export class DigitalChecklistPage implements OnInit {
         complete:() => {
           this.dismissloading();
         }
-      })
+      });
     })
   }
 
@@ -244,22 +315,36 @@ export class DigitalChecklistPage implements OnInit {
       }
     }
     this.selectedDate = dat.fulldate;
-    this.getSchedule(dat.fulldate);
+    this.assignCheckList = [];
+    this.attendedCheckList = [];
+    this.checkCurrentDateDG(this.selectedDate);
   }
 
 
   openFillReport(data: any) {
-    if (this.platform.is('capacitor')) {
-      if (!data.barcode  || data.schedule_status === 'attended') {
-        this.router.navigateByUrl('/digital-checklist/fill-report/' + data.schedule_id + '/' + this.isOnBehalf);
-      } else {
-        this.qrType = data.schedule_id;
-        this.router.navigateByUrl('/barcode');
-      }
-    } else {
-      this.router.navigateByUrl('/digital-checklist/fill-report/' + data.schedule_id + '/' + this.isOnBehalf);
+    const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
+    const currentDate = moment(moment().format('YYYY-MM-DD'));
+    if (!currentDate.isSame(pastDate)) {
+      this.common.presentToast('You can fill only Current Date Checklist', 'warning');
+      return;
     }
+    const pastDateTime = moment(data.sch_dateTime);
+    const currentDateTime = moment();
+    const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
+    if (!isCurrentDatetimeBigger) {
+      this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
+      return;
+    }
+    this.openPageUrl(data);
+  }
 
+  openPageUrl(data: any) {
+    this.router.navigate(['/digital-checklist/fill-report/'], {
+      queryParams: {
+        isOnBehalf: this.isOnBehalf,
+        schedule_id: data.schedule_id
+      }
+    });
   }
 
   verifyBarcode(obj: any){
@@ -286,18 +371,38 @@ export class DigitalChecklistPage implements OnInit {
     if (action == 'next') {
       let next = moment(this.selectedDate).add(1, 'day').format('YYYY-MM-DD');
       this.selectedDate = next;
-      this.getSchedule(this.selectedDate);
     } else {
       let prev = moment(this.selectedDate).subtract(1, 'day').format('YYYY-MM-DD');
       this.selectedDate = prev;
-      this.getSchedule(this.selectedDate);
     }
   }
 
-
   openBarcode() {
     this.allChecklist = [];
-    this.qrType = 'otherbarcode';
     this.router.navigateByUrl('/barcode');
+  }
+
+  createCustomCalendar(DATE: any) {
+    let status: any, index = 0 ,end: any;
+    end = moment(DATE).endOf('month').format('DD');
+    this.dateArr = [];
+    for (let i = 1; i <= end ; i++) {
+      if (moment(DATE).format('YYYY-MM-DD') ==  moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')) {
+        status = true;
+        index = i;
+      } else {
+        status = false
+      }
+      this.dateArr.push({
+        date: moment(DATE).startOf('month').add(i - 1, 'day').format('DD'),
+        day: moment(DATE).startOf('month').add(i - 1, 'day').format('dddd')[0],
+        isSelect: status,
+        ind: i,
+        fulldate : moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')
+      })
+    }
+    setTimeout(() => {
+      this.slides.slideTo(index - 3);
+    }, 50);
   }
 }

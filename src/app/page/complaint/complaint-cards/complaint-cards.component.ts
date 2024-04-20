@@ -35,7 +35,9 @@ export class ComplaintCardsComponent  implements OnInit {
     private loadingController: LoadingController,
     private alertController: AlertController,
     private navCtrl: NavController
-  ) { }
+  ) {
+
+  }
 
   ngOnInit() {
   }

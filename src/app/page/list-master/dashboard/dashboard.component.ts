@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { CommonService } from 'src/app/provider/common/common.service';
 import { ListMasterService } from 'src/app/provider/list-master/list-master.service';
 
 @Component({
@@ -36,7 +37,8 @@ export class DashboardComponent  implements OnInit {
     }
    }
   constructor(
-    private httpList: ListMasterService
+    private httpList: ListMasterService,
+    private common: CommonService
   ) { }
 
   ngOnInit() {
@@ -45,7 +47,18 @@ export class DashboardComponent  implements OnInit {
 
   ngOnChanges() {
     if (this.eventChange) {
-      this.getDashboard();
+      this.common.checkInternet().then(res => {
+        if (res) {
+          this.getDashboard();
+        } else {
+          let temp: any = JSON.parse(localStorage.getItem('dashboard')!);
+          console.log(temp);
+          this.breakdown = temp.breakdown;
+          this.pms = temp.pms
+          this.indent = temp.indent,
+          this.meter = temp.meter
+        }
+      });
     }
   }
 
@@ -56,6 +69,13 @@ export class DashboardComponent  implements OnInit {
         this.pms = data.data.pms.assign.toString();
         this.indent = data.data.indent.assign.toString();
         this.meter = data.data?.meter?.assign.toString();
+        const obj = {
+          breakdown: this.breakdown,
+          pms: this.pms,
+          indent: this.indent,
+          meter: this.meter
+        };
+        localStorage.setItem('dashboard', JSON.stringify(obj));
       }
     });
   }

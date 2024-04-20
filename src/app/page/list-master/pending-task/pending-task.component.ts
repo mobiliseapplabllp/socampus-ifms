@@ -14,7 +14,8 @@ import { TicketHistoryComponent } from '../../complaint/ticket-history/ticket-hi
 import { TicketTypeComponent } from '../../complaint/ticket-type/ticket-type.component';
 import { Router } from '@angular/router';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-
+import { liveQuery } from 'dexie';
+import { db } from '../../../provider/local-db/local-db.service';
 @Component({
   selector: 'app-pending-task',
   templateUrl: './pending-task.component.html',
@@ -22,7 +23,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 })
 export class PendingTaskComponent  implements OnInit {
   @Input() eventChange: any;
-  @Input() ionRefresh: any;
+  @Input() didEnter: any;
   loading: any;
   pendingTask = true;
   segments = 'helpdesk';
@@ -34,6 +35,8 @@ export class PendingTaskComponent  implements OnInit {
   pmsList: any = [];
   meterInfo: any = [];
   formData = new FormData();
+  userData: any;
+  isInternet: any;
   constructor(
     private loadingController: LoadingController,
     private httpCompalint: ComplaintService,
@@ -47,10 +50,22 @@ export class PendingTaskComponent  implements OnInit {
 
   ngOnInit() {
     // this.getData();
+    this.common.checkInternet().then(res => {
+      if (res) {
+        this.isInternet = true;
+      } else {
+        this.isInternet = false;
+      }
+    });
+    const user = localStorage.getItem('user');
+    if (user) {
+      this.userData = JSON.parse(user);
+    }
   }
 
   ngOnChanges() {
-    if (this.eventChange || this.ionRefresh) {
+    if (this.eventChange) {
+      console.log('changes');
       this.getData();
     }
   }
@@ -61,7 +76,8 @@ export class PendingTaskComponent  implements OnInit {
       this.pendingTicket = [];
       this.getPendingTicket();
     } else if (this.segments === 'digital') {
-      this.getSchedule(moment().format('YYYY-MM-DD'));
+      this.checkCurrentDateDG(moment().format('YYYY-MM-DD'));
+      // this.getSchedule(moment().format('YYYY-MM-DD'));
     } else if (this.segments === 'pms') {
       this.getPendingPms();
     } else if (this.segments === 'meter') {
@@ -80,12 +96,61 @@ export class PendingTaskComponent  implements OnInit {
     if (val === 'helpdesk') {
       this.getPendingTicket();
     } else if (val === 'digital') {
-      this.getSchedule(moment().format('YYYY-MM-DD'));
+      this.checkCurrentDateDG(moment().format('YYYY-MM-DD'));
+      // this.getSchedule(moment().format('YYYY-MM-DD'));
     } else if (val === 'pms') {
       this.getPendingPms();
     } else if (val === 'meter') {
       this.getPendingMeter();
     }
+  }
+
+  checkCurrentDateDG(date: string) {
+    console.log('abc');
+    const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).toArray());
+    const sub = friendsObservable.subscribe({
+      next:(data) => {
+        this.allChecklist = data;
+        console.log(this.allChecklist);
+        this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+        this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+        if (this.allChecklist.length === 0 && this.isInternet) {
+          this.getOfflineCheckListFromServer(date);
+        }
+        setTimeout(() => {
+          sub.unsubscribe();
+        }, 1000);
+      }
+    });
+  }
+
+  getOfflineCheckListFromServer(date: string) {
+    this.presentLoading('Checklist is save in offline. It may take time to be Please wait, data is loading if user is online').then(preLoad => {
+      this.httpDigital.getOfflineCheckListFromServer(date).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.allChecklist = data.data;
+            console.log(this.allChecklist);
+            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+            this.addBulkCheckList(this.allChecklist);
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+  }
+
+  async addBulkCheckList(checkListData: any) {
+    await db.checklist.bulkAdd(checkListData);
   }
 
   getPendingTicket() {
@@ -236,7 +301,29 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   openFillReport(data: any) {
-    this.router.navigateByUrl('/digital-checklist/fill-report/' + data.schedule_id + '/' + 0);
+    const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
+    const currentDate = moment(moment().format('YYYY-MM-DD'));
+    if (!currentDate.isSame(pastDate)) {
+      this.common.presentToast('You can fill only Current Date Checklist', 'warning');
+      return;
+    }
+    const pastDateTime = moment(data.sch_dateTime);
+    const currentDateTime = moment();
+    const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
+    if (!isCurrentDatetimeBigger) {
+      this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
+      return;
+    }
+    this.openPageUrl(data);
+  }
+
+  openPageUrl(data: any) {
+    this.router.navigate(['/digital-checklist/fill-report/'], {
+      queryParams: {
+        isOnBehalf: 0,
+        schedule_id: data.schedule_id
+      }
+    });
   }
 
   uploadPtw(dat: any) {}
@@ -459,10 +546,16 @@ export class PendingTaskComponent  implements OnInit {
     modal.present();
   }
 
-  async presentLoading() {
+  async presentLoading(msg?: string) {
+    let message;
+    if (msg) {
+      message = msg;
+    } else {
+      message = 'Please Wait'
+    }
     this.loading = await this.loadingController.create({
       cssClass: 'my-custom-class',
-      message: 'Please wait...',
+      message: message,
     });
     await this.loading.present();
   }

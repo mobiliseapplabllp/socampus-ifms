@@ -3,7 +3,6 @@ import { ToastController } from '@ionic/angular';
 import { Network } from '@capacitor/network';
 import * as CryptoJS from 'crypto-js';
 import { environment } from 'src/environments/environment';
-
 @Injectable({
   providedIn: 'root'
 })

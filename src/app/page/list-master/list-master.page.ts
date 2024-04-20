@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-
+import { CommonService } from 'src/app/provider/common/common.service';
+import { LoginService } from 'src/app/provider/login/login.service';
+import { db } from '../../provider/local-db/local-db.service';
+import { liveQuery } from 'dexie';
+import { AlertController,  } from '@ionic/angular';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -11,7 +16,15 @@ export class ListMasterPage implements OnInit {
   eventChange = false;
   didEnter = false;
   isLoading!: boolean;
-  constructor() {
+  isInternet!: boolean;
+  DGArr: any = [];
+  constructor(
+    private common: CommonService,
+    private loginPro: LoginService,
+    private alertController: AlertController,
+    private router: Router,
+  ) {
+
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
@@ -20,7 +33,68 @@ export class ListMasterPage implements OnInit {
   }
 
   ngOnInit(): void {
-    this.changeEvent();
+    this.getHomeLoad();
+  }
+
+  getHomeLoad() {
+    this.common.checkInternet().then(res => {
+      if (res) {
+        this.isInternet = true;
+        this.common.setBarcode('');
+
+        this.getOffLineCheckList();
+      } else {
+        this.isInternet = false
+        // let menu, MENU_TEMP = localStorage.getItem('home_menu');
+        // if (MENU_TEMP) {
+        //   this.myMenu = JSON.parse(MENU_TEMP);
+        //   console.log(this.myMenu);
+        //   this.isInternet = false;
+        //   console.log(menu);
+        // } else {
+        //   this.common.presentToastWithOk('Menu Icon Not Saved in your Local DB, please connect with internet to save menu in Local DB', 'warning');
+        // }
+      }
+    });
+  }
+
+  async getOffLineCheckList() {
+    console.log('offline');
+    const friendsObservable = liveQuery (() => db.checklist.where({offline_save: "true"}).toArray());
+    const sub = friendsObservable.subscribe({
+      next:(data) => {
+        console.log(data);
+        this.DGArr = data;
+        if (this.DGArr.length > 0) {
+          this.presentAlertConfirm();
+        }
+        setTimeout(() => {
+          sub.unsubscribe();
+        }, 1000);
+      }
+    });
+  }
+
+  async presentAlertConfirm() {
+    const alert = await this.alertController.create({
+      cssClass: 'my-custom-class',
+      header: 'Offline Data',
+      message: 'You have some offline Data Save, do you want to push to server',
+      mode: 'ios',
+      buttons: [{
+        text: 'Cancel',
+          handler: (data) => {
+            console.log("Cancel");
+          }
+        },{
+          text: 'YES',
+          handler: (data) => {
+            // this.router.navigateByUrl('/list-master/offline-data');
+            this.openPageRoute();
+          }
+        }]
+    });
+    await alert.present();
   }
 
   changeEvent() {
@@ -33,6 +107,7 @@ export class ListMasterPage implements OnInit {
   }
 
   ionViewDidEnter() {
+    this.changeEvent();
     this.didEnter = true;
     setTimeout(() => {
       this.didEnter = false;
@@ -43,5 +118,9 @@ export class ListMasterPage implements OnInit {
     event.target.complete();
     this.isLoading = true;
     this.changeEvent();
+  }
+
+  openPageRoute() {
+    this.router.navigateByUrl('/list-master/offline-data');
   }
 }

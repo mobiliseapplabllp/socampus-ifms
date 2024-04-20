@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Offline Data</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="presentAlertConfirm()" color="danger" >Reset</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <ion-segment [(ngModel)]='status' (ionChange)="changeSegment($event)">
+    <ion-segment-button value="dc">
+      <ion-label>DC</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="complaint">
+      <ion-label>Complaint </ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="pms">
+      <ion-label>PMS </ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="meter">
+      <ion-label>Meter </ion-label>
+    </ion-segment-button>
+  </ion-segment>
+  <div [ngSwitch]='status'>
+    <div *ngSwitchCase= "'dc'">
+      <ion-row *ngIf="checkListSelect.length > 0">
+        <ion-col class="ion-text-right">
+          <ion-button size="small" (click)="submitAllDc()">Submit All</ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-card *ngFor="let dat of checkList" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
+        <ion-item lines="none" color="none">
+          <ion-checkbox slot="start" [(ngModel)]="dat.isSelect" (ionChange)="changeDc()"></ion-checkbox>
+          <ion-label class="ion-text-wrap">
+            <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
+            <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
+            <p><b>({{dat.loc_id}}){{dat.location_desc}}</b></p>
+            <p><b>{{dat.barcode}}</b></p>
+            <p><b>{{dat.assign_to}}</b></p>
+          </ion-label>
+          <ion-button slot="end" size="small" fill="outline" (click)="submitDc(dat)">Submit</ion-button>
+        </ion-item>
+      </ion-card>
+    </div>
+    <div *ngSwitchCase= "'complaint'">
+    </div>
+    <div *ngSwitchCase= "'pms'">
+    </div>
+    <div *ngSwitchCase= "'dc'">
+    </div>
+  </div>
+
+
+</ion-content>

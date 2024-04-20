@@ -3,9 +3,15 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>Digital Checklist</ion-title>
+    <ion-title >Digital Checklist</ion-title>
     <ion-buttons slot="end">
-      <ion-button id="chklist-date" fill="clear" color="light" class="ion-text-capitalize" [hidden]="scanBarcode">
+      <ion-button fill="clear" color="light" (click)="presentAlertConfirm()" [hidden]="!isInternet || scanBarcodeDetail.isScanBarcode">
+        <ion-icon name="sync-outline"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" color="light" *ngIf="scanBarcodeDetail.isScanBarcode" (click)="myCheckList()">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+      <ion-button id="chklist-date" fill="clear" color="light" class="ion-text-capitalize" [hidden]="!isInternet || scanBarcodeDetail.isScanBarcode">
         <ion-icon name="calendar-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -17,7 +23,7 @@
     </ion-popover>
   </ion-toolbar>
   <ion-toolbar>
-    <ion-slides [options]="slideBanner" [hidden]="scanBarcode" style="margin-bottom:10px">
+    <ion-slides [options]="slideBanner" [hidden]="scanBarcodeDetail.isScanBarcode" style="margin-bottom:10px">
       <ion-slide *ngFor="let dat of dateArr" style="padding:0px">
         <div style="width:40px;height:70px;border-radius: 20px;" [ngClass]="{'black': dat.isSelect, 'medium': !dat.isSelect}" (click)="changeCalendarDate(dat)">
           <section style="width:40px;height:35px;padding:2px !important">
@@ -50,18 +56,17 @@
       <ion-icon name="qr-code-outline"></ion-icon>
     </ion-fab-button>
   </ion-fab>
-
   <div [ngSwitch]='segmentStatus'>
     <div *ngSwitchCase= "'assigned'">
-      <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }" (click)="openFillReport(dat)">
+      <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }" (click)="openFillReport(dat)">
         <ion-item lines="none" color="none">
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
             <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
-            <p><b>{{dat.schedule_time}}</b></p>
-            <p><b>{{dat.location_desc}}</b></p>
+            <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
+            <p><b>({{dat.loc_id}}){{dat.location_desc}}</b></p>
             <p><b>{{dat.barcode}}</b></p>
-            <p><b>{{dat.schedule_status}}</b></p>
+            <p><b>{{dat.assign_to}}</b></p>
           </ion-label>
           <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize" >Fill</ion-button>
         </ion-item>
@@ -73,10 +78,10 @@
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
             <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
-            <p><b>{{dat.schedule_time}}</b></p>
-            <p><b>{{dat.location_desc}}</b></p>
+            <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
+            <p><b>({{dat.loc_id}}){{dat.location_desc}}</b></p>
             <p><b>{{dat.barcode}}</b></p>
-            <p><b>{{dat.schedule_status}}</b></p>
+            <p><b>{{dat.assign_to}}</b></p>
           </ion-label>
           <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize">View</ion-button>
         </ion-item>

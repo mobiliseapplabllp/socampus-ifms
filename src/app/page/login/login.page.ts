@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingController, MenuController, ModalController, Platform } from '@ionic/angular';
@@ -71,6 +71,10 @@ export class LoginPage implements OnInit {
   }
 
   changePass(pass: any) { }
+
+  // clearDb() {
+  //   db.checklist.clear();
+  // }
 
 
   async checkInternet() {

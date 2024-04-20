@@ -3,9 +3,11 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { ListMasterPage } from './list-master.page';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { ChartDashboardComponent } from './chart-dashboard/chart-dashboard.component';
+import { OfflineDataComponent } from './offline-data/offline-data.component';
 import { MenuComponent } from './menu/menu.component';
 import { PendingTaskComponent } from './pending-task/pending-task.component';
-import { ChartDashboardComponent } from './chart-dashboard/chart-dashboard.component';
+import { ComplaintCardsComponent } from '../complaint/complaint-cards/complaint-cards.component';
 
 const routes: Routes = [
   {
@@ -15,6 +17,9 @@ const routes: Routes = [
     path: 'dashboard',
     component: DashboardComponent
   }, {
+    path: 'offline-data',
+    component: OfflineDataComponent
+  }, {
     path: 'menu',
     component: MenuComponent
   }, {
@@ -23,7 +28,10 @@ const routes: Routes = [
   }, {
     path: 'chart-dashboard',
     component: ChartDashboardComponent
-  }
+  }, {
+    path: 'complaint-card',
+    component: ComplaintCardsComponent
+  },
 ];
 
 @NgModule({

@@ -12,10 +12,12 @@ import { SubstringPipe } from 'src/app/pipes/substring.pipe';
 // import { SharedModule } from 'src/app/shared/shared.module';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { ChartDashboardComponent } from './chart-dashboard/chart-dashboard.component';
+import { OfflineDataComponent } from './offline-data/offline-data.component';
 import { MenuComponent } from './menu/menu.component';
 import { PendingTaskComponent } from './pending-task/pending-task.component';
+import { SharedModule } from 'src/app/shared/shared.module';
 import { ComplaintPageModule } from '../complaint/complaint.module';
-import { ChartDashboardComponent } from './chart-dashboard/chart-dashboard.component';
 
 @NgModule({
   imports: [
@@ -23,8 +25,8 @@ import { ChartDashboardComponent } from './chart-dashboard/chart-dashboard.compo
     FormsModule,
     IonicModule,
     ListMasterPageRoutingModule,
-    ComplaintPageModule
-    // SharedModule
+    ComplaintPageModule,
+    SharedModule
   ],
   declarations: [
     ListMasterPage,
@@ -32,7 +34,8 @@ import { ChartDashboardComponent } from './chart-dashboard/chart-dashboard.compo
     DashboardComponent,
     MenuComponent,
     PendingTaskComponent,
-    ChartDashboardComponent
+    ChartDashboardComponent,
+    OfflineDataComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
