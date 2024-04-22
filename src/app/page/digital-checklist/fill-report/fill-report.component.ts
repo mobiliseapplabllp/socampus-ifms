@@ -11,6 +11,7 @@ import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { checklist, db } from '../../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
 import * as moment from 'moment';
+import { PhotoViewComponent } from 'src/app/shared/photo-view/photo-view.component';
 @Component({
   selector: 'app-fill-report',
   templateUrl: './fill-report.component.html',
@@ -34,6 +35,7 @@ export class FillReportComponent  implements OnInit {
   index: any;
   loop = false;
   isInternet!:boolean;
+  offline_save!: string;
   constructor(
     private activeRoute: ActivatedRoute,
     private httpDigital: DigitalChecklistService,
@@ -45,7 +47,6 @@ export class FillReportComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(moment().format('YYYY-MM-DD H:mm:ss'));
     this.common.checkInternet().then(res => {
       if (res) {
         this.isInternet = true;
@@ -75,6 +76,7 @@ export class FillReportComponent  implements OnInit {
         this.schedule_status = this.scheduleArr[0].schedule_status
         this.remark =this.scheduleArr[0].final_remark;
         this.signatureBase64 =this.scheduleArr[0].base64_sign;
+        this.offline_save = this.scheduleArr[0].offline_save
       },
     });
 
@@ -280,11 +282,7 @@ export class FillReportComponent  implements OnInit {
   }
 
   updateCheckList(scheduleUniqueId: number, updatedData: Partial<checklist>) {
-    return db.checklist
-    .where('schedule_id')
-    .equals(scheduleUniqueId)
-    .first()
-    .then((existingRecord) => {
+    return db.checklist.where('schedule_id').equals(scheduleUniqueId).first().then((existingRecord) => {
       if (existingRecord) {
         Object.assign(existingRecord, updatedData);
         return db.checklist.put(existingRecord);
@@ -362,7 +360,7 @@ export class FillReportComponent  implements OnInit {
     return formData;
   }
 
-  testSubmit() {
+  submitAction() {
     this.scheduleArr[0].offline_save = 'false'
     const formData = this.convertToFormData(this.scheduleArr[0]);
     this.presentLoading().then(preLoad => {
@@ -370,6 +368,7 @@ export class FillReportComponent  implements OnInit {
         next:(data) => {
           if (data.status) {
             this.common.presentToast(data.msg, 'success');
+            this.common.setHomeLoadStatus(true);
             this.scheduleArr[0].schedule_status = 'attended'
             this.actionUpdateChecklist();
             this.navCtrl.pop();
@@ -424,14 +423,15 @@ export class FillReportComponent  implements OnInit {
       }
     }
     this.scheduleArr[0].final_remark = this.remark;
-    this.scheduleArr[0].base64_sign = this.signatureBase64
+    this.scheduleArr[0].base64_sign = this.signatureBase64;
+    this.scheduleArr[0].fill_date_time = moment().format('YYYY-MM-DD H:mm:ss');
     this.common.checkInternet().then(res => {
       if (res) {
-        this.testSubmit()
+        this.submitAction()
       } else {
         this.common.presentToast('Internet not Working Your Checklist Saved in Local Db', 'tertiary');
-        this.scheduleArr[0].fill_date_time = moment().format('YYYY-MM-DD H:mm:ss');
         this.scheduleArr[0].offline_save = 'true'
+        this.common.setHomeLoadStatus(true);
         this.actionUpdateChecklist();
         this.navCtrl.pop();
       }
@@ -528,10 +528,31 @@ export class FillReportComponent  implements OnInit {
     }
   }
 
-  viewDocs(url: any) {
-    console.log(url);
-    this.common.openDoc(url);
+  viewDocs(obj: any) {
+    let type = typeof(obj);
+    if(type === 'object') {
+      this.openPhotoViewer(obj);
+    } else {
+      this.common.openDoc(obj);
+    }
   }
+
+  async openPhotoViewer(blob: Blob) {
+    const modal = await this.modalCtrl.create({
+      component: PhotoViewComponent,
+      cssClass: 'my-modal',
+      componentProps: {
+        blobFile: blob
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {
+
+      }
+    });
+    modal.present();
+  }
+
 
   changeBackground(ind: any) {
     for (var i = 0; i < this.scheduleArr.length;i++) {

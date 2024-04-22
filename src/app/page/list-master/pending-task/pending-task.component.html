@@ -34,7 +34,7 @@
       </ion-infinite-scroll>
     </div>
     <div *ngSwitchCase= "'digital'">
-      <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
+      <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
         <ion-item lines="none" color="none" (click)="openFillReport(dat)">
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
@@ -76,7 +76,7 @@
       </ion-card>
     </div>
     <div *ngSwitchCase= "'meter'">
-      <ion-card  *ngFor="let dat of meterInfo;let i = index" style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}">
+      <ion-card  *ngFor="let dat of meterInfo;let i = index"   style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}">
         <ion-item>
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">

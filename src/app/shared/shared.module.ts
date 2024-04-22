@@ -15,6 +15,7 @@ import { FloorComponent } from './floor/floor.component';
 import { LocationComponent } from './location/location.component';
 import { DeviceGroupComponent } from './device-group/device-group.component';
 import { BuildingComponent } from './building/building.component';
+import { PhotoViewComponent } from './photo-view/photo-view.component';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -28,7 +29,8 @@ import { BuildingComponent } from './building/building.component';
     FloorComponent,
     LocationComponent,
     DeviceGroupComponent,
-    BuildingComponent
+    BuildingComponent,
+    PhotoViewComponent
   ],
   imports: [
     CommonModule,
@@ -49,7 +51,8 @@ import { BuildingComponent } from './building/building.component';
     FloorComponent,
     LocationComponent,
     DeviceGroupComponent,
-    BuildingComponent
+    BuildingComponent,
+    PhotoViewComponent
   ]
 })
 export class SharedModule { }

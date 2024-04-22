@@ -80,6 +80,7 @@ export class AssignTicketComponent  implements OnInit {
         next:(data) => {
           if (data.status) {
             this.httpCommon.presentToast(data.msg, 'success');
+            this.httpCommon.setHomeLoadStatus(true);
             this.close(null, true);
           } else {
             this.httpCommon.presentToast(data.msg, 'warning');

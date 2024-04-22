@@ -190,7 +190,6 @@ export class DigitalChecklistPage implements OnInit {
     const sub = friendsObservable.subscribe({
       next:(data) => {
         this.allChecklist = data;
-        console.log(this.allChecklist);
         this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
         this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
         if (this.allChecklist.length === 0 && this.isInternet) {
@@ -209,7 +208,6 @@ export class DigitalChecklistPage implements OnInit {
         next:(data: any) => {
           if (data.status) {
             this.allChecklist = data.data;
-            console.log(this.allChecklist);
             this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
             this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
             this.addBulkCheckList(this.allChecklist);
@@ -322,20 +320,24 @@ export class DigitalChecklistPage implements OnInit {
 
 
   openFillReport(data: any) {
-    const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
-    const currentDate = moment(moment().format('YYYY-MM-DD'));
-    if (!currentDate.isSame(pastDate)) {
-      this.common.presentToast('You can fill only Current Date Checklist', 'warning');
-      return;
+    if (data.schedule_status !== 'assigned') {
+      this.openPageUrl(data);
+    } else {
+      const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
+      const currentDate = moment(moment().format('YYYY-MM-DD'));
+      if (!currentDate.isSame(pastDate)) {
+        this.common.presentToast('You can fill only Current Date Checklist', 'warning');
+        return;
+      }
+      const pastDateTime = moment(data.sch_dateTime);
+      const currentDateTime = moment();
+      const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
+      if (!isCurrentDatetimeBigger) {
+        this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
+        return;
+      }
+      this.openPageUrl(data);
     }
-    const pastDateTime = moment(data.sch_dateTime);
-    const currentDateTime = moment();
-    const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
-    if (!isCurrentDatetimeBigger) {
-      this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
-      return;
-    }
-    this.openPageUrl(data);
   }
 
   openPageUrl(data: any) {

@@ -1,0 +1,11 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Image</ion-title>
+    <ion-button slot="end" (click)="closeModal(null, false)">
+      <ion-icon name="close-outline"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <img [src]="imageUrl" alt="Image from Blob" style="height:100%;width:100%">
+</ion-content>

@@ -3,15 +3,25 @@ import { ToastController } from '@ionic/angular';
 import { Network } from '@capacitor/network';
 import * as CryptoJS from 'crypto-js';
 import { environment } from 'src/environments/environment';
+import { BehaviorSubject } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
 
 export class CommonService {
   public barcode!: string;
+  private isHomeLoad = new BehaviorSubject(true);
   constructor(
     private toastController: ToastController
   ) { }
+
+  setHomeLoadStatus(value: boolean) {
+    this.isHomeLoad.next(value);
+  }
+
+  getHomeLoadStatus() {
+    return this.isHomeLoad;
+  }
 
   setBarcode(barcode: string) {
     this.barcode = barcode

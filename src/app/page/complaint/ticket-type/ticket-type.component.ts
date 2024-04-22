@@ -52,28 +52,11 @@ export class TicketTypeComponent  implements OnInit {
     private loadingController: LoadingController,
     private activeRoute: ActivatedRoute,
     private navCtrl: NavController) {
-      // this.requestedData = this.navParam.get('requestedData');
-      // this.ticketPriority = this.requestedData?.priority_list || [];
-      // this.allData = this.requestedData?.data || [];
-      // this.pc_hse_conf = this.requestedData.data?.pc_hse_conf || [];
-      // this.ticket = this.allData?.tkts_id ;
-      // if (this.allData?.source !== 'QRCODE') {
-      //   this.isShowBuilding = true;
-      // }
-      // this.getBuilding(this.allData.pc_id);
-      // this.getRequestType(this.allData.tkts_issue_id);
-      // this.getSpecificTicket();
   }
 
   ngOnInit() {
     this.initForm();
     this.activeRoute.queryParams.subscribe((res) => {
-      // this.requestedData_TEMP = JSON.parse(res['data']);
-      // console.log(this.requestedData_TEMP)
-      // this.requestedData = this.requestedData_TEMP.data;
-      // this.ticket_id = this.requestedData.tkts_id;
-      // this.mobile = this.requestedData.mobile
-       // this.requestedData = this.navParam.get('requestedData');
        this.requestedData = JSON.parse(res['data']);;
        this.ticketPriority = this.requestedData?.priority_list || [];
        this.allData = this.requestedData?.data || [];
@@ -83,10 +66,9 @@ export class TicketTypeComponent  implements OnInit {
        if (this.allData?.source !== 'QRCODE') {
          this.isShowBuilding = true;
        }
-      //  this.getBuilding(this.allData.pc_id);
        this.getRequestType(this.allData.tkts_issue_id);
     });
-    // this.getPriority();
+    // this.httpCommon.setHomeLoadStatus(true);
   }
 
 
@@ -587,6 +569,7 @@ export class TicketTypeComponent  implements OnInit {
           next:(data) => {
             if (data.status) {
               this.httpCommon.presentToast(data.msg, 'success');
+              this.httpCommon.setHomeLoadStatus(true);
               this.navCtrl.pop();
               // this.dismiss(data, true);
             } else {

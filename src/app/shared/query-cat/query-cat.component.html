@@ -7,9 +7,11 @@
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar mode="md" (ionChange)="search($event)" debounce="1000"></ion-searchbar>
+  </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-searchbar mode="md" (ionChange)="search($event)" debounce="1000"></ion-searchbar>
   <ion-virtual-scroll [items]="allQueryCat" approxItemHeight="320px" >
     <ion-item *virtualItem="let item; let itemBounds = bounds;" (click)="closeModal(item, true)">
       {{item.label}}

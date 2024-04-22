@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonService } from 'src/app/provider/common/common.service';
-import { LoginService } from 'src/app/provider/login/login.service';
 import { db } from '../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
 import { AlertController,  } from '@ionic/angular';
@@ -18,13 +17,11 @@ export class ListMasterPage implements OnInit {
   isLoading!: boolean;
   isInternet!: boolean;
   DGArr: any = [];
+  subs: any;
   constructor(
     private common: CommonService,
-    private loginPro: LoginService,
     private alertController: AlertController,
-    private router: Router,
-  ) {
-
+    private router: Router) {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
@@ -33,7 +30,22 @@ export class ListMasterPage implements OnInit {
   }
 
   ngOnInit(): void {
+    // this.changeEvent();
     this.getHomeLoad();
+  }
+
+  ionViewWillEnter() {
+    this.subs = this.common.getHomeLoadStatus().subscribe(val => {
+      console.log(val);
+      if (val) {
+        this.changeEvent();
+      }
+    });
+    this.didEnter = true;
+    setTimeout(() => {
+      this.subs.unsubscribe();
+      this.didEnter = false;
+    }, 1500);
   }
 
   getHomeLoad() {
@@ -41,29 +53,17 @@ export class ListMasterPage implements OnInit {
       if (res) {
         this.isInternet = true;
         this.common.setBarcode('');
-
         this.getOffLineCheckList();
       } else {
         this.isInternet = false
-        // let menu, MENU_TEMP = localStorage.getItem('home_menu');
-        // if (MENU_TEMP) {
-        //   this.myMenu = JSON.parse(MENU_TEMP);
-        //   console.log(this.myMenu);
-        //   this.isInternet = false;
-        //   console.log(menu);
-        // } else {
-        //   this.common.presentToastWithOk('Menu Icon Not Saved in your Local DB, please connect with internet to save menu in Local DB', 'warning');
-        // }
       }
     });
   }
 
   async getOffLineCheckList() {
-    console.log('offline');
     const friendsObservable = liveQuery (() => db.checklist.where({offline_save: "true"}).toArray());
     const sub = friendsObservable.subscribe({
       next:(data) => {
-        console.log(data);
         this.DGArr = data;
         if (this.DGArr.length > 0) {
           this.presentAlertConfirm();
@@ -89,7 +89,6 @@ export class ListMasterPage implements OnInit {
         },{
           text: 'YES',
           handler: (data) => {
-            // this.router.navigateByUrl('/list-master/offline-data');
             this.openPageRoute();
           }
         }]
@@ -103,16 +102,10 @@ export class ListMasterPage implements OnInit {
     setTimeout(() => {
       this.eventChange = false;
       this.isLoading = false;
+      this.common.setHomeLoadStatus(false);
     }, 1500);
   }
 
-  ionViewDidEnter() {
-    this.changeEvent();
-    this.didEnter = true;
-    setTimeout(() => {
-      this.didEnter = false;
-    }, 1500);
-  }
 
   handleRefresh(event: any) {
     event.target.complete();
@@ -123,4 +116,6 @@ export class ListMasterPage implements OnInit {
   openPageRoute() {
     this.router.navigateByUrl('/list-master/offline-data');
   }
+
+
 }

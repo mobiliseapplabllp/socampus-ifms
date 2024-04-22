@@ -140,6 +140,7 @@ export class TravelDetailComponent  implements OnInit {
           next:(data) => {
             if(data.status) {
               this.common.presentToast(data.msg, 'success');
+              this.common.setHomeLoadStatus(true);
               this.closeModal(this.tkts_id, true);
             } else {
               this.common.presentToast(data.msg, 'warning');

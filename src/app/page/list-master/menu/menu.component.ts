@@ -121,7 +121,6 @@ export class MenuComponent  implements OnInit {
   }
 
   openPage(data: any) {
-    console.log(data);
     if (data.link === 'barcode_history') {
       this.isQrScanning = true;
       this.router.navigateByUrl('/barcode');

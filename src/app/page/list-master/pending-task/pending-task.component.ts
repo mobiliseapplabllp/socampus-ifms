@@ -49,7 +49,6 @@ export class PendingTaskComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    // this.getData();
     this.common.checkInternet().then(res => {
       if (res) {
         this.isInternet = true;
@@ -65,7 +64,6 @@ export class PendingTaskComponent  implements OnInit {
 
   ngOnChanges() {
     if (this.eventChange) {
-      console.log('changes');
       this.getData();
     }
   }

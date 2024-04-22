@@ -74,8 +74,11 @@ export class ComplaintCardsComponent  implements OnInit {
               this.openTicketTypeModal(data);
             } else if (data.data?.pc_hse_conf.travel_allow === 1 && !data.data?.pc_hse_conf.travel_data && data.data.canWork) {
               this.travelModal();
-            } else {
+            } else if (data.data.canWork){
               this.openTicketWork(data);
+            } else {
+              this.common.presentToast(`You can't work on this Ticket`, 'warning');
+              return
             }
           } else {
             this.common.presentToast(data.msg, 'warning');

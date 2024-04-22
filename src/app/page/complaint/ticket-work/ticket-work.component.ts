@@ -353,9 +353,10 @@ export class TicketWorkComponent  implements OnInit {
       this.httpComplaint.submitTicketTransaction(this.formData).subscribe({
         next:(data) => {
           if (data.status) {
-            if (this.ticket_id && this.workSpace.value.status == 4) {
-              this.httpComplaint.setResolveTicket({status: true, ticket_id: this.ticket_id});
+            if (this.workSpace.value.status == 4) {
+              this.httpCommon.setHomeLoadStatus(true);
             }
+
             this.httpCommon.presentToast(data.msg, 'success');
             this.navCtrl.pop();
           } else {

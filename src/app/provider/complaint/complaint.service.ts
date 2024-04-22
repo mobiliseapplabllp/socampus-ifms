@@ -7,7 +7,7 @@ import { environment } from 'src/environments/environment';
 })
 export class ComplaintService {
   private assignTickets = new BehaviorSubject('');
-  private rslvTicket = new BehaviorSubject({});
+  // private rslvTicket = new BehaviorSubject({});
   constructor(
     private https: HttpClient
   ) { }
@@ -20,13 +20,13 @@ export class ComplaintService {
     return this.assignTickets;
   }
 
-  setResolveTicket(obj: any) {
-    this.rslvTicket.next(obj);
-  }
+  // setResolveTicket(obj: any) {
+  //   this.rslvTicket.next(obj);
+  // }
 
-  getResolveTicket() {
-    return this.rslvTicket;
-  }
+  // getResolveTicket() {
+  //   return this.rslvTicket;
+  // }
 
   reOpenTicket(obj: any): Observable<any> {
     return this.https.post(environment.url + 'complaints/reopen_tkt', obj);
@@ -46,7 +46,6 @@ export class ComplaintService {
 
 
   getTicketMaster(status: any, page: any): Observable<any> {
-    console.log('hit api');
     let url;
     if (!status) {
       url = 'limit=10&page=' + page + '&ticket_type=not_resolved';
