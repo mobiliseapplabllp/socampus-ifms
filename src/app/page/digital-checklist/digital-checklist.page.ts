@@ -320,24 +320,29 @@ export class DigitalChecklistPage implements OnInit {
 
 
   openFillReport(data: any) {
-    if (data.schedule_status !== 'assigned') {
-      this.openPageUrl(data);
+    if (this.platform.is('capacitor')) {
+      if (data.schedule_status !== 'assigned') {
+        this.openPageUrl(data);
+      } else {
+        const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
+        const currentDate = moment(moment().format('YYYY-MM-DD'));
+        if (!currentDate.isSame(pastDate)) {
+          this.common.presentToast('You can fill only Current Date Checklist', 'warning');
+          return;
+        }
+        const pastDateTime = moment(data.sch_dateTime);
+        const currentDateTime = moment();
+        const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
+        if (!isCurrentDatetimeBigger) {
+          this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
+          return;
+        }
+        this.openPageUrl(data);
+      }
     } else {
-      const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
-      const currentDate = moment(moment().format('YYYY-MM-DD'));
-      if (!currentDate.isSame(pastDate)) {
-        this.common.presentToast('You can fill only Current Date Checklist', 'warning');
-        return;
-      }
-      const pastDateTime = moment(data.sch_dateTime);
-      const currentDateTime = moment();
-      const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
-      if (!isCurrentDatetimeBigger) {
-        this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
-        return;
-      }
       this.openPageUrl(data);
     }
+
   }
 
   openPageUrl(data: any) {

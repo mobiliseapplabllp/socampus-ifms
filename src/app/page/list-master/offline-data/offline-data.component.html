@@ -26,20 +26,24 @@
   </ion-segment>
   <div [ngSwitch]='status'>
     <div *ngSwitchCase= "'dc'">
-      <ion-row *ngIf="checkListSelect.length > 0">
+      <!-- <ion-row *ngIf="checkListSelect.length > 0">
         <ion-col class="ion-text-right">
           <ion-button size="small" (click)="submitAllDc()">Submit All</ion-button>
         </ion-col>
-      </ion-row>
+      </ion-row> -->
       <ion-card *ngFor="let dat of checkList" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
         <ion-item lines="none" color="none">
-          <ion-checkbox slot="start" [(ngModel)]="dat.isSelect" (ionChange)="changeDc()"></ion-checkbox>
-          <ion-label class="ion-text-wrap">
+          <!-- <ion-avatar slot="start" class="center">
+            <div>
+              <ion-checkbox [(ngModel)]="dat.isSelect" (ionChange)="changeDc()"></ion-checkbox>
+            </div>
+          </ion-avatar> -->
+          <ion-label class="ion-text-wrap" (click)="openPageUrl(dat)">
             <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
             <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
             <p><b>({{dat.loc_id}}){{dat.location_desc}}</b></p>
             <p><b>{{dat.barcode}}</b></p>
-            <p><b>{{dat.assign_to}}</b></p>
+            <p><b>Filled Time {{dat.fill_date_time | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
           </ion-label>
           <ion-button slot="end" size="small" fill="outline" (click)="submitDc(dat)">Submit</ion-button>
         </ion-item>

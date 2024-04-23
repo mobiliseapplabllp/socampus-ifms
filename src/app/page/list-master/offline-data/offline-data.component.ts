@@ -5,6 +5,7 @@ import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digi
 import { checklist, db } from '../../../provider/local-db/local-db.service';
 import { environment } from 'src/environments/environment';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-offline-data',
   templateUrl: './offline-data.component.html',
@@ -21,7 +22,8 @@ export class OfflineDataComponent  implements OnInit {
     private loadingController: LoadingController,
     private httpDigital: DigitalChecklistService,
     private navCtrl: NavController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -37,6 +39,7 @@ export class OfflineDataComponent  implements OnInit {
     const sub = friendsObservable.subscribe({
       next:(data) => {
         this.checkList = data;
+        console.log(this.checkList);
         setTimeout(() => {
           sub.unsubscribe();
         }, 1000);
@@ -53,7 +56,6 @@ export class OfflineDataComponent  implements OnInit {
             this.common.presentToast(data.msg, 'success');
             dat.schedule_status = 'attended'
             dat.offline_save = "false"
-            console.log(dat);
             this.actionUpdateChecklist(dat);
           } else {
             this.common.presentToast(data.msg, 'warning');
@@ -89,6 +91,14 @@ export class OfflineDataComponent  implements OnInit {
         }]
     });
     await alert.present();
+  }
+
+  openPageUrl(data: any) {
+    this.router.navigate(['/digital-checklist/fill-report/'], {
+      queryParams: {
+        schedule_id: data.schedule_id
+      }
+    });
   }
 
 

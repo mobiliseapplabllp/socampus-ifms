@@ -145,6 +145,6 @@
 </ion-content>
 <ion-footer *ngIf="scheduleArr.length > 0" [hidden]="schedule_status !== 'assigned'">
   <ion-toolbar>
-    <ion-button expand="block" (click)="finalSubmit()" color="primary" tappable>Submit <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
+    <ion-button expand="block" (click)="finalSubmit()" color="primary" [disabled]="offline_save === 'true'" tappable>Submit <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
   </ion-toolbar>
 </ion-footer>

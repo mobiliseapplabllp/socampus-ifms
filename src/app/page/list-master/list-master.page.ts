@@ -18,6 +18,7 @@ export class ListMasterPage implements OnInit {
   isInternet!: boolean;
   DGArr: any = [];
   subs: any;
+  count = 0;
   constructor(
     private common: CommonService,
     private alertController: AlertController,
@@ -31,7 +32,7 @@ export class ListMasterPage implements OnInit {
 
   ngOnInit(): void {
     // this.changeEvent();
-    this.getHomeLoad();
+
   }
 
   ionViewWillEnter() {
@@ -46,6 +47,7 @@ export class ListMasterPage implements OnInit {
       this.subs.unsubscribe();
       this.didEnter = false;
     }, 1500);
+    this.getHomeLoad();
   }
 
   getHomeLoad() {
@@ -65,7 +67,8 @@ export class ListMasterPage implements OnInit {
     const sub = friendsObservable.subscribe({
       next:(data) => {
         this.DGArr = data;
-        if (this.DGArr.length > 0) {
+        if (this.DGArr.length > 0 && this.count == 0) {
+          this.count = 1;
           this.presentAlertConfirm();
         }
         setTimeout(() => {
@@ -110,12 +113,11 @@ export class ListMasterPage implements OnInit {
   handleRefresh(event: any) {
     event.target.complete();
     this.isLoading = true;
+    this.getHomeLoad();
     this.changeEvent();
   }
 
   openPageRoute() {
     this.router.navigateByUrl('/list-master/offline-data');
   }
-
-
 }

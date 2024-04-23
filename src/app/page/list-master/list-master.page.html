@@ -7,7 +7,7 @@
     <ion-buttons slot="end" *ngIf="isInternet">
       <ion-button slot="icon-only"  (click)="openPageRoute()" style="position: relative;">
         <ion-icon name="cloud-upload-outline"></ion-icon>
-        <ion-text color="danger" *ngIf="DGArr.length > 0" style="position: absolute;top:0px;right:0px">{{DGArr.length}}</ion-text>
+        <ion-text color="danger" style="position: absolute;top:0px;right:0px">{{DGArr.length}}</ion-text>
       </ion-button>
       <ion-button slot="icon-only" [disabled]="isLoading" (click)="changeEvent()" class="ion-text-capitalize">
         <ion-icon  slot="end" name="reload-outline" *ngIf="!isLoading"></ion-icon>
