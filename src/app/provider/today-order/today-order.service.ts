@@ -78,6 +78,22 @@ export class TodayOrderService {
     return this.https.post(environment.url + 'meal/order/order_reached', obj);
   }
 
+  getCkmsSite(): Observable<any> {
+    return this.https.get(environment.url + 'meal/cpu/ckms_site_data')
+  }
+
+  getReturnCmbroData(site_id: any): Observable<any> {
+    const formData = new FormData();
+    formData.append('site_id', site_id);
+    return this.https.post(environment.url + 'meal/cambroReturn/cmr_detail_data', formData)
+  }
+
+  returnAction(obj: any): Observable<any> {
+    var arr = [];
+    arr.push(obj);
+    return this.https.post(environment.url + 'meal/cambroReturn/return_cambro_init', arr);
+  }
+
 //   https://ifmsuat.mobilisepro.com/backend/api/meal/order/order_reached
 // FormData:-
 // order_id:{val}

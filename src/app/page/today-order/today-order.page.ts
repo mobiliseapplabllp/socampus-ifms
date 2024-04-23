@@ -101,9 +101,8 @@ export class TodayOrderPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.id = this.activeRoute.snapshot.paramMap.get('id');
+    this.id = this.activeRoute.snapshot.paramMap.get('id'); // id == 1 for driver dispatch and 2 for site receive
     console.log(this.id);
-
   }
 
   ionViewDidEnter() {

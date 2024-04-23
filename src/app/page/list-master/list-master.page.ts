@@ -163,12 +163,19 @@ export class ListMasterPage implements OnInit {
             }
             this.myMenu.push(obj1);
           } else {
-            const obj = {
+            const obj = [{
               icon_path: 'assets/meal/i2.png',
               smnu_desc: 'Order Received',
               link: '/t-order/2'
+            },{
+              icon_path: 'assets/meal/i2.png',
+              smnu_desc: 'Return Cambro',
+              link: 'today-order/return-cmro'
+            }]
+            for (var i = 0; i < obj.length; i++) {
+              this.myMenu.push(obj[i]);
             }
-            this.myMenu.push(obj);
+
           }
 
 

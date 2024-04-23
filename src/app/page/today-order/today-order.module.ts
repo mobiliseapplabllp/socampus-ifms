@@ -12,6 +12,8 @@ import { OrderDetailComponent } from './order-detail/order-detail.component';
 import { OrderHistoryDetailComponent } from './order-history-detail/order-history-detail.component';
 import { OrderReceivedComponent } from './order-received/order-received.component';
 import { DriverDetailComponent } from './driver-detail/driver-detail.component';
+import { ReturnCmroComponent } from './return-cmro/return-cmro.component';
+import { CkmsSiteComponent } from './ckms-site/ckms-site.component';
 
 @NgModule({
   imports: [
@@ -26,6 +28,8 @@ import { DriverDetailComponent } from './driver-detail/driver-detail.component';
     OrderDetailComponent,
     OrderHistoryDetailComponent,
     OrderReceivedComponent,
-    DriverDetailComponent]
+    DriverDetailComponent,
+    ReturnCmroComponent,
+    CkmsSiteComponent]
 })
 export class TodayOrderPageModule {}

@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Return Cambro</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-item (click)="openSiteModal()">
+    <ion-label color="primary" position="floating">Select Site <ion-text color="danger">*</ion-text></ion-label>
+    <ion-input type="text" [(ngModel)]="site_desc" readonly></ion-input>
+  </ion-item>
+  <ion-row>
+    <ion-col class="ion-text-center">
+      <ion-button shape="round" (click)="search()">Search <ion-icon name="search-outline" slot="end"></ion-icon> </ion-button>
+    </ion-col>
+  </ion-row>
+  <ion-card *ngFor="let dat of returnCambroArr">
+    <ion-row>
+      <ion-col size="6">
+        <ion-text color="primary">Cambro Id</ion-text><br>
+        <ion-text color="medium">{{dat.cambro_id}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Order Id</ion-text><br>
+        <ion-text color="medium">{{dat.order_id}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">PC Id</ion-text><br>
+        <ion-text color="medium">{{dat.pc_id}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Description</ion-text><br>
+        <ion-text color="medium">{{dat.type_desc}}</ion-text>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-right">
+        <ion-button shape="round" (click)="return(dat)">Return Cambro</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+</ion-content>
