@@ -16,7 +16,7 @@ export class LoginService {
   ) { }
 
   uploadVideo(formData: any): Observable<any> {
-    return this.https.post(environment.url1 + 'upload-video', formData);
+    return this.https.post('https://hr-access.herokuapp.com/https://backend.demosocampus.mobilisepro.com/upload-video', formData);
   }
 
   LoginAuth(login: any) {

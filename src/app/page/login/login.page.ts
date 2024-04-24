@@ -7,9 +7,8 @@ import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digi
 import { LoginService } from 'src/app/provider/login/login.service';
 import { environment } from 'src/environments/environment';
 
-// import { CaptureVideoOptions, } from '@awesome-cordova-plugins/media-capture';
-// import { File, FileEntry } from '@awesome-cordova-plugins/file/ngx';
-// import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@awesome-cordova-plugins/media-capture/ngx';
+import { File, FileEntry } from '@awesome-cordova-plugins/file/ngx';
+import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -36,8 +35,8 @@ export class LoginPage implements OnInit {
     private loginPro: LoginService,
     private common: CommonService,
     private httpDigi: DigitalChecklistService,
-    // private mediaCapture: MediaCapture,
-    // private file: File
+    private mediaCapture: MediaCapture,
+    private file: File
 
   ) {
     this.loginForms = formbuilder.group({
@@ -68,7 +67,7 @@ export class LoginPage implements OnInit {
     this.menu.enable(true);
   }
 
-  changePass(pass: any) { }
+  changePass(_pass: any) { }
 
   // clearDb() {
   //   db.checklist.clear();
@@ -130,9 +129,68 @@ export class LoginPage implements OnInit {
     this.router.navigateByUrl(url);
   }
 
-  async captureAndUploadVideo() {
-    // let options: CaptureVideoOptions = { limit: 1, quality: 60 };
-    // const mediaFiles: any = await this.mediaCapture.captureVideo(options);
+  async captureAndUploadVideo(_val: any) {
+    let options: CaptureVideoOptions = { limit: 1, quality: 60 };
+    const mediaFiles: any = await this.mediaCapture.captureVideo(options).then((res: any) => {
+      let capturedFile = res;
+      console.log(capturedFile);
+      // console.log(capturedFile.getFormatData);
+      // capturedFile.getFormatData().then((blobFile: any) => {
+      //   console.log(blobFile)
+      // })
+      // if (val === 1) {
+      //   console.log('1');
+      //   let blob = new Blob([JSON.stringify(capturedFile)], { type: 'video/mp4' });
+      //   console.log(blob);
+      //   const formData = new FormData();
+      //   formData.append('video', blob, 'a.mp4');
+      //   this.uploadVideo(formData);
+      // } else if (val ===  2){
+      //   console.log('2')
+      //   let blob1 = new Blob([JSON.stringify(res)], { type: 'video/mp4' });
+      //   console.log(blob1)
+      //   const formData = new FormData();
+      //   formData.append('video', blob1, 'a.mp4');
+      //   this.uploadVideo(formData);
+      // } else if (val === 3) {
+      //   console.log('3')
+      //   let blob1 = new Blob([capturedFile], { type: 'video/mp4' });
+      //   console.log(blob1)
+      //   const formData = new FormData();
+      //   formData.append('video', blob1, 'a.mp4');
+      //   this.uploadVideo(formData);
+      // } else if (val === 4) {
+      //   console.log('4')
+      //   let blob1 = new Blob([res], { type: 'video/mp4' });
+      //   console.log(blob1)
+      //   const formData = new FormData();
+      //   formData.append('video', blob1, 'a.mp4');
+      //   this.uploadVideo(formData);
+      // }
+
+      // this.file.resolveLocalFilesystemUrl(capturedFile.fullPath).then((entry: any) => {
+      //   entry.file((file: any) => {
+      //     // this.uploadVideo(formData);
+      //     this.read(file);
+      //   });
+      // }, err => {
+      //   alert(JSON.stringify(err) + 'File Not Supported');
+      // });
+      // console.log('my file', capturedFile);
+      // let fileName = capturedFile.name;
+      // let dir = capturedFile['localURL'].split('/');
+      // dir.pop();
+      // let fromDirectory = dir.join('/');
+      // let toDirectory = this.file.dataDirectory;
+      // this.file.copyFile(fromDirectory, fileName , toDirectory, fileName).then(res => {
+      //   console.log(res);
+      // }, err => {
+      //   console.log(err);
+      // })
+    }, err=> {
+      console.log('ERR--');
+      console.log(err);
+    });
     // console.log(mediaFiles)
     // if (mediaFiles.length > 0) {
     //     const videoFile: MediaFile = mediaFiles[0];
@@ -146,52 +204,62 @@ export class LoginPage implements OnInit {
     // }
 }
 
-// async convertMediaFileToBlob(mediaFile: MediaFile): Promise<Blob> {
-//     const blob: any = await this.file.readAsArrayBuffer(mediaFile.fullPath, mediaFile.name);
-//     console.log(blob);
-//     return blob;
-// }
+read(file: any) {
+  console.log('read');
+  const reader: any = new FileReader();
+  reader.readAsArrayBuffer(file);
+  reader.onload = () => {
+    const blob = new Blob([reader.result], {
+      type: file.type
+    });
+    console.log(blob);
+  };
+  this.presentLoading().then(_preLoad => {
+    setTimeout(() => {
+      this.dismissloading();
+    }, 1000);
+  });
+  console.log('end');
+}
+
+async convertMediaFileToBlob(mediaFile: MediaFile): Promise<Blob> {
+    const blob: any = await this.file.readAsArrayBuffer(mediaFile.fullPath, mediaFile.name);
+    console.log(blob);
+    return blob;
+}
+
+changeFile(ev: any) {
+  console.log(ev)
+  console.log((ev.target.files[0]));
+  const formData = new FormData();
+  formData.append('video', ev.target.files[0]);
+  this.uploadVideo(formData);
+}
 
 
   async startRecording() {
-    // try {
-    //   let options: CaptureVideoOptions = { limit: 1, quality:60 }
-    //   const data: any = await this.mediaCapture.captureVideo(options);
-    //   console.log(data);
-    //   this.video = data[0];
+    try {
+      let options: CaptureVideoOptions = { limit: 1, quality:60 }
+      const data: any = await this.mediaCapture.captureVideo(options);
+      console.log(data);
+      this.video = data[0];
 
-    // }  catch(e) {
-    //   console.log('err');
-    //   console.log(e);
-    // }
+    }  catch(e) {
+      console.log('err');
+      console.log(e);
+    }
   }
 
-  read(file: any) {
-    console.log('read');
-    const reader: any = new FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.onload = () => {
-      const blob = new Blob([reader.result], {
-        type: file.type,
-      });
-      console.log('&&&&&');
-      console.log(blob);
-      const formData = new FormData();
-      formData.append('video', blob);
-      // this.uploadVideo(formData);
-    };
+  uploadVideo(formData: any) {
+    this.loginPro.uploadVideo(formData).subscribe({
+      next:(data) => {
+        console.log(data);
+      },
+      error:(err) => {
+        console.log(err)
+      }
+    })
   }
-
-  // uploadVideo(formData: any) {
-  //   this.loginPro.uploadVideo(formData).subscribe({
-  //     next:(data) => {
-  //       console.log(data);
-  //     },
-  //     error:(err) => {
-  //       console.log(err)
-  //     }
-  //   })
-  // }
 
 
 }
