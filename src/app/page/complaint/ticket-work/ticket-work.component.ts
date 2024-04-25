@@ -345,7 +345,7 @@ export class TicketWorkComponent  implements OnInit {
     }
 
     if (this.workSpace.value.status === 3 && this.requestedData.ptw_mandatory && this.requestedData.ptwApproved === 0 && !this.ppeFileName) {
-      alert('Opps you have not attached PPE kit selfie.');
+      alert(' ');
       return;
     }
 

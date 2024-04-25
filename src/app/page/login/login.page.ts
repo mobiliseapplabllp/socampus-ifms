@@ -132,8 +132,9 @@ export class LoginPage implements OnInit {
   async captureAndUploadVideo(_val: any) {
     let options: CaptureVideoOptions = { limit: 1, quality: 60 };
     const mediaFiles: any = await this.mediaCapture.captureVideo(options).then((res: any) => {
-      let capturedFile = res;
+      let capturedFile = res[0];
       console.log(capturedFile);
+      console.log(capturedFile.fullPath);
       // console.log(capturedFile.getFormatData);
       // capturedFile.getFormatData().then((blobFile: any) => {
       //   console.log(blobFile)
@@ -168,14 +169,20 @@ export class LoginPage implements OnInit {
       //   this.uploadVideo(formData);
       // }
 
-      // this.file.resolveLocalFilesystemUrl(capturedFile.fullPath).then((entry: any) => {
-      //   entry.file((file: any) => {
-      //     // this.uploadVideo(formData);
-      //     this.read(file);
-      //   });
-      // }, err => {
-      //   alert(JSON.stringify(err) + 'File Not Supported');
-      // });
+      this.file.resolveLocalFilesystemUrl(capturedFile.fullPath).then((entry: any) => {
+        entry.file((file: any) => {
+          console.log(file);
+          const blob = new Blob([file],{type: 'video/mp4'})
+          console.log(blob);
+          const formData = new FormData();
+          formData.append('video', blob, 'a1.mp4');
+          this.uploadVideo(formData);
+          // this.uploadVideo(formData);
+
+        });
+      }, err => {
+        alert(JSON.stringify(err) + 'File Not Supported');
+      });
       // console.log('my file', capturedFile);
       // let fileName = capturedFile.name;
       // let dir = capturedFile['localURL'].split('/');

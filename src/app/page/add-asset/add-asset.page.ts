@@ -43,7 +43,7 @@ export class AddAssetPage implements OnInit {
   formData = new FormData();
   public errorMessages = {
     input_asset_id: [
-      { type: 'required', message: 'Asset ID is Required' },
+      { type: 'required', message: 'Asset Id is Required' },
       { type: 'minlength', message: 'Asset Id should have 6 digits' }
     ],
   };
