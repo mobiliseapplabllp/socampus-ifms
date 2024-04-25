@@ -54,7 +54,6 @@ export class ListMasterPage implements OnInit {
     this.common.checkInternet().then(res => {
       if (res) {
         this.isInternet = true;
-        this.common.setBarcode('');
         this.getOffLineCheckList();
       } else {
         this.isInternet = false

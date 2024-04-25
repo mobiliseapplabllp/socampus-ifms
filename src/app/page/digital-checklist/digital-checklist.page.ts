@@ -203,7 +203,7 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   getOfflineCheckListFromServer(date: string) {
-    this.presentLoading('Checklist is save in offline. It may take time to be Please wait, data is loading if user is online').then(preLoad => {
+    this.presentLoading('Please Wait, Application is Fetching your Data').then(preLoad => {
       this.httpDigital.getOfflineCheckListFromServer(date).subscribe({
         next:(data: any) => {
           if (data.status) {
