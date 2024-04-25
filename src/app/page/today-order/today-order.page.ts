@@ -102,7 +102,8 @@ export class TodayOrderPage implements OnInit {
 
   ngOnInit() {
     this.id = this.activeRoute.snapshot.paramMap.get('id'); // id == 1 for driver dispatch and 2 for site receive
-    console.log(this.id);
+    console.log(typeof(this.id));
+
   }
 
   ionViewDidEnter() {
@@ -194,7 +195,39 @@ export class TodayOrderPage implements OnInit {
         }
       })
     })
+  }
 
+  challan(dat: any) {
+    console.log(dat)
+    var obj: any = {
+      data: dat.order_id
+    }
+    if (this.id === '1') {
+      obj.req_for = 'driver'
+    } else if (this.id === '2') {
+      obj.req_for = 'site'
+    }
+    this.presentLoading().then(preLoad => {
+      this.httpTo.viewPdf(obj).subscribe({
+        next:(data) => {
+          console.log(data);
+          if (data.status) {
+            this.common.openDoc(data.url);
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+
+    console.log(obj);
   }
 
 

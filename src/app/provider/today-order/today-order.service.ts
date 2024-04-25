@@ -94,6 +94,10 @@ export class TodayOrderService {
     return this.https.post(environment.url + 'meal/cambroReturn/return_cambro_init', arr);
   }
 
+  viewPdf(obj: object): Observable<any> {
+    return this.https.post(environment.url + 'meal/order/downloadPDF', obj)
+  }
+
 //   https://ifmsuat.mobilisepro.com/backend/api/meal/order/order_reached
 // FormData:-
 // order_id:{val}

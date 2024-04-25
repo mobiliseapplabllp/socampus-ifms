@@ -43,6 +43,7 @@
               <ion-icon name="checkmark-outline"></ion-icon>
             </ion-button>
           </p>
+          <ion-button *ngIf="dat.challan_btn_show === 1" size="small" (click)="challan(dat)">Challan</ion-button>
         </div>
       </ion-col>
     </ion-row>
