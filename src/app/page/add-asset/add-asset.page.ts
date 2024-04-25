@@ -138,6 +138,18 @@ export class AddAssetPage implements OnInit {
   }
 
   ngOnInit() {
+    // var date1 = moment('2024-04-24 15:30:00');
+    // var date2 = moment('2024-04-24 15:20:00');
+    // var dateDiff = date2.diff(date1, 'minutes');
+    // if (dateDiff < -10 || dateDiff > 10) {
+
+    // }
+    // console.log(dateDiff);
+    // const moment = require('moment-timezone'); // Assuming you use a module bundler like webpack
+    // const currentTimeZone = moment.tz.guess();
+    // console.log(currentTimeZone);
+    // console.log(new Date().getTimezoneOffset());
+
     this.httpCommon.setBarcode('');
   }
 

@@ -65,11 +65,11 @@
         </ion-col>
         <ion-col size="6" *ngIf="dat.schedule_status !== 'assigned'" >
           <ion-text color="primary"> Attended Date</ion-text><br>
-          <ion-text>{{arr.submitted_date}}</ion-text>
+          <ion-text>{{dat.submitted_date}}</ion-text>
         </ion-col>
       </ion-row>
       <ion-row *ngIf="dat.schedule_status !== 'assigned'" >
-        <ion-col size="6">
+        <ion-col size="6" *ngIf="dat.review_date">
           <ion-text color="primary"> Review Date</ion-text><br>
           <ion-text>{{dat.review_date}}</ion-text>
         </ion-col>
@@ -137,7 +137,7 @@
     <ion-label position="floating">Remark</ion-label>
     <ion-input type="text" [(ngModel)]="remark" [disabled]="schedule_status !== 'assigned' || offline_save === 'true' "></ion-input>
   </ion-item>
-  <img [src]="signatureBase64" style="width:200px;height:200px;" *ngIf="signatureBase64 && schedule_status !== 'assigned' || offline_save === 'true'" style="border:1px solid black">
+  <img [src]="signatureBase64" style="width:200px;height:200px;" *ngIf="(isInternet && signatureBase64) && schedule_status !== 'assigned' || offline_save === 'true' " style="border:1px solid black">
   <ion-item lines="none" [hidden]="schedule_status !== 'assigned' || offline_save === 'true'">
     <ion-button (click)="openSign()" [fill]="signatureBase64 ? 'solid':'outline'">Signature <ion-icon name="checkmark-done-outline" slot="end" *ngIf="signatureBase64"></ion-icon></ion-button>
     <img [src]="signatureBase64" style="height:30px;width:30px;border:1px solid black" slot="end" *ngIf="signatureBase64">

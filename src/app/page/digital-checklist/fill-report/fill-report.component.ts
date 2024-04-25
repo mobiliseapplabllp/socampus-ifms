@@ -36,6 +36,7 @@ export class FillReportComponent  implements OnInit {
   loop = false;
   isInternet!:boolean;
   offline_save!: string;
+  userData: any = [];
   constructor(
     private activeRoute: ActivatedRoute,
     private httpDigital: DigitalChecklistService,
@@ -54,6 +55,11 @@ export class FillReportComponent  implements OnInit {
         this.isInternet = false;
       }
     });
+    const user = localStorage.getItem('user');
+    if (user) {
+      this.userData = JSON.parse(user);
+      console.log(this.userData);
+    }
     this.selectedLanguage = 'en';
     this.activeRoute.queryParams.subscribe((res) => {
       this.on_behalf = res['isOnBehalf'];
@@ -425,6 +431,8 @@ export class FillReportComponent  implements OnInit {
     this.scheduleArr[0].final_remark = this.remark;
     this.scheduleArr[0].base64_sign = this.signatureBase64;
     this.scheduleArr[0].fill_date_time = moment().format('YYYY-MM-DD H:mm:ss');
+    this.scheduleArr[0].submitted_date = moment().format('YYYY-MM-DD H:mm:ss');
+    this.scheduleArr[0].user = this.userData.user_name
     this.common.checkInternet().then(res => {
       if (res) {
         this.submitAction()
@@ -458,6 +466,9 @@ export class FillReportComponent  implements OnInit {
       if (disModal.role) {
         let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
         this.signatureBase64 = disModal.data;
+        // const base64Response = await fetch(this.signatureBase64);
+        // const blob = await base64Response.blob();
+        // console.log(blob);
       }
     });
     modal.present();
@@ -533,6 +544,10 @@ export class FillReportComponent  implements OnInit {
     if(type === 'object') {
       this.openPhotoViewer(obj);
     } else {
+      if (!this.isInternet) {
+        this.common.presentToast('Internet Not Working', 'warning');
+        return;
+      }
       this.common.openDoc(obj);
     }
   }

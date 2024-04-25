@@ -61,7 +61,6 @@ export class MenuComponent  implements OnInit {
   }
 
   ngOnChanges() {
-    console.log('on changes' + this.didEnter + '=' + this.isQrScanning + '=' + this.isInternet);
     if (this.didEnter && this.isQrScanning && this.isInternet) {
       this.isQrScanning = false
       let bar = this.common.getBarcode();
