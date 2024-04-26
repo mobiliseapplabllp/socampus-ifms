@@ -9,6 +9,8 @@ import { OrderReceivedComponent } from './order-received/order-received.componen
 import { DriverDetailComponent } from './driver-detail/driver-detail.component';
 import { ReturnCmroComponent } from './return-cmro/return-cmro.component';
 import { CkmsSiteComponent } from './ckms-site/ckms-site.component';
+import { ReturnCaroDriverComponent } from './return-caro-driver/return-caro-driver.component';
+import { ReturnCmroDriverDetailComponent } from './return-cmro-driver-detail/return-cmro-driver-detail.component';
 
 const routes: Routes = [
   {
@@ -35,6 +37,12 @@ const routes: Routes = [
   }, {
     path: 'ckms-site',
     component: CkmsSiteComponent
+  }, {
+    path: 'return-cmro-driver',
+    component: ReturnCaroDriverComponent
+  }, {
+    path: 'return-cmro-driver-detail/:id',
+    component: ReturnCmroDriverDetailComponent
   }
 ];
 

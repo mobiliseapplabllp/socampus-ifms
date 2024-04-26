@@ -98,6 +98,20 @@ export class TodayOrderService {
     return this.https.post(environment.url + 'meal/order/downloadPDF', obj)
   }
 
+  getReturnCambro(): Observable<any> {
+    return this.https.get(environment.url + 'meal/cambroReturn/get-return-cambro-list?req_for=driver&status_type=pending-return');
+  }
+
+  getReturnCambroDetails(return_id: any): Observable<any> {
+    return this.https.get(environment.url + 'meal/cambroReturn/get-return-cambro-detail?return_id=' + return_id)
+  }
+
+  dispatchCambro(return_id: any): Observable<any> {
+    const formData = new FormData();
+    formData.append('return_id', return_id);
+    return this.https.post(environment.url + 'meal/cambroReturn/return-cambro-dispatch', formData)
+  }
+
 //   https://ifmsuat.mobilisepro.com/backend/api/meal/order/order_reached
 // FormData:-
 // order_id:{val}

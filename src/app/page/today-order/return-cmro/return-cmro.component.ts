@@ -4,7 +4,6 @@ import { CkmsSiteComponent } from '../ckms-site/ckms-site.component';
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { environment } from 'src/environments/environment';
-import { error } from 'console';
 
 @Component({
   selector: 'app-return-cmro',

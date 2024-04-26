@@ -26,34 +26,6 @@
       </ion-col>
     </ion-row>
   </ion-card>
-  <!-- <ion-card style="box-shadow: none;background-color: #B10000B2;border-radius: 10px;margin: 10px; color:white">
-    <ion-item lines="none" color="none">
-      <ion-label slot="start" class="ion-text-wrap" style="color:white">
-        <p><ion-text color="light"><b>ORD ID:</b></ion-text> {{requestedData.order_id}}</p>
-        <p><ion-text><b>PC Name: </b></ion-text> {{requestedData.pc_desc}}<ion-icon name="location-outline" color="danger"></ion-icon> </p>
-      </ion-label>
-      <ion-label slot="end" class="ion-text-wrap" style="color:white">
-        <p><ion-text><b>PC Code:</b> </ion-text> {{requestedData.pc_ext_id}}</p>
-        <p><ion-text><b>No of Boxes:</b> </ion-text> {{requestedData.total_camro_box}}</p>
-      </ion-label>
-    </ion-item>
-  </ion-card> -->
-
-  <!-- <ion-item *ngFor="let dat of order_details;let i = index">
-    <ion-avatar class="center">
-      <b>{{i+1}}</b>
-    </ion-avatar>
-    <ion-label>
-      <p><ion-text color="dark"><b>{{dat.subgrp_desc}}</b></ion-text></p>
-      <p><ion-text color="dark"><b>{{dat.item_name}}</b></ion-text></p>
-      <p><ion-text color="dark"><b>Qty: {{dat.order_qty}}</b> </ion-text> <img src="assets/meal/veg.png" style="height:10px;width:10px"> </p>
-
-    </ion-label>
-    <ion-buttons slot="end">
-      <ion-button *ngIf="!dat.isPick" (click)="pick(dat)" color="danger">Pick</ion-button>
-      <ion-button *ngIf="dat.isPick" color="success">Picked</ion-button>
-    </ion-buttons>
-  </ion-item> -->
 
   <ion-grid>
     <ion-row *ngFor="let dat of order_details;let i = index" [ngClass]="{'err': dat.showErr}">

@@ -1,0 +1,23 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Cambro Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-item *ngFor="let dat of cambroList">
+    <ion-label>
+      <h3>{{dat.ext_asset_id}}</h3>
+      <p>Cambro Id: {{dat.cambro_id}}</p>
+      <p>Order Id: {{dat.order_id}}</p>
+      <p>Cambro Return Id: {{dat.cmbr_return_id}}</p>
+    </ion-label>
+  </ion-item>
+</ion-content>
+<ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <ion-button expand="block" (click)="dispathCambro()">Return Cambro</ion-button>
+  </ion-toolbar>
+</ion-footer>
