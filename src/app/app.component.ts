@@ -24,6 +24,7 @@ export class AppComponent {
       })
   }
 
+
   initApp() {
     if (this.platform.is('capacitor')) {
       StatusBar.setOverlaysWebView({overlay: false});

@@ -18,6 +18,7 @@
 </ion-content>
 <ion-footer class="ion-no-border">
   <ion-toolbar>
-    <ion-button expand="block" (click)="dispathCambro()">Return Cambro</ion-button>
+    <ion-button expand="block" (click)="dispathCambro()" *ngIf="type === '1'">Return Cambro</ion-button>
+    <ion-button expand="block" (click)="receiveCambro()" *ngIf="type === '2'">Receive Cambro</ion-button>
   </ion-toolbar>
 </ion-footer>

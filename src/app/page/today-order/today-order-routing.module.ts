@@ -38,10 +38,10 @@ const routes: Routes = [
     path: 'ckms-site',
     component: CkmsSiteComponent
   }, {
-    path: 'return-cmro-driver',
+    path: 'return-cmro-driver/:id',
     component: ReturnCaroDriverComponent
   }, {
-    path: 'return-cmro-driver-detail/:id',
+    path: 'return-cmro-driver-detail/:id/:type',
     component: ReturnCmroDriverDetailComponent
   }
 ];

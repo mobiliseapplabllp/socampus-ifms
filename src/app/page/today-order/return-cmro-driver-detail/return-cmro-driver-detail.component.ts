@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController, NavController } from '@ionic/angular';
 import { Observable } from 'rxjs';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
@@ -13,18 +13,20 @@ import { environment } from 'src/environments/environment';
 })
 export class ReturnCmroDriverDetailComponent  implements OnInit {
   id: any;
+  type: any;
   cambroList: any  = [];
   loading: any;
   constructor(
     private activeRoute: ActivatedRoute,
     private httpTo: TodayOrderService,
     private common: CommonService,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private navCtrl: NavController
   ) { }
 
   ngOnInit() {
-    this.id = this.activeRoute.snapshot.paramMap.get('id');
-    console.log(this.id);
+    this.id = this.activeRoute.snapshot.paramMap.get('id'); // id is return_id
+    this.type = this.activeRoute.snapshot.paramMap.get('type'); // 1 for driver 2 for cpu
     this.getCambroReturnDetails();
   }
 
@@ -69,7 +71,12 @@ export class ReturnCmroDriverDetailComponent  implements OnInit {
     this.presentLoading().then(preLoad => {
       this.httpTo.dispatchCambro(this.id).subscribe({
         next:(data) => {
-          console.log(data);
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            this.navCtrl.pop();
+          } else {
+            this.common.presentToast(data.msg, 'warning')
+          }
         },
         error:() => {
           this.dismissloading();
@@ -80,7 +87,28 @@ export class ReturnCmroDriverDetailComponent  implements OnInit {
         }
       })
     })
+  }
 
+  receiveCambro() {
+    this.presentLoading().then(preLoad => {
+      this.httpTo.receiveCambro(this.id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            this.navCtrl.pop();
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
   }
 
 

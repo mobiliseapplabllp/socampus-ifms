@@ -85,21 +85,21 @@ export class TodayOrderService {
   getReturnCmbroData(site_id: any): Observable<any> {
     const formData = new FormData();
     formData.append('site_id', site_id);
-    return this.https.post(environment.url + 'meal/cambroReturn/cmr_detail_data', formData)
+    return this.https.post(environment.url + 'meal/cambroReturn/cmr-detail-data', formData)
   }
 
   returnAction(obj: any): Observable<any> {
     var arr = [];
     arr.push(obj);
-    return this.https.post(environment.url + 'meal/cambroReturn/return_cambro_init', arr);
+    return this.https.post(environment.url + 'meal/cambroReturn/return-cambro-init', arr);
   }
 
   viewPdf(obj: object): Observable<any> {
     return this.https.post(environment.url + 'meal/order/downloadPDF', obj)
   }
 
-  getReturnCambro(): Observable<any> {
-    return this.https.get(environment.url + 'meal/cambroReturn/get-return-cambro-list?req_for=driver&status_type=pending-return');
+  getReturnCambro(type: string): Observable<any> {
+    return this.https.get(environment.url + 'meal/cambroReturn/get-return-cambro-list?req_for=' + type + '&status_type=pending-return');
   }
 
   getReturnCambroDetails(return_id: any): Observable<any> {
@@ -110,6 +110,13 @@ export class TodayOrderService {
     const formData = new FormData();
     formData.append('return_id', return_id);
     return this.https.post(environment.url + 'meal/cambroReturn/return-cambro-dispatch', formData)
+  }
+
+  // return-cambro-dispatch?return_id=1
+  receiveCambro(return_id: any): Observable<any> {
+    const formData = new FormData();
+    formData.append('return_id', return_id)
+    return this.https.post(environment.url + 'meal/cambroReturn/return-cambro-reached', formData)
   }
 
 //   https://ifmsuat.mobilisepro.com/backend/api/meal/order/order_reached
