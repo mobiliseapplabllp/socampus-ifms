@@ -304,6 +304,7 @@ export class AddAssetPage implements OnInit {
   }
 
   async readImg(photo: any, imageno: any) {
+    console.log(photo);
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
     const response = await fetch(photo.webPath);
     const blob = await response.blob();

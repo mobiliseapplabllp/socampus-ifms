@@ -9,7 +9,9 @@ import { environment } from 'src/environments/environment';
 
 import { File } from '@awesome-cordova-plugins/file/ngx';
 import { MediaCapture, MediaFile, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
-// import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -37,39 +39,51 @@ export class LoginPage implements OnInit {
     private common: CommonService,
     private httpDigi: DigitalChecklistService,
     private mediaCapture: MediaCapture,
-    private file: File,
-
-  ) {
+    private file: File) {
     this.loginForms = formbuilder.group({
       userid: ['', Validators.required],
       password: ['' , Validators.required],
     });
+    Filesystem.requestPermissions();
   }
 
-//   import { Capacitor, Filesystem } from '@capacitor/core';
 
-// async function convertFileToBlob(fullPathOrLocalURL: string): Promise<Blob | null> {
-//   // Check if it's a local file path
-//   if (fullPathOrLocalURL.startsWith('file:///')) {
-//     try {
-//       const fileData = await Filesystem.readFile({ path: fullPathOrLocalURL });
-//       return new Blob([fileData.data], { type: getMimeType(fullPathOrLocalURL) });
-//     } catch (err) {
-//       console.error('Error reading file:', err);
-//       return null;
-//     }
-//   } else {
-//     // Handle downloaded resources based on your download method (replace with your logic)
-//     // ...
-//   }
-// }
 
-// function getMimeType(fullPath: string): string {
-//   // Implement logic to determine the MIME type based on file extension or other information
-//   const extension = fullPath.split('.').pop();
-//   // Use a mapping or logic to get the MIME type based on extension
-//   return 'application/octet-stream'; // Default if type can't be determined
-// }
+async convertFileToBlob(fullPathOrLocalURL: string) {
+  // Check if it's a local file path
+  console.log(fullPathOrLocalURL);
+  if (fullPathOrLocalURL.startsWith('file:///')) {
+    try {
+      const readFileResult: any = await Filesystem.readFile({
+        path: fullPathOrLocalURL,
+      });
+
+      const buffer = new Uint8Array(readFileResult.data.length);
+      for (let i = 0; i < readFileResult.data.length; i++) {
+        buffer[i] = readFileResult.data.charCodeAt(i);
+      }
+
+      // Handle the video buffer (e.g., display using video element)
+      const blob = new Blob([buffer], { type: 'video/mp4' }); // Set appropriate MIME type
+      console.log(blob)
+    } catch (err) {
+      console.error('Error reading video:', err);
+      // Handle specific errors (e.g., permission denied, file not found)
+    }
+  } else {
+    console.log('return outside');
+    return
+    // Handle downloaded resources based on your download method (replace with your logic)
+    // ...
+  }
+}
+
+getMimeType(fullPath: string): string {
+  // Implement logic to determine the MIME type based on file extension or other information
+  const extension = fullPath.split('.').pop();
+  // Use a mapping or logic to get the MIME type based on extension
+  return 'application/octet-stream'; // Default if type can't be determined
+}
 
   ngOnInit() {
     this.common.setBarcode('');
@@ -222,139 +236,58 @@ export class LoginPage implements OnInit {
 }
 
   async captureAndUploadVideo(_val: any) {
-    console.log('hell');
-    let options: CaptureVideoOptions = { limit: 1, quality: 60 };
-    // this.mediaCapture.captureImage(options).then((data: MediaFile[]) => console.log(data), (err: CaptureError) => console.error(err));
+    console.log('hello start');
+    let options: CaptureVideoOptions = { limit: 1, quality: .3};
     this.mediaCapture.captureVideo(options).then(async (_data: any) => {
-      const response = await fetch(_data[0].localURL);
-      const blob = await response.blob();
-      console.log(blob);
-      const response1 = await fetch(_data[0].fullPath);
-      const blob1 = await response1.blob();
-      console.log(blob1);
-      // const rspsn = Capacitor.convertFileSrc(_data[0].localURL)
-      // console.log('====');
-      // console.log(rspsn);
-      // console.log('+++++');
-      // const rspsn1 = Capacitor.convertFileSrc(_data[0].fullPath)
-      // console.log('*****')
-      // console.log(rspsn1);
-      // console.log('$$$$')
-      // const rspsn2 = Capacitor.convertFileSrc(_data[0])
-      // console.log('((((')
-      // console.log(rspsn2);
-      // console.log('))))')
-      // const rspsn3 = Capacitor.convertFileSrc(_data)
-      // console.log('[][][]')
-      // console.log(rspsn3);
-      // console.log('[][][]')
+      console.log(_data);
+      if (_val === 1) {
+        // let webView = Capacitor.convertFileSrc(_data[0].fullPath);
+        // const response = await fetch(webView);
+        // const blob = await response.blob();
+        // console.log(blob);
+        // let blob1 = await fetch(_data[0].fullPath).then(r => r.blob());
+        // console.log(blob1);
+        this.getVideoUrl(_data[0].fullPath);
+
+      } else if (_val === 2) {
+        let webView = Capacitor.convertFileSrc(_data[0].localURL);
+        const response = await fetch(webView);
+        const blob = await response.blob();
+        console.log(blob);
+        let blob2 = await fetch(_data[0].localURL).then(r => r.blob());
+        console.log(blob2);
+        this.getVideoUrl(_data[0].localURL);
+      }
+
+      // Filesystem.requestPermissions()
+      // if (_val === 1) {
+      //   let blob = this.convertFileToBlob(_data[0].fullPath);
+      //   console.log(blob);
+      // } else {
+      //   let blob = this.convertFileToBlob(_data[0].localURL);
+      //   console.log(blob);
+      // }
+
+
     }, _err => {
 
     });
+}
 
-
-    // const mediaFiles: any = await this.mediaCapture.captureVideo(options)
-    // mediaFiles.getFormatData().then((res: any) => {
-    //   console.log(res)
-    // })
-    // return;
-    const mediaFiles1: any = await this.mediaCapture.captureVideo(options).then((res: any) => {
-      this.readFileAsUint8Array(res[0])
-      // let capturedFile = res[0];
-      // console.log(capturedFile);
-      // console.log(capturedFile.fullPath);
-      // mediaFiles.getFormatData
-      // fetch(capturedFile.localURL).then(response => response.blob()).then(blob => {
-      //   console.log('local url 1')
-      //   console.log(blob);
-      //   console.log('local url 2')
-      // })
-      // fetch(capturedFile.fullPath).then(response => response.blob()).then(blob => {
-      //   console.log('full url 1')
-      //   console.log(blob);
-      //   console.log('full url 2')
-      // })
-      // console.log(capturedFile.getFormatData);
-      // capturedFile.getFormatData().then((blobFile: any) => {
-      //   console.log(blobFile)
-      // })
-      // if (val === 1) {
-      //   console.log('1');
-      //   let blob = new Blob([JSON.stringify(capturedFile)], { type: 'video/mp4' });
-      //   console.log(blob);
-      //   const formData = new FormData();
-      //   formData.append('video', blob, 'a.mp4');
-      //   this.uploadVideo(formData);
-      // } else if (val ===  2){
-      //   console.log('2')
-      //   let blob1 = new Blob([JSON.stringify(res)], { type: 'video/mp4' });
-      //   console.log(blob1)
-      //   const formData = new FormData();
-      //   formData.append('video', blob1, 'a.mp4');
-      //   this.uploadVideo(formData);
-      // } else if (val === 3) {
-      //   console.log('3')
-      //   let blob1 = new Blob([capturedFile], { type: 'video/mp4' });
-      //   console.log(blob1)
-      //   const formData = new FormData();
-      //   formData.append('video', blob1, 'a.mp4');
-      //   this.uploadVideo(formData);
-      // } else if (val === 4) {
-      //   console.log('4')
-      //   let blob1 = new Blob([res], { type: 'video/mp4' });
-      //   console.log(blob1)
-      //   const formData = new FormData();
-      //   formData.append('video', blob1, 'a.mp4');
-      //   this.uploadVideo(formData);
-      // }
-
-      // this.file.resolveLocalFilesystemUrl(capturedFile.fullPath).then((entry: any) => {
-      //   entry.file((file: any) => {
-      //     console.log(file);
-      //     var blob = new Blob([new Uint8Array(file)], { type: file.type });
-      //     console.log(blob)
-      //     return;
-      //     var reader = new FileReader();
-      //     reader.onloadend = function() {
-      //         console.log("Successful file read: " + this.result);
-      //         // displayFileData(fileEntry.fullPath + ": " + this.result)
-      //         var blob = new Blob([new Uint8Array(this.result)], { type: file.type });
-      //         console.log(blob)
-      //     };
-
-      //     reader.readAsArrayBuffer(file);
-
-
-      //   });
-      // }, err => {
-      //   alert(JSON.stringify(err) + 'File Not Supported');
-      // });
-      // console.log('my file', capturedFile);
-      // let fileName = capturedFile.name;
-      // let dir = capturedFile['localURL'].split('/');
-      // dir.pop();
-      // let fromDirectory = dir.join('/');
-      // let toDirectory = this.file.dataDirectory;
-      // this.file.copyFile(fromDirectory, fileName , toDirectory, fileName).then(res => {
-      //   console.log(res);
-      // }, err => {
-      //   console.log(err);
-      // })
-    }, err=> {
-      console.log('ERR--');
-      console.log(err);
+  async getVideoUrl(fullPath: string) {
+    console.log(fullPath);
+    const file = await Filesystem.readFile({
+      path: fullPath,
     });
-    // console.log(mediaFiles)
-    // if (mediaFiles.length > 0) {
-    //     const videoFile: MediaFile = mediaFiles[0];
-    //     const blob: Blob = await this.convertMediaFileToBlob(videoFile);
-    //     console.log(blob)
-    //     const formData = new FormData();
-    //     formData.append('video', blob);
-    //     // this.uploadVideo(formData);
-    // } else {
-    //   console.log('abc');
-    // }
+    const base64Video = `data:video/mp4;base64,${file.data}`
+    console.log(base64Video);
+    const base64Response = await fetch(base64Video);
+    const blob = await base64Response.blob();
+    console.log(blob);
+    const formData = new FormData();
+    formData.append('video', blob, 'a.mp4')
+    this.uploadVideo(formData);
+
 }
 
 read(file: any) {
