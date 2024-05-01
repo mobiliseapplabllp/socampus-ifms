@@ -1,0 +1,72 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>PTW Approval</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-segment  [(ngModel)]='segmentStatus' (ionChange)="changeSegment($event)">
+    <ion-segment-button value="pending">
+      <ion-label>Pending </ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="completed">
+      <ion-label>Completed </ion-label>
+    </ion-segment-button>
+  </ion-segment>
+  <div [ngSwitch]='segmentStatus'>
+    <div *ngSwitchCase= "'pending'">
+      <ion-card *ngFor="let dat of pendingList">
+        <ion-card-header color="primary">Ticket id: {{dat.tkts_id}}</ion-card-header>
+        <ion-card-content>
+          <ion-row>
+            <ion-col size="6">
+              <ion-text color="primary">Complaint Type</ion-text><br>
+              <ion-text color="medium">{{dat.issue_desc}}</ion-text>
+            </ion-col>
+            <ion-col size="6">
+              <ion-text color="primary">Site Name</ion-text><br>
+              <ion-text color="medium">{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-text>
+            </ion-col>
+            <ion-col size="6">
+              <ion-text color="primary">Barcode</ion-text><br>
+              <ion-text color="medium">{{dat.ext_asset_id}}</ion-text>
+            </ion-col>
+            <ion-col size="6">
+              <ion-text color="primary">Logged By</ion-text><br>
+              <ion-text color="medium">{{dat.logged_by_name}}</ion-text>
+            </ion-col>
+            <ion-col size="6">
+              <ion-text color="primary">Loged ON</ion-text><br>
+              <ion-text color="medium">{{dat.created_at}}</ion-text>
+            </ion-col>
+            <ion-col size="6">
+              <ion-text color="primary">Complaint Remark</ion-text><br>
+              <ion-text color="medium">{{dat.remark}}</ion-text>
+            </ion-col>
+            <ion-col size="6">
+              <ion-text color="primary">PTW Remark</ion-text><br>
+              <ion-text color="medium">{{dat.ptw_remark}}</ion-text>
+            </ion-col>
+            <ion-col *ngIf="dat.ptw_attach">
+              <ion-button color="secondary" shape="round" fill="clear" (click)="openDoc(dat.ptw_attach)">View <ion-icon name="attach-outline" slot="end"></ion-icon> </ion-button>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="6">
+              <ion-button size="block" shape="round" fill="outline" color="danger"  (click)="presentAlertConfirm(dat, '0', 'Reject')">Reject <ion-icon name="close-outline" slot="end"></ion-icon> </ion-button>
+            </ion-col>
+            <ion-col size="6">
+              <ion-button size="block" shape="round" fill="solid" color="success"  (click)="presentAlertConfirm(dat, '1', 'Approval')">Approve <ion-icon name="checkmark-outline" slot="end"></ion-icon> </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-card-content>
+      </ion-card>
+    </div>
+    <div *ngSwitchCase= "'completed'">
+      completed
+    </div>
+  </div>
+
+</ion-content>

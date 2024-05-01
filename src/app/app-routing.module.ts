@@ -72,6 +72,10 @@ const routes: Routes = [
     path: 'digital-checklist-offline',
     loadChildren: () => import('./page/digital-checklist-offline/digital-checklist-offline.module').then( m => m.DigitalChecklistOfflinePageModule)
   },
+  {
+    path: 'approvals',
+    loadChildren: () => import('./page/approvals/approvals.module').then( m => m.ApprovalsPageModule)
+  },
 ];
 
 @NgModule({
