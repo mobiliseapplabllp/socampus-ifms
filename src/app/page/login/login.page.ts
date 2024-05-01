@@ -236,8 +236,8 @@ getMimeType(fullPath: string): string {
 }
 
   async captureAndUploadVideo(_val: any) {
-    console.log('hello start');
-    let options: CaptureVideoOptions = { limit: 1, quality: .3};
+    console.log('hello start1');
+    let options: CaptureVideoOptions = { limit: 1, quality: 1, duration: 60};
     this.mediaCapture.captureVideo(options).then(async (_data: any) => {
       console.log(_data);
       if (_val === 1) {
