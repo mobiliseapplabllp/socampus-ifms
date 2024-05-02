@@ -59,14 +59,10 @@ export class OrderDetailComponent  implements OnInit {
             let barcode = data.data.text;
             if (barcode === this.order_details[this.index].ext_asset_id) {
               this.order_details[this.index].isPack = true;
+              this.order_details[this.index].showErr = false;
             } else {
               this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
             }
-            // let temp, firstDigit,lastDigit;
-            // temp = data.data.text;
-            // firstDigit = temp.slice(0, 4);
-            // lastDigit = temp.slice(-6);
-
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

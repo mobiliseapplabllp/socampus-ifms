@@ -7,13 +7,22 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-item *ngFor="let dat of cambroList">
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
+    <ion-fab-button fill="clear" color="primary" (click)="scanBarcode()">
+      <ion-icon name="qr-code-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-item *ngFor="let dat of cambroList; let i = index">
     <ion-label>
       <h3>{{dat.ext_asset_id}}</h3>
       <p>Cambro Id: {{dat.cambro_id}}</p>
       <p>Order Id: {{dat.order_id}}</p>
       <p>Cambro Return Id: {{dat.cmbr_return_id}}</p>
     </ion-label>
+    <ion-buttons slot="end" *ngIf="dat.isPack">
+      <ion-button>Picked</ion-button>
+    </ion-buttons>
   </ion-item>
 </ion-content>
 <ion-footer class="ion-no-border">
