@@ -19,11 +19,12 @@ export class LoginService {
     return this.https.post(environment.url1 + 'upload-video', formData);
   }
 
-  LoginAuth(login: any) {
+  LoginAuth(login: any, fcmToken: any) {
     return new Promise(resolve => {
       const obj = {
         username: login.userid,
-        password: login.password
+        password: login.password,
+        fcm_token: fcmToken
       }
       this.https.post(environment.url + 'login' , obj).subscribe({
         next:(data) => {

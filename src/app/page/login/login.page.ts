@@ -6,10 +6,7 @@ import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { environment } from 'src/environments/environment';
-
-// import { CaptureVideoOptions, } from '@awesome-cordova-plugins/media-capture';
-// import { File, FileEntry } from '@awesome-cordova-plugins/file/ngx';
-// import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@awesome-cordova-plugins/media-capture/ngx';
+import { PushNotifications } from '@capacitor/push-notifications';
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -27,6 +24,7 @@ export class LoginPage implements OnInit {
   isAndroid!: boolean;
   mypass = true;
   video: any;
+  fcmToken: any;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -36,9 +34,6 @@ export class LoginPage implements OnInit {
     private loginPro: LoginService,
     private common: CommonService,
     private httpDigi: DigitalChecklistService,
-    // private mediaCapture: MediaCapture,
-    // private file: File
-
   ) {
     this.loginForms = formbuilder.group({
       userid: ['', Validators.required],
@@ -48,7 +43,54 @@ export class LoginPage implements OnInit {
 
   ngOnInit() {
     this.common.setBarcode('');
+    if (this.platform.is('capacitor')) {
+      this.initFcm();
+    }
   }
+
+  initFcm() {
+    const addListeners = async () => {
+      await PushNotifications.addListener('registration', token => {
+        console.info('Registration token: ', token.value);
+        this.fcmToken = token.value;
+      });
+
+      await PushNotifications.addListener('registrationError', err => {
+        console.error('Registration error: ', err.error);
+      });
+
+      await PushNotifications.addListener('pushNotificationReceived', notification => {
+        console.log('Push notification received: ', notification);
+      });
+
+      await PushNotifications.addListener('pushNotificationActionPerformed', notification => {
+        console.log('Push notification action performed', notification.actionId, notification.inputValue);
+      });
+    }
+
+    const registerNotifications = async () => {
+      let permStatus = await PushNotifications.checkPermissions();
+
+      if (permStatus.receive === 'prompt') {
+        permStatus = await PushNotifications.requestPermissions();
+      }
+
+      if (permStatus.receive !== 'granted') {
+        throw new Error('User denied permissions!');
+      }
+
+      await PushNotifications.register();
+    }
+
+    const getDeliveredNotifications = async () => {
+      const notificationList = await PushNotifications.getDeliveredNotifications();
+      console.log('delivered notifications', notificationList);
+    }
+    addListeners();
+    registerNotifications();
+    getDeliveredNotifications();
+  }
+
 
   ionViewDidEnter() {
     if (this.platform.is('android')) {
@@ -70,10 +112,6 @@ export class LoginPage implements OnInit {
 
   changePass(pass: any) { }
 
-  // clearDb() {
-  //   db.checklist.clear();
-  // }
-
 
   async checkInternet() {
     this.common.checkInternet().then(res => {
@@ -88,7 +126,7 @@ export class LoginPage implements OnInit {
 
   onLogin() {
     this.isHidden = false;
-    this.loginPro.LoginAuth(this.loginForms.value).then(data => {
+    this.loginPro.LoginAuth(this.loginForms.value, this.fcmToken).then(data => {
       setTimeout(() => {
         this.isHidden = true;
       }, 1000);
@@ -130,41 +168,7 @@ export class LoginPage implements OnInit {
     this.router.navigateByUrl(url);
   }
 
-  async captureAndUploadVideo() {
-    // let options: CaptureVideoOptions = { limit: 1, quality: 60 };
-    // const mediaFiles: any = await this.mediaCapture.captureVideo(options);
-    // console.log(mediaFiles)
-    // if (mediaFiles.length > 0) {
-    //     const videoFile: MediaFile = mediaFiles[0];
-    //     const blob: Blob = await this.convertMediaFileToBlob(videoFile);
-    //     console.log(blob)
-    //     const formData = new FormData();
-    //     formData.append('video', blob);
-    //     // this.uploadVideo(formData);
-    // } else {
-    //   console.log('abc');
-    // }
-}
 
-// async convertMediaFileToBlob(mediaFile: MediaFile): Promise<Blob> {
-//     const blob: any = await this.file.readAsArrayBuffer(mediaFile.fullPath, mediaFile.name);
-//     console.log(blob);
-//     return blob;
-// }
-
-
-  async startRecording() {
-    // try {
-    //   let options: CaptureVideoOptions = { limit: 1, quality:60 }
-    //   const data: any = await this.mediaCapture.captureVideo(options);
-    //   console.log(data);
-    //   this.video = data[0];
-
-    // }  catch(e) {
-    //   console.log('err');
-    //   console.log(e);
-    // }
-  }
 
   read(file: any) {
     console.log('read');
@@ -178,20 +182,7 @@ export class LoginPage implements OnInit {
       console.log(blob);
       const formData = new FormData();
       formData.append('video', blob);
-      // this.uploadVideo(formData);
     };
   }
-
-  // uploadVideo(formData: any) {
-  //   this.loginPro.uploadVideo(formData).subscribe({
-  //     next:(data) => {
-  //       console.log(data);
-  //     },
-  //     error:(err) => {
-  //       console.log(err)
-  //     }
-  //   })
-  // }
-
 
 }
