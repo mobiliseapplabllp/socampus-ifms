@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Order Packing Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card style="background-color: rgb(173, 209, 251); ">
+    <ion-row>
+      <ion-col size="6">
+        <ion-text color="primary">Order Id</ion-text><br>
+        <ion-text color="medium">{{basicDetails.order_id}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Total Recipes</ion-text><br>
+        <ion-text color="medium">{{basicDetails.total_items}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Pickup Time</ion-text><br>
+        <ion-text color="medium">{{basicDetails.dispatch_time}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Packed Recipe</ion-text><br>
+        <ion-text color="medium"></ion-text>
+      </ion-col><ion-col size="6">
+        <ion-text color="primary">Dispatch Time Id</ion-text><br>
+        <ion-text color="medium">{{basicDetails.site_dlvry_time}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">No of Cambro Box</ion-text><br>
+        <ion-text color="medium"></ion-text>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+  <ion-card *ngFor="let dat of orderArr" >
+    <ion-row>
+      <ion-col size="12">
+        <ion-text color="primary">Menu List</ion-text><br>
+        <ion-text color="medium">{{dat.item_name}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Total Wastage</ion-text><br>
+        <ion-text color="medium">{{dat.item_name}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">No of Packed</ion-text><br>
+        <ion-text color="medium">{{dat.order_qty}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Rate</ion-text><br>
+        <ion-text color="medium">{{dat.total_amt}}</ion-text>
+      </ion-col>
+    </ion-row>
+    <ion-item>
+      <ion-label position="floating">Temperature</ion-label>
+      <ion-input type="text"></ion-input>
+      <ion-buttons slot="end">
+        <ion-button shape="round" fill="outline">Submit</ion-button>
+      </ion-buttons>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Cambro Box</ion-label>
+      <ion-select mode="ios" interface="action-sheet">
+        <ion-select-option *ngFor="let dat of driverArr" [value]="dat.cambro_id">{{dat.subgrp_desc}}</ion-select-option>
+      </ion-select>
+      <ion-buttons slot="end">
+        <ion-button shape="round" fill="outline" >Submit</ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-card>
+
+</ion-content>

@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
 
@@ -16,13 +16,17 @@ import { ReturnCmroComponent } from './return-cmro/return-cmro.component';
 import { CkmsSiteComponent } from './ckms-site/ckms-site.component';
 import { ReturnCaroDriverComponent } from './return-caro-driver/return-caro-driver.component';
 import { ReturnCmroDriverDetailComponent } from './return-cmro-driver-detail/return-cmro-driver-detail.component';
-
+import { OrderPackingComponent } from './order-packing/order-packing.component';
+import { SharedModule } from 'src/app/shared/shared.module';
+import { OrderPackingDetailComponent } from './order-packing-detail/order-packing-detail.component';
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
+    ReactiveFormsModule,
     TodayOrderPageRoutingModule,
+    SharedModule
   ],
   declarations: [
     TodayOrderPage,
@@ -34,6 +38,9 @@ import { ReturnCmroDriverDetailComponent } from './return-cmro-driver-detail/ret
     ReturnCmroComponent,
     CkmsSiteComponent,
     ReturnCaroDriverComponent,
-    ReturnCmroDriverDetailComponent]
+    ReturnCmroDriverDetailComponent,
+    OrderPackingComponent,
+    OrderPackingDetailComponent
+  ]
 })
 export class TodayOrderPageModule {}

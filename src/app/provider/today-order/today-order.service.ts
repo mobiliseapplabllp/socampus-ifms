@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -112,15 +112,32 @@ export class TodayOrderService {
     return this.https.post(environment.url + 'meal/cambroReturn/return-cambro-dispatch', formData)
   }
 
-  // return-cambro-dispatch?return_id=1
   receiveCambro(return_id: any): Observable<any> {
     const formData = new FormData();
     formData.append('return_id', return_id)
     return this.https.post(environment.url + 'meal/cambroReturn/return-cambro-reached', formData)
   }
 
-//   https://ifmsuat.mobilisepro.com/backend/api/meal/order/order_reached
-// FormData:-
-// order_id:{val}
+  getOrderForDispatch(data: any): Observable<any> {
+    let param = new HttpParams();
+    for (const key in data) {
+      if (data[key] !== '' && data[key] !== undefined && data[key] !== null) {
+        param = param.append(key, data[key]);
+      }
+    }
+    return this.https.get(environment.url + 'meal/order/get_order_count_data', { params: param });
+  }
+
+  getDispathOrderDetail(order_id: any): Observable<any> {
+    return this.https.get(environment.url + 'meal/order/get_order_history?order_id=' + order_id);
+  }
+
+  getCambroByPC(pc_id: any): Observable<any> {
+    return this.https.get(environment.url + 'assets/reporting/get_cambro_by_pc?pc_id=' + pc_id);
+  }
+
+  getDriverByPc(pc_id: any): Observable<any> {
+    return this.https.get(environment.url + 'assets/reporting/get_driver_by_pc?pc_id=' + pc_id);
+  }
 
 }

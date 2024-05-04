@@ -11,6 +11,9 @@ import { ReturnCmroComponent } from './return-cmro/return-cmro.component';
 import { CkmsSiteComponent } from './ckms-site/ckms-site.component';
 import { ReturnCaroDriverComponent } from './return-caro-driver/return-caro-driver.component';
 import { ReturnCmroDriverDetailComponent } from './return-cmro-driver-detail/return-cmro-driver-detail.component';
+import { OrderPackingComponent } from './order-packing/order-packing.component';
+import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
+import { OrderPackingDetailComponent } from './order-packing-detail/order-packing-detail.component';
 
 const routes: Routes = [
   {
@@ -43,6 +46,15 @@ const routes: Routes = [
   }, {
     path: 'return-cmro-driver-detail/:id/:type',
     component: ReturnCmroDriverDetailComponent
+  }, {
+    path: 'order-pack',
+    component: OrderPackingComponent
+  }, {
+    path: 'cost-center',
+    component: CostCenterComponent
+  }, {
+    path: 'order-pack-detail',
+    component: OrderPackingDetailComponent
   }
 ];
 

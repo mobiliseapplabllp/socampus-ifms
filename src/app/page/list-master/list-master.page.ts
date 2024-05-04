@@ -181,6 +181,10 @@ export class ListMasterPage implements OnInit {
               icon_path: 'assets/meal/i2.png',
               smnu_desc: 'Receive Cambro CPU',
               link: 'today-order/return-cmro-driver/2'
+            },{
+              icon_path: 'assets/meal/i2.png',
+              smnu_desc: 'Order Pack',
+              link: 'today-order/order-pack'
             }]
             for (var i = 0; i < obj.length; i++) {
               this.myMenu.push(obj[i]);
