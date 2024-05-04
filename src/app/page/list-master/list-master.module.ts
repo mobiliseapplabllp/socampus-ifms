@@ -18,6 +18,7 @@ import { MenuComponent } from './menu/menu.component';
 import { PendingTaskComponent } from './pending-task/pending-task.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ComplaintPageModule } from '../complaint/complaint.module';
+import { SosComponent } from './sos/sos.component';
 
 @NgModule({
   imports: [
@@ -36,6 +37,7 @@ import { ComplaintPageModule } from '../complaint/complaint.module';
     PendingTaskComponent,
     ChartDashboardComponent,
     OfflineDataComponent,
+    SosComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

@@ -8,6 +8,7 @@ import { OfflineDataComponent } from './offline-data/offline-data.component';
 import { MenuComponent } from './menu/menu.component';
 import { PendingTaskComponent } from './pending-task/pending-task.component';
 import { ComplaintCardsComponent } from '../complaint/complaint-cards/complaint-cards.component';
+import { SosComponent } from './sos/sos.component';
 
 const routes: Routes = [
   {
@@ -31,7 +32,10 @@ const routes: Routes = [
   }, {
     path: 'complaint-card',
     component: ComplaintCardsComponent
-  },
+  }, {
+    path: 'sos',
+    component: SosComponent
+  }
 ];
 
 @NgModule({

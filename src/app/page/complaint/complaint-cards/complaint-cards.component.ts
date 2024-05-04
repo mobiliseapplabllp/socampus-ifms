@@ -46,6 +46,10 @@ export class ComplaintCardsComponent  implements OnInit {
     data.hide = !data.hide;
   }
 
+  check() {
+    console.log(this.data);
+  }
+
   async openSite() {
     const modal = await this.modalCtrl.create({
       component: SiteDetailComponent,

@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { db } from '../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
-import { AlertController,  } from '@ionic/angular';
+import { AlertController, ModalController,  } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { SosComponent } from './sos/sos.component';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -22,7 +23,8 @@ export class ListMasterPage implements OnInit {
   constructor(
     private common: CommonService,
     private alertController: AlertController,
-    private router: Router) {
+    private router: Router,
+    private modalCtrl: ModalController) {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
@@ -119,4 +121,14 @@ export class ListMasterPage implements OnInit {
   openPageRoute() {
     this.router.navigateByUrl('/list-master/offline-data');
   }
+
+  async openSosModal() {
+    const modal = await this.modalCtrl.create({
+      component: SosComponent,
+      // cssClass: 'my-modal',
+      componentProps: { }
+    });
+    modal.present();
+  }
+
 }
