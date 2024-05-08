@@ -63,18 +63,31 @@ export class ReturnCmroDriverDetailComponent  implements OnInit {
   }
 
   cambroPicked(decBarcode: string) {
-    let isFound = false;
-    for (var i  = 0; i < this.cambroList.length; i++) {
-      if (this.cambroList[i].ext_asset_id === decBarcode) {
-        this.cambroList[i].isPack = true;
-        isFound = true;
-        this.common.presentToast('QR Found Successfully,', 'success');
+    const index = this.cambroList.findIndex((item: any) => item.ext_asset_id === decBarcode);
+    console.log(index);
+    if (index !== -1) {
+      if (this.cambroList[index].isPack) {
+        this.common.presentToast('This Cambro Already Packed', 'warning');
+      } else {
+        this.cambroList[index].isPack = true;
         this.repeatLoop();
-        return;
-      } else if (i === this.cambroList.length - 1 && !isFound) {
-        this.presentAlertConfirm();
       }
+    } else {
+      this.presentAlertConfirm();
     }
+
+    // let isFound = false;
+    // for (var i  = 0; i < this.cambroList.length; i++) {
+    //   if (this.cambroList[i].ext_asset_id === decBarcode) {
+    //     this.cambroList[i].isPack = true;
+    //     isFound = true;
+    //     this.common.presentToast('QR Found Successfully,', 'success');
+    //     this.repeatLoop();
+    //     return;
+    //   } else if (i === this.cambroList.length - 1 && !isFound) {
+    //     this.presentAlertConfirm();
+    //   }
+    // }
   }
 
   async presentAlertConfirm() {
@@ -82,12 +95,12 @@ export class ReturnCmroDriverDetailComponent  implements OnInit {
       header: 'Not Found.',
       message: 'This QR Not Found.. Do you want to Try again!!!',
       buttons: [{
-        text: 'Disagree',
+        text: 'Cancel',
         handler: () => {
           console.log('Disagree clicked');
         }
       }, {
-        text: 'Agree',
+        text: 'RETRY',
         handler: () => {
           this.repeatLoop();
         }
@@ -142,6 +155,34 @@ export class ReturnCmroDriverDetailComponent  implements OnInit {
   }
 
   dispathCambro(){
+    if (this.cambroList.length === 0) {
+      this.common.presentToast('No Data Found', 'warning');
+      return;
+    }
+    let result = 0;
+    for (var i = 0;i < this.cambroList.length; i++) {
+      if (!this.cambroList[i].isPack) {
+        this.cambroList[i].showErr = true;
+        result = result + 1;
+      } else {
+        this.cambroList[i].showErr = false;
+      }
+    }
+    if (result > 0) {
+      this.common.presentToast('Please Pick All Cambro Box', 'warning');
+      return;
+    }
+
+    // let count = 0;
+    // for (var i = 0; i < this.cambroList.length;i++) {
+    //   if (this.cambroList[i].isPack) {
+    //     this.cambroList[i].isErr = false;
+    //     count++
+    //   } else if(this.cambroList.length === count) {
+
+    //   }
+    // }
+
     this.presentLoading().then(preLoad => {
       this.httpTo.dispatchCambro(this.id).subscribe({
         next:(data) => {
@@ -186,6 +227,12 @@ export class ReturnCmroDriverDetailComponent  implements OnInit {
   }
 
   scanBarcode() {
-    this.router.navigateByUrl('/barcode');
+    let checkEmpty = this.cambroList.filter((val: any) => !val.isPack);
+    if (checkEmpty.length > 0) {
+      this.router.navigateByUrl('/barcode');
+    } else {
+      this.common.presentToast('All Cambro Packed, please final Submit', 'tertiary');
+    }
+
   }
 }

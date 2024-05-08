@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Cambro Status</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close(null, false)">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12">
+        <ion-text color="primary">PC</ion-text><br>
+        <ion-text color="medium">{{data.pc_desc}}</ion-text><br>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Status</ion-text><br>
+        <ion-text color="medium">{{data.availability_status}}</ion-text><br>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Item Name</ion-text><br>
+        <ion-text color="medium">{{data.item_name}}</ion-text><br>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Type</ion-text><br>
+        <ion-text color="medium">{{data.type_desc}}</ion-text><br>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Order Id</ion-text><br>
+        <ion-text color="medium">{{data.order_id}}</ion-text><br>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+</ion-content>

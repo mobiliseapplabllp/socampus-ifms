@@ -4,8 +4,9 @@ import { LoadingController, ModalController, Platform, ToastController } from '@
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ListMasterService } from 'src/app/provider/list-master/list-master.service';
 import { LoginService } from 'src/app/provider/login/login.service';
-import { TextToSpeech } from '@capacitor-community/text-to-speech';
-import { SpeechRecognition } from "@capacitor-community/speech-recognition";
+import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
+import { CambroStatusComponent } from './cambro-status/cambro-status.component';
+import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -40,17 +41,23 @@ export class ListMasterPage implements OnInit {
     private loadingController: LoadingController,
     private common: CommonService,
     private router: Router,
-    private platform: Platform
-  ) {
+    private httpTo: TodayOrderService,
+    private modalCtrl: ModalController) {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
       this.userName = this.userData.user_name
-      console.log(this.userData);
     }
+    // this.checkDeviceTime();
   }
 
   ngOnInit() {
+    // console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    if (this.isAutomaticDateTimeEnabled()) {
+      console.log('correct');
+    } else {
+      console.log('not correct');
+    }
     this.common.checkInternet().then(res => {
       if (res) {
         this.isInternet = true;
@@ -58,10 +65,6 @@ export class ListMasterPage implements OnInit {
         this.userData = this.loginPro.getLoginUserValue();
         this.getMenuDetail();
         this.getDashboard();
-        // if (this.platform.is('capacitor')) {
-        //   this.permission();
-        //   this.listen();
-        // }
       } else {
         let menu, MENU_TEMP = localStorage.getItem('home_menu');
         if (MENU_TEMP) {
@@ -86,58 +89,51 @@ export class ListMasterPage implements OnInit {
     });
   }
 
-  speak() {
-    const speak = async () => {
-      await TextToSpeech.speak({
-        text: 'This is a sample text.',
-        lang: 'en',
-        rate: 1.0,
-        pitch: 1.0,
-        volume: 1.0,
-        category: 'ambient',
-      });
-    };
-    speak();
-  }
-
-  stopSpeak() {
-    TextToSpeech.stop();
-  }
-
-  permission() {
-    SpeechRecognition.requestPermissions().then(res => {
-      console.log(res);
-    })
-  }
-
-  listen() {
-    SpeechRecognition.start({
-      language: "en-US",
-      maxResults: 2,
-      prompt: "Say something",
-      partialResults: true,
-      popup: true,
-    }).then(res => {
-      console.log(res);
-    })
-    // SpeechRecognition.addListener("partialResults", (data: any) => {
-    //   console.log("partialResults was fired", data.matches);
-    //   // if (data.matches[0] == 'open asset tagging') {
-    //   //   const data = {
-    //   //     link: '/add-asset'
-    //   //   }
-    //   //   this.openPage(data);
-    //   // }
-    // });
-  }
-
-  removeListen() {
-    SpeechRecognition.removeAllListeners();
-  }
-
-
   ionViewWillLeave() {
     this.dismissloading();
+  }
+
+  ionViewDidEnter() {
+    let bar = this.common.getBarcode();
+    if (bar) {
+      console.log(bar);
+      this.common.setBarcode('');
+      this.presentLoading().then(preLoad => {
+        this.httpTo.getCambroStatus(bar).subscribe({
+          next:(data) => {
+            if (data.status) {
+              this.openCambroStatus(data.data)
+            } else {
+              this.common.presentToast(data.msg, 'warning');
+            }
+          },
+          error:() => {
+            this.dismissloading();
+            this.common.presentToast(environment.errMsg, 'danger');
+          },
+          complete:() => {
+            this.dismissloading();
+          }
+        });
+      })
+    }
+  }
+
+  async openCambroStatus(data: any) {
+    const modal = await this.modalCtrl.create({
+      component: CambroStatusComponent,
+      cssClass: 'my-modal2',
+      backdropDismiss:false,
+      componentProps: {
+        data: data
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      console.log(disModal);
+      if (disModal.role == 'true') {
+      }
+    });
+    modal.present();
   }
 
   async presentToast() {
@@ -191,8 +187,6 @@ export class ListMasterPage implements OnInit {
             }
 
           }
-
-
           localStorage.setItem('home_menu', JSON.stringify(this.myMenu));
         }
       }, err => {
@@ -238,4 +232,59 @@ export class ListMasterPage implements OnInit {
   openPageTest(url: string) {
     this.router.navigateByUrl(url);
   }
+
+  openBarcode() {
+    this.router.navigateByUrl('/barcode');
+  }
+
+  getStoredTimestamp() {
+    return localStorage.getItem('storedTimestamp');
+  }
+
+  storeTimestamp() {
+    const currentTimestamp = new Date().getTime();
+    console.log(currentTimestamp);
+    localStorage.setItem('storedTimestamp', currentTimestamp.toString());
+  }
+
+
+  checkDeviceTime() {
+    const storedTimestamp = this.getStoredTimestamp();
+    if (!storedTimestamp) {
+        // No stored timestamp, store the current timestamp
+        this.storeTimestamp();
+        console.log('Stored current timestamp for future reference');
+        return;
+    }
+
+    const storedTime = new Date(parseInt(storedTimestamp));
+    const currentTime = new Date();
+    const timeDifference = Math.abs(currentTime.getTime() - storedTime.getTime());
+
+    // Define a threshold (in milliseconds) for allowable time difference
+    const allowableDifference = 60000; // 1 minute
+
+    if (timeDifference > allowableDifference) {
+        console.log('Device time may have been tampered with');
+    } else {
+        console.log('Device time appears to be accurate');
+    }
+  }
+
+  isAutomaticDateTimeEnabled() {
+    // Get the current time from the device
+    const currentTime = new Date().getTime();
+    // Get the time of the last reboot of the device
+    const lastRebootTime = performance.timeOrigin
+
+    // Calculate the time difference in milliseconds
+    const timeDifference = Math.abs(currentTime - lastRebootTime);
+
+    // Set a threshold to determine if the time difference is significant (e.g., 1 minute)
+    const threshold = 60 * 1000; // 1 minute in milliseconds
+
+    // Compare the time difference with the threshold
+    return timeDifference < threshold;
+  }
+
 }

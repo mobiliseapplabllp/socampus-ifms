@@ -140,4 +140,8 @@ export class TodayOrderService {
     return this.https.get(environment.url + 'assets/reporting/get_driver_by_pc?pc_id=' + pc_id);
   }
 
+  getCambroStatus(encQr: string): Observable<any> {
+    return this.https.get(environment.url + 'meal/cambroReturn/cambro-info-by-barcode?barcode=' + encQr);
+  }
+
 }

@@ -13,7 +13,7 @@
     </ion-fab-button>
   </ion-fab>
 
-  <ion-item *ngFor="let dat of cambroList; let i = index">
+  <ion-item *ngFor="let dat of cambroList; let i = index" [ngClass]="{'err': dat.showErr}">
     <ion-label>
       <h3>{{dat.ext_asset_id}}</h3>
       <p>Cambro Id: {{dat.cambro_id}}</p>
