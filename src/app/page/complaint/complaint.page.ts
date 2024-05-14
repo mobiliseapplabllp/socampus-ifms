@@ -1,16 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingController, ModalController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
 import { CostCenterComponent } from '../../shared/cost-center/cost-center.component';
+import { CaptureComponent } from 'src/app/shared/capture/capture.component';
 @Component({
   selector: 'app-complaint',
   templateUrl: './complaint.page.html',
   styleUrls: ['./complaint.page.scss'],
 })
 export class ComplaintPage implements OnInit {
+  @ViewChild('videoElement') videoElement!: ElementRef;
+  @ViewChild('video') video!: ElementRef;
+
+  mediaRecorder: any;
+  recordedChunks: Blob[] = [];
+  output: any;
+
   status = 'not_resolved';
   tickets: any = [];
   ticketsCopy: any = [];
@@ -29,6 +37,7 @@ export class ComplaintPage implements OnInit {
   searchValue!: string;
   searchValueDesc!: string;
   resolveTicket: any = [];
+  isWorkingVid = false;
   constructor(
     private httpCompalint: ComplaintService,
     private httpCommon: CommonService,
@@ -45,6 +54,79 @@ export class ComplaintPage implements OnInit {
   ionViewDidEnter() {}
 
   ionViewDidLeave() {}
+
+  async openCapture() {
+    const modal = await this.modalController.create({
+      component: CaptureComponent,
+      componentProps : { }
+    });
+    modal.onWillDismiss().then(disModal => {
+      console.log(disModal);
+      if (disModal.role) {
+      }
+    });
+    return await modal.present();
+  }
+
+  startRecording() {
+    const videoElement: HTMLVideoElement = this.videoElement.nativeElement;
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+      videoElement.srcObject = stream;
+      this.mediaRecorder = new MediaRecorder(stream);
+      this.mediaRecorder.ondataavailable = (event: any) => {
+        if (event.data.size > 0) {
+          this.recordedChunks.push(event.data);
+        }
+      };
+      this.mediaRecorder.start();
+    }).catch((err) => {
+      console.error('Error accessing media devices: ', err);
+    });
+  }
+
+  stopRecording() {
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      this.mediaRecorder.stop();
+      setTimeout(() => {
+        const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+        console.log(blob);
+        this.output = blob;
+        const stream = this.videoElement.nativeElement.srcObject as MediaStream;
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+        this.videoElement.nativeElement.srcObject = null;
+        this.playRecordedVideo();
+      }, 1000);
+
+    }
+  }
+
+  downloadVideo() {
+    const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+    console.log(blob);
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'recorded-video.webm';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+
+  playRecordedVideo() {
+    if (this.output) {
+      const url = window.URL.createObjectURL(this.output);
+      this.video.nativeElement.src = url;
+      this.video.nativeElement.play();
+      // Revoke object URL when video playback is done
+      this.video.nativeElement.onended = () => {
+        window.URL.revokeObjectURL(url);
+      };
+    }
+  }
+
 
   ionViewWillEnter() {
     this.getTicketStages();

@@ -1,0 +1,11 @@
+<div  *ngIf="!conversation"  class="ion-text-center">
+  <ion-button (click)="getOrcreateConversation()">Start Video Call</ion-button>
+</div>
+
+<div *ngIf="conversation" class="container">
+  <div id="remote-container" style="height:50%;width:100%;border-radius: 20px;">
+   </div>
+  <div id="local-container" style="height:50%;width:100%;border-radius: 20px;">
+    <video #localVideo autoplay playsinline style="height:100%;width:100%;border:1px solid var(--ion-color-secondary)"></video>
+  </div>
+</div>

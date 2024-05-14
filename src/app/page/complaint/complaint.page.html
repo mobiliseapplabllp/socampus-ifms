@@ -3,10 +3,25 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>Helpdesk</ion-title>
+    <ion-title >Helpdesk</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="isWorkingVid = !isWorkingVid"> Video</ion-button>
+      <ion-button (click)="openCapture()">Custom</ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content>
+  <div *ngIf="isWorkingVid">
+    <ion-button (click)="startRecording()">Start</ion-button>
+    <ion-button (click)="stopRecording()">Stop</ion-button>
+    <ion-button (click)="downloadVideo()">Download</ion-button>
+    <video #videoElement autoplay></video>
+    <hr>
+    <video width="320" #video height="240" controls>
+      <source [src]="output"  autoplay>
+    </video>
+  </div>
+
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
     <ion-fab-button fill="clear" color="primary" (click)="creteTicket()">
       <ion-icon name="add-outline"></ion-icon>

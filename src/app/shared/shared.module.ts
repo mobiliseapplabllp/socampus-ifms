@@ -16,6 +16,8 @@ import { LocationComponent } from './location/location.component';
 import { DeviceGroupComponent } from './device-group/device-group.component';
 import { BuildingComponent } from './building/building.component';
 import { PhotoViewComponent } from './photo-view/photo-view.component';
+import { VideoComponent } from './video/video.component';
+import { CaptureComponent } from './capture/capture.component';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -30,7 +32,9 @@ import { PhotoViewComponent } from './photo-view/photo-view.component';
     LocationComponent,
     DeviceGroupComponent,
     BuildingComponent,
-    PhotoViewComponent
+    PhotoViewComponent,
+    VideoComponent,
+    CaptureComponent
   ],
   imports: [
     CommonModule,
@@ -52,7 +56,12 @@ import { PhotoViewComponent } from './photo-view/photo-view.component';
     LocationComponent,
     DeviceGroupComponent,
     BuildingComponent,
-    PhotoViewComponent
+    PhotoViewComponent,
+    VideoComponent,
+    CaptureComponent
+  ],
+  exports: [
+    VideoComponent
   ]
 })
 export class SharedModule { }

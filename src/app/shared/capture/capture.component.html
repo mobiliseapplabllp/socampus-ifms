@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Camera/Video</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeCamera()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  {{currentStatus}}
+  <video id="liveVideo" style="height:100%;width:100%" autoplay [hidden]="currentStatus !== 'camera-running'"></video>
+  <img id="imagePreview" style="height:100%;width:100%" *ngIf="currentStatus === 'photo-capture'">
+</ion-content>
+<ion-footer>
+  <ion-row >
+    <ion-col size="4" class="ion-text-center">
+      <!-- <img id="imagePreview" style="height:50px;width:50px;border-radius: 50%;"> -->
+    </ion-col>
+    <ion-col size="4" class="ion-text-center">
+      <ion-button (click)="captureImage()">Capture</ion-button>
+    </ion-col>
+    <ion-col size="4" class="ion-text-center">
+      <ion-button>Rec Video</ion-button>
+    </ion-col>
+  </ion-row>
+</ion-footer>
