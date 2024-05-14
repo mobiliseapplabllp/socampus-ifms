@@ -25,7 +25,10 @@
       <h2><b><ion-text color="primary">Welcome Home</ion-text></b></h2>
       <p style="font-size:18px"><ion-text>{{userName}}</ion-text></p>
     </ion-label>
-    <!-- <ion-button slot="end" color="danger" shape="round" fill="outline" (click)="openSosModal()">SOS</ion-button> -->
+    <!-- <ion-buttons slot="end">
+      <ion-button slot="end" color="danger" shape="round" fill="outline" (click)="openSosModal()">SOS</ion-button>
+    </ion-buttons> -->
+    <ion-button size="small" slot="end" class="ion-text-capitalize" color="danger" (click)="downloadApp(appUpdate.url)" *ngIf="isAndroid && appUpdate.is_view && currentVersion !== appUpdate.vesrion" >App Update</ion-button>
   </ion-item>
   <app-dashboard [eventChange]="eventChange" ></app-dashboard>
   <app-menu [didEnter]="didEnter"></app-menu>

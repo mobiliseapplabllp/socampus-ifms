@@ -122,9 +122,9 @@ export class DigitalChecklistPage implements OnInit {
 
   getCheckListByBarcode(type: string, val: any) {
     if (type === 'complaint-qr-code') {
-      var friendsObservable = liveQuery (() => db.checklist.where({loc_id:parseInt(val, 10)}).toArray());
+      var friendsObservable = liveQuery (() => db.checklist.where({loc_id:parseInt(val, 10), schedule_date: moment().format('YYYY-MM-DD')}).toArray());
     } else if (type === 'create-ticket-qr-code') {
-      var friendsObservable = liveQuery (() => db.checklist.where({barcode:val}).toArray());
+      var friendsObservable = liveQuery (() => db.checklist.where({barcode:val, schedule_date: moment().format('YYYY-MM-DD')}).toArray());
     } else {
       return
     }

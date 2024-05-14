@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 export class CommonService {
   public barcode!: string;
   private isHomeLoad = new BehaviorSubject(true);
+  public appVersion = new BehaviorSubject([]);
   constructor(
     private toastController: ToastController
   ) { }
@@ -114,6 +115,14 @@ export class CommonService {
     match = val.match(regex);
     console.log(match);
     return extractedString = match ? match[1] : null;
+  }
+
+  setAppVersion(obj: any) {
+    this.appVersion.next(obj);
+  }
+
+  getAppVersionObs() {
+    return this.appVersion;
   }
 
 }

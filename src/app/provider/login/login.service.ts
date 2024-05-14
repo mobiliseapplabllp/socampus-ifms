@@ -51,6 +51,15 @@ export class LoginService {
     });
   }
 
+  getAppVersion(platform: string): Observable<any> {
+    const obj = {
+      platform: platform,
+      req_for: 'ServiceApp'
+    }
+    return this.https.post(environment.url + 'app_version', obj)
+  }
+
+
   getUserDataObs() {
     return this.username;
   }

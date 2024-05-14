@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { db } from '../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
-import { AlertController, ModalController,  } from '@ionic/angular';
+import { AlertController, ModalController, Platform,  } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { SosComponent } from './sos/sos.component';
+import { App } from '@capacitor/app';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -20,11 +21,15 @@ export class ListMasterPage implements OnInit {
   DGArr: any = [];
   subs: any;
   count = 0;
+  appUpdate: any = {};
+  currentVersion!: string;
+  isAndroid!: boolean;
   constructor(
     private common: CommonService,
     private alertController: AlertController,
     private router: Router,
-    private modalCtrl: ModalController) {
+    private modalCtrl: ModalController,
+    private platform: Platform) {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
@@ -33,7 +38,30 @@ export class ListMasterPage implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.changeEvent();
+    this.common.getAppVersionObs().subscribe(data => {
+      this.appUpdate = data;
+      console.log(this.appUpdate);
+      if (this.platform.is('android')) {
+        this.isAndroid = true;
+        App.getInfo().then(res => {
+          const curVersion = res.version.toString();
+          this.currentVersion = curVersion.toString();
+          if (this.appUpdate.is_view && this.appUpdate.forceupdate && (this.appUpdate.vesrion !== this.currentVersion)) {
+            this.downloadApp(this.appUpdate.url);
+            // this.common.presentToast('Please Update your App', 'warning');
+          }
+        });
+      }
+    });
+  }
+
+  downloadApp(url: string) {
+    if (url){
+      this.common.presentToast('Please install latest application', 'secondary');
+      this.common.openDoc(url);
+    } else {
+      this.common.presentToast('Download URL not found', 'warning');
+    }
 
   }
 

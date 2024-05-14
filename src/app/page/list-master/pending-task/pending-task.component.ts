@@ -104,7 +104,6 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   checkCurrentDateDG(date: string) {
-    console.log('abc');
     const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).toArray());
     const sub = friendsObservable.subscribe({
       next:(data) => {

@@ -17,6 +17,8 @@ export class AppComponent {
   userInfo: any = [];
   myMenu: any = [];
   loading: any;
+  appVersion!: string;
+  isAndroid!: boolean;
   constructor(
     private loginPro: LoginService,
     private router: Router,
@@ -37,6 +39,12 @@ export class AppComponent {
     if (this.platform.is('capacitor')) {
       StatusBar.setOverlaysWebView({overlay: false});
       StatusBar.setBackgroundColor({'color': '#040E51'})
+      App.getInfo().then(res => {
+        this.appVersion = res.version
+      });
+      this.getAppVersion();
+    } else {
+      this.getAppVersion();
     }
     this.initIdle();
     const isLogin = localStorage.getItem('isAlreadyLogin');
@@ -52,6 +60,32 @@ export class AppComponent {
         }
       });
     }
+  }
+
+  getAppVersion() {
+    let platform;
+    if (this.platform.is('android')) {
+      platform = 'android';
+    } else {
+      platform = 'ios';
+    }
+    this.httpLogin.getAppVersion(platform).subscribe({
+      next:(data) => {
+        if (data.status) {
+          this.common.setAppVersion(data.data);
+        }
+      },
+      error:() => {
+
+      },
+      complete:() => {
+
+      }
+    })
+  }
+
+  appUrl() {
+    alert(environment.url2);
   }
 
   refreshTokenOnly() {
