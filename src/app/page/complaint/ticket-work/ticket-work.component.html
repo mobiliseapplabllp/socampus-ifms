@@ -17,9 +17,9 @@
     <ion-segment-button value="service" *ngIf="requestedData.issue_desc === 'Service'">
       <ion-label>Service</ion-label>
     </ion-segment-button>
-    <ion-segment-button value="video">
+    <!-- <ion-segment-button value="video">
       <ion-label>Video</ion-label>
-    </ion-segment-button>
+    </ion-segment-button> -->
   </ion-segment>
   <div [ngSwitch]='segmentStatus'>
     <div *ngSwitchCase="'ticket'">
