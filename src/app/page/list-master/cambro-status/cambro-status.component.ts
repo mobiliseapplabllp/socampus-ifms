@@ -7,7 +7,8 @@ import { ModalController } from '@ionic/angular';
   styleUrls: ['./cambro-status.component.scss'],
 })
 export class CambroStatusComponent  implements OnInit {
-  data: any
+  data: any;
+  ticketTransaction: any = [{status: 'Packed', time: '12:30', class: 'active'}, {status: 'Dispatched', time: '15:00', class: 'active'}, { status: 'Reach at Site', time: '18:00', class: 'active'}, { status: 'Return Initiated', time: '19:00', class: 'active'}, { status: 'Driver Picked', time: '21:00', class: 'in-active'}, { status: 'Received CPU', time: '23:00', class: 'in-active'}]
   constructor(
     private modalCtrl: ModalController
   ) { }

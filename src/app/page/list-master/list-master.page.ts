@@ -122,7 +122,7 @@ export class ListMasterPage implements OnInit {
   async openCambroStatus(data: any) {
     const modal = await this.modalCtrl.create({
       component: CambroStatusComponent,
-      cssClass: 'my-modal2',
+      cssClass: 'my-modal',
       backdropDismiss:false,
       componentProps: {
         data: data
