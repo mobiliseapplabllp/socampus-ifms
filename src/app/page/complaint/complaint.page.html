@@ -7,6 +7,7 @@
     <ion-buttons slot="end">
       <ion-button (click)="isWorkingVid = !isWorkingVid"> Video</ion-button>
       <ion-button (click)="openCapture()">Custom</ion-button>
+      <ion-button (click)="play = true">Play</ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -20,6 +21,18 @@
     <video width="320" #video height="240" controls>
       <source [src]="output"  autoplay>
     </video>
+
+    <section *ngIf="play">
+      <div *ngFor="let dat of allRecording">
+        {{dat}}
+      </div>
+      <div *ngFor="let dat of allRecording" >
+        <video width="320" #video height="240" controls>
+          <source src={{dat}}  autoplay>
+        </video>
+      </div>
+    </section>
+
   </div>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" >

@@ -38,6 +38,8 @@ export class ComplaintPage implements OnInit {
   searchValueDesc!: string;
   resolveTicket: any = [];
   isWorkingVid = false;
+  allRecording: any = [];
+  play = false;
   constructor(
     private httpCompalint: ComplaintService,
     private httpCommon: CommonService,
@@ -75,7 +77,9 @@ export class ComplaintPage implements OnInit {
       this.mediaRecorder = new MediaRecorder(stream);
       this.mediaRecorder.ondataavailable = (event: any) => {
         if (event.data.size > 0) {
+          // console.log(event.data);
           this.recordedChunks.push(event.data);
+          this.convertAndSaveVideos(this.recordedChunks, 1048576 * 4  );
         }
       };
       this.mediaRecorder.start();
@@ -84,19 +88,65 @@ export class ComplaintPage implements OnInit {
     });
   }
 
+  convertAndSaveVideos(recordedChunks: any, maxSizeInBytes: any) {
+    // Concatenate recorded chunks into a single Blob
+    const concatenatedBlob = new Blob(recordedChunks, { type: 'video/webm' });
+
+    // Check if concatenated Blob size exceeds maxSizeInBytes
+    if (concatenatedBlob.size > maxSizeInBytes) {
+        const numChunks = Math.ceil(concatenatedBlob.size / maxSizeInBytes);
+        const chunkSize = Math.ceil(concatenatedBlob.size / numChunks);
+
+        let start = 0;
+        let end = chunkSize;
+        let chunkIndex = 0;
+
+        // Split Blob into smaller Blobs
+        while (start < concatenatedBlob.size) {
+            const chunkBlob: any = concatenatedBlob.slice(start, end, concatenatedBlob.type);
+            this.saveBlobAsFile(chunkBlob, `video_chunk_${chunkIndex}.webm`);
+            start = end;
+            end = Math.min(start + chunkSize, concatenatedBlob.size);
+            chunkIndex++;
+        }
+    } else {
+        // Save the single Blob as a video file
+        console.log('Single Video');
+        this.saveBlobAsFile(concatenatedBlob, 'video.webm');
+    }
+}
+
+saveBlobAsFile(blob: any, fileName: any) {
+  // console.log(fileName);
+  // console.log(blob);
+  // this.allRecording.push(blob);
+  // console.log(this.allRecording);
+  // return;
+  const a: any = document.createElement('a');
+  document.body.appendChild(a);
+  a.style = 'display: none';
+  const url = window.URL.createObjectURL(blob);
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+
   stopRecording() {
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
       this.mediaRecorder.stop();
       setTimeout(() => {
         const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
-        console.log(blob);
+
         this.output = blob;
+        console.log(this.output);
         const stream = this.videoElement.nativeElement.srcObject as MediaStream;
         const tracks = stream.getTracks();
         tracks.forEach(track => track.stop());
         this.videoElement.nativeElement.srcObject = null;
         this.playRecordedVideo();
-      }, 1000);
+      }, 3000);
 
     }
   }
