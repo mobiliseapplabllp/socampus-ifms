@@ -40,7 +40,6 @@ export class ListMasterPage implements OnInit {
   ngOnInit(): void {
     this.common.getAppVersionObs().subscribe(data => {
       this.appUpdate = data;
-      console.log(this.appUpdate);
       if (this.platform.is('android')) {
         this.isAndroid = true;
         App.getInfo().then(res => {
@@ -67,7 +66,6 @@ export class ListMasterPage implements OnInit {
 
   ionViewWillEnter() {
     this.subs = this.common.getHomeLoadStatus().subscribe(val => {
-      console.log(val);
       if (val) {
         this.changeEvent();
       }

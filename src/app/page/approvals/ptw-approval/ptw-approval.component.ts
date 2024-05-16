@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { ActivatedRoute } from '@angular/router';
+import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { ApprovalService } from 'src/app/provider/approval/approval.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { environment } from 'src/environments/environment';
-
 @Component({
   selector: 'app-ptw-approval',
   templateUrl: './ptw-approval.component.html',
@@ -12,16 +12,23 @@ import { environment } from 'src/environments/environment';
 export class PtwApprovalComponent  implements OnInit {
   segmentStatus = 'pending'
   loading: any;
+  requestData: any = [];
   pendingList: any = [];
   constructor(
     private httpApproval: ApprovalService,
     private loadingController: LoadingController,
     private common: CommonService,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private activeRoute: ActivatedRoute,
+    private navCtrl: NavController
+
   ) { }
 
   ngOnInit() {
-    this.getPendingPTW();
+    this.activeRoute.queryParams.subscribe((res) => {
+      this.requestData = JSON.parse(res['data']);
+      this.pendingList = this.requestData;
+    });
   }
 
   getPendingPTW() {
@@ -44,7 +51,6 @@ export class PtwApprovalComponent  implements OnInit {
         }
       })
     })
-
   }
 
   openDoc(url: string) {
@@ -73,7 +79,7 @@ export class PtwApprovalComponent  implements OnInit {
     const alert = await this.alertController.create({
       cssClass: 'my-custom-class',
       header: msg + '?',
-      message: 'Are you Sure Want to ' + msg + '?',
+      message: 'Are you sure you want to ' + msg.toLowerCase() + ' this request?',
       mode: 'ios',
       inputs: [{
         name: 'remark',
@@ -105,13 +111,15 @@ export class PtwApprovalComponent  implements OnInit {
   }
 
   actionPtw(obj: any) {
-    console.log(obj);
     this.presentLoading().then(preLoad => {
       this.httpApproval.actionPtw(obj).subscribe({
         next:(data) => {
           if (data.status) {
             this.common.presentToast(data.msg, 'success');
             this.pendingList = this.pendingList.filter((val: any) => val.rel_id !== obj.rel_id);
+            if (this.pendingList.length === 0) {
+              this.navCtrl.pop();
+            }
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

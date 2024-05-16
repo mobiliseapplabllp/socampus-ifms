@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
+import { AlertController, LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { SignatureComponent } from 'src/app/shared/signature/signature.component';
@@ -12,6 +12,7 @@ import { checklist, db } from '../../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
 import * as moment from 'moment';
 import { PhotoViewComponent } from 'src/app/shared/photo-view/photo-view.component';
+import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 @Component({
   selector: 'app-fill-report',
   templateUrl: './fill-report.component.html',
@@ -45,6 +46,8 @@ export class FillReportComponent  implements OnInit {
     private loadingController: LoadingController,
     private modalCtrl: ModalController,
     private platform: Platform,
+    private alertController: AlertController,
+    private httpComplaint: ComplaintService
   ) { }
 
   ngOnInit() {
@@ -58,7 +61,6 @@ export class FillReportComponent  implements OnInit {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
-      console.log(this.userData);
     }
     this.selectedLanguage = 'en';
     this.activeRoute.queryParams.subscribe((res) => {
@@ -579,5 +581,112 @@ export class FillReportComponent  implements OnInit {
         }
       }
     }
+  }
+
+  async presentAlertConfirm() {
+    const alert = await this.alertController.create({
+      cssClass: 'my-custom-class',
+      header: 'Create Ticket',
+      message: 'please Enter Remark',
+      mode: 'ios',
+      inputs: [{
+        name: 'remark',
+        type:'textarea',
+        placeholder: 'Enter Remarks',
+      }],
+      buttons: [{
+        text: 'Cancel',
+          handler: (data) => {
+          }
+        },{
+          text: 'YES',
+          handler: (dat) => {
+            if(dat.remark){
+              const obj = {
+                source: environment.source,
+                remark: dat.remark,
+                schedule_id: this.schedule_id
+
+              }
+              this.actionTicket(obj);
+            } else {
+              this.common.presentToast('Please Enter Remark', 'warning');
+            }
+          }
+        }]
+    });
+    await alert.present();
+  }
+
+  actionTicket(obj: any) {
+    let remark = 'Issue raised against this scheduled ID # '+ this.scheduleArr[0].schedule_unique_id + ' Remark -' + obj.remark;
+    const formData = {
+      remark: remark,
+      barcode:"",
+      category:1,
+      is_barcode:"",
+      issue_id:2,
+      priority:'medium',
+      source: obj.source,
+      subcat1_id: 0,
+      subcat2_id: 0,
+      mobile: this.userData.mobile,
+      email: this.userData.email,
+      pc_id: this.scheduleArr[0].pc_id,
+      req_type_id:4,
+      loc_code: this.scheduleArr[0].loc_id,
+      wo_id: this.scheduleArr[0].schedule_id
+    }
+    this.actionComplaint(formData);
+  }
+
+  actionComplaint(formData: any) {
+    this.presentLoading().then(preLoad => {
+      this.httpComplaint.createTicketAction(formData).subscribe({
+        next:(data) => {
+          if (data.status) {
+            const fData = {
+              wo_id: this.scheduleArr[0].schedule_id,
+              ticketid: data.ticket_id
+            }
+            this.common.presentToast(data.msg, 'success');
+            this.updateTicket(fData);
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+  }
+
+  updateTicket(formData: any) {
+    this.presentLoading().then(preLoad => {
+      this.httpDigital.updateTktToSchedule(formData).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.scheduleArr[0].ticket_id = formData.ticketid;
+            this.actionUpdateChecklist();
+            this.common.presentToast(data.msg, 'success');
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg + ' Err: Ticket Update API', 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+
   }
 }

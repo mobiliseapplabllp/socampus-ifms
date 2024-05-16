@@ -52,6 +52,10 @@ export class DigitalChecklistService {
     return this.http.post(this.baseurl + 'digicheck/offlineapp/saveAllPendingChecklist', formData);
   }
 
+  updateTktToSchedule(formData: any): Observable<any> {
+    return this.http.post(this.baseurl + 'digicheck/update_raised_issued_schudled', formData);
+  }
+
   googleTranslate(data: any, lang: string): Observable<any> {
     return this.http.post('https://translate.googleapis.com/language/translate/v2?key=AIzaSyDJjHphpheVQM7CRYNqHHdJqMqAgt0IY70', {
       "q": data,

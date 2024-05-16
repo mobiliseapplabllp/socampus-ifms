@@ -55,10 +55,6 @@ export class ComplaintService {
     return this.https.get(environment.url + 'complaints/get_assign_ticket_master?' + url);
   }
 
-  // getPendingTicketHomePage(limit: any) {
-  //   return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=' + limit + '&page=1&ticket_type=not_resolved');
-  // }
-
   getSiteDetailUsingBarcode(type: string, enc_key: string): Observable<any> {
     const formData = new FormData();
     formData.append('type',type);

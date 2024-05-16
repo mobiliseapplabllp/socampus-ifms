@@ -14,6 +14,9 @@ export interface checklist {
   sch_endDateTime:  string,
   schedule_date: string,
   schedule_id: number,
+  ticket_id: number,
+  raised_cust: string,
+  pc_id: any,
   schedule_status: string,
   schedule_unique_id: string,
   offline_save: string,
@@ -38,24 +41,6 @@ export interface checklist {
       optn_value: string,
       q_id: number
     }],
-
-    // q_desc?: string,
-    // critical_desc?: string,
-    // q_id: number,
-    // q_max_score?: string,
-    // q_type?: number,
-    // question_type?: string,
-    // remark?: string,
-    // rspns?: number,
-    // rspns_temp: number,
-    // imagename?: Blob,
-    // options: [{
-    //   q_id: number,
-    //   optn_id: number,
-    //   optn_desc: string,
-    //   is_rmrk_mandatory: number,
-    //   is_doc_mandatory: number
-    // }]
   }]
 }
 

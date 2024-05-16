@@ -72,7 +72,6 @@ export class ComplaintCardsComponent  implements OnInit {
     this.presentLoading().then(preLoad => {
       this.httpComplaint.getSpecificTicket(this.data.tkts_id).subscribe({
         next:(data) => {
-          console.log(data);
           if (data.status) {
             if (data.data.complaint_type_cfrm === 0 && data.data.canDoTktConfirmationWork) {
               this.openTicketTypeModal(data);
