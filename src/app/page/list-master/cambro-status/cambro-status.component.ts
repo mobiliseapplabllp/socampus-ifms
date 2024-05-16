@@ -7,14 +7,41 @@ import { ModalController } from '@ionic/angular';
   styleUrls: ['./cambro-status.component.scss'],
 })
 export class CambroStatusComponent  implements OnInit {
+  indexArr = [{
+    label: 'Order Packed',
+    id: 0
+  }, {
+    label: 'Order Dispatched',
+    id: 1
+  }, {
+
+  }, ''];
   data: any;
-  ticketTransaction: any = [{status: 'Packed', time: '12:30', class: 'active'}, {status: 'Dispatched', time: '15:00', class: 'active'}, { status: 'Reach at Site', time: '18:00', class: 'active'}, { status: 'Return Initiated', time: '19:00', class: 'active'}, { status: 'Driver Picked', time: '21:00', class: 'in-active'}, { status: 'Received CPU', time: '23:00', class: 'in-active'}]
+  ticketTransaction: any = [{
+    status: 'Order Packed',
+    time: '12:30',
+    class: 'in-active'
+  }, {
+    status: 'Order Dispatched',
+    time: '15:00',
+    class: 'in-active'
+  }, {
+    status: 'Order Reached at Site',
+    time: '18:00',
+    class: 'in-active'
+  }, {
+    status: 'Order Received',
+    time: '19:00',
+    class: 'in-active'
+  }];
   constructor(
     private modalCtrl: ModalController
   ) { }
 
   ngOnInit() {
     console.log(this.data);
+    let order_status = 'Order Reached at Site';
+
   }
 
   close(data: any, status: any) {
