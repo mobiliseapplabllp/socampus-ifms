@@ -75,10 +75,15 @@ export class ComplaintPage implements OnInit {
   startRecording() {
     // const videoElement = document.querySelector('video');
     const videoElement: HTMLVideoElement = this.videoElement.nativeElement;
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    navigator.mediaDevices.getUserMedia({ video: {width: {ideal: 640}, height: {ideal: 480}, frameRate: {ideal: 15}}, audio: true })
         .then((stream) => {
             videoElement.srcObject = stream;
-            this.mediaRecorder = new MediaRecorder(stream);
+            const options = {
+              mimeType: 'video/webm; codecs=vp8', // Ensure compatibility
+              videoBitsPerSecond: 500000,         // Set video bitrate to 500kbps
+              audioBitsPerSecond: 64000           // Set audio bitrate to 64kbps
+          };
+            this.mediaRecorder = new MediaRecorder(stream, options);
 
             this.mediaRecorder.ondataavailable = (event: any) => {
                 if (event.data.size > 0) {
@@ -88,7 +93,8 @@ export class ComplaintPage implements OnInit {
 
             this.mediaRecorder.onstop = () => {
                 if (this.mediaRecorder.state !== 'recording') {
-                    this.mediaRecorder.start();
+                  // console.log('on stop fun');
+                  //   this.mediaRecorder.start();
 
                 }
             };
@@ -105,7 +111,7 @@ saveBlobAndRestart() {
   let setTimeOut = setTimeout(() => {
     this.mediaRecorder.stop();
     this.startRecording();
-  }, 10 * 1000);
+  }, 60 * 1000);
 }
 
 
@@ -119,7 +125,6 @@ stopAndRestartRecording() {
 saveBlobAsFile(blob: any, fileName: any) {
   console.log(blob);
   console.log(fileName);
-  return;
   const a: any = document.createElement('a');
   document.body.appendChild(a);
   a.style = 'display: none';
