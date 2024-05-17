@@ -14,8 +14,10 @@
 <ion-content>
   <div *ngIf="isWorkingVid">
     <ion-button (click)="startRecording()">Start</ion-button>
-    <ion-button (click)="stopRecording()">Stop</ion-button>
-    <ion-button (click)="downloadVideo()">Download</ion-button>
+    <ion-button (click)="stopAndRestartRecording()">Stop</ion-button>
+    <!-- <ion-button (click)="down(allRecording[0])">Download0</ion-button>
+    <ion-button (click)="down(allRecording[1])">Download1</ion-button>
+    <ion-button (click)="down(allRecording[2])">Download2</ion-button> -->
     <video #videoElement autoplay></video>
     <hr>
     <video width="320" #video height="240" controls>
@@ -23,14 +25,14 @@
     </video>
 
     <section *ngIf="play">
-      <div *ngFor="let dat of allRecording">
-        {{dat}}
-      </div>
-      <div *ngFor="let dat of allRecording" >
+      <video width="320" #video height="240" controls>
+        <source [src]="output1"  autoplay>
+      </video>
+      <!-- <div *ngFor="let dat of allRecording" >
         <video width="320" #video height="240" controls>
-          <source src={{dat}}  autoplay>
+          <source [src]="dat"  autoplay>
         </video>
-      </div>
+      </div> -->
     </section>
 
   </div>
