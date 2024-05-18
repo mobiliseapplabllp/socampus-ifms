@@ -102,6 +102,10 @@ export class OrderPackingDetailComponent  implements OnInit {
     }
   }
 
+  packAction() {
+
+  }
+
 
 
 }

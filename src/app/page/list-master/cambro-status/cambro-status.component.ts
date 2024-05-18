@@ -7,7 +7,7 @@ import { ModalController } from '@ionic/angular';
   styleUrls: ['./cambro-status.component.scss'],
 })
 export class CambroStatusComponent  implements OnInit {
-  indexArr = ['Order Packed', 'Order Dispatched', 'Order Reached at Site', 'Order Received' ];
+  // indexArr = ['Order Packed', 'Order Dispatched', 'Order Reached at Site', 'Order Received' ];
   data: any;
   ticketTransaction: any = [{
     status: 'Order Packed',
@@ -33,23 +33,24 @@ export class CambroStatusComponent  implements OnInit {
   ngOnInit() {
     console.log(this.data);
     let order_status;
-    if (!this.data.order_status) {
-      order_status = 'Order Reached at Site'
-    } else {
-      order_status = this.data.order_status;
-    }
-    let index = this.indexArr.indexOf(order_status);
-    console.log(index);
-    if (index != -1) {
-      for (var i = 0 ; i < this.ticketTransaction.length; i++) {
-        if (i <= index) {
-          this.ticketTransaction[i].class = 'active';
-        } else {
-          this.ticketTransaction[i].class = 'in-active';
-        }
-      }
-      console.log(this.ticketTransaction);
-    }
+    this.ticketTransaction = this.data.statusArr;
+    // if (!this.data.order_status) {
+    //   order_status = 'Order Reached at Site'
+    // } else {
+    //   order_status = this.data.order_status;
+    // }
+    // let index = this.indexArr.indexOf(order_status);
+    // console.log(index);
+    // if (index != -1) {
+    //   for (var i = 0 ; i < this.ticketTransaction.length; i++) {
+    //     if (i <= index) {
+    //       this.ticketTransaction[i].class = 'active';
+    //     } else {
+    //       this.ticketTransaction[i].class = 'in-active';
+    //     }
+    //   }
+    //   console.log(this.ticketTransaction);
+    // }
 
   }
 

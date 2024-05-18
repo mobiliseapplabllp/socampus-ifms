@@ -7,7 +7,45 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <form [formGroup]="forms">
+
+  <ion-slides [options]="slideBanner" style="padding-top:10px">
+    <ion-slide *ngFor="let dat of dateArr" style="padding:0px">
+      <div style="width:40px;height:70px;border-radius: 20px;" [ngClass]="{'black': dat.isSelect, 'medium': !dat.isSelect}" (click)="changeDate(dat)">
+        <section style="width:40px;height:35px;padding:2px !important">
+          <span class="center" style="height:35px;width:100%;border-radius: 20px;font-size:11px;font-weight: 550;" [ngClass]="{'white': dat.isSelect, 'dark': !dat.isSelect}">
+            {{dat.day}}
+          </span>
+        </section>
+        <section style="width:100%;height:35px;font-size:14px;font-weight: 550;" class="center" [ngClass]="{'text-white': dat.isSelect}">
+          {{dat.date}}
+        </section>
+      </div>
+    </ion-slide>
+  </ion-slides>
+
+  <ion-card *ngFor="let dat of packingArr" class="cards">
+    <ion-row>
+      <ion-col size="1" class="ion-text-center">
+        <div style="height:100%;width:5px;border-radius: 5px;background-color: #040E51; margin:auto"></div>
+      </ion-col>
+      <ion-col size="6" style="display: flex;align-items: center;">
+        <div>
+          <p><ion-text class="key">Order ID:</ion-text> <ion-text class="value">{{dat.order_id}}</ion-text> </p>
+          <p><ion-text class="key">Picking Time:</ion-text>   </p>
+          <p><ion-text class="key">PC Id:</ion-text> <ion-text class="value">{{dat.pc_id}}-{{dat.pc_desc}}</ion-text> </p>
+        </div>
+      </ion-col>
+      <ion-col size="5" style="display: flex;align-items: center;">
+        <div>
+          <p><ion-text class="key"> No of Boxes: </ion-text></p>
+          <p><ion-text class="key">Delivery Time: </ion-text></p>
+          <ion-button size="small" class="ion-text-capitalize" color="success" (click)="openPage(dat)">View Items <ion-icon name="arrow-forward-outline" slot="end"></ion-icon> </ion-button>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+
+  <!-- <form [formGroup]="forms">
     <ion-item (click)="openSiteModal()">
       <ion-label color="primary" position="floating">Select Site <ion-text color="danger">*</ion-text></ion-label>
       <ion-input type="text" formControlName="pc_id_desc"  readonly></ion-input>
@@ -72,6 +110,6 @@
     <ion-row>
       <ion-col class="ion-text-right"><ion-button shape="round">Next <ion-icon name="arrow-forward-outline" slot="end"></ion-icon> </ion-button></ion-col>
     </ion-row>
-  </ion-card>
+  </ion-card> -->
 
 </ion-content>

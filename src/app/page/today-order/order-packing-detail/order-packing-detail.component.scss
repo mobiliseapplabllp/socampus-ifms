@@ -1,3 +1,24 @@
 ion-text {
   font-weight: 500;
 }
+
+.details {
+  background-color: rgb(186, 0, 0);
+  font-size:11px;
+}
+
+p {
+  margin:1px 0px;
+  color: #040E51 !important;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 451;
+  line-height: normal;
+}
+
+ion-input {
+  border: 0.5px solid rgba(0, 0, 0,0.46);
+  font-size:12px;
+  font-weight: 451;
+  border-radius: 6px;
+}

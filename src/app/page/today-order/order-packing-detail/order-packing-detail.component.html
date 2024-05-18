@@ -7,34 +7,54 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-card style="background-color: rgb(173, 209, 251); ">
+  <ion-card class="details" >
     <ion-row>
       <ion-col size="6">
-        <ion-text color="primary">Order Id</ion-text><br>
-        <ion-text color="medium">{{basicDetails.order_id}}</ion-text>
+        <ion-text color="light">Order Id</ion-text><br>
+        <ion-text color="light">{{basicDetails.order_id}}</ion-text>
       </ion-col>
       <ion-col size="6">
-        <ion-text color="primary">Total Recipes</ion-text><br>
-        <ion-text color="medium">{{basicDetails.total_items}}</ion-text>
+        <ion-text color="light">Total Recipes</ion-text><br>
+        <ion-text color="light">{{basicDetails.total_items}}</ion-text>
       </ion-col>
       <ion-col size="6">
-        <ion-text color="primary">Pickup Time</ion-text><br>
-        <ion-text color="medium">{{basicDetails.dispatch_time}}</ion-text>
+        <ion-text color="light">Pickup Time</ion-text><br>
+        <ion-text color="light">{{basicDetails.dispatch_time}}</ion-text>
       </ion-col>
       <ion-col size="6">
-        <ion-text color="primary">Packed Recipe</ion-text><br>
-        <ion-text color="medium"></ion-text>
+        <ion-text color="light">Packed Recipe</ion-text><br>
+        <ion-text color="light"></ion-text>
       </ion-col><ion-col size="6">
-        <ion-text color="primary">Dispatch Time Id</ion-text><br>
-        <ion-text color="medium">{{basicDetails.site_dlvry_time}}</ion-text>
+        <ion-text color="light">Dispatch Time Id</ion-text><br>
+        <ion-text color="light">{{basicDetails.site_dlvry_time}}</ion-text>
       </ion-col>
       <ion-col size="6">
-        <ion-text color="primary">No of Cambro Box</ion-text><br>
-        <ion-text color="medium"></ion-text>
+        <ion-text color="light">No of Cambro Box</ion-text><br>
+        <ion-text color="light"></ion-text>
       </ion-col>
     </ion-row>
   </ion-card>
-  <ion-card *ngFor="let dat of orderArr" >
+  <ion-row *ngFor="let dat of orderArr;let i = index">
+    <ion-col size="1" class="center">
+      <div style="padding:3px;height:20px;width:20px;border-radius:50%;background-color:var(--ion-color-primary);color:var(--ion-color-light);font-size:12px;font-weight: 700;" class="center">{{i+1}}</div>
+    </ion-col>
+    <ion-col size="5">
+      <p>Cambro - 4422338</p>
+      <p>{{dat.item_name}}</p>
+      <p>(12kg)</p>
+    </ion-col>
+    <ion-col size="3">
+      <div style="width: 100%;">
+        <div style="font-size:12px;width:100%;text-align: center;margin-bottom:2px">Temperature</div>
+        <ion-input type="number" [ngStyle]="{'background-color': !dat.isReceivedEnable ? 'white': 'rgba(0, 0, 0, 0.20)'}" [disabled]="!dat.isReceivedEnable ? false: true " [(ngModel)]="dat.received_qty" [autofocus]="dat.isAutoFocus ? true:false" > </ion-input>
+      </div>
+    </ion-col>
+    <ion-col size="3">
+      <div style="font-size:12px;width:100%;text-align: center;height:10px"></div>
+      <ion-button size="small" expand="block" color="primary" class="ion-text-capitalize" style="--border-radius: 6px;height:38px" (click)="packAction()">Pack Now</ion-button>
+    </ion-col>
+  </ion-row>
+  <!-- <ion-card *ngFor="let dat of orderArr" >
     <ion-row>
       <ion-col size="12">
         <ion-text color="primary">Menu List</ion-text><br>
@@ -69,6 +89,6 @@
         <ion-button shape="round" fill="outline" >Submit</ion-button>
       </ion-buttons>
     </ion-item>
-  </ion-card>
+  </ion-card> -->
 
 </ion-content>
