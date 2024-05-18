@@ -64,7 +64,7 @@
           <ion-text>{{dat.submitted_date}}</ion-text>
         </ion-col>
         <ion-col size="6" *ngIf="(dat.raised_cust === 'Yes' || dat.ticket_id > 0) && isInternet">
-          <ion-button size="small" shape="round" (click)="presentAlertConfirm()" *ngIf="dat.raised_cust === 'Yes' && dat.ticket_id === 0">Raise a Ticket</ion-button>
+          <ion-button size="small" shape="round" (click)="presentAlertConfirm()" *ngIf="dat.raised_cust === 'Yes' && dat.ticket_id === 0" mode="ios">Raise a Ticket</ion-button>
           <ion-button size="small" shape="round" color="success" *ngIf="dat.ticket_id > 0">Ticket ID: {{dat.ticket_id}}</ion-button>
         </ion-col>
       </ion-row>

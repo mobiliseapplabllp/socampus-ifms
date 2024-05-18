@@ -587,7 +587,6 @@ export class FillReportComponent  implements OnInit {
     const alert = await this.alertController.create({
       cssClass: 'my-custom-class',
       header: 'Create Ticket',
-      message: 'please Enter Remark',
       mode: 'ios',
       inputs: [{
         name: 'remark',
@@ -599,7 +598,7 @@ export class FillReportComponent  implements OnInit {
           handler: (data) => {
           }
         },{
-          text: 'YES',
+          text: 'Submit',
           handler: (dat) => {
             if(dat.remark){
               const obj = {
@@ -610,7 +609,7 @@ export class FillReportComponent  implements OnInit {
               }
               this.actionTicket(obj);
             } else {
-              this.common.presentToast('Please Enter Remark', 'warning');
+              this.common.presentToast('Please Enter Remarks', 'warning');
             }
           }
         }]

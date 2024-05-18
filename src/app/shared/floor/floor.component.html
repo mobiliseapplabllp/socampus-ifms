@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Floor</ion-title>
+    <ion-title>Floor({{myFloorCopy.length}}) </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="closeModal(null, false)">
         <ion-icon slot="icon-only" name="close"></ion-icon>
@@ -11,7 +11,6 @@
     <ion-searchbar (ionChange)="search($event)" debounce="1000" mode="md"></ion-searchbar>
   </ion-toolbar>
 </ion-header>
-
 
 <ion-content>
   <ion-virtual-scroll [items]="myFloor" approxItemHeight="320px">

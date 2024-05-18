@@ -3,7 +3,6 @@ import { LoadingController, ModalController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { environment } from 'src/environments/environment';
-
 @Component({
   selector: 'app-floor',
   templateUrl: './floor.component.html',
@@ -22,8 +21,13 @@ export class FloorComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.bldg_id);
     this.getFloor();
+  }
+
+  ionViewDidLeave() {
+    this.myFloor = [];
+    this.myFloorCopy = [];
+    this.dismissloading();
   }
 
   getFloor() {
@@ -33,8 +37,6 @@ export class FloorComponent  implements OnInit {
           if (data.status) {
             this.myFloor = data.data;
             this.myFloorCopy = data.data;
-            // this.addAsset.get('floor_id')?.setValue('');
-            // this.addAsset.get('loc_id')?.setValue('');
           }
         },
         error:() => {
@@ -77,5 +79,4 @@ export class FloorComponent  implements OnInit {
       });
     }
   }
-
 }

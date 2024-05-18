@@ -11,7 +11,6 @@ export class AssetPlantComponent  implements OnInit {
   plantName: any = [];
   plantNameCopy: any = [];
   loading: any;
-
   timeout = null;
   faciity_type: any;
   constructor(
@@ -29,6 +28,8 @@ export class AssetPlantComponent  implements OnInit {
   }
 
   ionViewDidLeave() {
+    this.plantName = [];
+    this.plantNameCopy = [];
     this.dismissloading();
   }
 
@@ -69,5 +70,4 @@ export class AssetPlantComponent  implements OnInit {
       });
     }
   }
-
 }

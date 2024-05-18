@@ -24,6 +24,8 @@ export class AssetManufacturerComponent  implements OnInit {
   }
 
   ionViewDidLeave() {
+    this.manufacturer = [];
+    this.manufacturerCopy = [];
     this.dismissloading();
   }
 

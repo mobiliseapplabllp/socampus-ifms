@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { LoadingController, ModalController } from '@ionic/angular';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
-
 @Component({
   selector: 'app-asset-department',
   templateUrl: './asset-department.component.html',
@@ -12,13 +11,19 @@ export class AssetDepartmentComponent  implements OnInit {
   myDepartmentCopy: any = [];
   loading: any;
   constructor(
-    public modalCtrl: ModalController,
-    public httpAsset: MyAssetGetService,
-    public loadingController: LoadingController
+    private modalCtrl: ModalController,
+    private httpAsset: MyAssetGetService,
+    private loadingController: LoadingController
   ) { }
 
   ngOnInit() {
     this.getDepartment();
+  }
+
+  ionViewDidLeave() {
+    this.myDepartment = [];
+    this.myDepartmentCopy = [];
+    this.dismissloading();
   }
 
   closeModal(val: any, status: any) {
@@ -34,8 +39,7 @@ export class AssetDepartmentComponent  implements OnInit {
           this.myDepartmentCopy = data.data;
         }
       });
-    })
-
+    });
   }
 
   search(ev: any) {
@@ -53,7 +57,8 @@ export class AssetDepartmentComponent  implements OnInit {
   }
 
   async presentLoading() {
-    this.loading = await this.loadingController.create({      cssClass: 'my-custom-class',
+    this.loading = await this.loadingController.create({
+      cssClass: 'my-custom-class',
       message: 'Please wait...'
     });
     await this.loading.present();
@@ -64,6 +69,4 @@ export class AssetDepartmentComponent  implements OnInit {
       this.loading.dismiss();
     }
   }
-
-
 }

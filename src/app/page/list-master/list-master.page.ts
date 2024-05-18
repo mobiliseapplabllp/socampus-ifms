@@ -46,8 +46,8 @@ export class ListMasterPage implements OnInit {
           const curVersion = res.version.toString();
           this.currentVersion = curVersion.toString();
           if (this.appUpdate.is_view && this.appUpdate.forceupdate && (this.appUpdate.vesrion !== this.currentVersion)) {
-            this.downloadApp(this.appUpdate.url);
-            // this.common.presentToast('Please Update your App', 'warning');
+            // this.downloadApp(this.appUpdate.url);
+            this.common.presentToast('Please Update your App', 'warning');
           }
         });
       }

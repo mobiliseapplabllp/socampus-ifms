@@ -3,7 +3,6 @@ import { LoadingController, ModalController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { environment } from 'src/environments/environment';
-
 @Component({
   selector: 'app-location',
   templateUrl: './location.component.html',
@@ -23,6 +22,12 @@ export class LocationComponent  implements OnInit {
 
   ngOnInit() {
     this.getLocation();
+  }
+
+  ionViewDidLeave() {
+    this.myLocation = [];
+    this.myLocationCopy = [];
+    this.dismissloading();
   }
 
   getLocation() {

@@ -13,13 +13,19 @@ export class AssetDevicenameComponent  implements OnInit {
   loading:any;
   grp_id: any;
   constructor(
-    public modalCtrl: ModalController,
-    public loadingController: LoadingController,
-    public httpAsset: MyAssetGetService,
+    private modalCtrl: ModalController,
+    private loadingController: LoadingController,
+    private httpAsset: MyAssetGetService,
   ) { }
 
   ngOnInit() {
     this.getDeviceName();
+  }
+
+  ionViewDidLeave() {
+    this.myDeviceName = [];
+    this.myDeviceNameCopy = [];
+    this.dismissloading();
   }
 
   getDeviceName() {
@@ -38,8 +44,7 @@ export class AssetDevicenameComponent  implements OnInit {
           this.dismissloading();
         }
       });
-    })
-
+    });
   }
 
   closeModal(val: any, status: any) {
@@ -73,6 +78,4 @@ export class AssetDevicenameComponent  implements OnInit {
       });
     }
   }
-
-
 }

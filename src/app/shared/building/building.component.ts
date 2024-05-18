@@ -3,7 +3,6 @@ import { LoadingController, ModalController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
-
 @Component({
   selector: 'app-building',
   templateUrl: './building.component.html',
@@ -23,6 +22,12 @@ export class BuildingComponent  implements OnInit {
 
   ngOnInit() {
     this.getBuilding(this.id);
+  }
+
+  ionViewDidLeave() {
+    this.buildingArr = [];
+    this.buildingArrCopy = [];
+    this.dismissloading();
   }
 
   getBuilding(id: any) {

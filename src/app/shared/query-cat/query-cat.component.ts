@@ -23,7 +23,6 @@ export class QueryCatComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.data);
     if (this.data.length > 0) {
       this.allQueryCat = this.data;
       this.allQueryCatCopy = this.data;
@@ -34,6 +33,12 @@ export class QueryCatComponent  implements OnInit {
 
   closeModal(data: any, status: any) {
     this.modalCtrl.dismiss(data, status);
+  }
+
+  ionViewDidLeave() {
+    this.allQueryCat = [];
+    this.allQueryCatCopy = [];
+    this.dismissloading();
   }
 
   getQueryCagegory() {
@@ -65,7 +70,9 @@ export class QueryCatComponent  implements OnInit {
   }
 
   async dismissloading() {
-    this.loading.dismiss();
+    if (this.loading) {
+      this.loading.dismiss();
+    }
   }
 
   search(ev: any) {
