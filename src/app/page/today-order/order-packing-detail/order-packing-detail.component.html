@@ -41,54 +41,52 @@
     <ion-col size="5">
       <p>Cambro - 4422338</p>
       <p>{{dat.item_name}}</p>
-      <p>(12kg)</p>
+      <p>({{dat.order_qty}}{{dat.uom}})</p>
+      <p>
+        <span *ngFor="let val of dat.qr_data" (click)="setOpen(val,dat, true)" style="padding:1px 2px;border:1px solid var(--ion-color-light);background-color: #020295;color:var(--ion-color-light)">{{val.dispatch_qty}} {{val.uom}}</span>
+      </p>
     </ion-col>
     <ion-col size="3">
       <div style="width: 100%;">
         <div style="font-size:12px;width:100%;text-align: center;margin-bottom:2px">Temperature</div>
-        <ion-input type="number" [ngStyle]="{'background-color': !dat.isReceivedEnable ? 'white': 'rgba(0, 0, 0, 0.20)'}" [disabled]="!dat.isReceivedEnable ? false: true " [(ngModel)]="dat.received_qty" [autofocus]="dat.isAutoFocus ? true:false" > </ion-input>
+        <ion-input type="number" [(ngModel)]="dat.temperature" [ngStyle]="{'background-color': !dat.is_temperature ? 'white': 'rgba(0, 0, 0, 0.20)'}" [disabled]="!dat.is_temperature ? false: true" (change)="updateTemperature(dat)" > </ion-input>
       </div>
     </ion-col>
     <ion-col size="3">
       <div style="font-size:12px;width:100%;text-align: center;height:10px"></div>
-      <ion-button size="small" expand="block" color="primary" class="ion-text-capitalize" style="--border-radius: 6px;height:38px" (click)="packAction()">Pack Now</ion-button>
+      <ion-button *ngIf="!dat.is_packed" (click)="presentActionSheet(dat)" size="small" expand="block" color="primary" class="ion-text-capitalize" style="--border-radius: 6px;height:38px" >LINK</ion-button>
+      <ion-button *ngIf="dat.is_packed" size="small" expand="block" color="success" class="ion-text-capitalize" style="--border-radius: 6px;height:38px" >Packed</ion-button>
     </ion-col>
   </ion-row>
-  <!-- <ion-card *ngFor="let dat of orderArr" >
-    <ion-row>
-      <ion-col size="12">
-        <ion-text color="primary">Menu List</ion-text><br>
-        <ion-text color="medium">{{dat.item_name}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text color="primary">Total Wastage</ion-text><br>
-        <ion-text color="medium">{{dat.item_name}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text color="primary">No of Packed</ion-text><br>
-        <ion-text color="medium">{{dat.order_qty}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text color="primary">Rate</ion-text><br>
-        <ion-text color="medium">{{dat.total_amt}}</ion-text>
-      </ion-col>
-    </ion-row>
-    <ion-item>
-      <ion-label position="floating">Temperature</ion-label>
-      <ion-input type="text"></ion-input>
-      <ion-buttons slot="end">
-        <ion-button shape="round" fill="outline">Submit</ion-button>
-      </ion-buttons>
-    </ion-item>
-    <ion-item>
-      <ion-label position="floating">Cambro Box</ion-label>
-      <ion-select mode="ios" interface="action-sheet">
-        <ion-select-option *ngFor="let dat of driverArr" [value]="dat.cambro_id">{{dat.subgrp_desc}}</ion-select-option>
-      </ion-select>
-      <ion-buttons slot="end">
-        <ion-button shape="round" fill="outline" >Submit</ion-button>
-      </ion-buttons>
-    </ion-item>
-  </ion-card> -->
-
 </ion-content>
+
+<ion-footer class="ion-padding-start ion-padding-end">
+  <ion-button expand="block" (click)="finalPack()">Pack</ion-button>
+</ion-footer>
+
+<ion-modal [isOpen]="isModalOpen" [initialBreakpoint]="0.25" [breakpoints]="[0, 0.25]" handleBehavior="cycle" (willDismiss)="onWillDismiss()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Details</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="setOpen({}, {},false)">Close</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-row>
+        <ion-col size="4">Order ID</ion-col>
+        <ion-col>{{packCambro.order_id}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="4">Cambro No</ion-col>
+        <ion-col>{{packCambro.ext_asset_id}}({{packCambro.size}}{{packCambro.uom}})</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="4">Recipe</ion-col>
+        <ion-col>{{packCambro.item_name}}</ion-col>
+      </ion-row>
+    </ion-content>
+  </ng-template>
+</ion-modal>

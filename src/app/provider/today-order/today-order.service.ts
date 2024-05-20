@@ -36,7 +36,18 @@ export class TodayOrderService {
       edate: data.edate,
     }
     return this.https.get(environment.url + 'meal/order/history/orderwise?limit=20&page=1&sdate=' + data.sdate + '&edate=' + data.edate + '&tab=pending&main_sec=orderwise')
-    // return this.https.post(environment.url + 'meal/order/history/orderwise', obj);
+  }
+
+  updateTemperature(obj: any): Observable<any> {
+    return this.https.post(environment.url + 'meal/order/updte_order_recipe_temp', obj);
+  }
+
+  updateRecipePacking(obj: any): Observable<any> {
+    return this.https.post(environment.url + 'meal/order/updte_order_recipe_packing_qty', obj);
+  }
+
+  actionOrderPack(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'meal/order/order_packed', formData);
   }
 
   getTodayOrderDetail(ord_id: any): Observable<any> {

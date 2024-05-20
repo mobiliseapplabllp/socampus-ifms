@@ -89,8 +89,11 @@ export class OrderPackingComponent  implements OnInit {
       pc_id: [''],
       type_id: [''],
       ord_status: [''],
-      date: ['2024-05-15'],
+      date: [moment().format('YYYY-MM-DD')],
     });
+  }
+
+  ionViewDidEnter() {
     this.search();
   }
 
@@ -211,12 +214,9 @@ getStatus() {}
         console.log(this.dateArr[i]);
         this.forms.get('date')?.setValue(this.dateArr[i].fulldate);
         this.search();
-        // this.getOrderHistory(this.dateArr[i].fulldate);
       } else {
         this.dateArr[i].isSelect= false
       }
     }
   }
-
-
 }
