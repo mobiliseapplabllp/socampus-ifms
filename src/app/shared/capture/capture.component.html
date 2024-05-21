@@ -1,14 +1,46 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Camera/Video</ion-title>
+    <ion-title>Camera/Video </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="closeCamera()">
+      <ion-button (click)="closeModal(null, false)">
         <ion-icon name="close-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content>
+  <div class="video-container" *ngIf="isCameraOpen">
+    <video #videoElement class="videoElement" autoplay></video>
+  </div>
+  <!-- <div  *ngIf="!isCameraOpen">
+    <video width="320" #video height="240" controls>
+      <source [src]="output" autoplay>
+    </video>
+  </div> -->
+
+  <video width="320" #video height="240" controls>
+    <source [src]="output" autoplay>
+  </video>
+</ion-content>
+<ion-footer>
+  <ion-row>
+    <ion-col size="4" class="center">
+      <ion-button size="small" fill="clear" *ngIf="recordedVideo.length > 0" (click)="playVideo()">Play Video</ion-button>
+    </ion-col>
+    <ion-col size="4" class="ion-text-center">
+      <ion-button shape="round" fill="clear" (click)="startRecording()" *ngIf="!isRecordingStart" color="danger">
+        <ion-icon name="videocam-outline"></ion-icon>
+      </ion-button>
+      <ion-button shape="round" fill="clear" (click)="stopRecording()" *ngIf="isRecordingStart" color="primary">
+        <ion-icon name="videocam-off-outline"></ion-icon>
+      </ion-button>
+    </ion-col>
+    <ion-col size="4" class="center">
+      <ion-text color="danger" *ngIf="isRecordingStart">{{recordingCount}}</ion-text>
+    </ion-col>
+  </ion-row>
+</ion-footer>
+<!-- <ion-content>
   {{currentStatus}}
   <video id="liveVideo" style="height:100%;width:100%" autoplay [hidden]="currentStatus !== 'camera-running'"></video>
   <img id="imagePreview" style="height:100%;width:100%" *ngIf="currentStatus === 'photo-capture'">
@@ -16,7 +48,6 @@
 <ion-footer>
   <ion-row >
     <ion-col size="4" class="ion-text-center">
-      <!-- <img id="imagePreview" style="height:50px;width:50px;border-radius: 50%;"> -->
     </ion-col>
     <ion-col size="4" class="ion-text-center">
       <ion-button (click)="captureImage()">Capture</ion-button>
@@ -25,4 +56,4 @@
       <ion-button>Rec Video</ion-button>
     </ion-col>
   </ion-row>
-</ion-footer>
+</ion-footer> -->

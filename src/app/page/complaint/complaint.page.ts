@@ -75,12 +75,12 @@ export class ComplaintPage implements OnInit {
   startRecording() {
     // const videoElement = document.querySelector('video');
     const videoElement: HTMLVideoElement = this.videoElement.nativeElement;
-    navigator.mediaDevices.getUserMedia({ video: {width: {ideal: 640}, height: {ideal: 480}, frameRate: {ideal: 15}}, audio: true })
+    navigator.mediaDevices.getUserMedia({ video: {width: {ideal: 640}, height: {ideal: 480}, frameRate: {ideal: 15}}, audio: false })
         .then((stream) => {
             videoElement.srcObject = stream;
             const options = {
               mimeType: 'video/webm; codecs=vp8', // Ensure compatibility
-              videoBitsPerSecond: 500000,         // Set video bitrate to 500kbps
+              videoBitsPerSecond: 200000,         // Set video bitrate to 500kbps
               audioBitsPerSecond: 64000           // Set audio bitrate to 64kbps
           };
             this.mediaRecorder = new MediaRecorder(stream, options);
