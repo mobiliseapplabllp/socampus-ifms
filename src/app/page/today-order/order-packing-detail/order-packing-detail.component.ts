@@ -16,11 +16,14 @@ export class OrderPackingDetailComponent  implements OnInit {
   loading: any;
   orderArr: any = [];
   basicDetails: any = {};
+  driverArr: any = [];
+  selectedDriver: any;
   cambroArr: any = [];
   scanValue = 0;
   scanData: any = {};
   isModalOpen = false;
   packCambro: any = {};
+  isDriverModal = false;
   constructor(
     private activeRoute: ActivatedRoute,
     private httpTo: TodayOrderService,
@@ -54,8 +57,7 @@ export class OrderPackingDetailComponent  implements OnInit {
         next:(data) => {
           console.log(data);
           if (data.status) {
-            // let tempQR = data.data.text;
-            let tempQR = '1016000001'
+            let tempQR = data.data.text;
             const obj = this.cambroArr.filter((val: any) => val.ext_asset_id === tempQR);
             if (obj.length > 0) {
               this.openModal(obj[0])
@@ -102,6 +104,10 @@ export class OrderPackingDetailComponent  implements OnInit {
     this.isModalOpen = isOpen;
   }
 
+  setDriveModal(isOpen: boolean, val?: any, data?: any) {
+    this.isDriverModal = isOpen;
+  }
+
   finalPack() {
     this.presentLoading().then(preLoad => {
       const obj = [{order_id: this.requestedData.order_id}];
@@ -130,6 +136,10 @@ export class OrderPackingDetailComponent  implements OnInit {
     this.isModalOpen = false
   }
 
+  onWillDismissDriver() {
+    this.isDriverModal = false
+  }
+
   getDispathOrderDetail(order_id: any) {
     this.presentLoading().then(preLoad => {
       this.httpTo.getDispathOrderDetail(order_id).subscribe({
@@ -155,7 +165,6 @@ export class OrderPackingDetailComponent  implements OnInit {
   }
 
   updateTemperature(dat: any) {
-    console.log(dat);
     const obj = {
       temperature: dat.temperature,
       txn_id: dat.txn_id
@@ -202,7 +211,10 @@ export class OrderPackingDetailComponent  implements OnInit {
   getDriverByPc(pc_id: string) {
     this.httpTo.getDriverByPc(pc_id).subscribe({
       next:(data) => {
-        console.log(data);
+        if (data.status) {
+          this.driverArr = data.data;
+          this.driverArr = this.driverArr.filter((val: any) => val.driver_id !== this.basicDetails.driver_id);
+        }
       },
       error:() => {
 
@@ -264,5 +276,38 @@ export class OrderPackingDetailComponent  implements OnInit {
     this.modal.dismiss(null, 'confirm');
   }
 
+  changeDriver() {
+    if (!this.selectedDriver) {
+      this.common.presentToast('Please Select Driver', 'warning');
+      return;
+    }
+    const driver = this.driverArr.filter((val: any) => val.driver_id === this.selectedDriver)[0];
+    const obj = {
+      order_id: this.basicDetails.order_id,
+      driver_details: driver
+    }
+    this.presentLoading().then(preLoad => {
+      this.httpTo.updateDriver(obj).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.isDriverModal = false;
+            this.selectedDriver = null;
+            this.common.presentToast(data.msg, 'success');
+            this.getDispathOrderDetail(this.requestedData.order_id);
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
 
+
+  }
 }

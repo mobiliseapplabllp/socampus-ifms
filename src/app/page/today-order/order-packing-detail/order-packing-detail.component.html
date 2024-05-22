@@ -33,6 +33,11 @@
         <ion-text color="light"></ion-text>
       </ion-col>
     </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-right">
+        <ion-button size="small" color="light" shape="round" fill="outline" (click)="setDriveModal(true)">Driver Detail <ion-icon name="create-outline" slot="end"></ion-icon></ion-button>
+      </ion-col>
+    </ion-row>
   </ion-card>
   <ion-row *ngFor="let dat of orderArr;let i = index">
     <ion-col size="1" class="center">
@@ -89,4 +94,55 @@
       </ion-row>
     </ion-content>
   </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="isDriverModal" [initialBreakpoint]="0.9" [breakpoints]="[0, 0.25, 0.5, 0.9]" handleBehavior="cycle" (willDismiss)="onWillDismissDriver()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Driver Detail</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="setDriveModal(false)">Close</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="driver_modal">
+      <ion-row class="odd">
+        <ion-col size="6">Name</ion-col>
+        <ion-col size="6">{{basicDetails.driver_name}}</ion-col>
+      </ion-row>
+      <ion-row >
+        <ion-col size="6">Phone No</ion-col>
+        <ion-col size="6">{{basicDetails.driver_mobile}}</ion-col>
+      </ion-row>
+      <ion-row class="odd">
+        <ion-col size="6">Email ID</ion-col>
+        <ion-col size="6">{{basicDetails.driver_email}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="6">Vechile Info</ion-col>
+        <ion-col size="6">{{basicDetails.driver_vehicle_type}}</ion-col>
+      </ion-row>
+      <ion-row class="odd">
+        <ion-col size="6">Vechile No</ion-col>
+        <ion-col size="6">{{basicDetails.driver_vehicle_no}}</ion-col>
+      </ion-row>
+      <fieldset>
+        <legend>Change Driver</legend>
+        <ion-radio-group [(ngModel)]="selectedDriver">
+          <ion-item *ngFor="let dat of driverArr">
+            <ion-radio slot="start" [(ngModel)]="dat.driver_id"></ion-radio>
+            <ion-label class="ion-text-wrap">
+              <h3>{{dat.driver_name}}({{dat.driver_id}})</h3>
+              <p>{{dat.mobile}}</p>
+              <p>{{dat.email}}</p>
+              <p>{{dat.vehicle_type}} {{dat.vehicle_no}}</p>
+            </ion-label>
+          </ion-item>
+        </ion-radio-group>
+        <ion-button expand="block" (click)="changeDriver()">Change Driver</ion-button>
+      </fieldset>
+    </ion-content>
+  </ng-template>
+
 </ion-modal>

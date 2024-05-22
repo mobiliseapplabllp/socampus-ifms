@@ -60,7 +60,13 @@ export class OrderPackingModalComponent  implements OnInit {
         }
       });
     })
+  }
 
+  changeQty() {
+    if (this.qty > this.scanData.ttl_left_portion) {
+      this.common.presentToast(`You can't enter more than (${this.scanData.ttl_left_portion}) remaining Qty`, 'warning');
+      this.qty = ''
+    }
   }
 
   async presentLoading() {

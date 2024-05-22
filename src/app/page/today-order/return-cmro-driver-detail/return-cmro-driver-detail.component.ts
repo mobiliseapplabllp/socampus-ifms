@@ -67,7 +67,7 @@ export class ReturnCmroDriverDetailComponent  implements OnInit {
     console.log(index);
     if (index !== -1) {
       if (this.cambroList[index].isPack) {
-        this.common.presentToast('This Cambro Already Packed', 'warning');
+        this.common.presentToast('This Cambro Already Picked', 'warning');
       } else {
         this.cambroList[index].isPack = true;
         this.repeatLoop();

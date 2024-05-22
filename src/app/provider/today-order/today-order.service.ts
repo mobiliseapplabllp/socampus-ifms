@@ -50,6 +50,11 @@ export class TodayOrderService {
     return this.https.post(environment.url + 'meal/order/order_packed', formData);
   }
 
+  updateDriver(obj: Object): Observable<any> {
+    return this.https.post(environment.url + 'meal/order/update_order_driver', obj);
+  }
+
+
   getTodayOrderDetail(ord_id: any): Observable<any> {
     return this.https.get(environment.url + 'meal/order/get_order_cambro_dtl?order_id='+ ord_id)
   }
