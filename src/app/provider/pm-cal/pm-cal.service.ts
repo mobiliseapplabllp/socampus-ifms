@@ -25,6 +25,10 @@ export class PmCalService {
     return this.https.get(environment.url + 'pmscal/get_work_order?limit=10&page=' + current_page + '&stage_id=' + stage_id + '&shource_from=app');
   }
 
+  getPmCount(): Observable<any>  {
+    return this.https.get(environment.url + 'pmscal/get_work_order_counts');
+  }
+
   searchTicketFromServer(key: any, value: any): Observable<any> {
     let url;
     url = 'limit=40&page=1&' + key + '=' + value + '&shource_from=app';

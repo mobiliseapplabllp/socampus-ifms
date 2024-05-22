@@ -48,6 +48,7 @@ export class PmCalPage implements OnInit {
    searchValue: any;searchValueDesc: any;
    fileName1!: string;
    selectedBarcode: any;
+   countObj: any = {};
   constructor(
     private loadingController: LoadingController,
     private httpPms: PmCalService,
@@ -77,7 +78,26 @@ export class PmCalPage implements OnInit {
       this.verifyBarcode(obj);
       return;
     }
+    this.getPmsCount();
     this.getPm(this.lastSegment);
+  }
+
+  getPmsCount() {
+    this.httpPms.getPmCount().subscribe({
+      next:(data) => {
+        if (data.status) {
+          this.countObj = data.data;
+        } else {
+          this.common.presentToast(data.msg, 'warning');
+        }
+      },
+      error:() => {
+        this.common.presentToast(environment.errMsg, 'danger');
+      },
+      complete:() => {
+
+      }
+    })
   }
 
   verifyBarcode(obj: any){
