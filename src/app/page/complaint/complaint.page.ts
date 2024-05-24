@@ -299,17 +299,17 @@ saveBlobAsFile(blob: any, fileName: any) {
 //   }
 
 
-//   playRecordedVideo() {
-//     if (this.output) {
-//       const url = window.URL.createObjectURL(this.output);
-//       this.video.nativeElement.src = url;
-//       this.video.nativeElement.play();
-//       // Revoke object URL when video playback is done
-//       this.video.nativeElement.onended = () => {
-//         window.URL.revokeObjectURL(url);
-//       };
-//     }
-//   }
+  // playRecordedVideo() {
+  //   if (this.output) {
+  //     const url = window.URL.createObjectURL(this.output);
+  //     this.video.nativeElement.src = url;
+  //     this.video.nativeElement.play();
+  //     // Revoke object URL when video playback is done
+  //     this.video.nativeElement.onended = () => {
+  //       window.URL.revokeObjectURL(url);
+  //     };
+  //   }
+  // }
 
 
   ionViewWillEnter() {

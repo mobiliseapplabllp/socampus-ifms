@@ -1,6 +1,8 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { LoadingController, ModalController } from '@ionic/angular';
-
+import { CommonService } from 'src/app/provider/common/common.service';
+import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
+import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-capture',
   templateUrl: './capture.component.html',
@@ -8,6 +10,8 @@ import { LoadingController, ModalController } from '@ionic/angular';
 })
 export class CaptureComponent  implements OnInit {
   @ViewChild('videoElement') videoElement!: ElementRef;
+  @ViewChild('video') video!: ElementRef;
+  requestedData: any;
   vidRef: any
   mediaRecorder: any;
   isRecordingStart = false;
@@ -15,16 +19,32 @@ export class CaptureComponent  implements OnInit {
   recordingCount = 0;
   splitCount = 0;
   clrInterval: any;
+  clrTimeout: any;
   recordedVideo: any = [];
   isCameraOpen = true;
   output: any;
   loading: any;
+  formData = new FormData();
+  SPLIT_VIDEO_TIME = 180
   constructor(
     private modalCtrl: ModalController,
-    private loadingController: LoadingController) { }
+    private loadingController: LoadingController,
+    private httpComplaint: ComplaintService,
+    private common: CommonService) { }
 
   ngOnInit(): void {
+    console.log(this.requestedData);
     setTimeout(() => {
+      this.formData.append('pc_id', this.requestedData.pc_id);
+      this.formData.append('status', '3');
+      this.formData.append('remark', 'CUSTOM VIDEO UPLOAD');
+      this.formData.append('source', environment.source);
+      this.formData.append('ticketId', this.requestedData.tkts_id);
+      this.formData.append('ptwApproved', this.requestedData.ptwApproved);
+      this.formData.append('ptwPending', this.requestedData.ptwPending);
+      this.formData.append('ptw_mandatory', this.requestedData.ptw_mandatory);
+      this.formData.append('ppekitFilled', this.requestedData.ppekitFilled)
+      this.formData.append('ppekit_mandatory', this.requestedData.ppekit_mandatory)
       this.openCamera();
      }, 1000);
   }
@@ -58,11 +78,11 @@ export class CaptureComponent  implements OnInit {
         this.stream = stream;
         this.mediaRecorder.ondataavailable = (event: any) => {
           if (event.data.size > 0) {
+            console.log(event.data);
+            this.formData.delete('video');
             this.saveBlobAsFile(event.data, `video_chunk_${Date.now()}.webm`);
           }
         };
-        // this.mediaRecorder.start();
-        // this.saveBlobAndRestart();
       }).catch((err) => {
         console.error('Error accessing media devices:', err);
     });
@@ -75,19 +95,41 @@ export class CaptureComponent  implements OnInit {
     this.stopStream();
   }
 
+  playRecordedVideo() {
+    if (this.output) {
+      const url = window.URL.createObjectURL(this.output);
+      this.video.nativeElement.src = url;
+      this.video.nativeElement.play();
+      this.video.nativeElement.onended = () => {
+        window.URL.revokeObjectURL(url);
+      };
+    }
+  }
+
+
   startRecording() {
     this.mediaRecorder.start();
     this.isRecordingStart = true;
-    this.clrInterval = setInterval(() => {
-      this.recordingCount++;
-    }, 1000);
-
+    if (!this.clrInterval) {
+      this.clrInterval = setInterval(() => {
+        this.recordingCount++;
+      }, 1000);
+    }
+    this.clrTimeout = setTimeout(() => {
+      this.stopAndRestart();
+    }, this.SPLIT_VIDEO_TIME * 1000);
   }
 
   stopStream() {
     this.stream.getTracks().forEach((track: any) => track.stop());
     this.vidRef.srcObject = null;
+  }
 
+  stopAndRestart() {
+    this.mediaRecorder.stop();
+    setTimeout(() => {
+      this.startRecording();
+    }, 500);
   }
 
   stopRecording() {
@@ -95,6 +137,8 @@ export class CaptureComponent  implements OnInit {
     this.isRecordingStart = false;
     this.recordingCount = 0;
     clearInterval(this.clrInterval);
+    clearTimeout(this.clrTimeout);
+    this.clrInterval = null;
   }
 
 
@@ -106,30 +150,54 @@ export class CaptureComponent  implements OnInit {
 // }
 
 saveBlobAsFile(blob: any, fileName: any) {
-  // console.log(blob);
-  // console.log(fileName);
-  const tempArr = []
-  tempArr.push(blob);
-  this.output = new Blob(tempArr, { type: 'video/webm' });
-  // console.log(concatenatedBlob);
-  this.recordedVideo.push(this.output);
-  this.presentLoading().then(preLoad => {
-    this.dismissloading();
-  })
+  console.log(blob);
+  // const b = new Blob(blob, { type: 'video/webm' });
+  this.formData.append('video', blob, fileName);
+  this.output = blob;
+
+  this.uploadToServer(this.formData);
+  return;
+  // return;
+  // this.recordedVideo.push(blob);
+  // console.log(this.recordedVideo);
+  // return;
+  // // console.log(blob);
+  // // console.log(fileName);
+  // const tempArr = []
+  // tempArr.push(blob);
+  // this.output = new Blob(tempArr, { type: 'video/webm' });
+  // // console.log(concatenatedBlob);
+  // this.recordedVideo.push(this.output);
+  // this.presentLoading().then(preLoad => {
+  //   this.dismissloading();
+  // })
 
   // console.log(this.recordedVideo);
-  // const a: any = document.createElement('a');
-  // document.body.appendChild(a);
-  // a.style = 'display: none';
-  // const url = window.URL.createObjectURL(blob);
-  // a.href = url;
-  // a.download = fileName;
-  // a.click();
-  // window.URL.revokeObjectURL(url);
+  const a: any = document.createElement('a');
+  document.body.appendChild(a);
+  a.style = 'display: none';
+  const url = window.URL.createObjectURL(blob);
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  window.URL.revokeObjectURL(url);
 }
 
-testVideo(vid: any) {
-  console.log(vid);
+uploadToServer(formData: any) {
+  this.httpComplaint.submitTicketTransaction(formData).subscribe({
+    next:(data) => {
+      if (data.status) {
+        this.splitCount = this.splitCount + 1;
+      } else {
+        this.common.presentToast(data.msg, 'warning');
+      }
+    },
+    error:() => {
+      this.common.presentToast(environment.errMsg, 'danger');
+    },
+    complete:() => {
+    }
+  });
 }
 
 
@@ -141,6 +209,9 @@ testVideo(vid: any) {
   // }
 
   closeModal(data: any, status: any) {
+    if (this.isRecordingStart) {
+      this.stopRecording();
+    }
     this.stopStream();
     this.modalCtrl.dismiss(data, status)
   }

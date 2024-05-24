@@ -12,6 +12,7 @@ import { InstructionModalComponent } from '../instruction-modal/instruction-moda
 import { File } from '@awesome-cordova-plugins/file/ngx';
 import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
 import { Filesystem } from '@capacitor/filesystem';
+import { CaptureComponent } from 'src/app/shared/capture/capture.component';
 
 @Component({
   selector: 'app-ticket-work',
@@ -71,7 +72,8 @@ export class TicketWorkComponent  implements OnInit {
     private loadingController: LoadingController,
     private platform: Platform,
     private mediaCapture: MediaCapture,
-    private file: File
+    private file: File,
+    private modalController: ModalController
   ) { }
 
   ngOnInit() {
@@ -363,7 +365,6 @@ export class TicketWorkComponent  implements OnInit {
             if (this.workSpace.value.status == 4) {
               this.httpCommon.setHomeLoadStatus(true);
             }
-
             this.httpCommon.presentToast(data.msg, 'success');
             this.navCtrl.pop();
           } else {
@@ -571,6 +572,23 @@ export class TicketWorkComponent  implements OnInit {
       }
     });
   }
+
+  async openCapture() {
+    const modal = await this.modalController.create({
+      component: CaptureComponent,
+      componentProps : {
+        requestedData: this.requestedData
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      console.log(disModal);
+      if (disModal.role) {
+
+      }
+    });
+    return await modal.present();
+  }
+
 
   async openSign(data: any) {
     const modal = await this.modalCtrl.create({
