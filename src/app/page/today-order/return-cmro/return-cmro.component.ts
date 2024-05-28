@@ -15,6 +15,7 @@ export class ReturnCmroComponent  implements OnInit {
   site_id!: number;
   loading: any;
   returnCambroArr: any = [];
+  isShowButton!: boolean;
   constructor(
     private modalCtrl: ModalController,
     private httpToday: TodayOrderService,
@@ -67,13 +68,41 @@ export class ReturnCmroComponent  implements OnInit {
     })
   }
 
+  selectAll() {
+    for (var i = 0 ; i < this.returnCambroArr.length; i++) {
+      this.returnCambroArr[i].isSelect = !this.returnCambroArr[i].isSelect;
+    }
+  }
+
+  changeCheckbox() {
+    const arr = this.returnCambroArr.filter((val: any) => val.isSelect);
+    if (arr.length > 0) {
+      this.isShowButton = true;
+    } else {
+      this.isShowButton = false;
+    }
+  }
+
+  returnAll() {
+    const arr = this.returnCambroArr.filter((val: any) => val.isSelect);
+    console.log(arr);
+    this.return(arr);
+  }
+
+  returnAction(dat: any) {
+    var arr = [];
+    arr.push(dat);
+    this.return(arr);
+  }
+
   return(data: any) {
     this.presentLoading().then(preLoad => {
       this.httpToday.returnAction(data).subscribe({
         next:(data: any) => {
           console.log(data);
           if (data.status) {
-            this.returnCambroArr = this.returnCambroArr.filter((val: any) => val.cambro_id !== data.cambro_id);
+            // this.returnCambroArr = this.returnCambroArr.filter((val: any) => val.cambro_id !== data.cambro_id);
+            this.search();
             this.common.presentToast(data.msg, 'success');
           } else {
             this.common.presentToast(data.msg, 'danger');

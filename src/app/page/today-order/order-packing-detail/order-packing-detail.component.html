@@ -46,21 +46,24 @@
     <ion-col size="5">
       <p>Cambro - 4422338</p>
       <p>{{dat.item_name}}</p>
-      <p>({{dat.order_qty}}{{dat.uom}})</p>
+      <p>Pax:{{dat.order_qty}}{{dat.uom}} </p>
+      <p>Portion: {{dat.ttl_portion}}</p>
       <p>
-        <span *ngFor="let val of dat.qr_data" (click)="setOpen(val,dat, true)" style="padding:1px 2px;border:1px solid var(--ion-color-light);background-color: #020295;color:var(--ion-color-light)">{{val.dispatch_qty}} {{val.uom}}</span>
+        <span *ngIf="dat.qr_data.length > 0">Packed Qty: </span> <span *ngFor="let val of dat.qr_data" (click)="setOpen(val,dat, true)" style="padding:1px 2px;border:1px solid var(--ion-color-light);background-color: #020295;color:var(--ion-color-light)">{{val.dispatch_qty}} {{val.uom}}</span>
       </p>
     </ion-col>
-    <ion-col size="3">
+    <ion-col size="3" class="center">
       <div style="width: 100%;">
         <div style="font-size:12px;width:100%;text-align: center;margin-bottom:2px">Temperature</div>
         <ion-input type="number" [(ngModel)]="dat.temperature" [ngStyle]="{'background-color': !dat.is_temperature ? 'white': 'rgba(0, 0, 0, 0.20)'}" [disabled]="!dat.is_temperature ? false: true" (change)="updateTemperature(dat)" > </ion-input>
       </div>
     </ion-col>
-    <ion-col size="3">
-      <div style="font-size:12px;width:100%;text-align: center;height:10px"></div>
-      <ion-button *ngIf="!dat.is_packed" (click)="presentActionSheet(dat)" size="small" expand="block" color="primary" class="ion-text-capitalize" style="--border-radius: 6px;height:38px" >LINK</ion-button>
-      <ion-button *ngIf="dat.is_packed" size="small" expand="block" color="success" class="ion-text-capitalize" style="--border-radius: 6px;height:38px" >Packed</ion-button>
+    <ion-col size="3" class="center">
+      <section style="width:100%">
+        <div style="font-size:12px;width:100%;text-align: center;height:10px"></div>
+        <ion-button *ngIf="!dat.is_packed" (click)="presentActionSheet(dat)" size="small" expand="block" color="primary" class="ion-text-capitalize" style="--border-radius: 6px;height:38px" >LINK</ion-button>
+        <ion-button *ngIf="dat.is_packed" size="small" expand="block" color="success" class="ion-text-capitalize" style="--border-radius: 6px;height:38px" >Packed</ion-button>
+      </section>
     </ion-col>
   </ion-row>
 </ion-content>

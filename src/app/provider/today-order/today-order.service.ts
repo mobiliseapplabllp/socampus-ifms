@@ -104,10 +104,8 @@ export class TodayOrderService {
     return this.https.post(environment.url + 'meal/cambroReturn/cmr-detail-data', formData)
   }
 
-  returnAction(obj: any): Observable<any> {
-    var arr = [];
-    arr.push(obj);
-    return this.https.post(environment.url + 'meal/cambroReturn/return-cambro-init', arr);
+  returnAction(data: any): Observable<any> {
+    return this.https.post(environment.url + 'meal/cambroReturn/return-cambro-init', data);
   }
 
   viewPdf(obj: object): Observable<any> {

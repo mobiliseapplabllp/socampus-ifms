@@ -24,6 +24,9 @@ export class OrderPackingModalComponent  implements OnInit {
   ngOnInit() {
     console.log(this.scanData);
     console.log(this.cambroData);
+    if (this.scanData.ttl_left_portion <= this.cambroData.size) {
+      this.qty = this.scanData.ttl_left_portion;
+    }
   }
 
   closeModal(data: any, status: any) {
@@ -33,6 +36,7 @@ export class OrderPackingModalComponent  implements OnInit {
   submit() {
     if (!this.qty) {
       this.common.presentToast('Please Enter Packing Qty', 'warning');
+      return;
     }
     const obj = {
       camro_box_id: this.cambroData.cambro_id,

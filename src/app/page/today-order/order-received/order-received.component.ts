@@ -40,13 +40,12 @@ export class OrderReceivedComponent  implements OnInit {
   ionViewDidEnter() {
     let bar = this.common.getBarcode();
     if (bar) {
-      // this.getDecBarcode(bar);
-      // return;
       if (this.platform.is('capacitor')) {
         this.getDecBarcode(bar)
       } else {
         this.order_details[this.index].isReceivedEnable = true;
         this.order_details[this.index].showErr = false;
+        this.order_details[this.index].received_qty = this.order_details[this.index].dispatch_qty;
         setTimeout(() => {
           this.order_details[this.index].isAutoFocus = true;
         }, 100);
@@ -189,7 +188,7 @@ export class OrderReceivedComponent  implements OnInit {
     let result = 0;
     console.log(this.order_details);
     for (var i = 0; i < this.order_details.length;i++) {
-      if (!this.order_details[i].received_qty) {
+      if (!this.order_details[i].received_qty && this.order_details[i].received_qty !== 0) {
         result = result + 1;
         this.order_details[i].showErr = true
       } else {
