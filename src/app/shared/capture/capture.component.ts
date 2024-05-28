@@ -25,7 +25,9 @@ export class CaptureComponent  implements OnInit {
   output: any;
   loading: any;
   formData = new FormData();
-  SPLIT_VIDEO_TIME = 180
+  SPLIT_VIDEO_TIME = 180;
+  VIDEO_BYTE = 2;
+  isProcessing = false;
   constructor(
     private modalCtrl: ModalController,
     private loadingController: LoadingController,
@@ -37,7 +39,7 @@ export class CaptureComponent  implements OnInit {
     setTimeout(() => {
       this.formData.append('pc_id', this.requestedData.pc_id);
       this.formData.append('status', '3');
-      this.formData.append('remark', 'CUSTOM VIDEO UPLOAD');
+      this.formData.append('remark', this.requestedData.remark);
       this.formData.append('source', environment.source);
       this.formData.append('ticketId', this.requestedData.tkts_id);
       this.formData.append('ptwApproved', this.requestedData.ptwApproved);
@@ -71,7 +73,7 @@ export class CaptureComponent  implements OnInit {
       this.vidRef.srcObject = stream;
       const options = {
         mimeType: 'video/webm; codecs=vp8', // Ensure compatibility
-        videoBitsPerSecond: 200000,         // Set video bitrate to 500kbps
+        videoBitsPerSecond: 500000,         // Set video bitrate to 500kbps
         audioBitsPerSecond: 64000           // Set audio bitrate to 64kbps
       };
       this.mediaRecorder = new MediaRecorder(stream, options);
@@ -139,74 +141,52 @@ export class CaptureComponent  implements OnInit {
     clearInterval(this.clrInterval);
     clearTimeout(this.clrTimeout);
     this.clrInterval = null;
+    this.presentLoading().then(preLoad => {
+      this.dismissloading();
+    })
   }
 
+  saveBlobAsFile(blob: any, fileName: any) {
+    console.log(blob);
+    this.formData.append('video', blob, fileName);
+    // this.output = blob;
+    this.uploadToServer(this.formData);
+    return;
+    const a: any = document.createElement('a');
+    document.body.appendChild(a);
+    a.style = 'display: none';
+    const url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
 
-// saveBlobAndRestart() {
-//   let setTimeOut = setTimeout(() => {
-//     this.mediaRecorder.stop();
-//     this.startRecording();
-//   }, 30 * 1000);
-// }
-
-saveBlobAsFile(blob: any, fileName: any) {
-  console.log(blob);
-  // const b = new Blob(blob, { type: 'video/webm' });
-  this.formData.append('video', blob, fileName);
-  this.output = blob;
-
-  this.uploadToServer(this.formData);
-  return;
-  // return;
-  // this.recordedVideo.push(blob);
-  // console.log(this.recordedVideo);
-  // return;
-  // // console.log(blob);
-  // // console.log(fileName);
-  // const tempArr = []
-  // tempArr.push(blob);
-  // this.output = new Blob(tempArr, { type: 'video/webm' });
-  // // console.log(concatenatedBlob);
-  // this.recordedVideo.push(this.output);
-  // this.presentLoading().then(preLoad => {
-  //   this.dismissloading();
-  // })
-
-  // console.log(this.recordedVideo);
-  const a: any = document.createElement('a');
-  document.body.appendChild(a);
-  a.style = 'display: none';
-  const url = window.URL.createObjectURL(blob);
-  a.href = url;
-  a.download = fileName;
-  a.click();
-  window.URL.revokeObjectURL(url);
-}
-
-uploadToServer(formData: any) {
-  this.httpComplaint.submitTicketTransaction(formData).subscribe({
-    next:(data) => {
-      if (data.status) {
-        this.splitCount = this.splitCount + 1;
-      } else {
-        this.common.presentToast(data.msg, 'warning');
+  uploadToServer(formData: any) {
+    this.isProcessing = true;
+    this.httpComplaint.submitTicketTransaction(formData).subscribe({
+      next:(data) => {
+        if (data.status) {
+          this.splitCount = this.splitCount + 1;
+          if (!this.isRecordingStart) {
+            this.common.presentToast('Video Uploaded to Server Successfully', 'warning');
+            this.closeModal([], true);
+          }
+        } else {
+          this.common.presentToast(data.msg, 'warning');
+        }
+      },
+      error:() => {
+        this.isProcessing = false;
+        console.log(this.isProcessing);
+        this.common.presentToast(environment.errMsg, 'danger');
+      },
+      complete:() => {
+        this.isProcessing = false;
+        console.log(this.isProcessing);
       }
-    },
-    error:() => {
-      this.common.presentToast(environment.errMsg, 'danger');
-    },
-    complete:() => {
-    }
-  });
-}
-
-
-  // ngOnInit() {
-  //   this.liveVideo = document.getElementById('liveVideo');
-  //   setTimeout(() => {
-  //     this.openCamera();
-  //   }, 1000);
-  // }
+    });
+  }
 
   closeModal(data: any, status: any) {
     if (this.isRecordingStart) {

@@ -108,7 +108,7 @@
         <ion-col class="ion-text-center">
           <ion-button style="width:80%;font-size:xx-small;" color="medium" (click)="history()">History </ion-button>
         </ion-col>
-        <ion-col *ngIf="(data.canWork || data.canDoTktConfirmationWork) && !(data.stage_id === 4 || data.stage_id === 6)">
+        <ion-col class="ion-text-center" *ngIf="(data.canWork || data.canDoTktConfirmationWork) && !(data.stage_id === 4 || data.stage_id === 6)">
           <ion-button style="width:80%;font-size:xx-small;" color="warning" (click)="work_now()">Work Now</ion-button>
         </ion-col>
         <!-- <ion-col class="ion-text-center" *ngIf="data.canWork" >

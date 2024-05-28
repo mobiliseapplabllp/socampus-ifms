@@ -574,6 +574,12 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   async openCapture() {
+    if (!this.workSpace.value.remark) {
+      this.httpCommon.presentToast('Please Enter Remark', 'warning');
+      return;
+    }
+    this.requestedData.remark = this.workSpace.value.remark
+    console.log(this.requestedData);
     const modal = await this.modalController.create({
       component: CaptureComponent,
       componentProps : {
