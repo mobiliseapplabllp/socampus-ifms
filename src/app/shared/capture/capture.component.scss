@@ -4,10 +4,12 @@
   width: 100%;
   height: 100%;
   position: relative;
+  z-index: 99;
 }
 
 .videoElement {
   width: 100%;
   height: 100%;
   object-fit: cover; /* Ensures the video maintains aspect ratio and covers the element */
+  z-index: 99;
 }

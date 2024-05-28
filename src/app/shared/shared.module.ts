@@ -18,6 +18,7 @@ import { BuildingComponent } from './building/building.component';
 import { PhotoViewComponent } from './photo-view/photo-view.component';
 import { VideoComponent } from './video/video.component';
 import { CaptureComponent } from './capture/capture.component';
+import { TimesPipe } from '../pipes/times.pipe';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -34,14 +35,16 @@ import { CaptureComponent } from './capture/capture.component';
     BuildingComponent,
     PhotoViewComponent,
     VideoComponent,
-    CaptureComponent
+    CaptureComponent,
+
   ],
   imports: [
     CommonModule,
     SignaturePadModule,
     IonicModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TimesPipe
   ],
   entryComponents: [
     SignatureComponent,

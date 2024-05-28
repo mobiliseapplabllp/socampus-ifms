@@ -1,4 +1,4 @@
-<ion-header class="ion-no-border">
+<!-- <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start" *ngIf="isProcessing">
       <ion-button color="danger">Uploading <ion-spinner slot="end" name="lines-sharp"></ion-spinner> </ion-button>
@@ -9,8 +9,28 @@
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
-</ion-header>
+</ion-header> -->
 <ion-content>
+  <ion-row style="position:absolute;top:0px;background: transparent !important;z-index:100;width: 100%;">
+    <ion-col size="4">
+      <ion-button fill="clear" (click)="closeModal(null, false)" color="danger">X</ion-button>
+    </ion-col>
+    <ion-col size="4" class="center">
+      <img src="assets/img/rec.gif" style="height:30px;width:30px;border-radius: 50%;" *ngIf="isRecordingStart">
+    </ion-col>
+    <ion-col size="4" class="ion-text-right">
+      <ion-button fill="clear">{{recordingCount | times}}</ion-button>
+    </ion-col>
+  </ion-row>
+  <!-- <ion-toolbar style="position:absolute;top:0px;background: transparent !important">
+    <ion-buttons slot="start">
+      <ion-button>X</ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">REC</ion-title>
+    <ion-buttons slot="end">
+      <ion-button>Time</ion-button>
+    </ion-buttons>
+  </ion-toolbar> -->
   <div class="video-container" *ngIf="isCameraOpen">
     <video #videoElement class="videoElement" autoplay></video>
   </div>
@@ -22,16 +42,17 @@
         Uploaded({{splitCount}})
       </ion-button>
     </ion-col>
-    <ion-col size="4" class="ion-text-center" >
-      <ion-button shape="round" fill="clear" (click)="startRecording()" *ngIf="!isRecordingStart" color="danger">
-        <ion-icon name="videocam-outline"></ion-icon>
+    <ion-col size="4" class="center" >
+      <ion-button shape="round" class="ion-text-capitalize" (click)="startRecording()" *ngIf="!isRecordingStart" color="primary">
+        Start Recording <ion-icon name="videocam-outline" slot="end"></ion-icon>
       </ion-button>
-      <ion-button shape="round" fill="clear" (click)="stopRecording()" *ngIf="isRecordingStart" color="primary">
-        <ion-icon name="videocam-off-outline"></ion-icon>
+      <ion-button shape="round" class="ion-text-capitalize" (click)="stopRecording()" *ngIf="isRecordingStart" color="danger">
+        Finish <ion-icon name="videocam-off-outline" slot="end"></ion-icon>
       </ion-button>
     </ion-col>
-    <ion-col size="4" class="center">
-      <ion-text color="danger" *ngIf="isRecordingStart">{{recordingCount}}</ion-text>
+    <ion-col size="4" class="ion-text-right">
+      <ion-spinner name="lines-sharp" color="danger" *ngIf="isProcessing"></ion-spinner>
+      <!-- <ion-text color="danger" *ngIf="isRecordingStart">{{recordingCount}}</ion-text> -->
     </ion-col>
   </ion-row>
 </ion-footer>

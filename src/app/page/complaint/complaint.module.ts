@@ -21,6 +21,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
 import { InstructionModalComponent } from './instruction-modal/instruction-modal.component';
 import { TravelDetailComponent } from './travel-detail/travel-detail.component';
 import { HseAssignComponent } from './hse-assign/hse-assign.component';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -29,7 +30,7 @@ import { HseAssignComponent } from './hse-assign/hse-assign.component';
     ReactiveFormsModule,
     ComplaintPageRoutingModule,
     NgOtpInputModule,
-    SharedModule,
+    SharedModule
   ],
   declarations: [
     ComplaintPage,

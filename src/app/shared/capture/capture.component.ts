@@ -25,7 +25,7 @@ export class CaptureComponent  implements OnInit {
   output: any;
   loading: any;
   formData = new FormData();
-  SPLIT_VIDEO_TIME = 180;
+  SPLIT_VIDEO_TIME = 120;
   VIDEO_BYTE = 2;
   isProcessing = false;
   constructor(
