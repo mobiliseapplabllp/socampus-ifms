@@ -27,11 +27,12 @@ export class CaptureComponent  implements OnInit {
   output: any;
   loading: any;
   formData = new FormData();
-  SPLIT_VIDEO_TIME = 30;
+  SPLIT_VIDEO_TIME = 15;
   VIDEO_BYTE = 2;
   isProcessing = false;
   dateTime!: string;
   COUNTDOWNTIME = 3;
+  PENDING_VIDEO: any = {};
   constructor(
     private modalCtrl: ModalController,
     private loadingController: LoadingController,
@@ -57,6 +58,7 @@ export class CaptureComponent  implements OnInit {
       this.COUNTDOWNTIME = this.COUNTDOWNTIME - 1;
       if (this.COUNTDOWNTIME < 1) {
         clearInterval(this.clrInterval);
+        this.clrInterval = null;
       }
      }, 1000);
   }
@@ -90,7 +92,7 @@ export class CaptureComponent  implements OnInit {
         this.stream = stream;
         this.mediaRecorder.ondataavailable = (event: any) => {
           if (event.data.size > 0) {
-            let fullDateTime = this.dateTime + moment().format('h:mm:ss)');
+            let fullDateTime = this.dateTime + moment().format('H:mm:ss)');
             fullDateTime = fullDateTime.replace(/([A-Z][a-z]{2})/, (match) => match.toUpperCase());
             this.formData.delete('video');
             this.saveBlobAsFile(event.data, `${fullDateTime}.webm`);
@@ -122,7 +124,7 @@ export class CaptureComponent  implements OnInit {
   startRecording() {
     this.mediaRecorder.start();
     this.isRecordingStart = true;
-    this.dateTime = moment().format('DMMMY(h:mm:ss-');
+    this.dateTime = moment().format('DMMMY(H:mm:ss-');
     if (!this.clrInterval) {
       this.clrInterval = setInterval(() => {
         this.recordingCount++;
@@ -179,8 +181,6 @@ export class CaptureComponent  implements OnInit {
           this.splitCount = this.splitCount + 1;
           if (!this.isRecordingStart) {
             this.isShowFinal = true;
-            // this.common.presentToast('Video Uploaded to Server Successfully', 'warning');
-            // this.closeModal([], true);
           }
         } else {
           this.common.presentToast(data.msg, 'warning');
@@ -203,7 +203,8 @@ export class CaptureComponent  implements OnInit {
   }
 
   finalUpload() {
-
+    this.common.presentToast('Video Uploaded to Server Successfully', 'warning');
+    this.closeModal([], true);
   }
 
   closeModal(data: any, status: any) {
