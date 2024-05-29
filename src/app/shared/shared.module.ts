@@ -36,6 +36,7 @@ import { TimesPipe } from '../pipes/times.pipe';
     PhotoViewComponent,
     VideoComponent,
     CaptureComponent,
+    TimesPipe
 
   ],
   imports: [
@@ -44,7 +45,6 @@ import { TimesPipe } from '../pipes/times.pipe';
     IonicModule,
     FormsModule,
     ReactiveFormsModule,
-    TimesPipe
   ],
   entryComponents: [
     SignatureComponent,
@@ -64,7 +64,8 @@ import { TimesPipe } from '../pipes/times.pipe';
     CaptureComponent
   ],
   exports: [
-    VideoComponent
+    VideoComponent,
+    TimesPipe
   ]
 })
 export class SharedModule { }

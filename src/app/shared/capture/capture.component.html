@@ -1,41 +1,47 @@
-<!-- <ion-header class="ion-no-border">
-  <ion-toolbar>
-    <ion-buttons slot="start" *ngIf="isProcessing">
-      <ion-button color="danger">Uploading <ion-spinner slot="end" name="lines-sharp"></ion-spinner> </ion-button>
-    </ion-buttons>
-    <ion-buttons slot="end">
-      <ion-button (click)="closeModal(null, false)">
-        <ion-icon name="close-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header> -->
 <ion-content>
   <ion-row style="position:absolute;top:0px;background: transparent !important;z-index:100;width: 100%;">
     <ion-col size="4">
-      <ion-button fill="clear" (click)="closeModal(null, false)" color="danger">X</ion-button>
+      <ion-button fill="clear" (click)="closeModal(null, false)" color="danger" *ngIf="!isRecordingStart"> X</ion-button>
     </ion-col>
     <ion-col size="4" class="center">
       <img src="assets/img/rec.gif" style="height:30px;width:30px;border-radius: 50%;" *ngIf="isRecordingStart">
     </ion-col>
     <ion-col size="4" class="ion-text-right">
-      <ion-button fill="clear">{{recordingCount | times}}</ion-button>
+      <ion-button fill="clear" color="danger">{{recordingCount | times}}</ion-button>
     </ion-col>
   </ion-row>
-  <!-- <ion-toolbar style="position:absolute;top:0px;background: transparent !important">
-    <ion-buttons slot="start">
-      <ion-button>X</ion-button>
-    </ion-buttons>
-    <ion-title class="ion-text-center">REC</ion-title>
-    <ion-buttons slot="end">
-      <ion-button>Time</ion-button>
-    </ion-buttons>
-  </ion-toolbar> -->
+
+  <div class="midCenter" *ngIf="COUNTDOWNTIME > 0">{{COUNTDOWNTIME}}</div>
+
   <div class="video-container" *ngIf="isCameraOpen">
     <video #videoElement class="videoElement" autoplay></video>
   </div>
+
+  <ion-row style="position:absolute;bottom:0px;background: transparent !important;z-index:100;width: 100%;">
+    <ion-col size="4" class="center">
+      <ion-button size="small" fill="clear" color="danger" *ngIf="splitCount > 0">
+        Uploaded({{splitCount}})
+      </ion-button>
+    </ion-col>
+    <ion-col size="4" class="center" >
+      <ion-button shape="round" class="ion-text-capitalize" (click)="startRecording()" *ngIf="!isRecordingStart && !isShowFinal" color="primary">
+        Start Recording <ion-icon name="videocam-outline" slot="end"></ion-icon>
+      </ion-button>
+      <ion-button shape="round" class="ion-text-capitalize" (click)="stopRecording()" *ngIf="isRecordingStart && !isShowFinal" color="danger">
+        Finish <ion-icon name="videocam-off-outline" slot="end"></ion-icon>
+      </ion-button>
+      <ion-button shape="round" class="ion-text-capitalize" (click)="finalUpload()" *ngIf="isShowFinal" color="tertiary">
+        Upload <ion-icon name="cloud-upload-outline" slot="end"></ion-icon>
+      </ion-button>
+    </ion-col>
+    <ion-col size="4" class="center">
+      <ion-spinner name="lines-sharp" color="danger" *ngIf="isProcessing"></ion-spinner>
+    </ion-col>
+  </ion-row>
+
+
 </ion-content>
-<ion-footer>
+<!-- <ion-footer>
   <ion-row>
     <ion-col size="4" class="center">
       <ion-button size="small" fill="clear" color="danger" *ngIf="splitCount > 0">
@@ -43,16 +49,18 @@
       </ion-button>
     </ion-col>
     <ion-col size="4" class="center" >
-      <ion-button shape="round" class="ion-text-capitalize" (click)="startRecording()" *ngIf="!isRecordingStart" color="primary">
+      <ion-button shape="round" class="ion-text-capitalize" (click)="startRecording()" *ngIf="!isRecordingStart && !isShowFinal" color="primary">
         Start Recording <ion-icon name="videocam-outline" slot="end"></ion-icon>
       </ion-button>
-      <ion-button shape="round" class="ion-text-capitalize" (click)="stopRecording()" *ngIf="isRecordingStart" color="danger">
+      <ion-button shape="round" class="ion-text-capitalize" (click)="stopRecording()" *ngIf="isRecordingStart && !isShowFinal" color="danger">
         Finish <ion-icon name="videocam-off-outline" slot="end"></ion-icon>
       </ion-button>
+      <ion-button shape="round" class="ion-text-capitalize" (click)="finalUpload()" *ngIf="isShowFinal" color="tertiary">
+        Upload <ion-icon name="cloud-upload-outline" slot="end"></ion-icon>
+      </ion-button>
     </ion-col>
-    <ion-col size="4" class="ion-text-right">
+    <ion-col size="4" class="center">
       <ion-spinner name="lines-sharp" color="danger" *ngIf="isProcessing"></ion-spinner>
-      <!-- <ion-text color="danger" *ngIf="isRecordingStart">{{recordingCount}}</ion-text> -->
     </ion-col>
   </ion-row>
-</ion-footer>
+</ion-footer> -->

@@ -1,5 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { LoadingController, ModalController } from '@ionic/angular';
+import * as moment from 'moment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
@@ -15,6 +16,7 @@ export class CaptureComponent  implements OnInit {
   vidRef: any
   mediaRecorder: any;
   isRecordingStart = false;
+  isShowFinal = false;
   stream: any;
   recordingCount = 0;
   splitCount = 0;
@@ -25,9 +27,11 @@ export class CaptureComponent  implements OnInit {
   output: any;
   loading: any;
   formData = new FormData();
-  SPLIT_VIDEO_TIME = 120;
+  SPLIT_VIDEO_TIME = 30;
   VIDEO_BYTE = 2;
   isProcessing = false;
+  dateTime!: string;
+  COUNTDOWNTIME = 3;
   constructor(
     private modalCtrl: ModalController,
     private loadingController: LoadingController,
@@ -48,6 +52,12 @@ export class CaptureComponent  implements OnInit {
       this.formData.append('ppekitFilled', this.requestedData.ppekitFilled)
       this.formData.append('ppekit_mandatory', this.requestedData.ppekit_mandatory)
       this.openCamera();
+     }, 1000);
+     this.clrInterval = setInterval(() => {
+      this.COUNTDOWNTIME = this.COUNTDOWNTIME - 1;
+      if (this.COUNTDOWNTIME < 1) {
+        clearInterval(this.clrInterval);
+      }
      }, 1000);
   }
 
@@ -80,9 +90,10 @@ export class CaptureComponent  implements OnInit {
         this.stream = stream;
         this.mediaRecorder.ondataavailable = (event: any) => {
           if (event.data.size > 0) {
-            console.log(event.data);
+            let fullDateTime = this.dateTime + moment().format('h:mm:ss)');
+            fullDateTime = fullDateTime.replace(/([A-Z][a-z]{2})/, (match) => match.toUpperCase());
             this.formData.delete('video');
-            this.saveBlobAsFile(event.data, `video_chunk_${Date.now()}.webm`);
+            this.saveBlobAsFile(event.data, `${fullDateTime}.webm`);
           }
         };
       }).catch((err) => {
@@ -108,10 +119,10 @@ export class CaptureComponent  implements OnInit {
     }
   }
 
-
   startRecording() {
     this.mediaRecorder.start();
     this.isRecordingStart = true;
+    this.dateTime = moment().format('DMMMY(h:mm:ss-');
     if (!this.clrInterval) {
       this.clrInterval = setInterval(() => {
         this.recordingCount++;
@@ -147,9 +158,7 @@ export class CaptureComponent  implements OnInit {
   }
 
   saveBlobAsFile(blob: any, fileName: any) {
-    console.log(blob);
     this.formData.append('video', blob, fileName);
-    // this.output = blob;
     this.uploadToServer(this.formData);
     return;
     const a: any = document.createElement('a');
@@ -169,8 +178,9 @@ export class CaptureComponent  implements OnInit {
         if (data.status) {
           this.splitCount = this.splitCount + 1;
           if (!this.isRecordingStart) {
-            this.common.presentToast('Video Uploaded to Server Successfully', 'warning');
-            this.closeModal([], true);
+            this.isShowFinal = true;
+            // this.common.presentToast('Video Uploaded to Server Successfully', 'warning');
+            // this.closeModal([], true);
           }
         } else {
           this.common.presentToast(data.msg, 'warning');
@@ -178,14 +188,22 @@ export class CaptureComponent  implements OnInit {
       },
       error:() => {
         this.isProcessing = false;
-        console.log(this.isProcessing);
         this.common.presentToast(environment.errMsg, 'danger');
+        this.presentLoading().then(preLoad => {
+          this.dismissloading();
+        })
       },
       complete:() => {
         this.isProcessing = false;
-        console.log(this.isProcessing);
+        this.presentLoading().then(preLoad => {
+          this.dismissloading();
+        })
       }
     });
+  }
+
+  finalUpload() {
+
   }
 
   closeModal(data: any, status: any) {
