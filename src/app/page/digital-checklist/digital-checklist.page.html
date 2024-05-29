@@ -18,7 +18,7 @@
 
     <ion-popover trigger="chklist-date" mode="md">
       <ng-template>
-        <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" (ionChange)="changeDateComponent($event)"></ion-datetime>
+        <ion-datetime #popoverDatetime [max]="today" presentation="date" size="cover" (ionChange)="changeDateComponent($event)"></ion-datetime>
       </ng-template>
     </ion-popover>
   </ion-toolbar>

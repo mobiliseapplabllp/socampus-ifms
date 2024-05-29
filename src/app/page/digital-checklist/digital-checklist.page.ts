@@ -21,6 +21,7 @@ export class DigitalChecklistPage implements OnInit {
   allChecklist: any = [];
   loading: any;
   selectedDate = moment().format('YYYY-MM-DD');
+  today = moment().format('YYYY-MM-DD')
   scanBarcodeDetail: any = {
     isScanBarcode: false,
     QRType: '',

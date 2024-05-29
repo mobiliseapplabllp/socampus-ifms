@@ -40,7 +40,7 @@
     </div>
   </form>
 
-  <ion-row>
+  <ion-row *ngIf="!isAndroid">
     <ion-col class="ion-text-center">
       <ion-text style="color:rgba(146, 149, 152, 1)">Don't have account? <b><ion-text color="primary" (click)="openPage('/register')">Register Now</ion-text></b></ion-text>
     </ion-col>
