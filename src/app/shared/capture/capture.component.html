@@ -24,10 +24,10 @@
       </ion-button>
     </ion-col>
     <ion-col size="4" class="center" >
-      <ion-button shape="round" class="ion-text-capitalize" (click)="startRecording()" *ngIf="!isRecordingStart && !isShowFinal && !isProcessing" color="primary">
+      <ion-button shape="round" class="ion-text-capitalize" (click)="startRecording()" *ngIf="!isRecordingStart && !isShowFinal && !isProcessing && PENDING_VIDEO.length === 0" color="primary">
         Start Recording <ion-icon name="videocam-outline" slot="end"></ion-icon>
       </ion-button>
-      <ion-button shape="round" class="ion-text-capitalize" (click)="stopRecording()" *ngIf="isRecordingStart && !isShowFinal && !isProcessing" color="danger">
+      <ion-button shape="round" class="ion-text-capitalize" (click)="stopRecording()" *ngIf="isRecordingStart && !isShowFinal" color="danger">
         Finish <ion-icon name="videocam-off-outline" slot="end"></ion-icon>
       </ion-button>
       <ion-button shape="round" class="ion-text-capitalize" (click)="finalUpload()" *ngIf="isShowFinal" color="tertiary">

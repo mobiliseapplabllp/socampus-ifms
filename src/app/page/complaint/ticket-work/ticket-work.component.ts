@@ -187,6 +187,10 @@ export class TicketWorkComponent  implements OnInit {
     await confirm.present();
   }
 
+  changeFile(ev: any) {
+    console.log(ev.target.files[0]);
+  }
+
   changePriority(ev: any) {
     const obj = {
       id: ev.target.value,

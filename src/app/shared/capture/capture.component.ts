@@ -32,7 +32,8 @@ export class CaptureComponent  implements OnInit {
   isProcessing = false;
   dateTime!: string;
   COUNTDOWNTIME = 3;
-  PENDING_VIDEO: any = {};
+  PENDING_VIDEO: any = [];
+  videoCount = 0;
   constructor(
     private modalCtrl: ModalController,
     private loadingController: LoadingController,
@@ -94,8 +95,18 @@ export class CaptureComponent  implements OnInit {
           if (event.data.size > 0) {
             let fullDateTime = this.dateTime + moment().format('H:mm:ss)');
             fullDateTime = fullDateTime.replace(/([A-Z][a-z]{2})/, (match) => match.toUpperCase());
-            this.formData.delete('video');
-            this.saveBlobAsFile(event.data, `${fullDateTime}.webm`);
+            this.videoCount = this.videoCount + 1;
+            this.PENDING_VIDEO.push({
+              id: this.videoCount,
+              video: event.data,
+              name: fullDateTime + '.webm'
+            });
+            if (this.PENDING_VIDEO.length === 1) {
+              this.repeatLoop();
+            }
+
+            // this.formData.delete('video');
+            // this.saveBlobAsFile(event.data, `${fullDateTime}.webm`);
           }
         };
       }).catch((err) => {
@@ -103,23 +114,43 @@ export class CaptureComponent  implements OnInit {
     });
   }
 
-  playVideo() {
-    setTimeout(() => {
-      this.isCameraOpen = false;
-    }, 2000);
-    this.stopStream();
-  }
-
-  playRecordedVideo() {
-    if (this.output) {
-      const url = window.URL.createObjectURL(this.output);
-      this.video.nativeElement.src = url;
-      this.video.nativeElement.play();
-      this.video.nativeElement.onended = () => {
-        window.URL.revokeObjectURL(url);
-      };
+  repeatLoop() {
+    console.log('repeat loop');
+    console.log(this.PENDING_VIDEO);
+    console.log(this.isProcessing);
+    // if (this.isProcessing) {
+    //   return;
+    // }
+    if (this.PENDING_VIDEO.length > 0) {
+      this.formData.delete('video');
+      console.log(this.PENDING_VIDEO[0]);
+      this.formData.append('video', this.PENDING_VIDEO[0].video, this.PENDING_VIDEO[0].name);
+      this.uploadToServer(this.formData)
+      // console.log(this.PENDING_VIDEO[0]);
+      // setTimeout(() => {
+      //   console.log('video pop');
+      //   console.log(this.PENDING_VIDEO.pop());
+      // }, 4000);
     }
   }
+
+  // playVideo() {
+  //   setTimeout(() => {
+  //     this.isCameraOpen = false;
+  //   }, 2000);
+  //   this.stopStream();
+  // }
+
+  // playRecordedVideo() {
+  //   if (this.output) {
+  //     const url = window.URL.createObjectURL(this.output);
+  //     this.video.nativeElement.src = url;
+  //     this.video.nativeElement.play();
+  //     this.video.nativeElement.onended = () => {
+  //       window.URL.revokeObjectURL(url);
+  //     };
+  //   }
+  // }
 
   startRecording() {
     this.mediaRecorder.start();
@@ -179,8 +210,13 @@ export class CaptureComponent  implements OnInit {
       next:(data) => {
         if (data.status) {
           this.splitCount = this.splitCount + 1;
-          if (!this.isRecordingStart) {
+          this.PENDING_VIDEO.splice(0,1);
+          if (!this.isRecordingStart && this.PENDING_VIDEO.length == 0) {
             this.isShowFinal = true;
+          } else {
+            setTimeout(() => {
+              this.repeatLoop();
+            }, 500);
           }
         } else {
           this.common.presentToast(data.msg, 'warning');
@@ -191,13 +227,13 @@ export class CaptureComponent  implements OnInit {
         this.common.presentToast(environment.errMsg, 'danger');
         this.presentLoading().then(preLoad => {
           this.dismissloading();
-        })
+        });
       },
       complete:() => {
         this.isProcessing = false;
         this.presentLoading().then(preLoad => {
           this.dismissloading();
-        })
+        });
       }
     });
   }
@@ -270,7 +306,8 @@ export class CaptureComponent  implements OnInit {
   async presentLoading() {
     this.loading = await this.loadingController.create({
       cssClass: 'my-custom-class',
-      message: 'Please wait...'
+      message: 'Please wait...',
+      duration: 3000
     });
     await this.loading.present();
   }
