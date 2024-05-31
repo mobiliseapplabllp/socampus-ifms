@@ -8,6 +8,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { UserIdleService } from 'angular-user-idle';
 import { CommonService } from './provider/common/common.service';
 import { environment } from 'src/environments/environment';
+import { checklist, db } from './provider/local-db/local-db.service';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -178,7 +179,8 @@ export class AppComponent {
     await alert.present();
   }
 
-  cleanDb() {
+  async cleanDb() {
+    await db.checklist.clear();
     localStorage.clear();
     this.router.navigateByUrl('/login', {replaceUrl: true});
   }
@@ -231,14 +233,14 @@ export class AppComponent {
     });
   }
 
-  reset() {
+  async reset() {
     localStorage.clear();
+    await db.checklist.clear();
     if (this.platform.is('android')) {
       App.exitApp();
     } else {
       this.router.navigateByUrl('/login');
     }
-
   }
 
   openPage(data: any) {

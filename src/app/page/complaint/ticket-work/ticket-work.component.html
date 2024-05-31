@@ -68,7 +68,7 @@
                 <ion-textarea rows="4" formControlName="remark"></ion-textarea>
               </ion-item>
               <ion-button  size="small" shape="round" fill="outline" color="danger" [color]="fileName ? 'success': 'danger'"  class="ion-padding-start" (click)="presentActionSheet('image')">
-                <ion-text *ngIf="arr.hasWIP === 0; else image">Upload PTW</ion-text>
+                <ion-text *ngIf="arr.hasWIP === 0 && arr.ptw_mandatory && arr.ptwApproved === 0; else image">Upload PTW</ion-text>
                 <ng-template #image>
                   <ion-text>Upload Image</ion-text>
                 </ng-template>

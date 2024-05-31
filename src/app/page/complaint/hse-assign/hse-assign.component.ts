@@ -32,6 +32,10 @@ export class HseAssignComponent  implements OnInit {
 
 
   close(data: any, status: any) {
+    if (status && data.gpsData?.can_assign !== 1 && this.pc_hse_conf.gps_allow === 1) {
+      this.httpCommon.presentToast('This User Currently Offline', 'warning');
+      return;
+    }
     this.modal.dismiss(data, status);
   }
 
