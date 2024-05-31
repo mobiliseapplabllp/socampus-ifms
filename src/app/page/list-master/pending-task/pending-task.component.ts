@@ -75,7 +75,6 @@ export class PendingTaskComponent  implements OnInit {
       this.getPendingTicket();
     } else if (this.segments === 'digital') {
       this.checkCurrentDateDG(moment().format('YYYY-MM-DD'));
-      // this.getSchedule(moment().format('YYYY-MM-DD'));
     } else if (this.segments === 'pms') {
       this.getPendingPms();
     } else if (this.segments === 'meter') {
@@ -95,7 +94,6 @@ export class PendingTaskComponent  implements OnInit {
       this.getPendingTicket();
     } else if (val === 'digital') {
       this.checkCurrentDateDG(moment().format('YYYY-MM-DD'));
-      // this.getSchedule(moment().format('YYYY-MM-DD'));
     } else if (val === 'pms') {
       this.getPendingPms();
     } else if (val === 'meter') {
@@ -108,7 +106,6 @@ export class PendingTaskComponent  implements OnInit {
     const sub = friendsObservable.subscribe({
       next:(data) => {
         this.allChecklist = data;
-        console.log(this.allChecklist);
         this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
         this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
         if (this.allChecklist.length === 0 && this.isInternet) {
@@ -127,7 +124,6 @@ export class PendingTaskComponent  implements OnInit {
         next:(data: any) => {
           if (data.status) {
             this.allChecklist = data.data;
-            console.log(this.allChecklist);
             this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
             this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
             this.addBulkCheckList(this.allChecklist);

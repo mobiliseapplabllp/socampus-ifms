@@ -61,8 +61,8 @@ export class DigitalChecklistPage implements OnInit {
     private httpDigital: DigitalChecklistService,
     private loadingController: LoadingController,
     private platform: Platform,
-    private alertController: AlertController
-  ) { }
+    private alertController: AlertController) {
+  }
 
   ngOnInit() {
     this.common.checkInternet().then(res => {
@@ -177,10 +177,9 @@ export class DigitalChecklistPage implements OnInit {
         }
         this.assignCheckList = [];
         this.attendedCheckList = [];
-        this.deleteCheckList(this.selectedDate);
+        this.getOfflineCheckListFromServer(this.selectedDate);
         setTimeout(() => {
           sub.unsubscribe();
-          this.checkCurrentDateDG(this.selectedDate);
         },500);
       }
     });
@@ -228,7 +227,9 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   async addBulkCheckList(checkListData: any) {
-    await db.checklist.bulkAdd(checkListData);
+    await db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
+      await db.checklist.bulkAdd(checkListData);
+    });
   }
 
   async deleteCheckList(date: any) {
@@ -240,32 +241,32 @@ export class DigitalChecklistPage implements OnInit {
     return await db.checklist.clear();
   }
 
-  getScheduleUsingBarcode(loc_id: any) {
-    this.isOnBehalf = 0;
-    this.assignCheckList = [];
-    this.attendedCheckList = [];
-    this.presentLoading().then(preLoad => {
-      this.httpDigital.getSceduleMissed(loc_id).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.isOnBehalf = 1;
-            this.allChecklist = data.data;
-            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended');
-          } else {
-            this.common.presentToast(data.msg, 'warning');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      });
-    })
-  }
+  // getScheduleUsingBarcode(loc_id: any) {
+  //   this.isOnBehalf = 0;
+  //   this.assignCheckList = [];
+  //   this.attendedCheckList = [];
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpDigital.getSceduleMissed(loc_id).subscribe({
+  //       next:(data) => {
+  //         if (data.status) {
+  //           this.isOnBehalf = 1;
+  //           this.allChecklist = data.data;
+  //           this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
+  //           this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended');
+  //         } else {
+  //           this.common.presentToast(data.msg, 'warning');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.common.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     });
+  //   })
+  // }
 
   openPage(url: string) {
     this.router.navigateByUrl(url);
