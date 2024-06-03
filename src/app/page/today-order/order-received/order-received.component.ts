@@ -40,20 +40,21 @@ export class OrderReceivedComponent  implements OnInit {
   ionViewDidEnter() {
     let bar = this.common.getBarcode();
     if (bar) {
+      this.common.setBarcode('');
       if (this.platform.is('capacitor')) {
         this.getDecBarcode(bar)
       } else {
         this.order_details[this.index].isReceivedEnable = true;
         this.order_details[this.index].showErr = false;
         this.order_details[this.index].received_qty = this.order_details[this.index].dispatch_qty;
+        this.order_details[this.index].isScan = true;
+
         setTimeout(() => {
           this.order_details[this.index].isAutoFocus = true;
         }, 100);
       }
-      this.common.setBarcode('');
     }
   }
-
 
   // ionViewDidEnter() {
   //   let bar = this.common.getBarcode();
@@ -89,6 +90,8 @@ export class OrderReceivedComponent  implements OnInit {
             if (barcode === this.order_details[this.index].ext_asset_id) {
               this.order_details[this.index].isReceivedEnable = true;
               this.order_details[this.index].showErr = false;
+              this.order_details[this.index].received_qty = this.order_details[this.index].dispatch_qty;
+              this.order_details[this.index].isScan = true;
               setTimeout(() => {
                 this.order_details[this.index].isAutoFocus = true;
               }, 100);
@@ -113,9 +116,7 @@ export class OrderReceivedComponent  implements OnInit {
         }
       })
     })
-
   }
-
 
   ScanBarcode(dat: any, ind: any){
     if (this.requestedData.ord_status === 9) {
@@ -124,7 +125,6 @@ export class OrderReceivedComponent  implements OnInit {
     } else {
       this.common.presentToast('you not receive order before reached', 'warning');
     }
-
   }
 
   inputQty(dat: any, ev: any) {
@@ -142,13 +142,16 @@ export class OrderReceivedComponent  implements OnInit {
         next:(data) => {
           if (data.status) {
             this.order_details = data.data;
-            for (var i = 0; this.order_details.length; i++) {
-              if (this.order_details[i].received_qty == 0) {
+            // console.log(this.order_details);
+            for (var i = 0; i < this.order_details.length; i++) {
+              if (this.order_details[i].received_qty === 0) {
                 this.order_details[i].isReceivedEnable = false;
-                this.order_details[i].isReceived = false;
+                this.order_details[i].isRec = false;
+
               } else {
+                this.order_details[i].already_rec = this.order_details[i].received_qty
                 this.order_details[i].isReceivedEnable = true;
-                this.order_details[i].isReceived = true;
+                this.order_details[i].isRec = true;
               }
             }
             console.log(this.order_details);
@@ -164,8 +167,7 @@ export class OrderReceivedComponent  implements OnInit {
           this.dismissloading();
         }
       })
-    })
-
+    });
   }
 
 
@@ -188,7 +190,7 @@ export class OrderReceivedComponent  implements OnInit {
     let result = 0;
     console.log(this.order_details);
     for (var i = 0; i < this.order_details.length;i++) {
-      if (!this.order_details[i].received_qty && this.order_details[i].received_qty !== 0) {
+      if (!this.order_details[i].received_qty || this.order_details[i].received_qty == 0) {
         result = result + 1;
         this.order_details[i].showErr = true
       } else {
@@ -229,14 +231,23 @@ export class OrderReceivedComponent  implements OnInit {
 
   }
 
+  changeFun(dat: any) {
+    if (dat.received_qty &&  (dat.already_rec == dat.received_qty)) {
+      return;
+    }
+    dat.isRec = false;
+    dat.isScan = true;
+  }
+
   changeRecQty(dat: any) {
-    console.log(dat);
+    // console.log(dat);
+    // return;
     this.presentLoading().then(preLoad => {
       this.httpTo.reciveOrder(dat).subscribe({
         next:(data) => {
           if (data.status) {
             this.common.presentToast(data.msg, 'success');
-            dat.isReceived = true;
+            dat.isRec = true;
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

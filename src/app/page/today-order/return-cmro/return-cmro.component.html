@@ -22,10 +22,10 @@
     </ion-col>
   </ion-row>
   <ion-item *ngFor="let dat of returnCambroArr">
-    <ion-checkbox [(ngModel)]="dat.isSelect" (ionChange)="changeCheckbox()"> </ion-checkbox>
-    <ion-label>
+    <ion-checkbox [(ngModel)]="dat.isSelect" (ionChange)="changeCheckbox()" slot="start"> </ion-checkbox>
+    <ion-label class="ion-text-wrap">
       <h3>Cambro ID: {{dat.cambro_id}}</h3>
-      <p>Order ID: {{dat.order_od}}</p>
+      <p>Order ID: {{dat.order_id}}</p>
       <p>PC ID: {{dat.pc_id}}</p>
       <p>Description: {{dat.type_desc}}</p>
     </ion-label>
