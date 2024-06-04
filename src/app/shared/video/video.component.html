@@ -1,11 +1,15 @@
 <div  *ngIf="!conversation"  class="ion-text-center">
-  <ion-button (click)="getOrcreateConversation()">Start Video Call</ion-button>
+  <ion-button (click)="getOrcreateConversation('environment')" [disabled]="isProcess">Start Video Call <ion-spinner name="lines" slot="end" *ngIf="isProcess"></ion-spinner></ion-button>
 </div>
-
-<div *ngIf="conversation" class="container">
-  <div id="remote-container" style="height:50%;width:100%;border-radius: 20px;">
-   </div>
-  <div id="local-container" style="height:50%;width:100%;border-radius: 20px;">
-    <video #localVideo autoplay playsinline style="height:100%;width:100%;border:1px solid var(--ion-color-secondary)"></video>
+<div *ngIf="conversation">
+  <div id="remote-container" style="height:100%;width:100%;border-radius: 20px;z-index: 1"></div>
+  <div id="local-container" style="height:200px;width:200px;border-radius: 10px;z-index:2;position: absolute; bottom: 5px; right:5px ">
+    <video #localVideo autoplay playsinline style="height:100%;width:100%;"></video>
   </div>
+  <ion-button size="small" style="z-index: 2;position: absolute;top:5px; right:5px" color="danger" (click)="LeaveCall()">Leave Call</ion-button>
 </div>
+<!-- <ion-footer *ngIf="conversation">
+  <ion-toolbar>
+    <ion-button expand="block" (click)="LeaveCall()">LEAVE CALL</ion-button>
+  </ion-toolbar>
+</ion-footer> -->

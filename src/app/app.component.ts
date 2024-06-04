@@ -28,8 +28,8 @@ export class AppComponent {
     private loadingController: LoadingController,
     private common: CommonService) {
       this.platform.ready().then(res => {
-        // this.initApp();
-        // this.getUserData();
+        this.initApp();
+        this.getUserData();
       })
   }
 
@@ -148,7 +148,6 @@ export class AppComponent {
     localStorage.clear();
     this.router.navigateByUrl('/login', {replaceUrl: true});
   }
-
 
   async presentAlertConfirm() {
     const alert = await this.alertController.create({

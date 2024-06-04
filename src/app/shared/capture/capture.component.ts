@@ -27,7 +27,7 @@ export class CaptureComponent  implements OnInit {
   output: any;
   loading: any;
   formData = new FormData();
-  SPLIT_VIDEO_TIME = 15;
+  SPLIT_VIDEO_TIME = 100;
   VIDEO_BYTE = 2;
   isProcessing = false;
   dateTime!: string;
@@ -104,9 +104,6 @@ export class CaptureComponent  implements OnInit {
             if (this.PENDING_VIDEO.length === 1) {
               this.repeatLoop();
             }
-
-            // this.formData.delete('video');
-            // this.saveBlobAsFile(event.data, `${fullDateTime}.webm`);
           }
         };
       }).catch((err) => {
@@ -115,42 +112,12 @@ export class CaptureComponent  implements OnInit {
   }
 
   repeatLoop() {
-    console.log('repeat loop');
-    console.log(this.PENDING_VIDEO);
-    console.log(this.isProcessing);
-    // if (this.isProcessing) {
-    //   return;
-    // }
     if (this.PENDING_VIDEO.length > 0) {
       this.formData.delete('video');
-      console.log(this.PENDING_VIDEO[0]);
       this.formData.append('video', this.PENDING_VIDEO[0].video, this.PENDING_VIDEO[0].name);
       this.uploadToServer(this.formData)
-      // console.log(this.PENDING_VIDEO[0]);
-      // setTimeout(() => {
-      //   console.log('video pop');
-      //   console.log(this.PENDING_VIDEO.pop());
-      // }, 4000);
     }
   }
-
-  // playVideo() {
-  //   setTimeout(() => {
-  //     this.isCameraOpen = false;
-  //   }, 2000);
-  //   this.stopStream();
-  // }
-
-  // playRecordedVideo() {
-  //   if (this.output) {
-  //     const url = window.URL.createObjectURL(this.output);
-  //     this.video.nativeElement.src = url;
-  //     this.video.nativeElement.play();
-  //     this.video.nativeElement.onended = () => {
-  //       window.URL.revokeObjectURL(url);
-  //     };
-  //   }
-  // }
 
   startRecording() {
     this.mediaRecorder.start();
@@ -193,15 +160,6 @@ export class CaptureComponent  implements OnInit {
   saveBlobAsFile(blob: any, fileName: any) {
     this.formData.append('video', blob, fileName);
     this.uploadToServer(this.formData);
-    return;
-    const a: any = document.createElement('a');
-    document.body.appendChild(a);
-    a.style = 'display: none';
-    const url = window.URL.createObjectURL(blob);
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    window.URL.revokeObjectURL(url);
   }
 
   uploadToServer(formData: any) {
@@ -216,7 +174,7 @@ export class CaptureComponent  implements OnInit {
           } else {
             setTimeout(() => {
               this.repeatLoop();
-            }, 500);
+            }, 2000);
           }
         } else {
           this.common.presentToast(data.msg, 'warning');

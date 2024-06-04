@@ -189,6 +189,12 @@ export class TicketWorkComponent  implements OnInit {
 
   changeFile(ev: any) {
     console.log(ev.target.files[0]);
+    if (ev.target.files.length > 0) {
+      this.formData.delete('video');
+      this.formData.append('video', ev.target.files[0]);
+      this.isVidUpl = true;
+    }
+
   }
 
   changePriority(ev: any) {
@@ -216,8 +222,29 @@ export class TicketWorkComponent  implements OnInit {
         }
       });
     });
-
   }
+
+  async customActionSheet() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Choose Video Option',
+      mode: 'ios',
+      buttons: [{
+        text: 'Record Video',
+        handler:() => {
+          this.openCapture();
+        }
+      }, {
+        text: 'Upload Video',
+        handler:() => {
+          document.getElementById('choose-file')?.click();
+        }
+      }],
+    });
+
+    await actionSheet.present();
+  }
+
+
 
   getPriority() {
     this.httpComplaint.getTicketPriority(this.ticket_id).subscribe({
