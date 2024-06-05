@@ -37,6 +37,7 @@ export class MealCheckinPage implements OnInit {
   ionViewDidEnter() {
     let bar = this.common.getBarcode();
     if (bar) {
+      console.log(bar);
       this.submit(bar);
       this.common.setBarcode('');
     }
@@ -73,6 +74,7 @@ export class MealCheckinPage implements OnInit {
   }
 
   changeRo(ev: any) {
+    this.allLocation = [];
     this.presentLoading().then(preLoad => {
       this.httpMeal.getFoodYou(ev.target.value).subscribe({
         next:(data) => {
@@ -94,21 +96,24 @@ export class MealCheckinPage implements OnInit {
   }
 
   changeLocation(ev: any) {
-    this.httpMeal.mealLocation(8, ev.target.value).subscribe({
-      next:(data) => {
-        if (data.status) {
-          this.allRoaster = data.data;
-        } else {
-          this.common.presentToast(data.msg, 'warning');
+    this.allRoaster = [];
+    this.presentLoading().then(preLoad => {
+      this.httpMeal.mealLocation(this.checkinMeal.value.pc_id, ev.target.value).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.allRoaster = data.data;
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
         }
-      },
-      error:() => {
-        this.dismissloading();
-        this.common.presentToast(environment.errMsg, 'danger');
-      },
-      complete:() => {
-        this.dismissloading();
-      }
+      });
     });
   }
 
@@ -133,6 +138,7 @@ export class MealCheckinPage implements OnInit {
   }
 
   submit(encryptionId: any) {
+
     this.itemList = this.allRoaster.filter((val: any) => val.meal_type_id === this.checkinMeal.value.roaster_id)[0];
     const obj = {
       pc_id: this.itemList.pc_id,
