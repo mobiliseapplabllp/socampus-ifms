@@ -21,7 +21,7 @@
       <ion-label>Live</ion-label>
     </ion-segment-button>
   </ion-segment>
-  <div [ngSwitch]='segmentStatus'>
+  <div [ngSwitch]='segmentStatus' style="height: 100%;width:100%;">
     <div *ngSwitchCase="'ticket'">
       <div *ngIf="arr.attend_time || arr.attend_time === 0">
         <ion-item >
@@ -263,9 +263,8 @@
         </ion-row>
       </ion-card>
     </div>
-    <div *ngSwitchCase="'video'">
+    <div *ngSwitchCase="'video'" style="border:1px solid black;height:100%;width:100%">
       <app-video [ticket_id]="ticket_id"></app-video>
     </div>
   </div>
-
 </ion-content>

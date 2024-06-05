@@ -83,7 +83,7 @@ export class VideoComponent {
             facingMode: {
               ideal: facingMode
             }
-          }
+          },
         }
       }).then((stream: Stream) => {
           console.log('createStream :', stream);
@@ -91,6 +91,7 @@ export class VideoComponent {
           localStream = stream;
           this.stream = stream;
           // Display stream
+          this.videoRef.nativeElement.muted = true;
           localStream.attachToElement(this.videoRef.nativeElement);
           //==============================
           // 6/ JOIN CONVERSATION

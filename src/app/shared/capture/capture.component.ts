@@ -81,9 +81,10 @@ export class CaptureComponent  implements OnInit {
           ideal: 'environment'
         }
       },
-      audio: false
+      audio: true
     }).then((stream) => {
       this.vidRef.srcObject = stream;
+      this.vidRef.muted= true;
       const options = {
         mimeType: 'video/webm; codecs=vp8', // Ensure compatibility
         videoBitsPerSecond: 500000,         // Set video bitrate to 500kbps
