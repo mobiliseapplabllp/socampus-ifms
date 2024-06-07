@@ -20,6 +20,8 @@ export class TodayOrderService {
       url = environment.url + 'meal/order/get_order_by_status?req_for=site&status_type=today-pending';
     } else if (id === '3'){
       url = environment.url + 'meal/order/get_order_by_status?ord_date=' + date;
+    } else if (id === '4') {
+      url = environment.url + 'meal/order/get_order_by_status?req_for=cpu&status_type=today-pending';
     } else {
       alert('Wrong Paramter');
     }

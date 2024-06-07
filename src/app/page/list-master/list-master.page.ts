@@ -166,6 +166,10 @@ export class ListMasterPage implements OnInit {
             }
           } else {
             const obj = [{
+              icon_path: 'assets/meal/i1.png',
+              smnu_desc: 'Order Dispatch',
+              link: '/t-order/4'
+            },{
               icon_path: 'assets/meal/i2.png',
               smnu_desc: 'Order Received',
               link: '/t-order/2'

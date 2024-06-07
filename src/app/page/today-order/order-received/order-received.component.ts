@@ -98,11 +98,6 @@ export class OrderReceivedComponent  implements OnInit {
             } else {
               this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
             }
-            // let temp, firstDigit,lastDigit;
-            // temp = data.data.text;
-            // firstDigit = temp.slice(0, 4);
-            // lastDigit = temp.slice(-6);
-
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

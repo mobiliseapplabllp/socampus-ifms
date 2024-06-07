@@ -10,32 +10,33 @@
   <ion-card class="details" >
     <ion-row>
       <ion-col size="6">
-        <ion-text color="light">Order Id</ion-text><br>
-        <ion-text color="light">{{basicDetails.order_id}}</ion-text>
+        <ion-text color="dark">Order Id</ion-text><br>
+        <ion-text >{{basicDetails.order_id}}</ion-text>
       </ion-col>
       <ion-col size="6">
-        <ion-text color="light">Total Recipes</ion-text><br>
-        <ion-text color="light">{{basicDetails.total_items}}</ion-text>
+        <ion-text color="dark">Total Recipes</ion-text><br>
+        <ion-text >{{basicDetails.total_items}}</ion-text>
       </ion-col>
       <ion-col size="6">
-        <ion-text color="light">Pickup Time</ion-text><br>
-        <ion-text color="light">{{basicDetails.dispatch_time}}</ion-text>
+        <ion-text color="dark">Pickup Time</ion-text><br>
+        <ion-text >{{basicDetails.dispatch_time}}</ion-text>
       </ion-col>
       <ion-col size="6">
-        <ion-text color="light">Packed Recipe</ion-text><br>
-        <ion-text color="light"></ion-text>
-      </ion-col><ion-col size="6">
-        <ion-text color="light">Dispatch Time Id</ion-text><br>
-        <ion-text color="light">{{basicDetails.site_dlvry_time}}</ion-text>
+        <ion-text color="dark">Packed Recipe</ion-text><br>
+        <ion-text >{{basicDetails.packQty}}</ion-text>
       </ion-col>
       <ion-col size="6">
-        <ion-text color="light">No of Cambro Box</ion-text><br>
-        <ion-text color="light"></ion-text>
+        <ion-text color="dark">Dispatch Time Id</ion-text><br>
+        <ion-text >{{basicDetails.site_dlvry_time}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="dark">No of Cambro Box</ion-text><br>
+        <ion-text >{{basicDetails.qr_count}}</ion-text>
       </ion-col>
     </ion-row>
     <ion-row>
       <ion-col class="ion-text-right">
-        <ion-button size="small" color="light" shape="round" fill="outline" (click)="setDriveModal(true)">Driver Detail <ion-icon name="create-outline" slot="end"></ion-icon></ion-button>
+        <ion-button size="small" shape="round" fill="outline" (click)="setDriveModal(true)">Driver Detail <ion-icon name="create-outline" slot="end"></ion-icon></ion-button>
       </ion-col>
     </ion-row>
   </ion-card>
@@ -44,7 +45,6 @@
       <div style="padding:3px;height:20px;width:20px;border-radius:50%;background-color:var(--ion-color-primary);color:var(--ion-color-light);font-size:12px;font-weight: 700;" class="center">{{i+1}}</div>
     </ion-col>
     <ion-col size="5">
-      <p>Cambro - 4422338</p>
       <p>{{dat.item_name}}</p>
       <p>Pax:{{dat.order_qty}}{{dat.uom}} </p>
       <p>Portion: {{dat.ttl_portion}}</p>
@@ -55,7 +55,7 @@
     <ion-col size="3" class="center">
       <div style="width: 100%;">
         <div style="font-size:12px;width:100%;text-align: center;margin-bottom:2px">Temperature</div>
-        <ion-input type="number" [(ngModel)]="dat.temperature" [ngStyle]="{'background-color': !dat.is_temperature ? 'white': 'rgba(0, 0, 0, 0.20)'}" [disabled]="!dat.is_temperature ? false: true" (change)="updateTemperature(dat)" > </ion-input>
+        <ion-input type="number" [(ngModel)]="dat.temperature" (ionChange)="changeTemp(dat)"  (change)="updateTemperature(dat)" > </ion-input> <!-- [disabled]="!dat.is_temperature ? false: true"  [ngStyle]="{'background-color': !dat.is_temperature ? 'white': 'rgba(0, 0, 0, 0.20)'}"-->
       </div>
     </ion-col>
     <ion-col size="3" class="center">
@@ -99,7 +99,7 @@
   </ng-template>
 </ion-modal>
 
-<ion-modal [isOpen]="isDriverModal" [initialBreakpoint]="0.9" [breakpoints]="[0, 0.25, 0.5, 0.9]" handleBehavior="cycle" (willDismiss)="onWillDismissDriver()">
+<ion-modal [isOpen]="isDriverModal" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.25, 0.5, 0.9]" handleBehavior="cycle" (willDismiss)="onWillDismissDriver()">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -110,7 +110,21 @@
       </ion-toolbar>
     </ion-header>
     <ion-content class="driver_modal">
-      <ion-row class="odd">
+      <fieldset>
+        <legend>Selected Driver</legend>
+        <ion-item>
+          <ion-thumbnail slot="start">
+            <img [src]="basicDetails.driver_img" onError="src = 'assets/img/person_img.png'">
+          </ion-thumbnail>
+          <ion-label class="ion-text-wrap">
+            <h3>{{basicDetails.driver_name}}</h3>
+            <p>{{basicDetails.driver_mobile}}</p>
+            <p>{{basicDetails.driver_email}}</p>
+            <p>{{basicDetails.driver_vehicle_type}} {{basicDetails.driver_vehicle_no}}</p>
+          </ion-label>
+        </ion-item>
+      </fieldset>
+      <!-- <ion-row class="odd">
         <ion-col size="6">Name</ion-col>
         <ion-col size="6">{{basicDetails.driver_name}}</ion-col>
       </ion-row>
@@ -129,18 +143,21 @@
       <ion-row class="odd">
         <ion-col size="6">Vechile No</ion-col>
         <ion-col size="6">{{basicDetails.driver_vehicle_no}}</ion-col>
-      </ion-row>
+      </ion-row> -->
       <fieldset>
         <legend>Change Driver</legend>
-        <ion-radio-group [(ngModel)]="selectedDriver">
+        <ion-radio-group [(ngModel)]="selectedDriver" mode="md">
           <ion-item *ngFor="let dat of driverArr">
-            <ion-radio slot="start" [(ngModel)]="dat.driver_id"></ion-radio>
+            <ion-avatar slot="start">
+              <img [src]="dat.driver_img" onError="src = 'assets/img/person_img.png'">
+            </ion-avatar>
             <ion-label class="ion-text-wrap">
               <h3>{{dat.driver_name}}({{dat.driver_id}})</h3>
               <p>{{dat.mobile}}</p>
               <p>{{dat.email}}</p>
               <p>{{dat.vehicle_type}} {{dat.vehicle_no}}</p>
             </ion-label>
+            <ion-radio slot="end" [(ngModel)]="dat.driver_id"></ion-radio>
           </ion-item>
         </ion-radio-group>
         <ion-button expand="block" (click)="changeDriver()">Change Driver</ion-button>

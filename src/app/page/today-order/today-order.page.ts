@@ -101,11 +101,11 @@ export class TodayOrderPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.id = this.activeRoute.snapshot.paramMap.get('id'); // id == 1 for driver dispatch and 2 for site receive
-    console.log(typeof(this.id));
-    fetch('mediaFile.localUrl').then(response => response.blob()).then(blob => {
-      console.log(blob);
-    })
+    this.id = this.activeRoute.snapshot.paramMap.get('id'); // id == 1 for driver dispatch and 2 for site receive and 4 for cpu
+    // console.log(typeof(this.id));
+    // fetch('mediaFile.localUrl').then(response => response.blob()).then(blob => {
+    //   console.log(blob);
+    // })
 
   }
 
@@ -236,7 +236,7 @@ export class TodayOrderPage implements OnInit {
 
 
   viewBox(data: any) {
-    if (this.id === '1') {
+    if (this.id === '4') {
       this.router.navigate(['/today-order/order-detail'], {
         queryParams: {
           data: JSON.stringify(data),

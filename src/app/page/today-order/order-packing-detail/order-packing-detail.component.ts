@@ -47,6 +47,7 @@ export class OrderPackingDetailComponent  implements OnInit {
   ionViewDidEnter() {
     let bar = this.common.getBarcode();
     if (bar) {
+      this.common.setBarcode('');
       this.getDecBarcode(bar);
     }
   }
@@ -147,6 +148,13 @@ export class OrderPackingDetailComponent  implements OnInit {
           if (data.status) {
             this.basicDetails = data.data;
             this.orderArr = data.txn_data;
+            let packQty = 0
+            for(var i = 0 ; i < this.orderArr.length; i++) {
+              if(this.orderArr[i].is_packed) {
+                packQty = packQty + 1;
+              }
+            }
+            this.basicDetails.packQty = packQty
             this.getCamroByPc(this.basicDetails.cpu_pc_id);
             this.getDriverByPc(this.basicDetails.pc_id);
           } else {
@@ -164,7 +172,18 @@ export class OrderPackingDetailComponent  implements OnInit {
     })
   }
 
+  changeTemp(dat: any) {
+    if (dat.temperature < -20  || dat.temperature > 100) {
+      dat.temperature = '';
+      this.common.presentToast('Temperature accept only -20 to 100 degree only', 'warning');
+      return;
+    }
+  }
+
   updateTemperature(dat: any) {
+    if (!dat.temperature) {
+      return;
+    }
     const obj = {
       temperature: dat.temperature,
       txn_id: dat.txn_id
@@ -197,6 +216,8 @@ export class OrderPackingDetailComponent  implements OnInit {
       next:(data) => {
         if (data.status) {
           this.cambroArr = data.data;
+        } else {
+          this.common.presentToast(data.msg, 'warning');
         }
       },
       error:() => {
