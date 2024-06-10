@@ -156,11 +156,13 @@ export class ListMasterPage implements OnInit {
               icon_path: 'assets/meal/i1.png',
               smnu_desc: 'Order Dispatch',
               link: '/t-order/1'
-            },{
-              icon_path: 'assets/meal/i1.png',
-              smnu_desc: 'Return Cambro',
-              link: 'today-order/return-cmro-driver/1'
-            }]
+            }
+            // ,{
+            //   icon_path: 'assets/meal/i1.png',
+            //   smnu_desc: 'Return Cambro',
+            //   link: 'today-order/return-cmro-driver/1'
+            // }
+          ]
             for (var i = 0; i < obj1.length; i++) {
               this.myMenu.push(obj1[i]);
             }
@@ -173,15 +175,18 @@ export class ListMasterPage implements OnInit {
               icon_path: 'assets/meal/i2.png',
               smnu_desc: 'Order Received',
               link: '/t-order/2'
-            },{
-              icon_path: 'assets/meal/i2.png',
-              smnu_desc: 'Return Cambro',
-              link: 'today-order/return-cmro'
-            },{
-              icon_path: 'assets/meal/i2.png',
-              smnu_desc: 'Receive Cambro CPU',
-              link: 'today-order/return-cmro-driver/2'
-            },{
+            }
+            // ,{
+            //   icon_path: 'assets/meal/i2.png',
+            //   smnu_desc: 'Return Cambro',
+            //   link: 'today-order/return-cmro'
+            // }
+            // ,{
+            //   icon_path: 'assets/meal/i2.png',
+            //   smnu_desc: 'Receive Cambro CPU',
+            //   link: 'today-order/return-cmro-driver/2'
+            // }
+            ,{
               icon_path: 'assets/meal/i2.png',
               smnu_desc: 'Order Pack',
               link: 'today-order/order-pack'

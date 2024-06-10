@@ -183,9 +183,8 @@ export class OrderReceivedComponent  implements OnInit {
 
   submit() {
     let result = 0;
-    console.log(this.order_details);
     for (var i = 0; i < this.order_details.length;i++) {
-      if (!this.order_details[i].received_qty || this.order_details[i].received_qty == 0) {
+      if (!this.order_details[i].received_qty || this.order_details[i].received_qty == 0 || !this.order_details[i].isRec) {
         result = result + 1;
         this.order_details[i].showErr = true
       } else {
@@ -196,9 +195,7 @@ export class OrderReceivedComponent  implements OnInit {
       this.common.presentToast('Please Receive All Qty', 'warning');
       return;
     } else {
-      console.log('saved');
       this.finalOrder();
-
     }
   }
 
