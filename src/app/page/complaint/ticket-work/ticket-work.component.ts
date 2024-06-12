@@ -344,7 +344,7 @@ export class TicketWorkComponent  implements OnInit {
       return;
     }
 
-    if (this.workSpace.value.status === 3 && this.requestedData.ptw_mandatory && this.requestedData.ptwApproved === 0 && !this.ppeFileName) {
+    if (this.workSpace.value.status === 3 && this.requestedData.ppekit_mandatory && !this.requestedData.ppekitFilled && !this.ppeFileName) {
       alert('Opps you have not attached PPE kit selfie.');
       return;
     }
@@ -356,7 +356,6 @@ export class TicketWorkComponent  implements OnInit {
             if (this.workSpace.value.status == 4) {
               this.httpCommon.setHomeLoadStatus(true);
             }
-
             this.httpCommon.presentToast(data.msg, 'success');
             this.navCtrl.pop();
           } else {
@@ -480,7 +479,6 @@ export class TicketWorkComponent  implements OnInit {
   viewAttachment(img: string) {
     this.httpCommon.openDoc(img);
   }
-
 
   sendOtp() {
     const obj = {
