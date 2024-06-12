@@ -58,7 +58,7 @@
   </ion-fab>
   <div [ngSwitch]='segmentStatus'>
     <div *ngSwitchCase= "'assigned'">
-      <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }" (click)="openFillReport(dat)">
+      <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }" (click)="verifyQr(dat)">
         <ion-item lines="none" color="none">
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">

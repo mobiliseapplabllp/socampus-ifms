@@ -55,6 +55,8 @@ export class DigitalChecklistPage implements OnInit {
   dateArr: any = [];
   isInternet!: boolean;
   userData: any = [];
+  qrType = 'site';
+  qrObject: any = {};
   constructor(
     private common: CommonService,
     private router: Router,
@@ -89,28 +91,45 @@ export class DigitalChecklistPage implements OnInit {
 
   ionViewDidEnter() {
     let split, type, ecn_key, bar = this.common.getBarcode();
-    if (bar) {
-      this.scanBarcodeDetail.isScanBarcode = true;
-      this.common.setBarcode('');
+    this.common.setBarcode('');
+    if (this.qrType === 'site') {
+      if (bar) {
+        this.scanBarcodeDetail.isScanBarcode = true;
+        split = bar.split('/');
+        if (split.length === 6) {
+          type = split[4];
+          ecn_key = split[5];
+          let val = this.common.decryptValue(ecn_key);
+          this.scanBarcodeDetail.QRType = type;
+          this.scanBarcodeDetail.QRValue = val;
+          if (val) {
+            this.getCheckListByBarcode(type, val);
+          } else {
+            this.common.presentToast('Invalid Encryption', 'warning');
+          }
+        } else {
+          this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+        }
+      } else if(this.scanBarcodeDetail.isScanBarcode) {
+        this.getCheckListByBarcode(this.scanBarcodeDetail.QRType, this.scanBarcodeDetail.QRValue);
+      } else {
+        this.checkCurrentDateDG(this.selectedDate);
+      }
+    } else if (this.qrType === 'verify') {
+      this.qrType = 'site';
       split = bar.split('/');
       if (split.length === 6) {
-        type = split[4];
         ecn_key = split[5];
         let val = this.common.decryptValue(ecn_key);
-        this.scanBarcodeDetail.QRType = type;
-        this.scanBarcodeDetail.QRValue = val;
-        if (val) {
-          this.getCheckListByBarcode(type, val);
+        this.qrType = 'site'
+        if (this.qrObject.barcode === val) {
+          this.openFillReport(this.qrObject);
         } else {
-          this.common.presentToast('Invalid Encryption', 'warning');
+          this.common.presentToast('You are Scan Wrong QR Code ' + val, 'warning');
         }
       } else {
         this.common.presentToast('You are Scan Wrong QR Code', 'warning');
       }
-    } else if(this.scanBarcodeDetail.isScanBarcode) {
-      this.getCheckListByBarcode(this.scanBarcodeDetail.QRType, this.scanBarcodeDetail.QRValue);
-    } else {
-      this.checkCurrentDateDG(this.selectedDate);
     }
   }
 
@@ -241,33 +260,6 @@ export class DigitalChecklistPage implements OnInit {
     return await db.checklist.clear();
   }
 
-  // getScheduleUsingBarcode(loc_id: any) {
-  //   this.isOnBehalf = 0;
-  //   this.assignCheckList = [];
-  //   this.attendedCheckList = [];
-  //   this.presentLoading().then(preLoad => {
-  //     this.httpDigital.getSceduleMissed(loc_id).subscribe({
-  //       next:(data) => {
-  //         if (data.status) {
-  //           this.isOnBehalf = 1;
-  //           this.allChecklist = data.data;
-  //           this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned');
-  //           this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'attended');
-  //         } else {
-  //           this.common.presentToast(data.msg, 'warning');
-  //         }
-  //       },
-  //       error:() => {
-  //         this.dismissloading();
-  //         this.common.presentToast(environment.errMsg, 'danger');
-  //       },
-  //       complete:() => {
-  //         this.dismissloading();
-  //       }
-  //     });
-  //   })
-  // }
-
   openPage(url: string) {
     this.router.navigateByUrl(url);
   }
@@ -320,6 +312,15 @@ export class DigitalChecklistPage implements OnInit {
     this.checkCurrentDateDG(this.selectedDate);
   }
 
+  verifyQr(data: any) {
+    if (data.barcode) {
+      this.qrType = 'verify';
+      this.qrObject = data;
+      this.router.navigateByUrl('/barcode');
+    } else {
+      this.openFillReport(data);
+    }
+  }
 
   openFillReport(data: any) {
     if (this.platform.is('capacitor')) {
@@ -344,7 +345,6 @@ export class DigitalChecklistPage implements OnInit {
     } else {
       this.openPageUrl(data);
     }
-
   }
 
   openPageUrl(data: any) {
@@ -356,25 +356,25 @@ export class DigitalChecklistPage implements OnInit {
     });
   }
 
-  verifyBarcode(obj: any){
-    this.presentLoading().then(preLoad => {
-      this.httpDigital.verifyAssetByQr(obj).subscribe({
-        next:(dat: any) => {
-          if (dat.status) {
-            this.common.presentToast(dat.msg, 'success');
-            this.router.navigateByUrl('/digital-checklist/fill-report/' + obj.sch_id + '/' + this.isOnBehalf);
-          } else {
-            this.common.presentToast(dat.msg, 'warning');
-          }
-        }, error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        }, complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
-  }
+  // verifyBarcode(obj: any){
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpDigital.verifyAssetByQr(obj).subscribe({
+  //       next:(dat: any) => {
+  //         if (dat.status) {
+  //           this.common.presentToast(dat.msg, 'success');
+  //           this.router.navigateByUrl('/digital-checklist/fill-report/' + obj.sch_id + '/' + this.isOnBehalf);
+  //         } else {
+  //           this.common.presentToast(dat.msg, 'warning');
+  //         }
+  //       }, error:() => {
+  //         this.dismissloading();
+  //         this.common.presentToast(environment.errMsg, 'danger');
+  //       }, complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     })
+  //   })
+  // }
 
   changeDate(action: any) {
     if (action == 'next') {
@@ -388,6 +388,7 @@ export class DigitalChecklistPage implements OnInit {
 
   openBarcode() {
     this.allChecklist = [];
+    this.qrType = 'site';
     this.router.navigateByUrl('/barcode');
   }
 

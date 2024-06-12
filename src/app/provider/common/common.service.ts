@@ -93,7 +93,6 @@ export class CommonService {
         iv: iv
       });
       decrypted1 = decrypted.toString(CryptoJS.enc.Utf8);
-      console.log(decrypted1);
       return this.extractIntegerValue(decrypted1);
     } catch {
       return '';
@@ -104,7 +103,6 @@ export class CommonService {
     var regex, match, extractedString;
     regex = /i:(\d+)/;
     match = val.match(regex);
-    console.log(match);
     return extractedString = match ? match[1] : this.extractStringValue(val);
   }
 
@@ -113,7 +111,6 @@ export class CommonService {
     var regex, match, extractedString;
     regex = /"([^"]+)"/;
     match = val.match(regex);
-    console.log(match);
     return extractedString = match ? match[1] : null;
   }
 

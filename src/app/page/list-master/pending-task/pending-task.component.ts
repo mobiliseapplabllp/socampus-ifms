@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { LoadingController, ModalController, Platform } from '@ionic/angular';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -37,6 +37,8 @@ export class PendingTaskComponent  implements OnInit {
   formData = new FormData();
   userData: any;
   isInternet: any;
+  qrType!: string;
+  qrObject: any = {};
   constructor(
     private loadingController: LoadingController,
     private httpCompalint: ComplaintService,
@@ -45,10 +47,12 @@ export class PendingTaskComponent  implements OnInit {
     private httpPm: PmCalService,
     private modalCtrl: ModalController,
     private httpMeter: MeterService,
-    private router: Router
+    private router: Router,
+    private platform: Platform
   ) { }
 
   ngOnInit() {
+
     this.common.checkInternet().then(res => {
       if (res) {
         this.isInternet = true;
@@ -65,6 +69,25 @@ export class PendingTaskComponent  implements OnInit {
   ngOnChanges() {
     if (this.eventChange) {
       this.getData();
+    }
+    if (this.didEnter) {
+      let split, ecn_key ,bar = this.common.getBarcode();
+      if (bar && this.qrType === 'verify') {
+        this.qrType = '';
+        this.common.setBarcode('');
+        split = bar.split('/');
+        if (split.length === 6) {
+          ecn_key = split[5];
+          let val = this.common.decryptValue(ecn_key);
+          if (this.qrObject.barcode === val) {
+            this.openFillReport(this.qrObject);
+          } else {
+            this.common.presentToast('You are Scan Wrong QR Code ' + val, 'warning');
+          }
+        } else {
+          this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+        }
+      }
     }
   }
 
@@ -293,21 +316,39 @@ export class PendingTaskComponent  implements OnInit {
     });
   }
 
+  verifyQr(data: any) {
+    if (data.barcode) {
+      this.qrType = 'verify';
+      this.qrObject = data;
+      this.router.navigateByUrl('/barcode');
+    } else {
+      this.openFillReport(data);
+    }
+  }
+
   openFillReport(data: any) {
-    const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
-    const currentDate = moment(moment().format('YYYY-MM-DD'));
-    if (!currentDate.isSame(pastDate)) {
-      this.common.presentToast('You can fill only Current Date Checklist', 'warning');
-      return;
+    if (this.platform.is('capacitor')) {
+      if (data.schedule_status !== 'assigned') {
+        this.openPageUrl(data);
+      } else {
+        const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
+        const currentDate = moment(moment().format('YYYY-MM-DD'));
+        if (!currentDate.isSame(pastDate)) {
+          this.common.presentToast('You can fill only Current Date Checklist', 'warning');
+          return;
+        }
+        const pastDateTime = moment(data.sch_dateTime);
+        const currentDateTime = moment();
+        const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
+        if (!isCurrentDatetimeBigger) {
+          this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
+          return;
+        }
+        this.openPageUrl(data);
+      }
+    } else {
+      this.openPageUrl(data);
     }
-    const pastDateTime = moment(data.sch_dateTime);
-    const currentDateTime = moment();
-    const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
-    if (!isCurrentDatetimeBigger) {
-      this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
-      return;
-    }
-    this.openPageUrl(data);
   }
 
   openPageUrl(data: any) {
@@ -318,6 +359,32 @@ export class PendingTaskComponent  implements OnInit {
       }
     });
   }
+
+  // openFillReport(data: any) {
+  //   const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
+  //   const currentDate = moment(moment().format('YYYY-MM-DD'));
+  //   if (!currentDate.isSame(pastDate)) {
+  //     this.common.presentToast('You can fill only Current Date Checklist', 'warning');
+  //     return;
+  //   }
+  //   const pastDateTime = moment(data.sch_dateTime);
+  //   const currentDateTime = moment();
+  //   const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
+  //   if (!isCurrentDatetimeBigger) {
+  //     this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
+  //     return;
+  //   }
+  //   this.openPageUrl(data);
+  // }
+
+  // openPageUrl(data: any) {
+  //   this.router.navigate(['/digital-checklist/fill-report/'], {
+  //     queryParams: {
+  //       isOnBehalf: 0,
+  //       schedule_id: data.schedule_id
+  //     }
+  //   });
+  // }
 
   uploadPtw(dat: any) {}
 

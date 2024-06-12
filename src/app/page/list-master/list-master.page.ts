@@ -151,7 +151,6 @@ export class ListMasterPage implements OnInit {
   async openSosModal() {
     const modal = await this.modalCtrl.create({
       component: SosComponent,
-      // cssClass: 'my-modal',
       componentProps: { }
     });
     modal.present();

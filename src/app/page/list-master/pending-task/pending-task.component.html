@@ -35,7 +35,7 @@
     </div>
     <div *ngSwitchCase= "'digital'">
       <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
-        <ion-item lines="none" color="none" (click)="openFillReport(dat)">
+        <ion-item lines="none" color="none" (click)="verifyQr(dat)">
           <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
             <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
