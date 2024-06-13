@@ -25,6 +25,12 @@ export class LoginPage implements OnInit {
   mypass = true;
   video: any;
   fcmToken: any;
+  viewCondition = 'sso' // 1. sso, 2. login, 3. multi_factor, 4.forgot_pass, 5. verification)code 6. create_new_pass
+  otpConfig = {
+    length: 4,
+    inputClass: 'custom-otp-input',
+    containerClass: 'custom-otp-container'
+  };
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -143,10 +149,16 @@ export class LoginPage implements OnInit {
           localStorage.setItem('enc_id', this.userValue.enc_id);
           localStorage.setItem('user', JSON.stringify(this.userValue.user));
           localStorage.setItem('isAlreadyLogin', 'true');
+          this.viewCondition = 'multi_factor';
+          return;
           this.router.navigateByUrl('/list-master', { replaceUrl: true });
         }
       }
     });
+  }
+
+  multiFactorSubmit() {
+    this.router.navigateByUrl('/list-master', { replaceUrl: true });
   }
 
   async presentLoading() {

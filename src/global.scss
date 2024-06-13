@@ -25,6 +25,40 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
+
+@font-face {
+  font-family: sansapro_black;
+  src: url(assets/sansa_pro/sansapro_black.otf);
+}
+
+@font-face {
+  font-family: sansapro_bold;
+  src: url(assets/sansa_pro/sansapro_bold.otf);
+}
+
+@font-face {
+  font-family: sansapro_light;
+  src: url(assets/sansa_pro/sansapro_light.otf);
+}
+
+@font-face {
+  font-family: sansapro_normal;
+  src: url(assets/sansa_pro/sansapro_normal.otf);
+}
+
+@font-face {
+  font-family: sansapro_semibold;
+  src: url(assets/sansa_pro/sansapro_semibold.otf);
+}
+
+ion-content {
+  font-family: 'sansapro_semibold' !important;
+}
+
+ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
+  font-family: 'sansapro_semibold' !important;
+}
+
 .my-modal{
   --height: 93%;
   --border-radius: 5px;
@@ -37,6 +71,26 @@
   padding: 25px;
 }
 
+.custom-otp-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.custom-otp-input {
+  width: 50px !important;
+  height: 50px !important;
+  margin: 0 5px !important;
+  border: 2px solid var(--ion-color-primary) !important;
+  border-radius: 5px !important;
+  text-align: center;
+  font-size: 18px !important;
+  outline: none;
+}
+
+.custom-otp-input:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
 .center {
   display: flex;
   align-items: center;
@@ -48,30 +102,53 @@ body.scanner-active {
   --ion-background-color: '#00000000';
 }
 
+
 section.inputbox {
-  padding:0px 10px !important;
   ion-text {
     font-size: 14px;
     font-weight: 550;
-
+    font-family: 'sansapro_semibold' !important;
   }
   ion-item {
     margin: 5px 0px;
+    border:1px solid var(--ion-color-primary);
+    border-radius: 4px;
     font-weight: bold;
     font-size:90%;
-    background-color: rgba(227, 237, 255, 0.8);
-    border-radius: 10px;
+    background-color: white;
     ion-icon {
-      margin-right: 16px;
-    }
-    ion-input {
-      background-color:transparent !important
+      margin-right:10px;
     }
     ion-select {
       width:100%
     }
   }
 }
+
+// section.inputbox {
+//   padding:0px 10px !important;
+//   ion-text {
+//     font-size: 14px;
+//     font-weight: 550;
+
+//   }
+//   ion-item {
+//     margin: 5px 0px;
+//     font-weight: bold;
+//     font-size:90%;
+//     background-color: rgba(227, 237, 255, 0.8);
+//     border-radius: 10px;
+//     ion-icon {
+//       margin-right: 16px;
+//     }
+//     ion-input {
+//       background-color:transparent !important
+//     }
+//     ion-select {
+//       width:100%
+//     }
+//   }
+// }
 
 // ion-button.ion-color-primary, ion-toolbar.ion-color-primary {
 //   --ion-color-base: linear-gradient(

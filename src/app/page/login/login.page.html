@@ -1,4 +1,138 @@
-<ion-content>
+
+<!-- <ion-col class="ion-text-center">
+  <img src="assets/menu_icon.svg" style="height:80px;width:170px">
+</ion-col> -->
+<ion-content class="center">
+  <ion-row style="position:absolute;top:100px;width:100%">
+    <ion-col class="ion-text-center">
+      <img src="assets/img/white-logo.png" style="height:45px;width:210px">
+    </ion-col>
+  </ion-row>
+  <div style="width:100%;height:100%;border-top:50vh solid var(--ion-color-primary);position: absolute;top:0px;z-index:-1"></div>
+  <div style="height:100%;width:100%" class="center">
+    <ion-card style="min-height:40vh;width:90vw;box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;padding:20px;border-radius: 30px;" class="center">
+      <section style="width:100%;min-height:40vh;" *ngIf="viewCondition === 'sso' ">
+        <ion-row>
+          <ion-col>
+            <h2>
+              <ion-text color="dark">Login</ion-text>
+            </h2>
+          </ion-col>
+        </ion-row>
+        <br>
+        <ion-row>
+          <ion-col>
+            <ion-button expand="block" fill="outline" class="ion-text-capitalize custom">i am a SSO User <ion-icon name="arrow-forward-outline" slot="end"></ion-icon></ion-button>
+            <ion-note style="padding-left:10px;" color="medium">use this if you have a @sodexo Email ID.</ion-note>
+          </ion-col>
+        </ion-row>
+        <br>
+        <br>
+        <ion-row>
+          <ion-col>
+            <ion-button expand="block" fill="outline" class="ion-text-capitalize custom" (click)="viewCondition = 'login' ">No, i am not a SSO User <ion-icon name="arrow-forward-outline" slot="end"></ion-icon></ion-button>
+            <ion-note style="padding-left:10px;" color="medium">use this if you want to log in with your Emp ID.</ion-note>
+          </ion-col>
+        </ion-row>
+      </section>
+      <section style="width:100%;min-height:40vh;border-radius: 16px;" *ngIf="viewCondition === 'login'">
+        <ion-row>
+          <ion-col class="ion-no-padding">
+            <ion-button fill="clear" (click)="viewCondition = 'sso' " size="small">
+              <ion-icon name="chevron-back-outline" slot="start" > </ion-icon> Back
+            </ion-button>
+          </ion-col>
+        </ion-row>
+        <h2>
+          <ion-text color="dark">Login</ion-text>
+        </h2>
+        <form [formGroup]="loginForms" (ngSubmit)="onLogin()" mode="md"><!--(ngSubmit)="onLogin()"-->
+          <section class="inputbox">
+            <ion-text color="primary" >User ID</ion-text>
+            <ion-item lines="none">
+              <ion-icon name="person-outline" slot="start" color="primary"></ion-icon>
+              <ion-input type="text" placeholder="USER ID" [(ngModel)]="login.userid"  formControlName="userid"></ion-input>
+            </ion-item>
+          </section>
+
+          <section class="inputbox" >
+            <ion-text color="primary">Password </ion-text>
+            <ion-item lines="none">
+              <ion-icon name="key-outline" slot="start" color="primary"></ion-icon>
+              <ion-input [type]="isPassword ? 'password': 'text'" placeholder="Password" [(ngModel)]="login.password" formControlName="password"></ion-input>
+              <ion-buttons slot="end">
+                <ion-button fill="clear" (click)="isPassword = !isPassword">
+                  <ion-icon [name]="isPassword ? 'eye-outline':'eye-off-outline' " slot="icon-only"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+            </ion-item>
+          </section>
+
+          <ion-row class="ion-margin-top">
+            <ion-col class="ion-no-padding">
+              <ion-button type="submit" expand="block" color="primary"  [disabled]="!loginForms.valid || !isHidden" class="ion-text-capitalize"> Next  <ion-spinner *ngIf="!isHidden"></ion-spinner>  </ion-button>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-center">
+              <ion-text color="primary" (click)="openPage('/forgot-password')"><b>Forgot Password</b></ion-text>
+            </ion-col>
+          </ion-row>
+        </form>
+      </section>
+      <section style="width:100%;min-height:40vh" *ngIf="viewCondition === 'multi_factor'">
+        <ion-row >
+          <ion-col class="ion-no-padding" >
+            <ion-button fill="clear" (click)="viewCondition = 'login'" size="small">
+              <ion-icon name="chevron-back-outline" slot="start" > </ion-icon> Back
+            </ion-button>
+          </ion-col>
+        </ion-row>
+        <h2>
+          <ion-text color="dark">Multi-Factor Authentication</ion-text>
+        </h2>
+        <p>
+          <ion-text color="primary">We have sent a code to your mobile no ********099</ion-text>
+        </p>
+        <br>
+
+        <ion-row>
+          <ion-col class="ion-text-center">
+            <ng-otp-input  [config]="otpConfig"></ng-otp-input>
+          </ion-col>
+        </ion-row>
+        <br>
+        <br>
+        <ion-row>
+          <ion-col class="ion-no-padding">
+            <ion-button expand="block" fill="solid" class="ion-text-capitalie" (click)="multiFactorSubmit()">Submit Code </ion-button>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col class="ion-no-padding">
+            <ion-button expand="block" fill="clear" class="ion-text-capitalie">Resend Code </ion-button>
+          </ion-col>
+        </ion-row>
+      </section>
+    </ion-card>
+  </div>
+
+  <ion-grid style="position:absolute;bottom:10px;width:100%">
+    <ion-row>
+      <ion-col  class="ion-text-center">
+        <ion-text color="primary" style="font-size:11px;font-weight: 530;">Powered By</ion-text>
+      </ion-col>
+    </ion-row>
+    <ion-row >
+      <ion-col class="ion-text-center">
+        <img src="assets/img/mobilise-logo.svg" style="height:23px;width:88px">
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+
+<!-- <ion-content>
   <div style="height:15%;width:100%;display: flex;justify-content:right;align-items: center;padding-right:20px">
     <img src="assets/menu_icon.svg" style="height:40px;width:200px;">
   </div>
@@ -54,55 +188,4 @@
   <div style="width:100%;height:80px;text-align: center;">
     <img src="assets/img/mobilise_sodexo.png" style="height:80px;width:70%;">
   </div>
-</ion-content>
-<!-- <ion-content>
-  <div class="mainDiv">
-    <div class="splash-bg">
-      <img src="assets/menu_icon.svg">
-    </div>
-    <img src="assets/bottom_icon.png" style="position:absolute;bottom:5px;right:5px;height:100px;width:100px;">
-    <div class="formDiv">
-      <form [formGroup]="loginForms" (ngSubmit)="checkInternet()">
-        <ion-list class="bg-transparent">
-          <ion-item color="none" lines="none" >
-            <ion-label position="floating" color="primary">USER ID</ion-label>
-            <ion-input [(ngModel)]="login.userid" type="text"  formControlName="userid" required>
-            </ion-input>
-          </ion-item>
-
-          <ion-item color="none" lines="none">
-            <ion-label position="floating" color="primary">PASSWORD</ion-label>
-            <ion-input [(ngModel)]="login.password" [type]="mypass ? 'password': 'text'" formControlName="password" required></ion-input>
-            <ion-buttons slot="end">
-              <ion-button (click)="mypass = !mypass" slot="icon-only">
-                <ion-icon [name]="mypass ? 'eye-outline': 'eye-off-outline'"></ion-icon>
-              </ion-button>
-            </ion-buttons>
-          </ion-item>
-        </ion-list>
-        <ion-row>
-          <ion-col class="ion-text-center">
-            <ion-button type="submit" color="primary" expand="block" [disabled]="!loginForms.valid" [hidden]='!isHidden'>Login</ion-button>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col *ngIf="!isAndroid">
-            <ion-text color="danger" (click)="openPage('/register')"><u>Register</u></ion-text>
-          </ion-col>
-          <ion-col class="ion-text-right">
-            <ion-text color="danger" (click)="openPage('/forgot-password')"><u>Forgot Password</u></ion-text>
-          </ion-col>
-        </ion-row>
-      </form>
-    </div>
-
-    <div class="mobilise_logo">
-      <img src="assets/mobilise_loader.gif" [ngClass]="{'loader-img': !isHidden}">
-    </div>
-    <div class="company_title">
-      Powered by Mobilise
-    </div>
-  </div>
-
-</ion-content>
- -->
+</ion-content> -->
