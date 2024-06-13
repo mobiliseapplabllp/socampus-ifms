@@ -185,7 +185,6 @@ export class AppComponent {
     this.router.navigateByUrl('/login', {replaceUrl: true});
   }
 
-
   async presentAlertConfirm() {
     const alert = await this.alertController.create({
       cssClass: 'my-custom-class',

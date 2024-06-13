@@ -1,16 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingController, ModalController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
 import { CostCenterComponent } from '../../shared/cost-center/cost-center.component';
+import { CaptureComponent } from 'src/app/shared/capture/capture.component';
 @Component({
   selector: 'app-complaint',
   templateUrl: './complaint.page.html',
   styleUrls: ['./complaint.page.scss'],
 })
 export class ComplaintPage implements OnInit {
+  @ViewChild('videoElement') videoElement!: ElementRef;
+  @ViewChild('video') video!: ElementRef;
+
+  mediaRecorder: any;
+  maxChunkDuration = 10000;
+  recordedChunks: Blob[] = [];
+  output: any;
+  output1: any;
+
   status = 'not_resolved';
   tickets: any = [];
   ticketsCopy: any = [];
@@ -29,6 +39,9 @@ export class ComplaintPage implements OnInit {
   searchValue!: string;
   searchValueDesc!: string;
   resolveTicket: any = [];
+  isWorkingVid = false;
+  allRecording: any = [];
+  play = false;
   constructor(
     private httpCompalint: ComplaintService,
     private httpCommon: CommonService,
@@ -45,6 +58,259 @@ export class ComplaintPage implements OnInit {
   ionViewDidEnter() {}
 
   ionViewDidLeave() {}
+
+  async openCapture() {
+    const modal = await this.modalController.create({
+      component: CaptureComponent,
+      componentProps : { }
+    });
+    modal.onWillDismiss().then(disModal => {
+      console.log(disModal);
+      if (disModal.role) {
+      }
+    });
+    return await modal.present();
+  }
+
+  startRecording() {
+    // const videoElement = document.querySelector('video');
+    const videoElement: HTMLVideoElement = this.videoElement.nativeElement;
+    navigator.mediaDevices.getUserMedia({ video: {width: {ideal: 640}, height: {ideal: 480}, frameRate: {ideal: 15}}, audio: false })
+        .then((stream) => {
+            videoElement.srcObject = stream;
+            const options = {
+              mimeType: 'video/webm; codecs=vp8', // Ensure compatibility
+              videoBitsPerSecond: 200000,         // Set video bitrate to 500kbps
+              audioBitsPerSecond: 64000           // Set audio bitrate to 64kbps
+          };
+            this.mediaRecorder = new MediaRecorder(stream, options);
+
+            this.mediaRecorder.ondataavailable = (event: any) => {
+                if (event.data.size > 0) {
+                    this.saveBlobAsFile(event.data, `video_chunk_${Date.now()}.webm`);
+                }
+            };
+
+            this.mediaRecorder.onstop = () => {
+                if (this.mediaRecorder.state !== 'recording') {
+                  // console.log('on stop fun');
+                  //   this.mediaRecorder.start();
+
+                }
+            };
+
+            this.mediaRecorder.start();
+            this.saveBlobAndRestart();
+        })
+        .catch((err) => {
+            console.error('Error accessing media devices:', err);
+        });
+}
+
+saveBlobAndRestart() {
+  let setTimeOut = setTimeout(() => {
+    this.mediaRecorder.stop();
+    this.startRecording();
+  }, 60 * 1000);
+}
+
+
+
+stopAndRestartRecording() {
+  if (this.mediaRecorder.state === 'recording') {
+      this.mediaRecorder.stop();
+  }
+}
+
+saveBlobAsFile(blob: any, fileName: any) {
+  console.log(blob);
+  console.log(fileName);
+  const a: any = document.createElement('a');
+  document.body.appendChild(a);
+  a.style = 'display: none';
+  const url = window.URL.createObjectURL(blob);
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+//   startRecording() {
+//     const videoElement: HTMLVideoElement = this.videoElement.nativeElement;
+//     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+//       videoElement.srcObject = stream;
+//       this.mediaRecorder = new MediaRecorder(stream);
+//       this.mediaRecorder.ondataavailable = (event: any) => {
+//         if (event.data.size > 0) {
+//           // console.log(event.data);
+//           this.recordedChunks.push(event.data);
+//           // this.splitAndSaveChunks(this.recordedChunks, 1048576 * 4 );
+//         }
+//       };
+//       this.mediaRecorder.start();
+//     }).catch((err) => {
+//       console.error('Error accessing media devices: ', err);
+//     });
+//   }
+
+//   async splitAndSaveChunks(blob: any, maxSizeInBytes: number, startIndex = 0) {
+//     const chunkSize = maxSizeInBytes;
+//     const numChunks = Math.ceil(blob.size / chunkSize);
+
+//     if (startIndex >= numChunks) {
+//         return; // All chunks processed
+//     }
+
+//     const start = startIndex * chunkSize;
+//     const end = Math.min(start + chunkSize, blob.size);
+//     const chunkBlob = blob.slice(start, end, 'video/webm');
+
+//     await this.saveBlobAsFile(chunkBlob, `video_chunk_${startIndex}.webm`);
+
+//     await this.splitAndSaveChunks(blob, maxSizeInBytes, startIndex + 1); // Process next chunk
+// }
+
+// async convertAndSaveVideos(recordedChunks: any, maxSizeInBytes: any) {
+//   const concatenatedBlob = new Blob(recordedChunks, { type: 'video/webm' });
+
+//   const numChunks = Math.ceil(concatenatedBlob.size / maxSizeInBytes);
+
+//   for (let i = 0; i < numChunks; i++) {
+//       const start = i * maxSizeInBytes;
+//       const end = Math.min(start + maxSizeInBytes, concatenatedBlob.size);
+//       const chunkBlob = concatenatedBlob.slice(start, end, 'video/webm');
+
+//       if (chunkBlob.size > 0) {
+//           await this.saveBlobAsFile(chunkBlob, `video_chunk_${i}.webm`);
+//       }
+//   }
+// }
+
+// async saveBlobAsFile(blob: any, fileName: any) {
+//   console.log(fileName);
+//   console.log(blob);
+//   const a: any = document.createElement('a');
+//   document.body.appendChild(a);
+//   a.style = 'display: none';
+//   const url = window.URL.createObjectURL(blob);
+//   a.href = url;
+//   a.download = fileName;
+//   a.click();
+//   window.URL.revokeObjectURL(url);
+// }
+
+//   convertAndSaveVideos(recordedChunks: any, maxSizeInBytes: any) {
+//     // Concatenate recorded chunks into a single Blob
+//     const concatenatedBlob = new Blob(recordedChunks, { type: 'video/webm' });
+
+//     // Check if concatenated Blob size exceeds maxSizeInBytes
+//     if (concatenatedBlob.size > maxSizeInBytes) {
+//         const numChunks = Math.ceil(concatenatedBlob.size / maxSizeInBytes);
+//         const chunkSize = Math.ceil(concatenatedBlob.size / numChunks);
+
+//         let start = 0;
+//         let end = chunkSize;
+//         let chunkIndex = 0;
+
+
+//         const chunkBlob: any = concatenatedBlob.slice(3490734, 6981468, 'video/webm');
+//         this.saveBlobAsFile(chunkBlob, `video_chunk_${chunkIndex}.webm`, start, end);
+//         // Split Blob into smaller Blobs
+//         // while (start < concatenatedBlob.size) {
+//         //     const chunkBlob: any = concatenatedBlob.slice(start, end, 'video/webm');
+//         //     this.saveBlobAsFile(chunkBlob, `video_chunk_${chunkIndex}.webm`, start, end);
+//         //     start = end;
+//         //     end = Math.min(start + chunkSize, concatenatedBlob.size);
+//         //     chunkIndex++;
+//         // }
+//     } else {
+//         // Save the single Blob as a video file
+//         console.log('Single Video');
+//         this.saveBlobAsFile(concatenatedBlob, 'video.webm', '', '');
+//     }
+// }
+
+
+
+// 4050658
+
+// saveBlobAsFile(blob: any, fileName: any, start?: any, end?: any) {
+//   console.log('start= ' + start + ' End=' + end);
+//   // this.allRecording.push(blob);
+//   // console.log(this.allRecording);
+//   // return;
+//   const a: any = document.createElement('a');
+//   document.body.appendChild(a);
+//   a.style = 'display: none';
+//   const url = window.URL.createObjectURL(blob);
+//   a.href = url;
+//   a.download = fileName;
+//   a.click();
+//   window.URL.revokeObjectURL(url);
+// }
+
+// down(blob: any) {
+//   console.log(blob);
+//   const a: any = document.createElement('a');
+//   document.body.appendChild(a);
+//   a.style = 'display: none';
+//   const url = window.URL.createObjectURL(blob);
+//   a.href = url;
+//   a.download = 'video.webm';
+//   a.click();
+//   window.URL.revokeObjectURL(url);
+// }
+
+
+//   stopRecording() {
+//     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+//       this.mediaRecorder.stop();
+//       setTimeout(() => {
+//         const maxSizeInBytes = 5 * 1024 * 1024;
+//         this.convertAndSaveVideos(this.recordedChunks, maxSizeInBytes);
+//         // console.log(this.recordedChunks);
+
+//         // const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+
+//         // this.output = blob;
+//         // this.splitAndSaveChunks(blob, 1048576 * 4 );
+//         // console.log(this.output);
+//         const stream = this.videoElement.nativeElement.srcObject as MediaStream;
+//         const tracks = stream.getTracks();
+//         tracks.forEach(track => track.stop());
+//         this.videoElement.nativeElement.srcObject = null;
+//         this.playRecordedVideo();
+//       }, 1000);
+
+//     }
+//   }
+
+//   downloadVideo() {
+//     const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+//     console.log(blob);
+//     const url = window.URL.createObjectURL(blob);
+//     const a = document.createElement('a');
+//     document.body.appendChild(a);
+//     a.style.display = 'none';
+//     a.href = url;
+//     a.download = 'recorded-video.webm';
+//     a.click();
+//     window.URL.revokeObjectURL(url);
+//   }
+
+
+  // playRecordedVideo() {
+  //   if (this.output) {
+  //     const url = window.URL.createObjectURL(this.output);
+  //     this.video.nativeElement.src = url;
+  //     this.video.nativeElement.play();
+  //     // Revoke object URL when video playback is done
+  //     this.video.nativeElement.onended = () => {
+  //       window.URL.revokeObjectURL(url);
+  //     };
+  //   }
+  // }
+
 
   ionViewWillEnter() {
     this.getTicketStages();

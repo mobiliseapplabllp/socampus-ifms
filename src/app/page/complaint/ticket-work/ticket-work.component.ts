@@ -9,6 +9,11 @@ import { Camera, CameraResultType } from '@capacitor/camera';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { SignatureComponent } from 'src/app/shared/signature/signature.component';
 import { InstructionModalComponent } from '../instruction-modal/instruction-modal.component';
+import { File } from '@awesome-cordova-plugins/file/ngx';
+import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
+import { Filesystem } from '@capacitor/filesystem';
+import { CaptureComponent } from 'src/app/shared/capture/capture.component';
+
 @Component({
   selector: 'app-ticket-work',
   templateUrl: './ticket-work.component.html',
@@ -53,6 +58,7 @@ export class TicketWorkComponent  implements OnInit {
   isPtwMandatory!: boolean;
   arr: any = [];
   scopeOfWorkArr: any = [];
+  isVidUpl!: boolean
   constructor(
     private activeRoute: ActivatedRoute,
     private formbuilder: FormBuilder,
@@ -64,7 +70,10 @@ export class TicketWorkComponent  implements OnInit {
     private actionSheetController: ActionSheetController,
     private router: Router,
     private loadingController: LoadingController,
-    private platform: Platform
+    private platform: Platform,
+    private mediaCapture: MediaCapture,
+    private file: File,
+    private modalController: ModalController
   ) { }
 
   ngOnInit() {
@@ -178,6 +187,14 @@ export class TicketWorkComponent  implements OnInit {
     await confirm.present();
   }
 
+  changeFile(ev: any) {
+    if (ev.target.files.length > 0) {
+      this.formData.delete('video');
+      this.formData.append('video', ev.target.files[0], ev.target.files[0].name);
+      this.isVidUpl = true;
+    }
+  }
+
   changePriority(ev: any) {
     const obj = {
       id: ev.target.value,
@@ -203,8 +220,29 @@ export class TicketWorkComponent  implements OnInit {
         }
       });
     });
-
   }
+
+  async customActionSheet() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Choose Video Option',
+      mode: 'ios',
+      buttons: [{
+        text: 'Record Video',
+        handler:() => {
+          this.openCapture();
+        }
+      }, {
+        text: 'Upload Video',
+        handler:() => {
+          document.getElementById('choose-file')?.click();
+        }
+      }],
+    });
+
+    await actionSheet.present();
+  }
+
+
 
   getPriority() {
     this.httpComplaint.getTicketPriority(this.ticket_id).subscribe({
@@ -356,7 +394,6 @@ export class TicketWorkComponent  implements OnInit {
             if (this.workSpace.value.status == 4) {
               this.httpCommon.setHomeLoadStatus(true);
             }
-
             this.httpCommon.presentToast(data.msg, 'success');
             this.navCtrl.pop();
           } else {
@@ -373,6 +410,36 @@ export class TicketWorkComponent  implements OnInit {
       });
     })
   }
+
+  async captureAndUploadVideo() {
+    let options: CaptureVideoOptions = { limit: 1, quality:0, duration: 60};
+    this.mediaCapture.captureVideo(options).then(async (_data: any) => {
+      console.log(_data);
+      this.getVideoUrl(_data[0].fullPath);
+    }, _err => {
+
+    });
+  }
+
+  async getVideoUrl(fullPath: string) {
+    console.log(fullPath);
+    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.mp4'
+    const file = await Filesystem.readFile({
+      path: fullPath,
+    });
+
+    this.presentLoading().then(async preLoad => {
+      const base64Video = `data:video/mp4;base64,${file.data}`
+      const base64Response = await fetch(base64Video);
+      const blob = await base64Response.blob();
+      console.log(blob);
+      this.formData.delete('video');
+      this.formData.append('video', blob, random);
+      this.isVidUpl = true;
+      this.dismissLoading();
+    })
+
+}
 
   async assignTicket() {
     const modal = await this.modalCtrl.create({
@@ -534,6 +601,29 @@ export class TicketWorkComponent  implements OnInit {
       }
     });
   }
+
+  async openCapture() {
+    if (!this.workSpace.value.remark) {
+      this.httpCommon.presentToast('Please Enter Remark', 'warning');
+      return;
+    }
+    this.requestedData.remark = this.workSpace.value.remark
+    console.log(this.requestedData);
+    const modal = await this.modalController.create({
+      component: CaptureComponent,
+      componentProps : {
+        requestedData: this.requestedData
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      console.log(disModal);
+      if (disModal.role) {
+
+      }
+    });
+    return await modal.present();
+  }
+
 
   async openSign(data: any) {
     const modal = await this.modalCtrl.create({

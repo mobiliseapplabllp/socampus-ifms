@@ -1,7 +1,4 @@
 
-<!-- <ion-col class="ion-text-center">
-  <img src="assets/menu_icon.svg" style="height:80px;width:170px">
-</ion-col> -->
 <ion-content class="center">
   <ion-row style="position:absolute;top:100px;width:100%">
     <ion-col class="ion-text-center">
@@ -137,7 +134,7 @@
     <img src="assets/menu_icon.svg" style="height:40px;width:200px;">
   </div>
 
-  <ion-item lines="none">
+  <ion-item lines="none" (click)="captureAndUploadVideo(3)">
     <ion-label>
       <h2 style="height:27px"><b>Welcome</b></h2>
       <p style="height:18px; color:rgba(156, 181, 225, 1)">to Socampus Service Application</p>
@@ -180,9 +177,10 @@
     </ion-col>
   </ion-row>
   <br>
+
   <div class="br"></div>
   <br>
-  <ion-row>
+  <ion-row (click)="captureAndUploadVideo(1)">
     <ion-col class="ion-text-center"><i><ion-text color="medium">--Powered By--</ion-text></i></ion-col>
   </ion-row>
   <div style="width:100%;height:80px;text-align: center;">

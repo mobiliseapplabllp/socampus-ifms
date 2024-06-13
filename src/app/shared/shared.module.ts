@@ -16,6 +16,9 @@ import { LocationComponent } from './location/location.component';
 import { DeviceGroupComponent } from './device-group/device-group.component';
 import { BuildingComponent } from './building/building.component';
 import { PhotoViewComponent } from './photo-view/photo-view.component';
+import { VideoComponent } from './video/video.component';
+import { CaptureComponent } from './capture/capture.component';
+import { TimesPipe } from '../pipes/times.pipe';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -30,14 +33,18 @@ import { PhotoViewComponent } from './photo-view/photo-view.component';
     LocationComponent,
     DeviceGroupComponent,
     BuildingComponent,
-    PhotoViewComponent
+    PhotoViewComponent,
+    VideoComponent,
+    CaptureComponent,
+    TimesPipe
+
   ],
   imports: [
     CommonModule,
     SignaturePadModule,
     IonicModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   entryComponents: [
     SignatureComponent,
@@ -52,7 +59,13 @@ import { PhotoViewComponent } from './photo-view/photo-view.component';
     LocationComponent,
     DeviceGroupComponent,
     BuildingComponent,
-    PhotoViewComponent
+    PhotoViewComponent,
+    VideoComponent,
+    CaptureComponent
+  ],
+  exports: [
+    VideoComponent,
+    TimesPipe
   ]
 })
 export class SharedModule { }

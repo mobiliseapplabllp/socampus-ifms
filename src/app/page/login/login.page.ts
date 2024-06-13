@@ -1,12 +1,18 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LoadingController, MenuController, ModalController, Platform } from '@ionic/angular';
+import { LoadingController, MenuController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { environment } from 'src/environments/environment';
 import { PushNotifications } from '@capacitor/push-notifications';
+
+import { File } from '@awesome-cordova-plugins/file/ngx';
+import { MediaCapture, MediaFile, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -28,6 +34,7 @@ export class LoginPage implements OnInit {
   viewCondition = 'sso' // 1. sso, 2. login, 3. multi_factor, 4.forgot_pass, 5. verification)code 6. create_new_pass
   otpConfig = {
     length: 4,
+    allowNumbersOnly:true,
     inputClass: 'custom-otp-input',
     containerClass: 'custom-otp-container'
   };
@@ -39,12 +46,52 @@ export class LoginPage implements OnInit {
     private router: Router,
     private loginPro: LoginService,
     private common: CommonService,
-    private httpDigi: DigitalChecklistService) {
+    private mediaCapture: MediaCapture,
+    private file: File) {
     this.loginForms = formbuilder.group({
       userid: ['', Validators.required],
       password: ['' , Validators.required],
     });
+    // Filesystem.requestPermissions();
   }
+
+
+
+async convertFileToBlob(fullPathOrLocalURL: string) {
+  // Check if it's a local file path
+  console.log(fullPathOrLocalURL);
+  if (fullPathOrLocalURL.startsWith('file:///')) {
+    try {
+      const readFileResult: any = await Filesystem.readFile({
+        path: fullPathOrLocalURL,
+      });
+
+      const buffer = new Uint8Array(readFileResult.data.length);
+      for (let i = 0; i < readFileResult.data.length; i++) {
+        buffer[i] = readFileResult.data.charCodeAt(i);
+      }
+
+      // Handle the video buffer (e.g., display using video element)
+      const blob = new Blob([buffer], { type: 'video/mp4' }); // Set appropriate MIME type
+      console.log(blob)
+    } catch (err) {
+      console.error('Error reading video:', err);
+      // Handle specific errors (e.g., permission denied, file not found)
+    }
+  } else {
+    console.log('return outside');
+    return
+    // Handle downloaded resources based on your download method (replace with your logic)
+    // ...
+  }
+}
+
+getMimeType(fullPath: string): string {
+  // Implement logic to determine the MIME type based on file extension or other information
+  const extension = fullPath.split('.').pop();
+  // Use a mapping or logic to get the MIME type based on extension
+  return 'application/octet-stream'; // Default if type can't be determined
+}
 
   ngOnInit() {
     this.common.setBarcode('');
@@ -115,7 +162,7 @@ export class LoginPage implements OnInit {
     this.menu.enable(true);
   }
 
-  changePass(pass: any) { }
+  changePass(_pass: any) { }
 
 
   async checkInternet() {
