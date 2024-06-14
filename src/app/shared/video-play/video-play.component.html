@@ -1,0 +1,25 @@
+<ion-header>
+  <ion-toolbar color="primary`">
+    <ion-title>Video Play</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal(null, false)">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <video  controls autoplay loop muted>
+    <source [src]="url" type="video/mp4" style="height:100%;width:100%"/>
+    Browser not supported
+  </video>
+</ion-content>
+<ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <ion-button slot="end">
+      <ion-button [href]="url" download="my_video.webm">
+        Download <ion-icon name="cloud-download-outline" slot="end"></ion-icon>
+      </ion-button>
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

@@ -9,6 +9,20 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
+
+  <!-- <div  *ngIf="videoSource">
+    <video width="100%" height="50%" controls autoplay loop muted>
+      <source [src]="videoSource" type="video/mp4" style="height:100%;width:100%"/>
+      Browser not supported
+    </video>
+    <br>
+    <br>
+    <a [href]="videoSource" download="my_video.webm">
+      <button>Download Video</button>
+    </a>
+
+  </div> -->
+
   <ion-card *ngFor="let dat of history"  [ngClass]="{'wip': dat.ticket_status === 'work in progress', 'assign': dat.ticket_status === 'assigned', 'resolve': dat.ticket_status === 'resolve'}">
     <ion-row>
       <ion-col size="4">

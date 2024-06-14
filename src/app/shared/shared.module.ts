@@ -19,6 +19,7 @@ import { PhotoViewComponent } from './photo-view/photo-view.component';
 import { VideoComponent } from './video/video.component';
 import { CaptureComponent } from './capture/capture.component';
 import { TimesPipe } from '../pipes/times.pipe';
+import { VideoPlayComponent } from './video-play/video-play.component';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -36,7 +37,8 @@ import { TimesPipe } from '../pipes/times.pipe';
     PhotoViewComponent,
     VideoComponent,
     CaptureComponent,
-    TimesPipe
+    TimesPipe,
+    VideoPlayComponent
 
   ],
   imports: [
@@ -61,11 +63,13 @@ import { TimesPipe } from '../pipes/times.pipe';
     BuildingComponent,
     PhotoViewComponent,
     VideoComponent,
-    CaptureComponent
+    CaptureComponent,
+    VideoPlayComponent
   ],
   exports: [
     VideoComponent,
-    TimesPipe
+    TimesPipe,
+    VideoPlayComponent
   ]
 })
 export class SharedModule { }

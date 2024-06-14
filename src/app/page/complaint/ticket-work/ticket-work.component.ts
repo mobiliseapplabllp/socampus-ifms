@@ -13,6 +13,12 @@ import { File } from '@awesome-cordova-plugins/file/ngx';
 import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
 import { Filesystem } from '@capacitor/filesystem';
 import { CaptureComponent } from 'src/app/shared/capture/capture.component';
+import { from } from 'rxjs';
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+
+// import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+// const { createFFmpeg, fetchFile } = require('@ffmpeg/ffmpeg');
+// const ffmpeg = createFFmpeg({ log: true });
 
 @Component({
   selector: 'app-ticket-work',
@@ -20,6 +26,8 @@ import { CaptureComponent } from 'src/app/shared/capture/capture.component';
   styleUrls: ['./ticket-work.component.scss'],
 })
 export class TicketWorkComponent  implements OnInit {
+  // ffmpeg = createFFmpeg({ log: true });
+  // ffmpeg = createFFmpeg({ log: true });
   segmentStatus = 'ticket';
   public workSpace!: FormGroup;
   assetInfo: any = {};
@@ -58,7 +66,9 @@ export class TicketWorkComponent  implements OnInit {
   isPtwMandatory!: boolean;
   arr: any = [];
   scopeOfWorkArr: any = [];
-  isVidUpl!: boolean
+  isVidUpl!: boolean;
+  ffmpeg = createFFmpeg({ log: true });
+  selectedFile: any;
   constructor(
     private activeRoute: ActivatedRoute,
     private formbuilder: FormBuilder,
@@ -70,9 +80,7 @@ export class TicketWorkComponent  implements OnInit {
     private actionSheetController: ActionSheetController,
     private router: Router,
     private loadingController: LoadingController,
-    private platform: Platform,
     private mediaCapture: MediaCapture,
-    private file: File,
     private modalController: ModalController
   ) { }
 
@@ -86,8 +94,43 @@ export class TicketWorkComponent  implements OnInit {
       this.initForm();
     });
     this.getTicketStages();
+    this.loadFFmpeg();
     // this.httpComplaint.setResolveTicket({status: true, ticket_id: 283});
   }
+
+  async loadFFmpeg() {
+    if (!this.ffmpeg.isLoaded()) {
+      await this.ffmpeg.load();
+    }
+  }
+
+
+  async onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+      console.log(this.selectedFile);
+      // this.videoPlayer.nativeElement.src = URL.createObjectURL(this.selectedFile);
+
+      // await this.loadFFmpeg();
+
+      const fileData = await fetchFile(this.selectedFile);
+      const fileName = this.selectedFile.name;
+      console.log(fileData);
+      console.log(fileName);
+      this.ffmpeg.FS('writeFile', fileName, fileData);
+
+      await this.ffmpeg.run('-i', fileName, '-vcodec', 'libx264', '-crf', '28', 'output.mp4');
+
+      const data = this.ffmpeg.FS('readFile', 'output.mp4');
+
+      const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
+      console.log(videoBlob);
+      // this.compressedFile = new File([videoBlob], 'output.mp4', { type: 'video/mp4' });
+      // this.videoPlayer.nativeElement.src = URL.createObjectURL(this.compressedFile);
+    }
+  }
+
 
   initForm() {
     this.workSpace = this.formbuilder.group({
@@ -187,7 +230,9 @@ export class TicketWorkComponent  implements OnInit {
     await confirm.present();
   }
 
-  changeFile(ev: any) {
+  async changeFile(ev: any) {
+    console.log(ev.target.files[0]);
+    console.log(ev.target.files[0].name);
     if (ev.target.files.length > 0) {
       this.formData.delete('video');
       this.formData.append('video', ev.target.files[0], ev.target.files[0].name);
