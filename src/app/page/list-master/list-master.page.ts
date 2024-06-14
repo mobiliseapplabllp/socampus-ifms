@@ -34,6 +34,7 @@ export class ListMasterPage implements OnInit {
     autoplay: true,
   };
   isInternet!: boolean;
+  myFiles: any;
   constructor(
     private listMaster: ListMasterService,
     private toastController: ToastController,
@@ -48,16 +49,9 @@ export class ListMasterPage implements OnInit {
       this.userData = JSON.parse(user);
       this.userName = this.userData.user_name
     }
-    // this.checkDeviceTime();
   }
 
   ngOnInit() {
-    // console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
-    if (this.isAutomaticDateTimeEnabled()) {
-      console.log('correct');
-    } else {
-      console.log('not correct');
-    }
     this.common.checkInternet().then(res => {
       if (res) {
         this.isInternet = true;
@@ -76,6 +70,32 @@ export class ListMasterPage implements OnInit {
         }
       }
     });
+
+  }
+
+  changeFile(ev: any) {
+    console.log(ev);
+    this.myFiles = ev.target.files[0]
+    setTimeout(() => {
+      this.testAi();
+    }, 1000);
+
+  }
+
+  testAi() {
+    console.log('a');
+    const formData = new FormData();
+    formData.append('document', this.myFiles);
+    formData.append('type', 'type');
+    formData.append('count', '0');
+    this.listMaster.tstInv(formData).subscribe({
+      next:(data) => {
+        console.log(data);
+      },
+      error:() => {
+
+      }
+    })
   }
 
   getDashboard() {

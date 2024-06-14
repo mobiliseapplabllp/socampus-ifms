@@ -4,13 +4,12 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title > {{userName}} </ion-title>
-    <!-- <ion-buttons slot="end" >
+    <ion-buttons slot="end" >
       <ion-button (click)="openBarcode()">
         <ion-icon name="qr-code-outline"></ion-icon>
       </ion-button>
-    </ion-buttons> -->
+    </ion-buttons>
   </ion-toolbar>
-
 </ion-header>
 <ion-content>
   <ion-row *ngIf="isInternet">
@@ -18,7 +17,7 @@
       <ion-text color="primary"><b>Working Summary</b></ion-text>
     </ion-col>
   </ion-row>
-
+  <!-- <ion-input type="file" (change)="changeFile($event)"></ion-input> -->
   <ion-slides *ngIf="isInternet" [options]="slideOptsOne" pager="true" class="custom_slide">
     <ion-slide >
       <ion-row >

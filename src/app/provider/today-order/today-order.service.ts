@@ -157,7 +157,8 @@ export class TodayOrderService {
   }
 
   getCambroStatus(encQr: string): Observable<any> {
-    return this.https.get(environment.url + 'meal/cambroReturn/cambro-info-by-barcode?barcode=' + encQr);
+    // http://localhost/socampus-backend/api/assets/reporting/cambro-info-by-barcode?barcode=1016111232
+    return this.https.get(environment.url + 'assets/reporting/cambro-info-by-barcode?barcode=' + encQr);
   }
 
 }

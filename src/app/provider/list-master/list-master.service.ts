@@ -50,4 +50,8 @@ export class ListMasterService {
   getComplaintSummary(): Observable<any> {
     return this.https.get(environment.url + 'complaints/dash/statusCount');
   }
+
+  tstInv(formData: any): Observable<any> {
+    return this.https.post('http://13.71.46.146/doc/invoice', formData);
+  }
 }
