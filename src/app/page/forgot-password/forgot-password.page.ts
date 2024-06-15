@@ -20,6 +20,12 @@ export class ForgotPasswordPage implements OnInit {
   myOtp!: string;
   requestedData: any = [];
   lastNumber!: string;
+  otpConfig = {
+    length: 4,
+    allowNumbersOnly:true,
+    inputClass: 'custom-otp-input',
+    containerClass: 'custom-otp-container'
+  };
   constructor(
     private loadingController: LoadingController,
     private httpLogin: LoginService,
@@ -78,6 +84,10 @@ export class ForgotPasswordPage implements OnInit {
         });
       });
     }
+  }
+
+  popPage() {
+    this.navCtrl.pop();
   }
 
   async presentLoading() {

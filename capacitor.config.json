@@ -11,8 +11,8 @@
   "SplashScreen": {
     "launchShowDuration": 3000,
     "launchAutoHide": false,
-    "backgroundColor": "#ffffff",
-    "androidScaleType": "CENTER_CROP",
+    "backgroundColor": "#FE9999",
+    "androidScaleType": "FIT_XY",
     "showSpinner": false
   },
   "cordova": {

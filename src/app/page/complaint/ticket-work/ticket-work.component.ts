@@ -9,16 +9,9 @@ import { Camera, CameraResultType } from '@capacitor/camera';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { SignatureComponent } from 'src/app/shared/signature/signature.component';
 import { InstructionModalComponent } from '../instruction-modal/instruction-modal.component';
-import { File } from '@awesome-cordova-plugins/file/ngx';
 import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
 import { Filesystem } from '@capacitor/filesystem';
 import { CaptureComponent } from 'src/app/shared/capture/capture.component';
-import { from } from 'rxjs';
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
-
-// import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
-// const { createFFmpeg, fetchFile } = require('@ffmpeg/ffmpeg');
-// const ffmpeg = createFFmpeg({ log: true });
 
 @Component({
   selector: 'app-ticket-work',
@@ -26,8 +19,6 @@ import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
   styleUrls: ['./ticket-work.component.scss'],
 })
 export class TicketWorkComponent  implements OnInit {
-  // ffmpeg = createFFmpeg({ log: true });
-  // ffmpeg = createFFmpeg({ log: true });
   segmentStatus = 'ticket';
   public workSpace!: FormGroup;
   assetInfo: any = {};
@@ -46,7 +37,6 @@ export class TicketWorkComponent  implements OnInit {
   requestedData_TEMP: any = [];
   mobile: any;
   hasWip: any;
-  // ptwApproved: any;
   countStatus = false;
   countTime!: number;
   mm!: number;
@@ -61,13 +51,11 @@ export class TicketWorkComponent  implements OnInit {
   isFormDisabled!: boolean;
   ticketPriority: any = [];
   isPriority: any;
-  // selectPriority: string;
   changePriorityObj: any = {};
   isPtwMandatory!: boolean;
   arr: any = [];
   scopeOfWorkArr: any = [];
   isVidUpl!: boolean;
-  ffmpeg = createFFmpeg({ log: true });
   selectedFile: any;
   constructor(
     private activeRoute: ActivatedRoute,
@@ -94,43 +82,7 @@ export class TicketWorkComponent  implements OnInit {
       this.initForm();
     });
     this.getTicketStages();
-    this.loadFFmpeg();
-    // this.httpComplaint.setResolveTicket({status: true, ticket_id: 283});
   }
-
-  async loadFFmpeg() {
-    if (!this.ffmpeg.isLoaded()) {
-      await this.ffmpeg.load();
-    }
-  }
-
-
-  async onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-      console.log(this.selectedFile);
-      // this.videoPlayer.nativeElement.src = URL.createObjectURL(this.selectedFile);
-
-      // await this.loadFFmpeg();
-
-      const fileData = await fetchFile(this.selectedFile);
-      const fileName = this.selectedFile.name;
-      console.log(fileData);
-      console.log(fileName);
-      this.ffmpeg.FS('writeFile', fileName, fileData);
-
-      await this.ffmpeg.run('-i', fileName, '-vcodec', 'libx264', '-crf', '28', 'output.mp4');
-
-      const data = this.ffmpeg.FS('readFile', 'output.mp4');
-
-      const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
-      console.log(videoBlob);
-      // this.compressedFile = new File([videoBlob], 'output.mp4', { type: 'video/mp4' });
-      // this.videoPlayer.nativeElement.src = URL.createObjectURL(this.compressedFile);
-    }
-  }
-
 
   initForm() {
     this.workSpace = this.formbuilder.group({
@@ -144,7 +96,6 @@ export class TicketWorkComponent  implements OnInit {
       phone_no: [''],
       otp: [''],
     });
-
   }
 
   testOtp() {

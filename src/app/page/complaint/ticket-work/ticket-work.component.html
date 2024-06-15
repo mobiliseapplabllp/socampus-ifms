@@ -23,7 +23,6 @@
   </ion-segment>
   <div [ngSwitch]='segmentStatus' style="height: 100%;width:100%;">
     <div *ngSwitchCase="'ticket'">
-      <input type="file" accept="video/*" capture="camcorder" (change)="onFileSelected($event)">
       <div *ngIf="arr.attend_time || arr.attend_time === 0">
         <ion-item >
           <ion-label position="floating">Ticket Priority <ion-text color="danger">*</ion-text> </ion-label>
