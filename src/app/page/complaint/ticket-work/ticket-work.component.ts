@@ -89,6 +89,39 @@ export class TicketWorkComponent  implements OnInit {
     this.getTicketStages();
   }
 
+  async compressVideo(file: Blob) {
+    try {
+      console.log(file);
+
+      const inputPath = this.createLocalUrl(file);
+      console.log('1');
+      const outputPath = inputPath.replace(/(\.\w+)$/, '-compressed$1');
+      console.log('2');
+      // Replace this command with your desired FFmpeg command for compression
+      const ffmpegCommand = `-i ${inputPath} -vcodec libx265 -crf 28 ${outputPath}`;
+      console.log('3');
+      const result = await this.ffmpeg.exec(ffmpegCommand);
+      console.log('Compression successful:', result);
+
+      // You can now use the outputPath to do something with the compressed video
+    } catch (error) {
+      console.error('Error compressing video:', error);
+    }
+  }
+
+  createLocalUrl(file: Blob): string {
+    const url = URL.createObjectURL(file);
+    return url;
+  }
+
+  // changeFile(event: Event) {
+  //   const input = event.target as HTMLInputElement;
+  //   if (input.files && input.files[0]) {
+  //     const file = input.files[0];
+  //     this.compressVideo(file);
+  //   }
+  // }
+
   initForm() {
     this.workSpace = this.formbuilder.group({
       status: ['' , Validators.required],
@@ -187,13 +220,19 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   async changeFile(ev: any) {
-    console.log(ev.target.files[0]);
-    console.log(ev.target.files[0].name);
-    if (ev.target.files.length > 0) {
-      this.formData.delete('video');
-      this.formData.append('video', ev.target.files[0], ev.target.files[0].name);
-      this.isVidUpl = true;
+    const input = ev.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      console.log(file);
+      this.compressVideo(file);
     }
+    // console.log(ev.target.files[0]);
+    // console.log(ev.target.files[0].name);
+    // if (ev.target.files.length > 0) {
+    //   this.formData.delete('video');
+    //   this.formData.append('video', ev.target.files[0], ev.target.files[0].name);
+    //   this.isVidUpl = true;
+    // }
   }
 
   changePriority(ev: any) {
