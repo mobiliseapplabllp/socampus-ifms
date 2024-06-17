@@ -37,79 +37,11 @@
       </ion-col>
       <ion-col size="5" style="display: flex;align-items: center;">
         <div>
-          <!-- <p><ion-text class="key"> No of Boxes: </ion-text></p>
-          <p><ion-text class="key">Delivery Time: </ion-text></p> -->
           <ion-button size="small" class="ion-text-capitalize" color="success" (click)="openPage(dat)">View Items <ion-icon name="arrow-forward-outline" slot="end"></ion-icon> </ion-button>
         </div>
       </ion-col>
     </ion-row>
   </ion-card>
 
-  <!-- <form [formGroup]="forms">
-    <ion-item (click)="openSiteModal()">
-      <ion-label color="primary" position="floating">Select Site <ion-text color="danger">*</ion-text></ion-label>
-      <ion-input type="text" formControlName="pc_id_desc"  readonly></ion-input>
-    </ion-item>
-    <ion-row>
-      <ion-col class="ion-no-padding" size="6">
-        <ion-item>
-          <ion-label position="floating">Meal Type</ion-label>
-          <ion-select interface="action-sheet" mode="ios" formControlName="type_id">
-            <ion-select-option *ngFor="let dat of typeArr" [value]="dat.type_id">{{dat.label}}</ion-select-option>
-          </ion-select>
-        </ion-item>
-      </ion-col>
-      <ion-col class="ion-no-padding" size="6">
-        <ion-item>
-          <ion-label position="floating">Status</ion-label>
-          <ion-select interface="action-sheet" mode="ios" formControlName="ord_status">
-            <ion-select-option  *ngFor="let dat of orderStatusArr" [value]="dat.value">{{dat.label}}</ion-select-option>
-          </ion-select>
-        </ion-item>
-      </ion-col>
-    </ion-row>
-    <ion-item id="order-pack-date">
-      <ion-label color="primary" position="floating">Select Date</ion-label>
-      <ion-input type="text"  placeholder="Select Date" [value]="forms.value.date | date"  readonly></ion-input>
-    </ion-item>
-    <ion-popover trigger="order-pack-date" >
-      <ng-template>
-        <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" formControlName="date" (ionChange)="changeDate()"></ion-datetime>
-      </ng-template>
-    </ion-popover>
-    <ion-row>
-      <ion-col size="12">
-        <ion-button expand="block" shape="round" (click)="search()">Search <ion-icon name="search-outline" slot="end"></ion-icon></ion-button>
-      </ion-col>
-    </ion-row>
-  </form>
-
-  <ion-card *ngFor="let dat of packingArr" (click)="openPage(dat)">
-    <ion-row>
-      <ion-col size="12">
-        <ion-text color="primary">PC</ion-text><br>
-        <ion-text color="medium">{{dat.pc_desc}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text color="primary">Order ID</ion-text><br>
-        <ion-text color="medium">{{dat.order_id}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text color="primary">PC ID</ion-text><br>
-        <ion-text color="medium">{{dat.pc_id}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text color="primary">Type</ion-text><br>
-        <ion-text color="medium">{{dat.type_desc}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text color="primary">Total Items</ion-text><br>
-        <ion-text color="medium">{{dat.total_items}}</ion-text>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col class="ion-text-right"><ion-button shape="round">Next <ion-icon name="arrow-forward-outline" slot="end"></ion-icon> </ion-button></ion-col>
-    </ion-row>
-  </ion-card> -->
 
 </ion-content>

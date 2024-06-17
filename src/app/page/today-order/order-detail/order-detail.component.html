@@ -48,7 +48,7 @@
         </svg>
         <ion-button *ngIf="dat.isPack" size="small" expand="block" class="ion-text-capitalize" style="--background:#040E51;--border-radius:6px">Picked</ion-button>
       </ion-col>
-      <ion-col size="3" class="center" *ngIf="requestedData.ord_status !== 5">
+      <ion-col size="3" class="center" *ngIf="requestedData.ord_status !== 5 && requestedData.ord_status">
         <ion-button size="small" expand="block" class="ion-text-capitalize" style="--background:#040E51;--border-radius:6px">Picked</ion-button>
       </ion-col>
     </ion-row>

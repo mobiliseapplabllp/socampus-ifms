@@ -22,16 +22,12 @@
         <ion-text >{{basicDetails.dispatch_time}}</ion-text>
       </ion-col>
       <ion-col size="6">
-        <ion-text color="dark">Packed Recipe</ion-text><br>
-        <ion-text >{{basicDetails.packQty}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text color="dark">Dispatch Time Id</ion-text><br>
+        <ion-text color="dark">Dispatch Time </ion-text><br>
         <ion-text >{{basicDetails.site_dlvry_time}}</ion-text>
       </ion-col>
       <ion-col size="6">
-        <ion-text color="dark">No of Cambro Box</ion-text><br>
-        <ion-text >{{basicDetails.qr_count}}</ion-text>
+        <ion-text color="dark">Cambro Box</ion-text><br>
+        <ion-text >{{basicDetails.packQty}}/{{basicDetails.qr_count}}</ion-text>
       </ion-col>
     </ion-row>
     <ion-row>
@@ -124,26 +120,6 @@
           </ion-label>
         </ion-item>
       </fieldset>
-      <!-- <ion-row class="odd">
-        <ion-col size="6">Name</ion-col>
-        <ion-col size="6">{{basicDetails.driver_name}}</ion-col>
-      </ion-row>
-      <ion-row >
-        <ion-col size="6">Phone No</ion-col>
-        <ion-col size="6">{{basicDetails.driver_mobile}}</ion-col>
-      </ion-row>
-      <ion-row class="odd">
-        <ion-col size="6">Email ID</ion-col>
-        <ion-col size="6">{{basicDetails.driver_email}}</ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="6">Vechile Info</ion-col>
-        <ion-col size="6">{{basicDetails.driver_vehicle_type}}</ion-col>
-      </ion-row>
-      <ion-row class="odd">
-        <ion-col size="6">Vechile No</ion-col>
-        <ion-col size="6">{{basicDetails.driver_vehicle_no}}</ion-col>
-      </ion-row> -->
       <fieldset>
         <legend>Change Driver</legend>
         <ion-radio-group [(ngModel)]="selectedDriver" mode="md">

@@ -73,31 +73,6 @@ export class ListMasterPage implements OnInit {
 
   }
 
-  changeFile(ev: any) {
-    console.log(ev);
-    this.myFiles = ev.target.files[0]
-    setTimeout(() => {
-      this.testAi();
-    }, 1000);
-
-  }
-
-  testAi() {
-    console.log('a');
-    const formData = new FormData();
-    formData.append('document', this.myFiles);
-    formData.append('type', 'type');
-    formData.append('count', '0');
-    this.listMaster.tstInv(formData).subscribe({
-      next:(data) => {
-        console.log(data);
-      },
-      error:() => {
-
-      }
-    })
-  }
-
   getDashboard() {
     this.listMaster.getDashboard().subscribe(data => {
       console.log(data);
@@ -195,7 +170,7 @@ export class ListMasterPage implements OnInit {
               icon_path: 'assets/meal/i2.png',
               smnu_desc: 'Order Received',
               link: '/t-order/2'
-            }
+            },
             // ,{
             //   icon_path: 'assets/meal/i2.png',
             //   smnu_desc: 'Return Cambro',
@@ -205,8 +180,12 @@ export class ListMasterPage implements OnInit {
             //   icon_path: 'assets/meal/i2.png',
             //   smnu_desc: 'Receive Cambro CPU',
             //   link: 'today-order/return-cmro-driver/2'
+            // },{
+            //   icon_path: 'assets/meal/i2.png',
+            //   smnu_desc: 'Dashboard',
+            //   link: 'today-order/ckms-dashboard'
             // }
-            ,{
+            {
               icon_path: 'assets/meal/i2.png',
               smnu_desc: 'Order Pack',
               link: 'today-order/order-pack'

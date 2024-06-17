@@ -243,7 +243,6 @@ export class TodayOrderPage implements OnInit {
         }
       });
     } else if (this.id === '2') {
-      // this.router.navigateByUrl('/today-order/order-received');
       this.router.navigate(['/today-order/order-received'], {
         queryParams: {
           data: JSON.stringify(data),
