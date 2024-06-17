@@ -21,7 +21,7 @@ export class BarcodeComponent  implements OnInit {
     if (this.platform.is('capacitor')) {
       this.startScan();
     } else {
-      let random = 'eyJpdiI6InJmYTVpY0M1QTRBS1JQMms0SEVaMnc9PSIsInZhbHVlIjoic2xmelpxQXVtc3U0eDRMbW14Vk9IcnRoV0dyZm1mWE9DT2kybFp2bnlQOD0iLCJtYWMiOiI4ZjQyZTU5YTM0ODliNjMwNWE4NWFhYjlkY2M4OWM5MWFjYjM3YjI0ZDk0ZGUyN2M4M2FkMzhmYWQ1NTNkMTlmIn0%3D';
+      let random = 'eyJpdiI6InRWWFhRZ0N5S0JndElERkd4N0FDQ1E9PSIsInZhbHVlIjoidTRFUlBFRFM0Y1kzaFVxOXdTeEY1WTNCWlRMRDZ2WE11a1pXSlFWdys0ND0iLCJtYWMiOiJjNmRlNjY0YjFlNWQyYTE2YmI5ZTNhYWU1ZWRkYTc2ZmJhZmI0MDRmMmFmOTY3ZTYyZmZlMjNjZGY2YjMwYjNkIn0%3D';
       this.barcodeNo = random;
       setTimeout(() => {
         this.common.setBarcode(this.barcodeNo);

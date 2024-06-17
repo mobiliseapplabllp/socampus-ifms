@@ -4,50 +4,44 @@
       <ion-button></ion-button>
     </ion-buttons>
     <ion-title class="ion-text-center">Cambro Details</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="close(null, false)">
-        <ion-icon name="close-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content>
   <ion-grid>
     <ion-row>
-      <ion-col size="4">Site From</ion-col>
-      <ion-col>{{data.pc_desc}}</ion-col>
+      <ion-col size="4">CPU</ion-col>
+      <ion-col>{{data.pc_desc || 'NA'}}</ion-col>
     </ion-row>
-    <ion-row>
-      <ion-col size="4">Site To</ion-col>
-      <ion-col>{{data.cpu_desc}}</ion-col>
+    <ion-row *ngIf="data.availability_status !== 'Available' ">
+      <ion-col size="4">Site</ion-col>
+      <ion-col>{{data.cpu_desc || 'NA'}}</ion-col>
     </ion-row>
     <ion-row>
       <ion-col size="4">Cambro No</ion-col>
-      <ion-col>{{data.ext_asset_id}}</ion-col>
+      <ion-col>{{data.ext_asset_id || 'NA'}}</ion-col>
     </ion-row>
-    <ion-row>
+    <ion-row *ngIf="data.availability_status !== 'Available' ">
       <ion-col size="4">Temperature</ion-col>
-      <ion-col>{{data.temperature}}</ion-col>
+      <ion-col>{{data.temperature || 'NA'}}</ion-col>
     </ion-row>
-    <ion-row>
+    <ion-row *ngIf="data.availability_status !== 'Available' ">
       <ion-col size="4">Item Name</ion-col>
-      <ion-col>{{data.item_name}}- {{data.type_desc}}</ion-col>
+      <ion-col>{{data.item_name || 'NA'}} {{data.type_desc }}</ion-col>
     </ion-row>
-    <ion-row>
+    <ion-row *ngIf="data.availability_status !== 'Available' ">
       <ion-col size="4">Order ID</ion-col>
-      <ion-col>{{data.order_id}}</ion-col>
+      <ion-col>{{data.order_id || 'NA'}}</ion-col>
     </ion-row>
-    <ion-row>
+    <ion-row *ngIf="data.availability_status !== 'Available' ">
       <ion-col size="4">Order Status</ion-col>
-      <ion-col>{{data.order_status}}</ion-col>
+      <ion-col>{{data.order_status || 'NA'}}</ion-col>
     </ion-row>
     <ion-row>
       <ion-col size="4">Cambro Status</ion-col>
-      <ion-col>{{data.availability_status}}</ion-col>
+      <ion-col>{{data.availability_status || 'NA'}}</ion-col>
     </ion-row>
-
   </ion-grid>
-  <div class="container">
+  <div class="container" *ngIf="data.availability_status !== 'Available' ">
     <div *ngFor="let dat of ticketTransaction" class="step" [ngClass]="{'active': dat.class === 'active', 'completed': dat.class !== 'active'}">
       <div class="v-stepper" >
         <div class="circle"></div>
@@ -58,6 +52,20 @@
         <p style="margin-top:0px;font-size:10px;color:var(--ion-color-medium)">{{dat.time}}</p>
       </div>
     </div>
+  </div>
+  <div *ngIf="data.availability_status === 'Available' "><!---->
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <ion-text color="primary">
+          {{data.cambro_msg}}
+        </ion-text>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <img src="assets/img/lunch-box.gif">
+      </ion-col>
+    </ion-row>
   </div>
 </ion-content>
 <ion-footer class="ion-no-border">

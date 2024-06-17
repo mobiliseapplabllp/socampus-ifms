@@ -18,8 +18,8 @@ export class OrderPackingModalComponent  implements OnInit {
     private modalCtrl: ModalController,
     private common: CommonService,
     private httpTo: TodayOrderService,
-    private loadingController: LoadingController
-  ) { }
+    private loadingController: LoadingController) {
+  }
 
   ngOnInit() {
     console.log(this.scanData);
@@ -38,6 +38,17 @@ export class OrderPackingModalComponent  implements OnInit {
       this.common.presentToast('Please Enter Packing Qty', 'warning');
       return;
     }
+    if (this.qty > this.cambroData.size) {
+      this.common.presentToast(`You can't enter more than Camro Size (${this.cambroData.size})`, 'warning');
+      return;
+    }
+
+    if (this.qty > this.scanData.ttl_left_portion) {
+      this.qty = null;
+      this.common.presentToast(`You can't enter more than Remaining Qty (${this.scanData.ttl_left_portion})`, 'warning');
+      return;
+    }
+
     const obj = {
       camro_box_id: this.cambroData.cambro_id,
       dispatch_qty: this.qty,
@@ -67,10 +78,28 @@ export class OrderPackingModalComponent  implements OnInit {
   }
 
   changeQty() {
-    if (this.qty > this.cambroData.size) {
-      this.common.presentToast(`You can't enter more than (${this.scanData.ttl_left_portion}) remaining Qty`, 'warning');
-      this.qty = ''
-    }
+    // let qty, cambroSize, remQty;
+    // qty = this.qty || null;
+    // cambroSize = this.cambroData.size;
+    // remQty = this.scanData.ttl_left_portion;
+    // // if (!qty) {
+    // //   this.qty = null;
+    // //   return
+    // // }
+    // console.log(typeof(qty));
+    // console.log(cambroSize);
+    // console.log(remQty);
+
+    // if (qty > remQty) {
+    //   this.qty = null;
+    //   this.common.presentToast(`You can't enter more than Remaining Qty (${remQty})`, 'warning');
+    //   return;
+    // }
+    // if (qty > cambroSize) {
+    //   this.qty = null
+    //   this.common.presentToast(`You can't enter more than Camro Size (${this.cambroData.size})`, 'warning');
+    //   return
+    // }
   }
 
   async presentLoading() {
