@@ -21,8 +21,12 @@
       "es2018",
       "dom"
     ],
+    "paths": {
+      "@ffmpeg/ffmpeg": ["node_modules/@ffmpeg/ffmpeg"]
+    },
     "useDefineForClassFields": false
   },
+  "exclude": ["node_modules"],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,

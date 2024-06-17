@@ -12,6 +12,7 @@ import { InstructionModalComponent } from '../instruction-modal/instruction-moda
 import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
 import { Filesystem } from '@capacitor/filesystem';
 import { CaptureComponent } from 'src/app/shared/capture/capture.component';
+import { FFMpeg } from '@awesome-cordova-plugins/ffmpeg/ngx';
 
 @Component({
   selector: 'app-ticket-work',
@@ -57,6 +58,9 @@ export class TicketWorkComponent  implements OnInit {
   scopeOfWorkArr: any = [];
   isVidUpl!: boolean;
   selectedFile: any;
+
+  videoBlob: Blob | null = null;
+  compressedVideoUrl: string | null = null;
   constructor(
     private activeRoute: ActivatedRoute,
     private formbuilder: FormBuilder,
@@ -69,7 +73,8 @@ export class TicketWorkComponent  implements OnInit {
     private router: Router,
     private loadingController: LoadingController,
     private mediaCapture: MediaCapture,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private ffmpeg: FFMpeg
   ) { }
 
   ngOnInit() {
