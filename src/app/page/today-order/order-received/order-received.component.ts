@@ -232,6 +232,10 @@ export class OrderReceivedComponent  implements OnInit {
   }
 
   changeRecQty(dat: any) {
+    if (dat.received_qty < 0) {
+      this.common.presentToast(`You can't less than 0 qty`,  'warning');
+      return;
+    }
     // console.log(dat);
     // return;
     this.presentLoading().then(preLoad => {

@@ -10,15 +10,19 @@
   <ion-grid>
     <ion-row>
       <ion-col size="4">CPU</ion-col>
-      <ion-col>{{data.pc_desc || 'NA'}}</ion-col>
+      <ion-col>{{data.cpu_desc || 'NA'}}</ion-col>
     </ion-row>
     <ion-row *ngIf="data.availability_status !== 'Available' ">
       <ion-col size="4">Site</ion-col>
-      <ion-col>{{data.cpu_desc || 'NA'}}</ion-col>
+      <ion-col>{{data.pc_desc || 'NA'}}</ion-col>
     </ion-row>
     <ion-row>
       <ion-col size="4">Cambro No</ion-col>
       <ion-col>{{data.ext_asset_id || 'NA'}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="4">Cambro Size</ion-col>
+      <ion-col>{{data.cambro_size || 'NA'}}</ion-col>
     </ion-row>
     <ion-row *ngIf="data.availability_status !== 'Available' ">
       <ion-col size="4">Temperature</ion-col>

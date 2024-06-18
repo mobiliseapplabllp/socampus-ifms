@@ -38,6 +38,10 @@ export class OrderPackingModalComponent  implements OnInit {
       this.common.presentToast('Please Enter Packing Qty', 'warning');
       return;
     }
+    if (this.qty < 1) {
+      this.common.presentToast(`You can't enter less than 1 qty`, 'warning');
+      return;
+    }
     if (this.qty > this.cambroData.size) {
       this.common.presentToast(`You can't enter more than Camro Size (${this.cambroData.size})`, 'warning');
       return;
