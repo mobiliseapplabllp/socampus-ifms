@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -24,9 +24,10 @@ export class LoginService {
       const obj = {
         username: login.userid,
         password: login.password,
-        fcm_token: fcmToken
+        fcm_token: fcmToken,
+        source: environment.source
       }
-      this.https.post(environment.url + 'login' , obj).subscribe({
+      this.https.post(environment.url + 'login_with_otp' , obj).subscribe({
         next:(data) => {
           this.userDataTemp = data;
           if (this.userDataTemp.status) {
@@ -50,6 +51,19 @@ export class LoginService {
       });
     });
   }
+
+  ssoGatesLoginDetails(data: any): Observable<any> {
+    let param: any = new HttpParams();
+    param = param.append('data', data);
+    return this.https.get(`${environment.url}/ssoGatesLoginDetails`,{
+      params: param,
+    });
+  }
+
+  verifyOtp(formData: any): Observable<any> {
+    return this.https.post(environment.url + '/verify_login_otp', formData);
+  }
+
 
   getAppVersion(platform: string): Observable<any> {
     const obj = {

@@ -11,6 +11,7 @@ import { TokenInterceptor } from './service/interceptor/token.interceptor';
 import { provideUserIdleConfig } from 'angular-user-idle';
 import { File } from '@awesome-cordova-plugins/file/ngx';
 import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@awesome-cordova-plugins/media-capture/ngx';
+import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -20,7 +21,8 @@ import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@awe
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideUserIdleConfig({ idle:2, timeout: 10000, ping: 1 }),
     File,
-    MediaCapture
+    MediaCapture,
+    InAppBrowser
   ],
   bootstrap: [AppComponent],
 })

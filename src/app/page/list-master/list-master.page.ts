@@ -61,7 +61,6 @@ export class ListMasterPage implements OnInit {
     } else {
       this.common.presentToast('Download URL not found', 'warning');
     }
-
   }
 
   ionViewWillEnter() {

@@ -54,7 +54,8 @@ export class AppComponent {
     } else {
       this.common.checkInternet().then(res => {
         if (res) {
-          this.refreshToken();
+          // this.refreshToken();
+          this.router.navigateByUrl('/login', { replaceUrl: true });
         } else {
           this.common.presentToast('You are in Offline Mode', 'warning')
           this.router.navigateByUrl('/list-master', { replaceUrl: true });

@@ -3,15 +3,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingController, MenuController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
-import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { environment } from 'src/environments/environment';
 import { PushNotifications } from '@capacitor/push-notifications';
-
-import { File } from '@awesome-cordova-plugins/file/ngx';
-import { MediaCapture, MediaFile, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
-import { Capacitor } from '@capacitor/core';
+import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
+import { env } from 'process';
 
 @Component({
   selector: 'app-login',
@@ -38,6 +34,8 @@ export class LoginPage implements OnInit {
     inputClass: 'custom-otp-input',
     containerClass: 'custom-otp-container'
   };
+  otp: any;
+  sendMobileMsg!: string;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -46,52 +44,13 @@ export class LoginPage implements OnInit {
     private router: Router,
     private loginPro: LoginService,
     private common: CommonService,
-    private mediaCapture: MediaCapture,
-    private file: File) {
-    this.loginForms = formbuilder.group({
+    private iab: InAppBrowser) {
+    this.loginForms = this.formbuilder.group({
       userid: ['', Validators.required],
       password: ['' , Validators.required],
     });
-    // Filesystem.requestPermissions();
   }
 
-
-
-async convertFileToBlob(fullPathOrLocalURL: string) {
-  // Check if it's a local file path
-  console.log(fullPathOrLocalURL);
-  if (fullPathOrLocalURL.startsWith('file:///')) {
-    try {
-      const readFileResult: any = await Filesystem.readFile({
-        path: fullPathOrLocalURL,
-      });
-
-      const buffer = new Uint8Array(readFileResult.data.length);
-      for (let i = 0; i < readFileResult.data.length; i++) {
-        buffer[i] = readFileResult.data.charCodeAt(i);
-      }
-
-      // Handle the video buffer (e.g., display using video element)
-      const blob = new Blob([buffer], { type: 'video/mp4' }); // Set appropriate MIME type
-      console.log(blob)
-    } catch (err) {
-      console.error('Error reading video:', err);
-      // Handle specific errors (e.g., permission denied, file not found)
-    }
-  } else {
-    console.log('return outside');
-    return
-    // Handle downloaded resources based on your download method (replace with your logic)
-    // ...
-  }
-}
-
-getMimeType(fullPath: string): string {
-  // Implement logic to determine the MIME type based on file extension or other information
-  const extension = fullPath.split('.').pop();
-  // Use a mapping or logic to get the MIME type based on extension
-  return 'application/octet-stream'; // Default if type can't be determined
-}
 
   ngOnInit() {
     this.common.setBarcode('');
@@ -179,9 +138,7 @@ getMimeType(fullPath: string): string {
   onLogin() {
     this.isHidden = false;
     this.loginPro.LoginAuth(this.loginForms.value, this.fcmToken).then(data => {
-      setTimeout(() => {
-        this.isHidden = true;
-      }, 1000);
+      this.isHidden = true;
       this.userValue = data;
       if (this.userValue === null) return
       if (this.userValue === false) {
@@ -190,19 +147,104 @@ getMimeType(fullPath: string): string {
         if (this.userValue.status === false ) {
           this.common.presentToast(this.userValue.msg, 'warning');
         } else  if (this.userValue.status === true) {
-          localStorage.setItem('userInfo', JSON.stringify(this.userValue.extra));
-          localStorage.setItem('loginvalue', JSON.stringify(this.loginForms.value));
-          localStorage.setItem('token1', this.userValue.token);
-          localStorage.setItem('enc_id', this.userValue.enc_id);
-          localStorage.setItem('user', JSON.stringify(this.userValue.user));
-          localStorage.setItem('isAlreadyLogin', 'true');
+          this.sendMobileMsg = this.userValue.msg
           this.viewCondition = 'multi_factor';
-          return;
-          this.router.navigateByUrl('/list-master', { replaceUrl: true });
         }
       }
     });
   }
+
+  openInAppBrowser() {
+    let browser = this.iab.create(environment.url2 + 'ssoGates/saml2/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let count = 0;
+    browser.on('loadstart').subscribe((data: any) => {
+      if (data.url.match(environment.url2 + '#/auth/ssoGates/')) {
+        let url, token
+        url = data.url;
+        token = url.split('ssoGates/')[1];
+        browser.close();
+        count = count + 1;
+        if (count <= 1) {
+          this.getSsoEnc(token);
+        }
+      }
+    });
+  }
+
+  getSsoEnc(token: string) {
+    this.isHidden = !this.isHidden;
+    this.presentLoading().then(preLoad => {
+      this.loginPro.ssoGatesLoginDetails(token).subscribe({
+        next:(data) => {
+          this.isHidden = !this.isHidden;
+          this.userValue = data;
+          if (this.userValue === null) return
+          if (this.userValue === false) {
+            this.common.presentToast(environment.errMsg, 'danger');
+          } else {
+            if (this.userValue.status === false ) {
+              this.common.presentToast(this.userValue.msg, 'warning');
+            } else  if (this.userValue.status === true) {
+              localStorage.setItem('userInfo', JSON.stringify(this.userValue.extra));
+              localStorage.setItem('loginvalue', JSON.stringify(this.loginForms.value));
+              localStorage.setItem('token1', this.userValue.token);
+              localStorage.setItem('enc_id', this.userValue.enc_id);
+              localStorage.setItem('user', JSON.stringify(this.userValue.user));
+              localStorage.setItem('isAlreadyLogin', 'true');
+              this.multiFactorSubmit();
+            }
+          }
+        },
+        error:() => {
+          this.dismissloading();
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    });
+  }
+
+  getOtpValue(ev: any) {
+    console.log(ev);
+    console.log(ev.length);
+    this.otp = '';
+    if (ev.length === 4) {
+      this.otp = ev;
+    }
+  }
+
+  verifyOtp() {
+    console.log(this.loginForms.value);
+    const formData = new FormData();
+    formData.append('user_name', this.loginForms.value.userid);
+    formData.append('otp', this.otp);
+    this.presentLoading().then(preLoad => {
+      this.loginPro.verifyOtp(formData).subscribe({
+        next:(data) => {
+          if (data.status === true) {
+            localStorage.setItem('loginvalue', JSON.stringify(this.loginForms.value));
+            localStorage.setItem('token1', data.token);
+            localStorage.setItem('enc_id', data.enc_id);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('isAlreadyLogin', 'true');
+            this.multiFactorSubmit();
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.dismissloading();
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+
+  }
+
 
   multiFactorSubmit() {
     this.router.navigateByUrl('/list-master', { replaceUrl: true });
@@ -225,22 +267,4 @@ getMimeType(fullPath: string): string {
   openPage(url: any) {
     this.router.navigateByUrl(url);
   }
-
-
-
-  read(file: any) {
-    console.log('read');
-    const reader: any = new FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.onload = () => {
-      const blob = new Blob([reader.result], {
-        type: file.type,
-      });
-      console.log('&&&&&');
-      console.log(blob);
-      const formData = new FormData();
-      formData.append('video', blob);
-    };
-  }
-
 }

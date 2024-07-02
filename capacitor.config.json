@@ -9,11 +9,8 @@
     }
   },
   "SplashScreen": {
-    "launchShowDuration": 3000,
-    "launchAutoHide": false,
-    "backgroundColor": "#FE9999",
-    "androidScaleType": "FIT_XY",
-    "showSpinner": false
+    "launchShowDuration": 0,
+    "launchAutoHide": true
   },
   "cordova": {
     "preferences": {
