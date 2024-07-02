@@ -38,6 +38,7 @@ export class FillReportComponent  implements OnInit {
   isInternet!:boolean;
   offline_save!: string;
   userData: any = [];
+  ticketMsg!: string;
   constructor(
     private activeRoute: ActivatedRoute,
     private httpDigital: DigitalChecklistService,
@@ -648,7 +649,7 @@ export class FillReportComponent  implements OnInit {
               wo_id: this.scheduleArr[0].schedule_id,
               ticketid: data.ticket_id
             }
-            // this.common.presentToast(data.msg, 'success');
+            this.ticketMsg = data.msg;
             this.updateTicket(fData);
           } else {
             this.common.presentToast(data.msg, 'warning');
@@ -672,7 +673,7 @@ export class FillReportComponent  implements OnInit {
           if (data.status) {
             this.scheduleArr[0].ticket_id = formData.ticketid;
             this.actionUpdateChecklist();
-            this.common.presentToast(data.msg, 'success');
+            this.common.presentToast(this.ticketMsg, 'success');
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

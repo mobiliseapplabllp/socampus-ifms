@@ -62,7 +62,7 @@ export class LoginPage implements OnInit {
   initFcm() {
     const addListeners = async () => {
       await PushNotifications.addListener('registration', token => {
-        console.info('Registration token: ', token.value);
+        console.info('Registration token:--', token.value);
         this.fcmToken = token.value;
       });
 

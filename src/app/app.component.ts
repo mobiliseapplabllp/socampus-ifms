@@ -45,7 +45,7 @@ export class AppComponent {
       });
       this.getAppVersion();
     } else {
-      this.getAppVersion();
+      // this.getAppVersion();
     }
     this.initIdle();
     const isLogin = localStorage.getItem('isAlreadyLogin');

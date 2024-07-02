@@ -77,7 +77,7 @@ export class AddMeterComponent implements OnInit {
       ext_id_temp: ['',[Validators.required , Validators.minLength(6)]],
       ext_id: ['', Validators.required],
       is_child_asset:['', Validators.required],
-      parent_asset_id: ['',[Validators.required , Validators.minLength(10)]],
+      parent_asset_id: [''],
       meter_type_id: ['', Validators.required],
       meter_name: ['', Validators.required],
       uom_id: ['', Validators.required],
@@ -85,19 +85,31 @@ export class AddMeterComponent implements OnInit {
       model: ['', Validators.required],
       s_no: ['', Validators.required],
       ideal_reading: ['', Validators.required],
+      start_date: ['', Validators.required],
+      start_time_temp: [''],
+      start_time: ['', Validators.required],
       mnf_details: ['', Validators.required],
       is_consumption: ['', Validators.required],
       cuns_min: [''],
       cuns_max: [''],
+      cons_mult_fact: [''],
+      cons_mult_fact_val: [''],
+      cons_inc: [''],
       is_generation: ['', Validators.required],
       gen_min: [''],
       gen_max: [''],
+      gen_mult_fact:[''],
+      gen_mult_fact_val: [''],
+      gen_inc: [''],
       oth_read: ['', Validators.required],
       oth_min: [''],
       oth_max: [''],
-      mult_fact: ['', Validators.required],
-      mult_fact_val: [''],
-      inc: ['', Validators.required],
+      oth_mult_fact: [''],
+      oth_mult_fact_val: [''],
+      oth_inc: [''],
+      // mult_fact: ['', Validators.required],
+      // mult_fact_val: [''],
+      // inc: ['', Validators.required],
       back_date: ['', Validators.required],
       back_days: [''],
       edit_allow: ['', Validators.required],
@@ -135,6 +147,7 @@ export class AddMeterComponent implements OnInit {
     });
     modal.onWillDismiss().then(disModal => {
       if (disModal.data) {
+        console.log(disModal);
         let prefix = 'M'+disModal.data.barcode_prefix;
         this.addAsset.get('site_id_description')?.setValue(disModal.data.pc_desc);
         this.addAsset.get('site_id')?.setValue(disModal.data.pc_id);
@@ -162,6 +175,10 @@ export class AddMeterComponent implements OnInit {
     return await modal.present();
   }
 
+  test() {
+    console.log(this.addAsset);
+  }
+
   changeFromDate(index: any, type: string) {
     if (type === 'from') {
       let date = moment(this.timeArr[index].from_date).format('H:mm');
@@ -175,6 +192,15 @@ export class AddMeterComponent implements OnInit {
         this.timeArr[index].to_date_temp = null;
       }
     }
+  }
+
+  changeTime() {
+    let time = moment(this.addAsset.value.start_time_temp).format('H:mm');
+    console.log(time);
+    this.addAsset.get('start_time')?.setValue(time);
+
+
+
   }
 
   addMoreSlot() {
@@ -346,6 +372,15 @@ export class AddMeterComponent implements OnInit {
     if (this.addAsset.value.is_consumption === '1' && (!this.addAsset.value.cuns_min || !this.addAsset.value.cuns_max)) {
       this.httpCommon.presentToast('Consumption Minimum & Maximum Reading is required', 'warning');
       return false;
+    } else if (this.addAsset.value.is_consumption === '1' && !this.addAsset.value.cons_mult_fact) {
+      this.httpCommon.presentToast('Please Select Consumption Multi Factor', 'warning');
+      return false;
+    } else if (this.addAsset.value.is_consumption === '1' && !this.addAsset.value.cons_inc) {
+      this.httpCommon.presentToast('Please Select Reading Increment of Consumption', 'warning');
+      return false;
+    } else if (this.addAsset.value.cons_mult_fact === '1' && !this.addAsset.value.cons_mult_fact_val) {
+      this.httpCommon.presentToast('Consumption Multi Factor Value is Required', 'warning');
+      return false;
     } else {
       return true;
     }
@@ -355,6 +390,15 @@ export class AddMeterComponent implements OnInit {
     if (this.addAsset.value.is_generation === '1' && (!this.addAsset.value.gen_min || !this.addAsset.value.gen_max)) {
       this.httpCommon.presentToast('Generation Minimum & Maximum Reading is required', 'warning');
       return false;
+    } else if (this.addAsset.value.is_generation === '1' && !this.addAsset.value.gen_mult_fact) {
+      this.httpCommon.presentToast('Please Select Generation Multi Factor', 'warning');
+      return false;
+    } else if (this.addAsset.value.is_generation === '1' && !this.addAsset.value.gen_inc) {
+      this.httpCommon.presentToast('Please Select Reading Increment of Generation', 'warning');
+      return false;
+    } else if (this.addAsset.value.gen_mult_fact === '1' && !this.addAsset.value.gen_mult_fact_val) {
+      this.httpCommon.presentToast('Generation Multi Factor Value is Required', 'warning');
+      return false;
     } else {
       return true;
     }
@@ -363,6 +407,15 @@ export class AddMeterComponent implements OnInit {
   checkOtherCondition() {
     if (this.addAsset.value.oth_read === '1' && (!this.addAsset.value.oth_min || !this.addAsset.value.oth_max)) {
       this.httpCommon.presentToast('Other Minimum & Maximum Reading is required', 'warning');
+      return false;
+    } else if (this.addAsset.value.oth_read === '1' && !this.addAsset.value.oth_mult_fact) {
+      this.httpCommon.presentToast('Please Select Other Multi Factor', 'warning');
+      return false;
+    } else if (this.addAsset.value.oth_read === '1' && !this.addAsset.value.oth_inc) {
+      this.httpCommon.presentToast('Please Select Reading Increment of Other', 'warning');
+      return false;
+    } else if (this.addAsset.value.oth_mult_fact === '1' && !this.addAsset.value.oth_mult_fact_val) {
+      this.httpCommon.presentToast('Other Multi Factor Value is Required', 'warning');
       return false;
     } else {
       return true;
@@ -406,15 +459,17 @@ export class AddMeterComponent implements OnInit {
   }
 
   addMeter() {
+    console.log(this.addAsset);
     if (this.addAsset.value.is_child_asset == '1' && !this.parentAssetObj.isExists) {
       this.httpCommon.presentToast('Please Verify Parent Asset Id', 'warning');
       return;
     }
-    var timeslots, totimeslots, fromDate, toDate;
+    var timeslots, totimeslots, fromDate, toDate, start_date;
     timeslots = this.timeArr.map((res: any) => res.from_date_temp);
     totimeslots = this.timeArr.map((res: any) => res.to_date_temp);
     fromDate = moment(this.fromDate).format('YYYY-MM-DD');
     toDate = moment(this.toDate).format('YYYY-MM-DD');
+    start_date = moment(this.addAsset.value.start_date).format('YYYY-MM-DD');
 
     for(let key in this.addAsset.value) {
       this.formData.delete(key);
@@ -430,6 +485,7 @@ export class AddMeterComponent implements OnInit {
     this.formData.delete('fromDate');
     this.formData.delete('toDate');
     this.formData.delete('type');
+    this.formData.delete('start_date');
 
     this.formData.append('daysSlots', JSON.stringify(this.days));
     this.formData.append('escalate_to',JSON.stringify(this.escalate_to));
@@ -441,6 +497,7 @@ export class AddMeterComponent implements OnInit {
     this.formData.append('fromDate', fromDate)
     this.formData.append('toDate', toDate);
     this.formData.append('type', '2');
+    this.formData.append('start_date', start_date);
 
     this.presentLoading().then(preLoad => {
       this.httpMeter.addMeter(this.formData).subscribe({

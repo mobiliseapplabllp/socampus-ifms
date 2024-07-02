@@ -46,6 +46,7 @@ export class CommonService {
       message: data,
       position: 'bottom',
       color: clr,
+      duration: 60000,
       buttons: [{
         text: 'OK',
         role: 'cancel',

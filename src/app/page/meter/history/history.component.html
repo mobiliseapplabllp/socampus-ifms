@@ -46,14 +46,64 @@
       </ion-label>
       <ion-buttons  slot="end" >
         <ion-button fill="clear" class="ion-text-capitalize" (click)="dat.isMore = !dat.isMore">
-          <ion-icon name="search-outline"></ion-icon>
+          <ion-icon [name]="!dat.isMore ? 'arrow-forward-outline': 'arrow-down-outline' "></ion-icon>
         </ion-button>
-        <ion-button fill="clear" class="ion-text-capitalize" (click)="meterReadingHistory(dat)">
+        <!-- <ion-button fill="clear" class="ion-text-capitalize" (click)="meterReadingHistory(dat)">
           <ion-icon name="time-outline"></ion-icon>
-        </ion-button>
+        </ion-button> -->
       </ion-buttons>
     </ion-item>
-    <ion-row>
+    <fieldset  *ngIf="dat.is_consumption === 1">
+      <legend>Consumption</legend>
+      <ion-row>
+        <ion-col size="6">
+          <ion-text color="primary">Reading</ion-text><br>
+          <ion-text>{{dat.reading}}</ion-text>
+          <ion-button size="small" fill="clear" *ngIf="dat.img1" (click)="openDoc(dat.img1)">
+            <ion-icon name="attach-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Remark</ion-text><br>
+          <ion-text>{{dat.con_remark}}</ion-text>
+        </ion-col>
+      </ion-row>
+    </fieldset>
+
+    <fieldset *ngIf="dat.is_generation === 1 " >
+      <legend>Generation</legend>
+      <ion-row>
+        <ion-col size="6">
+          <ion-text color="primary">Reading</ion-text><br>
+          <ion-text>{{dat.gen_reading}}</ion-text>
+          <ion-button size="small" fill="clear" *ngIf="dat.img2" (click)="openDoc(dat.img2)">
+            <ion-icon name="attach-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Remark</ion-text><br>
+          <ion-text>{{dat.gen_remark}}</ion-text>
+        </ion-col>
+      </ion-row>
+    </fieldset>
+
+    <fieldset>
+      <legend>Other</legend>
+      <ion-row>
+        <ion-col size="6">
+          <ion-text color="primary">Reading</ion-text><br>
+          <ion-text>{{dat.oth_reading}}</ion-text>
+          <ion-button size="small" fill="clear" *ngIf="dat.img3" (click)="openDoc(dat.img3)">
+            <ion-icon name="attach-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Remark</ion-text><br>
+          <ion-text>{{dat.oth_remark}}</ion-text>
+        </ion-col>
+      </ion-row>
+    </fieldset>
+    <!-- <ion-row>
       <ion-col *ngIf="dat.is_consumption === 1" class="ion-padding-start" size="6" style="position:relative">
         <ion-text color="primary">Consumption</ion-text><br>
         <ion-text>{{dat.reading}}</ion-text>
@@ -71,43 +121,59 @@
       <ion-col *ngIf="dat.oth_read === 1 " class="ion-padding-start" size="6">
         <ion-text color="primary">Other</ion-text><br>
         <ion-text>{{dat.oth_reading}}</ion-text>
+        <ion-button size="small" fill="clear" *ngIf="dat.img3" (click)="openDoc(dat.img3)">
+          <ion-icon name="attach-outline"></ion-icon>
+        </ion-button>
       </ion-col>
-    </ion-row>
+    </ion-row> -->
     <div *ngIf="dat.isMore">
       <ion-row>
-        <ion-col class="ion-padding-start">
-          <ion-text color="dark">Make</ion-text><br>
-          <ion-text>{{dat.make}}</ion-text>
+        <ion-col class="ion-padding-start" size="6">
+          <ion-text color="primary">Schedule Time</ion-text><br>
+          <ion-text>{{dat.sch_datetime}}</ion-text>
         </ion-col>
-        <ion-col>
-          <ion-text color="dark">Meter Type</ion-text><br>
+        <ion-col size="6">
+          <ion-text color="primary">Capture Time</ion-text><br>
+          <ion-text>{{dat.reading_datetime}}</ion-text>
+        </ion-col>
+        <ion-col class="ion-padding-start" size="6">
+          <ion-text color="primary">Meter Name</ion-text><br>
+          <ion-text>{{dat.meter_name}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Meter Type</ion-text><br>
           <ion-text>{{dat.meter_type}}</ion-text>
         </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col class="ion-padding-start">
-          <ion-text color="dark">Manufacturer</ion-text><br>
+        <ion-col class="ion-padding-start" size="6">
+          <ion-text color="primary">Manufacturer</ion-text><br>
           <ion-text>{{dat.mnf_name}}</ion-text>
         </ion-col>
-        <ion-col>
-          <ion-text color="dark">Model</ion-text><br>
+        <ion-col size="6">
+          <ion-text color="primary">Model</ion-text><br>
           <ion-text>{{dat.model}}</ion-text>
         </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col class="ion-padding-start">
-          <ion-text color="dark">Serial No</ion-text><br>
+        <ion-col class="ion-padding-start" size="6">
+          <ion-text color="primary">Serial No</ion-text><br>
           <ion-text>{{dat.serial_no}}</ion-text>
         </ion-col>
-        <ion-col>
-          <ion-text color="dark">UOM</ion-text><br>
+        <ion-col size="6">
+          <ion-text color="primary">UOM</ion-text><br>
           <ion-text>{{dat.uom}}</ion-text>
         </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col class="ion-padding-start">
-          <ion-text color="dark">Work order</ion-text><br>
+        <ion-col class="ion-padding-start" size="6">
+          <ion-text color="primary">Work order</ion-text><br>
           <ion-text>{{dat.wo_id}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Site</ion-text><br>
+          <ion-text>{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-text>
+        </ion-col>
+        <ion-col class="ion-padding-start" size="12">
+          <ion-text color="primary">Location</ion-text><br>
+          <ion-text>{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-text><br>
+          <ion-text>Building: {{dat.building_desc}} <br> </ion-text>
+          <ion-text>Floor:{{dat.floor_desc}} </ion-text><br>
+          <ion-text>Location: {{dat.location_desc}}</ion-text>
         </ion-col>
       </ion-row>
     </div>
