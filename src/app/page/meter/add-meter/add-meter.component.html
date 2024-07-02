@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title> Add Meter </ion-title>
+    <ion-title (click)="test()"> Add Meter </ion-title>
   </ion-toolbar>
 </ion-header>
 <ion-content>
@@ -69,7 +69,6 @@
         <ion-label position="floating">Full Meter Id <ion-text color="danger">*</ion-text> </ion-label>
         <ion-input type="text" formControlName="ext_id" readonly></ion-input>
       </ion-item>
-
 
       <ion-item>
         <ion-label position="floating">Link Asset Id <ion-text color="danger">*</ion-text> </ion-label>
@@ -149,6 +148,31 @@
         <ion-label position="floating">Starting Reading <ion-text color="danger">*</ion-text> </ion-label>
         <ion-input type="text" formControlName="ideal_reading"></ion-input>
       </ion-item>
+      <ion-row>
+        <ion-col size="6">
+          <ion-item id="add-meter-start-date">
+            <ion-label color="primary" position="floating">Start Date <ion-text color="danger">*</ion-text></ion-label>
+            <ion-input type="text"  placeholder="Select Date"  [value]="addAsset.value.start_date | date"  readonly></ion-input>
+          </ion-item>
+          <ion-popover trigger="add-meter-start-date" >
+            <ng-template>
+              <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" formControlName="start_date" [showDefaultButtons]="true"></ion-datetime>
+            </ng-template>
+          </ion-popover>
+        </ion-col>
+        <ion-col size="6">
+          <ion-item id="add-meter-start-time" >
+            <ion-label position="floating">Start Time <ion-text color="danger">*</ion-text></ion-label>
+            <ion-input type="text" [value]="addAsset.value.start_time"  readonly></ion-input>
+          </ion-item>
+
+          <ion-modal trigger="add-meter-start-time" [cssClass]="'center1'">
+            <ng-template>
+              <ion-datetime presentation="time" formControlName="start_time_temp"  size="cover" [showDefaultButtons]="true" (ionChange)="changeTime()"></ion-datetime>
+            </ng-template>
+          </ion-modal>
+        </ion-col>
+      </ion-row>
       <ion-item>
         <ion-label position="floating">MNF Detail <ion-text color="danger">*</ion-text> </ion-label>
         <ion-input type="text" formControlName="mnf_details"></ion-input>
@@ -166,66 +190,134 @@
         <ion-button (click)="escalateToModal()">Escalate To</ion-button>
         <ion-chip *ngFor="let dat of escalate_to">{{dat}}</ion-chip>
       </ion-item>
-      <ion-item>
-        <ion-label position="floating">Consumption  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-select interface="action-sheet" formControlName="is_consumption" mode="ios">
-          <ion-select-option value="1"> Yes</ion-select-option>
-          <ion-select-option value="0">No</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-row *ngIf="addAsset.value.is_consumption === '1'">
-        <ion-col size="6">
-          <ion-item>
-            <ion-input type="text" placeholder="Minimum Reading" formControlName="cuns_min"></ion-input>
-          </ion-item>
-        </ion-col>
-        <ion-col size="6">
-          <ion-item>
-            <ion-input type="text" placeholder="Maximum Reading" formControlName="cuns_max"></ion-input>
-          </ion-item>
-        </ion-col>
-      </ion-row>
 
-      <ion-item>
-        <ion-label position="floating">Generation  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-select interface="action-sheet" formControlName="is_generation" mode="ios">
-          <ion-select-option value="1"> Yes</ion-select-option>
-          <ion-select-option value="0">No</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-row *ngIf="addAsset.value.is_generation === '1'">
-        <ion-col size="6">
+      <fieldset>
+        <legend>Consumption</legend>
+        <ion-item>
+          <ion-label position="floating">Consumption  <ion-text color="danger">*</ion-text> </ion-label>
+          <ion-select interface="action-sheet" formControlName="is_consumption" mode="ios">
+            <ion-select-option value="1"> Yes</ion-select-option>
+            <ion-select-option value="0">No</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <div *ngIf="addAsset.value.is_consumption === '1'">
+          <ion-row >
+            <ion-col size="6">
+              <ion-item>
+                <ion-input type="text" placeholder="Min Reading" formControlName="cuns_min"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="6">
+              <ion-item>
+                <ion-input type="text" placeholder="Max Reading" formControlName="cuns_max"></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
           <ion-item>
-            <ion-input type="text" placeholder="Minimum Reading" formControlName="gen_min"></ion-input>
+            <ion-label position="floating">Multi Factor  <ion-text color="danger">*</ion-text> </ion-label>
+            <ion-select interface="action-sheet" formControlName="cons_mult_fact" mode="ios">
+              <ion-select-option value="1"> Yes</ion-select-option>
+              <ion-select-option value="2">No</ion-select-option>
+            </ion-select>
           </ion-item>
-        </ion-col>
-        <ion-col size="6">
+          <ion-item *ngIf="addAsset.value.cons_mult_fact === '1' ">
+            <ion-input type="text" placeholder="Multi Factor Value" formControlName="cons_mult_fact_val"></ion-input>
+          </ion-item>
           <ion-item>
-            <ion-input type="text" placeholder="Maximum Reading" formControlName="gen_max"></ion-input>
+            <ion-label position="floating">Reading Incremental  <ion-text color="danger">*</ion-text> </ion-label>
+            <ion-select interface="action-sheet" formControlName="cons_inc" mode="ios">
+              <ion-select-option value="1">Yes</ion-select-option>
+              <ion-select-option value="2">No</ion-select-option>
+            </ion-select>
           </ion-item>
-        </ion-col>
-      </ion-row>
+        </div>
+      </fieldset>
 
-      <ion-item>
-        <ion-label position="floating">Other  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-select interface="action-sheet" formControlName="oth_read" mode="ios">
-          <ion-select-option value="1"> Yes</ion-select-option>
-          <ion-select-option value="0">No</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-row *ngIf="addAsset.value.oth_read === '1'">
-        <ion-col size="6">
+      <fieldset>
+        <legend>Generation</legend>
+        <ion-item>
+          <ion-label position="floating">Generation  <ion-text color="danger">*</ion-text> </ion-label>
+          <ion-select interface="action-sheet" formControlName="is_generation" mode="ios">
+            <ion-select-option value="1"> Yes</ion-select-option>
+            <ion-select-option value="0">No</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <div *ngIf="addAsset.value.is_generation === '1'">
+          <ion-row >
+            <ion-col size="6">
+              <ion-item>
+                <ion-input type="text" placeholder="Min Reading" formControlName="gen_min"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="6">
+              <ion-item>
+                <ion-input type="text" placeholder="Max Reading" formControlName="gen_max"></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
           <ion-item>
-            <ion-input type="text" placeholder="Minimum Reading" formControlName="oth_min"></ion-input>
+            <ion-label position="floating">Multi Factor  <ion-text color="danger">*</ion-text> </ion-label>
+            <ion-select interface="action-sheet" formControlName="gen_mult_fact" mode="ios">
+              <ion-select-option value="1"> Yes</ion-select-option>
+              <ion-select-option value="2">No</ion-select-option>
+            </ion-select>
           </ion-item>
-        </ion-col>
-        <ion-col size="6">
+          <ion-item *ngIf="addAsset.value.gen_mult_fact === '1' ">
+            <ion-input type="text" placeholder="Multi Factor Value" formControlName="gen_mult_fact_val"></ion-input>
+          </ion-item>
           <ion-item>
-            <ion-input type="text" placeholder="Maximum Reading" formControlName="oth_max"></ion-input>
+            <ion-label position="floating">Reading Incremental  <ion-text color="danger">*</ion-text> </ion-label>
+            <ion-select interface="action-sheet" formControlName="gen_inc" mode="ios">
+              <ion-select-option value="1">Yes</ion-select-option>
+              <ion-select-option value="2">No</ion-select-option>
+            </ion-select>
           </ion-item>
-        </ion-col>
-      </ion-row>
+        </div>
+      </fieldset>
 
+      <fieldset>
+        <legend>Other</legend>
+        <ion-item>
+          <ion-label position="floating">Other  <ion-text color="danger">*</ion-text> </ion-label>
+          <ion-select interface="action-sheet" formControlName="oth_read" mode="ios">
+            <ion-select-option value="1"> Yes</ion-select-option>
+            <ion-select-option value="0">No</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <div *ngIf="addAsset.value.oth_read === '1'">
+          <ion-row >
+            <ion-col size="6">
+              <ion-item>
+                <ion-input type="text" placeholder="Min Reading" formControlName="oth_min"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="6">
+              <ion-item>
+                <ion-input type="text" placeholder="Max Reading" formControlName="oth_max"></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-item>
+            <ion-label position="floating">Multi Factor  <ion-text color="danger">*</ion-text> </ion-label>
+            <ion-select interface="action-sheet" formControlName="oth_mult_fact" mode="ios">
+              <ion-select-option value="1"> Yes</ion-select-option>
+              <ion-select-option value="2">No</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item *ngIf="addAsset.value.gen_mult_fact === '1' ">
+            <ion-input type="text" placeholder="Multi Factor Value" formControlName="oth_mult_fact_val"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Reading Incremental  <ion-text color="danger">*</ion-text> </ion-label>
+            <ion-select interface="action-sheet" formControlName="oth_inc" mode="ios">
+              <ion-select-option value="1">Yes</ion-select-option>
+              <ion-select-option value="2">No</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+      </fieldset>
+<!--
       <ion-item>
         <ion-label position="floating">Multiplication Factor  <ion-text color="danger">*</ion-text> </ion-label>
         <ion-select interface="action-sheet" formControlName="mult_fact" mode="ios">
@@ -239,16 +331,14 @@
             <ion-input type="text" placeholder="Enter Multiple Factor Value" formControlName="mult_fact_val"></ion-input>
           </ion-item>
         </ion-col>
-      </ion-row>
-
-
-      <ion-item>
+      </ion-row> -->
+      <!-- <ion-item>
         <ion-label position="floating">Reading Incremental  <ion-text color="danger">*</ion-text> </ion-label>
         <ion-select interface="action-sheet" formControlName="inc" mode="ios">
           <ion-select-option value="1"> Yes</ion-select-option>
           <ion-select-option value="0">No</ion-select-option>
         </ion-select>
-      </ion-item>
+      </ion-item> -->
 
       <ion-item>
         <ion-label position="floating">Back Date Reading Allowed <ion-text color="danger">*</ion-text> </ion-label>
@@ -299,9 +389,7 @@
       </ion-item>
     </ion-card-content>
   </ion-card>
-
 </form>
-
   <ion-card>
     <ion-card-header color="primary"> Working Detail</ion-card-header>
     <ion-card-content>
@@ -377,36 +465,11 @@
         <ion-input type="text" [(ngModel)]="remark"></ion-input>
       </ion-item>
 
-      <ion-button expand="block"  (click)="checkCondition()" [disabled]="addAsset.invalid">Add meter <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
-
-
-
-
-      <!-- <ion-row>
-        <ion-col class="ion-text-center">
-          <ion-button fill="clear" color="danger" (click)="presentActionSheet(1)">
-            <ion-icon name="camera-outline"></ion-icon>
-          </ion-button><br>
-          <ion-text>{{img1}}</ion-text>
-        </ion-col>
-        <ion-col class="ion-text-center">
-          <ion-button fill="clear" color="danger" (click)="presentActionSheet(2)">
-            <ion-icon name="camera-outline"></ion-icon>
-          </ion-button><br>
-          <ion-text>{{img2}}</ion-text>
-        </ion-col>
-        <ion-col class="ion-text-center">
-          <ion-button fill="clear" color="danger" (click)="presentActionSheet(3)">
-            <ion-icon name="camera-outline"></ion-icon>
-          </ion-button><br>
-          <ion-text>{{img3}}</ion-text>
-        </ion-col>
-      </ion-row> -->
     </ion-card-content>
   </ion-card>
-
-
-
-
-
 </ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <ion-button expand="block"  (click)="checkCondition()" [disabled]="addAsset.status === 'INVALID' ">Add meter <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
+  </ion-toolbar>
+</ion-footer>

@@ -49,23 +49,19 @@ body.scanner-active {
 }
 
 section.inputbox {
-  padding:0px 10px !important;
-  ion-text {
-    font-size: 14px;
-    font-weight: 550;
-
-  }
+  // ion-text {
+  //   // font-size: 14px;
+  //   // font-weight: 550;
+  // }
   ion-item {
     margin: 5px 0px;
+    border:1px solid #D9E1EB;
+    border-radius: 4px;
     font-weight: bold;
     font-size:90%;
-    background-color: rgba(227, 237, 255, 0.8);
-    border-radius: 10px;
+    background-color: white;
     ion-icon {
-      margin-right: 16px;
-    }
-    ion-input {
-      background-color:transparent !important
+      margin-right:10px;
     }
     ion-select {
       width:100%

@@ -5,7 +5,7 @@
     </ion-buttons>
     <ion-title>Meter</ion-title>
     <ion-buttons slot="end">
-      <ion-button slot="icon-only" (click)='openBarcode()'>
+      <ion-button slot="icon-only" (click)="openBarcode('site')">
         <ion-icon name="qr-code-outline"></ion-icon>
       </ion-button>
       <ion-button fill="outline" class="ion-text-capitalize" (click)="openPage('/meter/history')"> History</ion-button>
@@ -33,18 +33,15 @@
       </ion-label>
       <ion-buttons  slot="end" >
         <ion-button fill="clear" class="ion-text-capitalize" (click)="dat.isMore = !dat.isMore">
-          <ion-icon name="search-outline"></ion-icon>
-        </ion-button>
-        <ion-button fill="clear" class="ion-text-capitalize" (click)="meterReadingHistory(dat)">
-          <ion-icon name="time-outline"></ion-icon>
+          <ion-icon [name]="!dat.isMore ? 'arrow-forward-outline': 'arrow-down-outline' "></ion-icon>
         </ion-button>
       </ion-buttons>
     </ion-item>
     <div *ngIf="dat.isMore">
       <ion-row>
         <ion-col class="ion-padding-start">
-          <ion-text color="dark">Make</ion-text><br>
-          <ion-text>{{dat.make}}</ion-text>
+          <ion-text color="dark">Meter Name</ion-text><br>
+          <ion-text>{{dat.meter_name}}</ion-text>
         </ion-col>
         <ion-col>
           <ion-text color="dark">Meter Type</ion-text><br>
@@ -77,10 +74,112 @@
           <ion-text>{{dat.wo_id}}</ion-text>
         </ion-col>
       </ion-row>
+      <ion-row>
+        <ion-col class="ion-padding-start" size="12">
+          <ion-text color="primary">Location</ion-text><br>
+          <ion-text>{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-text><br>
+          <ion-text><b>Building:</b> {{dat.building_desc}} <br> </ion-text>
+          <ion-text><b>Floor:</b> {{dat.floor_desc}} </ion-text><br>
+          <ion-text><b>Location:</b> {{dat.location_desc}}</ion-text>
+        </ion-col>
+      </ion-row>
     </div>
 
     <section *ngIf="dat.canCapture">
-      <ion-item style="border:2px solid var(--ion-color-dark); margin:5px;border-radius:5px" *ngIf="dat.is_consumption === 1 && dat.is_generation === 2 "> <!--*ngIf="dat.is_consumption == 1 && dat.is_generation == 0 "-->
+      <div *ngIf="!dat.isQrVerify">
+        <ion-row>
+          <ion-col>
+            <ion-button expand="block" (click)="openBarcode('verify', dat)">SCAN QR <ion-icon name="qr-code-outline" slot="end"></ion-icon></ion-button>
+          </ion-col>
+        </ion-row>
+      </div>
+      <div *ngIf="dat.isQrVerify">
+        <ion-row *ngIf="dat.is_consumption === 1">
+          <ion-col size="6">
+            <section class="inputbox">
+              <ion-text color="primary" >Consumption Reading</ion-text>
+              <ion-item lines="none">
+                <ion-input type="number" placeholder="Consumption Reading" [(ngModel)]="dat.consumption_reading"></ion-input>
+                <ion-buttons slot="end" class="ion-no-margin">
+                  <ion-button class="ion-text-capitalize" shape="round" [fill]="!dat.isConsumptionImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat , 'consumption')">
+                    <ion-icon name="camera-outline"  *ngIf="!dat.isConsumptionImg"></ion-icon>
+                    <ion-icon name="checkmark-outline" [slot]="dat.isConsumptionImg ? 'icon-only': 'end' " *ngIf="dat.isConsumptionImg"></ion-icon>
+                    <ion-text *ngIf="dat.is_img_req === 1 && !dat.isConsumptionImg" >*</ion-text>
+                  </ion-button>
+                </ion-buttons>
+              </ion-item>
+            </section>
+          </ion-col>
+          <ion-col size="6">
+            <section class="inputbox">
+              <ion-text color="primary" >Consumption Remark <span *ngIf="dat.is_remark_req === 1">*</span> </ion-text>
+              <ion-item lines="none">
+                <ion-input type="text" placeholder="Consumption Remark" [(ngModel)]="dat.con_remark"></ion-input>
+              </ion-item>
+            </section>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="dat.is_generation === 1">
+          <ion-col size="6">
+            <section class="inputbox">
+              <ion-text color="primary" >Generation Reading</ion-text>
+              <ion-item lines="none">
+                <ion-input type="number" placeholder="Generating Reading" [(ngModel)]="dat.generate_reading"></ion-input>
+                <ion-buttons slot="end" class="ion-no-margin">
+                  <ion-button class="ion-text-capitalize" shape="round" [fill]="!dat.isGenerationImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat, 'generate_reading')">
+                    <ion-icon name="camera-outline" *ngIf="!dat.isGenerationImg"></ion-icon>
+                    <ion-icon name="checkmark-outline" [slot]="dat.isGenerationImg ? '': 'end' " *ngIf="dat.isGenerationImg"></ion-icon>
+                    <ion-text *ngIf="dat.is_img_req === 1 && !dat.isGenerationImg">*</ion-text>
+                  </ion-button>
+                </ion-buttons>
+              </ion-item>
+            </section>
+          </ion-col>
+          <ion-col size="6" >
+            <section class="inputbox">
+              <ion-text color="primary" >Generation Remark <span *ngIf="dat.is_remark_req === 1">*</span> </ion-text>
+              <ion-item lines="none">
+                <ion-input type="text" placeholder="Generation Remark" [(ngModel)]="dat.gen_remark"></ion-input>
+              </ion-item>
+            </section>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="dat.oth_read === 1 ">
+          <ion-col size="6">
+            <section class="inputbox">
+              <ion-text color="primary" >Other Reading</ion-text>
+              <ion-item lines="none">
+                <ion-input type="number" placeholder="Other Reading" [(ngModel)]="dat.other_reading"></ion-input>
+                <ion-buttons slot="end" class="ion-no-margin">
+                  <ion-button class="ion-text-capitalize" shape="round" [fill]="!dat.isOtherImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat, 'other')">
+                    <ion-icon name="camera-outline" *ngIf="!dat.isOtherImg"></ion-icon>
+                    <ion-icon name="checkmark-outline" [slot]="dat.isOtherImg ? '': 'end' " *ngIf="dat.isOtherImg"></ion-icon>
+                    <ion-text *ngIf="dat.is_img_req === 1 && !dat.isOtherImg">*</ion-text>
+                  </ion-button>
+                </ion-buttons>
+              </ion-item>
+            </section>
+          </ion-col>
+          <ion-col size="6" >
+            <section class="inputbox">
+              <ion-text color="primary" >Other Remark <span *ngIf="dat.is_remark_req === 1">*</span></ion-text>
+              <ion-item lines="none">
+                <ion-input type="text" placeholder="Other Remark" [(ngModel)]="dat.oth_remark"></ion-input>
+              </ion-item>
+            </section>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <ion-button expand="block"  (click)="updRead(dat)">Submit <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
+          </ion-col>
+        </ion-row>
+      </div>
+
+    </section>
+
+    <!-- <section *ngIf="dat.canCapture">
+      <ion-item style="border:2px solid var(--ion-color-dark); margin:5px;border-radius:5px" *ngIf="dat.is_consumption === 1 && dat.is_generation === 2 ">
         <ion-input type="number" placeholder="Consumption Reading" [(ngModel)]="dat.consumption_reading"></ion-input>
         <ion-buttons slot="end" class="ion-no-margin">
           <ion-button class="ion-text-capitalize" shape="round" [fill]="!dat.isConsumptionImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat , 'consumption')">
@@ -92,7 +191,7 @@
         </ion-buttons>
       </ion-item>
 
-      <ion-item style="border:2px solid var(--ion-color-dark); margin:5px;border-radius:5px" *ngIf="dat.is_consumption === 2 && dat.is_generation === 1 "> <!--*ngIf="dat.is_consumption == 0 && dat.is_generation == 1 "-->
+      <ion-item style="border:2px solid var(--ion-color-dark); margin:5px;border-radius:5px" *ngIf="dat.is_consumption === 2 && dat.is_generation === 1 ">
         <ion-input type="number" placeholder="Generating Reading" [(ngModel)]="dat.generate_reading"></ion-input>
         <ion-buttons slot="end" class="ion-no-margin">
           <ion-button class="ion-text-capitalize" shape="round" [fill]="!dat.isGenerationImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat, 'generate_reading')">
@@ -131,6 +230,6 @@
         </ion-item>
         <ion-button expand="block"  (click)="updateReading(dat, 'both')">Submit <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
       </div>
-    </section>
+    </section> -->
   </ion-card>
 </ion-content>

@@ -71,21 +71,30 @@ export class PendingTaskComponent  implements OnInit {
       this.getData();
     }
     if (this.didEnter) {
-      let split, ecn_key ,bar = this.common.getBarcode();
+      let split, ecn_key, val ,bar = this.common.getBarcode();
+      this.common.setBarcode('');
       if (bar && this.qrType === 'verify') {
         this.qrType = '';
-        this.common.setBarcode('');
         split = bar.split('/');
         if (split.length === 6) {
           ecn_key = split[5];
-          let val = this.common.decryptValue(ecn_key);
+          val = this.common.decryptValue(ecn_key);
           if (this.qrObject.barcode === val) {
             this.openFillReport(this.qrObject);
           } else {
-            this.common.presentToast('You are Scan Wrong QR Code ' + val, 'warning');
+            this.common.presentToastWithOk('You are Scan Wrong QR Code ' + val, 'warning');
           }
         } else {
           this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+        }
+      } else if (bar && this.qrType === 'verify_meter') {
+        split = bar.split('/');
+        ecn_key = split[split.length - 1];
+        val = this.common.decryptValue(ecn_key);
+        if (this.qrObject.ext_id === val) {
+          this.qrObject.isQrVerify = true;
+        } else {
+          this.common.presentToastWithOk(`You are Scanning Wrong QR Code. ${val}`, 'warning');
         }
       }
     }
@@ -326,6 +335,12 @@ export class PendingTaskComponent  implements OnInit {
     }
   }
 
+  openBarcode(type: string, dat: any) {
+    this.qrType = type;
+    this.qrObject = dat;
+    this.router.navigateByUrl('/barcode');
+  }
+
   openFillReport(data: any) {
     if (this.platform.is('capacitor')) {
       if (data.schedule_status !== 'assigned') {
@@ -468,12 +483,39 @@ export class PendingTaskComponent  implements OnInit {
           this.meterInfo[i].isGenerationImg = false;
         }
       }
+    } else if (type === 'other') {
+      this.formData.delete('img3');
+      this.formData.append('img3', blob, random);
+      data.isOtherImg = true;
+      for (var i = 0; i < this.meterInfo.length;i++) {
+        if (data.wo_id !== this.meterInfo[i].wo_id) {
+          this.meterInfo[i].isOtherImg = false;
+        }
+      }
     }
     this.presentLoading().then(preLoad => {
       setTimeout(() => {
         this.dismissloading();
       }, 500)
     })
+  }
+
+  updRead(dat: any) {
+    if (this.checkConsumptionCondition(dat) && this.checkGenertionCondition(dat) && this.checkOtherCondition(dat)) {
+      const obj = {
+        wo_id: dat.wo_id,
+        consume_reading: dat.consumption_reading || '',
+        gen_reading: dat.generate_reading || '',
+        new_oth_reading: dat.other_reading || '',
+        con_remark: dat.con_remark || '',
+        gen_remark: dat.gen_remark || '',
+        oth_remark: dat.oth_remark || '',
+        ideal_reading: dat.ideal_reading || '',
+        meter_id: dat.meter_id,
+      };
+      console.log(obj);
+      this.save(obj, dat);
+    }
   }
 
   updateReading(dat: any, type: any) {
@@ -507,37 +549,74 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   checkConsumptionCondition(dat: any) {
-    if (!dat.consumption_reading) {
-      alert('Please Enter Consumption Reading');
+    if (dat.is_consumption == 1 && !dat.consumption_reading) {
+      this.common.presentToast('Consumption Reading is Mandatory', 'tertiary');
       return false;
-    } else if (dat.is_img_req == 1 && !dat.isConsumptionImg) {
-      alert('Consumption Image is Required');
+    } else if (dat.is_consumption == 1 && dat.is_remark_req == 1 && !dat.con_remark) {
+      this.common.presentToast('Consumption Remark is Mandatory', 'tertiary');
+      return false;
+    } else if (dat.is_consumption == 1 && dat.is_img_req && !dat.isConsumptionImg) {
+      this.common.presentToast('Consumption Image is Mandatory', 'tertiary');
       return false;
     } else {
       return true;
     }
+    // if (!dat.consumption_reading) {
+    //   alert('Please Enter Consumption Reading');
+    //   return false;
+    // } else if (dat.is_img_req == 1 && !dat.isConsumptionImg) {
+    //   alert('Consumption Image is Required');
+    //   return false;
+    // } else {
+    //   return true;
+    // }
   }
 
   checkGenertionCondition(dat: any) {
-    if (!dat.generate_reading) {
-      alert('Please Enter Generate Reading');
+    if (dat.is_generation == 1 && !dat.generate_reading) {
+      this.common.presentToast('Generation Reading is Mandatory', 'tertiary');
       return false;
-    } else if (dat.is_img_req == 1 && !dat.isGenerationImg) {
-      alert('Generation Image is Required');
+    } else if (dat.is_generation == 1 && dat.is_remark_req == 1 && !dat.gen_remark) {
+      this.common.presentToast('Generation Remark is Mandatory', 'tertiary');
+      return false;
+    } else if (dat.is_generation == 1 && dat.is_img_req && !dat.isGenerationImg) {
+      this.common.presentToast('Generation Image is Mandatory', 'tertiary');
       return false;
     } else {
       return true;
     }
+    // if (!dat.generate_reading) {
+    //   alert('Please Enter Generate Reading');
+    //   return false;
+    // } else if (dat.is_img_req == 1 && !dat.isGenerationImg) {
+    //   alert('Generation Image is Required');
+    //   return false;
+    // } else {
+    //   return true;
+    // }
   }
 
   checkOtherCondition(dat: any) {
-    if (!dat.other_reading && dat.oth_read == 1) {
-      alert('Other Reading is Required');
+    if (dat.oth_read == 1 && !dat.other_reading) {
+      this.common.presentToast('Other Reading is Mandatory', 'tertiary');
+      return false;
+    } else if (dat.oth_read == 1 && dat.is_remark_req == 1 && !dat.oth_remark) {
+      this.common.presentToast('Other Remark is Mandatory', 'tertiary');
+      return false;
+    } else if (dat.oth_read == 1 && dat.is_img_req && !dat.isOtherImg) {
+      this.common.presentToast('Other Image is Mandatory', 'tertiary');
       return false;
     } else {
       return true;
     }
+    // if (!dat.other_reading && dat.oth_read == 1) {
+    //   alert('Other Reading is Required');
+    //   return false;
+    // } else {
+    //   return true;
+    // }
   }
+
 
   save(obj: any, dat: any) {
     for (let key in obj) {
