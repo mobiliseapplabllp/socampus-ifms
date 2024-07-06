@@ -29,6 +29,10 @@
       <ion-col>{{data.temperature || 'NA'}}</ion-col>
     </ion-row>
     <ion-row *ngIf="data.availability_status !== 'Available' ">
+      <ion-col size="4">Item Code</ion-col>
+      <ion-col>{{data.item_code || 'NA'}}</ion-col>
+    </ion-row>
+    <ion-row *ngIf="data.availability_status !== 'Available' ">
       <ion-col size="4">Item Name</ion-col>
       <ion-col>{{data.item_name || 'NA'}} {{data.type_desc }}</ion-col>
     </ion-row>
@@ -46,28 +50,28 @@
     </ion-row>
   </ion-grid>
   <div class="container" *ngIf="data.availability_status !== 'Available' ">
-    <div *ngFor="let dat of ticketTransaction" class="step" [ngClass]="{'active': dat.class === 'active', 'completed': dat.class !== 'active'}">
+    <div *ngFor="let dat of ticketTransaction" class="step" [ngClass]="{'active': dat.class === 'active', 'completed': dat.class !== 'active', 'animate__animated animate__fadeInDown': dat.sideright}" [hidden]="!dat.sideright">
       <div class="v-stepper" >
         <div class="circle"></div>
         <div class="line"></div>
       </div>
       <div class="content" >
-        <p style="margin-bottom:0px;font-size:12px;color:var(--ion-color-primary)">{{dat.status}}</p>
-        <p style="margin-top:0px;font-size:10px;color:var(--ion-color-medium)">{{dat.time}}</p>
+        <p style="margin-bottom:0px;margin-top:0px;font-size:14px;color:var(--ion-color-primary);">{{dat.status}}</p>
+        <p style="margin-top:0px;font-size:12px;color:var(--ion-color-medium)">{{dat.time}}</p>
       </div>
     </div>
   </div>
   <div *ngIf="data.availability_status === 'Available' "><!---->
     <ion-row>
-      <ion-col class="ion-text-center">
-        <ion-text color="primary">
+      <ion-col class="ion-text-center ion-padding">
+        <ion-text color="primary" style="font-size:17px">
           {{data.cambro_msg}}
         </ion-text>
       </ion-col>
     </ion-row>
     <ion-row>
       <ion-col class="ion-text-center">
-        <img src="assets/img/lunch-box.gif">
+        <img src="assets/img/lunch-box.gif" style="width:70%;height:auto">
       </ion-col>
     </ion-row>
   </div>

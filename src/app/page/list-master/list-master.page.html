@@ -13,11 +13,10 @@
 </ion-header>
 <ion-content>
   <ion-row *ngIf="isInternet">
-    <ion-col class="ion-text-center" > <!-- (click)="speak()"-->
+    <ion-col class="ion-text-center" >
       <ion-text color="primary"><b>Working Summary</b></ion-text>
     </ion-col>
   </ion-row>
-  <!-- <ion-input type="file" (change)="changeFile($event)"></ion-input> -->
   <ion-slides *ngIf="isInternet" [options]="slideOptsOne" pager="true" class="custom_slide">
     <ion-slide >
       <ion-row >

@@ -207,6 +207,11 @@ getStatus() {}
 
 
   changeDate(dat: any) {
+    console.log(dat);
+    if (dat.fulldate !== moment().format('YYYY-MM-DD')) {
+      this.common.presentToast(`You can Pack only Today Date`, 'warning');
+    }
+    return;
     this.slides.slideTo(dat.ind - 3);
     for (var i = 0 ; i < this.dateArr.length; i++) {
       if (dat.date == this.dateArr[i].date) {

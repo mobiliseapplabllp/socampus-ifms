@@ -41,7 +41,7 @@
       <div style="padding:3px;height:20px;width:20px;border-radius:50%;background-color:var(--ion-color-primary);color:var(--ion-color-light);font-size:12px;font-weight: 700;" class="center">{{i+1}}</div>
     </ion-col>
     <ion-col size="5">
-      <p>{{dat.item_name}}</p>
+      <p>{{dat.item_name}} <img [src]="dat.order_type === 'non-vegetarian' ? 'assets/meal/non-veg.png': 'assets/meal/veg.png'  " style="height:10px;width:10px;position:absolute;right:10px"></p>
       <p>Pax:{{dat.order_qty}}{{dat.uom}} </p>
       <p>Portion: {{dat.ttl_portion}}</p>
       <p>

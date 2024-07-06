@@ -139,7 +139,7 @@ export class OrderReceivedComponent  implements OnInit {
             this.order_details = data.data;
             // console.log(this.order_details);
             for (var i = 0; i < this.order_details.length; i++) {
-              if (this.order_details[i].received_qty === 0) {
+              if (this.order_details[i].received_qty < 1) {
                 this.order_details[i].isReceivedEnable = false;
                 this.order_details[i].isRec = false;
 
@@ -225,6 +225,7 @@ export class OrderReceivedComponent  implements OnInit {
 
   changeFun(dat: any) {
     if (dat.received_qty &&  (dat.already_rec == dat.received_qty)) {
+      dat.isRec = true;
       return;
     }
     dat.isRec = false;
@@ -243,6 +244,7 @@ export class OrderReceivedComponent  implements OnInit {
         next:(data) => {
           if (data.status) {
             this.common.presentToast(data.msg, 'success');
+            dat.already_rec = dat.received_qty;
             dat.isRec = true;
           } else {
             this.common.presentToast(data.msg, 'warning');

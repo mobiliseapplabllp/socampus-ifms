@@ -19,11 +19,12 @@ export class CommonService {
     return this.barcode;
   }
 
-  async presentToast(msg: any, clr: any) {
+  async presentToast(msg: any, clr: any, pos?: any) {
     const toast = await this.toastController.create({
       message: msg,
       duration: 3000,
-      color: clr
+      color: clr,
+      position: 'top'
     });
     toast.present();
   }

@@ -16,6 +16,18 @@ export class CambroStatusComponent  implements OnInit {
   ngOnInit() {
     console.log(this.data);
     this.ticketTransaction = this.data.statusArr;
+    let i = 0;
+    this.sliderAnimation(i);
+  }
+
+  sliderAnimation(i: any) {
+    setTimeout(() => {
+      if (i < this.ticketTransaction.length) {
+        this.ticketTransaction[i].sideright = true;
+        i = i + 1
+        this.sliderAnimation(i);
+      }
+    }, i * 100);
   }
 
   close(data: any, status: any) {
