@@ -48,7 +48,6 @@
     "chart.js": "^4.4.0",
     "cordova-plugin-file": "^8.0.1",
     "cordova-plugin-inappbrowser": "^6.0.0",
-    "cordova-plugin-lottie-splashscreen": "git+https://github.com/timbru31/cordova-plugin-lottie-splashscreen.git",
     "cordova-plugin-media-capture": "^5.0.0",
     "crypto-js": "^4.1.1",
     "dexie": "^3.2.4",

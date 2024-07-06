@@ -47,7 +47,9 @@ export class AppComponent {
     } else {
       // this.getAppVersion();
     }
+    this.router.navigateByUrl('/login/splash');
     this.initIdle();
+    return;
     const isLogin = localStorage.getItem('isAlreadyLogin');
     if (!isLogin) {
       this.router.navigateByUrl('/login', { replaceUrl: true });
@@ -138,7 +140,7 @@ export class AppComponent {
   async presentLoading() {
     this.loading = await this.loadingController.create({
       cssClass: 'my-custom-class',
-      message: 'Please wait...'
+      message: 'Please wait..'
     });
     await this.loading.present();
   }

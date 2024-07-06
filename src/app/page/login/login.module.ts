@@ -8,6 +8,7 @@ import { LoginPageRoutingModule } from './login-routing.module';
 
 import { LoginPage } from './login.page';
 import { NgOtpInputModule } from  'ng-otp-input';
+import { SplashComponent } from './splash/splash.component';
 // import { SharedModule } from 'src/app/shared/shared.module';
 
 @NgModule({
@@ -22,6 +23,7 @@ import { NgOtpInputModule } from  'ng-otp-input';
   ],
   declarations: [
     LoginPage,
+    SplashComponent
   ]
 })
 export class LoginPageModule {}

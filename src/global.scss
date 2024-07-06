@@ -80,7 +80,7 @@ ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
   width: 50px !important;
   height: 50px !important;
   margin: 0 5px !important;
-  border: 2px solid var(--ion-color-primary) !important;
+  border: 1px solid var(--ion-color-primary) !important;
   border-radius: 5px !important;
   text-align: center;
   font-size: 18px !important;
@@ -111,8 +111,8 @@ section.inputbox {
   }
   ion-item {
     margin: 5px 0px;
-    border:1px solid var(--ion-color-primary);
-    border-radius: 4px;
+    border:2px solid var(--ion-color-primary);
+    border-radius: 6px;
     font-weight: bold;
     font-size:90%;
     background-color: white;
