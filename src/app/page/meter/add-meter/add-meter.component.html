@@ -118,7 +118,7 @@
       <ion-item>
         <ion-label position="floating">Meter Type <ion-text color="danger">*</ion-text> </ion-label>
         <ion-select interface="action-sheet" formControlName="meter_type_id" mode="ios">
-          <ion-select-option *ngFor="let dat of meterType" [value]="dat.id"> {{dat.meter_type}}</ion-select-option>
+          <ion-select-option *ngFor="let dat of meterType" [value]="dat.value"> {{dat.label}}</ion-select-option>
         </ion-select>
       </ion-item>
       <ion-item>

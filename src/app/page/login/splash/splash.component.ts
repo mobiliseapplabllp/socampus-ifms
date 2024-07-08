@@ -34,7 +34,6 @@ export class SplashComponent  implements OnInit {
           }
         });
       }
-    }, 2500);
+    }, 3300);
   }
-
 }

@@ -15,6 +15,9 @@ export class MeterService {
     return this.http.get(environment.url + 'meter/meter-type');
   }
 
+  getMeterTypeAll(pc_id: any): Observable<any> {
+    return this.http.get(environment.url + 'meter/meter-type-all?pc_id=' +pc_id);
+  }
   getUomMeter(): Observable<any> {
     return this.http.get(environment.url + 'meter/meter-uom-all');
   }

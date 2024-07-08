@@ -26,6 +26,38 @@
 @import "~@ionic/angular/css/flex-utils.css";
 
 
+// open sans
+@font-face {
+  font-family: opensans_bold;
+  src: url(assets/OpenSans/OpenSans-Bold.ttf);
+}
+
+@font-face {
+  font-family: opensans_ex_bold;
+  src: url(assets/OpenSans/OpenSans-ExtraBold.ttf);
+}
+
+@font-face {
+  font-family: opensans_light;
+  src: url(assets/OpenSans/OpenSans-Light.ttf);
+}
+
+@font-face {
+  font-family: opensans_medium;
+  src: url(assets/OpenSans/OpenSans-Medium.ttf);
+}
+
+@font-face {
+  font-family: opensans_regular;
+  src: url(assets/OpenSans/OpenSans-Regular.ttf);
+}
+
+@font-face {
+  font-family: opensans_semibold;
+  src: url(assets/OpenSans/OpenSans-SemiBold.ttf);
+}
+
+// sansapro black
 @font-face {
   font-family: sansapro_black;
   src: url(assets/sansa_pro/sansapro_black.otf);
@@ -52,11 +84,11 @@
 }
 
 ion-content {
-  font-family: 'sansapro_semibold' !important;
+  font-family: 'opensans_semibold' !important;
 }
 
 ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
-  font-family: 'sansapro_semibold' !important;
+  font-family: 'opensans_semibold' !important;
 }
 
 .my-modal{
@@ -107,7 +139,7 @@ section.inputbox {
   ion-text {
     font-size: 14px;
     font-weight: 550;
-    font-family: 'sansapro_semibold' !important;
+    font-family: 'opensans_semibold' !important;
   }
   ion-item {
     margin: 5px 0px;

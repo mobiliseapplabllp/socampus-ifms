@@ -57,9 +57,9 @@ export class AddMeterComponent implements OnInit {
 
   ngOnInit() {
     this.initForm();
-    this.getFacilityType();
+    // this.getFacilityType();
     this.getEquipStatus();
-    this.getMeterType();
+    // this.getMeterType();
     this.getUomMeter();
   }
 
@@ -153,6 +153,7 @@ export class AddMeterComponent implements OnInit {
         this.addAsset.get('site_id')?.setValue(disModal.data.pc_id);
         this.addAsset.get('ext_asset_id')?.setValue(prefix);
         this.addAsset.get('ext_asset_id_pre')?.setValue(prefix);
+        this.getMeterType(disModal.data.pc_id);
         this.presentLoading().then(preLoad => {
           this.httpAsset.getBlock(disModal.data.pc_id).subscribe({
             next:(data) => {
@@ -168,7 +169,7 @@ export class AddMeterComponent implements OnInit {
               this.dismissloading();
             }
           });
-        })
+        });
       } else {
       }
     });
@@ -217,10 +218,10 @@ export class AddMeterComponent implements OnInit {
   }
 
 
-  getMeterType() {
-    this.httpMeter.getMeterType().subscribe(data => {
+  getMeterType(pc_id: any) {
+    this.httpMeter.getMeterTypeAll(pc_id).subscribe(data => {
       if (data.status) {
-        this.meterType = data.data.data
+        this.meterType = data.data
       } else {
         this.httpCommon.presentToast(data.msg, 'warning');
       }

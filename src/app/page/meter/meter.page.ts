@@ -253,6 +253,7 @@ export class MeterPage implements OnInit {
             setTimeout(() => {
               this.meterInfo = this.meterInfo.filter((val: any) => val.wo_id !== obj.wo_id);
               this.meterInfoCopy = this.meterInfoCopy.filter((val: any) => val.wo_id !== obj.wo_id);
+              this.formData = new FormData();
             }, 500);
           } else {
             this.common.presentToast(data.msg, 'warning');
