@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonService } from 'src/app/provider/common/common.service';
-
+import { SplashScreen } from '@capacitor/splash-screen';
 @Component({
   selector: 'app-splash',
   templateUrl: './splash.component.html',
@@ -15,6 +15,10 @@ export class SplashComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
+    setTimeout(() => {
+      SplashScreen.hide();
+    }, 200);
+
     setTimeout(() => {
       const isLogin = localStorage.getItem('isAlreadyLogin');
       if (!isLogin) {

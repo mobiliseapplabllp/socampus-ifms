@@ -9,6 +9,7 @@ import { UserIdleService } from 'angular-user-idle';
 import { CommonService } from './provider/common/common.service';
 import { environment } from 'src/environments/environment';
 import { checklist, db } from './provider/local-db/local-db.service';
+
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
