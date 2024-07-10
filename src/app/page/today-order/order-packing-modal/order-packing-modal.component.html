@@ -39,7 +39,7 @@
       <ion-col size="4">Cambro Size</ion-col>
       <ion-col>{{cambroData.size}} {{cambroData.uom}}</ion-col>
     </ion-row>
-    <ion-input type="number" placeholder="Enter Packing Qty" [(ngModel)]="qty" (ionChange)="changeQty()"></ion-input>
+    <ion-input type="number" placeholder="Enter Packing Qty" [(ngModel)]="qty" (ionInput)="changeQty($event)" ></ion-input>
     <p><b>Note:-</b> You can't enter more than remaining quantity</p>
     <ion-row>
       <ion-col class="ion-text-center">

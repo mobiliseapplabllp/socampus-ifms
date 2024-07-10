@@ -38,8 +38,8 @@ export class OrderPackingModalComponent  implements OnInit {
       this.common.presentToast('Please Enter Packing Qty', 'warning');
       return;
     }
-    if (this.qty < 1) {
-      this.common.presentToast(`You can't enter less than 1 qty`, 'warning');
+    if (this.qty == 0) {
+      this.common.presentToast(`You can't enter 0 qty`, 'warning');
       return;
     }
     if (this.qty > this.cambroData.size) {
@@ -81,7 +81,13 @@ export class OrderPackingModalComponent  implements OnInit {
     })
   }
 
-  changeQty() {
+  changeQty(event: any) {
+    const value = event.target.value;
+    const decimalIndex = value.indexOf('.');
+
+    if (decimalIndex !== -1 && value.length - decimalIndex - 1 > 2) {
+        this.qty = value.slice(0, decimalIndex + 2);
+    }
     // let qty, cambroSize, remQty;
     // qty = this.qty || null;
     // cambroSize = this.cambroData.size;

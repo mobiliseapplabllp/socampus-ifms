@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ListMasterService } from './provider/list-master/list-master.service';
 import { Platform } from '@ionic/angular';
 import { StatusBar, Style } from '@capacitor/status-bar';
+import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -13,6 +14,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 export class AppComponent {
   userInfo: any = [];
   myMenu: any = [];
+  appVersion!: string;
   constructor(
     private loginPro: LoginService,
     private router: Router,
@@ -30,6 +32,9 @@ export class AppComponent {
       StatusBar.setStyle({ style: Style.Dark })
       StatusBar.setBackgroundColor({'color': '#222428'})
     }
+    App.getInfo().then(res => {
+      this.appVersion = res.version
+    });
     this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 
@@ -51,5 +56,9 @@ export class AppComponent {
 
   openPage(data: any) {
     this.router.navigateByUrl(data.link);
+  }
+
+  appUrl() {
+    alert(environment.url2);
   }
 }
