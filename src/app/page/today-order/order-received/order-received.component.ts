@@ -125,9 +125,19 @@ export class OrderReceivedComponent  implements OnInit {
   inputQty(dat: any, ev: any) {
     console.log(dat);
     console.log(ev.target.value);
+    if (ev.target.value < 0 || ev.target.value == 0) {
+      dat.received_qty = 0
+      return;
+    }
     if (ev.target.value > dat.dispatch_qty) {
-      this.common.presentToast('You can not enter more than order Qty ' , 'warning');
+      this.common.presentToast('You can not enter more than order Qty ' + dat.dispatch_qty , 'warning');
       dat.received_qty = '';
+      return
+    }
+    const value = ev.target.value;
+    const decimalIndex = value.indexOf('.');
+    if (decimalIndex !== -1 && value.length - decimalIndex - 1 > 2) {
+        dat.received_qty = value.slice(0, decimalIndex + 2);
     }
   }
 
@@ -139,7 +149,7 @@ export class OrderReceivedComponent  implements OnInit {
             this.order_details = data.data;
             // console.log(this.order_details);
             for (var i = 0; i < this.order_details.length; i++) {
-              if (this.order_details[i].received_qty < 1) {
+              if (!this.order_details[i].received_qty) {
                 this.order_details[i].isReceivedEnable = false;
                 this.order_details[i].isRec = false;
 
@@ -235,6 +245,11 @@ export class OrderReceivedComponent  implements OnInit {
   changeRecQty(dat: any) {
     if (dat.received_qty < 0) {
       this.common.presentToast(`You can't less than 0 qty`,  'warning');
+      return;
+    }
+
+    if (dat.received_qty > dat.dispatch_qty) {
+      this.common.presentToast(`You can't Receive more than Dispatch Qty ${dat.dispatch_qty}`, 'warning');
       return;
     }
     // console.log(dat);
