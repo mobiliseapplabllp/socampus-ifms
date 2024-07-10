@@ -90,6 +90,8 @@ export class OrderPackingComponent  implements OnInit {
       type_id: [''],
       ord_status: [''],
       date: [moment().format('YYYY-MM-DD')],
+      souce: [environment.source],
+      for: ['order-packing']
     });
   }
 
