@@ -129,7 +129,7 @@
             <ion-row>
               <ion-col>
                 <ion-button expand="block" fill="outline" mode="ios" class="custom" (click)="openInAppBrowser()">I am a SSO User <ion-icon name="arrow-forward-outline" slot="end"></ion-icon></ion-button>
-                <ion-note color="medium">Use this if you have a @ sodexo Email Id.</ion-note>
+                <ion-note color="medium">Use this if you have a @ sodexo Email ID.</ion-note>
               </ion-col>
             </ion-row>
             <br>
@@ -137,7 +137,7 @@
             <ion-row>
               <ion-col>
                 <ion-button expand="block" fill="outline" mode="ios" class="custom" (click)="viewCondition = 'login' ">No, I am not a SSO User <ion-icon name="arrow-forward-outline" slot="end"></ion-icon></ion-button>
-                <ion-note color="medium">Use this if you want to log in with your Employee Id.</ion-note>
+                <ion-note color="medium">Use this if you want to log in with your User ID.</ion-note>
               </ion-col>
             </ion-row>
           </section>
@@ -150,9 +150,9 @@
             </h2>
             <form [formGroup]="loginForms" (ngSubmit)="onLogin()" mode="md"><!--(ngSubmit)="onLogin()"-->
               <section class="inputbox">
-                <ion-text color="primary" >Employee Id</ion-text>
+                <ion-text color="primary" >User ID</ion-text>
                 <ion-item lines="none">
-                  <ion-input type="text" placeholder="Employee Id" [(ngModel)]="login.userid"  formControlName="userid"></ion-input>
+                  <ion-input type="text" placeholder="Enter your User ID" [(ngModel)]="login.userid"  formControlName="userid"></ion-input>
                 </ion-item>
               </section>
               <br>
