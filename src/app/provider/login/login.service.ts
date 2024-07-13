@@ -52,9 +52,10 @@ export class LoginService {
     });
   }
 
-  ssoGatesLoginDetails(data: any): Observable<any> {
+  ssoGatesLoginDetails(data: any, fcm_token: string): Observable<any> {
     let param: any = new HttpParams();
-    param = param.append('data', data);
+    param.append('data', data);
+    param.append('fcm_token', fcm_token);
     return this.https.get(`${environment.url}/ssoGatesLoginDetails`,{
       params: param,
     });

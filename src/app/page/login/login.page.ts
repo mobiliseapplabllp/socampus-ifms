@@ -113,7 +113,7 @@ export class LoginPage implements OnInit {
       if (isLogin) {
         const decrypt = JSON.parse(isLogin);
         this.login.userid = decrypt.userid;
-        this.login.password = decrypt.password;
+        // this.login.password = decrypt.password;
       }
     }
   }
@@ -174,7 +174,7 @@ export class LoginPage implements OnInit {
   getSsoEnc(token: string) {
     this.isHidden = !this.isHidden;
     this.presentLoading().then(preLoad => {
-      this.loginPro.ssoGatesLoginDetails(token).subscribe({
+      this.loginPro.ssoGatesLoginDetails(token, this.fcmToken).subscribe({
         next:(data) => {
           this.isHidden = !this.isHidden;
           this.userValue = data;
@@ -219,6 +219,7 @@ export class LoginPage implements OnInit {
     const formData = new FormData();
     formData.append('user_name', this.loginForms.value.userid);
     formData.append('otp', this.otp);
+    formData.append('fcm_token', this.fcmToken);
     this.presentLoading().then(preLoad => {
       this.loginPro.verifyOtp(formData).subscribe({
         next:(data) => {
