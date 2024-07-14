@@ -40,7 +40,7 @@ export class AppComponent {
   initApp() {
     if (this.platform.is('capacitor')) {
       StatusBar.setOverlaysWebView({overlay: false});
-      StatusBar.setBackgroundColor({'color': '#DB2222'})
+      StatusBar.setBackgroundColor({'color': '#040E51'})
       App.getInfo().then(res => {
         this.appVersion = res.version
       });
@@ -48,8 +48,10 @@ export class AppComponent {
     } else {
       // this.getAppVersion();
     }
-    this.router.navigateByUrl('/login/splash');
-    this.initIdle();
+    setTimeout(() => {
+      this.router.navigateByUrl('/login/splash');
+      this.initIdle();
+    }, 2000);
     return;
     const isLogin = localStorage.getItem('isAlreadyLogin');
     if (!isLogin) {
