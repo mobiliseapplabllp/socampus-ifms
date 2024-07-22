@@ -11,9 +11,10 @@
           <img src="assets/home_banner1/helpdesk.png" style="height:40px;width:40px"><br>
           <ion-text color="light" style="margin-left:5px;font-weight: 550;">Helpdesk </ion-text>
         </div>
-        <br>
         <div class="ion-text-right">
-          <ion-text color="light" style="font-weight: 550;font-size:35px">{{breakdown}}</ion-text>
+          <ion-text color="light">Assign: {{breakdown.assign}}</ion-text><br>
+          <ion-text color="light">In Progress: {{breakdown.wip}}</ion-text><br>
+          <ion-text color="light">Re Open: {{breakdown.reopen}}</ion-text><br>
         </div>
       </ion-card>
     </ion-slide>
@@ -23,9 +24,10 @@
           <img src="assets/home_banner1/checklist.png" style="height:40px;width:40px"><br>
           <ion-text color="light" style="margin-left:5px;font-weight: 550;">Digital </ion-text>
         </div>
-        <br>
         <div class="ion-text-right">
-          <ion-text color="light" style="font-weight: 550;font-size:35px">4</ion-text>
+          <ion-text color="light">Scheduled: {{digital.scheduled}}</ion-text><br>
+          <ion-text color="light">Attended: {{digital.attended}}</ion-text><br>
+          <ion-text color="light">Missed: {{digital.missed}}</ion-text><br>
         </div>
       </ion-card>
     </ion-slide>
@@ -35,9 +37,10 @@
           <img src="assets/home_banner1/pms.png" style="height:40px;width:40px"><br>
           <ion-text color="light" style="margin-left:5px;font-weight: 550;">PMS </ion-text>
         </div>
-        <br>
         <div class="ion-text-right">
-          <ion-text color="light" style="font-weight: 550;font-size:35px">{{pms}}</ion-text><!--{{indent.inapproval}}-->
+          <ion-text color="light">Scheduled: {{pms.assign}}</ion-text><br>
+          <ion-text color="light">Actionable: {{pms.actionable}}</ion-text><br>
+          <ion-text color="light">Overdue: {{pms.overdue}}</ion-text><br>
         </div>
       </ion-card>
     </ion-slide>
@@ -47,9 +50,10 @@
           <img src="assets/home_banner1/meter.png" style="height:40px;width:40px"><br>
           <ion-text color="light" style="margin-left:5px;font-weight: 550;">Meter </ion-text>
         </div>
-        <br>
         <div class="ion-text-right">
-          <ion-text color="light" style="font-weight: 550;font-size:35px">{{meter}}</ion-text><!--{{indent.inapproval}}-->
+          <ion-text color="light">Scheduled: {{meter.scheduled}}</ion-text><br>
+          <ion-text color="light">Attended: {{meter.attended}}</ion-text><br>
+          <ion-text color="light">Missed: {{meter.missed}}</ion-text><br>
         </div>
       </ion-card>
     </ion-slide>

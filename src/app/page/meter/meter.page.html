@@ -24,6 +24,50 @@
   </ion-fab>
   <ion-card  *ngFor="let dat of meterInfo;let i = index" style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}">
     <ion-item>
+      <img src="assets/img/meter-left1.jpeg" style="height:100px;width:auto;margin-right:10px" slot="start" >
+      <ion-label class="ion-text-wrap">
+        <p><ion-text color="dark">Reading ID:</ion-text> {{dat.wo_id}}</p>
+        <p><ion-text>{{dat.sch_datetime | date: 'dd-MMM-yyyy hh:mm:ss'}}</ion-text></p>
+        <p><ion-text color="dark">Building:</ion-text> {{dat.building_desc}} </p>
+        <p><ion-text color="dark">Floor:</ion-text> {{dat.floor_desc}} </p>
+        <p><ion-text color="dark">Location:</ion-text> {{dat.location_desc}}</p>
+      </ion-label>
+      <ion-button slot="end" class="ion-text-capitalize" (click)="dat.isMore = !dat.isMore" fill="outline">
+        <ion-text *ngIf="!dat.isMore">View Detail</ion-text>
+        <ion-text *ngIf="dat.isMore">Less Detail</ion-text>
+      </ion-button>
+    </ion-item>
+    <div *ngIf="dat.isMore">
+      <ion-row>
+        <ion-col class="ion-padding-start">
+          <ion-text color="dark">Site</ion-text><br>
+          <ion-text>{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-text>
+        </ion-col>
+        <ion-col>
+          <ion-text color="dark">Meter ID</ion-text><br>
+          <ion-text>{{dat.ext_id}}</ion-text>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col class="ion-padding-start">
+          <ion-text color="dark">Meter Type</ion-text><br>
+          <ion-text>{{dat.meter_type}}</ion-text>
+        </ion-col>
+        <ion-col>
+          <ion-text color="dark">Meter Name</ion-text><br>
+          <ion-text>{{dat.meter_name}}</ion-text>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col class="ion-padding-start" size="12">
+          <ion-text color="dark">Reading Type</ion-text><br>
+          <ion-text *ngIf="dat.is_consumption === 1">Consumption </ion-text><br>
+          <ion-text *ngIf="dat.is_generation === 1">Generation </ion-text><br>
+          <ion-text *ngIf="dat.oth_read === 1">Other </ion-text>
+        </ion-col>
+      </ion-row>
+    </div>
+    <!-- <ion-item>
       <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
       <ion-label class="ion-text-wrap">
         <h2> <span style="height:20px;width:20px;border-radius: 50%;background-color:green"></span> <b> {{dat.make}}</b></h2>
@@ -83,7 +127,7 @@
           <ion-text><b>Location:</b> {{dat.location_desc}}</ion-text>
         </ion-col>
       </ion-row>
-    </div>
+    </div> -->
 
     <section *ngIf="dat.canCapture">
       <div *ngIf="!dat.isQrVerify">
