@@ -62,7 +62,7 @@ export class LoginService {
   }
 
   verifyOtp(formData: any): Observable<any> {
-    return this.https.post(environment.url + '/verify_login_otp', formData);
+    return this.https.post(environment.url + 'verify_login_otp', formData);
   }
 
 

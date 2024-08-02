@@ -310,7 +310,7 @@ export class ComplaintService {
 
   verifyOtp(mobile: any, otp: any) {
     return new Promise(resolve => {
-      this.https.get(environment.url + '/customer_verify_otp.php?mobile=' + mobile + '&otp=' + otp).subscribe({
+      this.https.get(environment.url + 'customer_verify_otp.php?mobile=' + mobile + '&otp=' + otp).subscribe({
         next:(data) => {
           resolve(data)
         },
