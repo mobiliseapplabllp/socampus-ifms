@@ -40,13 +40,16 @@ export class OrderDetailComponent  implements OnInit {
   ionViewDidEnter() {
     let bar = this.common.getBarcode();
     if (bar) {
-      if (this.platform.is('capacitor')) {
-        this.getDecBarcode(bar)
-      } else {
-        this.order_details[this.index].isPack = true;
-        this.order_details[this.index].showErr = false;
-      }
       this.common.setBarcode('');
+      console.log(bar);
+      this.getDecBarcode(bar);
+      // if (this.platform.is('capacitor')) {
+      //   this.getDecBarcode(bar)
+      // } else {
+      //   this.order_details[this.index].isPack = true;
+      //   this.order_details[this.index].showErr = false;
+      // }
+
     }
   }
 
@@ -57,12 +60,34 @@ export class OrderDetailComponent  implements OnInit {
           console.log(data);
           if (data.status) {
             let barcode = data.data.text;
-            if (barcode === this.order_details[this.index].ext_asset_id) {
-              this.order_details[this.index].isPack = true;
-              this.order_details[this.index].showErr = false;
-            } else {
-              this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
+            let count = 0
+            for (var i = 0; i < this.order_details.length; i++) {
+              if (this.order_details[i].ext_asset_id === barcode) {
+                count = count + 1;
+                if (this.order_details[i].isPack === true) {
+                  this.common.presentToast('Cambro No. ' + barcode + ' is already picked ', 'warning');
+                  return;
+                } else {
+                  this.order_details[i].isPack = true;
+                  const arr = this.order_details.filter((val: any) => !val.isPack) || [];
+                  if (arr.length > 0) {
+                    this.openScan();
+                  } else {
+                    this.common.presentToast('All Receipe Packed Successfully', 'success');
+                    return;
+                  }
+                }
+              }
             }
+            if (count == 0) {
+              this.common.presentToast('You are scanning wrong QR ' + barcode, 'warning');
+            }
+            // if (barcode === this.order_details[this.index].ext_asset_id) {
+            //   this.order_details[this.index].isPack = true;
+            //   this.order_details[this.index].showErr = false;
+            // } else {
+            //   this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
+            // }
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -119,6 +144,10 @@ export class OrderDetailComponent  implements OnInit {
   scanBarcode(data: any,ind: any) {
     this.index = ind;
     this.decQr = data.qr_value;
+    this.router.navigateByUrl('/barcode');
+  }
+
+  openScan() {
     this.router.navigateByUrl('/barcode');
   }
 
