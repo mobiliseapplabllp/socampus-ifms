@@ -275,4 +275,30 @@ export class OrderReceivedComponent  implements OnInit {
       });
     })
   }
+
+  updateTemp(dat: any) {
+    console.log(dat);
+    const formData = new FormData();
+    formData.append('temperature', dat.temperature);
+    formData.append('txn_id', dat.txn_id);
+    this.presentLoading().then(preLoad => {
+      this.httpTo.updateTemp(formData).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+
+  }
 }

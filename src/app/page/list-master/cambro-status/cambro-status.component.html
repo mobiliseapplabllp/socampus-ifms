@@ -57,7 +57,9 @@
       </div>
       <div class="content" >
         <p style="margin-bottom:0px;margin-top:0px;font-size:14px;color:var(--ion-color-primary);">{{dat.status}}</p>
-        <p style="margin-top:0px;font-size:12px;color:var(--ion-color-medium)">{{dat.time}}</p>
+        <p style="margin-top:0px;font-size:12px;color:var(--ion-color-medium);height:15px;">
+          <span *ngIf="dat.time !== '00:00:00'">{{dat.time}}</span>
+        </p>
       </div>
     </div>
   </div>

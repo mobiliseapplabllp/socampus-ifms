@@ -43,13 +43,6 @@ export class OrderDetailComponent  implements OnInit {
       this.common.setBarcode('');
       console.log(bar);
       this.getDecBarcode(bar);
-      // if (this.platform.is('capacitor')) {
-      //   this.getDecBarcode(bar)
-      // } else {
-      //   this.order_details[this.index].isPack = true;
-      //   this.order_details[this.index].showErr = false;
-      // }
-
     }
   }
 
@@ -202,5 +195,13 @@ export class OrderDetailComponent  implements OnInit {
         }
       })
     })
+  }
+
+  dummy() {
+    if (!this.platform.is('capacitor')) {
+      for (var i = 0; i < this.order_details.length; i++) {
+        this.order_details[i].isPack = true;
+      }
+    }
   }
 }

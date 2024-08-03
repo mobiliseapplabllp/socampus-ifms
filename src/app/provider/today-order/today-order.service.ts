@@ -161,4 +161,8 @@ export class TodayOrderService {
     return this.https.get(environment.url + 'assets/reporting/cambro-info-by-barcode?barcode=' + encQr);
   }
 
+  updateTemp(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'meal/order/updte_order_recieved_temp', formData );
+  }
+
 }

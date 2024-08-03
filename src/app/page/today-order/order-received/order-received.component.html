@@ -38,13 +38,13 @@
           <span>Cambro {{dat.ext_asset_id}}</span>
         </div>
       </ion-col>
-      <ion-col size="2">
+      <!-- <ion-col size="2">
         <div>
           <span>Temp</span>
-          <ion-input type="number" [(ngModel)]="dat.temperature" > </ion-input>
+          <ion-input type="number" [(ngModel)]="dat.temperature" (change)="updateTemp(dat)"> </ion-input>
         </div>
-      </ion-col>
-      <ion-col size="2">
+      </ion-col> -->
+      <ion-col size="4">
         <div>
           <span>Rec Qty </span>
           <ion-input type="number" [ngStyle]="{'background-color': dat.isReceivedEnable ? 'white': 'rgba(0, 0, 0, 0.20)', 'border': dat.isReceivedEnable ? '0.5px solid rgba(0, 0, 0,0.46)': '0.5px solid rgba(0, 0, 0, 0.46);' }" [disabled]="dat.isReceivedEnable ? false: true " [(ngModel)]="dat.received_qty" (ionInput)="inputQty(dat, $event)" (ionChange)="changeFun(dat)" [autofocus]="dat.isAutoFocus ? true:false"> </ion-input>
