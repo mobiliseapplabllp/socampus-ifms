@@ -59,7 +59,7 @@ export class DigitalChecklistPage implements OnInit {
   qrObject: any = {};
   isLoop!: boolean;
   offset = 0;
-  TOTAL_CHECKLIST = 45300;
+  TOTAL_CHECKLIST = 0;
   constructor(
     private common: CommonService,
     private router: Router,
@@ -204,6 +204,9 @@ export class DigitalChecklistPage implements OnInit {
         this.attendedCheckList = [];
         this.presentLoading('Deleteing Data from Local Database').then(preLoad => {
           db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
+            this.dismissloading();
+            this.offset = 0;
+            this.TOTAL_CHECKLIST = 0;
             this.getOfflineCheckListFromServer(this.selectedDate, 0);
           });
         })
@@ -238,8 +241,20 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   getOfflineCheckListFromServer(date: string, offset: number) {
-    let percentage = ((this.offset * 100) / this.TOTAL_CHECKLIST).toFixed(2);
-    this.presentLoading('Please Wait, Application is Fetching your Data ' + percentage + '%').then(preLoad => {
+    let percentage,tmp_per, msg;
+    if (this.offset && this.TOTAL_CHECKLIST) {
+      tmp_per = ((this.offset * 100) / this.TOTAL_CHECKLIST);
+      if (tmp_per > 100) {
+        tmp_per = 100;
+        percentage = tmp_per.toFixed(2);
+      } else {
+        percentage = tmp_per.toFixed(2);
+      }
+      msg = 'Please Wait, Application is Fetching your Data ' + percentage + '%';
+    } else {
+      msg = 'Please Wait, Application is Fetching your Data ';
+    }
+    this.presentLoading(msg).then(preLoad => {
       this.httpDigital.getOfflineCheckListFromServer(date, offset).subscribe({
         next:(data: any) => {
           if (data.status) {
@@ -284,7 +299,7 @@ export class DigitalChecklistPage implements OnInit {
 
   async addBulkCheckList(checkListData: any) {
     await db.checklist.bulkAdd(checkListData).then(res => {
-      if (this.isLoop) {
+      if (this.isLoop && this.TOTAL_CHECKLIST > 300) {
         this.offset = this.offset + 300;
         this.getOfflineCheckListFromServer(this.selectedDate, this.offset);
       } else {
