@@ -39,6 +39,10 @@ export class PendingTaskComponent  implements OnInit {
   isInternet: any;
   qrType!: string;
   qrObject: any = {};
+  offset = 0;
+  TOTAL_CHECKLIST = 0;
+  isLoop!: boolean;
+  selected_date =  moment().format('YYYY-MM-DD');
   constructor(
     private loadingController: LoadingController,
     private httpCompalint: ComplaintService,
@@ -106,7 +110,7 @@ export class PendingTaskComponent  implements OnInit {
       this.pendingTicket = [];
       this.getPendingTicket();
     } else if (this.segments === 'digital') {
-      this.checkCurrentDateDG(moment().format('YYYY-MM-DD'));
+      this.checkCurrentDateDG(this.selected_date);
     } else if (this.segments === 'pms') {
       this.getPendingPms();
     } else if (this.segments === 'meter') {
@@ -125,7 +129,7 @@ export class PendingTaskComponent  implements OnInit {
     if (val === 'helpdesk') {
       this.getPendingTicket();
     } else if (val === 'digital') {
-      this.checkCurrentDateDG(moment().format('YYYY-MM-DD'));
+      this.checkCurrentDateDG(this.selected_date);
     } else if (val === 'pms') {
       this.getPendingPms();
     } else if (val === 'meter') {
@@ -134,33 +138,69 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   checkCurrentDateDG(date: string) {
-    const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).toArray());
-    const sub = friendsObservable.subscribe({
-      next:(data) => {
-        this.allChecklist = data;
-        this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-        this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-        if (this.allChecklist.length === 0 && this.isInternet) {
-          this.getOfflineCheckListFromServer(date);
+    this.presentLoading().then(preLoad => {
+      const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
+      const sub = friendsObservable.subscribe({
+        next:(data) => {
+          this.dismissloading();
+          this.allChecklist = data;
+          this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+          this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+          if (this.allChecklist.length === 0 && this.isInternet) {
+            this.getOfflineCheckListFromServer(date, 0);
+          }
+          setTimeout(() => {
+            sub.unsubscribe();
+          }, 1000);
         }
-        setTimeout(() => {
-          sub.unsubscribe();
-        }, 1000);
-      }
+      });
     });
   }
 
-  getOfflineCheckListFromServer(date: string) {
-    this.presentLoading('Please Wait, Application is Fetching your Data').then(preLoad => {
-      this.httpDigital.getOfflineCheckListFromServer(date).subscribe({
+  getOfflineCheckListFromServer(date: string, offset: number) {
+    let percentage,tmp_per, msg;
+    if (this.offset && this.TOTAL_CHECKLIST) {
+      tmp_per = ((this.offset * 100) / this.TOTAL_CHECKLIST);
+      if (tmp_per > 100) {
+        tmp_per = 100;
+        percentage = tmp_per.toFixed(2);
+      } else {
+        percentage = tmp_per.toFixed(2);
+      }
+      msg = 'Please Wait, Application is Fetching your Data ' + percentage + '%';
+    } else {
+      msg = 'Please Wait, Application is Fetching your Data ';
+    }
+    this.presentLoading(msg).then(preLoad => {
+      this.httpDigital.getOfflineCheckListFromServer(date, offset).subscribe({
         next:(data: any) => {
           if (data.status) {
-            this.allChecklist = data.data;
-            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-            this.addBulkCheckList(this.allChecklist);
+            if(data.data?.data.length > 0) {
+              this.isLoop = true;
+              this.allChecklist = data.data.data;
+              if (this.offset === 0) {
+                this.TOTAL_CHECKLIST = data.data.total;
+              }
+              this.addBulkCheckList(this.allChecklist);
+            } else {
+              this.isLoop = false;
+              this.checkCurrentDateDG(date);
+            }
           } else {
-            this.common.presentToast(data.msg, 'warning');
+            this.presentLoading().then(preLoad => {
+              const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
+              const sub = friendsObservable.subscribe({
+                next:(data) => {
+                  this.dismissloading();
+                  this.allChecklist = data;
+                  this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+                  this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+                  setTimeout(() => {
+                    sub.unsubscribe();
+                  }, 1000);
+                }
+              });
+            });
           }
         },
         error:() => {
@@ -175,8 +215,64 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   async addBulkCheckList(checkListData: any) {
-    await db.checklist.bulkAdd(checkListData);
+    await db.checklist.bulkAdd(checkListData).then(res => {
+      if (this.isLoop && this.TOTAL_CHECKLIST > 300) {
+        this.offset = this.offset + 300;
+        this.getOfflineCheckListFromServer(this.selected_date, this.offset);
+      } else {
+        this.checkCurrentDateDG(this.selected_date);
+      }
+    });
+    // await db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
+    //   await db.checklist.bulkAdd(checkListData);
+    // });
   }
+
+
+  // checkCurrentDateDG(date: string) {
+  //   const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).toArray());
+  //   const sub = friendsObservable.subscribe({
+  //     next:(data) => {
+  //       this.allChecklist = data;
+  //       this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+  //       this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+  //       if (this.allChecklist.length === 0 && this.isInternet) {
+  //         this.getOfflineCheckListFromServer(date);
+  //       }
+  //       setTimeout(() => {
+  //         sub.unsubscribe();
+  //       }, 1000);
+  //     }
+  //   });
+  // }
+
+  // getOfflineCheckListFromServer(date: string) {
+  //   this.presentLoading('Please Wait, Application is Fetching your Data').then(preLoad => {
+  //     this.httpDigital.getOfflineCheckListFromServer(date).subscribe({
+  //       next:(data: any) => {
+  //         if (data.status) {
+  //           this.allChecklist = data.data;
+  //           this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+  //           this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+  //           this.addBulkCheckList(this.allChecklist);
+  //         } else {
+  //           this.common.presentToast(data.msg, 'warning');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     })
+  //   })
+  // }
+
+  // async addBulkCheckList(checkListData: any) {
+  //   await db.checklist.bulkAdd(checkListData);
+  // }
 
   getPendingTicket() {
     this.httpCompalint.getTicketMaster(null, this.page).subscribe({

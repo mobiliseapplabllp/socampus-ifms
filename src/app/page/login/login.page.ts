@@ -155,10 +155,10 @@ export class LoginPage implements OnInit {
   }
 
   openInAppBrowser() {
-    let browser = this.iab.create(environment.url2 + 'ssoGates/saml2/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let browser = this.iab.create(environment.ssoUrl + 'ssoGates/saml2/index.php?sso', '_blank', 'location=no,zoom=yes');
     let count = 0;
     browser.on('loadstart').subscribe((data: any) => {
-      if (data.url.match(environment.url2 + '#/auth/ssoGates/')) {
+      if (data.url.match(environment.ssoUrl + '#/auth/ssoGates/')) {
         let url, token
         url = data.url;
         token = url.split('ssoGates/')[1];
