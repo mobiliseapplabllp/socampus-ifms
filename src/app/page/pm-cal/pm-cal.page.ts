@@ -17,16 +17,16 @@ import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digi
 export class PmCalPage implements OnInit {
   status = 'open';
   pmCal: any = [];
-  pmCalCopy: any = [];
-  resolvedPm: any = [];
-  resolvedPmCopy: any = [];
+  // pmCalCopy: any = [];
+  // resolvedPm: any = [];
+  // resolvedPmCopy: any = [];
   loading: any;
-  userData: any = [];
-  pmCalBoolean!: boolean;
-  pmCalResBoolean!: boolean;
-  counter = 0;
-  userInfo: any = [];
-  userName!: string;
+  // userData: any = [];
+  // pmCalBoolean!: boolean;
+  // pmCalResBoolean!: boolean;
+  // counter = 0;
+  // userInfo: any = [];
+  // userName!: string;
   openPm: any = [];
   openPmCopy: any = [];
   actionPm: any = [];
@@ -37,17 +37,17 @@ export class PmCalPage implements OnInit {
   lastPage: any;
   currentPage = 1;
   myWorkOrder: any = [];
-  slideOptsOne = {
-    initialSlide: 0,
-    slidesPerView: 2.5,
-    autoplay: false,
-    slideShadows: true,
-   };
+  // slideOptsOne = {
+  //   initialSlide: 0,
+  //   slidesPerView: 2.5,
+  //   autoplay: false,
+  //   slideShadows: true,
+  //  };
    selectedPms: any = [];
    searchBy: any;
    searchValue: any;searchValueDesc: any;
-   fileName1!: string;
-   selectedBarcode: any;
+  //  fileName1!: string;
+   selectedObj: any = {};
    countObj: any = {};
   constructor(
     private loadingController: LoadingController,
@@ -64,18 +64,35 @@ export class PmCalPage implements OnInit {
   }
 
   ionViewDidEnter() {
-    let bar = this.common.getBarcode();
+    let bar = this.common.getBarcode(), split, type, ecn_key;
     if (bar) {
-      let temp, temp1;
-      temp = bar;
-      temp1 = temp.split('/');
-      const obj = {
-        sch_id: '',
-        wo_id: this.selectedBarcode.wo_id,
-        enc_barcode: temp1[5],
-        type: 'pms',
+      this.common.setBarcode('');
+      split = bar.split('/');
+      if (split.length === 6) {
+        type = split[4];
+        ecn_key = split[5];
+        let val = this.common.decryptValue(ecn_key);
+        console.log(val);
+        console.log(this.selectedObj);
+        if (val === this.selectedObj.ext_asset_id) {
+          this.openPage(this.selectedObj);
+          return;
+        } else {
+          this.common.presentToast('You are Scan wrong QR Code ' + val, 'warning');
+        }
+      } else {
+        this.common.presentToast('You are Scan Wrong QR Code', 'warning');
       }
-      this.verifyBarcode(obj);
+      // let temp, temp1;
+      // temp = bar;
+      // temp1 = temp.split('/');
+      // const obj = {
+      //   sch_id: '',
+      //   wo_id: this.selectedBarcode.wo_id,
+      //   enc_barcode: temp1[5],
+      //   type: 'pms',
+      // }
+      // this.verifyBarcode(obj);
       return;
     }
     this.getPmsCount();
@@ -101,23 +118,23 @@ export class PmCalPage implements OnInit {
   }
 
   verifyBarcode(obj: any){
-    this.presentLoading().then(preLoad => {
-      this.httpDigital.verifyAssetByQr(obj).subscribe({
-        next:(dat: any) => {
-          if (dat.status) {
-            this.common.setBarcode('');
-            this.openPage(this.selectedBarcode);
-          } else {
-            this.common.presentToast(dat.msg, 'warning');
-          }
-        }, error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        }, complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
+    // this.presentLoading().then(preLoad => {
+    //   this.httpDigital.verifyAssetByQr(obj).subscribe({
+    //     next:(dat: any) => {
+    //       if (dat.status) {
+    //         this.common.setBarcode('');
+    //         this.openPage(this.selectedBarcode);
+    //       } else {
+    //         this.common.presentToast(dat.msg, 'warning');
+    //       }
+    //     }, error:() => {
+    //       this.dismissloading();
+    //       this.common.presentToast(environment.errMsg, 'danger');
+    //     }, complete:() => {
+    //       this.dismissloading();
+    //     }
+    //   })
+    // })
   }
 
   ionViewDidLeave() {
@@ -206,7 +223,8 @@ export class PmCalPage implements OnInit {
   }
 
   openFillReport(data: any) {
-    if (data.ext_asset_id && this.platform.is('capacitor')) {
+    if (data.ext_asset_id) {
+      this.selectedObj = data;
       this.openBarcode(data)
     } else {
       this.openPage(data);
@@ -214,7 +232,6 @@ export class PmCalPage implements OnInit {
   }
 
   openBarcode(data: any) {
-    this.selectedBarcode = data;
     this.router.navigateByUrl('/barcode');
   }
 

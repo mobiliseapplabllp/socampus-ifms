@@ -54,6 +54,10 @@ export class PmReportComponent  implements OnInit {
     }
   }
 
+  ionViewWillLeave() {
+    this.common.setHomeLoadStatus(true);
+  }
+
   removeListen() {
     SpeechRecognition.removeAllListeners();
   }

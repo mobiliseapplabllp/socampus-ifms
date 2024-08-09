@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AddReadingComponent } from './add-reading/add-reading.component';
-import { ModalController, LoadingController } from '@ionic/angular';
+import { ModalController, LoadingController, Platform } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -23,7 +23,8 @@ export class MeterPage implements OnInit {
     private router: Router,
     private common: CommonService,
     private loadingController: LoadingController,
-    private httpMeter: MeterService
+    private httpMeter: MeterService,
+    private platform: Platform
   ) { }
 
   ngOnInit() {
@@ -43,8 +44,6 @@ export class MeterPage implements OnInit {
         let ext_id ,enc_key, split = bar.split('/');
         enc_key = split[split.length - 1];
         ext_id = this.common.decryptValue(enc_key);
-        console.log(ext_id);
-        console.log(this.qrObj);
         if (ext_id === this.qrObj.ext_id) {
           this.qrObj.isQrVerify = true;
         } else {
@@ -165,9 +164,14 @@ export class MeterPage implements OnInit {
   }
 
   openBarcode(type: string, dat?: any) {
-    this.qrType = type;
-    this.qrObj = dat;
-    this.router.navigateByUrl('/barcode');
+    if (this.platform.is('capacitor')) {
+      this.qrType = type;
+      this.qrObj = dat;
+      this.router.navigateByUrl('/barcode');
+    } else {
+      dat.isQrVerify = true;
+    }
+
   }
 
   checkConsumptionCondition(dat: any) {

@@ -52,7 +52,6 @@ export class PendingTaskComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-
     this.common.checkInternet().then(res => {
       if (res) {
         this.isInternet = true;
@@ -95,6 +94,15 @@ export class PendingTaskComponent  implements OnInit {
           this.qrObject.isQrVerify = true;
         } else {
           this.common.presentToastWithOk(`You are Scanning Wrong QR Code. ${val}`, 'warning');
+        }
+      } else if (bar && this.qrType === 'pms') {
+        split = bar.split('/');
+        ecn_key = split[split.length - 1];
+        val = this.common.decryptValue(ecn_key);
+        if (this.qrObject.ext_asset_id === val) {
+          this.openFillReportPms(this.qrObject);
+        } else {
+          this.common.presentToastWithOk(`You are Scanning Wrong Asset QR Code. ${val}`, 'warning');
         }
       }
     }
@@ -317,14 +325,6 @@ export class PendingTaskComponent  implements OnInit {
     });
   }
 
-  openFillReportPms(dat: any) {
-    this.router.navigate(['/pm-calibration/pm-report'], {
-      queryParams: {
-        data: JSON.stringify(dat),
-      }
-    });
-  }
-
   verifyQr(data: any) {
     if (data.barcode) {
       this.qrType = 'verify';
@@ -336,6 +336,10 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   openBarcode(type: string, dat: any) {
+    if (!this.platform.is('capacitor') && type === 'verify') {
+      dat.isQrVerify = true;
+      return;
+    }
     this.qrType = type;
     this.qrObject = dat;
     this.router.navigateByUrl('/barcode');
@@ -645,6 +649,43 @@ export class PendingTaskComponent  implements OnInit {
         }
       });
     })
+  }
+
+  checkPms(type: string, data: any) {
+    if (data.ext_asset_id) {
+      this.openBarcode(type, data);
+    } else {
+      this.openFillReportPms(data);
+    }
+  }
+
+  openFillReportPms(dat: any) {
+    this.router.navigate(['/pm-calibration/pm-report'], {
+      queryParams: {
+        data: JSON.stringify(dat),
+      }
+    });
+  }
+
+  //   openFillReport(data: any) {
+  //   if (data.ext_asset_id) {
+  //     this.selectedObj = data;
+  //     this.openBarcode(data)
+  //   } else {
+  //     this.openPage(data);
+  //   }
+  // }
+
+  // openBarcode(data: any) {
+  //   this.router.navigateByUrl('/barcode');
+  // }
+
+  openPage(data: any) {
+    this.router.navigate(['/pm-calibration/pm-report'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
   }
 
   changePendingTask() {
