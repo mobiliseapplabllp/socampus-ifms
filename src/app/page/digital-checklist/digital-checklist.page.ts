@@ -130,6 +130,22 @@ export class DigitalChecklistPage implements OnInit {
       } else {
         this.common.presentToast('You are Scan Wrong QR Code', 'warning');
       }
+    } else if (this.qrType === 'loc-verify') {
+      this.qrType = 'site';
+      split = bar.split('/');
+      if (split.length === 6) {
+        ecn_key = split[5];
+        let val = this.common.decryptValue(ecn_key);
+        console.log(this.qrObject);
+        console.log(val);
+        if (this.qrObject.loc_id === parseInt(val, 10)) {
+          this.openFillReport(this.qrObject);
+        } else {
+          this.common.presentToast('You are Scan Wrong Location QR Code ' + val, 'warning');
+        }
+      } else {
+        this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+      }
     }
   }
 
@@ -318,7 +334,10 @@ export class DigitalChecklistPage implements OnInit {
       this.qrObject = data;
       this.router.navigateByUrl('/barcode');
     } else {
-      this.openFillReport(data);
+      this.qrType = 'loc-verify';
+      this.qrObject = data;
+      this.router.navigateByUrl('/barcode');
+      // this.openFillReport(data);
     }
   }
 

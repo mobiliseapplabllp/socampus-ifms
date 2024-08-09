@@ -88,7 +88,7 @@
                     <ion-button class="ion-text-capitalize" shape="round" [color]="!dat.isConsumptionImg ? 'primary': 'success'" [fill]="!dat.isConsumptionImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat , 'consumption')">
                       <ion-icon name="camera-outline"  *ngIf="!dat.isConsumptionImg"></ion-icon>
                       <ion-icon name="checkmark-outline" [slot]="dat.isConsumptionImg ? 'icon-only': 'end' " *ngIf="dat.isConsumptionImg"></ion-icon>
-                      <ion-text *ngIf="dat.is_img_req === 1 && !dat.isConsumptionImg" >*</ion-text>
+                      <ion-text *ngIf="dat.is_img_req === 1 && !dat.isConsumptionImg" color="danger">*</ion-text>
                     </ion-button>
                   </ion-buttons>
                 </ion-item>
@@ -117,7 +117,7 @@
                     <ion-button class="ion-text-capitalize" shape="round"  [color]="!dat.isGenerationImg ? 'primary': 'success'" [fill]="!dat.isGenerationImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat, 'generate_reading')">
                       <ion-icon name="camera-outline" *ngIf="!dat.isGenerationImg"></ion-icon>
                       <ion-icon name="checkmark-outline" [slot]="dat.isGenerationImg ? '': 'end' " *ngIf="dat.isGenerationImg"></ion-icon>
-                      <ion-text *ngIf="dat.is_img_req === 1 && !dat.isGenerationImg">*</ion-text>
+                      <ion-text *ngIf="dat.is_img_req === 1 && !dat.isGenerationImg" color="danger">*</ion-text>
                     </ion-button>
                   </ion-buttons>
                 </ion-item>
@@ -145,7 +145,7 @@
                     <ion-button class="ion-text-capitalize" shape="round" [color]="!dat.isOtherImg ? 'primary': 'success'" [fill]="!dat.isOtherImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat, 'other')">
                       <ion-icon name="camera-outline" *ngIf="!dat.isOtherImg"></ion-icon>
                       <ion-icon name="checkmark-outline" [slot]="dat.isOtherImg ? '': 'end' " *ngIf="dat.isOtherImg"></ion-icon>
-                      <ion-text *ngIf="dat.is_img_req === 1 && !dat.isOtherImg">*</ion-text>
+                      <ion-text *ngIf="dat.is_img_req === 1 && !dat.isOtherImg" color="danger">*</ion-text>
                     </ion-button>
                   </ion-buttons>
                 </ion-item>

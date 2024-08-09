@@ -23,7 +23,7 @@ export class PmCalService {
 
   getPm(stage_id: any, current_page: any): Observable<any> {
 
-    return this.https.get(environment.url + 'pmscal/get_ppm_work_area_work_order?limit=50&page=' + current_page + '&stage_id=' + stage_id + '&shource_from=app');
+    return this.https.get(environment.url + 'pmscal/get_ppm_work_area_work_order?limit=20&page=' + current_page + '&stage_id=' + stage_id + '&shource_from=app');
     // return this.https.get(environment.url + 'pmscal/get_work_order?limit=10&page=' + current_page + '&stage_id=' + stage_id + '&shource_from=app');
   }
 
