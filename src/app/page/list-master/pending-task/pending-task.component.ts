@@ -109,8 +109,6 @@ export class PendingTaskComponent  implements OnInit {
         if (split.length === 6) {
           ecn_key = split[5];
           let val = this.common.decryptValue(ecn_key);
-          console.log(this.qrObject);
-          console.log(val);
           if (this.qrObject.loc_id === parseInt(val, 10)) {
             this.openFillReport(this.qrObject);
           } else {
@@ -535,7 +533,6 @@ export class PendingTaskComponent  implements OnInit {
         ideal_reading: dat.ideal_reading || '',
         meter_id: dat.meter_id,
       };
-      console.log(obj);
       this.save(obj, dat);
     }
   }

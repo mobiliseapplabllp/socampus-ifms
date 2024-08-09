@@ -31,7 +31,6 @@ export class OfflineDataComponent  implements OnInit {
   }
 
   changeSegment(ev: any) {
-    console.log(ev.target.value);
   }
 
   async getOffLineCheckList() {
@@ -39,7 +38,6 @@ export class OfflineDataComponent  implements OnInit {
     const sub = friendsObservable.subscribe({
       next:(data) => {
         this.checkList = data;
-        console.log(this.checkList);
         setTimeout(() => {
           sub.unsubscribe();
         }, 1000);
@@ -81,7 +79,7 @@ export class OfflineDataComponent  implements OnInit {
       buttons: [{
         text: 'Cancel',
           handler: (data) => {
-            console.log("Cancel");
+
           }
         },{
           text: 'YES',

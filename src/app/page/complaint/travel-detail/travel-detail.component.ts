@@ -30,7 +30,6 @@ export class TravelDetailComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.tkts_id);
     this.getTravelType();
   }
 
@@ -38,7 +37,6 @@ export class TravelDetailComponent  implements OnInit {
     this.presentLoading().then(preLoad => {
       this.httpComplaint.getTravelType(this.tkts_id).subscribe({
         next:(data) => {
-          console.log(data);
           if (data.status) {
             this.travelNote = data.data?.travelInfo.remarkNote;
             this.travelMode = data.data?.travelType;

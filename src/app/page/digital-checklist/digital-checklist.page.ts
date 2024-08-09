@@ -136,8 +136,6 @@ export class DigitalChecklistPage implements OnInit {
       if (split.length === 6) {
         ecn_key = split[5];
         let val = this.common.decryptValue(ecn_key);
-        console.log(this.qrObject);
-        console.log(val);
         if (this.qrObject.loc_id === parseInt(val, 10)) {
           this.openFillReport(this.qrObject);
         } else {
@@ -185,7 +183,6 @@ export class DigitalChecklistPage implements OnInit {
       buttons: [{
         text: 'Cancel',
           handler: (data) => {
-            console.log("Cancel");
           }
         },{
           text: 'YES',
@@ -201,7 +198,6 @@ export class DigitalChecklistPage implements OnInit {
     const friendsObservable = liveQuery (() => db.checklist.where({offline_save: "true"}).toArray());
     const sub = friendsObservable.subscribe({
       next:(data) => {
-        console.log(data);
         if (data.length > 0) {
           setTimeout(() => {
             sub.unsubscribe();

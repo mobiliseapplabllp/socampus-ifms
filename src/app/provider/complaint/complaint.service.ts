@@ -215,7 +215,7 @@ export class ComplaintService {
   }
 
   getTicketHistory(dat: any) {
-    console.log(dat.ticket_id);
+
     return new Promise(resolve => {
       this.https.get(environment.url + 'specific_ticket.php?ticket_id=' + dat.ticket_id +
       '&ticket_type=' + dat.product_type).subscribe({

@@ -108,7 +108,6 @@ export class CommonService {
   }
 
   extractStringValue(val: any) {
-    console.log(val);
     var regex, match, extractedString;
     regex = /"([^"]+)"/;
     match = val.match(regex);

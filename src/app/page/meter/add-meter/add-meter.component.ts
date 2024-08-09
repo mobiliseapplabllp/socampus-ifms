@@ -147,7 +147,6 @@ export class AddMeterComponent implements OnInit {
     });
     modal.onWillDismiss().then(disModal => {
       if (disModal.data) {
-        console.log(disModal);
         let prefix = 'M'+disModal.data.barcode_prefix;
         this.addAsset.get('site_id_description')?.setValue(disModal.data.pc_desc);
         this.addAsset.get('site_id')?.setValue(disModal.data.pc_id);
@@ -177,7 +176,6 @@ export class AddMeterComponent implements OnInit {
   }
 
   test() {
-    console.log(this.addAsset);
   }
 
   changeFromDate(index: any, type: string) {
@@ -197,11 +195,7 @@ export class AddMeterComponent implements OnInit {
 
   changeTime() {
     let time = moment(this.addAsset.value.start_time_temp).format('H:mm');
-    console.log(time);
     this.addAsset.get('start_time')?.setValue(time);
-
-
-
   }
 
   addMoreSlot() {
@@ -214,9 +208,7 @@ export class AddMeterComponent implements OnInit {
     } else {
       this.timeArr.splice(index, 1);
     }
-
   }
-
 
   getMeterType(pc_id: any) {
     this.httpMeter.getMeterTypeAll(pc_id).subscribe(data => {
@@ -460,7 +452,6 @@ export class AddMeterComponent implements OnInit {
   }
 
   addMeter() {
-    console.log(this.addAsset);
     if (this.addAsset.value.is_child_asset == '1' && !this.parentAssetObj.isExists) {
       this.httpCommon.presentToast('Please Verify Parent Asset Id', 'warning');
       return;

@@ -37,7 +37,6 @@ export class LoginService {
           resolve(data);
         },
         error:(err) => {
-          console.log(err);
           if (err.status === 403) {
             this.common.presentToast(err.error.msg, 'warning');
             resolve(null)

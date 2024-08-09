@@ -26,7 +26,6 @@ export class HseAssignComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.allData + '=' + this.val);
     this.getAssignMember();
   }
 
@@ -49,7 +48,6 @@ export class HseAssignComponent  implements OnInit {
     this.presentLoading().then(preLoad => {
       this.httpComplaint.getTeam(this.allData.pc_id, with_gps).subscribe({
         next:(data) => {
-          console.log(data);
           if (data.status) {
             this.assignUser = data.data;
             this.assignUserCopy = data.data;
@@ -111,11 +109,4 @@ export class HseAssignComponent  implements OnInit {
       });
     }
   }
-
-  // changeRadioUser(ev: any) {
-  //   console.log(ev.target.value);
-  //   this.modal.dismiss(ev.target.value, 'confirm');
-
-  // }
-
 }

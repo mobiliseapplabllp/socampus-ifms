@@ -113,7 +113,7 @@ export class ListMasterPage implements OnInit {
       buttons: [{
         text: 'Cancel',
           handler: (data) => {
-            console.log("Cancel");
+
           }
         },{
           text: 'YES',

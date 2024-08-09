@@ -35,7 +35,6 @@ export class PtwApprovalComponent  implements OnInit {
     this.presentLoading().then(preLoad => {
       this.httpApproval.getPendingPTW().subscribe({
         next:(data) => {
-          console.log(data);
           if (data.status) {
             this.pendingList = data.data;
           } else {
@@ -72,7 +71,6 @@ export class PtwApprovalComponent  implements OnInit {
   }
 
   changeSegment(ev: any) {
-    console.log(ev.target.value);
   }
 
   async presentAlertConfirm(data: any, status: string, msg: string) {

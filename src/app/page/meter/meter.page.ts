@@ -128,7 +128,6 @@ export class MeterPage implements OnInit {
         ideal_reading: dat.ideal_reading || '',
         meter_id: dat.meter_id,
       };
-      console.log(obj);
       this.save(obj, dat);
     }
   }

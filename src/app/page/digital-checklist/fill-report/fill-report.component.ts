@@ -469,9 +469,6 @@ export class FillReportComponent  implements OnInit {
       if (disModal.role) {
         let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
         this.signatureBase64 = disModal.data;
-        // const base64Response = await fetch(this.signatureBase64);
-        // const blob = await base64Response.blob();
-        // console.log(blob);
       }
     });
     modal.present();

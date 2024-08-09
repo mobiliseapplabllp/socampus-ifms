@@ -26,7 +26,7 @@ export class AttendanceService {
   }
 
   getAttendanceHistory(month: any, pc_id: any): Observable<any> {
-    console.log(month);
+
     let year =  moment().format('YYYY');
     return this.http.get(environment.url + `shared/get-engineer-attendance?month=${month}&year=${year}&pc_id=${pc_id}`);
   }

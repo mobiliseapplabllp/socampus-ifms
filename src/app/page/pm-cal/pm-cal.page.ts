@@ -72,8 +72,7 @@ export class PmCalPage implements OnInit {
         type = split[4];
         ecn_key = split[5];
         let val = this.common.decryptValue(ecn_key);
-        console.log(val);
-        console.log(this.selectedObj);
+
         if (val === this.selectedObj.ext_asset_id) {
           this.openPage(this.selectedObj);
           return;

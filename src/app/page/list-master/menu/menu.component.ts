@@ -54,7 +54,6 @@ export class MenuComponent  implements OnInit {
         this.getMenuDetail();
       } else {
         let temp: any = JSON.parse(localStorage.getItem('home_menu')!);
-        console.log(temp);
         this.chunkedArray(temp);
       }
     });

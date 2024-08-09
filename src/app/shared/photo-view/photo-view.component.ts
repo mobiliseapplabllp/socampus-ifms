@@ -16,7 +16,6 @@ export class PhotoViewComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.blobFile);
     this.imageUrl = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(this.blobFile));
   }
 

@@ -63,7 +63,7 @@ export class TokenInterceptor implements HttpInterceptor {
       buttons: [{
         text: 'Okay',
         handler: () => {
-          console.log('Confirm Okay');
+
         }
       }]
     });

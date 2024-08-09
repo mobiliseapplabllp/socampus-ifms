@@ -65,7 +65,6 @@ export class ComplaintPage implements OnInit {
       componentProps : { }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
       }
     });
@@ -93,9 +92,6 @@ export class ComplaintPage implements OnInit {
 
             this.mediaRecorder.onstop = () => {
                 if (this.mediaRecorder.state !== 'recording') {
-                  // console.log('on stop fun');
-                  //   this.mediaRecorder.start();
-
                 }
             };
 
@@ -123,8 +119,6 @@ stopAndRestartRecording() {
 }
 
 saveBlobAsFile(blob: any, fileName: any) {
-  console.log(blob);
-  console.log(fileName);
   const a: any = document.createElement('a');
   document.body.appendChild(a);
   a.style = 'display: none';

@@ -420,7 +420,6 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   async openCategorySubCat2() {
-    console.log(this.ticketForm.value);
     if(!this.ticketForm.value.subcat1_id) {
       alert('Please Select Category 1');
       return;
@@ -642,9 +641,7 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   async hseAssign(val: string) {
-    console.log(this.assignUserSelect);
     if (val === 'buddy' && !this.assignUserSelect.value) {
-      console.log(this.assignUserSelect);
       this.httpCommon.presentToast('Please Select Assign To User First', 'warning');
       return
     }
@@ -659,7 +656,6 @@ export class TicketTypeComponent  implements OnInit {
     });
     modal.onWillDismiss().then(async disModal => {
       if (disModal.role) {
-        console.log(disModal);
         if (val === 'assign') {
           this.assignUserSelect = disModal.data;
           this.ticketForm.get('assignToName')?.setValue(this.assignUserSelect.label);
@@ -676,21 +672,4 @@ export class TicketTypeComponent  implements OnInit {
     });
     modal.present();
   }
-
-  // getSpecificTicket() {
-  //   this.httpComplaint.getSpecificTicket(this.ticket).subscribe({
-  //     next:(data) => {
-  //       console.log(data);
-  //       // pc_hse_conf
-  //       if (data.status) {
-  //         this.pc_hse_conf = data.data.pc_hse_conf;
-  //         console.log(this.pc_hse_conf);
-  //       }
-  //     },
-  //     error:() => {
-
-  //     }
-  //   })
-  // }
-
 }

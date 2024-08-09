@@ -66,7 +66,6 @@ export class PmAssignComponent  implements OnInit {
       workorderData: this.work_order,
       source: environment.source
     }
-    console.log(obj);
     this.presentLoading().then(preLoad => {
       this.httpPms.assignPm(obj).subscribe({
         next:(data) => {

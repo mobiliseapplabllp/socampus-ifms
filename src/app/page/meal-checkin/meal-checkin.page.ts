@@ -37,7 +37,6 @@ export class MealCheckinPage implements OnInit {
   ionViewDidEnter() {
     let bar = this.common.getBarcode();
     if (bar) {
-      console.log(bar);
       this.submit(bar);
       this.common.setBarcode('');
     }

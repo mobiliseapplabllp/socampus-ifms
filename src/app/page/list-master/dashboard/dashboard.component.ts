@@ -53,7 +53,6 @@ export class DashboardComponent  implements OnInit {
           this.getDashboard();
         } else {
           let temp: any = JSON.parse(localStorage.getItem('dashboard')!);
-          console.log(temp);
           this.breakdown = temp.breakdown;
           this.pms = temp.pms
           this.indent = temp.indent,

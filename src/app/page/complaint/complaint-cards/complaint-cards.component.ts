@@ -47,7 +47,6 @@ export class ComplaintCardsComponent  implements OnInit {
   }
 
   check() {
-    console.log(this.data);
   }
 
   async openSite() {
@@ -292,7 +291,6 @@ export class ComplaintCardsComponent  implements OnInit {
       }
     });
     modal.onWillDismiss().then(async disModal => {
-      console.log(disModal);
       if (disModal.role) {
         // this.greetEvent.emit(true);
       }

@@ -26,7 +26,7 @@ export class SosComponent  implements OnInit {
   }
 
   hitRequest() {
-    console.log('hit request');
+
   }
 
   closeModal(data: any, status: any) {

@@ -41,7 +41,6 @@ export class CaptureComponent  implements OnInit {
     private common: CommonService) { }
 
   ngOnInit(): void {
-    console.log(this.requestedData);
     setTimeout(() => {
       this.formData.append('pc_id', this.requestedData.pc_id);
       this.formData.append('status', '3');
@@ -209,58 +208,6 @@ export class CaptureComponent  implements OnInit {
     this.stopStream();
     this.modalCtrl.dismiss(data, status)
   }
-
-  // openCamera() {
-  //   navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then((stream) => {
-  //     this.stream = stream;
-  //     this.liveVideo.srcObject = stream;
-  //     // this.mediaaRecorder = new MediaRecorder(stream);
-  //     // this.mediaRecorder.ondataavailable = (event: any) => {
-  //     //   if (event.data.size > 0) {
-  //     //     this.recordedChunks.push(event.data);
-  //     //   }
-  //     // };
-  //     // this.mediaRecorder.start();
-  //   }).catch((err) => {
-  //     console.error('Error accessing media devices: ', err);
-  //   });
-  // }
-
-  // closeCamera() {
-  //   this.stream.getTracks().forEach((track: any) => track.stop());
-  //   this.liveVideo.srcObject = null;
-  //   this.closeModal(null, false);
-  // }
-
-  // captureImage() {
-  //   console.log(this.liveVideo + '=' +this.liveVideo.width + '=' + this.liveVideo.height);
-  //   const canvas = document.createElement('canvas');
-  //   const ctx: any = canvas.getContext('2d');
-  //   const width = 700;
-  //   const height = 600;
-  //   setTimeout(() => {
-  //     canvas.width = width;
-  //     canvas.height = height;
-  //     ctx.drawImage(this.liveVideo, 0, 0, width, height);
-  //     canvas.toBlob((blob) => {
-  //       if (blob) {
-  //         this.currentStatus = 'photo-capture';
-  //         setTimeout(() => {
-  //           this.blobImage = URL.createObjectURL(blob);
-  //           const imageElement: HTMLImageElement = document.getElementById('imagePreview') as HTMLImageElement;
-  //           if (imageElement) {
-  //             imageElement.src = this.blobImage;
-  //           }
-  //           this.stream.getTracks().forEach((track: any) => track.stop());
-  //           this.liveVideo.srcObject = null;
-  //         }, 1000);
-  //         this.presentLoading().then(preLoad => {
-  //           this.dismissloading();
-  //         })
-  //       }
-  //     }, 'video/webm');
-  //   }, 1000);
-  // }
 
   async presentLoading() {
     this.loading = await this.loadingController.create({

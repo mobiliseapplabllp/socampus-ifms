@@ -4,7 +4,7 @@ import { IonDatetime, LoadingController, ModalController, Platform } from '@ioni
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { environment } from 'src/environments/environment';
-import { AssetPlantComponent } from './asset-plant/asset-plant.component';
+// import { AssetPlantComponent } from './asset-plant/asset-plant.component';
 import { AssetDepartmentComponent } from './asset-department/asset-department.component';
 import { AssetDevicenameComponent } from './asset-devicename/asset-devicename.component';
 import { AssetManufacturerComponent } from './asset-manufacturer/asset-manufacturer.component';
@@ -129,8 +129,6 @@ export class AddAssetPage implements OnInit {
 
     });
     this.pinPointStyleFun();
-    // this.getFacilityType();
-    // this.getDeviceGroup();
     this.getOwnership();
     this.getEquipStatus();
     this.getTechnology();
@@ -138,18 +136,6 @@ export class AddAssetPage implements OnInit {
   }
 
   ngOnInit() {
-    // var date1 = moment('2024-04-24 15:30:00');
-    // var date2 = moment('2024-04-24 15:20:00');
-    // var dateDiff = date2.diff(date1, 'minutes');
-    // if (dateDiff < -10 || dateDiff > 10) {
-
-    // }
-    // console.log(dateDiff);
-    // const moment = require('moment-timezone'); // Assuming you use a module bundler like webpack
-    // const currentTimeZone = moment.tz.guess();
-    // console.log(currentTimeZone);
-    // console.log(new Date().getTimezoneOffset());
-
     this.httpCommon.setBarcode('');
   }
 
@@ -316,7 +302,6 @@ export class AddAssetPage implements OnInit {
   }
 
   async readImg(photo: any, imageno: any) {
-    console.log(photo);
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
     const response = await fetch(photo.webPath);
     const blob = await response.blob();

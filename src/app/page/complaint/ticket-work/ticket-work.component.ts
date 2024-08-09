@@ -78,7 +78,6 @@ export class TicketWorkComponent  implements OnInit {
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
       this.requestedData_TEMP = JSON.parse(res['data']);
-      console.log(this.requestedData_TEMP)
       this.requestedData = this.requestedData_TEMP.data;
       this.ticket_id = this.requestedData.tkts_id;
       this.mobile = this.requestedData.mobile
@@ -185,7 +184,6 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   async changeFile(ev: any) {
-    console.log(ev);
     if (ev.target.files.length > 0) {
       this.formData.delete('video');
       this.formData.append('video', ev.target.files[0], ev.target.files[0].name);
@@ -409,7 +407,6 @@ export class TicketWorkComponent  implements OnInit {
   async captureAndUploadVideo() {
     let options: CaptureVideoOptions = { limit: 1, quality:0, duration: 60};
     this.mediaCapture.captureVideo(options).then(async (_data: any) => {
-      console.log(_data);
       this.getVideoUrl(_data[0].fullPath);
     }, _err => {
 
@@ -417,7 +414,6 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   async getVideoUrl(fullPath: string) {
-    console.log(fullPath);
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.mp4'
     const file = await Filesystem.readFile({
       path: fullPath,
@@ -427,7 +423,6 @@ export class TicketWorkComponent  implements OnInit {
       const base64Video = `data:video/mp4;base64,${file.data}`
       const base64Response = await fetch(base64Video);
       const blob = await base64Response.blob();
-      console.log(blob);
       this.formData.delete('video');
       this.formData.append('video', blob, random);
       this.isVidUpl = true;
@@ -602,7 +597,6 @@ export class TicketWorkComponent  implements OnInit {
       return;
     }
     this.requestedData.remark = this.workSpace.value.remark
-    console.log(this.requestedData);
     const modal = await this.modalController.create({
       component: CaptureComponent,
       componentProps : {
@@ -610,7 +604,6 @@ export class TicketWorkComponent  implements OnInit {
       }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
 
       }

@@ -49,7 +49,6 @@ export class ApprovalsPage implements OnInit {
     this.presentLoading().then(preLoad => {
       this.httpApproval.getPendingPTW().subscribe({
         next:(data) => {
-          console.log(data);
           if (data.status) {
             this.pendingList = data.data;
             const index = this.approvalsList.findIndex((item: any) => item.id === 1);

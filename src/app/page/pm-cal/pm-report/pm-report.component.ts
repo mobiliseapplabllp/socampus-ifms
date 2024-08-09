@@ -114,7 +114,6 @@ export class PmReportComponent  implements OnInit {
   }
 
   async notApplicable(dat: any) {
-    console.log(dat);
     const alert = await this.alertController.create({
       header: 'Confirm!!!',
       message: 'Are you sure want to NA "' + dat.cat_desc + '"',
@@ -404,7 +403,6 @@ export class PmReportComponent  implements OnInit {
             if (data.cat_head && data.cat_ques) {
               // this.scrollCategory(data);
             } else {
-              console.log('cat not found');
             }
           }
         },
@@ -487,7 +485,7 @@ export class PmReportComponent  implements OnInit {
           }
         }
       }).catch(err => {
-        console.log(err);
+
       });
     };
     speak();

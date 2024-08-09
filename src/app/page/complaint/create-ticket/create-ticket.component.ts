@@ -111,7 +111,6 @@ export class CreateTicketComponent  implements OnInit {
         this.httpCommon.setBarcode('');
         this.httpCommon.openDoc(fullurl);
       } else if (this.qrType === 'scan') {
-        console.log(bar);
         let  type,enc_key,split = bar.split('/');
         enc_key = split[split.length - 1];
         type = split[split.length - 2];
