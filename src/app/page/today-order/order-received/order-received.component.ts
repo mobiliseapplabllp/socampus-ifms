@@ -11,11 +11,87 @@ import { environment } from 'src/environments/environment';
   templateUrl: './order-received.component.html',
   styleUrls: ['./order-received.component.scss'],
 })
+
 export class OrderReceivedComponent  implements OnInit {
   order_details: any = [];
+  updateArr: any = [];
   requestedData: any  = [];
   loading: any;
   index: any;
+
+  // orderReceiveArr: any = [{
+  //   item_name: 'Carrot & Beans palya',
+  //   received_temperature: '20',
+  //   temperature: '35',
+  //   txn_id: 1211,
+  //   data: [{
+  //     // old data
+  //   }]
+  // }]
+
+  // originalArr = [{
+  //   item_name: "Carrot & Beans palya",
+  //   ext_asset_id: "1016128982",
+  //   received_temperature: "10",
+  //   txn_id: 1244,
+  //   id: 357,
+  //   dispatch_qty: 10,
+  //   cat_image: "image_url.png",
+  // },{
+  //   item_name: "Carrot & Beans palya",
+  //   ext_asset_id: "1016128984",
+  //   received_temperature: "11",
+  //   txn_id: 1245,
+  //   id: 358,
+  //   dispatch_qty: 11,
+  //   cat_image: "image_url.png",
+  // },{
+  //   item_name: "Butter Chicken",
+  //   ext_asset_id: "1016128990",
+  //   received_temperature: "12",
+  //   txn_id: 1250,
+  //   id: 360,
+  //   dispatch_qty: 12,
+  //   cat_image: "image_url.png",
+  // }]
+
+  // output = [{
+  //   item_name: "Carrot & Beans palya",
+  //   ext_asset_id: "1016128982",
+  //   received_temperature: "10",
+  //   txn_id: 1244,
+  //   data: [{
+  //     item_name: "Carrot & Beans palya",
+  //     ext_asset_id: "1016128982",
+  //     received_temperature: "10",
+  //     txn_id: 1244,
+  //     id: 357,
+  //     dispatch_qty: 10,
+  //     cat_image: "image_url.png",
+  //   },{
+  //     item_name: "Carrot & Beans palya",
+  //     ext_asset_id: "1016128984",
+  //     received_temperature: "11",
+  //     txn_id: 1245,
+  //     id: 358,
+  //     dispatch_qty: 11,
+  //     cat_image: "image_url.png",
+  //   }]
+  // },{
+  //   item_name: "Butter Chicken",
+  //   ext_asset_id: "1016128990",
+  //   received_temperature: "12",
+  //   txn_id: 1250,
+  //   data: [{
+  //     item_name: "Butter Chicken",
+  //     ext_asset_id: "1016128990",
+  //     received_temperature: "12",
+  //     txn_id: 1250,
+  //     id: 360,
+  //     dispatch_qty: 12,
+  //     cat_image: "image_url.png",
+  //   }]
+  // }]
   constructor(
     private activeRoute: ActivatedRoute,
     private httpTo: TodayOrderService,
@@ -147,7 +223,6 @@ export class OrderReceivedComponent  implements OnInit {
         next:(data) => {
           if (data.status) {
             this.order_details = data.data;
-            // console.log(this.order_details);
             for (var i = 0; i < this.order_details.length; i++) {
               if (!this.order_details[i].received_qty) {
                 this.order_details[i].isReceivedEnable = false;
@@ -159,7 +234,8 @@ export class OrderReceivedComponent  implements OnInit {
                 this.order_details[i].isRec = true;
               }
             }
-            console.log(this.order_details);
+            this.updateArr = this.groupByItemName(this.order_details);
+            console.log(this.updateArr);
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -175,7 +251,24 @@ export class OrderReceivedComponent  implements OnInit {
     });
   }
 
+  groupByItemName(items: any) {
+    const grouped: { [key: string]: any } = {};
 
+    items.forEach((item: any) => {
+      if (!grouped[item.item_name]) {
+        grouped[item.item_name] = {
+          item_name: item.item_name,
+          ext_asset_id: item.ext_asset_id,
+          received_temperature: item.received_temperature,
+          txn_id: item.txn_id,
+          cat_image: item.cat_image,
+          data: []
+        };
+      }
+      grouped[item.item_name].data.push(item);
+    });
+    return Object.values(grouped);
+  }
   async presentLoading(msg?: any) {
     this.loading = await this.loadingController.create({
       cssClass: 'my-custom-class',
@@ -193,14 +286,25 @@ export class OrderReceivedComponent  implements OnInit {
 
   submit() {
     let result = 0;
-    for (var i = 0; i < this.order_details.length;i++) {
-      if (!this.order_details[i].received_qty || this.order_details[i].received_qty == 0 || !this.order_details[i].isRec) {
-        result = result + 1;
-        this.order_details[i].showErr = true
-      } else {
-        this.order_details[i].showErr = false
+    this.updateArr.forEach((element: any) => {
+      console.log(element);
+      for (var i = 0 ; i < element.data.length; i++) {
+        if (!element.data[i].received_qty || element.data[i].received_qty == 0 || !element.data[i].isRec) {
+          result = result + 1;
+          element.data[i].showErr = true
+        } else {
+          element.data[i].showErr = false
+        }
       }
-    }
+    });
+    // for (var i = 0; i < this.order_details.length;i++) {
+    //   if (!this.order_details[i].received_qty || this.order_details[i].received_qty == 0 || !this.order_details[i].isRec) {
+    //     result = result + 1;
+    //     this.order_details[i].showErr = true
+    //   } else {
+    //     this.order_details[i].showErr = false
+    //   }
+    // }
     if (result > 0) {
       this.common.presentToast('Please Receive All Qty', 'warning');
       return;
@@ -277,9 +381,8 @@ export class OrderReceivedComponent  implements OnInit {
   }
 
   updateTemp(dat: any) {
-    console.log(dat);
     const formData = new FormData();
-    formData.append('temperature', dat.temperature);
+    formData.append('temperature', dat.received_temperature);
     formData.append('txn_id', dat.txn_id);
     this.presentLoading().then(preLoad => {
       this.httpTo.updateTemp(formData).subscribe({
