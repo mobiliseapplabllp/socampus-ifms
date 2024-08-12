@@ -325,16 +325,20 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   verifyQr(data: any) {
-    if (data.barcode) {
-      this.qrType = 'verify';
-      this.qrObject = data;
-      this.router.navigateByUrl('/barcode');
+    if (this.platform.is('capacitor')) {
+      if (data.barcode) {
+        this.qrType = 'verify';
+        this.qrObject = data;
+        this.router.navigateByUrl('/barcode');
+      } else {
+        this.qrType = 'loc-verify';
+        this.qrObject = data;
+        this.router.navigateByUrl('/barcode');
+      }
     } else {
-      this.qrType = 'loc-verify';
-      this.qrObject = data;
-      this.router.navigateByUrl('/barcode');
-      // this.openFillReport(data);
+      this.openFillReport(data);
     }
+
   }
 
   openFillReport(data: any) {
