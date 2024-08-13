@@ -4,6 +4,9 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title> Fill Report ({{requestedData.short_code}}/{{requestedData.year}}/{{requestedData.wo_id}}) </ion-title>
+    <ion-buttons slot="end" *ngIf="loop">
+      <ion-button (click)="stopSpeaker()" color="danger">Stop <ion-icon name="volume-high-outline" slot="end"></ion-icon></ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content>
@@ -54,41 +57,49 @@
       <b>Question List</b>
     </ion-col>
   </ion-row>
-  <div *ngFor="let dat of myCategory; let i = index" [ngClass]="{fullborder: dat.isError === true}">
-    <div #a>
+
+  <div *ngFor="let dat of myCategory; let ind = index" [ngClass]="{fullborder: dat.isError === true}">
+    <div id={{ind}}>
       <section style="background-color:var(--ion-color-light); margin:3px;border:2px solid var(--ion-color-medium);border-radius: 6px;box-shadow: 1px 1px 3px rgb(101, 98, 98);">
         <ion-item color="none" lines="none">
-          <ion-label class="ion-text-wrap">  <b> {{i + 1}}. {{dat.cat_desc}} </b></ion-label>
+          <ion-label class="ion-text-wrap">  <b> {{ind + 1}}. {{dat.cat_desc}} </b></ion-label>
+          <ion-button slot="end" fill="clear" (click)="actionCategory(dat, ind, 0)">
+            <ion-icon [name]="dat.bgcolor ? 'volume-mute-outline': 'volume-high-outline'" [color]="dat.bgcolor ? 'danger': 'dark'"></ion-icon>
+          </ion-button>
         </ion-item>
-        <ion-row >
+        <ion-row>
           <ion-col size="5" style="font-size:large;font-weight: 500;display: flex; align-items: center; padding-left: 10px">Applicable</ion-col>
           <ion-col class="ion-text-right">
             <ion-button size="small" [fill]="dat.is_applicable === 3 ? 'solid': 'outline'" shape="round" (click)="notApplicable(dat)" [color]="dat.is_applicable === 3 ? 'success': 'medium'" [disabled]="dat.is_applicable === 3"> <!-- [disabled]="dat.is_applicable === 3"-->
               NA <ion-icon *ngIf="dat.is_applicable === 3" name="checkmark-outline" slot="end"></ion-icon>
             </ion-button>
-            <ion-button size="small" [fill]="dat.is_applicable === 1 ? 'solid': 'outline'" shape="round" (click)="expand(dat, i)" [color]="dat.is_applicable === 1 ? 'success': 'medium'" [disabled]="dat.is_applicable === 1"> <!-- [disabled]="dat.is_applicable === 1"-->
+            <ion-button size="small" [fill]="dat.is_applicable === 1 ? 'solid': 'outline'" shape="round" (click)="expand(dat, ind)" [color]="dat.is_applicable === 1 ? 'success': 'medium'" [disabled]="dat.is_applicable === 1"> <!-- [disabled]="dat.is_applicable === 1"-->
               YES <ion-icon *ngIf="dat.is_applicable === 1" name="checkmark-outline" slot="end"></ion-icon>
             </ion-button>
-            <ion-button size="small" shape="round" color="secondary" fill="outline" *ngIf="dat.is_applicable === 1" [hidden]="dat.isResponseShow" (click)="viewMore(dat, i)"> <!-- (click)="dat.isResponseShow = true"-->
-              <ion-icon name="eye-outline"></ion-icon>
+            <ion-button size="small" shape="round" color="secondary" fill="outline" *ngIf="dat.is_applicable === 1" (click)="viewMore(dat, ind)">
+              <ion-icon [name]="!dat.isResponseShow ? 'eye-outline' : 'eye-off-outline'"></ion-icon>
             </ion-button>
-            <ion-button size="small" shape="round" color="secondary" fill="outline" *ngIf="dat.is_applicable === 1" [hidden]="!dat.isResponseShow" (click)="viewMore(dat, i)"> <!-- (click)="dat.isResponseShow = false" -->
+            <!-- <ion-button size="small" shape="round" color="secondary" fill="outline" *ngIf="dat.is_applicable === 1" [hidden]="!dat.isResponseShow" (click)="viewMore(dat, ind)">
               <ion-icon name="eye-off-outline"></ion-icon>
-            </ion-button>
+            </ion-button> -->
           </ion-col>
         </ion-row>
       </section>
     </div>
 
     <div *ngIf="dat.isResponseShow" class="ion-no-padding">
-      <div style="margin:10px;padding:5px 0px ;border:1px solid black;border-radius: 10px;" *ngFor="let val of dat.qus; let i = index" [ngClass]="{critical: val.critical_desc === 'Critical', noncritical: val.critical_desc === 'Non Critical', fullborder: val.isNotFill === true}">
-        <ion-item >
+      <div style="margin:10px;padding:5px 0px ;border:1px solid black;border-radius: 10px;" *ngFor="let val of dat.qus; let i = index" [ngClass]="{critical: val.critical_desc === 'Critical', noncritical: val.critical_desc === 'Non Critical', fullborder: val.isNotFill === true, bgcolor: val.bgcolor === true}">
+        <div id={{ind}}{{i}}></div>
+        <ion-item color="none">
           <ion-avatar class="center">
             <b>{{i+1}}</b>
           </ion-avatar>
           <ion-label class="ion-text-wrap" [innerHTML]="val.q_desc"></ion-label>
+          <ion-button slot="end" fill="clear" (click)="actionSpeak(val, ind, i)">
+            <ion-icon name="volume-high-outline"></ion-icon>
+          </ion-button>
         </ion-item>
-        <ion-item *ngIf="val.is_correct === 0">
+        <ion-item *ngIf="val.is_correct === 0" color="none">
           <ion-label class="ion-text-wrap">
             <b>Requirement:</b> {{val.requirement}}<br>
             <ion-text color="primary">{{val.critical_desc}}</ion-text> (<ion-text color="primary">{{val.scope_desc}}</ion-text>)
@@ -99,7 +110,7 @@
         </ion-item>
         <ion-row>
           <ion-col>
-            <ion-radio-group *ngIf="val.q_type === '226'" [(ngModel)]="val.rspns" (ionChange)="changeOptionResponse(val, $event)">
+            <ion-radio-group *ngIf="val.q_type === '226'" [(ngModel)]="val.rspns" (ionChange)="changeOptionResponse(val, $event)" color="none" mode="md">
               <ion-row>
                 <ion-col size="4" *ngFor="let opt of val.options">
                   <ion-item lines="none">
@@ -111,12 +122,12 @@
             </ion-radio-group>
           </ion-col>
         </ion-row>
-        <ion-item [ngClass]="{redBorder: val.is_rmrk_mandatory === 1 && !val.remark}">
+        <ion-item [ngClass]="{redBorder: val.is_rmrk_mandatory === 1 && !val.remark}" color="none">
           <ion-input type="text" [(ngModel)]="val.remark" placeholder="Enter Remark" [disabled]="!val.rspns" (change)="changeRemark(val)"></ion-input>
         </ion-item>
         <ion-row>
           <ion-col class="ion-text-left" size="6" >
-            <ion-button [disabled]="!val.rspns" [ngClass]="{redBorder: val.is_doc_mandatory === 1 && (!val.imagename && !val.attachment)}" size="small" [color]="!val.imagename ? 'primary': 'success'" [fill]="!val.imagename ? 'outline' : 'solid' " (click)="presentActionSheet(val)">
+            <ion-button [disabled]="!val.rspns" [ngClass]="{redBorder: val.is_doc_mandatory === 1 && (!val.imagename && !val.attachment)}" size="small" [color]="!val.imagename ? 'primary': 'success'" [fill]="!val.imagename ? 'outline' : 'solid' " (click)="presentActionSheet(val, 1)">
               IMG
               <ion-icon name="attach-outline" slot="end" *ngIf="!val.imagename"></ion-icon>
               <ion-icon name="checkmark-done-outline" slot="end" *ngIf="val.imagename"></ion-icon>

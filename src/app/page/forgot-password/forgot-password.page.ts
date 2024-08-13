@@ -20,6 +20,16 @@ export class ForgotPasswordPage implements OnInit {
   myOtp!: string;
   requestedData: any = [];
   lastNumber!: string;
+  otpConfig = {
+    length: 4,
+    allowNumbersOnly:true,
+    inputClass: 'custom-otp-input',
+    containerClass: 'custom-otp-container'
+  };
+  reEnterPass = true;
+  reEnterPassCnfm = true;
+  pageStatus = 1;
+  animation = false;
   constructor(
     private loadingController: LoadingController,
     private httpLogin: LoginService,
@@ -27,7 +37,9 @@ export class ForgotPasswordPage implements OnInit {
     private navCtrl: NavController
   ) {}
 
-  ngOnInit() { }
+  ngOnInit() {
+
+  }
 
   sendOtp() {
     this.presentLoading().then(preLoad => {
@@ -50,34 +62,47 @@ export class ForgotPasswordPage implements OnInit {
     });
   }
 
-  getOtpValue(ev: any) {
-    let str = ev;
-    if (str.length === 4) {
-      this.isNewPass = false;
-      this.presentLoading().then(preLoad => {
-        this.httpLogin.validateOtp(this.empid, ev).then((res: any) => {
-          this.dismissloading();
-          this.result = res;
-          if (this.result === false) {
-            this.httpNotify.presentToast(environment.errMsg, 'danger');
-          } else {
-            if (this.result.status === true) {
-              this.httpNotify.presentToast(this.result.msg, 'success');
-              this.isNewPass = true;
-              this.myOtp = ev;
-            } else if (this.result.status === false) {
-              this.httpNotify.presentToast(this.result.msg, 'warning');
-            } else if (this.result.status === 'eyJpdiI6Ik1USXpORFUyTnpnNU1UQXhNVEV5TVE100') {
-              this.httpNotify.presentToast(this.result.msg, 'success');
-              this.isNewPass = true;
-              this.myOtp = ev;
-            } else if (this.result.status === 'eyJpdiI6Ik1USXpORFUyTnpnNU1UQXhNVEV5TVE9') {
-              this.httpNotify.presentToast(this.result.msg, 'warning');
-            }
-          }
-        });
-      });
+  backButton() {
+    this.isOtpSent = false;
+    this.isNewPass = false
+  }
+
+  changeNgOtp(ev: any) {
+    this.myOtp = '';
+    if (ev.length === 4) {
+      this.myOtp = ev;
     }
+  }
+
+  validateOtp() {
+    this.isNewPass = false;
+    this.presentLoading().then(preLoad => {
+      this.httpLogin.validateOtp(this.empid, this.myOtp).then((res: any) => {
+        this.dismissloading();
+        this.result = res;
+        if (this.result === false) {
+          this.httpNotify.presentToast(environment.errMsg, 'danger');
+        } else {
+          if (this.result.status === true) {
+            this.httpNotify.presentToast(this.result.msg, 'success');
+            this.isNewPass = true;
+            // this.myOtp = ev;
+          } else if (this.result.status === false) {
+            this.httpNotify.presentToast(this.result.msg, 'warning');
+          } else if (this.result.status === 'eyJpdiI6Ik1USXpORFUyTnpnNU1UQXhNVEV5TVE100') {
+            this.httpNotify.presentToast(this.result.msg, 'success');
+            this.isNewPass = true;
+            // this.myOtp = ev;
+          } else if (this.result.status === 'eyJpdiI6Ik1USXpORFUyTnpnNU1UQXhNVEV5TVE9') {
+            this.httpNotify.presentToast(this.result.msg, 'warning');
+          }
+        }
+      });
+    });
+  }
+
+  popPage() {
+    this.navCtrl.pop();
   }
 
   async presentLoading() {
@@ -107,7 +132,11 @@ export class ForgotPasswordPage implements OnInit {
         } else {
           if (this.result.status === true) {
             this.httpNotify.presentToast(this.result.msg, 'success');
-            this.navCtrl.pop();
+            // this.navCtrl.pop();
+            this.pageStatus = 2;
+            setTimeout(() => {
+              this.animation = true;
+            }, 1200);
           } else {
             this.httpNotify.presentToast(this.result.msg, 'warning');
           }

@@ -80,6 +80,10 @@ const routes: Routes = [
     path: 'today-order',
     loadChildren: () => import('./page/today-order/today-order.module').then( m => m.TodayOrderPageModule)
   },
+  {
+    path: 'approvals',
+    loadChildren: () => import('./page/approvals/approvals.module').then( m => m.ApprovalsPageModule)
+  },
 ];
 
 @NgModule({

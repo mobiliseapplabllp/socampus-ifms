@@ -51,12 +51,10 @@ export class HistoryComponent implements OnInit {
 
   changeDate(action: any) {
     if (action == 'next') {
-      console.log('nx');
       let next = moment(this.selectedDate).add(1, 'day').format('YYYY-MM-DD');
       this.selectedDate = next;
       this.getMeterWoHistory(this.selectedDate);
     } else {
-      console.log('pre');
       let prev = moment(this.selectedDate).subtract(1, 'day').format('YYYY-MM-DD');
       this.selectedDate = prev;
       this.getMeterWoHistory(this.selectedDate);
@@ -64,7 +62,6 @@ export class HistoryComponent implements OnInit {
   }
 
   changeDateComponent(ev: any) {
-    console.log(ev.detail.value);
     this.popoverDatetime.confirm(true);
     this.selectedDate = moment(ev.detail.value).format('YYYY-MM-DD');
     this.getMeterWoHistory(this.selectedDate);

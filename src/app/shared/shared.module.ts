@@ -15,6 +15,12 @@ import { FloorComponent } from './floor/floor.component';
 import { LocationComponent } from './location/location.component';
 import { DeviceGroupComponent } from './device-group/device-group.component';
 import { CpuSiteComponent } from './cpu-site/cpu-site.component';
+import { BuildingComponent } from './building/building.component';
+import { PhotoViewComponent } from './photo-view/photo-view.component';
+import { VideoComponent } from './video/video.component';
+import { CaptureComponent } from './capture/capture.component';
+import { TimesPipe } from '../pipes/times.pipe';
+import { VideoPlayComponent } from './video-play/video-play.component';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -28,14 +34,21 @@ import { CpuSiteComponent } from './cpu-site/cpu-site.component';
     FloorComponent,
     LocationComponent,
     DeviceGroupComponent,
-    CpuSiteComponent
+    CpuSiteComponent,
+    BuildingComponent,
+    PhotoViewComponent,
+    VideoComponent,
+    CaptureComponent,
+    TimesPipe,
+    VideoPlayComponent
+
   ],
   imports: [
     CommonModule,
     SignaturePadModule,
     IonicModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   entryComponents: [
     SignatureComponent,
@@ -49,7 +62,17 @@ import { CpuSiteComponent } from './cpu-site/cpu-site.component';
     FloorComponent,
     LocationComponent,
     DeviceGroupComponent,
-    CpuSiteComponent
+    CpuSiteComponent,
+    BuildingComponent,
+    PhotoViewComponent,
+    VideoComponent,
+    CaptureComponent,
+    VideoPlayComponent
+  ],
+  exports: [
+    VideoComponent,
+    TimesPipe,
+    VideoPlayComponent
   ]
 })
 export class SharedModule { }

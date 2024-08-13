@@ -19,6 +19,8 @@ import { NgOtpInputModule } from  'ng-otp-input';
 import { AssignTicketComponent } from './assign-ticket/assign-ticket.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { InstructionModalComponent } from './instruction-modal/instruction-modal.component';
+import { TravelDetailComponent } from './travel-detail/travel-detail.component';
+import { HseAssignComponent } from './hse-assign/hse-assign.component';
 @NgModule({
   imports: [
     CommonModule,
@@ -27,7 +29,7 @@ import { InstructionModalComponent } from './instruction-modal/instruction-modal
     ReactiveFormsModule,
     ComplaintPageRoutingModule,
     NgOtpInputModule,
-    SharedModule,
+    SharedModule
   ],
   declarations: [
     ComplaintPage,
@@ -39,6 +41,12 @@ import { InstructionModalComponent } from './instruction-modal/instruction-modal
     TicketTypeComponent,
     TicketWorkComponent,
     AssignTicketComponent,
-    InstructionModalComponent]
+    InstructionModalComponent,
+    TravelDetailComponent,
+    HseAssignComponent
+  ],
+  exports: [
+    ComplaintCardsComponent
+  ]
 })
 export class ComplaintPageModule {}

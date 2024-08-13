@@ -1,17 +1,27 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-searchbar (ionChange)="search($event)"></ion-searchbar>
+    <ion-title>Department({{myDepartmentCopy.length}})</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="closeModal(null, false)">
         <ion-icon slot="icon-only" name="close"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar (ionChange)="search($event)" mode="md"></ion-searchbar>
+  </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-list>
+
+  <!-- <ion-list>
     <ion-item *ngFor="let dat of myDepartment" (click)="closeModal(dat, true)">
       {{dat.dept_desc}}
     </ion-item>
-  </ion-list>
+  </ion-list> -->
+
+  <ion-virtual-scroll [items]="myDepartment" approxItemHeight="320px">
+    <ion-item *virtualItem="let item; let itemBounds = bounds;" (click)="closeModal(item, true)">
+      {{item.dept_desc}}
+    </ion-item>
+  </ion-virtual-scroll>
 </ion-content>

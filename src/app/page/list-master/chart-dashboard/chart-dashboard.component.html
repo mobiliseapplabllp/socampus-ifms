@@ -1,0 +1,50 @@
+<ion-row>
+  <ion-col size="4" class="ion-text-right">
+    <ion-button fill="clear" (click)="changeDate(0)">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+    </ion-button>
+  </ion-col>
+  <ion-col size="4" class="ion-text-center center">
+    <b>{{helpDeskDateLabe}}</b>
+  </ion-col>
+  <ion-col size="2" class="ion-text-left" >
+    <ion-button fill="clear" (click)="changeDate(1)">
+      <ion-icon name="chevron-forward-outline"></ion-icon>
+    </ion-button>
+  </ion-col>
+  <ion-col size="2" class="ion-text-left">
+    <ion-button id="home-circle-date" fill="clear" color="primary" class="ion-text-capitalize">
+      <ion-icon name="calendar-outline"></ion-icon>
+    </ion-button>
+    <ion-popover trigger="home-circle-date" mode="md">
+      <ng-template>
+        <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover"  (ionChange)="changeDateComponent($event)"></ion-datetime>
+      </ng-template>
+    </ion-popover>
+  </ion-col>
+</ion-row>
+
+<div style="width:100%;">
+  <canvas id="canvas1" style="width:100%;"></canvas>
+</div>
+
+<ion-row>
+  <ion-col size="4">
+    <ion-select interface="popover" placeholder="Select Type" [(ngModel)]="cat_id" (ionChange)="changeCat()">
+      <ion-select-option *ngFor="let dat of category" [value]="dat.value">{{dat.label}}</ion-select-option>
+    </ion-select>
+  </ion-col>
+  <ion-col size="4" class="ion-text-center center">
+    <b>{{scheduleDateLabel}}</b>
+  </ion-col>
+  <ion-col size="4" *ngIf="cat_id === 'digital' || cat_id === 'meter'">
+    <ion-select interface="popover" placeholder="Select Category" [(ngModel)]="sub_cat_id" (ionChange)="changeSubCat()">
+      <ion-select-option *ngFor="let dat of subCat" [value]="dat.value">{{dat.label}}</ion-select-option>
+    </ion-select>
+  </ion-col>
+</ion-row>
+
+<div style="width:100%;">
+  <canvas id="canvas" style="width:100%;"></canvas>
+</div>
+<br>

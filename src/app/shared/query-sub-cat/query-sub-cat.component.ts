@@ -22,13 +22,18 @@ export class QuerySubCatComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.qry_id);
     if (this.allData.length > 0) {
       this.allSubCat1 = this.allData;
       this.allSubCat1Copy = this.allData;
     } else {
       this.getQuerySubCat();
     }
+  }
+
+  ionViewDidLeave() {
+    this.allSubCat1 = [];
+    this.allSubCat1Copy = [];
+    this.dismissloading();
   }
 
   closeModal(data: any, status: any) {

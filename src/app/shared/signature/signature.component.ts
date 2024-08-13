@@ -29,9 +29,6 @@ export class SignatureComponent  implements OnInit {
   drawComplete() {}
 
   submit() {
-    console.log('a');
-    console.log(this.signaturePad?.toDataURL());
-
     this.closeModal(this.signaturePad?.toDataURL(), true);
   }
 

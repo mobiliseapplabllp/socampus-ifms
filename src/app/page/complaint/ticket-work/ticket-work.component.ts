@@ -9,6 +9,9 @@ import { Camera, CameraResultType } from '@capacitor/camera';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { SignatureComponent } from 'src/app/shared/signature/signature.component';
 import { InstructionModalComponent } from '../instruction-modal/instruction-modal.component';
+import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
+import { Filesystem } from '@capacitor/filesystem';
+import { CaptureComponent } from 'src/app/shared/capture/capture.component';
 
 @Component({
   selector: 'app-ticket-work',
@@ -23,6 +26,7 @@ export class TicketWorkComponent  implements OnInit {
   loading: any;
   formData:any = new FormData();
   fileName!: string;
+  ppeFileName!: string;
   isSpinner!: boolean;
   isImageUpload!: boolean;
   ticket_id: any;
@@ -30,9 +34,9 @@ export class TicketWorkComponent  implements OnInit {
   isOtpSent!: boolean;
   isVerifyOtp = false;
   requestedData: any = [];
+  requestedData_TEMP: any = [];
   mobile: any;
   hasWip: any;
-  // ptwApproved: any;
   countStatus = false;
   countTime!: number;
   mm!: number;
@@ -47,28 +51,34 @@ export class TicketWorkComponent  implements OnInit {
   isFormDisabled!: boolean;
   ticketPriority: any = [];
   isPriority: any;
-  // selectPriority: string;
   changePriorityObj: any = {};
   isPtwMandatory!: boolean;
   arr: any = [];
   scopeOfWorkArr: any = [];
+  isVidUpl!: boolean;
+  selectedFile: any;
+
+  videoBlob: Blob | null = null;
+  compressedVideoUrl: string | null = null;
   constructor(
-    public activeRoute: ActivatedRoute,
-    public formbuilder: FormBuilder,
-    public httpComplaint: ComplaintService,
-    public httpCommon: CommonService,
-    public alertCtrl: AlertController,
-    public navCtrl: NavController,
-    public modalCtrl: ModalController,
-    public actionSheetController: ActionSheetController,
-    public router: Router,
-    public loadingController: LoadingController,
-    public platform: Platform
+    private activeRoute: ActivatedRoute,
+    private formbuilder: FormBuilder,
+    private httpComplaint: ComplaintService,
+    private httpCommon: CommonService,
+    private alertCtrl: AlertController,
+    private navCtrl: NavController,
+    private modalCtrl: ModalController,
+    private actionSheetController: ActionSheetController,
+    private router: Router,
+    private loadingController: LoadingController,
+    private mediaCapture: MediaCapture,
+    private modalController: ModalController,
   ) { }
 
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
-      this.requestedData = JSON.parse(res['data']);
+      this.requestedData_TEMP = JSON.parse(res['data']);
+      this.requestedData = this.requestedData_TEMP.data;
       this.ticket_id = this.requestedData.tkts_id;
       this.mobile = this.requestedData.mobile
       this.initForm();
@@ -88,7 +98,6 @@ export class TicketWorkComponent  implements OnInit {
       phone_no: [''],
       otp: [''],
     });
-
   }
 
   testOtp() {
@@ -107,7 +116,6 @@ export class TicketWorkComponent  implements OnInit {
       this.presentLoading().then(preLoad => {
         this.dismissLoading();
       });
-      console.log(file);
     }
   }
 
@@ -132,7 +140,6 @@ export class TicketWorkComponent  implements OnInit {
             if (this.isPtwMandatory) {
               if ((this.arr.hasWIP == 0 || this.arr.ptwApproved == 0)) {
                 this.ticketStages = this.ticketStages.filter((val: any) => val.stage_id != 4);
-                console.log(this.ticketStages);
               }
             } else {
               if ((this.arr.hasWIP == 0)) {
@@ -165,22 +172,26 @@ export class TicketWorkComponent  implements OnInit {
       message: 'Are you Sure want to Confirm',
       buttons: [{
         text: 'Disagree',
-        handler: () => {
-          console.log('Disagree clicked');
-        }
+        handler: () => {}
       }, {
         text: 'Agree',
         handler: () => {
           this.changePriority(ev)
-          console.log('Agree clicked');
         }
       }]
     });
     await confirm.present();
   }
 
+  async changeFile(ev: any) {
+    if (ev.target.files.length > 0) {
+      this.formData.delete('video');
+      this.formData.append('video', ev.target.files[0], ev.target.files[0].name);
+      this.isVidUpl = true;
+    }
+  }
+
   changePriority(ev: any) {
-    console.log(ev.target.value);
     const obj = {
       id: ev.target.value,
       ticket_id: this.ticket_id,
@@ -205,8 +216,29 @@ export class TicketWorkComponent  implements OnInit {
         }
       });
     });
-
   }
+
+  async customActionSheet() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Choose Video Option',
+      mode: 'ios',
+      buttons: [{
+        text: 'Record Video',
+        handler:() => {
+          this.openCapture();
+        }
+      }, {
+        text: 'Upload Video',
+        handler:() => {
+          document.getElementById('choose-file')?.click();
+        }
+      }],
+    });
+
+    await actionSheet.present();
+  }
+
+
 
   getPriority() {
     this.httpComplaint.getTicketPriority(this.ticket_id).subscribe({
@@ -232,24 +264,45 @@ export class TicketWorkComponent  implements OnInit {
         this.dismissLoading();
         if (data.status) {
           this.ticketStages = data.data;
+
+          this.arr = this.requestedData;
+          this.isPriority = this.requestedData_TEMP.can_priority;
+          this.isPtwMandatory = this.requestedData.ptw_mandatory;
+          this.ticketPriority = this.requestedData_TEMP.priority_list;
+          this.formData.delete('ptwApproved');
+          this.formData.append('ptwApproved', this.requestedData.ptwApproved);
+          this.formData.delete('pc_id');
+          this.formData.append('pc_id', this.requestedData.pc_id);
+          if (this.arr.hasWIP == 1 && this.arr.ptwApproved == 0 && this.arr.ptwPending == true ) {
+            this.isFormDisabled = true;
+          } else {
+            this.isFormDisabled = false;
+          }
+          if (this.isPtwMandatory) {
+            if ((this.arr.hasWIP == 0 || this.arr.ptwApproved == 0)) {
+              this.ticketStages = this.ticketStages.filter((val: any) => val.stage_id != 4);
+            }
+          } else {
+            if ((this.arr.hasWIP == 0)) {
+              this.ticketStages = this.ticketStages.filter((val: any) => val.stage_id != 4);
+            }
+          }
+          if (this.arr.assets) {
+            this.assetInfo = data.data.assets;
+          }
+
           setTimeout(() => {
             this.workSpace.get('status')?.setValue(3);
           }, 1000);
         }
-        this.getSpecificTicket(this.ticket_id);
       });
     })
   }
   segmentChanged(ev: any) {
-    console.log(ev.target.value);
-    if(ev.target.value === 'asset') {
-
-    }
+    if(ev.target.value === 'asset') { }
   }
 
   checkHasWip() {
-    this.openInstructionModal();
-    return;
     if (this.arr.hasWIP == 0) {
       this.openInstructionModal();
     } else {
@@ -265,7 +318,6 @@ export class TicketWorkComponent  implements OnInit {
       componentProps: { }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role == 'true') {
         this.submitTicket();
       }
@@ -278,6 +330,19 @@ export class TicketWorkComponent  implements OnInit {
       this.formData.delete(key);
       this.formData.append(key, this.workSpace.value[key]);
     }
+
+    this.formData.delete('ptwApproved')
+    this.formData.delete('ptwPending')
+    this.formData.delete('ptw_mandatory')
+    this.formData.delete('ppekitFilled')
+    this.formData.delete('ppekit_mandatory')
+
+    this.formData.append('ptwApproved', this.requestedData.ptwApproved)
+    this.formData.append('ptwPending', this.requestedData.ptwPending)
+    this.formData.append('ptw_mandatory', this.requestedData.ptw_mandatory)
+    this.formData.append('ppekitFilled', this.requestedData.ppekitFilled)
+    this.formData.append('ppekit_mandatory', this.requestedData.ppekit_mandatory)
+
     if (this.workSpace.value.status == 4) {
       if (this.arr.tkts_issue_id == 1 && !this.isVerifyOtp) {
         this.httpCommon.presentToast('OTP is Mandatory for Asset Ticket', 'warning');
@@ -306,7 +371,12 @@ export class TicketWorkComponent  implements OnInit {
     }
 
     if(this.workSpace.value.status == 3 && !this.fileName && this.arr.hasWIP == 0 && this.isPtwMandatory) {
-      alert('Please Add Attachment');
+      alert('Opps you have not attached PTW document');
+      return;
+    }
+
+    if (this.workSpace.value.status === 3 && this.requestedData.ppekit_mandatory && !this.requestedData.ppekitFilled && !this.ppeFileName) {
+      alert('Opps you have not attached PPE kit selfie.');
       return;
     }
 
@@ -314,6 +384,9 @@ export class TicketWorkComponent  implements OnInit {
       this.httpComplaint.submitTicketTransaction(this.formData).subscribe({
         next:(data) => {
           if (data.status) {
+            if (this.workSpace.value.status == 4) {
+              this.httpCommon.setHomeLoadStatus(true);
+            }
             this.httpCommon.presentToast(data.msg, 'success');
             this.navCtrl.pop();
           } else {
@@ -331,16 +404,43 @@ export class TicketWorkComponent  implements OnInit {
     })
   }
 
+  async captureAndUploadVideo() {
+    let options: CaptureVideoOptions = { limit: 1, quality:0, duration: 60};
+    this.mediaCapture.captureVideo(options).then(async (_data: any) => {
+      this.getVideoUrl(_data[0].fullPath);
+    }, _err => {
+
+    });
+  }
+
+  async getVideoUrl(fullPath: string) {
+    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.mp4'
+    const file = await Filesystem.readFile({
+      path: fullPath,
+    });
+
+    this.presentLoading().then(async preLoad => {
+      const base64Video = `data:video/mp4;base64,${file.data}`
+      const base64Response = await fetch(base64Video);
+      const blob = await base64Response.blob();
+      this.formData.delete('video');
+      this.formData.append('video', blob, random);
+      this.isVidUpl = true;
+      this.dismissLoading();
+    })
+
+}
+
   async assignTicket() {
     const modal = await this.modalCtrl.create({
       component: AssignTicketComponent,
       cssClass: 'my-modal',
       componentProps: {
-        ticket_id: this.ticket_id
+        ticket_id: this.ticket_id,
+        allData: this.requestedData
       }
     });
     modal.onWillDismiss().then(async disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.navCtrl.pop();
       }
@@ -389,25 +489,32 @@ export class TicketWorkComponent  implements OnInit {
   changeEmp(ev: any) {
   }
 
-  async presentActionSheet() {
+  async presentActionSheet(val: string) {
     const takePicture = async () => {
       const image = await Camera.getPhoto({
         quality: 80,
         allowEditing: false,
         resultType: CameraResultType.Uri,
       });
-      this.readImg(image)
+      this.readImg(image, val)
     };
     takePicture();
   }
 
-  async readImg(photo: any) {
+  async readImg(photo: any, val: string) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
     const response = await fetch(photo.webPath);
     const blob = await response.blob();
-    this.formData.delete('img[]');
-    this.formData.append('img[]', blob, random);
-    this.fileName = random;
+    if (val === 'image') {
+      this.formData.delete('img[]');
+      this.formData.append('img[]', blob, random);
+      this.fileName = random;
+    } else if (val === 'ppe') {
+      this.formData.delete('ppeKitAttach');
+      this.formData.append('ppeKitAttach', blob, random);
+      this.ppeFileName = random;
+    }
+
     this.presentLoading().then(preLoad => {
       this.dismissLoading();
     })
@@ -430,7 +537,6 @@ export class TicketWorkComponent  implements OnInit {
   viewAttachment(img: string) {
     this.httpCommon.openDoc(img);
   }
-
 
   sendOtp() {
     const obj = {
@@ -485,6 +591,27 @@ export class TicketWorkComponent  implements OnInit {
     });
   }
 
+  async openCapture() {
+    if (!this.workSpace.value.remark) {
+      this.httpCommon.presentToast('Please Enter Remark', 'warning');
+      return;
+    }
+    this.requestedData.remark = this.workSpace.value.remark
+    const modal = await this.modalController.create({
+      component: CaptureComponent,
+      componentProps : {
+        requestedData: this.requestedData
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+
+      }
+    });
+    return await modal.present();
+  }
+
+
   async openSign(data: any) {
     const modal = await this.modalCtrl.create({
       component: SignatureComponent,
@@ -497,7 +624,6 @@ export class TicketWorkComponent  implements OnInit {
         let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
         if (data === 'engineer') {
           this.engSigImg = 'Uploaded';
-          console.log(disModal.data);
           this.engineerBase64 = disModal.data;
           const base64Response = await fetch(disModal.data);
           const blob = await base64Response.blob();
@@ -530,7 +656,6 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   resetVariable() {
-    console.log('abc');
     this.countTime = this.defaultCountTime;
     this.isOtpSent = false;
     this.isVerifyOtp = false;
@@ -539,7 +664,6 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   changeNgOtp(ev: any) {
-    console.log(ev);
     this.workSpace.get('otp')?.setValue(ev);
   }
 

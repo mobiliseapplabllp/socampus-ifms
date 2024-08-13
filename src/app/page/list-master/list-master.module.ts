@@ -7,8 +7,18 @@ import { IonicModule } from '@ionic/angular';
 import { ListMasterPageRoutingModule } from './list-master-routing.module';
 
 import { ListMasterPage } from './list-master.page';
-import { CambroStatusComponent } from './cambro-status/cambro-status.component';
+import { SubstringPipe } from 'src/app/pipes/substring.pipe';
 // import { SharedModule } from 'src/app/shared/shared.module';
+// import { SharedModule } from 'src/app/shared/shared.module';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { ChartDashboardComponent } from './chart-dashboard/chart-dashboard.component';
+import { OfflineDataComponent } from './offline-data/offline-data.component';
+import { MenuComponent } from './menu/menu.component';
+import { PendingTaskComponent } from './pending-task/pending-task.component';
+import { SharedModule } from 'src/app/shared/shared.module';
+import { ComplaintPageModule } from '../complaint/complaint.module';
+import { SosComponent } from './sos/sos.component';
 
 @NgModule({
   imports: [
@@ -16,11 +26,19 @@ import { CambroStatusComponent } from './cambro-status/cambro-status.component';
     FormsModule,
     IonicModule,
     ListMasterPageRoutingModule,
-    // SharedModule
+    ComplaintPageModule,
+    SharedModule
   ],
   declarations: [
     ListMasterPage,
-    CambroStatusComponent
-  ]
+    SubstringPipe,
+    DashboardComponent,
+    MenuComponent,
+    PendingTaskComponent,
+    ChartDashboardComponent,
+    OfflineDataComponent,
+    SosComponent
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ListMasterPageModule {}

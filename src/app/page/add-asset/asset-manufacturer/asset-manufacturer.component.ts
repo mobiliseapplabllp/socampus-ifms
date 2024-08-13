@@ -24,6 +24,8 @@ export class AssetManufacturerComponent  implements OnInit {
   }
 
   ionViewDidLeave() {
+    this.manufacturer = [];
+    this.manufacturerCopy = [];
     this.dismissloading();
   }
 
@@ -69,7 +71,6 @@ export class AssetManufacturerComponent  implements OnInit {
 
   search(ev: any) {
     let val: any;
-    console.log(ev.target.value);
     val = ev.target.value;
     this.manufacturer = this.manufacturerCopy;
     if (val && val.trim() !== '') {

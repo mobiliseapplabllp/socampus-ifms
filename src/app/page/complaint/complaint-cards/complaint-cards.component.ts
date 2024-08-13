@@ -7,6 +7,9 @@ import { environment } from 'src/environments/environment';
 import { SiteDetailComponent } from '../site-detail/site-detail.component';
 import { TicketHistoryComponent } from '../ticket-history/ticket-history.component';
 import { TicketTypeComponent } from '../ticket-type/ticket-type.component';
+import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
+import { TravelDetailComponent } from '../travel-detail/travel-detail.component';
+import { InstructionModalComponent } from '../instruction-modal/instruction-modal.component';
 @Component({
   selector: 'app-complaint-cards',
   templateUrl: './complaint-cards.component.html',
@@ -32,16 +35,21 @@ export class ComplaintCardsComponent  implements OnInit {
     private loadingController: LoadingController,
     private alertController: AlertController,
     private navCtrl: NavController
-  ) { }
+  ) {
 
-  ngOnInit() { }
+  }
+
+  ngOnInit() {
+  }
 
   isHidden(data: any) {
     data.hide = !data.hide;
   }
 
+  check() {
+  }
+
   async openSite() {
-    console.log('my site');
     const modal = await this.modalCtrl.create({
       component: SiteDetailComponent,
       cssClass: 'my-modal2',
@@ -61,12 +69,21 @@ export class ComplaintCardsComponent  implements OnInit {
 
   async work_now() {
     this.presentLoading().then(preLoad => {
-      this.httpComplaint.checkTicketConfirm(this.data.tkts_id).subscribe({
+      this.httpComplaint.getSpecificTicket(this.data.tkts_id).subscribe({
         next:(data) => {
           if (data.status) {
-            this.openTicketWork();
+            if (data.data.complaint_type_cfrm === 0 && data.data.canDoTktConfirmationWork) {
+              this.openTicketTypeModal(data);
+            } else if (data.data?.pc_hse_conf.travel_allow === 1 && !data.data?.pc_hse_conf.travel_data && data.data.canWork) {
+              this.travelModal();
+            } else if (data.data.canWork){
+              this.openTicketWork(data);
+            } else {
+              this.common.presentToast(`You can't work on this Ticket`, 'warning');
+              return
+            }
           } else {
-            this.openTicketTypeModal(data.locations);
+            this.common.presentToast(data.msg, 'warning');
           }
         },
         error:() => {
@@ -76,29 +93,48 @@ export class ComplaintCardsComponent  implements OnInit {
         complete:() => {
           this.dismissLoading();
         }
-      });
+      })
+      // this.httpComplaint.checkTicketConfirm(this.data.tkts_id).subscribe({
+      //   next:(data) => {
+      //     if (data.status) {
+      //       this.openTicketWork();
+      //     } else {
+      //       this.openTicketTypeModal(data.locations, data.data);
+      //     }
+      //   },
+      //   error:() => {
+      //     this.dismissLoading();
+      //     this.common.presentToast(environment.errMsg, 'danger');
+      //   },
+      //   complete:() => {
+      //     this.dismissLoading();
+      //   }
+      // });
     });
   }
 
-  async openTicketTypeModal(location: any) {
-    const modal = await this.modalCtrl.create({
-      component: TicketTypeComponent,
-      cssClass: 'my-modal',
-      componentProps: { allData:  this.data, locations: location }
-    });
-    modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
-      if (disModal.role) {
-        this.greetEvent.emit(true);
+  async openTicketTypeModal(data: any) {
+    this.router.navigate(['complaint/ticket-type'], {
+      queryParams: {
+        data: JSON.stringify(data),
       }
     });
-    modal.present();
+    // const modal = await this.modalCtrl.create({
+    //   component: TicketTypeComponent,
+    //   componentProps: { requestedData: data }
+    // });
+    // modal.onWillDismiss().then(disModal => {
+    //   if (disModal.role) {
+    //     this.greetEvent.emit(true);
+    //   }
+    // });
+    // modal.present();
   }
 
-  openTicketWork() {
+  openTicketWork(data: any) {
     this.router.navigate(['complaint/ticket-work'], {
       queryParams: {
-        data: JSON.stringify(this.data),
+        data: JSON.stringify(data),
       }
     });
   }
@@ -159,7 +195,6 @@ export class ComplaintCardsComponent  implements OnInit {
       buttons: [{
         text: 'Cancel',
           handler: (data) => {
-            console.log("Cancel");
           }
         },{
           text: 'YES',
@@ -210,6 +245,7 @@ export class ComplaintCardsComponent  implements OnInit {
     this.loading = await this.loadingController.create({
       cssClass: 'my-custom-class',
       message: 'Please wait...',
+
     });
     await this.loading.present();
   }
@@ -228,5 +264,54 @@ export class ComplaintCardsComponent  implements OnInit {
       }
     });
   }
+
+  async assignTicket(ticket_id: any,  data: any) {
+    const modal = await this.modalCtrl.create({
+      component: AssignTicketComponent,
+      cssClass: 'my-modal',
+      componentProps: {
+        ticket_id: ticket_id,
+        allData: data
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {
+        this.greetEvent.emit(true);
+      }
+    });
+    modal.present();
+  }
+
+  async travelModal() {
+    const modal = await this.modalCtrl.create({
+      component: TravelDetailComponent,
+      cssClass: 'my-modal2',
+      componentProps: {
+        tkts_id: this.data.tkts_id
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {
+        // this.greetEvent.emit(true);
+      }
+    });
+    modal.present();
+  }
+
+  async openInstructionModal() {
+    const modal = await this.modalCtrl.create({
+      component: InstructionModalComponent,
+      cssClass: 'my-modal',
+      backdropDismiss:false,
+      componentProps: { }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role == 'true') {
+
+      }
+    });
+    modal.present();
+  }
+
 
 }

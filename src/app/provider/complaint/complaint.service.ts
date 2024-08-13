@@ -10,7 +10,7 @@ export class ComplaintService {
   public testVar = new BehaviorSubject('');
   normalText = '';
   constructor(
-    public https: HttpClient
+    private https: HttpClient
   ) { }
 
   setNormalData(str: string) {
@@ -36,6 +36,14 @@ export class ComplaintService {
   getData() {
     return this.assignTickets;
   }
+
+  // setResolveTicket(obj: any) {
+  //   this.rslvTicket.next(obj);
+  // }
+
+  // getResolveTicket() {
+  //   return this.rslvTicket;
+  // }
 
   reOpenTicket(obj: any): Observable<any> {
     return this.https.post(environment.url + 'complaints/reopen_tkt', obj);
@@ -64,6 +72,21 @@ export class ComplaintService {
     return this.https.get(environment.url + 'complaints/get_assign_ticket_master?' + url);
   }
 
+  getSiteDetailUsingBarcode(type: string, enc_key: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('type',type);
+    formData.append('loc_id', enc_key);
+    return this.https.post(environment.url + 'shared/location-qrcode-scan-get-details', formData);
+  }
+
+  getTicketDashboard(date: string): Observable<any> {
+    return this.https.get(environment.url + 'complaints/app/get-helpdesk-graph?date=' + date);
+  }
+
+  getScheduleDashboard(date: string,cat_id: string, sub_cat_id: string): Observable<any> {
+    return this.https.get(environment.url + 'complaints/app/get-digital-pms-meter-graph?date=' + date + '&cate=' + cat_id + '&sub_cat_id=' + sub_cat_id)
+  }
+
   getResolvedTicket(): Observable<any> {
     return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=40&page=1&status=4')
   }
@@ -86,8 +109,8 @@ export class ComplaintService {
     return this.https.post(environment.url + 'complaints/submit_transaction', formData);
   }
 
-  getTeam(): Observable<any> {
-    return this.https.get(environment.url + 'setups/teams/get_team_members');
+  getTeam(pc_id: any, with_gps?: any): Observable<any> {
+    return this.https.get(environment.url + 'setups/teams/get_site_team_members/' + pc_id + '?with_gps=' + with_gps);
   }
 
   assignedTicket(formData: any): Observable<any> {
@@ -178,6 +201,10 @@ export class ComplaintService {
     return this.https.post(environment.url + 'complaints/complaint_type_cfrm', form)
   }
 
+  getTravelType(tkt_id: any): Observable<any> {
+    return this.https.get(environment.url + 'complaints/get_distance_travel_type_info?tkts_id=' + tkt_id);
+  }
+
   otpSend(form: any): Observable<any> {
     return this.https.post(environment.url + 'complaints/send_res_otp', form)
   }
@@ -217,7 +244,7 @@ export class ComplaintService {
   }
 
   getTicketHistory(dat: any) {
-    console.log(dat.ticket_id);
+
     return new Promise(resolve => {
       this.https.get(environment.url + 'specific_ticket.php?ticket_id=' + dat.ticket_id +
       '&ticket_type=' + dat.product_type).subscribe({
@@ -248,7 +275,9 @@ export class ComplaintService {
     });
   }
 
-
+  submitTravelInfo(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'complaints/save_travel_info', formData);
+  }
 
   resolveTicket(data: any) {
     return new Promise(resolve => {

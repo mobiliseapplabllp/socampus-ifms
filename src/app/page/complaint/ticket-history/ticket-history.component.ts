@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { LoadingController, ModalController, NavParams } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
+import { VideoPlayComponent } from 'src/app/shared/video-play/video-play.component';
 
 @Component({
   selector: 'app-ticket-history',
@@ -9,6 +10,7 @@ import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
   styleUrls: ['./ticket-history.component.scss'],
 })
 export class TicketHistoryComponent  implements OnInit {
+  @ViewChild('videoPlayer') videoplayer!: ElementRef;
   loading: any;
   ticket_id: any;
   history: any = []
@@ -22,7 +24,6 @@ export class TicketHistoryComponent  implements OnInit {
 
   ngOnInit() {
     this.ticket_id = this.navParam.get('ticket_id');
-    console.log(this.ticket_id);
     this.getSpecificTicket();
   }
 
@@ -33,7 +34,6 @@ export class TicketHistoryComponent  implements OnInit {
   getSpecificTicket() {
     this.presentLoading().then(preLoad => {
       this.complaint.getSpecificTicket(this.ticket_id).subscribe(data => {
-        console.log(data);
         this.dismissloading();
         if (data.status) {
           this.history = data.data.trans;
@@ -54,8 +54,30 @@ export class TicketHistoryComponent  implements OnInit {
     this.loading.dismiss();
   }
 
+  async videoPlay(url: string) {
+    const modal = await this.modalCtrl.create({
+      component: VideoPlayComponent,
+      componentProps: {
+        url:url,
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {
+      }
+    });
+    modal.present();
+  }
+
   viewDoc(url: any) {
-    this.common.openDoc(url);
+    const urlParts = url.split('?')[0];
+    const filename = urlParts.split('.').pop();
+    if (filename === 'mp4') {
+      this.videoPlay(url);
+    } else {
+      this.common.openDoc(url);
+    }
+
+
   }
 
 }

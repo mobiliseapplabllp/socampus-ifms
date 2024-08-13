@@ -2,5 +2,15 @@
 	"appId": "com.socampuseng.mbl",
 	"appName": "SoCampus Service",
 	"webDir": "www",
-	"bundledWebRuntime": false
+	"bundledWebRuntime": false,
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    },
+    "SplashScreen": {
+      "launchShowDuration": 10000,
+      "autoHide": false,
+      "backgroundColor": "#283897"
+    }
+  }
 }

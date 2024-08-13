@@ -11,9 +11,9 @@ export class CostCenterComponent  implements OnInit {
   allCostCenter: any = [];
   allCostCenterCopy: any = [];
   constructor(
-    public loadingController: LoadingController,
-    public httpComplaint: ComplaintService,
-    public modalCtrl: ModalController
+    private loadingController: LoadingController,
+    private httpComplaint: ComplaintService,
+    private modalCtrl: ModalController
   ) { }
 
   ngOnInit() {
@@ -22,6 +22,12 @@ export class CostCenterComponent  implements OnInit {
 
   closeModal(val: any, status: any) {
     this.modalCtrl.dismiss(val, status);
+  }
+
+  ionViewDidLeave() {
+    this.allCostCenter = [];
+    this.allCostCenterCopy = [];
+    this.dismissloading();
   }
 
   getCostCenter() {

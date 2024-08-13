@@ -1,0 +1,56 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Travel Detail</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal(null, false)">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-row>
+    <ion-col class="left">
+      <ion-text color="danger">Note: {{travelNote}}</ion-text>
+    </ion-col>
+  </ion-row>
+  <div *ngIf="canDoTravel === 1"><!--*ngIf="canDoTravel === 1"-->
+    <ion-item>
+      <ion-label position="floating">Travel Mode</ion-label>
+      <ion-select interface="action-sheet" mode="ios" (ionChange)="changeTravel($event)" [(ngModel)]="travelType">
+        <ion-select-option *ngFor="let dat of travelMode" [value]="dat.value">{{dat.label}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Remark</ion-label>
+      <ion-textarea rows="3" [(ngModel)]="remark"></ion-textarea>
+    </ion-item>
+
+    <ion-row>
+      <!-- <ion-button size="small" [color]="img1? 'success': 'danger'" (click)="presentActionSheet(1)">Selfie 1 <ion-icon name="checkmark-done-outline" slot="end" *ngIf="img1"></ion-icon></ion-button>
+      <ion-button size="small" [color]="img2? 'success': 'danger'" *ngIf="selectedTravel.num_img_req === 2" (click)="presentActionSheet(2)">Selfie 2 <ion-icon name="checkmark-done-outline" slot="end" *ngIf="img2"></ion-icon></ion-button> -->
+      <ion-col size="4" class="ion-text-center">
+        <ion-button fill="clear" [color]="img1? 'success': 'danger'" (click)="presentActionSheet(1)"> <!-- formcontrol name asset_img-->
+          <ion-icon name="camera-outline"></ion-icon>
+        </ion-button><br>
+        <ion-text color="dark" size="small">
+          {{ img1 ? 'Uploaded' : 'Selfie 1' }}
+        </ion-text> <br>
+      </ion-col>
+      <ion-col size="4" class="ion-text-center">
+        <ion-button fill="clear" [color]="img2? 'success': 'danger'" (click)="presentActionSheet(2)"> <!-- formcontrol name asset_img-->
+          <ion-icon name="camera-outline"></ion-icon>
+        </ion-button><br>
+        <ion-text color="dark" size="small">
+          {{ img2 ? 'Uploaded' : 'Vechile Detail' }}
+        </ion-text> <br>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <ion-button shape="round" (click)="submit()">Submit</ion-button>
+      </ion-col>
+    </ion-row>
+  </div>
+
+</ion-content>

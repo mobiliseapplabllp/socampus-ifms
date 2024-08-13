@@ -8,13 +8,13 @@
   <ion-toolbar>
     <ion-segment value="all" [(ngModel)]='status' color="primary" (ionChange)="changeSeg($event)" scrollable="true">
       <ion-segment-button value="open">
-        <ion-label>ASSIGN({{openPm.length}})</ion-label>
+        <ion-label>ASSIGN({{countObj.assignedWo}})</ion-label>
       </ion-segment-button>
       <ion-segment-button value="actionable">
-        <ion-label>ACTIONABLE({{actionPm.length}})</ion-label>
+        <ion-label>ACTIONABLE({{countObj.actionable}})</ion-label>
       </ion-segment-button>
       <ion-segment-button value="closed">
-        <ion-label>CLOSED({{closePm.length}})</ion-label>
+        <ion-label>CLOSED({{countObj.closeddWo}})</ion-label>
       </ion-segment-button>
     </ion-segment>
     <ion-row *ngIf="selectedPms.length > 0">
@@ -26,11 +26,11 @@
 </ion-header>
 
 <ion-content>
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
+  <!-- <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
     <ion-fab-button fill="clear" color="primary" (click)="cretePM()">
       <ion-icon name="add-outline"></ion-icon>
     </ion-fab-button>
-  </ion-fab>
+  </ion-fab> -->
   <div [ngSwitch]='status' class="mostOuter">
     <div *ngSwitchCase="'open'">
       <ion-row>
@@ -56,51 +56,41 @@
         </ion-col>
       </ion-row>
       <ion-button *ngIf="searchBy" expand="block" (click)="searchWoFromServer(1)">Search <ion-icon name="search-outline" slot="end"></ion-icon></ion-button>
-      <ion-card class="myCard" *ngFor="let dat of openPm; let i = index" >
-        <ion-card-header color="primary">
-          <ion-text> <b>{{i+1}}. {{dat.pc_desc}} ( {{dat.chklist_desc}} )</b> </ion-text>
-          <ion-checkbox style="float:right" [(ngModel)]="dat.isSelect" (click)="changeCheckbox(dat.isSelect)"></ion-checkbox>
+      <ion-card *ngFor="let dat of openPm; let i = index" >
+        <ion-card-header color="primary" style="padding:0px">
+          <ion-row class="ion-no-padding">
+            <ion-col size="1" class="center">
+              <ion-checkbox color="danger" [(ngModel)]="dat.isSelect" (click)="changeCheckbox(dat.isSelect)"></ion-checkbox>
+            </ion-col>
+            <ion-col size="7" style="display: flex;align-items: center;">
+              <b>{{i+1}}. {{dat.pc_desc}} ( {{dat.chklist_desc}} )</b>
+            </ion-col>
+            <ion-col size="4" class="center">
+              {{dat.log_date}}
+            </ion-col>
+            <ion-col size=""></ion-col>
+          </ion-row>
         </ion-card-header>
-        <ion-card-content class="ion-padding" style="background-color: var(--ion-color-light)">
+        <ion-card-content style="background-color: var(--ion-color-light);padding-bottom: 0px !important;">
           <ion-row>
             <ion-col size="6">
-              <ion-text color="primary">WO </ion-text><br>
-              <ion-text>{{dat.wo_no}}</ion-text>
+              <ion-text color="medium">WO </ion-text><br>
+              <ion-text color="dark">{{dat.wo_no}}</ion-text>
             </ion-col>
             <ion-col size="6">
-              <ion-text color="primary">Date</ion-text><br>
-              <ion-text>{{dat.log_date}}</ion-text>
+              <ion-text color="medium">Asset Id</ion-text><br>
+              <ion-text color="dark">{{dat.ext_asset_id || 'NA'}}</ion-text>
+            </ion-col>
+            <ion-col size="6">
+              <ion-text color="medium">Asset Name</ion-text><br>
+              <ion-text color="dark">{{dat.subgrp_desc || 'NA'}}</ion-text>
+            </ion-col>
+            <ion-col size="6">
+              <ion-text color="medium">Assigned To</ion-text><br>
+              <ion-text color="dark">{{dat.user}}-{{dat.username}}</ion-text>
             </ion-col>
           </ion-row>
-          <ion-row>
-            <ion-col size="6">
-              <div>
-                <ion-text color="primary">Asset Id</ion-text><br>
-                <ion-text>{{dat.ext_asset_id}}</ion-text>
-              </div>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="primary">Asset Name</ion-text><br>
-              <ion-text>{{dat.subgrp_desc}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="6">
-              <ion-text color="primary">Warranty Status</ion-text>
-              <ion-text>{{dat.warranty}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="primary">Manufacturer</ion-text><br>
-              <ion-text>{{dat.mnfctrer_desc}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="6">
-              <ion-text color="primary">Assigned To</ion-text><br>
-              <ion-text>{{dat.user}}-{{dat.username}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row>
+          <ion-row >
             <ion-col size="4">
               <ion-button class="ion-text-capitalize" color="secondary" size="small" expand="block" (click)="pmAssign(dat)"> Assign </ion-button>
             </ion-col>
@@ -122,7 +112,7 @@
     </div>
     <div *ngSwitchCase="'actionable'">
       <ion-toolbar>
-        <ion-searchbar (ionChange)="searchItem($event, 2)" debounce="1000"></ion-searchbar>
+        <ion-searchbar mode="md" (ionChange)="searchItem($event, 2)" debounce="1000"></ion-searchbar>
       </ion-toolbar>
       <ion-card class="myCard" *ngFor="let dat of actionPm; let i = index" >
         <ion-card-header color="primary" class="ion-no-padding">
@@ -131,43 +121,27 @@
             <ion-text slot="end" class="center">{{dat.pending_action}}</ion-text>
           </ion-item>
         </ion-card-header>
-        <ion-card-content class="ion-padding" style="background-color: var(--ion-color-light)">
+        <ion-card-content class="ion-padding-start ion-padding-end" style="background-color: var(--ion-color-light);padding-bottom:0px !important">
           <ion-row>
             <ion-col size="6">
-              <ion-text color="primary">WO </ion-text><br>
-              <ion-text>{{dat.wo_no}}</ion-text>
+              <ion-text color="medium">WO </ion-text><br>
+              <ion-text color="dark">{{dat.wo_no}}</ion-text>
             </ion-col>
             <ion-col size="6">
-              <ion-text color="primary">Date</ion-text><br>
-              <ion-text>{{dat.log_date}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="6">
-              <div>
-                <ion-text color="primary">Asset Id</ion-text><br>
-                <ion-text>{{dat.ext_asset_id}}</ion-text>
-              </div>
+              <ion-text color="medium">Date</ion-text><br>
+              <ion-text color="dark">{{dat.log_date}}</ion-text>
             </ion-col>
             <ion-col size="6">
-              <ion-text color="primary">Asset Name</ion-text><br>
-              <ion-text>{{dat.subgrp_desc}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="6">
-              <ion-text color="primary">Warranty Status</ion-text>
-              <ion-text>{{dat.warranty}}</ion-text>
+              <ion-text color="medium">Asset Id</ion-text><br>
+              <ion-text color="dark">{{dat.ext_asset_id || 'NA'}}</ion-text>
             </ion-col>
             <ion-col size="6">
-              <ion-text color="primary">Manufacturer</ion-text><br>
-              <ion-text>{{dat.mnfctrer_desc}}</ion-text>
+              <ion-text color="medium">Asset Name</ion-text><br>
+              <ion-text color="dark">{{dat.subgrp_desc || 'NA'}}</ion-text>
             </ion-col>
-          </ion-row>
-          <ion-row>
             <ion-col size="6">
-              <ion-text color="primary">Assigned To</ion-text><br>
-              <ion-text>{{dat.user}}-{{dat.username}}</ion-text>
+              <ion-text color="medium">Assigned To</ion-text><br>
+              <ion-text color="dark">{{dat.user}}-{{dat.username}}</ion-text>
             </ion-col>
           </ion-row>
           <ion-row>
@@ -190,49 +164,35 @@
     <!-- RESOLVED -->
     <div *ngSwitchCase="'closed'" class="openInner">
       <ion-toolbar>
-        <ion-searchbar (ionChange)="searchItem($event, 3)" debounce="1000"></ion-searchbar>
+        <ion-searchbar mode="md" (ionChange)="searchItem($event, 3)" debounce="1000"></ion-searchbar>
       </ion-toolbar>
       <ion-card class="myCard" *ngFor="let dat of closePm; let i = index" >
         <ion-card-header color="primary">
           <ion-text> <b>{{i+1}}. {{dat.pc_desc}} ( {{dat.chklist_desc}} )</b> </ion-text>
         </ion-card-header>
-        <ion-card-content class="ion-padding" style="background-color: var(--ion-color-light)">
+        <ion-card-content class="ion-padding-start ion-padding-end" style="background-color: var(--ion-color-light);padding-bottom:0px !important">
           <ion-row>
             <ion-col size="6">
-              <ion-text color="primary">WO </ion-text><br>
-              <ion-text>{{dat.wo_no}}</ion-text>
+              <ion-text color="medium">WO </ion-text><br>
+              <ion-text color="dark">{{dat.wo_no}}</ion-text>
             </ion-col>
             <ion-col size="6">
-              <ion-text color="primary">Date</ion-text><br>
-              <ion-text>{{dat.log_date}}</ion-text>
+              <ion-text color="medium">Date</ion-text><br>
+              <ion-text color="dark">{{dat.log_date}}</ion-text>
             </ion-col>
-          </ion-row>
-          <ion-row>
             <ion-col size="6">
               <div>
-                <ion-text color="primary">Asset Id</ion-text><br>
-                <ion-text>{{dat.ext_asset_id}}</ion-text>
+                <ion-text color="medium">Asset Id</ion-text><br>
+                <ion-text color="dark">{{dat.ext_asset_id || 'NA'}}</ion-text>
               </div>
             </ion-col>
             <ion-col size="6">
-              <ion-text color="primary">Asset Name</ion-text><br>
-              <ion-text>{{dat.subgrp_desc}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="6">
-              <ion-text color="primary">Warranty Status</ion-text>
-              <ion-text>{{dat.warranty}}</ion-text>
+              <ion-text color="medium">Asset Name</ion-text><br>
+              <ion-text>{{dat.subgrp_desc || 'NA'}}</ion-text>
             </ion-col>
             <ion-col size="6">
-              <ion-text color="primary">Manufacturer</ion-text><br>
-              <ion-text>{{dat.mnfctrer_desc}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="6">
-              <ion-text color="primary">Closed Date</ion-text><br>
-              <ion-text>{{dat.closed_date}}</ion-text>
+              <ion-text color="medium">Closed Date</ion-text><br>
+              <ion-text color="dark">{{dat.closed_date}}</ion-text>
             </ion-col>
           </ion-row>
           <ion-row>

@@ -56,13 +56,12 @@ export class AttendncePage implements OnInit {
     }
   }
 
-  ionViewDidEnter() {
-    // this.checkAttendance();
-  }
+  ionViewDidEnter() { }
 
   ionViewDidLeave() {
     clearInterval(this.clrInt);
   }
+
   async getLocation() {
     await Geolocation.getCurrentPosition({enableHighAccuracy: true}).then((res: any) => {
       this.latitude = res.coords.latitude;
@@ -189,139 +188,7 @@ export class AttendncePage implements OnInit {
           }
         });
       });
-
   }
-
-
-
-  punchInOut(val: any) {
-    // const options: CameraOptions = {
-    //   quality: 50,
-    //   destinationType: this.camera.DestinationType.FILE_URI,
-    //   encodingType: this.camera.EncodingType.JPEG,
-    //   mediaType: this.camera.MediaType.PICTURE,
-    //   correctOrientation: true,
-    //   targetHeight: 768,
-    //   targetWidth: 1024
-    // };
-    // this.camera.getPicture(options).then((imageData) => {
-    //   this.file.resolveLocalFilesystemUrl(imageData).then((entry: FileEntry) => {
-    //     entry.file(file => {
-    //       console.log(file);
-    //       this.read(file, val);
-    //     });
-    //   }, err => {
-    //     alert(JSON.stringify(err) + 'Err File');
-    //   });
-    // }, err => {
-    //   let errres = JSON.stringify(err);
-    //   if (errres == '20') {
-    //     alert('Plese Allow Camera Permission');
-    //   } else {
-    //     alert(JSON.stringify(err) + 'ERR Camera');
-    //   }
-    // });
-  }
-
-  read(file: any, val: any) {
-    // const reader = new FileReader();
-    // reader.readAsArrayBuffer(file);
-    // reader.onload = () => {
-    //   const blob = new Blob([reader.result], {
-    //     type: file.type
-    //   });
-
-    //   this.formData.delete('photo',);
-    //   this.formData.delete('emp_id');
-    //   this.formData.delete('att_date');
-    //   this.formData.delete('att_lattitude');
-    //   this.formData.delete('att_longitude');
-    //   this.formData.delete('att_time');
-    //   this.formData.delete('att_type');
-
-    //   this.formData.append('photo', blob, file.name);
-    //   this.formData.append('emp_id', this.userData.id);
-    //   this.formData.append('att_date', moment().format('yyyy-MM-DD'));
-    //   this.formData.append('att_lattitude', this.latitude);
-    //   this.formData.append('att_longitude', this.longitude);
-    //   this.formData.append('att_time', this.currentTime);
-    //   this.formData.append('att_type', val);
-    //   if (val === 'OUT') {
-    //     this.formData.append('id', this.att_id);
-    //   }
-    //   this.presentLoading().then(preLoad => {
-    //     this.httpAttendance.punchInOutAction(this.formData).then((res: any) => {
-    //       this.dismissloading();
-    //       this.result = res;
-    //       if (this.result === false) {
-    //         this.common.presentToast(environment.errMsg, 'danger');
-    //       } else {
-    //         if (this.result.status === true) {
-    //           this.common.presentToast(this.result.msg, 'success');
-    //           if (val === 'IN') {
-    //             this.attendanceStatus = true;
-    //           } else if (val === 'OUT') {
-    //             this.attendanceStatus = false;
-    //           }
-    //           this.navCtrl.pop();
-    //         } else if (this.result.status === false) {
-    //           this.common.presentToast(this.result.msg, 'warning');
-    //         }
-    //       }
-    //     });
-    //   });
-    // };
-  }
-
-  // uploadAttendance(event: any, val: any): void {
-  //   let lat, lng, id;
-  //   lat = 28.436913269756705;
-  //   lng = 77.31605195124482;
-  //   id = 40;
-  //   if (event.target.files.length > 0) {
-  //     const file = event.target.files[0];
-
-  //     this.formData.delete('photo',);
-  //     this.formData.delete('emp_id');
-  //     this.formData.delete('att_date');
-  //     this.formData.delete('att_lattitude');
-  //     this.formData.delete('att_longitude');
-  //     this.formData.delete('att_time');
-  //     this.formData.delete('att_type');
-  //     this.formData.delete('id');
-
-  //     this.formData.append('photo', file);
-  //     this.formData.append('emp_id', this.userData.id);
-  //     this.formData.append('att_date', moment().format('yyyy-MM-DD'));
-  //     this.formData.append('att_lattitude', lat);
-  //     this.formData.append('att_longitude', lng);
-  //     this.formData.append('att_time', this.currentTime);
-  //     this.formData.append('att_type', val);
-  //     if (val == 'OUT') {
-  //       this.formData.append('id', this.att_id);
-  //     }
-  //     this.presentLoading().then(preLoad => {
-  //       this.httpAttendance.punchInOutAction(this.formData).then(res => {
-  //         this.dismissloading();
-  //         this.result = res;
-  //         if (this.result === false) {
-  //           this.common.presentToast(environment.errMsg, 'danger');
-  //         } else {
-  //           if (this.result.status === true) {
-  //             this.common.presentToast(this.result.msg, 'success');
-  //             if (val === 'IN') {
-  //               this.attendanceStatus = true;
-  //             } else if (val === 'OUT') {
-  //               this.attendanceStatus = false;
-  //             }
-  //           } else if (this.result.status === false) {
-  //             this.common.presentToast(this.result.msg, 'warning');
-  //           }
-  //         }
-  //       });
-  //     });
-  //   }
-  // }
 
   async presentLoading() {
     this.loading = await this.loadingController.create({
@@ -344,7 +211,6 @@ export class AttendncePage implements OnInit {
       componentProps : { }
     });
     modal.onWillDismiss().then((disModal: any) => {
-      console.log(disModal);
       if (disModal.role) {
         this.costCenter = disModal.data.label;
         this.formData.delete('pc_ext_id');
@@ -360,7 +226,4 @@ export class AttendncePage implements OnInit {
     });
     return await modal.present();
   }
-
-
-
 }

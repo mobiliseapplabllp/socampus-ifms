@@ -26,25 +26,7 @@ export class TokenInterceptor implements HttpInterceptor {
     if (!localStorage.getItem('token1')) {
       return next.handle(request);
     } else {
-      if (request.url != 'https://translate.googleapis.com/language/translate/v2?key=AIzaSyDJjHphpheVQM7CRYNqHHdJqMqAgt0IY70') {
-        const userToken = localStorage.getItem('token1');
-        const modifiedReq = request.clone({headers: request.headers.set('Authorization', `Bearer ${userToken}`).set('Accept', 'application/json')});
-        return next.handle(modifiedReq).pipe(tap(() => {},
-          (err: any) => {
-          if (err instanceof HttpErrorResponse) {
-            if (err.status !== 401) {
-            return;
-            }
-            alert('Your Session is timeout please login again');
-            if (this.platform.is('android')) {
-              App.exitApp();
-            } else {
-              this.router.navigateByUrl('/login');
-            }
-
-          }
-        }));
-      } else {
+      if (request.url == 'https://translate.googleapis.com/language/translate/v2?key=AIzaSyDJjHphpheVQM7CRYNqHHdJqMqAgt0IY70') {
         const userToken = localStorage.getItem('token1');
         const modifiedReq = request.clone({headers: request.headers.set('Accept', 'application/json')});
         return next.handle(modifiedReq).pipe(tap(() => {},
@@ -54,11 +36,20 @@ export class TokenInterceptor implements HttpInterceptor {
             return;
             }
             alert('Your Session is timeout please login again');
-            if (this.platform.is('android')) {
-              App.exitApp();
-            } else {
-              this.router.navigateByUrl('/login');
+            this.router.navigateByUrl('/login',{replaceUrl: true});
+          }
+        }));
+      } else {
+        const userToken = localStorage.getItem('token1');
+        const modifiedReq = request.clone({headers: request.headers.set('Authorization', `Bearer ${userToken}`).set('Accept', 'application/json')});
+        return next.handle(modifiedReq).pipe(tap(() => {},
+          (err: any) => {
+          if (err instanceof HttpErrorResponse) {
+            if (err.status !== 401) {
+            return;
             }
+            alert('Your Session is timeout please login again');
+            this.router.navigateByUrl('/login',{replaceUrl: true});
           }
         }));
       }
@@ -73,7 +64,7 @@ export class TokenInterceptor implements HttpInterceptor {
       buttons: [{
         text: 'Okay',
         handler: () => {
-          console.log('Confirm Okay');
+
         }
       }]
     });

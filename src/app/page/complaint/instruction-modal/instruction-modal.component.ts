@@ -31,7 +31,6 @@ export class InstructionModalComponent  implements OnInit {
   }
 
   changeCheckBox(ev: any) {
-    console.log(ev);
     if (ev.detail.checked) {
       this.closeModal(null, 'true');
     }

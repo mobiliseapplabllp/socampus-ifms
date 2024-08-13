@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { delay, forkJoin, mergeMap, Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
@@ -11,8 +11,9 @@ export class DigitalChecklistService {
     private http: HttpClient
   ) { }
 
-  getOfflineCheckListFromServer(): Observable<any> {
-    return this.http.get('assets/data/offline_checklist.json');
+  getOfflineCheckListFromServer(date: string): Observable<any> {
+    // return this.http.get('assets/data/offline_checklist' + date + '.json');
+    return this.http.get(this.baseurl + 'digicheck/offlineapp/getAllPendingChecklist?date=' + date);
   }
 
   getSchedule(): Observable<any> {
@@ -48,7 +49,11 @@ export class DigitalChecklistService {
   }
 
   finalSubmitCheckList(formData: any): Observable<any> {
-    return this.http.post(this.baseurl + 'digicheck/update_schedule_status', formData)
+    return this.http.post(this.baseurl + 'digicheck/offlineapp/saveAllPendingChecklist', formData);
+  }
+
+  updateTktToSchedule(formData: any): Observable<any> {
+    return this.http.post(this.baseurl + 'digicheck/update_raised_issued_schudled', formData);
   }
 
   googleTranslate(data: any, lang: string): Observable<any> {
@@ -57,4 +62,72 @@ export class DigitalChecklistService {
       "target": lang
     });
   }
+
+  getMultipleData(data: any): Observable<any[]> {
+    const forkData: any = [];
+    for (var i = 0 ; i < data.length; i++) {
+      forkData.push(
+        this.http.post('https://api.example.com/data1', data[i])
+      )
+    }
+    const apiUrl1 = 'https://api.example.com/data1';
+    const apiUrl2 = 'https://api.example.com/data2';
+
+    return forkJoin([
+      this.http.get(apiUrl1),
+      this.http.get(apiUrl2)
+    ]);
+  }
+
+  getDynamicData(apiEndpoints: string[]): Observable<any[]> {
+    const observables = apiEndpoints.map(endpoint => this.http.get(endpoint));
+    return forkJoin(observables);
+  }
+
+  postDynamicData(apiRequests: any[]): Observable<any[]> {
+    const observables = apiRequests.map(request => {
+      const { method, url, data } = request;
+      if (method.toLowerCase() === 'post') {
+        return this.http.post(url, data)
+      } else {
+        return this.http.get(url)
+      }
+    });
+    return forkJoin(observables);
+  }
+
+  submitDummyApi(data: any): Observable<any> {
+    const formData = new FormData();
+    formData.append('a','1222');
+    return this.http.get('https://aovsshdashboard.com/Webservices/test_image.php' , {params: data})
+  }
+
+  // postDynamicData(apiRequests: any[]): Observable<any[]> {
+  //   const observables = apiRequests.map(request => {
+  //     const { method, url, data, delayTime, id } = request;
+
+  //     // Check if a delayTime is provided and if it's for the specific id
+  //     const delayObservable = url === 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/dash/mobile_app_engineer_dashboard'
+  //       ? of(null).pipe(delay(10000))
+  //       : of(null);
+
+  //     const apiRequestObservable = this.makeApiRequest(method, url, data);
+
+  //     // Use mergeMap to merge the delay and the actual API request
+  //     return delayObservable.pipe(
+  //       mergeMap(() => apiRequestObservable)
+  //     );
+  //   });
+
+  //   return forkJoin(observables);
+  // }
+
+  // private makeApiRequest(method: string, url: string, data: any): Observable<any> {
+  //   if (method.toLowerCase() === 'post') {
+  //     return this.http.post(url, data);
+  //   } else {
+  //     return this.http.get(url);
+  //   }
+  // }
+
 }

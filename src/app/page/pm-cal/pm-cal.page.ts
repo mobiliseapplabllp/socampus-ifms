@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { LoadingController, ModalController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
@@ -17,16 +17,16 @@ import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digi
 export class PmCalPage implements OnInit {
   status = 'open';
   pmCal: any = [];
-  pmCalCopy: any = [];
-  resolvedPm: any = [];
-  resolvedPmCopy: any = [];
+  // pmCalCopy: any = [];
+  // resolvedPm: any = [];
+  // resolvedPmCopy: any = [];
   loading: any;
-  userData: any = [];
-  pmCalBoolean!: boolean;
-  pmCalResBoolean!: boolean;
-  counter = 0;
-  userInfo: any = [];
-  userName!: string;
+  // userData: any = [];
+  // pmCalBoolean!: boolean;
+  // pmCalResBoolean!: boolean;
+  // counter = 0;
+  // userInfo: any = [];
+  // userName!: string;
   openPm: any = [];
   openPmCopy: any = [];
   actionPm: any = [];
@@ -37,17 +37,18 @@ export class PmCalPage implements OnInit {
   lastPage: any;
   currentPage = 1;
   myWorkOrder: any = [];
-  slideOptsOne = {
-    initialSlide: 0,
-    slidesPerView: 2.5,
-    autoplay: false,
-    slideShadows: true,
-   };
+  // slideOptsOne = {
+  //   initialSlide: 0,
+  //   slidesPerView: 2.5,
+  //   autoplay: false,
+  //   slideShadows: true,
+  //  };
    selectedPms: any = [];
    searchBy: any;
    searchValue: any;searchValueDesc: any;
-   fileName1!: string;
-   selectedBarcode: any;
+  //  fileName1!: string;
+   selectedObj: any = {};
+   countObj: any = {};
   constructor(
     private loadingController: LoadingController,
     private httpPms: PmCalService,
@@ -55,6 +56,7 @@ export class PmCalPage implements OnInit {
     private modalCtrl: ModalController,
     private router: Router,
     private httpDigital: DigitalChecklistService,
+    private platform: Platform
   ) { }
 
   ngOnInit() {
@@ -62,41 +64,76 @@ export class PmCalPage implements OnInit {
   }
 
   ionViewDidEnter() {
-    let bar = this.common.getBarcode();
+    let bar = this.common.getBarcode(), split, type, ecn_key;
     if (bar) {
-      let temp, temp1;
-      temp = bar;
-      temp1 = temp.split('/');
-      const obj = {
-        sch_id: '',
-        wo_id: this.selectedBarcode.wo_id,
-        enc_barcode: temp1[5],
-        type: 'pms',
+      this.common.setBarcode('');
+      split = bar.split('/');
+      if (split.length === 6) {
+        type = split[4];
+        ecn_key = split[5];
+        let val = this.common.decryptValue(ecn_key);
+
+        if (val === this.selectedObj.ext_asset_id) {
+          this.openPage(this.selectedObj);
+          return;
+        } else {
+          this.common.presentToast('You are Scan wrong QR Code ' + val, 'warning');
+        }
+      } else {
+        this.common.presentToast('You are Scan Wrong QR Code', 'warning');
       }
-      this.verifyBarcode(obj);
+      // let temp, temp1;
+      // temp = bar;
+      // temp1 = temp.split('/');
+      // const obj = {
+      //   sch_id: '',
+      //   wo_id: this.selectedBarcode.wo_id,
+      //   enc_barcode: temp1[5],
+      //   type: 'pms',
+      // }
+      // this.verifyBarcode(obj);
       return;
     }
+    this.getPmsCount();
     this.getPm(this.lastSegment);
   }
 
-  verifyBarcode(obj: any){
-    this.presentLoading().then(preLoad => {
-      this.httpDigital.verifyAssetByQr(obj).subscribe({
-        next:(dat: any) => {
-          if (dat.status) {
-            this.common.setBarcode('');
-            this.openPage(this.selectedBarcode);
-          } else {
-            this.common.presentToast(dat.msg, 'warning');
-          }
-        }, error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        }, complete:() => {
-          this.dismissloading();
+  getPmsCount() {
+    this.httpPms.getPmCount().subscribe({
+      next:(data) => {
+        if (data.status) {
+          this.countObj = data.data;
+        } else {
+          this.common.presentToast(data.msg, 'warning');
         }
-      })
+      },
+      error:() => {
+        this.common.presentToast(environment.errMsg, 'danger');
+      },
+      complete:() => {
+
+      }
     })
+  }
+
+  verifyBarcode(obj: any){
+    // this.presentLoading().then(preLoad => {
+    //   this.httpDigital.verifyAssetByQr(obj).subscribe({
+    //     next:(dat: any) => {
+    //       if (dat.status) {
+    //         this.common.setBarcode('');
+    //         this.openPage(this.selectedBarcode);
+    //       } else {
+    //         this.common.presentToast(dat.msg, 'warning');
+    //       }
+    //     }, error:() => {
+    //       this.dismissloading();
+    //       this.common.presentToast(environment.errMsg, 'danger');
+    //     }, complete:() => {
+    //       this.dismissloading();
+    //     }
+    //   })
+    // })
   }
 
   ionViewDidLeave() {
@@ -150,17 +187,13 @@ export class PmCalPage implements OnInit {
   }
 
   multiAssign() {
-    console.log(this.openPm);
     const obj =this.openPm.filter((val: any) => val.isSelect == true);
-    console.log(obj);
     this.pmAssign(obj);
   }
 
   changeCheckbox(val: any) {
-    console.log(val);
     setTimeout(() => {
       this.selectedPms = this.openPm.filter((val: any) => val.isSelect == true);
-      console.log(this.selectedPms);
     }, 500);
   }
 
@@ -172,9 +205,7 @@ export class PmCalPage implements OnInit {
     });
     modal.onWillDismiss().then(disModal => {
       if (disModal.role) {
-        console.log('ff');
         this.httpPms.getData().subscribe((data: any) => {
-          console.log(data);
           for (var i = 0; i < data.length; i++) {
             this.openPm = this.openPm.filter((val: any) => val.wo_id !== data[i].wo_id);
           }
@@ -184,9 +215,7 @@ export class PmCalPage implements OnInit {
     modal.present();
   }
 
-  cretePM() {
-    // this.router.navigateByUrl('/pm-calibration/create-pm');
-  }
+  cretePM() { }
 
   viewAttachment(url: string) {
     this.common.openDoc(url);
@@ -194,6 +223,7 @@ export class PmCalPage implements OnInit {
 
   openFillReport(data: any) {
     if (data.ext_asset_id) {
+      this.selectedObj = data;
       this.openBarcode(data)
     } else {
       this.openPage(data);
@@ -201,7 +231,6 @@ export class PmCalPage implements OnInit {
   }
 
   openBarcode(data: any) {
-    this.selectedBarcode = data;
     this.router.navigateByUrl('/barcode');
   }
 
@@ -220,7 +249,6 @@ export class PmCalPage implements OnInit {
       componentProps : { }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.searchValueDesc = disModal.data.label;
         this.searchValue = disModal.data.value;
@@ -238,9 +266,7 @@ export class PmCalPage implements OnInit {
       }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
-        console.log(disModal.data.ptw_attach);
         dat.ptw_attach = disModal.data.ptw_attach
       }
     });
@@ -295,7 +321,6 @@ export class PmCalPage implements OnInit {
   }
 
   changeSeg(ev: any) {
-    console.log(ev.target.value);
     if (ev.target.value == 'open') {
       this.lastSegment = 1;
       this.getPm(this.lastSegment);
@@ -305,9 +330,7 @@ export class PmCalPage implements OnInit {
     } else if (ev.target.value == 'closed') {
       this.lastSegment = 3;
       this.getPm(this.lastSegment);
-    } else if (ev.target.value == 'mywo') {
-      console.log('mywo');
-    }
+    } else if (ev.target.value == 'mywo') {}
   }
 
   async presentActionSheet(data: any) {
@@ -333,7 +356,6 @@ export class PmCalPage implements OnInit {
       data.docname_tmp = '';
       this.presentLoading().then(preLoad => {
         this.httpPms.uploadPtw(formData).subscribe(res => {
-          console.log(data);
           this.dismissloading();
           if (res.status) {
             this.common.presentToast(res.msg, 'success');
@@ -353,8 +375,6 @@ export class PmCalPage implements OnInit {
 
   changeFile(fileChangeEvent: any, data: any){
     const photo = fileChangeEvent.target.files[0];
-    console.log(photo);
-    console.log(data);
     let formData = new FormData();
       formData.append('attach', photo, photo.name);
       formData.append('id', data.id)
@@ -363,7 +383,6 @@ export class PmCalPage implements OnInit {
       this.presentLoading().then(preLoad => {
         this.httpPms.uploadPtw(formData).subscribe(res => {
           this.dismissloading();
-          console.log(res);
           if (res.status) {
             this.common.presentToast(res.msg, 'success');
             data.ptw_attach = res.ptw_attach
@@ -415,7 +434,6 @@ export class PmCalPage implements OnInit {
   }
 
   searchItem(ev: any, val: any) {
-    console.log(ev.target.value);
     if (val == 1) {
       this.openPm = this.openPmCopy;
       this.openPm = this.openPm.filter((data: any) => {

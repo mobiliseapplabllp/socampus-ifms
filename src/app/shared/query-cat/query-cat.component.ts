@@ -11,6 +11,7 @@ import { environment } from 'src/environments/environment';
 export class QueryCatComponent  implements OnInit {
   issue_id: any;
   pc_id: any;
+  data: any = [];
   allQueryCat: any = [];
   allQueryCatCopy: any = [];
   loading: any;
@@ -22,11 +23,22 @@ export class QueryCatComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.getQueryCagegory();
+    if (this.data.length > 0) {
+      this.allQueryCat = this.data;
+      this.allQueryCatCopy = this.data;
+    } else {
+      this.getQueryCagegory();
+    }
   }
 
   closeModal(data: any, status: any) {
     this.modalCtrl.dismiss(data, status);
+  }
+
+  ionViewDidLeave() {
+    this.allQueryCat = [];
+    this.allQueryCatCopy = [];
+    this.dismissloading();
   }
 
   getQueryCagegory() {
@@ -58,7 +70,9 @@ export class QueryCatComponent  implements OnInit {
   }
 
   async dismissloading() {
-    this.loading.dismiss();
+    if (this.loading) {
+      this.loading.dismiss();
+    }
   }
 
   search(ev: any) {

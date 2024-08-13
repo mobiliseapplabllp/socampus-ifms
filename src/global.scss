@@ -25,20 +25,104 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
+
+// open sans
+@font-face {
+  font-family: opensans_bold;
+  src: url(assets/OpenSans/OpenSans-Bold.ttf);
+}
+
+@font-face {
+  font-family: opensans_ex_bold;
+  src: url(assets/OpenSans/OpenSans-ExtraBold.ttf);
+}
+
+@font-face {
+  font-family: opensans_light;
+  src: url(assets/OpenSans/OpenSans-Light.ttf);
+}
+
+@font-face {
+  font-family: opensans_medium;
+  src: url(assets/OpenSans/OpenSans-Medium.ttf);
+}
+
+@font-face {
+  font-family: opensans_regular;
+  src: url(assets/OpenSans/OpenSans-Regular.ttf);
+}
+
+@font-face {
+  font-family: opensans_semibold;
+  src: url(assets/OpenSans/OpenSans-SemiBold.ttf);
+}
+
+// sansapro black
+@font-face {
+  font-family: sansapro_black;
+  src: url(assets/sansa_pro/sansapro_black.otf);
+}
+
+@font-face {
+  font-family: sansapro_bold;
+  src: url(assets/sansa_pro/sansapro_bold.otf);
+}
+
+@font-face {
+  font-family: sansapro_light;
+  src: url(assets/sansa_pro/sansapro_light.otf);
+}
+
+@font-face {
+  font-family: sansapro_normal;
+  src: url(assets/sansa_pro/sansapro_normal.otf);
+}
+
+@font-face {
+  font-family: sansapro_semibold;
+  src: url(assets/sansa_pro/sansapro_semibold.otf);
+}
+
+ion-content {
+  font-family: 'opensans_semibold' !important;
+}
+
+ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
+  font-family: 'opensans_semibold' !important;
+}
+
 .my-modal{
   --height: 93%;
   --border-radius: 5px;
   padding: 25px;
-  // --ion-background-color:red;
 }
 
 .my-modal2{
   --height: 50%;
   --border-radius: 5px;
   padding: 25px;
-  // --ion-background-color:red;
 }
 
+.custom-otp-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.custom-otp-input {
+  width: 50px !important;
+  height: 50px !important;
+  margin: 0 5px !important;
+  border: 1px solid var(--ion-color-primary) !important;
+  border-radius: 5px !important;
+  text-align: center;
+  font-size: 18px !important;
+  outline: none;
+}
+
+.custom-otp-input:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
 .center {
   display: flex;
   align-items: center;
@@ -50,24 +134,22 @@ body.scanner-active {
   --ion-background-color: '#00000000';
 }
 
+
 section.inputbox {
-  padding:0px 10px !important;
   ion-text {
     font-size: 14px;
     font-weight: 550;
-
+    font-family: 'opensans_semibold' !important;
   }
   ion-item {
     margin: 5px 0px;
-    border:1px solid #D9E1EB;
-    border-radius: 4px;
+    border:2px solid var(--ion-color-primary);
+    border-radius: 6px;
     font-weight: bold;
     font-size:90%;
     background-color: white;
-    border-radius: 16px; //26px
-    // box-shadow: 1px 1px 3px var(--ion-color-medium);
     ion-icon {
-      margin-right: 16px;
+      margin-right:10px;
     }
     ion-select {
       width:100%
@@ -75,3 +157,45 @@ section.inputbox {
   }
 }
 
+// section.inputbox {
+//   padding:0px 10px !important;
+//   ion-text {
+//     font-size: 14px;
+//     font-weight: 550;
+
+//   }
+//   ion-item {
+//     margin: 5px 0px;
+//     font-weight: bold;
+//     font-size:90%;
+//     background-color: rgba(227, 237, 255, 0.8);
+//     border-radius: 10px;
+//     ion-icon {
+//       margin-right: 16px;
+//     }
+//     ion-input {
+//       background-color:transparent !important
+//     }
+//     ion-select {
+//       width:100%
+//     }
+//   }
+// }
+
+// ion-button.ion-color-primary, ion-toolbar.ion-color-primary {
+//   --ion-color-base: linear-gradient(
+//   195deg,
+//   #25589c 20%,
+//   var(--ion-color-primary) 100%
+//   ) !important;
+// }
+
+// ion-card {
+//   ion-card-header.ion-color-primary {
+//     --ion-color-base: linear-gradient(
+//   195deg,
+//   #25589c 20%,
+//   var(--ion-color-primary) 100%
+//   ) !important;
+//   }
+// }

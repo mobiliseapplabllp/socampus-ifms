@@ -4,7 +4,7 @@ import { IonDatetime, LoadingController, ModalController, Platform } from '@ioni
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { environment } from 'src/environments/environment';
-import { AssetPlantComponent } from './asset-plant/asset-plant.component';
+// import { AssetPlantComponent } from './asset-plant/asset-plant.component';
 import { AssetDepartmentComponent } from './asset-department/asset-department.component';
 import { AssetDevicenameComponent } from './asset-devicename/asset-devicename.component';
 import { AssetManufacturerComponent } from './asset-manufacturer/asset-manufacturer.component';
@@ -14,6 +14,7 @@ import * as moment from 'moment';
 import { FloorComponent } from 'src/app/shared/floor/floor.component';
 import { LocationComponent } from 'src/app/shared/location/location.component';
 import { DeviceGroupComponent } from 'src/app/shared/device-group/device-group.component';
+import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
 @Component({
   selector: 'app-add-asset',
   templateUrl: './add-asset.page.html',
@@ -42,7 +43,7 @@ export class AddAssetPage implements OnInit {
   formData = new FormData();
   public errorMessages = {
     input_asset_id: [
-      { type: 'required', message: 'Asset ID is Required' },
+      { type: 'required', message: 'Asset Id is Required' },
       { type: 'minlength', message: 'Asset Id should have 6 digits' }
     ],
   };
@@ -77,14 +78,14 @@ export class AddAssetPage implements OnInit {
     private loadingController: LoadingController,
     private router: Router) {
     this.addAsset = this.formbuilder.group({
-      faciity_type: ['', Validators.required],
+      faciity_type: [''],
       site_id_description:[''],
       site_id: ['', Validators.required],
       block_id: [''],
       bldg_id: [''],
       floor_id: [''],
       floor_id_desc: [''],
-      loc_id: [''],
+      loc_id: ['', Validators.required],
       loc_id_desc: [''],
       dept_id: [''],
       dept_id_desc: [''],
@@ -119,6 +120,8 @@ export class AddAssetPage implements OnInit {
       warranty_id: [''],
       warranty_start_date: [''],
       warranty_end_date: [''],
+      is_pms: ['', Validators.required],
+      pms_freq: [''],
       vend_code: [''],
       is_insured: [''],
       remark: [''],
@@ -126,8 +129,6 @@ export class AddAssetPage implements OnInit {
 
     });
     this.pinPointStyleFun();
-    this.getFacilityType();
-    // this.getDeviceGroup();
     this.getOwnership();
     this.getEquipStatus();
     this.getTechnology();
@@ -174,8 +175,6 @@ export class AddAssetPage implements OnInit {
     this.coordinate.y = yCoordinate
     this.coordinate.x = parseInt(this.coordinate.x, 10);
     this.coordinate.y = parseInt(this.coordinate.y, 10);
-    console.log('X Coordinate:', xCoordinate);
-    console.log('Y Coordinate:', yCoordinate);
     this.pinPointStyleFun();
   }
 
@@ -236,7 +235,6 @@ export class AddAssetPage implements OnInit {
     this.currentDate = moment().format('YYYY-MM-DD');
     let bar = this.httpCommon.getBarcode();
     if (bar) {
-      console.log('Your Barcode is ' + bar);
       let temp, temp1;
       temp = bar;
       temp1 = temp.split('/');
@@ -246,8 +244,6 @@ export class AddAssetPage implements OnInit {
       } else {
         this.httpCommon.presentToast('This is invalid QR Code', 'warning');
       }
-      // this.addAsset.get('input_asset_id')?.setValue(bar);
-      // this.httpCommon.setBarcode('');
     }
   }
 
@@ -255,7 +251,6 @@ export class AddAssetPage implements OnInit {
     this.presentLoading().then(preLoad => {
       this.httpAsset.getDecBarcode(enc_barcode).subscribe({
         next:(data) => {
-          console.log(data);
           if (data.status) {
             let temp, firstDigit,lastDigit;
             temp = data.data.text;
@@ -264,7 +259,6 @@ export class AddAssetPage implements OnInit {
             if (firstDigit === this.addAsset.value.ext_asset_id_pre) {
               this.addAsset.get('input_asset_id')?.setValue(lastDigit);
             } else {
-              // this.httpCommon.presentToastWithOk('Starting 4 Digit Barcode is not Matched against the selected Site. ' + this.addAsset.value.site_id_description  + ' and 4 digit barcode ' + this.addAsset.value.ext_asset_id_pre + ' and after scan barcode digit is ' + firstDigit , 'warning');
               this.httpCommon.presentToastWithOk('Incorrect barcode!!  Starting 4 digits of the barcode does not match with the selected site ' + this.addAsset.value.site_id_description + '. The barcodes for the site begin with ' + firstDigit + '.' , 'warning');
             }
           } else {
@@ -293,22 +287,7 @@ export class AddAssetPage implements OnInit {
       return;
     }
     this.router.navigateByUrl('/barcode');
-    // this.barcodeScanner.scan().then(barcodeData => {
-    //   console.log('Barcode data', barcodeData);
-    //   let barcode = barcodeData.text;
-    //   if (barcode.length == 6) {
-    //     this.addAsset.get('input_asset_id').setValue(barcode)
-    //   } else {
-    //     alert(barcode + ' Barcode Should have 6 Digit Only');
-    //   }
-    // }).catch(err => {
-    //   console.log('Error', err);
-    // });
   }
-
-  // presentActionSheet(val: any) {
-
-  // }
 
   async presentActionSheet(val: any) {
     const takePicture = async () => {
@@ -383,17 +362,12 @@ export class AddAssetPage implements OnInit {
 
 
   async openSiteModal() {
-    if (!this.addAsset.value.faciity_type) {
-      alert('Please Select Facilty Type');
-      return;
-    }
     const modal = await this.modalController.create({
-      component: AssetPlantComponent,
+      component: CostCenterComponent,
       cssClass: 'my-modal',
       componentProps : { faciity_type: this.addAsset.value.faciity_type}
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.data) {
         this.addAsset.get('site_id_description')?.setValue(disModal.data.pc_desc);
         this.addAsset.get('site_id')?.setValue(disModal.data.pc_id);
@@ -423,7 +397,6 @@ export class AddAssetPage implements OnInit {
         })
 
         this.httpAsset.getPrefixBarcode(disModal.data.pc_id).subscribe(data => {
-          console.log(data);
           if (data.status) {
             this.prefixBarcode = data.data.barcode_prefix
             this.addAsset.get('ext_asset_id_pre')?.setValue(this.prefixBarcode);
@@ -443,7 +416,6 @@ export class AddAssetPage implements OnInit {
       componentProps : { }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.addAsset.get('dept_id_desc')?.setValue(disModal.data.dept_desc);
         this.addAsset.get('dept_id')?.setValue(disModal.data.dept_id);
@@ -469,12 +441,10 @@ export class AddAssetPage implements OnInit {
        }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.addAsset.get('subgrp_id')?.setValue(disModal.data.value);
         this.addAsset.get('subgrp_id_desc')?.setValue(disModal.data.label);
         setTimeout(() => {
-          console.log(disModal.data.subgrp_class);
           this.addAsset.get('subgrp_class')?.setValue(disModal.data.subgrp_class);
         }, 100)
 
@@ -490,7 +460,6 @@ export class AddAssetPage implements OnInit {
       componentProps : { }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.addAsset.get('manufacturer_id')?.setValue(disModal.data.mnfctrer_id);
         this.addAsset.get('manufacturer_id_desc')?.setValue(disModal.data.mnfctrer_desc);
@@ -499,9 +468,7 @@ export class AddAssetPage implements OnInit {
     return await modal.present();
   }
 
-
   changeBlock(ev: any) {
-    console.log(ev.target.value);
     if (!ev.target.value) {
       return;
     }
@@ -515,7 +482,6 @@ export class AddAssetPage implements OnInit {
             this.addAsset.get('floor_id_desc')?.setValue('');
             this.addAsset.get('loc_id')?.setValue('');
             this.addAsset.get('loc_id_desc')?.setValue('')
-
           }
         },
         error:() => {
@@ -528,30 +494,6 @@ export class AddAssetPage implements OnInit {
       });
     })
   }
-
-  // changeBuilding(ev: any) {
-  //   if (!ev.target.value) {
-  //     return;
-  //   }
-  //   this.presentLoading().then(preLoad => {
-  //     this.httpAsset.getFloorList(ev.target.value).subscribe({
-  //       next:(data) => {
-  //         if (data.status) {
-  //           this.myFloor = data.data;
-  //           this.addAsset.get('floor_id')?.setValue('');
-  //           this.addAsset.get('loc_id')?.setValue('');
-  //         }
-  //       },
-  //       error:() => {
-  //         this.dismissloading();
-  //         this.httpCommon.presentToast(environment.errMsg, 'danger');
-  //       },
-  //       complete:() => {
-  //         this.dismissloading();
-  //       }
-  //     });
-  //   })
-  // }
 
   async openFloorModal() {
     if (!this.addAsset.value.bldg_id) {
@@ -566,7 +508,6 @@ export class AddAssetPage implements OnInit {
       }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.floorImage = disModal.data.floor_img;
         this.addAsset.get('floor_id_desc')?.setValue(disModal.data.label);
@@ -592,9 +533,7 @@ export class AddAssetPage implements OnInit {
       }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
-        // this.floorImage = disModal.data.floor_img;
         this.addAsset.get('loc_id_desc')?.setValue(disModal.data.label);
         this.addAsset.get('loc_id')?.setValue(disModal.data.value);
       }
@@ -603,41 +542,8 @@ export class AddAssetPage implements OnInit {
     return await modal.present();
   }
 
-
-  // chnageFloor(ev: any) {
-  //   console.log(ev.target.value);
-  //   if (!ev.target.value) {
-  //     return;
-  //   }
-  //   let obj = this.myFloor.filter((val: any) => val.value === ev.target.value)[0];
-  //   this.floorImage = obj.floor_img;
-  //   console.log(this.floorImage);
-  //   this.presentLoading().then(preLoad => {
-  //     this.httpAsset.getLocation(ev.target.value).subscribe({
-  //       next:(data) => {
-  //         if (data.status) {
-  //           this.addAsset.get('loc_id')?.setValue('');
-  //           this.myLocation = data.data;
-  //         } else {
-  //           this.httpCommon.presentToast(data.msg, 'warning');
-  //         }
-  //       },
-  //       error:() => {
-  //         this.dismissloading();
-  //         this.httpCommon.presentToast(environment.errMsg, 'danger');
-  //       },
-  //       complete:() => {
-  //         this.dismissloading();
-  //       }
-  //     })
-  //   })
-
-  // }
-
   changeClientId() {
     return /^[A-Za-z0-9]*$/.test('str');
-    // let a = this.addAsset.value.client_asset_id.replace(/^a-zA-Z0-9 ]/g, '')
-    // console.log(a);
   }
 
   getFacilityType() {
@@ -674,18 +580,10 @@ export class AddAssetPage implements OnInit {
     this.addAsset.get('floor_id_desc')?.setValue('');
     this.addAsset.get('loc_id')?.setValue('');
     this.addAsset.get('loc_id_desc')?.setValue('');
-    // console.log(ev.target.value);
-    // this.httpAsset.getPlantByCategory(ev.target.value).subscribe(data => {
-    //   console.log(data);
-    //   if (data.status) {
-    //     this.myPlantArr = data.data
-    //   }
-    // });
   }
 
   getBuilding() {
     this.httpAsset.getBuilding().subscribe(data =>{
-      console.log(data);
       if (data.status) {
         this.myBuildingArr = data.data;
       }
@@ -711,7 +609,6 @@ export class AddAssetPage implements OnInit {
   changeDepartment(id: any) {
     this.presentLoading().then(preLoad => {
       this.httpAsset.getSubDepartment(id).subscribe(data => {
-        console.log(data);
         this.dismissloading();
         if (data.status) {
           this.mySubDepartment = data.data
@@ -732,7 +629,6 @@ export class AddAssetPage implements OnInit {
       }
     });
     modal.onWillDismiss().then(disModal => {
-      console.log(disModal);
       if (disModal.role) {
         this.floorImage = disModal.data.floor_img;
         this.addAsset.get('grp_id_desc')?.setValue(disModal.data.label);
@@ -744,36 +640,14 @@ export class AddAssetPage implements OnInit {
     return await modal.present();
   }
 
-
-
-  // getDeviceGroup() {
-  //   this.httpAsset.getDeviceGroup().subscribe(data => {
-  //     console.log(data);
-  //     if (data.status) {
-  //       this.myDeviceGroup = data.data;
-  //     }
-  //   });
-  // }
-
   changeDeviceGroup(ev: any) {
-    // console.log('a');
-    // console.log(ev.target.value);
-    // if (ev.target.vaue != '') {
-    //   this.httpAsset.getDeviceName(ev.target.value).subscribe(data => {
-    //     if (data.status) {
-    //       this.myDeviceName = data.data
-    //     }
-    //   })
-    // }
+
   }
 
   changeDeviceName(ev: any) {
-    console.log(ev.target.value);
-    console.log(this.myDeviceName);
     if (ev.target.value) {
       let dev_class;
       dev_class = this.myDeviceName.filter((val: any) => val.value == ev.target.value)[0].subgrp_class;
-      console.log(dev_class);
       this.addAsset.get('subgrp_class')?.setValue(dev_class);
     }
   }
@@ -785,7 +659,6 @@ export class AddAssetPage implements OnInit {
 
   getManufacturer() {
     this.httpAsset.getManufacturer().subscribe(data => {
-      console.log(data);
       if (data.status) {
         this.myManufacturer = data.data;
       }
@@ -794,7 +667,6 @@ export class AddAssetPage implements OnInit {
 
   getOwnership() {
     this.httpAsset.getOwnership().subscribe(data => {
-      console.log(data);
       if (data.status) {
         this.myOwnership = data.data;
       }
@@ -803,7 +675,6 @@ export class AddAssetPage implements OnInit {
 
   getEquipStatus() {
     this.httpAsset.getEquipmentStatus().subscribe(data => {
-      console.log(data);
       if (data.status) {
         this.myEquipStatus = data.data
       }
@@ -812,7 +683,6 @@ export class AddAssetPage implements OnInit {
 
   getTechnology() {
     this.httpAsset.getTechnology().subscribe(data => {
-      console.log(data);
       if (data.status) {
         this.myTechnology = data.data
       }
@@ -821,7 +691,6 @@ export class AddAssetPage implements OnInit {
 
   getWarranty() {
     this.httpAsset.getWarranty().subscribe(data => {
-      console.log(data);
       if (data.status) {
         this.myWarranty = data.data;
       }
@@ -868,13 +737,22 @@ export class AddAssetPage implements OnInit {
     return
   }
 
+  checkPmsCondition() {
+    if (this.addAsset.value.is_pms === '1' && !this.addAsset.value.pms_freq) {
+      alert('Please Enter PMS Frequency');
+      return false;
+    } else {
+      return true
+    }
+  }
+
   changeWarranty() {
     this.addAsset.get('warranty_start_date')?.setValue('');
     this.addAsset.get('warranty_end_date')?.setValue('');
   }
 
   saveAsset() {
-    if (this.checkWarrantyCondition() && this.checkParentCondition()) {
+    if (this.checkWarrantyCondition() && this.checkParentCondition() && this.checkPmsCondition()) {
       this.submitAsset();
     }
   }
@@ -899,8 +777,6 @@ export class AddAssetPage implements OnInit {
         this.formData.delete(key);
         this.formData.append(key, this.addAsset.value[key])
       }
-      // x_cor: [''],
-      //   y_cor: [''],
       this.formData.delete('x_cor');
       this.formData.delete('y_cor');
       this.formData.append('x_cor', this.coordinate.x)
@@ -909,7 +785,6 @@ export class AddAssetPage implements OnInit {
         next:(data) => {
           this.pendingApi = null;
           this.clrTime();
-          console.log(data);
           if (data.status) {
             this.httpCommon.presentToast(data.msg, 'success');
             this.parentAssetObj = { };
@@ -934,14 +809,13 @@ export class AddAssetPage implements OnInit {
   stopRequest() {
     this.clrTime();
     this.clrTiimeOut = setTimeout(() => {
-      console.log('clear timeout');
       if (this.pendingApi) {
-        this.httpCommon.presentToastWithOk('Session Timeout... Please Submit Data Again', 'danger');
+        this.httpCommon.presentToastWithOk('Due to poor internet connectivity, your data submission failed. Please try again when your internet is stronger.', 'warning');
         this.pendingApi.unsubscribe();
         this.dismissloading();
       }
       this.clrTime();
-    }, 30000);
+    }, 90000);
   }
 
   clrTime() {
@@ -951,7 +825,6 @@ export class AddAssetPage implements OnInit {
   }
 
   searchAssetId() {
-    console.log(this.addAsset.value.parent_asset_id);
     if (!this.addAsset.value.parent_asset_id) {
       alert('Please Enter Asset Parent ID');
       return;
@@ -967,7 +840,6 @@ export class AddAssetPage implements OnInit {
       this.httpCommon.presentToastWithOk('Incorrect barcode!!  Starting 4 digits of the barcode does not match with the selected site ' + this.addAsset.value.site_id_description + '. The barcodes for the site begin with ' + firstDigit + '.' , 'warning');
       return;
     }
-    // lastDigit = temp.slice(-6);
 
     this.parentAssetObj = {};
     this.presentLoading().then(preLoad => {

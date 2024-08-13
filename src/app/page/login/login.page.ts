@@ -1,11 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LoadingController, MenuController, ModalController, Platform } from '@ionic/angular';
+import { LoadingController, MenuController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
-import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { environment } from 'src/environments/environment';
+import { PushNotifications } from '@capacitor/push-notifications';
+import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
+import { env } from 'process';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -23,6 +26,16 @@ export class LoginPage implements OnInit {
   isAndroid!: boolean;
   mypass = true;
   video: any;
+  fcmToken: any;
+  viewCondition = 'sso' // 1. sso, 2. login, 3. multi_factor, 4.forgot_pass, 5. verification)code 6. create_new_pass
+  otpConfig = {
+    length: 4,
+    allowNumbersOnly:true,
+    inputClass: 'custom-otp-input',
+    containerClass: 'custom-otp-container'
+  };
+  otp: any;
+  sendMobileMsg!: string;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -31,17 +44,63 @@ export class LoginPage implements OnInit {
     private router: Router,
     private loginPro: LoginService,
     private common: CommonService,
-    private httpDigi: DigitalChecklistService,
-  ) {
-    this.loginForms = formbuilder.group({
+    private iab: InAppBrowser) {
+    this.loginForms = this.formbuilder.group({
       userid: ['', Validators.required],
       password: ['' , Validators.required],
     });
   }
 
+
   ngOnInit() {
     this.common.setBarcode('');
+    if (this.platform.is('capacitor')) {
+      this.initFcm();
+    }
   }
+
+  initFcm() {
+    const addListeners = async () => {
+      await PushNotifications.addListener('registration', token => {
+        this.fcmToken = token.value;
+      });
+
+      await PushNotifications.addListener('registrationError', err => {
+        console.error('Registration error: ', err.error);
+      });
+
+      await PushNotifications.addListener('pushNotificationReceived', notification => {
+        console.log('Push notification received: ', notification);
+      });
+
+      await PushNotifications.addListener('pushNotificationActionPerformed', notification => {
+        console.log('Push notification action performed', notification.actionId, notification.inputValue);
+      });
+    }
+
+    const registerNotifications = async () => {
+      let permStatus = await PushNotifications.checkPermissions();
+
+      if (permStatus.receive === 'prompt') {
+        permStatus = await PushNotifications.requestPermissions();
+      }
+
+      if (permStatus.receive !== 'granted') {
+        throw new Error('User denied permissions!');
+      }
+
+      await PushNotifications.register();
+    }
+
+    const getDeliveredNotifications = async () => {
+      const notificationList = await PushNotifications.getDeliveredNotifications();
+      console.log('delivered notifications', notificationList);
+    }
+    addListeners();
+    registerNotifications();
+    getDeliveredNotifications();
+  }
+
 
   ionViewDidEnter() {
     if (this.platform.is('android')) {
@@ -53,7 +112,7 @@ export class LoginPage implements OnInit {
       if (isLogin) {
         const decrypt = JSON.parse(isLogin);
         this.login.userid = decrypt.userid;
-        this.login.password = decrypt.password;
+        // this.login.password = decrypt.password;
       }
     }
   }
@@ -61,7 +120,7 @@ export class LoginPage implements OnInit {
     this.menu.enable(true);
   }
 
-  changePass(pass: any) { }
+  changePass(_pass: any) { }
 
 
   async checkInternet() {
@@ -77,10 +136,8 @@ export class LoginPage implements OnInit {
 
   onLogin() {
     this.isHidden = false;
-    this.loginPro.LoginAuth(this.loginForms.value).then(data => {
-      setTimeout(() => {
-        this.isHidden = true;
-      }, 1000);
+    this.loginPro.LoginAuth(this.loginForms.value, this.fcmToken).then(data => {
+      this.isHidden = true;
       this.userValue = data;
       if (this.userValue === null) return
       if (this.userValue === false) {
@@ -89,16 +146,108 @@ export class LoginPage implements OnInit {
         if (this.userValue.status === false ) {
           this.common.presentToast(this.userValue.msg, 'warning');
         } else  if (this.userValue.status === true) {
-          localStorage.setItem('userInfo', JSON.stringify(this.userValue.extra));
-          localStorage.setItem('loginvalue', JSON.stringify(this.loginForms.value));
-          localStorage.setItem('token1', this.userValue.token);
-          localStorage.setItem('enc_id', this.userValue.enc_id);
-          localStorage.setItem('user', JSON.stringify(this.userValue.user));
-          localStorage.setItem('isAlreadyLogin', 'true');
-          this.router.navigateByUrl('/list-master', { replaceUrl: true });
+          this.sendMobileMsg = this.userValue.msg
+          this.viewCondition = 'multi_factor';
         }
       }
     });
+  }
+
+  openInAppBrowser() {
+    let browser = this.iab.create(environment.url2 + 'ssoGates/saml2/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let count = 0;
+    browser.on('loadstart').subscribe((data: any) => {
+      if (data.url.match(environment.url2 + '#/auth/ssoGates/')) {
+        let url, token
+        url = data.url;
+        token = url.split('ssoGates/')[1];
+        browser.close();
+        count = count + 1;
+        if (count <= 1) {
+          this.getSsoEnc(token);
+        }
+      }
+    });
+  }
+
+  getSsoEnc(token: string) {
+    this.isHidden = !this.isHidden;
+    this.presentLoading().then(preLoad => {
+      this.loginPro.ssoGatesLoginDetails(token, this.fcmToken).subscribe({
+        next:(data) => {
+          this.isHidden = !this.isHidden;
+          this.userValue = data;
+          if (this.userValue === null) return
+          if (this.userValue === false) {
+            this.common.presentToast(environment.errMsg, 'danger');
+          } else {
+            if (this.userValue.status === false ) {
+              this.common.presentToast(this.userValue.msg, 'warning');
+            } else  if (this.userValue.status === true) {
+              localStorage.setItem('userInfo', JSON.stringify(this.userValue.extra));
+              localStorage.setItem('loginvalue', JSON.stringify(this.loginForms.value));
+              localStorage.setItem('token1', this.userValue.token);
+              localStorage.setItem('enc_id', this.userValue.enc_id);
+              localStorage.setItem('user', JSON.stringify(this.userValue.user));
+              localStorage.setItem('isAlreadyLogin', 'true');
+              this.multiFactorSubmit();
+            }
+          }
+        },
+        error:() => {
+          this.dismissloading();
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    });
+  }
+
+  getOtpValue(ev: any) {
+    console.log(ev);
+    console.log(ev.length);
+    this.otp = '';
+    if (ev.length === 4) {
+      this.otp = ev;
+    }
+  }
+
+  verifyOtp() {
+    console.log(this.loginForms.value);
+    const formData = new FormData();
+    formData.append('user_name', this.loginForms.value.userid);
+    formData.append('otp', this.otp);
+    formData.append('fcm_token', this.fcmToken);
+    this.presentLoading().then(preLoad => {
+      this.loginPro.verifyOtp(formData).subscribe({
+        next:(data) => {
+          if (data.status === true) {
+            localStorage.setItem('loginvalue', JSON.stringify(this.loginForms.value));
+            localStorage.setItem('token1', data.token);
+            localStorage.setItem('enc_id', data.enc_id);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('isAlreadyLogin', 'true');
+            this.multiFactorSubmit();
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.dismissloading();
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+
+  }
+
+
+  multiFactorSubmit() {
+    this.router.navigateByUrl('/list-master', { replaceUrl: true });
   }
 
   async presentLoading() {
@@ -118,23 +267,4 @@ export class LoginPage implements OnInit {
   openPage(url: any) {
     this.router.navigateByUrl(url);
   }
-
-
-
-  read(file: any) {
-    console.log('read');
-    const reader: any = new FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.onload = () => {
-      const blob = new Blob([reader.result], {
-        type: file.type,
-      });
-      console.log('&&&&&');
-      console.log(blob);
-      const formData = new FormData();
-      formData.append('video', blob);
-    };
-  }
-
-
 }

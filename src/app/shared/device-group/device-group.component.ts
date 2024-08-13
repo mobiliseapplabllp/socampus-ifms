@@ -3,7 +3,6 @@ import { LoadingController, ModalController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { environment } from 'src/environments/environment';
-
 @Component({
   selector: 'app-device-group',
   templateUrl: './device-group.component.html',
@@ -22,6 +21,12 @@ export class DeviceGroupComponent  implements OnInit {
 
   ngOnInit() {
     this.getDeviceGroup();
+  }
+
+  ionViewDidLeave() {
+    this.myDeviceGroup = [];
+    this.myDeviceGroupCopy = [];
+    this.dismissloading();
   }
 
   getDeviceGroup() {
@@ -43,8 +48,7 @@ export class DeviceGroupComponent  implements OnInit {
           this.dismissloading();
         }
       });
-    })
-
+    });
   }
 
   closeModal(val: any, status: any) {

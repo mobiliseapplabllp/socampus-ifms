@@ -26,7 +26,6 @@ export class ViewReportComponent  implements OnInit {
   ngOnInit() {
     this.activeroute.queryParams.subscribe((res: any) => {
       this.requestedData = JSON.parse(res.data);
-      console.log(this.requestedData);
     });
     this.getScheduleUser();
   }
@@ -88,19 +87,15 @@ export class ViewReportComponent  implements OnInit {
   }
 
   async addResponse(data: any, createAt: any) {
-
-    console.log(data, createAt);
     const modal = await this.modalCtrl.create({
       component: AddResponseComponent,
       cssClass: 'my-modal',
       componentProps: { requestedData: data, createAt: createAt }
     });
     modal.onWillDismiss().then((disModal: any) => {
-      console.log(disModal);
       if (disModal.role) {
         this.getScheduleUser();
       } else {
-        console.log(false);
       }
     });
     modal.present();

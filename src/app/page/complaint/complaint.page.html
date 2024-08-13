@@ -3,10 +3,16 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>Helpdesk</ion-title>
+    <ion-title >Helpdesk</ion-title>
+    <!-- <ion-buttons slot="end">
+      <ion-button (click)="isWorkingVid = !isWorkingVid"> Video</ion-button>
+      <ion-button (click)="openCapture()">Custom</ion-button>
+      <ion-button (click)="play = true">Play</ion-button>
+    </ion-buttons> -->
   </ion-toolbar>
 </ion-header>
 <ion-content>
+
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
     <ion-fab-button fill="clear" color="primary" (click)="creteTicket()">
       <ion-icon name="add-outline"></ion-icon>

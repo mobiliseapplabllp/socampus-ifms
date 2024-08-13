@@ -1,15 +1,28 @@
 import { Injectable } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { Network } from '@capacitor/network';
+import * as CryptoJS from 'crypto-js';
+import { environment } from 'src/environments/environment';
+import { BehaviorSubject } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
 
 export class CommonService {
   public barcode!: string;
+  private isHomeLoad = new BehaviorSubject(true);
+  public appVersion = new BehaviorSubject([]);
   constructor(
     private toastController: ToastController
   ) { }
+
+  setHomeLoadStatus(value: boolean) {
+    this.isHomeLoad.next(value);
+  }
+
+  getHomeLoadStatus() {
+    return this.isHomeLoad;
+  }
 
   setBarcode(barcode: string) {
     this.barcode = barcode
@@ -34,6 +47,7 @@ export class CommonService {
       message: data,
       position: 'bottom',
       color: clr,
+      duration: 60000,
       buttons: [{
         text: 'OK',
         role: 'cancel',
@@ -49,7 +63,6 @@ export class CommonService {
       alert('Attachment Not Available');
       return;
     }
-    console.log(url);
     let brecked;
     brecked = url.split('.');
     let ext;
@@ -64,8 +77,50 @@ export class CommonService {
   async checkInternet() {
     return new Promise(async resolve => {
       const status = await Network.getStatus();
-      console.log('Network status:', status.connected);
       resolve(status.connected);
     });
   }
+
+  decryptValue(encryptedValue: string) {
+    var encrypted: any, iv, value, key, key1, decrypted,decrypted1,regex,matches,extractedString
+    encrypted = decodeURIComponent(encryptedValue);
+    try {
+      encrypted = atob(encrypted);
+      encrypted = JSON.parse(encrypted);
+      iv = CryptoJS.enc.Base64.parse(encrypted.iv);
+      value = encrypted.value;
+      key = environment.LARAVEL_KEY;
+      key1 = CryptoJS.enc.Base64.parse(key);
+      decrypted = CryptoJS.AES.decrypt(value, key1, {
+        iv: iv
+      });
+      decrypted1 = decrypted.toString(CryptoJS.enc.Utf8);
+      return this.extractIntegerValue(decrypted1);
+    } catch {
+      return '';
+    }
+  }
+
+  extractIntegerValue(val: any) {
+    var regex, match, extractedString;
+    regex = /i:(\d+)/;
+    match = val.match(regex);
+    return extractedString = match ? match[1] : this.extractStringValue(val);
+  }
+
+  extractStringValue(val: any) {
+    var regex, match, extractedString;
+    regex = /"([^"]+)"/;
+    match = val.match(regex);
+    return extractedString = match ? match[1] : null;
+  }
+
+  setAppVersion(obj: any) {
+    this.appVersion.next(obj);
+  }
+
+  getAppVersionObs() {
+    return this.appVersion;
+  }
+
 }

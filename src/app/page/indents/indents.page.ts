@@ -4,7 +4,6 @@ import { environment } from '../../../environments/environment';
 import { LoadingController } from '@ionic/angular';
 import { IndentsService } from 'src/app/provider/indents/indents.service';
 import { CommonService } from 'src/app/provider/common/common.service';
-
 @Component({
   selector: 'app-indents',
   templateUrl: './indents.page.html',
@@ -73,7 +72,6 @@ export class IndentsPage implements OnInit {
   }
 
   myCustom(ev: any) {
-    console.log(ev);
     this.indentView = this.indentView.filter((val: any) => val.rqst_id !== ev.rqst_id);
   }
 

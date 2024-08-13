@@ -15,8 +15,15 @@ export class MeterService {
     return this.http.get(environment.url + 'meter/meter-type');
   }
 
+  getMeterTypeAll(pc_id: any): Observable<any> {
+    return this.http.get(environment.url + 'meter/meter-type-all?pc_id=' +pc_id);
+  }
   getUomMeter(): Observable<any> {
     return this.http.get(environment.url + 'meter/meter-uom-all');
+  }
+
+  meterPcWiseUser(pc_id: any): Observable<any> {
+    return this.http.get(environment.url + 'meter/meter-pc-wise-users/' + pc_id);
   }
 
   addMeter(formData: any): Observable<any> {
@@ -25,6 +32,10 @@ export class MeterService {
 
   getPendingWo(): Observable<any> {
     return this.http.get(environment.url + 'meter/ifms/get-pending-work-order');
+  }
+
+  getPendingWoBarcode(url: string): Observable<any> {
+    return this.http.get('https://hr-access.herokuapp.com/' + url);
   }
 
   updateReading(formData: any): Observable<any> {
