@@ -1,6 +1,4 @@
 import Dexie, { Table } from 'dexie';
-
-
 export interface checklist {
   unique_id?: number,
   assign_to: string,

@@ -41,8 +41,27 @@ export class OrderDetailComponent  implements OnInit {
     let bar = this.common.getBarcode();
     if (bar) {
       this.common.setBarcode('');
-      console.log(bar);
-      this.getDecBarcode(bar);
+      let count = 0,barcode = this.common.decryptValue(bar);
+      for (var i = 0; i < this.order_details.length; i++) {
+        if (this.order_details[i].ext_asset_id === barcode) {
+          count = count + 1;
+          if (this.order_details[i].isPack === true) {
+            this.common.presentToast('Cambro No. ' + barcode + ' is already picked ', 'warning');
+            return;
+          } else {
+            this.order_details[i].isPack = true;
+            console.log(this.order_details);
+            const arr = this.order_details.filter((val: any) => !val.isPack) || [];
+            if (arr.length > 0) {
+              this.openScan();
+            } else {
+              this.common.presentToast('All Receipe Packed Successfully', 'success');
+              return;
+            }
+          }
+        }
+      }
+      // this.getDecBarcode(bar);
     }
   }
 

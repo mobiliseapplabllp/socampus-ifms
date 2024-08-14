@@ -12,6 +12,7 @@ import { ListMasterService } from 'src/app/provider/list-master/list-master.serv
 export class MenuComponent  implements OnInit {
   @Input() didEnter: any;
   loading: any;
+  myMenu: any = [];
   menuTemp: any = [];
   menuNew: any = [];
   result: any = [];
@@ -40,6 +41,7 @@ export class MenuComponent  implements OnInit {
   }
   isQrScanning = false;
   isInternet!: boolean;
+  userData: any = [];
   constructor(
     private loadingController: LoadingController,
     private httpList: ListMasterService,
@@ -48,6 +50,10 @@ export class MenuComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
+    const user = localStorage.getItem('user');
+    if (user) {
+      this.userData = JSON.parse(user);
+    }
     this.common.checkInternet().then(res => {
       if (res) {
         this.isInternet = true;
@@ -79,8 +85,36 @@ export class MenuComponent  implements OnInit {
         this.dismissloading();
         this.result = data;
         if (this.result.status == true) {
-          this.chunkedArray(this.result.data[0].submenu)
-          localStorage.setItem('home_menu', JSON.stringify(this.result.data[0].submenu));
+          this.myMenu = this.result.data[0].submenu;
+          if (this.userData.user_type === 'Driver') {
+            const obj1 = [{
+              icon_path: 'assets/meal/i1.png',
+              smnu_desc: 'Order Dispatch',
+              link: '/t-order'
+            }]
+            for (var i = 0; i < obj1.length; i++) {
+              this.myMenu.unshift(obj1[i]);
+            }
+          } else {
+            const obj = [{
+              icon_path: 'assets/meal/i1.png',
+              smnu_desc: 'Order Dispatch',
+              link: '/t-order/4'
+            }, {
+              icon_path: 'assets/meal/i2.png',
+              smnu_desc: 'Order Received',
+              link: '/t-order/2'
+            }, {
+              icon_path: 'assets/meal/i2.png',
+              smnu_desc: 'Order Pack',
+              link: 'today-order/order-pack'
+            }];
+            for (var i = 0; i < obj.length; i++) {
+              this.myMenu.unshift(obj[i]);
+            }
+          }
+          this.chunkedArray(this.myMenu)
+          localStorage.setItem('home_menu', JSON.stringify(this.myMenu));
         }
       }, err => {
         this.dismissloading();

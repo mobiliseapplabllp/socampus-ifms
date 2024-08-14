@@ -188,7 +188,7 @@ export class FillReportComponent  implements OnInit {
     SpeechRecognition.start({
       language: this.selectedLanguage,
       maxResults: 2,
-      prompt: listen,
+      prompt: val.q_desc,
       partialResults: true,
       popup: true,
     }).then(res => {

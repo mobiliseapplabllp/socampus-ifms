@@ -21,7 +21,7 @@ export class BarcodeComponent  implements OnInit {
     if (this.platform.is('capacitor')) {
       this.startScan();
     } else {
-      let random = 'https://socampusuat.mobilisepro.com/#/create-ticket-qr-code/eyJpdiI6Ilp3bGVIb1N1U1VId0d3alNQc1VVT1E9PSIsInZhbHVlIjoiQXhYV3J0R25xbDYvZGxuNGxVTHhKMTIrMkVueDZxODF6cDhXR1FDczllUT0iLCJtYWMiOiJkYzQ2MmFmOTkxNThiZTUyMDdjOGVjN2NkNWFkZThiZjQ1NjI5MzkwMzdmNjZmODI2NTFhOTlhNDQzMGYxN2ZjIn0%3D';
+      let random = 'eyJpdiI6Inpncnh2WDUzVnlhNnQ5Zmw3WHNvd0E9PSIsInZhbHVlIjoiWFJhOTd0eUFUUGlUNWpxTFI4M0UrQ2tFWjFqTStlQkdOUkRHVCtMM3dscz0iLCJtYWMiOiIzYmMyMWEwNmUyNTVlZWNkMzlkNTljMjIwYTY0NGNiZGIwYmFmZTExZGI5M2ZhN2JhZDkwM2IyMGEyMmE4YWMwIn0%3D';
       // let random = 'https://ifmsuat.mobilisepro.com/#/create-ticket-qr-code/eyJpdiI6Ii8xUmxlTjhyMkRFVUQ1WkVabHQvTmc9PSIsInZhbHVlIjoiVHhZUGJveXord3RqdjB0eHlYZDdjTjYwejArUXpuQ0lYMEUzdy96Wmp1ST0iLCJtYWMiOiI0ZGExYzc0MWQ3OGQ0ODU3ZjVjYjAzOGFiYTIzZDRhMTA0ZTExOTY2Yjc1NTY3ZGFjZDQ5MDFlNGQzYzlmZjk0In0%3D';
       // https://ifmsuat.mobilisepro.com/#/complaint-qr-code/eyJpdiI6InZqV3ljU3gweE5mcDJuMm5DTHNTZWc9PSIsInZhbHVlIjoibEdNZlR5YVc3SDJFM1FxZGdwaXBrQT09IiwibWFjIjoiZGY0OGViNDdhYmFhN2M5NzY5NzFmMjIxNmJhZjY5OGYzYjBhZTAwNWZlM2U2YjNkMjAxMGNlNjYxNWIxM2VlNiJ9
       // https://ifmsuat.mobilisepro.com/#/complaint-qr-code/eyJpdiI6Ikkwcnd4YlNZWlY1SUJXaTd6akRHUlE9PSIsInZhbHVlIjoiaHdBd3JVcDJiT09qY2M1NDV4dkZsQT09IiwibWFjIjoiOTdmMmM0YTM1NGZjYWYwNmI3NzI5OTZhNjg1NzMzMmJlODJiMDIyNjkzZTdiYmY4MzlmMGNmZjgyNjRiNzYxMyJ9

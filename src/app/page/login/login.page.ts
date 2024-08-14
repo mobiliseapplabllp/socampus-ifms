@@ -36,6 +36,7 @@ export class LoginPage implements OnInit {
   };
   otp: any;
   sendMobileMsg!: string;
+  USER_ID!: string;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -146,6 +147,7 @@ export class LoginPage implements OnInit {
         if (this.userValue.status === false ) {
           this.common.presentToast(this.userValue.msg, 'warning');
         } else  if (this.userValue.status === true) {
+          this.USER_ID = this.userValue.user
           this.sendMobileMsg = this.userValue.msg
           this.viewCondition = 'multi_factor';
         }
@@ -205,8 +207,6 @@ export class LoginPage implements OnInit {
   }
 
   getOtpValue(ev: any) {
-    console.log(ev);
-    console.log(ev.length);
     this.otp = '';
     if (ev.length === 4) {
       this.otp = ev;
@@ -216,7 +216,7 @@ export class LoginPage implements OnInit {
   verifyOtp() {
     console.log(this.loginForms.value);
     const formData = new FormData();
-    formData.append('user_name', this.loginForms.value.userid);
+    formData.append('user_name', this.USER_ID);
     formData.append('otp', this.otp);
     formData.append('fcm_token', this.fcmToken);
     this.presentLoading().then(preLoad => {
