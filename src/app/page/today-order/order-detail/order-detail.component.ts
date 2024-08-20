@@ -6,6 +6,9 @@ import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.se
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 import { environment } from 'src/environments/environment';
 
+import { ord_dispatch, db } from '../../../provider/local-db-dispatch/local-db-dispatch.service';
+import { liveQuery } from 'dexie';
+import * as moment from 'moment';
 @Component({
   selector: 'app-order-detail',
   templateUrl: './order-detail.component.html',
@@ -17,6 +20,7 @@ export class OrderDetailComponent  implements OnInit {
   loading: any;
   index: any;
   decQr!: string;
+  todayDate = moment().format('YYYY-MM-DD');
   constructor(
     private activeRoute: ActivatedRoute,
     private httpTo: TodayOrderService,
@@ -32,9 +36,10 @@ export class OrderDetailComponent  implements OnInit {
     this.common.setBarcode('');
     this.activeRoute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
-      console.log(this.requestedData);
     });
-    this.getOrderDetail();
+    db.orderDispatch.filter(order => order.date !== this.todayDate).delete().then(res => {
+      this.getOrderDetail();
+    })
   }
 
   ionViewDidEnter() {
@@ -42,78 +47,96 @@ export class OrderDetailComponent  implements OnInit {
     if (bar) {
       this.common.setBarcode('');
       let count = 0,barcode = this.common.decryptValue(bar);
+      const check = this.order_details.filter((val: any) => val.ext_asset_id === barcode);
+      if (check.length === 0) {
+        this.common.presentToast(`You are scanning wrong cambro ` + barcode, 'warning');
+        return;
+      }
+
       for (var i = 0; i < this.order_details.length; i++) {
         if (this.order_details[i].ext_asset_id === barcode) {
           count = count + 1;
           if (this.order_details[i].isPack === true) {
-            this.common.presentToast('Cambro No. ' + barcode + ' is already picked ', 'warning');
+            this.common.presentToast('Cambro No. ' + barcode + ' is already picked.. ', 'warning');
             return;
           } else {
             this.order_details[i].isPack = true;
-            console.log(this.order_details);
-            const arr = this.order_details.filter((val: any) => !val.isPack) || [];
-            if (arr.length > 0) {
-              this.openScan();
-            } else {
+            const arr = this.order_details.filter((val: any) => val.isPack) || [];
+            if (arr.length === this.order_details.length) {
               this.common.presentToast('All Receipe Packed Successfully', 'success');
-              return;
+              return
+            } else {
+              const obj: any = [];
+              for (var i = 0; i < arr.length;i++) {
+                obj.push({
+                  order_id: arr[i].order_id,
+                  txn_id: arr[i].txn_id,
+                  isPack: arr[i].isPack,
+                  date: this.todayDate
+                })
+              }
+              db.orderDispatch.where({order_id: this.requestedData.order_id}).delete().then(delRes => {
+                db.orderDispatch.bulkAdd(obj).then(res => {
+                  this.openScan();
+                  return
+                });
+              })
             }
           }
         }
       }
-      // this.getDecBarcode(bar);
     }
   }
 
-  getDecBarcode(enc_barcode: string) {
-    this.presentLoading().then(preLoad => {
-      this.httpAsset.getDecBarcode(enc_barcode).subscribe({
-        next:(data) => {
-          console.log(data);
-          if (data.status) {
-            let barcode = data.data.text;
-            let count = 0
-            for (var i = 0; i < this.order_details.length; i++) {
-              if (this.order_details[i].ext_asset_id === barcode) {
-                count = count + 1;
-                if (this.order_details[i].isPack === true) {
-                  this.common.presentToast('Cambro No. ' + barcode + ' is already picked ', 'warning');
-                  return;
-                } else {
-                  this.order_details[i].isPack = true;
-                  const arr = this.order_details.filter((val: any) => !val.isPack) || [];
-                  if (arr.length > 0) {
-                    this.openScan();
-                  } else {
-                    this.common.presentToast('All Receipe Packed Successfully', 'success');
-                    return;
-                  }
-                }
-              }
-            }
-            if (count == 0) {
-              this.common.presentToast('You are scanning wrong QR ' + barcode, 'warning');
-            }
-            // if (barcode === this.order_details[this.index].ext_asset_id) {
-            //   this.order_details[this.index].isPack = true;
-            //   this.order_details[this.index].showErr = false;
-            // } else {
-            //   this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
-            // }
-          } else {
-            this.common.presentToast(data.msg, 'warning');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
-  }
+  // getDecBarcode(enc_barcode: string) {
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpAsset.getDecBarcode(enc_barcode).subscribe({
+  //       next:(data) => {
+  //         console.log(data);
+  //         if (data.status) {
+  //           let barcode = data.data.text;
+  //           let count = 0
+  //           for (var i = 0; i < this.order_details.length; i++) {
+  //             if (this.order_details[i].ext_asset_id === barcode) {
+  //               count = count + 1;
+  //               if (this.order_details[i].isPack === true) {
+  //                 this.common.presentToast('Cambro No. ' + barcode + ' is already picked ', 'warning');
+  //                 return;
+  //               } else {
+  //                 this.order_details[i].isPack = true;
+  //                 const arr = this.order_details.filter((val: any) => !val.isPack) || [];
+  //                 if (arr.length > 0) {
+  //                   this.openScan();
+  //                 } else {
+  //                   this.common.presentToast('All Receipe Packed Successfully', 'success');
+  //                   return;
+  //                 }
+  //               }
+  //             }
+  //           }
+  //           if (count == 0) {
+  //             this.common.presentToast('You are scanning wrong QR ' + barcode, 'warning');
+  //           }
+  //           // if (barcode === this.order_details[this.index].ext_asset_id) {
+  //           //   this.order_details[this.index].isPack = true;
+  //           //   this.order_details[this.index].showErr = false;
+  //           // } else {
+  //           //   this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
+  //           // }
+  //         } else {
+  //           this.common.presentToast(data.msg, 'warning');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.common.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     })
+  //   })
+  // }
 
   getOrderDetail() {
     this.presentLoading().then(preLoad => {
@@ -121,7 +144,7 @@ export class OrderDetailComponent  implements OnInit {
         next:(data) => {
           if (data.status) {
             this.order_details = data.data;
-            console.log(this.order_details);
+            this.getOffLineAssetList();
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -135,23 +158,28 @@ export class OrderDetailComponent  implements OnInit {
         }
       })
     })
-
   }
 
-  // pick(dat: any) {
-  //   let result = 0;
-  //   dat.isPick = true;
-  //   for (var i = 0 ; i < this.order_details.length; i++) {
-  //     if (!this.order_details[i].isPick) {
-  //       result = result + 1;
-  //     }
-  //   }
-  //   if (result > 0) {
-  //     this.isAllFull = false;
-  //   } else {
-  //     this.isAllFull = true;
-  //   }
-  // }
+  async getOffLineAssetList() {
+    // return await db.checklist.where({schedule_id: this.schedule_id}).toArray();
+
+    const friendsObservable = liveQuery (() => db.orderDispatch.where({order_id: this.requestedData.order_id}).toArray());
+    const sub = friendsObservable.subscribe({
+      next:(data) => {
+        const localData = data;
+        this.order_details = this.order_details.map((item1: any) => {
+          const matchingItem = localData.find(item2 => item2.txn_id === item1.txn_id);
+          if (matchingItem) {
+            return { ...item1, isPack: true };
+          }
+          return item1;
+        });
+        setTimeout(() => {
+          sub.unsubscribe();
+        }, 1000);
+      }
+    });
+  }
 
   scanBarcode(data: any,ind: any) {
     this.index = ind;
