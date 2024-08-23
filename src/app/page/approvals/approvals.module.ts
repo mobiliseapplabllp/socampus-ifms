@@ -8,6 +8,7 @@ import { ApprovalsPageRoutingModule } from './approvals-routing.module';
 
 import { ApprovalsPage } from './approvals.page';
 import { PtwApprovalComponent } from './ptw-approval/ptw-approval.component';
+import { PpmPtwComponent } from './ppm-ptw/ppm-ptw.component';
 
 @NgModule({
   imports: [
@@ -18,6 +19,7 @@ import { PtwApprovalComponent } from './ptw-approval/ptw-approval.component';
   ],
   declarations: [
     ApprovalsPage,
-    PtwApprovalComponent]
+    PtwApprovalComponent,
+    PpmPtwComponent]
 })
 export class ApprovalsPageModule {}

@@ -51,9 +51,6 @@
       <ion-card *ngFor="let dat of pmsList; let i = index" >
         <ion-card-header color="primary" style="padding:0px">
           <ion-row class="ion-no-padding">
-            <!-- <ion-col size="1" class="center">
-              <ion-checkbox color="danger" [(ngModel)]="dat.isSelect" (click)="changeCheckbox(dat.isSelect)"></ion-checkbox>
-            </ion-col> -->
             <ion-col size="7" style="display: flex;align-items: center;">
               <b>{{i+1}}. {{dat.pc_desc}} ( {{dat.chklist_desc}} )</b>
             </ion-col>
@@ -82,209 +79,41 @@
               <ion-text color="dark">{{dat.user}}-{{dat.username}}</ion-text>
             </ion-col>
           </ion-row>
-          <ion-row >
+          <ion-row>
             <ion-col size="4">
               <ion-button class="ion-text-capitalize" color="secondary" size="small" expand="block" (click)="pmAssign(dat)"> Assign </ion-button>
             </ion-col>
             <ion-col size="4">
-              <div *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
-                <ion-button class="ion-text-capitalize" size="small" color="danger" *ngIf="!dat.ptw_attach && !dat.ptw_status" expand="block" (click)="uploadPtw(dat)" >Upload PTW</ion-button>
+              <div *ngIf="dat.can_fill_chklist && dat.stage_id === 1 ">
+                <ion-button class="ion-text-capitalize" size="small" color="danger" *ngIf="((!dat.ptw_attach && dat.ptw_mandatory === 1) || (dat.ptw_status === '0' && dat.ptw_mandatory === 1 ))" expand="block" (click)="uploadPtw(dat)" >Upload PTW</ion-button>
               </div>
-              <ion-button class="ion-text-capitalize" size="small" color="medium" *ngIf="dat.ptw_attach" expand="block" (click)="viewAttachment(dat.ptw_attach)" >PTW Img</ion-button>
             </ion-col>
             <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
-              <ion-button class="ion-text-capitalize" color="tertiary" size="small" expand="block" (click)="checkPms('pms', dat)" *ngIf="(dat.ptw_attach && dat.ptw_status === 1) || !dat.ptw_mandatory">Fill Checklist  </ion-button>
+              <ion-button class="ion-text-capitalize" color="tertiary" size="small" expand="block" (click)="checkPms('pms', dat)" *ngIf="(dat.ptw_attach !== '' && dat.ptw_status === '1') || dat.ptw_mandatory === 0">Fill Checklist  </ion-button>
+            </ion-col>
+            <ion-col size="6" *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
+              <ion-button size="small" expand="block" color="warning">PTW In Approval </ion-button>
+            </ion-col>
+            <ion-col size="6" *ngIf="dat.ptw_status === '0' && dat.ptw_mandatory === 1 ">
+              <ion-button size="small" expand="block" color="danger">PTW Rejected </ion-button>
             </ion-col>
           </ion-row>
         </ion-card-content>
       </ion-card>
-      <!-- <ion-card *ngFor="let dat of pmsList" style="padding: 5px;margin:5px" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
-        <ion-item lines="none" color="none">
-          <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
-          <ion-label class="ion-text-wrap">
-            <h2><b>{{dat.pc_desc}}</b></h2>
-            <p><b>{{dat.wo_no}}</b></p>
-            <p><b>{{dat.log_date}}</b></p>
-            <p><b>{{dat.ext_asset_id}}</b></p>
-          </ion-label>
-        </ion-item>
-        <ion-row>
-          <ion-col size="4">
-            <ion-button class="ion-text-capitalize" color="secondary" size="small" expand="block" (click)="pmAssign(dat)"> Assign </ion-button>
-          </ion-col>
-          <ion-col size="4">
-            <div *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
-              <ion-button class="ion-text-capitalize" size="small" color="danger" *ngIf="!dat.ptw_attach && !dat.ptw_status" expand="block" (click)="uploadPtw(dat)" >Upload PTW</ion-button>
-            </div>
-            <ion-button class="ion-text-capitalize" size="small" color="medium" *ngIf="dat.ptw_attach" expand="block" (click)="viewAttachment(dat.ptw_attach)" >PTW Img</ion-button>
-          </ion-col>
-          <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
-            <ion-button class="ion-text-capitalize" color="tertiary" size="small" expand="block" (click)="checkPms('pms', dat)" *ngIf="(dat.ptw_attach && dat.ptw_status === 1) || !dat.ptw_mandatory">Fill Checklist  </ion-button>
-          </ion-col>
-        </ion-row>
-      </ion-card> -->
     </div>
     <div *ngSwitchCase= "'meter'">
-      <ion-card  *ngFor="let dat of meterInfo;let i = index" style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}">
+      <ion-card  *ngFor="let dat of meterInfo;let i = index" style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}" [ngStyle]="{'border-left': '3px solid ' + dat.color_code}">
         <ion-item>
-          <img src="assets/img/meter-left1.jpeg" style="height:120px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
-            <p><ion-text color="dark">Meter ID:</ion-text> {{dat.meter_id}}</p>
             <p><ion-text color="dark">Reading ID:</ion-text> {{dat.wo_id}}</p>
-            <p><ion-text>{{dat.sch_datetime | date: 'dd-MMM-yyyy hh:mm:ss'}}</ion-text></p>
+            <p><ion-text>{{dat.sch_datetime | date: 'dd-MM-yy hh:mm'}}</ion-text></p>
             <p><ion-text color="dark">Building:</ion-text> {{dat.building_desc}} </p>
             <p><ion-text color="dark">Floor:</ion-text> {{dat.floor_desc}} </p>
             <p><ion-text color="dark">Location:</ion-text> {{dat.location_desc}}</p>
           </ion-label>
           <ion-button slot="end" class="ion-text-capitalize" (click)="dat.isMore = !dat.isMore" fill="outline">
-            <ion-text *ngIf="!dat.isMore">View Detail</ion-text>
-            <ion-text *ngIf="dat.isMore">Less Detail</ion-text>
-          </ion-button>
-        </ion-item>
-        <div *ngIf="dat.isMore">
-          <ion-row>
-            <ion-col size="6" class="ion-padding-start">
-              <ion-text color="dark">Site</ion-text><br>
-              <ion-text>{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="dark">Meter Name</ion-text><br>
-              <ion-text>{{dat.meter_name}}</ion-text>
-            </ion-col>
-            <ion-col size="6" class="ion-padding-start">
-              <ion-text color="dark">Block</ion-text><br>
-              <ion-text>{{dat.block_desc}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="dark">Meter Type</ion-text><br>
-              <ion-text>{{dat.meter_type}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col class="ion-padding-start" size="12">
-              <ion-text color="dark">Reading Type</ion-text><br>
-              <ion-text *ngIf="dat.is_consumption === 1">Consumption </ion-text><br>
-              <ion-text *ngIf="dat.is_generation === 1">Generation </ion-text><br>
-              <ion-text *ngIf="dat.oth_read === 1">Other </ion-text>
-            </ion-col>
-          </ion-row>
-        </div>
-
-        <section *ngIf="dat.canCapture">
-          <div *ngIf="!dat.isQrVerify">
-            <ion-row>
-              <ion-col>
-                <ion-button expand="block" (click)="openBarcode('verify', dat)">SCAN QR <ion-icon name="qr-code-outline" slot="end"></ion-icon></ion-button>
-              </ion-col>
-            </ion-row>
-          </div>
-          <div *ngIf="dat.isQrVerify">
-            <fieldset *ngIf="dat.is_consumption === 1">
-              <legend>Consumption</legend>
-              <ion-row >
-                <ion-col size="12">
-                  <section class="inputbox">
-                    <ion-text color="primary" >Consumption</ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="number" placeholder="Consumption" [(ngModel)]="dat.consumption_reading"></ion-input>
-                      <ion-buttons slot="end" class="ion-no-margin">
-                        <ion-button class="ion-text-capitalize" shape="round" [color]="!dat.isConsumptionImg ? 'primary': 'success'" [fill]="!dat.isConsumptionImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat , 'consumption')">
-                          <ion-icon name="camera-outline"  *ngIf="!dat.isConsumptionImg"></ion-icon>
-                          <ion-icon name="checkmark-outline" [slot]="dat.isConsumptionImg ? 'icon-only': 'end' " *ngIf="dat.isConsumptionImg"></ion-icon>
-                          <ion-text *ngIf="dat.is_img_req === 1 && !dat.isConsumptionImg" color="danger">*</ion-text>
-                        </ion-button>
-                      </ion-buttons>
-                    </ion-item>
-                  </section>
-                </ion-col>
-                <ion-col size="12">
-                  <section class="inputbox">
-                    <ion-text color="primary" >Remark <span *ngIf="dat.is_remark_req === 1">*</span> </ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="text" placeholder=" Remark" [(ngModel)]="dat.con_remark"></ion-input>
-                    </ion-item>
-                  </section>
-                </ion-col>
-              </ion-row>
-            </fieldset>
-
-            <fieldset *ngIf="dat.is_generation === 1">
-              <legend>Generation</legend>
-              <ion-row >
-                <ion-col size="12">
-                  <section class="inputbox">
-                    <ion-text color="primary" >Generation</ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="number" placeholder="Generation" [(ngModel)]="dat.generate_reading"></ion-input>
-                      <ion-buttons slot="end" class="ion-no-margin">
-                        <ion-button class="ion-text-capitalize" shape="round"  [color]="!dat.isGenerationImg ? 'primary': 'success'" [fill]="!dat.isGenerationImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat, 'generate_reading')">
-                          <ion-icon name="camera-outline" *ngIf="!dat.isGenerationImg"></ion-icon>
-                          <ion-icon name="checkmark-outline" [slot]="dat.isGenerationImg ? '': 'end' " *ngIf="dat.isGenerationImg"></ion-icon>
-                          <ion-text *ngIf="dat.is_img_req === 1 && !dat.isGenerationImg" color="danger">*</ion-text>
-                        </ion-button>
-                      </ion-buttons>
-                    </ion-item>
-                  </section>
-                </ion-col>
-                <ion-col size="12" >
-                  <section class="inputbox">
-                    <ion-text color="primary" > Remark <span *ngIf="dat.is_remark_req === 1" >*</span> </ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="text" placeholder=" Remark" [(ngModel)]="dat.gen_remark"></ion-input>
-                    </ion-item>
-                  </section>
-                </ion-col>
-              </ion-row>
-            </fieldset>
-            <fieldset *ngIf="dat.oth_read === 1 ">
-              <legend>Other</legend>
-              <ion-row >
-                <ion-col size="12">
-                  <section class="inputbox">
-                    <ion-text color="primary" >Other</ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="number" placeholder="Other " [(ngModel)]="dat.other_reading"></ion-input>
-                      <ion-buttons slot="end" class="ion-no-margin">
-                        <ion-button class="ion-text-capitalize" shape="round" [color]="!dat.isOtherImg ? 'primary': 'success'" [fill]="!dat.isOtherImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat, 'other')">
-                          <ion-icon name="camera-outline" *ngIf="!dat.isOtherImg"></ion-icon>
-                          <ion-icon name="checkmark-outline" [slot]="dat.isOtherImg ? '': 'end' " *ngIf="dat.isOtherImg"></ion-icon>
-                          <ion-text *ngIf="dat.is_img_req === 1 && !dat.isOtherImg" color="danger">*</ion-text>
-                        </ion-button>
-                      </ion-buttons>
-                    </ion-item>
-                  </section>
-                </ion-col>
-                <ion-col size="12" >
-                  <section class="inputbox">
-                    <ion-text color="primary" > Remark <span *ngIf="dat.is_remark_req === 1">*</span></ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="text" placeholder=" Remark" [(ngModel)]="dat.oth_remark"></ion-input>
-                    </ion-item>
-                  </section>
-                </ion-col>
-              </ion-row>
-            </fieldset>
-            <ion-row>
-              <ion-col>
-                <ion-button expand="block"  (click)="updRead(dat)">Submit <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
-              </ion-col>
-            </ion-row>
-          </div>
-        </section>
-      </ion-card>
-      <!-- <ion-card  *ngFor="let dat of meterInfo;let i = index" style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}">
-        <ion-item>
-          <img src="assets/img/meter-left1.jpeg" style="height:100px;width:auto;margin-right:10px" slot="start" >
-          <ion-label class="ion-text-wrap">
-            <p><ion-text color="dark">Reading ID:</ion-text> {{dat.wo_id}}</p>
-            <p><ion-text>{{dat.sch_datetime | date: 'dd-MMM-yyyy hh:mm:ss'}}</ion-text></p>
-            <p><ion-text color="dark">Building:</ion-text> {{dat.building_desc}} </p>
-            <p><ion-text color="dark">Floor:</ion-text> {{dat.floor_desc}} </p>
-            <p><ion-text color="dark">Location:</ion-text> {{dat.location_desc}}</p>
-          </ion-label>
-          <ion-button slot="end" class="ion-text-capitalize" (click)="dat.isMore = !dat.isMore" fill="outline">
-            <ion-text *ngIf="!dat.isMore">View Detail</ion-text>
-            <ion-text *ngIf="dat.isMore">Less Detail</ion-text>
+            <ion-text *ngIf="!dat.isMore">View Details</ion-text>
+            <ion-text *ngIf="dat.isMore">Less Details</ion-text>
           </ion-button>
         </ion-item>
         <div *ngIf="dat.isMore">
@@ -409,7 +238,7 @@
             </ion-row>
           </div>
         </section>
-      </ion-card> -->
+      </ion-card>
     </div>
   </div>
 </div>

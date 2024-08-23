@@ -11,9 +11,9 @@ export class DigitalChecklistService {
     private http: HttpClient
   ) { }
 
-  getOfflineCheckListFromServer(date: string): Observable<any> {
+  getOfflineCheckListFromServer(date: string, offset?: number): Observable<any> {
     // return this.http.get('assets/data/offline_checklist' + date + '.json');
-    return this.http.get(this.baseurl + 'digicheck/offlineapp/getAllPendingChecklist?date=' + date);
+    return this.http.get(this.baseurl + 'digicheck/offlineapp/getAllPendingChecklist?date=' + date + '&paginate=1&limit=300&offset=' + offset);
   }
 
   getSchedule(): Observable<any> {

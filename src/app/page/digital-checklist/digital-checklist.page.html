@@ -24,7 +24,7 @@
   </ion-toolbar>
   <ion-toolbar>
     <ion-slides [options]="slideBanner" [hidden]="scanBarcodeDetail.isScanBarcode" style="margin-bottom:10px">
-      <ion-slide *ngFor="let dat of dateArr" style="padding:0px">
+      <ion-slide *ngFor="let dat of dateArr" style="padding:5px">
         <div style="width:40px;height:70px;border-radius: 20px;" [ngClass]="{'black': dat.isSelect, 'medium': !dat.isSelect}" (click)="changeCalendarDate(dat)">
           <section style="width:40px;height:35px;padding:2px !important">
             <span class="center" style="height:35px;width:100%;border-radius: 20px;font-size:11px" [ngClass]="{'white': dat.isSelect, 'dark': !dat.isSelect}">
@@ -57,35 +57,38 @@
     </ion-fab-button>
   </ion-fab>
   <div [ngSwitch]='segmentStatus'>
-    <div *ngSwitchCase= "'assigned'">
-      <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }" (click)="verifyQr(dat)">
-        <ion-item lines="none" color="none">
-          <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
-          <ion-label class="ion-text-wrap">
-            <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
-            <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
-            <p><b>({{dat.loc_id}})-{{dat.location_desc}}</b></p>
-            <p><b>{{dat.barcode}}</b></p>
-            <!-- <p><b>{{dat.assign_to}}</b></p> -->
-          </ion-label>
-          <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize" >Fill</ion-button>
-        </ion-item>
-      </ion-card>
+    <div *ngSwitchCase= "'assigned'" style="height:100%;margin-bottom:5px">
+      <ion-virtual-scroll [items]="assignCheckList" >
+        <ion-card *virtualItem="let dat; let itemBounds = bounds;" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }" (click)="verifyQr(dat)">
+          <ion-item lines="none" color="none">
+            <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
+            <ion-label class="ion-text-wrap">
+              <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
+              <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
+              <p><b>({{dat.loc_id}})-{{dat.location_desc}}</b></p>
+              <p><b>{{dat.barcode}}</b></p>
+            </ion-label>
+            <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize" >Fill</ion-button>
+          </ion-item>
+        </ion-card>
+      </ion-virtual-scroll>
+
     </div>
-    <div *ngSwitchCase= "'attended'">
-      <ion-card *ngFor="let dat of attendedCheckList" style="padding: 5px; margin: 5px">
-        <ion-item lines="none" color="none"  (click)="openFillReport(dat)">
-          <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
-          <ion-label class="ion-text-wrap">
-            <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
-            <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
-            <p><b>({{dat.loc_id}})-{{dat.location_desc}}</b></p>
-            <p><b>{{dat.barcode}}</b></p>
-            <!-- <p><b>{{dat.assign_to}}</b></p> -->
-          </ion-label>
-          <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize">View</ion-button>
-        </ion-item>
-      </ion-card>
+    <div *ngSwitchCase= "'attended'" style="height:100%;margin-bottom:5px">
+      <ion-virtual-scroll [items]="attendedCheckList" style="padding:5px;height:100%">
+        <ion-card *virtualItem="let dat; let itemBounds = bounds;" style="padding: 5px; margin: 10px">
+          <ion-item lines="none" color="none"  (click)="openFillReport(dat)">
+            <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
+            <ion-label class="ion-text-wrap">
+              <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
+              <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
+              <p><b>({{dat.loc_id}})-{{dat.location_desc}}</b></p>
+              <p><b>{{dat.barcode}}</b></p>
+            </ion-label>
+            <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize">View</ion-button>
+          </ion-item>
+        </ion-card>
+      </ion-virtual-scroll>
     </div>
   </div>
 </ion-content>

@@ -57,6 +57,9 @@ export class DigitalChecklistPage implements OnInit {
   userData: any = [];
   qrType = 'site';
   qrObject: any = {};
+  isLoop!: boolean;
+  offset = 0;
+  TOTAL_CHECKLIST = 0;
   constructor(
     private common: CommonService,
     private router: Router,
@@ -167,6 +170,9 @@ export class DigitalChecklistPage implements OnInit {
         this.allChecklist = data;
         this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned');
         this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned');
+        this.assignCheckList.sort((a: any, b: any) => {
+          return new Date(a.sch_dateTime).getTime() - new Date(b.sch_dateTime).getTime();
+        });
         setTimeout(() => {
           sub.unsubscribe();
         }, 1000);
@@ -208,7 +214,16 @@ export class DigitalChecklistPage implements OnInit {
         }
         this.assignCheckList = [];
         this.attendedCheckList = [];
-        this.getOfflineCheckListFromServer(this.selectedDate);
+        this.presentLoading('Deleteing Data from Local Database').then(preLoad => {
+          db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
+            this.dismissloading();
+            this.offset = 0;
+            this.TOTAL_CHECKLIST = 0;
+            this.getOfflineCheckListFromServer(this.selectedDate, 0);
+          });
+        })
+
+
         setTimeout(() => {
           sub.unsubscribe();
         },500);
@@ -217,33 +232,70 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   checkCurrentDateDG(date: string) {
-    const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).toArray());
-    const sub = friendsObservable.subscribe({
-      next:(data) => {
-        this.allChecklist = data;
-        this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-        this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-        if (this.allChecklist.length === 0 && this.isInternet) {
-          this.getOfflineCheckListFromServer(date);
+    this.presentLoading().then(preLoad => {
+      const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
+      const sub = friendsObservable.subscribe({
+        next:(data) => {
+          this.dismissloading();
+          this.allChecklist = data;
+          this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+          this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+          if (this.allChecklist.length === 0 && this.isInternet) {
+            this.getOfflineCheckListFromServer(date, 0);
+          }
+          setTimeout(() => {
+            sub.unsubscribe();
+          }, 1000);
         }
-        setTimeout(() => {
-          sub.unsubscribe();
-        }, 1000);
-      }
-    });
+      });
+    })
+
   }
 
-  getOfflineCheckListFromServer(date: string) {
-    this.presentLoading('Please Wait, Application is Fetching your Data').then(preLoad => {
-      this.httpDigital.getOfflineCheckListFromServer(date).subscribe({
+  getOfflineCheckListFromServer(date: string, offset: number) {
+    let percentage,tmp_per, msg;
+    if (this.offset && this.TOTAL_CHECKLIST) {
+      tmp_per = ((this.offset * 100) / this.TOTAL_CHECKLIST);
+      if (tmp_per > 100) {
+        tmp_per = 100;
+        percentage = tmp_per.toFixed(2);
+      } else {
+        percentage = tmp_per.toFixed(2);
+      }
+      msg = 'Please Wait, Application is Fetching your Data ' + percentage + '%';
+    } else {
+      msg = 'Please Wait, Application is Fetching your Data ';
+    }
+    this.presentLoading(msg).then(preLoad => {
+      this.httpDigital.getOfflineCheckListFromServer(date, offset).subscribe({
         next:(data: any) => {
           if (data.status) {
-            this.allChecklist = data.data;
-            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-            this.addBulkCheckList(this.allChecklist);
+            if(data.data?.data.length > 0) {
+              this.isLoop = true;
+              this.allChecklist = data.data.data;
+              if (this.offset === 0) {
+                this.TOTAL_CHECKLIST = data.data.total;
+              }
+              this.addBulkCheckList(this.allChecklist);
+            } else {
+              this.isLoop = false;
+              this.checkCurrentDateDG(this.selectedDate);
+            }
           } else {
-            this.common.presentToast(data.msg, 'warning');
+            this.presentLoading().then(preLoad => {
+              const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
+              const sub = friendsObservable.subscribe({
+                next:(data) => {
+                  this.dismissloading();
+                  this.allChecklist = data;
+                  this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+                  this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+                  setTimeout(() => {
+                    sub.unsubscribe();
+                  }, 1000);
+                }
+              });
+            });
           }
         },
         error:() => {
@@ -258,14 +310,22 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   async addBulkCheckList(checkListData: any) {
-    await db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
-      await db.checklist.bulkAdd(checkListData);
+    await db.checklist.bulkAdd(checkListData).then(res => {
+      if (this.isLoop && this.TOTAL_CHECKLIST > 300) {
+        this.offset = this.offset + 300;
+        this.getOfflineCheckListFromServer(this.selectedDate, this.offset);
+      } else {
+        this.checkCurrentDateDG(this.selectedDate);
+      }
     });
+    // await db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
+    //   await db.checklist.bulkAdd(checkListData);
+    // });
   }
 
   async deleteCheckList(date: any) {
-    let newDate = moment(date).add(1, 'day').format('YYYY-MM-DD');
-    await db.checklist.where("schedule_date").below(newDate).delete();
+    // let newDate = moment(date).add(3, 'day').format('YYYY-MM-DD');
+    await db.checklist.where("schedule_date").below(date).delete();
   }
 
   async clearChecList() {
@@ -286,6 +346,7 @@ export class DigitalChecklistPage implements OnInit {
     this.loading = await this.loadingController.create({
       cssClass: 'my-custom-class',
       message: message,
+      duration: 30000
     });
     await this.loading.present();
   }

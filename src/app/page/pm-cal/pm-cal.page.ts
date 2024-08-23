@@ -37,16 +37,9 @@ export class PmCalPage implements OnInit {
   lastPage: any;
   currentPage = 1;
   myWorkOrder: any = [];
-  // slideOptsOne = {
-  //   initialSlide: 0,
-  //   slidesPerView: 2.5,
-  //   autoplay: false,
-  //   slideShadows: true,
-  //  };
    selectedPms: any = [];
    searchBy: any;
    searchValue: any;searchValueDesc: any;
-  //  fileName1!: string;
    selectedObj: any = {};
    countObj: any = {};
   constructor(
@@ -72,7 +65,6 @@ export class PmCalPage implements OnInit {
         type = split[4];
         ecn_key = split[5];
         let val = this.common.decryptValue(ecn_key);
-
         if (val === this.selectedObj.ext_asset_id) {
           this.openPage(this.selectedObj);
           return;
@@ -82,16 +74,6 @@ export class PmCalPage implements OnInit {
       } else {
         this.common.presentToast('You are Scan Wrong QR Code', 'warning');
       }
-      // let temp, temp1;
-      // temp = bar;
-      // temp1 = temp.split('/');
-      // const obj = {
-      //   sch_id: '',
-      //   wo_id: this.selectedBarcode.wo_id,
-      //   enc_barcode: temp1[5],
-      //   type: 'pms',
-      // }
-      // this.verifyBarcode(obj);
       return;
     }
     this.getPmsCount();
