@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { ApprovalsPage } from './approvals.page';
 import { PtwApprovalComponent } from './ptw-approval/ptw-approval.component';
+import { PpmPtwComponent } from './ppm-ptw/ppm-ptw.component';
 
 const routes: Routes = [
   {
@@ -11,6 +12,9 @@ const routes: Routes = [
   }, {
     path: 'ptw-approval',
     component: PtwApprovalComponent
+  }, {
+    path: 'ppm-ptw',
+    component: PpmPtwComponent
   }
 ];
 

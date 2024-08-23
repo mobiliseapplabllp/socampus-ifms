@@ -14,6 +14,7 @@ export const environment = {
   // url: 'https://hr-access.herokuapp.com/https://bedemosocampus.mobilisepro.com/api/',
   // url1: 'https://hr-access.herokuapp.com/https://bedemosocampus.mobilisepro.com/',
   // url2: 'https://bedemosocampus.mobilisepro.com/api/',
+  // ssoUrl: 'https://bedemosocampus.mobilisepro.com/',
   db: 'socampuseng.db',
   db_location: 'default',
   errMsg: 'Internal Server Error Please try again!!!',

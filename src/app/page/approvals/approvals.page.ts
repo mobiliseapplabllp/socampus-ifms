@@ -17,6 +17,12 @@ export class ApprovalsPage implements OnInit {
     url: '/approvals/ptw-approval',
     id: 1,
     count: 0
+  },{
+    label:'PPM Ptw',
+    icon: 'assets/imgs/leave_approval.svg',
+    url: '/approvals/ppm-ptw',
+    id: 2,
+    count: 0
   }];
   loading: any;
   pendingList: any = [];
@@ -38,11 +44,16 @@ export class ApprovalsPage implements OnInit {
   }
 
   openPage(data: any) {
-    this.router.navigate([data.url], {
-      queryParams: {
-        data: JSON.stringify(data.data),
-      }
-    });
+    if (data.id === 1) {
+      this.router.navigate([data.url], {
+        queryParams: {
+          data: JSON.stringify(data.data),
+        }
+      });
+    } else if (data.id === 2) {
+      this.router.navigateByUrl(data.url);
+    }
+
   }
 
   getPendingPTW() {

@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>PPM PTW Approval</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card *ngFor="let dat of pendingData">
+    <ion-card-header color="primary">Wo No: #{{dat.wo_id}}</ion-card-header>
+    <ion-card-content>
+      <ion-row>
+        <ion-col size="6">
+          <ion-text color="primary">Site Name</ion-text><br>
+          <ion-text color="medium">{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Logged By</ion-text><br>
+          <ion-text color="medium">{{dat.createdby}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Logged On</ion-text><br>
+          <ion-text color="medium">{{dat.ptwcreateddate}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Remark</ion-text><br>
+          <ion-text color="medium">{{dat.ptw_remark}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button color="danger" shape="round" size="small" (click)="openDoc(dat.ptw_attach)">View <ion-icon name="attach-outline" slot="end"></ion-icon> </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="6">
+          <ion-button size="block" shape="round" fill="outline" color="danger"  (click)="presentAlertConfirm(dat, '0', 'Reject')">Reject <ion-icon name="close-outline" slot="end"></ion-icon> </ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button size="block" shape="round" fill="solid" color="success"  (click)="presentAlertConfirm(dat, '1', 'Approve')">Approve <ion-icon name="checkmark-outline" slot="end"></ion-icon> </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

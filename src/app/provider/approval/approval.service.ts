@@ -18,4 +18,12 @@ export class ApprovalService {
   actionPtw(obj: Object): Observable<any> {
     return this.http.post(environment.url + 'complaints/complaint_ptw_approval_action', obj);
   }
+
+  getPendingPpmPtw(): Observable<any> {
+    return this.http.get(environment.url + 'pmscal/get_pms_ptw_approvals');
+  }
+
+  actionPpmPtw(obj: Object): Observable<any> {
+    return this.http.post(environment.url + 'pmscal/pms_ptw_approval_action', obj);
+  }
 }

@@ -6,55 +6,107 @@
 <div class="dashboard">
   <ion-slides #mySlider [options]="option">
     <ion-slide >
-      <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:auto">
-        <div>
-          <img src="assets/home_banner1/helpdesk.png" style="height:40px;width:40px"><br>
-          <ion-text color="light" style="margin-left:5px;font-weight: 550;">Helpdesk </ion-text>
-        </div>
-        <div class="ion-text-right">
-          <ion-text color="light">Assign: {{breakdown.assign}}</ion-text><br>
-          <ion-text color="light">In Progress: {{breakdown.wip}}</ion-text><br>
-          <ion-text color="light">Re Open: {{breakdown.reopen}}</ion-text><br>
-        </div>
+      <ion-card  class="ion-text-left ion-no-padding" style="min-height:100px;margin-bottom:10px">
+        <ion-row style="margin:10px">
+          <ion-col size="5" class="ion-text-left">
+            <div>
+              <img src="assets/home_banner1/helpdesk.png" style="height:40px;width:40px"><br>
+              <ion-text color="light" >Helpdesk </ion-text>
+            </div>
+          </ion-col>
+          <ion-col size="7">
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">Assign:</ion-text>
+              <ion-text color="light">{{breakdown.assign}}</ion-text>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">In Progress:</ion-text>
+              <ion-text color="light">{{breakdown.wip}}</ion-text>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">Re Open:</ion-text>
+              <ion-text color="light">{{breakdown.reopen}}</ion-text>
+            </div>
+          </ion-col>
+        </ion-row>
       </ion-card>
     </ion-slide>
     <ion-slide>
-      <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:auto">
-        <div>
-          <img src="assets/home_banner1/checklist.png" style="height:40px;width:40px"><br>
-          <ion-text color="light" style="margin-left:5px;font-weight: 550;">Checklist </ion-text>
-        </div>
-        <div class="ion-text-right">
-          <ion-text color="light">Scheduled: {{digital.scheduled}}</ion-text><br>
-          <ion-text color="light">Attended: {{digital.attended}}</ion-text><br>
-          <ion-text color="light">Missed: {{digital.missed}}</ion-text><br>
-        </div>
+      <ion-card  class="ion-text-left ion-no-padding" style="min-height:100px;margin-bottom:10px">
+        <ion-row style="margin:10px">
+          <ion-col size="5" >
+            <div>
+              <img src="assets/home_banner1/checklist.png" style="height:40px;width:40px"><br>
+              <ion-text color="light" >Checklist </ion-text>
+            </div>
+          </ion-col>
+          <ion-col size="7">
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">Scheduled:</ion-text>
+              <ion-text color="light">{{digital.scheduled}}</ion-text>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">Attended:</ion-text>
+              <ion-text color="light">{{digital.attended}}</ion-text>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">Missed:</ion-text>
+              <ion-text color="light">{{digital.missed}}</ion-text>
+            </div>
+          </ion-col>
+        </ion-row>
       </ion-card>
     </ion-slide>
     <ion-slide>
-      <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:aut    o">
-        <div>
-          <img src="assets/home_banner1/pms.png" style="height:40px;width:40px"><br>
-          <ion-text color="light" style="margin-left:5px;font-weight: 550;">PMS </ion-text>
-        </div>
-        <div class="ion-text-right">
-          <ion-text color="light">Scheduled: {{pms.assign}}</ion-text><br>
-          <ion-text color="light">Actionable: {{pms.actionable}}</ion-text><br>
-          <ion-text color="light">Overdue: {{pms.overdue}}</ion-text><br>
-        </div>
+      <ion-card  class="ion-text-left ion-no-padding" style="min-height:100px;margin-bottom:10px">
+        <ion-row style="margin:10px">
+          <ion-col size="5" >
+            <div>
+              <img src="assets/home_banner1/pms.png" style="height:40px;width:40px"><br>
+              <ion-text color="light" >PMS </ion-text>
+            </div>
+          </ion-col>
+          <ion-col size="7">
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">Scheduled:</ion-text>
+              <ion-text color="light">{{pms.assign}}</ion-text>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">Actionable:</ion-text>
+              <ion-text color="light">{{pms.actionable}}</ion-text>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">Overdue:</ion-text>
+              <ion-text color="light">{{pms.overdue}}</ion-text>
+            </div>
+          </ion-col>
+        </ion-row>
       </ion-card>
     </ion-slide>
     <ion-slide>
-      <ion-card  class="ion-text-left ion-padding" style="min-height: 150px;height:auto">
-        <div>
-          <img src="assets/home_banner1/meter.png" style="height:40px;width:40px"><br>
-          <ion-text color="light" style="margin-left:5px;font-weight: 550;">Meter </ion-text>
-        </div>
-        <div class="ion-text-right">
-          <ion-text color="light">Scheduled: {{meter.scheduled}}</ion-text><br>
-          <ion-text color="light">Attended: {{meter.attended}}</ion-text><br>
-          <ion-text color="light">Missed: {{meter.missed}}</ion-text><br>
-        </div>
+      <ion-card class="ion-text-left ion-no-padding" style="min-height:100px;margin-bottom:10px">
+        <ion-row style="margin:10px">
+          <ion-col size="5" >
+            <div>
+              <img src="assets/home_banner1/meter.png" style="height:40px;width:40px"><br>
+              <ion-text color="light" >Meter </ion-text>
+            </div>
+          </ion-col>
+          <ion-col size="7">
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">Scheduled:</ion-text>
+              <ion-text color="light">{{meter.scheduled}}</ion-text>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">Attended:</ion-text>
+              <ion-text color="light">{{meter.attended}}</ion-text>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <ion-text color="light">Missed:</ion-text>
+              <ion-text color="light">{{meter.missed}}</ion-text>
+            </div>
+          </ion-col>
+        </ion-row>
       </ion-card>
     </ion-slide>
   </ion-slides>
