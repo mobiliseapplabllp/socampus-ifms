@@ -18,7 +18,7 @@
       <ion-button expand="block" [color]="segments === 'digital'? 'primary':'medium'" (click)="clickCustomSegment('digital')">Digital</ion-button>
     </ion-col>
     <ion-col size="3">
-      <ion-button expand="block" [color]="segments === 'pms'? 'primary':'medium'" (click)="clickCustomSegment('pms')">PMS</ion-button>
+      <ion-button expand="block" [color]="segments === 'pms'? 'primary':'medium'" (click)="clickCustomSegment('pms')">PPM</ion-button>
     </ion-col>
     <ion-col size="3">
       <ion-button expand="block" [color]="segments === 'meter'? 'primary':'medium'" (click)="clickCustomSegment('meter')">Meter</ion-button>
@@ -62,8 +62,8 @@
         </ion-card-header>
         <ion-card-content style="background-color: var(--ion-color-light);padding-bottom: 0px !important;">
           <ion-row>
-            <ion-col size="6">
-              <ion-text color="medium">WO </ion-text><br>
+            <ion-col size="6" (click)="ptwLogs(dat)">
+              <ion-text color="medium">WO </ion-text> <ion-icon name="information-outline" style="size:20px;color:red"></ion-icon><br>
               <ion-text color="dark">{{dat.wo_no}}</ion-text>
             </ion-col>
             <ion-col size="6">
@@ -78,6 +78,12 @@
               <ion-text color="medium">Assigned To</ion-text><br>
               <ion-text color="dark">{{dat.user}}-{{dat.username}}</ion-text>
             </ion-col>
+            <ion-col size="6" *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
+              <ion-text style="color:orange" >PTW In Approval</ion-text>
+            </ion-col>
+            <ion-col size="6" *ngIf="dat.ptw_status === '0' && dat.ptw_mandatory === 1 ">
+              <ion-text color="danger" >PTW Rejected</ion-text>
+            </ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="4">
@@ -91,12 +97,12 @@
             <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
               <ion-button class="ion-text-capitalize" color="tertiary" size="small" expand="block" (click)="checkPms('pms', dat)" *ngIf="(dat.ptw_attach !== '' && dat.ptw_status === '1') || dat.ptw_mandatory === 0">Fill Checklist  </ion-button>
             </ion-col>
-            <ion-col size="6" *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
+            <!-- <ion-col size="6" *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
               <ion-button size="small" expand="block" color="warning">PTW In Approval </ion-button>
             </ion-col>
             <ion-col size="6" *ngIf="dat.ptw_status === '0' && dat.ptw_mandatory === 1 ">
               <ion-button size="small" expand="block" color="danger">PTW Rejected </ion-button>
-            </ion-col>
+            </ion-col> -->
           </ion-row>
         </ion-card-content>
       </ion-card>

@@ -7,9 +7,11 @@
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar (ionChange)="search($event)" mode="md"></ion-searchbar>
+  </ion-toolbar>
 </ion-header>
 <ion-content>
-
   <ion-item *ngFor="let dat of allTeamMember;let i = index">
     <ion-avatar class="center">{{i+1}}</ion-avatar>
     <ion-label class="ion-text-wrap">

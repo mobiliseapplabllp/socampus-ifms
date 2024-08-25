@@ -17,6 +17,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { liveQuery } from 'dexie';
 import { db } from '../../../provider/local-db/local-db.service';
 import { PtwUploadComponent } from '../../pm-cal/ptw-upload/ptw-upload.component';
+import { LogsComponent } from '../../pm-cal/logs/logs.component';
 @Component({
   selector: 'app-pending-task',
   templateUrl: './pending-task.component.html',
@@ -847,6 +848,20 @@ export class PendingTaskComponent  implements OnInit {
     modal.onWillDismiss().then(disModal => {
       if (disModal.role) {
         this.pmsList = this.pmsList.filter((val:any) => val.wo_id !== dat.wo_id);
+      }
+    });
+    modal.present();
+  }
+
+  async ptwLogs(dat: any) {
+    const modal = await this.modalCtrl.create({
+      component: LogsComponent,
+      cssClass: 'my-modal',
+      componentProps: { data: dat }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+
       }
     });
     modal.present();

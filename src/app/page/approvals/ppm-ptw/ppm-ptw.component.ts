@@ -3,7 +3,6 @@ import { AlertController, LoadingController, NavController } from '@ionic/angula
 import { ApprovalService } from 'src/app/provider/approval/approval.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { environment } from 'src/environments/environment';
-
 @Component({
   selector: 'app-ppm-ptw',
   templateUrl: './ppm-ptw.component.html',
@@ -66,7 +65,7 @@ export class PpmPtwComponent  implements OnInit {
     const alert = await this.alertController.create({
       cssClass: 'my-custom-class',
       header: msg + '?',
-      message: 'Are you sure you want to ' + msg.toLowerCase() + ' this request?',
+      message: 'Are you sure you want to ' + msg.toLowerCase() + ' WO #' + data.wo_id,
       mode: 'ios',
       inputs: [{
         name: 'remark',

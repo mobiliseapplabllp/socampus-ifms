@@ -13,13 +13,13 @@ import { environment } from 'src/environments/environment';
 export class ApprovalsPage implements OnInit {
   approvalsList: any = [{
     label:'PTW Approval',
-    icon: 'assets/imgs/leave_approval.svg',
+    icon: 'assets/imgs/helpdesk.png',
     url: '/approvals/ptw-approval',
     id: 1,
     count: 0
   },{
     label:'PPM Ptw',
-    icon: 'assets/imgs/leave_approval.svg',
+    icon: 'assets/imgs/pms.png',
     url: '/approvals/ppm-ptw',
     id: 2,
     count: 0

@@ -8,7 +8,12 @@
 </ion-header>
 <ion-content>
   <ion-card *ngFor="let dat of pendingData">
-    <ion-card-header color="primary">Wo No: #{{dat.wo_id}}</ion-card-header>
+    <ion-card-header color="primary" style="padding:10px">
+      <ion-row class="ion-no-padding">
+        <ion-col size="4">Wo No: #{{dat.wo_id}}</ion-col>
+        <ion-col size="8" class="ion-text-right ion-padding-end">{{dat.ptwcreateddate}}</ion-col>
+      </ion-row>
+    </ion-card-header>
     <ion-card-content>
       <ion-row>
         <ion-col size="6">
@@ -19,16 +24,24 @@
           <ion-text color="primary">Logged By</ion-text><br>
           <ion-text color="medium">{{dat.createdby}}</ion-text>
         </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Logged On</ion-text><br>
-          <ion-text color="medium">{{dat.ptwcreateddate}}</ion-text>
+        <ion-col size="6" *ngIf="dat.ext_asset_id">
+          <ion-text color="primary">Asset ID</ion-text><br>
+          <ion-text color="medium">{{dat.ext_asset_id}}</ion-text>
+        </ion-col>
+        <ion-col size="6" *ngIf="dat.ext_asset_id">
+          <ion-text color="primary">Group Desc</ion-text><br>
+          <ion-text color="medium">{{dat.grp_desc}}</ion-text>
+        </ion-col>
+        <ion-col size="6" *ngIf="dat.ext_asset_id">
+          <ion-text color="primary">Manufacturer</ion-text><br>
+          <ion-text color="medium">{{dat.mnfctrer_desc}}</ion-text>
         </ion-col>
         <ion-col size="6">
           <ion-text color="primary">Remark</ion-text><br>
           <ion-text color="medium">{{dat.ptw_remark}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-button color="danger" shape="round" size="small" (click)="openDoc(dat.ptw_attach)">View <ion-icon name="attach-outline" slot="end"></ion-icon> </ion-button>
+          <ion-button fill="clear" color="danger" (click)="openDoc(dat.ptw_attach)">
+            <ion-icon name="attach-outline"></ion-icon>
+          </ion-button>
         </ion-col>
       </ion-row>
       <ion-row>

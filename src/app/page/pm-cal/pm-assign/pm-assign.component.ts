@@ -10,6 +10,7 @@ import { environment } from 'src/environments/environment';
 })
 export class PmAssignComponent  implements OnInit {
   allTeamMember: any = [];
+  allTeamMemberCopy: any = [];
   user_id!: string;
   data: any;
   work_order: any = [];
@@ -41,6 +42,7 @@ export class PmAssignComponent  implements OnInit {
         next:(data) => {
           if (data.status) {
             this.allTeamMember = data.data;
+            this.allTeamMemberCopy = data.data
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -86,6 +88,20 @@ export class PmAssignComponent  implements OnInit {
         }
       });
     });
+  }
+
+  search(ev: any) {
+    let val: any;
+    val = ev.target.value;
+    this.allTeamMember = this.allTeamMemberCopy;
+    if (val && val.trim() !== '') {
+      this.allTeamMember = this.allTeamMember.filter((dat: any) => {
+        if ((dat.label.toLowerCase().indexOf(val.toLowerCase()) > -1)) {
+          return (dat.label.toLowerCase().indexOf(val.toLowerCase()) > -1);
+        }
+        return
+      });
+    }
   }
 
   async presentLoading() {
