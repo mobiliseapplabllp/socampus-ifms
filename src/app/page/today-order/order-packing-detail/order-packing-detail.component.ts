@@ -24,6 +24,7 @@ export class OrderPackingDetailComponent  implements OnInit {
   isModalOpen = false;
   packCambro: any = {};
   isDriverModal = false;
+  packTypeArr: any = [];
   constructor(
     private activeRoute: ActivatedRoute,
     private httpTo: TodayOrderService,
@@ -32,7 +33,6 @@ export class OrderPackingDetailComponent  implements OnInit {
     private actionSheetCtrl: ActionSheetController,
     private router: Router,
     private modalCtrl: ModalController,
-    private httpAsset: MyAssetGetService,
     private modal: ModalController,
     private navCtrl: NavController
   ) { }
@@ -42,52 +42,83 @@ export class OrderPackingDetailComponent  implements OnInit {
       this.requestedData = JSON.parse(res['data']);
     });
     this.getDispathOrderDetail(this.requestedData.order_id);
+    this.getPackingType();
+  }
+
+  getPackingType() {
+    this.httpTo.getPackingType().subscribe({
+      next:(data) => {
+        if (data.status) {
+          this.packTypeArr = data.data;
+        } else {
+          this.common.presentToast(data.msg, 'warning');
+        }
+      },
+      error:() => {
+        this.common.presentToast(environment.errMsg, 'danger');
+      },
+      complete:() => {
+
+      }
+    });
   }
 
   ionViewDidEnter() {
     let bar = this.common.getBarcode();
     if (bar) {
       this.common.setBarcode('');
-      this.getDecBarcode(bar);
+      let decBarcode = this.common.decryptValue(bar);
+      console.log(decBarcode);
+      const obj = this.cambroArr.filter((val: any) => val.ext_asset_id === decBarcode);
+      if (obj.length > 0) {
+        this.openModal(obj[0], '0', decBarcode)
+      } else {
+        this.common.presentToast(`You are Scanning Wrong QR ${decBarcode}`, 'warning')
+      }
+      // this.getDecBarcode(bar);
     }
   }
 
-  getDecBarcode(enc_barcode: string) {
-    this.presentLoading().then(preLoad => {
-      this.httpAsset.getDecBarcode(enc_barcode).subscribe({
-        next:(data) => {
-          console.log(data);
-          if (data.status) {
-            let tempQR = data.data.text;
-            const obj = this.cambroArr.filter((val: any) => val.ext_asset_id === tempQR);
-            if (obj.length > 0) {
-              this.openModal(obj[0])
-            } else {
-              this.common.presentToast(`You are Scanning Wrong QR ${tempQR}`, 'warning')
-            }
-          } else {
-            this.common.presentToast(data.msg, 'warning');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
-  }
+  // getDecBarcode(enc_barcode: string) {
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpAsset.getDecBarcode(enc_barcode).subscribe({
+  //       next:(data) => {
+  //         console.log(data);
+  //         if (data.status) {
+  //           let tempQR = data.data.text;
+  //           const obj = this.cambroArr.filter((val: any) => val.ext_asset_id === tempQR);
+  //           if (obj.length > 0) {
+  //             this.openModal(obj[0])
+  //           } else {
+  //             this.common.presentToast(`You are Scanning Wrong QR ${tempQR}`, 'warning')
+  //           }
+  //         } else {
+  //           this.common.presentToast(data.msg, 'warning');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.common.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     })
+  //   })
+  // }
 
-  async openModal(obj: Object) {
+  async openModal(obj: Object, pack_type: any, pack_no: any, select_type?: string, type_id?: number) {
     const modal = await this.modalCtrl.create({
       component: OrderPackingModalComponent,
       cssClass: 'my-modal',
       backdropDismiss:false,
       componentProps: {
         scanData: this.scanData,
-        cambroData: obj
+        cambroData: obj,
+        pack_type: pack_type,
+        pack_no: pack_no,
+        select_type: select_type,
+        type_id: type_id
       }
     });
     modal.onWillDismiss().then((disModal: any) => {
@@ -100,6 +131,7 @@ export class OrderPackingDetailComponent  implements OnInit {
   }
 
   setOpen(val: any, data: any, isOpen: boolean) {
+    console.log(val);
     this.packCambro = val;
     this.packCambro.item_name = data.item_name;
     this.isModalOpen = isOpen;
@@ -246,6 +278,43 @@ export class OrderPackingDetailComponent  implements OnInit {
     })
   }
 
+  async presentActionSheet1(dat: any) {
+    let ref = this;
+    const buttons = this.packTypeArr.map((item: any) => {
+      return {
+        text: item.label,
+        handler: () => {
+          this.handleButtonClick(item, dat);
+        }
+      };
+    });
+
+    buttons.push({
+      text: 'Cancel',
+      role: 'cancel',
+      handler: () => {
+        console.log('Action sheet cancelled');
+      }
+    });
+    const actionSheet = await this.actionSheetCtrl.create({
+      mode: 'ios',
+      buttons: buttons
+    });
+
+    await actionSheet.present();
+  }
+
+  handleButtonClick(selectedItem: any, data: any) {
+    console.log(selectedItem);
+    if (selectedItem.value === 39) {
+      this.scanData = data;
+      this.router.navigateByUrl('/barcode');
+    } else {
+      this.scanData = data;
+      this.openModal(data, '1', '', selectedItem.label, selectedItem.value);
+    }
+  }
+
   async presentActionSheet(dat: any) {
     const actionSheet = await this.actionSheetCtrl.create({
       mode: 'ios',
@@ -327,8 +396,6 @@ export class OrderPackingDetailComponent  implements OnInit {
           this.dismissloading();
         }
       })
-    })
-
-
+    });
   }
 }

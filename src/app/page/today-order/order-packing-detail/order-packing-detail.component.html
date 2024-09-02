@@ -57,7 +57,7 @@
     <ion-col size="3" class="center">
       <section style="width:100%">
         <div style="font-size:12px;width:100%;text-align: center;height:10px"></div>
-        <ion-button *ngIf="!dat.is_packed" (click)="presentActionSheet(dat)" size="small" expand="block" color="primary" class="ion-text-capitalize" style="--border-radius: 6px;height:38px" >LINK</ion-button>
+        <ion-button *ngIf="!dat.is_packed" (click)="presentActionSheet1(dat)" size="small" expand="block" color="primary" class="ion-text-capitalize" style="--border-radius: 6px;height:38px" >LINK</ion-button>
         <ion-button *ngIf="dat.is_packed" size="small" expand="block" color="success" class="ion-text-capitalize" style="--border-radius: 6px;height:38px" >Packed</ion-button>
       </section>
     </ion-col>
@@ -84,9 +84,17 @@
         <ion-col>{{packCambro.order_id}}</ion-col>
       </ion-row>
       <ion-row>
+        <ion-col size="4">{{packCambro.key}}</ion-col>
+        <ion-col>{{packCambro.value}}</ion-col>
+      </ion-row>
+      <!-- <ion-row *ngIf="!packCambro.subgrp_desc">
         <ion-col size="4">Cambro No</ion-col>
         <ion-col>{{packCambro.ext_asset_id}}({{packCambro.size}}{{packCambro.uom}})</ion-col>
       </ion-row>
+      <ion-row *ngIf="packCambro.subgrp_desc">
+        <ion-col size="4">{{packCambro.subgrp_desc}}</ion-col>
+        <ion-col>{{packCambro.ext_asset_id}}</ion-col>
+      </ion-row> -->
       <ion-row>
         <ion-col size="4">Recipe</ion-col>
         <ion-col>{{packCambro.item_name}}</ion-col>

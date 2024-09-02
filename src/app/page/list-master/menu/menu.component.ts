@@ -90,7 +90,7 @@ export class MenuComponent  implements OnInit {
             const obj1 = [{
               icon_path: 'assets/meal/i1.png',
               smnu_desc: 'Order Dispatch',
-              link: '/t-order'
+              link: '/t-order/1'
             }]
             for (var i = 0; i < obj1.length; i++) {
               this.myMenu.unshift(obj1[i]);

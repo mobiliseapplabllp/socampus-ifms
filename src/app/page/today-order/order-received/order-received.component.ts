@@ -5,7 +5,6 @@ import { CommonService } from 'src/app/provider/common/common.service';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 import { environment } from 'src/environments/environment';
-
 @Component({
   selector: 'app-order-received',
   templateUrl: './order-received.component.html',
@@ -17,81 +16,8 @@ export class OrderReceivedComponent  implements OnInit {
   updateArr: any = [];
   requestedData: any  = [];
   loading: any;
-  index: any;
-
-  // orderReceiveArr: any = [{
-  //   item_name: 'Carrot & Beans palya',
-  //   received_temperature: '20',
-  //   temperature: '35',
-  //   txn_id: 1211,
-  //   data: [{
-  //     // old data
-  //   }]
-  // }]
-
-  // originalArr = [{
-  //   item_name: "Carrot & Beans palya",
-  //   ext_asset_id: "1016128982",
-  //   received_temperature: "10",
-  //   txn_id: 1244,
-  //   id: 357,
-  //   dispatch_qty: 10,
-  //   cat_image: "image_url.png",
-  // },{
-  //   item_name: "Carrot & Beans palya",
-  //   ext_asset_id: "1016128984",
-  //   received_temperature: "11",
-  //   txn_id: 1245,
-  //   id: 358,
-  //   dispatch_qty: 11,
-  //   cat_image: "image_url.png",
-  // },{
-  //   item_name: "Butter Chicken",
-  //   ext_asset_id: "1016128990",
-  //   received_temperature: "12",
-  //   txn_id: 1250,
-  //   id: 360,
-  //   dispatch_qty: 12,
-  //   cat_image: "image_url.png",
-  // }]
-
-  // output = [{
-  //   item_name: "Carrot & Beans palya",
-  //   ext_asset_id: "1016128982",
-  //   received_temperature: "10",
-  //   txn_id: 1244,
-  //   data: [{
-  //     item_name: "Carrot & Beans palya",
-  //     ext_asset_id: "1016128982",
-  //     received_temperature: "10",
-  //     txn_id: 1244,
-  //     id: 357,
-  //     dispatch_qty: 10,
-  //     cat_image: "image_url.png",
-  //   },{
-  //     item_name: "Carrot & Beans palya",
-  //     ext_asset_id: "1016128984",
-  //     received_temperature: "11",
-  //     txn_id: 1245,
-  //     id: 358,
-  //     dispatch_qty: 11,
-  //     cat_image: "image_url.png",
-  //   }]
-  // },{
-  //   item_name: "Butter Chicken",
-  //   ext_asset_id: "1016128990",
-  //   received_temperature: "12",
-  //   txn_id: 1250,
-  //   data: [{
-  //     item_name: "Butter Chicken",
-  //     ext_asset_id: "1016128990",
-  //     received_temperature: "12",
-  //     txn_id: 1250,
-  //     id: 360,
-  //     dispatch_qty: 12,
-  //     cat_image: "image_url.png",
-  //   }]
-  // }]
+  index1!: number;
+  index2!: number;
   constructor(
     private activeRoute: ActivatedRoute,
     private httpTo: TodayOrderService,
@@ -117,81 +43,76 @@ export class OrderReceivedComponent  implements OnInit {
     let bar = this.common.getBarcode();
     if (bar) {
       this.common.setBarcode('');
-      if (this.platform.is('capacitor')) {
-        this.getDecBarcode(bar)
+      let decBarcode = this.common.decryptValue(bar);
+      if(this.updateArr[this.index1].data[this.index2].ext_asset_id === decBarcode) {
+        this.updateArr[this.index1].data[this.index2].isReceivedEnable = true;
+        this.updateArr[this.index1].data[this.index2].showErr = false;
+        this.updateArr[this.index1].data[this.index2].received_qty = this.updateArr[this.index1].data[this.index2].dispatch_qty;
+        this.updateArr[this.index1].data[this.index2].isReceivedEnable = true;
+              //     this.order_details[this.index].isReceivedEnable = true;
+              // this.order_details[this.index].showErr = false;
+              // this.order_details[this.index].received_qty = this.order_details[this.index].dispatch_qty;
+              // this.order_details[this.index].isScan = true;
       } else {
-        this.order_details[this.index].isReceivedEnable = true;
-        this.order_details[this.index].showErr = false;
-        this.order_details[this.index].received_qty = this.order_details[this.index].dispatch_qty;
-        this.order_details[this.index].isScan = true;
-
-        setTimeout(() => {
-          this.order_details[this.index].isAutoFocus = true;
-        }, 100);
+        this.common.presentToast('You are scanning wrong QR Code ' + decBarcode, 'warning');
       }
+      // if (this.platform.is('capacitor')) {
+      //   // this.getDecBarcode(bar)
+      //   let decBarcode = this.common.decryptValue(bar);
+      //   console.log(this.updateArr);
+      //   console.log(this.updateArr[this.index1][this.index2]);
+      // } else {
+      //   // this.order_details[this.index].isReceivedEnable = true;
+      //   // this.order_details[this.index].showErr = false;
+      //   // this.order_details[this.index].received_qty = this.order_details[this.index].dispatch_qty;
+      //   // this.order_details[this.index].isScan = true;
+      //   setTimeout(() => {
+      //     // this.order_details[this.index].isAutoFocus = true;
+      //   }, 100);
+      // }
     }
   }
 
-  // ionViewDidEnter() {
-  //   let bar = this.common.getBarcode();
-  //   if (bar) {
-  //     if (this.platform.is('capacitor')) {
-  //       if (this.order_details[this.index].qr_value === bar) {
-  //         this.order_details[this.index].isReceivedEnable = true;
-  //         this.order_details[this.index].showErr = false;
-  //         setTimeout(() => {
-  //           this.order_details[this.index].isAutoFocus = true;
-  //         }, 100);
-  //       } else {
-  //         this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
-  //       }
-  //     } else {
-  //       this.order_details[this.index].isReceivedEnable = true;
-  //       this.order_details[this.index].showErr = false;
-  //       setTimeout(() => {
-  //         this.order_details[this.index].isAutoFocus = true;
-  //       }, 100);
-  //     }
-  //     this.common.setBarcode('');
-  //   }
-  // }
-
   getDecBarcode(enc_barcode: string) {
-    this.presentLoading().then(preLoad => {
-      this.httpAsset.getDecBarcode(enc_barcode).subscribe({
-        next:(data) => {
-          console.log(data);
-          if (data.status) {
-            let barcode = data.data.text;
-            if (barcode === this.order_details[this.index].ext_asset_id) {
-              this.order_details[this.index].isReceivedEnable = true;
-              this.order_details[this.index].showErr = false;
-              this.order_details[this.index].received_qty = this.order_details[this.index].dispatch_qty;
-              this.order_details[this.index].isScan = true;
-              setTimeout(() => {
-                this.order_details[this.index].isAutoFocus = true;
-              }, 100);
-            } else {
-              this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
-            }
-          } else {
-            this.common.presentToast(data.msg, 'warning');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    })
+    // this.presentLoading().then(preLoad => {
+    //   this.httpAsset.getDecBarcode(enc_barcode).subscribe({
+    //     next:(data) => {
+    //       console.log(data);
+    //       if (data.status) {
+    //         let barcode = data.data.text;
+    //         if (barcode === this.order_details[this.index].ext_asset_id) {
+    //           this.order_details[this.index].isReceivedEnable = true;
+    //           this.order_details[this.index].showErr = false;
+    //           this.order_details[this.index].received_qty = this.order_details[this.index].dispatch_qty;
+    //           this.order_details[this.index].isScan = true;
+    //           setTimeout(() => {
+    //             this.order_details[this.index].isAutoFocus = true;
+    //           }, 100);
+    //         } else {
+    //           this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
+    //         }
+    //       } else {
+    //         this.common.presentToast(data.msg, 'warning');
+    //       }
+    //     },
+    //     error:() => {
+    //       this.dismissloading();
+    //       this.common.presentToast(environment.errMsg, 'danger');
+    //     },
+    //     complete:() => {
+    //       this.dismissloading();
+    //     }
+    //   })
+    // })
   }
 
-  ScanBarcode(dat: any, ind: any){
+  ScanBarcode(i: number, j: number){
+
     if (this.requestedData.ord_status === 9) {
-      this.index = ind;
+      // this.index = ind;
+      console.log(i, j);
+      this.index1 = i;
+      this.index2 = j
       this.router.navigateByUrl('/barcode');
     } else {
       this.common.presentToast('you not receive order before reached', 'warning');
@@ -224,10 +145,11 @@ export class OrderReceivedComponent  implements OnInit {
           if (data.status) {
             this.order_details = data.data;
             for (var i = 0; i < this.order_details.length; i++) {
-              if (!this.order_details[i].received_qty) {
-                this.order_details[i].isReceivedEnable = false;
+              this.order_details[i].received_temperature = this.order_details[i].temperature
+              if (!this.order_details[i].received_qty ) {
                 this.order_details[i].isRec = false;
-
+                this.order_details[i].isReceivedEnable = this.order_details[i].pack_type === 1 ? true: false;
+                this.order_details[i].received_qty = this.order_details[i].pack_type === 1 ? this.order_details[i].dispatch_qty: 0
               } else {
                 this.order_details[i].already_rec = this.order_details[i].received_qty
                 this.order_details[i].isReceivedEnable = true;
@@ -288,6 +210,10 @@ export class OrderReceivedComponent  implements OnInit {
     let result = 0;
     this.updateArr.forEach((element: any) => {
       console.log(element);
+      if (!element.received_temperature) {
+        this.common.presentToast('Please Receive Temperature for ' + element.item_name , 'warning');
+        return;
+      }
       for (var i = 0 ; i < element.data.length; i++) {
         if (!element.data[i].received_qty || element.data[i].received_qty == 0 || !element.data[i].isRec) {
           result = result + 1;
@@ -297,14 +223,6 @@ export class OrderReceivedComponent  implements OnInit {
         }
       }
     });
-    // for (var i = 0; i < this.order_details.length;i++) {
-    //   if (!this.order_details[i].received_qty || this.order_details[i].received_qty == 0 || !this.order_details[i].isRec) {
-    //     result = result + 1;
-    //     this.order_details[i].showErr = true
-    //   } else {
-    //     this.order_details[i].showErr = false
-    //   }
-    // }
     if (result > 0) {
       this.common.presentToast('Please Receive All Qty', 'warning');
       return;
@@ -381,6 +299,10 @@ export class OrderReceivedComponent  implements OnInit {
   }
 
   updateTemp(dat: any) {
+    if (!dat.received_temperature) {
+      this.common.presentToast('Please Receive Temperature', 'warning');
+      return;
+    }
     const formData = new FormData();
     formData.append('temperature', dat.received_temperature);
     formData.append('txn_id', dat.txn_id);
@@ -388,6 +310,7 @@ export class OrderReceivedComponent  implements OnInit {
       this.httpTo.updateTemp(formData).subscribe({
         next:(data: any) => {
           if (data.status) {
+            dat.temperature_status = true
             this.common.presentToast(data.msg, 'success');
           } else {
             this.common.presentToast(data.msg, 'warning');

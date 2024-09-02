@@ -21,19 +21,6 @@ export class AppComponent {
   loading: any;
   appVersion!: string;
   isAndroid!: boolean;
-  arr = [{
-    id:1,
-    name: 'aman1'
-  },{
-    id:2,
-    name: 'aman2'
-  },{
-    id:3,
-    name: 'aman3'
-  },{
-    id:4,
-    name: 'aman4'
-  }]
   constructor(
     private loginPro: LoginService,
     private router: Router,
@@ -48,9 +35,6 @@ export class AppComponent {
         this.initApp()
         this.getUserData();
       });
-      for (let key of this.arr) {
-        console.log(key);
-      }
   }
 
   initApp() {

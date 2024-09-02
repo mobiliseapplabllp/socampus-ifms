@@ -3,7 +3,6 @@ import { LoadingController, ModalController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 import { environment } from 'src/environments/environment';
-
 @Component({
   selector: 'app-order-packing-modal',
   templateUrl: './order-packing-modal.component.html',
@@ -14,17 +13,23 @@ export class OrderPackingModalComponent  implements OnInit {
   cambroData: any;
   qty: any;
   loading: any;
+  pack_type: any; // 0 for cambro // 1for other
+  pack_no: any;
+  identify_key!: string;
+  select_type!: string;
+  type_id!: number;
   constructor(
     private modalCtrl: ModalController,
     private common: CommonService,
     private httpTo: TodayOrderService,
     private loadingController: LoadingController) {
+
   }
 
   ngOnInit() {
-    console.log(this.scanData);
-    console.log(this.cambroData);
-    if (this.scanData.ttl_left_portion <= this.cambroData.size) {
+    if (this.pack_type === '0' && (this.scanData.ttl_left_portion <= this.cambroData.size)) {
+      this.qty = this.scanData.ttl_left_portion;
+    } else {
       this.qty = this.scanData.ttl_left_portion;
     }
   }
@@ -53,13 +58,28 @@ export class OrderPackingModalComponent  implements OnInit {
       return;
     }
 
-    const obj = {
-      camro_box_id: this.cambroData.cambro_id,
+    var obj: any = {
+
       dispatch_qty: this.qty,
       item_id: this.scanData.item_id,
       order_id: this.scanData.order_id,
       txn_id: this.scanData.txn_id,
     }
+
+    if (this.pack_type === '1') {
+      if (!this.identify_key) {
+        this.common.presentToast('Please Enter Identify Key', 'warning');
+        return;
+      }
+      obj.pack_no = this.identify_key,
+      obj.pack_type = '1',
+      obj.camro_box_id = this.type_id
+    } else {
+      obj.camro_box_id = this.cambroData.cambro_id,
+      obj.pack_no = this.pack_no,
+      obj.pack_type = '0'
+    }
+
     this.presentLoading().then(preLoad => {
       this.httpTo.updateRecipePacking(obj).subscribe({
         next:(data) => {

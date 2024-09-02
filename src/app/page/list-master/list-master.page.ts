@@ -52,7 +52,6 @@ export class ListMasterPage implements OnInit {
         });
       }
     });
-
   }
 
   downloadApp(url: string) {

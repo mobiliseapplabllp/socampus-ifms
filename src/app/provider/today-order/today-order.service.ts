@@ -149,7 +149,7 @@ export class TodayOrderService {
   }
 
   getCambroByPC(pc_id: any): Observable<any> {
-    return this.https.get(environment.url + 'assets/reporting/get_cambro_by_pc?pc_id=' + pc_id);
+    return this.https.get(environment.url + 'assets/reporting/get_cambro_by_pc?pc_id=' + pc_id + '&group_id=39');
   }
 
   getDriverByPc(pc_id: any): Observable<any> {
@@ -163,6 +163,10 @@ export class TodayOrderService {
 
   updateTemp(formData: any): Observable<any> {
     return this.https.post(environment.url + 'meal/order/updte_order_recieved_temp', formData );
+  }
+
+  getPackingType(): Observable<any> {
+    return this.https.get(environment.url + 'meal/order/select_pack_type');
   }
 
 }

@@ -28,17 +28,29 @@
       <ion-col>{{scanData.ttl_left_portion}}</ion-col>
     </ion-row>
   </fieldset>
+  <fieldset *ngIf="pack_type === '1'">
+    <legend>Identify Key</legend>
+    <ion-input type="text" placeholder="Identify Key" [(ngModel)]="identify_key"></ion-input>
+  </fieldset>
 
   <fieldset>
-    <legend>Cambro</legend>
-    <ion-row>
-      <ion-col size="4">Cambro No</ion-col>
-      <ion-col>({{cambroData.cambro_id}}){{cambroData.ext_asset_id}}</ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="4">Cambro Size</ion-col>
-      <ion-col>{{cambroData.size}} {{cambroData.uom}}</ion-col>
-    </ion-row>
+    <legend>{{pack_type === '0'? 'Cambro': 'Packed With'}}</legend>
+    <div *ngIf="pack_type === '0'">
+      <ion-row>
+        <ion-col size="4">Cambro No</ion-col>
+        <ion-col>({{cambroData.cambro_id}}){{cambroData.ext_asset_id}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="4">Cambro Size</ion-col>
+        <ion-col>{{cambroData.size}} {{cambroData.uom}}</ion-col>
+      </ion-row>
+    </div>
+    <div *ngIf="pack_type === '1'">
+      <ion-row>
+        <ion-col size="4">{{select_type}}</ion-col>
+      </ion-row>
+    </div>
+
     <ion-input type="number" placeholder="Enter Packing Qty" [(ngModel)]="qty" (ionInput)="changeQty($event)" ></ion-input>
     <p><b>Note:-</b> You can't enter more than remaining quantity</p>
     <ion-row>
