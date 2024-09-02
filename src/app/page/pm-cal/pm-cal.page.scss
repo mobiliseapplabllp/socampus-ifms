@@ -1,7 +1,24 @@
-ion-text {
-  font-weight: 550;
-}
+// ion-text {
+//   font-weight: 550;
+// }
 
+
+.cards {
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+  border-radius: 10px;
+  ion-row {
+    ion-col {
+      font-family: 'opensans_semibold' !important;
+      font-size: 13px
+    }
+    ion-col:nth-child(odd) {
+      color: color(--ion-color-medium);
+    }
+    ion-col:nth-child(even) {
+      color: #2A295C;
+    }
+  }
+}
 
 
 .custom-file-upload{

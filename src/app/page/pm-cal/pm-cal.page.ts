@@ -204,12 +204,17 @@ export class PmCalPage implements OnInit {
   }
 
   openFillReport(data: any) {
-    if (data.ext_asset_id) {
-      this.selectedObj = data;
-      this.openBarcode(data)
+    if (this.platform.is('capacitor')) {
+      if (data.ext_asset_id) {
+        this.selectedObj = data;
+        this.openBarcode(data)
+      } else {
+        this.openPage(data);
+      }
     } else {
       this.openPage(data);
     }
+
   }
 
   openBarcode(data: any) {

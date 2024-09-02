@@ -1,6 +1,6 @@
 import { Component,OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AlertController, LoadingController, NavController, Platform } from '@ionic/angular';
+import { AlertController, LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { environment } from 'src/environments/environment';
@@ -23,7 +23,7 @@ export class PmReportComponent  implements OnInit {
   rowIndex: any;
   colIndex: any;
   loop = false;
-
+  progress = 50;
   constructor(
     private activeroute: ActivatedRoute,
     private alertController: AlertController,
@@ -33,13 +33,15 @@ export class PmReportComponent  implements OnInit {
     private navCtrl: NavController,
     private common: CommonService,
     private httpDigital: DigitalChecklistService,
-    private platform: Platform) {
+    private platform: Platform,
+    private modal: ModalController) {
 
   }
 
   ngOnInit() {
     this.activeroute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
+      console.log(this.requestedData);
       this.getScheduleQuestion();
     });
 
@@ -64,6 +66,10 @@ export class PmReportComponent  implements OnInit {
 
   permission() {
     SpeechRecognition.requestPermissions().then(res => {});
+  }
+
+  cancel() {
+    this.modal.dismiss(null, 'cancel');
   }
 
   scrollToDiv(id: string) {
