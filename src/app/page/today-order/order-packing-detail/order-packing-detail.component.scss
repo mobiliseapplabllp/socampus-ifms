@@ -42,3 +42,10 @@ ion-input {
   }
 }
 
+.err {
+  border: 1px solid var(--ion-color-danger);
+}
+
+.succ {
+  border: 1px solid var(--ion-color-success);
+}

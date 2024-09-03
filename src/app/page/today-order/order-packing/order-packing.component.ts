@@ -45,6 +45,7 @@ export class OrderPackingComponent  implements OnInit {
       },
     }
   };
+  isApiHit!: boolean;
   constructor(
     private modalController: ModalController,
     private formbuilder: FormBuilder,
@@ -122,6 +123,7 @@ export class OrderPackingComponent  implements OnInit {
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
+          this.isApiHit = true;
           this.dismissloading();
         }
       })

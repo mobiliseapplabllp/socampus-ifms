@@ -37,79 +37,7 @@ export class OrderHistoryComponent  implements OnInit {
   };
   dateArr: any = [];
   history: any = [];
-  // history: any = [{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'danger'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'danger'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'success'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'success'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'danger'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'success'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'danger'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'danger'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'success'
-  // }];
+  isApiHit!: boolean
   id!: string;
   loading: any;
   constructor(
@@ -179,6 +107,7 @@ export class OrderHistoryComponent  implements OnInit {
           this.common.presentToast(environment.errMsg, 'danger');
           this.dismissloading();
         },complete:() => {
+          this.isApiHit = true;
           this.dismissloading();
         }
       });

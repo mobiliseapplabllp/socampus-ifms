@@ -43,5 +43,15 @@
     </ion-row>
   </ion-card>
 
+  <div *ngIf="packingArr.length === 0 && isApiHit" style="padding-top:100px">
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <img src="assets/img/no_data_found.gif" style="height:100px;width:100px;"><br>
+        <h3>No Data Found </h3>
+      </ion-col>
+    </ion-row>
+
+  </div>
+
 
 </ion-content>

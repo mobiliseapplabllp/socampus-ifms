@@ -61,24 +61,13 @@
     </ion-row>
   </ion-card>
 
-  <!-- <ion-card *ngFor="let dat of history" style="box-shadow: none;background-color:#0D1F9A0D;border-radius: 10px;margin: 10px">
-    <ion-item lines="none" color="none">
-      <div style="width:5px;height:60px;background-color:black;border-radius: 20px; margin:5px" slot="start"></div>
-      <ion-label slot="start" class="ion-text-wrap">
-        <p><ion-text>{{dat.order_id}}</ion-text></p>
-        <p><ion-text>Pick Time: {{dat.pick_time}}</ion-text></p>
-        <p><ion-text>Delivery Time: {{dat.delivery_time}}</ion-text></p>
-        <p><ion-text>No of Boxes: {{dat.box}}</ion-text></p>
-      </ion-label>
-      <ion-label slot="end" class="ion-text-wrap">
-        <p><ion-text>PC: {{dat.pc}}</ion-text></p>
-        <p><ion-text>{{dat.location}}</ion-text> <ion-icon name="location-outline" color="danger"></ion-icon> </p>
-        <ion-button [color]="dat.color" class="ion-text-capitalize" (click)="status()" expand="block" (click)="orderDetails()">
-          <ion-text *ngIf="dat.color === 'danger'">Pending</ion-text>
-          <ion-text *ngIf="dat.color === 'success'">Completed</ion-text>
-        </ion-button>
-      </ion-label>
-    </ion-item>
-  </ion-card> -->
+  <div *ngIf="history.length === 0 && isApiHit" style="padding-top:100px">
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <img src="assets/img/no_data_found.gif" style="height:100px;width:100px;"><br>
+        <h3>No Data Found </h3>
+      </ion-col>
+    </ion-row>
+  </div>
 
 </ion-content>

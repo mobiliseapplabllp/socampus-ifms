@@ -32,7 +32,8 @@ export class LoginPage implements OnInit {
     length: 4,
     allowNumbersOnly:true,
     inputClass: 'custom-otp-input',
-    containerClass: 'custom-otp-container'
+    containerClass: 'custom-otp-container',
+    autofocus: true,
   };
   otp: any;
   sendMobileMsg!: string;

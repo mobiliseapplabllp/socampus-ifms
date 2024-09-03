@@ -13,82 +13,10 @@ import { LaunchNavigator } from '@awesome-cordova-plugins/launch-navigator/ngx';
   styleUrls: ['./today-order.page.scss'],
 })
 export class TodayOrderPage implements OnInit {
-  // todayOrder: any = [{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'danger'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'warning'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'success'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'tertiary'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'danger'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'medium'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'danger'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'danger'
-  // },{
-  //   order_id: 'OD1982',
-  //   pick_time: '11:00',
-  //   delivery_time: '12:30',
-  //   box: '125/05',
-  //   pc: '100023',
-  //   location: 'Google Campus',
-  //   color: 'secondary'
-  // }];
   todayOrder: any = [];
   id: any;
-  loading: any
+  loading: any;
+  isApiHit!: boolean;
   constructor(
     private router: Router,
     private activeRoute: ActivatedRoute,
@@ -102,11 +30,6 @@ export class TodayOrderPage implements OnInit {
 
   ngOnInit() {
     this.id = this.activeRoute.snapshot.paramMap.get('id'); // id == 1 for driver dispatch and 2 for site receive and 4 for cpu
-    // console.log(typeof(this.id));
-    // fetch('mediaFile.localUrl').then(response => response.blob()).then(blob => {
-    //   console.log(blob);
-    // })
-
   }
 
   ionViewDidEnter() {
@@ -129,6 +52,7 @@ export class TodayOrderPage implements OnInit {
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
+          this.isApiHit = true;
           this.dismissloading();
         }
       })
@@ -237,13 +161,13 @@ export class TodayOrderPage implements OnInit {
 
   viewBox(data: any) {
     if (this.id === '4') {
-      this.router.navigate(['/today-order/order-detail'], {
+      this.router.navigate(['/today-order/order-detail'], { // 4 cpu
         queryParams: {
           data: JSON.stringify(data),
         }
       });
     } else if (this.id === '2') {
-      this.router.navigate(['/today-order/order-received'], {
+      this.router.navigate(['/today-order/order-received'], { //2 site recivie
         queryParams: {
           data: JSON.stringify(data),
         }

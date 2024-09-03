@@ -19,7 +19,8 @@ export class OrderDetailComponent  implements OnInit {
   order_details: any = [];
   loading: any;
   index: any;
-  decQr!: string;
+  isApiHit!: boolean;
+  // decQr!: string;
   todayDate = moment().format('YYYY-MM-DD');
   constructor(
     private activeRoute: ActivatedRoute,
@@ -47,23 +48,38 @@ export class OrderDetailComponent  implements OnInit {
     if (bar) {
       this.common.setBarcode('');
       let count = 0,barcode = this.common.decryptValue(bar);
-      const check = this.order_details.filter((val: any) => val.ext_asset_id === barcode);
-      if (check.length === 0) {
-        this.common.presentToast(`You are scanning wrong cambro ` + barcode, 'warning');
-        return;
-      }
+      if (!this.index) {
+        const check = this.order_details.filter((val: any) => val.ext_asset_id === barcode);
+        if (check.length === 0) {
+          this.common.presentToast(`You are scanning wrong cambro ` + barcode, 'warning');
+          this.openScan();
+          return;
+        }
 
-      for (var i = 0; i < this.order_details.length; i++) {
-        if (this.order_details[i].ext_asset_id === barcode) {
-          count = count + 1;
-          if (this.order_details[i].isPack === true) {
-            this.common.presentToast('Cambro No. ' + barcode + ' is already picked.. ', 'warning');
-            return;
-          } else {
-            this.updateInLocalDb(i, 0);
+        for (var i = 0; i < this.order_details.length; i++) {
+          if (this.order_details[i].ext_asset_id === barcode) {
+            count = count + 1;
+            if (this.order_details[i].isPack === true) {
+              this.common.presentToast('Cambro No. ' + barcode + ' is already picked.. ', 'warning');
+              this.openScan();
+              return;
+            } else {
+              this.updateInLocalDb(i, 0);
+            }
           }
         }
+      } else {
+        if (barcode === this.order_details[this.index].ext_asset_id) {
+          this.updateInLocalDb(this.index, 1);
+        } else {
+          this.common.presentToast('You are scan wrong QR Code ' + barcode, 'warning');
+        }
+        // console.log(barcode);
+        // console.log(this.index);
+        // console.log(this.order_details[this.index]);
+        // console.log(this.decQr)
       }
+
     }
   }
 
@@ -100,6 +116,7 @@ export class OrderDetailComponent  implements OnInit {
         next:(data) => {
           if (data.status) {
             this.order_details = data.data;
+
             this.getOffLineAssetList();
           } else {
             this.common.presentToast(data.msg, 'warning');
@@ -110,6 +127,7 @@ export class OrderDetailComponent  implements OnInit {
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
+          this.isApiHit = true
           this.dismissloading();
         }
       })
@@ -137,11 +155,12 @@ export class OrderDetailComponent  implements OnInit {
 
   scanBarcode(data: any,ind: any) {
     this.index = ind;
-    this.decQr = data.qr_value;
+    // this.decQr = data;
     this.router.navigateByUrl('/barcode');
   }
 
   openScan() {
+    this.index = null;
     this.router.navigateByUrl('/barcode');
   }
 

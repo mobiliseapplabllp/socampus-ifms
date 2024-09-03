@@ -131,9 +131,10 @@ export class OrderPackingDetailComponent  implements OnInit {
   }
 
   setOpen(val: any, data: any, isOpen: boolean) {
-    console.log(val);
     this.packCambro = val;
     this.packCambro.item_name = data.item_name;
+    this.packCambro.pack_qty = val.dispatch_qty + '(' +val.uom + ')';
+
     this.isModalOpen = isOpen;
   }
 
@@ -142,6 +143,19 @@ export class OrderPackingDetailComponent  implements OnInit {
   }
 
   finalPack() {
+    let count = 0
+    for (var i = 0; i < this.orderArr.length; i++) {
+      if (!this.orderArr[i].is_temperature || !this.orderArr[i].is_packed) {
+        this.orderArr[i].err = true;
+        count = count + 1;
+      } else {
+        this.orderArr[i].err = false;
+      }
+    }
+    if (count > 0) {
+      this.common.presentToast('Please mention the temperature and pack all the receipe', 'warning');
+      return
+    }
     this.presentLoading().then(preLoad => {
       const obj = [{order_id: this.requestedData.order_id}];
       this.httpTo.actionOrderPack(obj).subscribe({
