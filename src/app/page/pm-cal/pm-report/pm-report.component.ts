@@ -23,7 +23,10 @@ export class PmReportComponent  implements OnInit {
   rowIndex: any;
   colIndex: any;
   loop = false;
-  progress = 50;
+  progress = 0;
+  isOpen = false;
+  questionList: any = [];
+  category: any = [];
   constructor(
     private activeroute: ActivatedRoute,
     private alertController: AlertController,
@@ -54,6 +57,21 @@ export class PmReportComponent  implements OnInit {
         }
       });
     }
+  }
+
+  openModal(question: any, category: any) {
+    console.log(category);
+    if (!category.is_applicable) {
+      return
+    }
+    this.isOpen = true;
+    this.questionList = question;
+    this.category = category
+
+    // console.log(this.questionList);
+    // console.log(this.category);
+    // this.progress =  Math.round(this.category.rspns_count * 100 / this.category.qus.length);
+
   }
 
   ionViewWillLeave() {
@@ -87,11 +105,21 @@ export class PmReportComponent  implements OnInit {
         next:(data) => {
           this.myCategory = data.data.categories;
           this.myCategory.forEach((element: any) => {
+            element.is_applicable === '' ? element.is_applicable = 3: element.is_applicable
+            element.is_applicable_temp = element.is_applicable === 1 ? true: false;
             element.isResponseShow = false;
+            element.rspns_count = 0;
+            let rspns_count = 0;
             element.qus.forEach((el: any) => {
+              if (element.is_applicable === 3) {
+                element.rspns_count = 0
+              }
               if(el.response) {
+                rspns_count = rspns_count + 1;
                 el.remark = el.response.remark;
                 el.attachment = el.response.attachment1;
+                element.rspns_count = rspns_count;
+                element.isResponseShow = true;
                 if(el.q_type == '226') {
                   el.rspns = el.response.optn_id;
                   if (el.rspns) {
@@ -106,7 +134,10 @@ export class PmReportComponent  implements OnInit {
                 el.response = {}
               }
             });
+            element.progress = Math.round(element.rspns_count * 100 / element.qus.length);
+            element.progress1 = element.progress / 100
           });
+          console.log(this.myCategory);
         },
         error:() => {
           this.dismissloading();
@@ -136,15 +167,21 @@ export class PmReportComponent  implements OnInit {
     await alert.present();
   }
 
-  expand(data: any, ind: any) {
-    this.rowIndex = ind;
-    this.colIndex = 0;
-    if (data.qus.length > 0 && data.is_applicable !== 1) {
+  changeToggle(data: any, ind: any) {
+    console.log(data);
+    data.is_applicable_temp === false ? data.is_applicable = 3: data.is_applicable = 1;
+    if (data.qus.length > 0) {
       for (var i = 0 ; i < data.qus.length; i ++) {
         data.qus[i].rspns = '';
       }
     }
-    this.submitCategoryAction(data, 1)
+    this.expand(data, ind);
+  }
+
+  expand(data: any, ind: any) {
+    this.rowIndex = ind;
+    this.colIndex = 0;
+    this.submitCategoryAction(data, data.is_applicable)
   }
 
   submitCategoryAction(data: any, is_applicable: number) {
@@ -228,6 +265,15 @@ export class PmReportComponent  implements OnInit {
       q_max_score: data.q_max_score,
       rspns_source: environment.source
     }
+    let rspns_count = 0;
+    this.category.qus.forEach((element: any) => {
+      if (element.response?.optn_id) {
+        rspns_count = rspns_count + 1;
+        this.category.rspns_count = rspns_count;
+      }
+    });
+    this.category.progress = Math.round(this.category.rspns_count * 100 / this.category.qus.length);
+    this.category.progress1 = this.category.progress / 100
     this.submitResponseAction(obj, data)
   }
 
@@ -384,14 +430,14 @@ export class PmReportComponent  implements OnInit {
           if (!this.myCategory[i].qus[j].rspns) {
             this.httpCommon.presentToastWithOk(`Please add Response for Question No ${ j + 1} from Category ${ this.myCategory[i].cat_desc }`, 'warning');
             this.myCategory[i].qus[j].isNotFill = true;
-            this.myCategory[i].isResponseShow = true;
+            this.myCategory[i].isError = true;
             let temp = i+j.toString();;
             setTimeout(() => {
               this.scrollToDiv(temp);
             }, 100);
             return;
           } else {
-            this.myCategory[i].isResponseShow = false;
+            this.myCategory[i].isError = false;
             this.myCategory[i].qus[j].isNotFill = false;
           }
         }

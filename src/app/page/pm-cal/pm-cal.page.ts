@@ -480,4 +480,12 @@ export class PmCalPage implements OnInit {
     });
   }
 
+  openActionable(data: any) {
+    this.router.navigate(['/pm-calibration/actionable'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
+  }
+
 }

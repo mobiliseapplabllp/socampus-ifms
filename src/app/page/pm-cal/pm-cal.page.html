@@ -6,7 +6,7 @@
     <ion-title>i-FMS</ion-title>
   </ion-toolbar>
   <ion-toolbar>
-    <ion-segment value="all" [(ngModel)]='status' color="primary" (ionChange)="changeSeg($event)" scrollable="true">
+    <ion-segment value="all" [(ngModel)]='status' mode="md" color="primary" (ionChange)="changeSeg($event)" scrollable="true">
       <ion-segment-button value="open">
         <ion-label>ASSIGN({{countObj.assignedWo}})</ion-label>
       </ion-segment-button>
@@ -211,7 +211,7 @@
               <ion-button size="small" fill="outline" color="primary-dark" expand="block" shape="round" (click)="viewAttachment(dat.ptw_attach)" *ngIf="dat.ptw_attach"  >PTW Img</ion-button>
             </ion-col>
             <ion-col>
-              <ion-button size="small" fill="outline" color="primary-dark" expand="block" shape="round" (click)="openViewReport(dat)" >View Report</ion-button>
+              <ion-button size="small" fill="outline" color="primary-dark" expand="block" shape="round" (click)="openActionable(dat)" >RESUME</ion-button>
             </ion-col>
           </ion-row>
         </ion-grid>

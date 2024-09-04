@@ -1,0 +1,84 @@
+ion-progress-bar {
+  height:7px;
+  border-radius:3px;
+}
+
+.modal-content {
+  --background:linear-gradient(180deg, var(--ion-color-primary-dark), var(--ion-color-primary));
+}
+
+.container {
+  width: 100%;
+  padding-left:10px
+}
+
+.step {
+  padding: 0px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  background-color: cream;
+}
+
+.v-stepper {
+  position: relative;
+}
+
+.step .circle {
+  background-color: white;
+  border: 3px solid gray;
+  border-radius: 100%;
+  width: 20px;
+  height: 20px;
+  // margin-top:50px !important;
+  display: inline-block;
+}
+
+.step .line {
+  top: 0px;
+  left: 47% !important;
+  width:8%;
+  height: 100% !important;
+  position: absolute;
+  background-color: gray;
+}
+
+.step.completed .circle {
+  visibility: visible;
+  background-color: var(--ion-color-primary-dark);;
+  border-color: var(--ion-color-primary-dark);;
+}
+
+.step.completed .line {
+  background-color:var(--ion-color-primary-dark);;
+  width:8%;
+}
+
+.step.active .circle {
+  visibility: visible;
+  border-color: var(--ion-color-primary-dark);
+}
+
+.step.empty .circle {
+  visibility: hidden;
+}
+
+.step.empty .line {
+  top: 0;
+  height: 150%;
+}
+
+.step:last-child .line {
+  width:2px;
+  border-left: 3px solid transparent;
+  background-color: transparent;
+  z-index: -1;
+}
+
+.content {
+  margin-left: 20px;
+  min-height: 70px;
+  width:100%;
+  padding-top:0px !important;
+  display: inline-block;
+}
