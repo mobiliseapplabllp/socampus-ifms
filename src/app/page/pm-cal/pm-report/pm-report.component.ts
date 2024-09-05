@@ -1,5 +1,5 @@
 import { Component,OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
@@ -8,6 +8,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
+
 @Component({
   selector: 'app-pm-report',
   templateUrl: './pm-report.component.html',
@@ -37,7 +38,8 @@ export class PmReportComponent  implements OnInit {
     private common: CommonService,
     private httpDigital: DigitalChecklistService,
     private platform: Platform,
-    private modal: ModalController) {
+    private modal: ModalController,
+    private router: Router) {
 
   }
 
@@ -45,7 +47,8 @@ export class PmReportComponent  implements OnInit {
     this.activeroute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
       console.log(this.requestedData);
-      this.getScheduleQuestion();
+      // this.getScheduleQuestion();
+
     });
 
     if (this.platform.is('capacitor')) {
@@ -59,6 +62,54 @@ export class PmReportComponent  implements OnInit {
     }
   }
 
+  ionViewDidEnter() {
+    this.getCategory(this.requestedData.wo_id);
+  }
+
+  getCategory(wo_id: any) {
+    this.presentLoading().then(preLoad => {
+      this.httpPmCal.getCategory(wo_id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.myCategory = data.data.categories;
+            for (var i = 0 ; i < this.myCategory.length; i++) {
+              if (this.myCategory[i].is_applicable === 1) { // 3 means NA; 1 = yes
+                this.myCategory[i].is_applicable_temp = true;
+              } else {
+                this.myCategory[i].is_applicable_temp = false;
+              }
+
+            }
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+
+  }
+
+  openQusPage(data: any) {
+    if (!data.is_applicable_temp) {
+      return;
+    }
+    data.wo_no = this.requestedData.wo_no;
+    data.wo_id = this.requestedData.wo_id
+    this.router.navigate(['/pm-calibration/fill-qus'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
+  }
+
+
   openModal(question: any, category: any) {
     console.log(category);
     if (!category.is_applicable) {
@@ -67,11 +118,6 @@ export class PmReportComponent  implements OnInit {
     this.isOpen = true;
     this.questionList = question;
     this.category = category
-
-    // console.log(this.questionList);
-    // console.log(this.category);
-    // this.progress =  Math.round(this.category.rspns_count * 100 / this.category.qus.length);
-
   }
 
   ionViewWillLeave() {
@@ -169,13 +215,11 @@ export class PmReportComponent  implements OnInit {
 
   changeToggle(data: any, ind: any) {
     console.log(data);
-    data.is_applicable_temp === false ? data.is_applicable = 3: data.is_applicable = 1;
-    if (data.qus.length > 0) {
-      for (var i = 0 ; i < data.qus.length; i ++) {
-        data.qus[i].rspns = '';
-      }
+    if (data.is_applicable_temp === true && data.is_applicable === 1) {
+      return;
     }
-    this.expand(data, ind);
+    data.is_applicable_temp === false ? data.is_applicable = 3: data.is_applicable = 1;
+    this.submitCategoryAction(data)
   }
 
   expand(data: any, ind: any) {
@@ -184,10 +228,10 @@ export class PmReportComponent  implements OnInit {
     this.submitCategoryAction(data, data.is_applicable)
   }
 
-  submitCategoryAction(data: any, is_applicable: number) {
+  submitCategoryAction(data: any, is_applicable?: number) {
     const obj = {
       cat_id: data.cat_id,
-      is_applicable: is_applicable,
+      is_applicable: data.is_applicable,
       rspns_source: environment.source,
       wo_id: this.requestedData.wo_id,
     };
@@ -473,10 +517,10 @@ export class PmReportComponent  implements OnInit {
     this.httpCommon.openDoc(url);
   }
 
-  async presentLoading(msg: string) {
+  async presentLoading(msg?: string) {
     this.loading = await this.loadingController.create({
       cssClass: 'my-custom-class',
-      message: msg,
+      message: msg ? msg: 'Please Wait...',
       duration: 8000
     });
     await this.loading.present();

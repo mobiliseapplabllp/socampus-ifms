@@ -204,13 +204,13 @@
             <ion-col>{{dat.user}}</ion-col>
           </ion-row>
           <ion-row>
-            <ion-col>
+            <ion-col size="4">
               <ion-button size="small" fill="outline" color="primary-dark" expand="block" shape="round" (click)="pmAssign(dat)" >Assign</ion-button>
             </ion-col>
-            <ion-col>
+            <ion-col size="4">
               <ion-button size="small" fill="outline" color="primary-dark" expand="block" shape="round" (click)="viewAttachment(dat.ptw_attach)" *ngIf="dat.ptw_attach"  >PTW Img</ion-button>
             </ion-col>
-            <ion-col>
+            <ion-col size="4">
               <ion-button size="small" fill="outline" color="primary-dark" expand="block" shape="round" (click)="openActionable(dat)" >RESUME</ion-button>
             </ion-col>
           </ion-row>

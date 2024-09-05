@@ -19,10 +19,10 @@
 <ion-content>
   <div [ngSwitch]='status'>
     <div *ngSwitchCase="'actionable'">
-      <ion-card *ngFor="let dat of actionableArr; let ind = index" (click)="openActionModal(true)" style="border-left:5px solid orange;box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;">
+      <ion-card *ngFor="let dat of actionableArr; let ind = index" (click)="openActionModal(dat)" style="border-left:5px solid orange;box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;">
         <ion-item>
           <ion-label class="ion-text-wrap">
-            <h2>{{dat.cat}}</h2>
+            <h2>{{dat.cat_desc}}</h2>
           </ion-label>
           <ion-buttons slot="end">
             <ion-button slot="icon-only">
@@ -31,15 +31,15 @@
           </ion-buttons>
         </ion-item>
         <ion-row >
-          <ion-col class="ion-padding-start">{{dat.qus}}</ion-col>
+          <ion-col class="ion-padding-start">{{dat.q_desc}}</ion-col>
         </ion-row>
       </ion-card>
     </div>
     <div *ngSwitchCase="'all_res'">
-      <ion-card *ngFor="let dat of allRes; let ind = index" (click)="isOpen = true" style="border-left:5px solid rgb(143, 6, 249);box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;padding-bottom:10px">
+      <ion-card *ngFor="let dat of allRes; let ind = index" (click)="viewReport(dat)" style="border-left:5px solid rgb(143, 6, 249);box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;padding-bottom:10px">
         <ion-item>
           <ion-label class="ion-text-wrap">
-            <h2>{{dat.cat}}</h2>
+            <h2>{{dat.cat_desc}}</h2>
           </ion-label>
           <ion-buttons slot="end">
             <ion-button slot="icon-only">
@@ -49,9 +49,9 @@
         </ion-item>
         <ion-row >
           <ion-col size="9">Question</ion-col>
-          <ion-col size="3" class="ion-text-right ion-padding-right">{{dat.action}}/{{dat.total}}</ion-col>
+          <ion-col size="3" class="ion-text-right ion-padding-right">{{dat.action_done}}/{{dat.total_length}}</ion-col>
           <ion-col size="12">
-            <ion-progress-bar [color]="dat.progress1 === 1 ? 'primary': 'warning' " [value]="dat.progress1"></ion-progress-bar>
+            <ion-progress-bar [color]="dat.action_done ===  dat.total_length ? 'primary': 'warning'" [value]="(dat.action_done * 100 / dat.total_length) / 100"></ion-progress-bar>
           </ion-col>
         </ion-row>
       </ion-card>
@@ -74,63 +74,67 @@
       </ion-header>
 
       <ion-content class="modal-content">
-        <ion-card *ngFor="let dat of questionList;let i = index" style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;padding:10px;margin:20px;border-radius: 10px;">
-          <ion-row>
-            <ion-col size="6">
-              <ion-text color="primary-dark" style="font-size:22px">Q.{{i+1}}</ion-text>
-            </ion-col>
-            <ion-col size="6" class="ion-text-right ion-padding-right" style="display: flex; justify-content: end;">
-              <ion-text color="primary">Scope -</ion-text> <ion-text color="primary-dark">Sodexo</ion-text> </ion-col>
-            <ion-col size="12">
-              <ion-text color="primary-dark"> {{dat.q_desc}}</ion-text>
-            </ion-col>
-            <ion-col size="12">
-              <a (click)="isPreOpen = true"><u>Previous Response</u></a>
-            </ion-col>
-          </ion-row>
+        <form [formGroup]="addResponse" >
+          <ion-card style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;padding:10px;margin:20px;border-radius: 10px;">
+            <ion-row>
+              <ion-col size="6">
+                <ion-text color="primary-dark" style="font-size:22px">Q.{{questionList.rspns_id}}</ion-text>
+              </ion-col>
+              <ion-col size="6" class="ion-text-right ion-padding-right" style="display: flex; justify-content: end;">
+                <ion-text color="primary">Scope -</ion-text> <ion-text color="primary-dark">{{questionList.scope_desc}}</ion-text> </ion-col>
+              <ion-col size="12">
+                <ion-text color="primary-dark"> {{questionList.q_desc}}</ion-text>
+              </ion-col>
+              <ion-col size="12">
+                <a (click)="isPreOpen = true"><u>Previous Response</u></a>
+              </ion-col>
+            </ion-row>
 
-          <ion-radio-group color="none" mode="md" [(ngModel)]="dat.rspns"  >
-            <ion-item class="radioButton" *ngFor="let opt of dat.options" >
-              <ion-label>{{opt.optn_desc}}</ion-label>
-              <ion-radio slot="end" [value]="opt.optn_id"></ion-radio>
-            </ion-item>
-          </ion-radio-group>
+            <ion-radio-group color="none" mode="md" formControlName="corrective_action">
+              <ion-item class="radioButton" *ngFor="let opt of questionList.options" >
+                <ion-label>{{opt.optn_desc}}</ion-label>
+                <ion-radio slot="end" [value]="opt.optn_id"></ion-radio>
+              </ion-item>
+            </ion-radio-group>
 
-          <section class="inputbox" >
-            <ion-text color="primary" >Remarks</ion-text>
-            <ion-item lines="none" >
-              <ion-textarea rows="3" type="text" [(ngModel)]="dat.remark" placeholder="Enter your Remark" [disabled]="!dat.rspns"></ion-textarea>
-            </ion-item>
-          </section>
+            <section class="inputbox" >
+              <ion-text color="primary" >Remarks</ion-text>
+              <ion-item lines="none" >
+                <ion-textarea rows="3" type="text" formControlName="remark"  placeholder="Enter your Remark"></ion-textarea>
+              </ion-item>
+            </section>
 
-          <section class="inputbox">
-            <ion-text color="primary" >Corrective Action Date</ion-text>
-            <ion-item id="actionable-date">
-              <ion-input type="text"  placeholder="Action Date"  readonly></ion-input>
-            </ion-item>
-          </section>
+            <section class="inputbox">
+              <ion-text color="primary" >Corrective Action Date</ion-text>
+              <ion-item id="actionable-date">
+                <ion-input type="text" [value]="addResponse.value.rspns_date | date"  placeholder="Action Date"  readonly></ion-input>
+              </ion-item>
+            </section>
+            <ion-popover trigger="actionable-date" >
+              <ng-template>
+                <ion-datetime #popoverDatetime presentation="date" formControlName="rspns_date" (ionChange)="changeDate()"></ion-datetime>
+              </ng-template>
+            </ion-popover>
+            <ion-row>
+              <ion-col class="ion-text-left" size="6" >
+                <ion-button  size="small" [color]="isImgUpload ? 'success': 'primary'" (click)="presentActionSheet()">
+                  IMG <ion-icon [name]="isImgUpload ? 'checkmark-done-circle-outline': 'attach-outline'" slot="end"></ion-icon>
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-card>
+        </form>
 
-          <ion-popover trigger="actionable-date" >
-            <ng-template>
-              <ion-datetime #popoverDatetime presentation="date" (ionChange)="changeDate()"></ion-datetime>
-            </ng-template>
-          </ion-popover>
-
-          <ion-row>
-            <ion-col class="ion-text-left" size="6" >
-              <ion-button [disabled]="!dat.rspns" [ngClass]="{redBorder: dat.is_doc_mandatory === 1 && (!dat.imagename && !dat.attachment)}" size="small" [color]="!dat.imagename ? 'primary': 'success'" [fill]="!dat.imagename ? 'outline' : 'solid' " >
-                IMG
-                <ion-icon name="attach-outline" slot="end" *ngIf="!dat.imagename"></ion-icon>
-                <ion-icon name="checkmark-done-outline" slot="end" *ngIf="dat.imagename"></ion-icon>
-              </ion-button>
-            </ion-col>
-          </ion-row>
-        </ion-card>
       </ion-content>
+      <ion-footer class="ion-no-border">
+        <ion-toolbar color="primary" style="padding: 0px 10px">
+          <ion-button expand="block" color="light" (click)="submitActionable()">Submit <ion-icon name="arrow-forward" slot="end"></ion-icon> </ion-button>
+        </ion-toolbar>
+      </ion-footer>
     </ng-template>
   </ion-modal>
 
-  <ion-modal [isOpen]="isPreOpen" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.25, 0.5, 0.75]" (willDismiss)="onWillPresent()">
+  <ion-modal [isOpen]="isPreOpen" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.25, 0.5, 0.75, 1]" (willDismiss)="onWillPresent()">
     <ng-template>
       <ion-header>
         <ion-toolbar>
@@ -138,22 +142,24 @@
         </ion-toolbar>
       </ion-header>
       <ion-content class="ion-padding" style="--background: #dbdbdb">
-        <div class="container">
-          <div *ngFor="let dat of previousResponse" class="step completed">
-            <div class="v-stepper" >
-              <div class="circle"></div>
-              <div class="line"></div>
+        <div class="card">
+          <div *ngFor="let dat of questionList.response_txn ">
+            <div class="response-date">
+              <div class="circle">
+                  <img src="assets/img/dot.jpeg" alt="Attachment Icon">
+              </div>
+              <div class="straight"> </div>
+              <p>{{dat.action_date}}</p>
             </div>
-            <div class="content">
-              <ion-row>
-                <ion-col size="9">{{dat.date}}</ion-col>
-                <ion-col size="3" class="ion-text-right">
-                  <ion-button fill="clear">
-                    <ion-icon name="attach-outline"></ion-icon>
-                  </ion-button>
-                </ion-col>
-              </ion-row>
-
+           <div class="response-details">
+              <div class="d-flex">
+                <p>Response:</p>
+                <p>{{dat.corrective_action}}</p>
+              </div>
+              <div class="d-flex">
+                <p>Remark:</p>
+                <p>{{dat.remark}}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -161,4 +167,5 @@
     </ng-template>
   </ion-modal>
 </ion-content>
+
 

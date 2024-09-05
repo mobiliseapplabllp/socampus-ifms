@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{requestedData.wo_no}}</ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="primary">
+    <ion-item color="none" lines="none">
+      <ion-label color="light">{{requestedData.cat_desc}}</ion-label>
+      <svg width="40" height="40" viewBox="0 0 36 36" class="circular-chart" slot="end">
+        <path class="circle-bg"
+          d="M18 2.0845
+            a 15.9155 15.9155 0 0 1 0 31.831
+            a 15.9155 15.9155 0 0 1 0 -31.831"
+        />
+        <path class="circle"
+          [attr.stroke-dasharray]="requestedData.responded_questions * 100 / requestedData.total_questions + ', 100'"
+          d="M18 2.0845
+            a 15.9155 15.9155 0 0 1 0 31.831
+            a 15.9155 15.9155 0 0 1 0 -31.831"
+        />
+        <text x="18" y="20.35" class="percentage">{{ requestedData.responded_questions }} / {{ requestedData.total_questions }}</text>
+      </svg>
+    </ion-item>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card *ngFor="let dat of questionList;let i = index" [ngClass]="{redBorder: dat.isNotFill}" style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;padding:10px;margin:20px;border-radius: 10px;">
+    <div id={{i}}></div>
+    <ion-row >
+      <ion-col size="6">
+        <ion-text color="primary-dark" style="font-size:22px">Q.{{i+1}}</ion-text>
+      </ion-col>
+      <ion-col size="6" class="ion-text-right ion-padding-right" style="display: flex; justify-content: end;">
+        <ion-text color="primary">Scope -</ion-text> <ion-text color="primary-dark">{{dat.scope_desc}}</ion-text> </ion-col>
+      <ion-col size="12">
+        <ion-text color="primary-dark"> {{dat.q_desc}}</ion-text>
+      </ion-col>
+    </ion-row>
+
+    <ion-radio-group color="none" mode="md" [(ngModel)]="dat.rspns"  (ionChange)="changeOptionResponse(dat, $event)" >
+      <ion-item class="radioButton" *ngFor="let opt of dat.options" >
+        <ion-label>{{opt.optn_desc}}</ion-label>
+        <ion-radio slot="end" [value]="opt.optn_id"></ion-radio>
+      </ion-item>
+    </ion-radio-group>
+
+    <section class="inputbox" >
+      <ion-text color="primary" >Remarks</ion-text>
+      <ion-item lines="none" [ngClass]="{redBorder: dat.is_rmrk_mandatory === 1 && !dat.remark}">
+        <ion-textarea rows="3" type="text" [(ngModel)]="dat.remark" placeholder="Enter your Remark" [disabled]="!dat.rspns" (change)="changeRemark(dat)"></ion-textarea>
+      </ion-item>
+    </section>
+    <ion-row>
+      <ion-col size="6" >
+        <ion-button [disabled]="!dat.rspns" [ngClass]="{redBorder: dat.is_doc_mandatory === 1 && (!dat.imagename && !dat.attachment)}" [color]="!dat.imagename ? 'primary': 'success'" [fill]="!dat.imagename ? 'outline' : 'solid' " (click)="presentActionSheet(dat, 1)">
+          IMG
+          <ion-icon [name]="!dat.imagename ?  'attach-outline': 'checkmark-done-outline' " slot="end" *ngIf="!dat.imagename"></ion-icon>
+        </ion-button>
+      </ion-col>
+      <ion-col *ngIf="dat.attachment" class="ion-text-right">
+        <ion-button color="danger" (click)="viewDocs(dat.attachment)" fill="clear">
+          <ion-icon name="attach-outline"></ion-icon>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+</ion-content>
+<ion-footer >
+  <ion-toolbar color="primary-dark" style="padding: 0px 10px">
+    <ion-button expand="block" color="light" (click)="submit()">Submit <ion-icon name="arrow-forward" slot="end"></ion-icon> </ion-button>
+  </ion-toolbar>
+</ion-footer>

@@ -40,6 +40,17 @@ export class PmCalService {
     return this.https.get(environment.url + 'pmscal/get_work_order?' + url);
   }
 
+  getCategory(cat_id: any): Observable<any> {
+    return this.https.get(environment.url + 'pmscal/schedule/get_wo_categories/' + cat_id);
+  }
+
+  getQuestionList(cat_id: any, wo_id: any): Observable<any> {
+    return this.https.get(environment.url + 'pmscal/schedule/get_questions?wo_id=' + wo_id + '&cat_id=' + cat_id)
+  }
+
+  getActionableQuestion(wo_id: any): Observable<any> {
+    return this.https.get(environment.url + 'pmscal/schedule/get_actionable_ques/' + wo_id);
+  }
 
   getScheduleQuestion(wo_id: any): Observable<any> {
     return this.https.get(environment.url + 'pmscal/schedule/get_schedule_questions/' + wo_id);

@@ -15,6 +15,7 @@ import { AddResponseComponent } from './add-response/add-response.component';
 import { PtwUploadComponent } from './ptw-upload/ptw-upload.component';
 import { LogsComponent } from './logs/logs.component';
 import { ActionableComponent } from './actionable/actionable.component';
+import { FillQusComponent } from './fill-qus/fill-qus.component';
 
 @NgModule({
   imports: [
@@ -33,6 +34,7 @@ import { ActionableComponent } from './actionable/actionable.component';
     AddResponseComponent,
     PtwUploadComponent,
     LogsComponent,
-    ActionableComponent]
+    ActionableComponent,
+    FillQusComponent]
 })
 export class PmCalPageModule {}
