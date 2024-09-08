@@ -21,7 +21,6 @@ export class LogsComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.data);
     this.getPpmPending();
   }
 

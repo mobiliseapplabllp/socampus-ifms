@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
@@ -40,7 +40,7 @@
     </ion-row>
 
     <ion-radio-group color="none" mode="md" [(ngModel)]="dat.optn_id" disabled="true">
-      <ion-item class="radioButton" *ngFor="let opt of dat.options" >
+      <ion-item class="radioButton" *ngFor="let opt of dat.options" [ngClass]="{'selectedRadioButton': opt.optn_id ===  dat.optn_id }">
         <ion-label>{{opt.optn_desc}}</ion-label>
         <ion-radio slot="end" [value]="opt.optn_id" disabled></ion-radio>
       </ion-item>

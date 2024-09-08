@@ -37,54 +37,6 @@ export class ActionableComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    // arr = [{
-    //   cat:1,
-    //   name: 'amna',
-    //   desc: 'this is desc',
-    //   qus: [{
-    //     q_id: 11,
-    //     q_desc: 'this is q desc',
-    //     status: 0,
-    //     isisDtlShow: true
-    //   },{
-    //     q_id: 11,
-    //     q_desc: 'this is q desc',
-    //     status: 1,
-    //     isisDtlShow: false
-    //   },{
-    //     q_id: 11,
-    //     q_desc: 'this is q desc',
-    //     status: 0,
-    //     isisDtlShow: true
-    //   }]
-    // }]
-
-    // output = [{
-    //   cat:1,
-    //   name: 'amna',
-    //   desc: 'this is desc',
-    //   total_length:  3,
-    //   pending: 2,
-    //   qus: [{
-    //     q_id: 11,
-    //     q_desc: 'this is q desc',
-    //     status: 0,
-    //     isisDtlShow: true
-    //   },{
-    //     q_id: 11,
-    //     q_desc: 'this is q desc',
-    //     status: 1,
-    //     isisDtlShow: false
-    //   },{
-    //     q_id: 11,
-    //     q_desc: 'this is q desc',
-    //     status: 0,
-    //     isisDtlShow: true
-    //   }]
-    // }]
-
-
-
     this.activeroute.queryParams.subscribe((res: any) => {
       this.requestedData = JSON.parse(res.data);
       console.log(this.requestedData);
@@ -210,6 +162,7 @@ export class ActionableComponent  implements OnInit {
 
   openActionModal(data: any) {
     this.questionList = data;
+    console.log(this.questionList);
     this.isOpen = true;
   }
 
@@ -223,6 +176,7 @@ export class ActionableComponent  implements OnInit {
 
   onWillPresent() {
     this.isPreOpen = false;
+    this.initializeForm();
   }
 
   submitActionable() {
@@ -259,6 +213,8 @@ export class ActionableComponent  implements OnInit {
           if (dat.status) {
             this.common.presentToast(dat.msg, 'success');
             this.isOpen = false;
+            this.initializeForm();
+            this.isImgUpload = false;
             this.getScheduleUser();
           } else {
             this.common.presentToast(dat.msg, 'warning');
@@ -299,6 +255,10 @@ export class ActionableComponent  implements OnInit {
         this.dismissloading();
       }, 500);
     })
+  }
+
+  openDoc(url: string) {
+    this.common.openDoc(url);
   }
 
 }

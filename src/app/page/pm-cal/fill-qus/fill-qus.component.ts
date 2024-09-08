@@ -18,6 +18,8 @@ export class FillQusComponent  implements OnInit {
   loading: any;
   selectedLanguage!: string;
   loop!: boolean;
+  isOpen!: boolean;
+  data: any = [];
   constructor(
     private activeroute: ActivatedRoute,
     private httpPms: PmCalService,
@@ -31,6 +33,19 @@ export class FillQusComponent  implements OnInit {
     this.activeroute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
       console.log(this.requestedData);
+      this.questionList = this.requestedData.qus;
+      this.questionList.forEach((el: any) => {
+        const obj = el.options.filter((val: any) => val.optn_id === el.rspns)[0];
+        if (obj) {
+          el.is_doc_mandatory = obj.is_doc_mandatory;
+          el.is_rmrk_mandatory = obj.is_rmrk_mandatory;
+        }
+        if (!el.response) {
+          el.response = {}
+        }
+      });
+      console.log(this.questionList);
+      return;
       this.getQuestionList(this.requestedData.wo_id, this.requestedData.cat_id);
     });
   }
@@ -72,7 +87,16 @@ export class FillQusComponent  implements OnInit {
         }
       })
     })
+  }
 
+  openModal(data: any) {
+    console.log(data);
+    this.isOpen = true;
+    this.data = data;
+  }
+
+  onWillDismiss() {
+    this.isOpen = false;
   }
 
   async presentLoading(msg?: string) {
@@ -118,6 +142,7 @@ export class FillQusComponent  implements OnInit {
   }
 
   submitResponseAction(obj: any, data: any) {
+    console.log(data);
     this.presentLoading('Please Wait').then(preLoad => {
       this.httpPms.scheduleResponseAction(obj).subscribe({
         next:(dat) =>{
@@ -312,7 +337,6 @@ export class FillQusComponent  implements OnInit {
   submit() {
     let index = -1;
     for (var i = 0 ; i < this.questionList.length; i++) {
-      console.log(this.questionList[i].rspns);
       if (!this.questionList[i].rspns) {
         this.questionList[i].isNotFill = true
         index = i;
@@ -323,7 +347,7 @@ export class FillQusComponent  implements OnInit {
           index = i;
           this.common.presentToast(`Please Add Remark for Question No ${i+1}`, 'warning');
           break;
-        } else if (this.questionList[i].is_rmrk_mandatory === 1 && !this.questionList[i].remark) {
+        } else if (this.questionList[i].is_rmrk_mandatory === 1 && (!this.questionList[i].attachment1 && !this.questionList[i].imagename )) {
           index = i;
           this.common.presentToast(`Please Add Attachment for Question No ${i+1}`, 'warning');
           break;

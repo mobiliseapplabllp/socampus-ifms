@@ -9,6 +9,7 @@ import { PtwUploadComponent } from './ptw-upload/ptw-upload.component';
 import { LogsComponent } from './logs/logs.component';
 import { ActionableComponent } from './actionable/actionable.component';
 import { FillQusComponent } from './fill-qus/fill-qus.component';
+import { ClosePmComponent } from './close-pm/close-pm.component';
 
 const routes: Routes = [
   {
@@ -46,6 +47,10 @@ const routes: Routes = [
   {
     path: 'fill-qus',
     component: FillQusComponent
+  },
+  {
+    path: 'close-pm',
+    component: ClosePmComponent
   }
 ];
 

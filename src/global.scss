@@ -91,6 +91,13 @@ ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
   font-family: 'opensans_semibold' !important;
 }
 
+.selectedRadioButton {
+  border:2px solid var(--ion-color-success) !important;
+  border-radius: 10px;
+  margin-bottom:20px
+}
+
+
 .radioButton {
   border:2px solid var(--ion-color-primary);
   border-radius: 10px;

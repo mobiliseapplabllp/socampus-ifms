@@ -46,9 +46,6 @@ export class PmReportComponent  implements OnInit {
   ngOnInit() {
     this.activeroute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
-      console.log(this.requestedData);
-      // this.getScheduleQuestion();
-
     });
 
     if (this.platform.is('capacitor')) {
@@ -63,7 +60,7 @@ export class PmReportComponent  implements OnInit {
   }
 
   ionViewDidEnter() {
-    this.getCategory(this.requestedData.wo_id);
+    this.getScheduleQuestion();
   }
 
   getCategory(wo_id: any) {
@@ -78,7 +75,6 @@ export class PmReportComponent  implements OnInit {
               } else {
                 this.myCategory[i].is_applicable_temp = false;
               }
-
             }
           } else {
             this.common.presentToast(data.msg, 'warning');
@@ -97,6 +93,7 @@ export class PmReportComponent  implements OnInit {
   }
 
   openQusPage(data: any) {
+    console.log(data);
     if (!data.is_applicable_temp) {
       return;
     }
@@ -150,40 +147,57 @@ export class PmReportComponent  implements OnInit {
       this.httpPmCal.getScheduleQuestion(this.requestedData.wo_id).subscribe({
         next:(data) => {
           this.myCategory = data.data.categories;
+          console.log(this.myCategory);
           this.myCategory.forEach((element: any) => {
-            element.is_applicable === '' ? element.is_applicable = 3: element.is_applicable
             element.is_applicable_temp = element.is_applicable === 1 ? true: false;
-            element.isResponseShow = false;
-            element.rspns_count = 0;
-            let rspns_count = 0;
+            element.total_questions = element.qus.length;
+            let total_action = 0;
+            element.responded_questions = total_action;
             element.qus.forEach((el: any) => {
-              if (element.is_applicable === 3) {
-                element.rspns_count = 0
-              }
-              if(el.response) {
-                rspns_count = rspns_count + 1;
+              if (el.response) {
+                total_action = total_action + 1;
+                el.rspns = el.response.optn_id;
                 el.remark = el.response.remark;
-                el.attachment = el.response.attachment1;
-                element.rspns_count = rspns_count;
-                element.isResponseShow = true;
-                if(el.q_type == '226') {
-                  el.rspns = el.response.optn_id;
-                  if (el.rspns) {
-                    const obj = el.options.filter((val: any) => val.optn_id === el.rspns)[0];
-                    el.is_doc_mandatory = obj.is_doc_mandatory;
-                    el.is_rmrk_mandatory = obj.is_rmrk_mandatory;
-                  }
-                } else {
-                  el.rspns = el.response.rspns;
-                }
-              } else {
-                el.response = {}
+                el.attachment1 = el.response.attachment1;
+                element.responded_questions = total_action;
               }
             });
-            element.progress = Math.round(element.rspns_count * 100 / element.qus.length);
-            element.progress1 = element.progress / 100
           });
           console.log(this.myCategory);
+          // this.myCategory.forEach((element: any) => {
+          //   element.is_applicable === '' ? element.is_applicable = 3: element.is_applicable
+          //   element.is_applicable_temp = element.is_applicable === 1 ? true: false;
+          //   element.isResponseShow = false;
+          //   element.rspns_count = 0;
+          //   let rspns_count = 0;
+          //   element.qus.forEach((el: any) => {
+          //     if (element.is_applicable === 3) {
+          //       element.rspns_count = 0
+          //     }
+          //     if(el.response) {
+          //       rspns_count = rspns_count + 1;
+          //       el.remark = el.response.remark;
+          //       el.attachment = el.response.attachment1;
+          //       element.rspns_count = rspns_count;
+          //       element.isResponseShow = true;
+          //       if(el.q_type == '226') {
+          //         el.rspns = el.response.optn_id;
+          //         if (el.rspns) {
+          //           const obj = el.options.filter((val: any) => val.optn_id === el.rspns)[0];
+          //           el.is_doc_mandatory = obj.is_doc_mandatory;
+          //           el.is_rmrk_mandatory = obj.is_rmrk_mandatory;
+          //         }
+          //       } else {
+          //         el.rspns = el.response.rspns;
+          //       }
+          //     } else {
+          //       el.response = {}
+          //     }
+          //   });
+          //   element.progress = Math.round(element.rspns_count * 100 / element.qus.length);
+          //   element.progress1 = element.progress / 100
+          // });
+          // console.log(this.myCategory);
         },
         error:() => {
           this.dismissloading();
@@ -458,36 +472,47 @@ export class PmReportComponent  implements OnInit {
   }
 
   finalSubmit() {
-    const obj = {
-      status: 2,
-      wo_id: this.requestedData.wo_id,
-      source: environment.source
-    };
-    for (let i = 0; i < this.myCategory.length; i++) {
-      if (!this.myCategory[i].is_applicable) {
-        this.httpCommon.presentToastWithOk(`Please Add Response for Category ${i+1} ${this.myCategory[i].cat_desc}` , 'warning');
-        this.scrollToDiv(i.toString());
+    const NACat: any = [];
+    for (var i = 0 ; i < this.myCategory.length; i++) {
+      if (this.myCategory[i].is_applicable === 1 && (this.myCategory[i].responded_questions !== this.myCategory[i].total_questions)) {
+        this.myCategory[i].isError = true;
+        this.common.presentToast(`Please Response all Question for Category ${i+1}`, 'warning');
         return;
-      }
-      if (this.myCategory[i].is_applicable != 3) {
-        for (let j = 0; j < this.myCategory[i].qus.length; j++) {
-          if (!this.myCategory[i].qus[j].rspns) {
-            this.httpCommon.presentToastWithOk(`Please add Response for Question No ${ j + 1} from Category ${ this.myCategory[i].cat_desc }`, 'warning');
-            this.myCategory[i].qus[j].isNotFill = true;
-            this.myCategory[i].isError = true;
-            let temp = i+j.toString();;
-            setTimeout(() => {
-              this.scrollToDiv(temp);
-            }, 100);
-            return;
-          } else {
-            this.myCategory[i].isError = false;
-            this.myCategory[i].qus[j].isNotFill = false;
-          }
-        }
+      } else if (this.myCategory[i].is_applicable !== 1) {
+        NACat.push(this.myCategory[i].cat_id);
       }
     }
-
+    // for (let i = 0; i < this.myCategory.length; i++) {
+    //   if (!this.myCategory[i].is_applicable) {
+    //     this.httpCommon.presentToastWithOk(`Please Add Response for Category ${i+1} ${this.myCategory[i].cat_desc}` , 'warning');
+    //     this.scrollToDiv(i.toString());
+    //     return;
+    //   }
+    //   if (this.myCategory[i].is_applicable != 3) {
+    //     for (let j = 0; j < this.myCategory[i].qus.length; j++) {
+    //       if (!this.myCategory[i].qus[j].rspns) {
+    //         this.httpCommon.presentToastWithOk(`Please add Response for Question No ${ j + 1} from Category ${ this.myCategory[i].cat_desc }`, 'warning');
+    //         this.myCategory[i].qus[j].isNotFill = true;
+    //         this.myCategory[i].isError = true;
+    //         let temp = i+j.toString();;
+    //         setTimeout(() => {
+    //           this.scrollToDiv(temp);
+    //         }, 100);
+    //         return;
+    //       } else {
+    //         this.myCategory[i].isError = false;
+    //         this.myCategory[i].qus[j].isNotFill = false;
+    //       }
+    //     }
+    //   }
+    // }
+    const obj: any = {
+      status: 2,
+      wo_id: this.requestedData.wo_id,
+      source: environment.source,
+      na_cat: NACat
+    };
+    console.log(obj);
     this.presentLoading('Saving Data..').then(preLoad => {
       this.httpPmCal.finalSubmitCheckList(obj).subscribe({
         next:(data) => {

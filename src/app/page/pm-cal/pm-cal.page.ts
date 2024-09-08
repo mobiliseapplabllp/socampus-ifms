@@ -27,6 +27,7 @@ export class PmCalPage implements OnInit {
   // counter = 0;
   // userInfo: any = [];
   // userName!: string;
+  selectedData: any = [];
   openPm: any = [];
   openPmCopy: any = [];
   actionPm: any = [];
@@ -42,13 +43,14 @@ export class PmCalPage implements OnInit {
    searchValue: any;searchValueDesc: any;
    selectedObj: any = {};
    countObj: any = {};
+  isPreOpen!: boolean;
+  logs: any = [];
   constructor(
     private loadingController: LoadingController,
     private httpPms: PmCalService,
     private common: CommonService,
     private modalCtrl: ModalController,
     private router: Router,
-    private httpDigital: DigitalChecklistService,
     private platform: Platform
   ) { }
 
@@ -487,5 +489,51 @@ export class PmCalPage implements OnInit {
       }
     });
   }
+
+  openClose(data: any) {
+    this.router.navigate(['/pm-calibration/close-pm'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
+  }
+
+  openModal(data: any) {
+    this.isPreOpen = true;
+    this.selectedData = data;
+
+    this.getPpmPending(this.selectedData.id);
+  }
+
+  onWillDismiss() {
+    this.isPreOpen = false;
+    this.selectedData = [];
+    this.logs = [];
+  }
+
+
+  getPpmPending(id: any) {
+    this.presentLoading().then(preLoad => {
+      this.httpPms.PpmPtwApproval(id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.logs = data.data;
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+
+  }
+
+
 
 }

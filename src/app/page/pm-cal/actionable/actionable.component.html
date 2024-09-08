@@ -73,12 +73,12 @@
         </ion-toolbar>
       </ion-header>
 
-      <ion-content class="modal-content">
+      <ion-content class="modal-content1">
         <form [formGroup]="addResponse" >
           <ion-card style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;padding:10px;margin:20px;border-radius: 10px;">
             <ion-row>
               <ion-col size="6">
-                <ion-text color="primary-dark" style="font-size:22px">Q.{{questionList.rspns_id}}</ion-text>
+                <ion-text color="primary-dark" style="font-size:22px">Q.</ion-text>
               </ion-col>
               <ion-col size="6" class="ion-text-right ion-padding-right" style="display: flex; justify-content: end;">
                 <ion-text color="primary">Scope -</ion-text> <ion-text color="primary-dark">{{questionList.scope_desc}}</ion-text> </ion-col>
@@ -134,35 +134,82 @@
     </ng-template>
   </ion-modal>
 
-  <ion-modal [isOpen]="isPreOpen" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.25, 0.5, 0.75, 1]" (willDismiss)="onWillPresent()">
+  <ion-modal [isOpen]="isPreOpen" [initialBreakpoint]="0.5" [breakpoints]="[0.5, 0.8, 1]" (willDismiss)="onWillPresent()">
     <ng-template>
       <ion-header>
-        <ion-toolbar>
+        <ion-toolbar color="primary">
           <ion-title>Previous Response</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isPreOpen = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding" style="--background: #dbdbdb">
-        <div class="card">
-          <div *ngFor="let dat of questionList.response_txn ">
-            <div class="response-date">
-              <div class="circle">
-                  <img src="assets/img/dot.jpeg" alt="Attachment Icon">
+      <ion-content style="--background: #dbdbdb; overflow: scroll;">
+        <ion-card *ngIf="questionList.response_txn.length > 0">
+          <ion-card-header color="primary">Logs</ion-card-header>
+          <ion-card-content>
+            <ion-item *ngFor="let dat of questionList.response_txn">
+              <ion-label>
+                <h2>{{dat.remark}}</h2>
+                <p>{{dat.action_date}}</p>
+                <p>{{dat.emp_name}}</p>
+              </ion-label>
+              <ion-buttons slot="end">
+                <ion-button (click)="openDoc(dat.artifact)">
+                  <ion-icon name="attach-outline"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+            </ion-item>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header color="primary">Original Response</ion-card-header>
+          <ion-card-content>
+            <ion-row>
+              <ion-col size="4">Response:</ion-col>
+              <ion-col size="8">{{questionList.rspns}}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="4">remark:</ion-col>
+              <ion-col size="8">{{questionList.remark}}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="4">
+                <ion-button fill="outline" shape="round" color="success" (click)="openDoc(questionList.attachment1)">
+                  Attachment
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-card-content>
+        </ion-card>
+
+
+        <!-- <div class="container mt-4">
+          <div class="card p-3">
+              <div class="row">
+                  <div class="col-1 text-center">
+                      <div class="images"> <img src="assets/img/dot.jpeg"></div>
+                      <div class="line"></div>
+                  </div>
+                  <div class="col-11">
+                      <p class="date">24 Feb 2024</p>
+                      <div class="d-flex justify-content-between ">
+                          <div>
+                              <p class="response-text">Response</p>
+                              <p class="remark-text">Remark</p>
+                          </div>
+                          <div>
+                              <p class="response-text">NA</p>
+                              <p class="remark-text">Remark</p>
+                          </div>
+                      </div>
+                  </div>
               </div>
-              <div class="straight"> </div>
-              <p>{{dat.action_date}}</p>
             </div>
-           <div class="response-details">
-              <div class="d-flex">
-                <p>Response:</p>
-                <p>{{dat.corrective_action}}</p>
-              </div>
-              <div class="d-flex">
-                <p>Remark:</p>
-                <p>{{dat.remark}}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+          </div> -->
       </ion-content>
     </ng-template>
   </ion-modal>

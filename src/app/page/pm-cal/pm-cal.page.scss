@@ -2,6 +2,10 @@
 //   font-weight: 550;
 // }
 
+ion-modal {
+  --border-radius: 20px 20px 0 0; /* Apply border-radius to the top */
+}
+
 
 .cards {
   box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
@@ -31,3 +35,73 @@
   padding: 6px 12px;
   cursor: pointer;
 }
+
+.approver_card {
+  font-family: 'opensans_light' !important;
+  font-size:10px;
+  color: var(--ion-color-primary-dark);
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+  margin-top:0px;
+  ion-content {
+    ion-row {
+      ion-col:nth-child(odd) {
+        color: color(--ion-color-medium);
+      }
+    }
+  }
+}
+
+
+.images {
+  border: 2px solid #C4C4C4;
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+  margin-left: -7px;
+  background-color: #fff ;
+  text-align: center;
+}
+
+.line {
+  height: 100%;
+  width: 3px;
+  background-color: #C4C4C4;
+  position: relative;
+  margin-left: 6px;
+}
+
+.date {
+  font-size: 16px;
+  font-weight: bold;
+  color: #212486;
+}
+
+.response-text, .remark-text {
+  font-size: 14px;
+  color: #212486;
+  margin-bottom: 0;
+}
+
+.attachment-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.card {
+  background-color: #F5F6FA;
+
+  padding: 15px;
+}
+
+.row {
+  // margin-bottom: 15px;
+  border:1px solid black;
+}
+
+.container {
+  max-width: 500px;
+}
+
+
+
+

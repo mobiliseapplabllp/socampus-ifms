@@ -25,10 +25,16 @@
   text-anchor: middle;
 }
 
+.button_err {
+  box-shadow: 10px 10px 10px rgb(225, 71, 71);
+  --background: red !important
+}
 .redBorder {
   border:2px solid var(--ion-color-danger) !important;
 }
 
-ion-content {
+.modal-content1 {
   --background:linear-gradient(180deg, var(--ion-color-primary), var(--ion-color-primary-dark));
 }
+
+

@@ -154,7 +154,7 @@ export class PmCalService {
   }
 
   finalSubmitCheckList(formData: any): Observable<any> {
-    return this.https.post(environment.url + 'pmscal/schedule/update_schedule_status__', formData);
+    return this.https.post(environment.url + 'pmscal/schedule/update_schedule_status', formData);
   }
 
   getOtherCategory() : Observable<any> {

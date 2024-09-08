@@ -24,13 +24,7 @@
     </ion-row>
   </ion-toolbar>
 </ion-header>
-
 <ion-content>
-  <!-- <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
-    <ion-fab-button fill="clear" color="primary" (click)="cretePM()">
-      <ion-icon name="add-outline"></ion-icon>
-    </ion-fab-button>
-  </ion-fab> -->
   <div [ngSwitch]='status' class="mostOuter">
     <div *ngSwitchCase="'open'">
       <ion-row>
@@ -60,9 +54,6 @@
         <ion-item>
           <ion-checkbox style="margin-right:16px" [(ngModel)]="dat.isSelect" (click)="changeCheckbox(dat.isSelect)"></ion-checkbox>
           <ion-label color="primary-dark">WO {{dat.wo_no}}</ion-label>
-          <ion-buttons slot="end">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-buttons>
         </ion-item>
         <ion-grid style="margin-left:10px;margin-right:10px;margin-top:0px">
           <ion-row>
@@ -88,13 +79,13 @@
           <ion-row *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
             <ion-col size="5">Ptw Status</ion-col>
             <ion-col>
-              <ion-chip size="small" style="color:orange" expand="block" color="warning">PTW In Approval </ion-chip>
+              <ion-chip size="small" style="color:orange" expand="block" color="warning" (click)="openModal(dat)">PTW In Approval </ion-chip>
             </ion-col>
           </ion-row>
           <ion-row *ngIf="dat.ptw_status === '0' && dat.ptw_mandatory === 1 ">
             <ion-col size="5">Ptw Status</ion-col>
             <ion-col>
-              <ion-chip size="small" color="danger" expand="block" color="warning">PTW Rejected </ion-chip>
+              <ion-chip size="small" color="danger" expand="block" color="danger"  (click)="openModal(dat)">PTW Rejected </ion-chip>
             </ion-col>
           </ion-row>
           <ion-row style="border-top: 1px solid #c2c2c2ab">
@@ -111,61 +102,6 @@
             </ion-col>
           </ion-row>
         </ion-grid>
-
-        <!-- <ion-card-header color="primary" style="padding:0px">
-          <ion-row class="ion-no-padding">
-            <ion-col size="1" class="center">
-              <ion-checkbox color="danger" [(ngModel)]="dat.isSelect" (click)="changeCheckbox(dat.isSelect)"></ion-checkbox>
-            </ion-col>
-            <ion-col size="7" style="display: flex;align-items: center;">
-              <b>{{i+1}}. {{dat.pc_desc}} ( {{dat.chklist_desc}} )</b>
-            </ion-col>
-            <ion-col size="4" class="center">
-              {{dat.log_date}}
-            </ion-col>
-            <ion-col size=""></ion-col>
-          </ion-row>
-        </ion-card-header>
-        <ion-card-content style="background-color: var(--ion-color-light);padding-bottom: 0px !important;">
-
-          <ion-row>
-            <ion-col size="6">
-              <ion-text color="medium">WO </ion-text><br>
-              <ion-text color="dark">{{dat.wo_no}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Asset Id</ion-text><br>
-              <ion-text color="dark">{{dat.ext_asset_id || 'NA'}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Asset Name</ion-text><br>
-              <ion-text color="dark">{{dat.subgrp_desc || 'NA'}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Assigned To</ion-text><br>
-              <ion-text color="dark">{{dat.user}}-{{dat.username}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row >
-            <ion-col size="4">
-              <ion-button class="ion-text-capitalize" color="secondary" size="small" expand="block" (click)="pmAssign(dat)"> Assign </ion-button>
-            </ion-col>
-            <ion-col size="4">
-              <div *ngIf="dat.can_fill_chklist && dat.stage_id === 1 ">
-                <ion-button class="ion-text-capitalize" size="small" color="danger" *ngIf="((!dat.ptw_attach && dat.ptw_mandatory === 1) || (dat.ptw_status === '0' && dat.ptw_mandatory === 1 ))" expand="block" (click)="uploadPtw(dat)" >Upload PTW</ion-button>
-              </div>
-            </ion-col>
-            <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
-              <ion-button class="ion-text-capitalize" color="tertiary" size="small" expand="block" (click)="openFillReport(dat)" *ngIf="(dat.ptw_attach !== '' && dat.ptw_status === '1') || dat.ptw_mandatory === 0">Fill Checklist  </ion-button>
-            </ion-col>
-            <ion-col size="6" *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
-              <ion-button size="small" expand="block" color="warning">PTW In Approval </ion-button>
-            </ion-col>
-            <ion-col size="6" *ngIf="dat.ptw_status === '0' && dat.ptw_mandatory === 1 ">
-              <ion-button size="small" expand="block" color="danger">PTW Rejected </ion-button>
-            </ion-col>
-          </ion-row>
-        </ion-card-content> -->
       </ion-card>
       <ion-infinite-scroll [hidden]="currentPage > lastPage" *ngIf="openPm.length > 0"  threshold="100px" (ionInfinite)="loadData($event, 1)">
         <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
@@ -216,50 +152,6 @@
           </ion-row>
         </ion-grid>
       </ion-card>
-
-      <!-- <ion-card class="myCard" *ngFor="let dat of actionPm; let i = index" >
-        <ion-card-header color="primary" class="ion-no-padding">
-          <ion-item color="none" lines="none">
-             <b>{{i+1}}. {{dat.pc_desc}} ({{dat.chklist_desc}})</b>
-            <ion-text slot="end" class="center">{{dat.pending_action}}</ion-text>
-          </ion-item>
-        </ion-card-header>
-        <ion-card-content class="ion-padding-start ion-padding-end" style="background-color: var(--ion-color-light);padding-bottom:0px !important">
-          <ion-row>
-            <ion-col size="6">
-              <ion-text color="medium">WO </ion-text><br>
-              <ion-text color="dark">{{dat.wo_no}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Date</ion-text><br>
-              <ion-text color="dark">{{dat.log_date}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Asset Id</ion-text><br>
-              <ion-text color="dark">{{dat.ext_asset_id || 'NA'}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Asset Name</ion-text><br>
-              <ion-text color="dark">{{dat.subgrp_desc || 'NA'}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Assigned To</ion-text><br>
-              <ion-text color="dark">{{dat.user}}-{{dat.username}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col>
-              <ion-button size="small" fill="outline" (click)="pmAssign(dat)" expand="block">Assign</ion-button>
-            </ion-col>
-            <ion-col>
-              <ion-button class="ion-text-capitalize" size="small" color="medium" *ngIf="dat.ptw_attach" expand="block" (click)="viewAttachment(dat.ptw_attach)" >PTW Img</ion-button>
-            </ion-col>
-            <ion-col>
-              <ion-button size="small"  color="success" (click)="openViewReport(dat)" expand="block">View Report</ion-button>
-            </ion-col>
-          </ion-row>
-        </ion-card-content>
-      </ion-card> -->
       <ion-infinite-scroll *ngIf="actionPm.length > 0" [hidden]="currentPage > lastPage" threshold="100px" (ionInfinite)="loadData($event, 2)">
         <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
       </ion-infinite-scroll>
@@ -296,57 +188,95 @@
           </ion-row>
           <ion-row>
             <ion-col class="ion-text-right" >
-              <ion-button size="small" fill="outline" shape="round" color="primary-dark" (click)="openViewReport(dat)" >
+              <ion-button size="small" fill="outline" shape="round" color="primary-dark" (click)="openClose(dat)" >
                 Check Report <ion-icon name="share-outline" slot="end"></ion-icon>
               </ion-button>
             </ion-col>
           </ion-row>
         </ion-grid>
       </ion-card>
-      <!-- <ion-card class="myCard" *ngFor="let dat of closePm; let i = index" >
-        <ion-card-header color="primary">
-          <ion-text> <b>{{i+1}}. {{dat.pc_desc}} ( {{dat.chklist_desc}} )</b> </ion-text>
-        </ion-card-header>
-        <ion-card-content class="ion-padding-start ion-padding-end" style="background-color: var(--ion-color-light);padding-bottom:0px !important">
-          <ion-row>
-            <ion-col size="6">
-              <ion-text color="medium">WO </ion-text><br>
-              <ion-text color="dark">{{dat.wo_no}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Date</ion-text><br>
-              <ion-text color="dark">{{dat.log_date}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <div>
-                <ion-text color="medium">Asset Id</ion-text><br>
-                <ion-text color="dark">{{dat.ext_asset_id || 'NA'}}</ion-text>
-              </div>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Asset Name</ion-text><br>
-              <ion-text>{{dat.subgrp_desc || 'NA'}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Closed Date</ion-text><br>
-              <ion-text color="dark">{{dat.closed_date}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col>
-              <ion-button class="ion-text-capitalize" size="small" color="medium" *ngIf="dat.ptw_attach" expand="block" (click)="viewAttachment(dat.ptw_attach)" >PTW Img</ion-button>
-            </ion-col>
-            <ion-col class="ion-text-right">
-              <ion-button size="small"  color="tertiary" (click)="openViewReport(dat)" >
-                Check Report <ion-icon name="share-outline" slot="end"></ion-icon>
-              </ion-button>
-            </ion-col>
-          </ion-row>
-        </ion-card-content>
-      </ion-card> -->
       <ion-infinite-scroll threshold="100px" [hidden]="currentPage > lastPage" (ionInfinite)="loadData($event, 3)" *ngIf="closePm.length > 0" >
         <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
       </ion-infinite-scroll>
     </div>
   </div>
+
+  <ion-modal [isOpen]="isPreOpen" [initialBreakpoint]="0.8" [breakpoints]="[0.8, 1]" (willDismiss)="onWillDismiss()">
+    <ng-template>
+      <ion-header>
+        <ion-item lines="none">
+          <ion-label>
+            <h2><ion-text color="primary-dark">{{selectedData.wo_no}}</ion-text></h2>
+            <p ><ion-text color="primary-dark" style="font-family: 'opensans_light' !important;">Approver Transaction</ion-text></p>
+          </ion-label>
+          <ion-buttons slot="end">
+            <ion-button (click)="isPreOpen = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-item>
+      </ion-header>
+      <ion-content>
+        <div style="padding:16px">
+          <ion-grid style="border:1px solid red">
+            <ion-row class="row" *ngFor="let dat of logs">
+              <ion-col size="1" class="ion-padding-start">
+                <div class="images"> <img src="assets/img/dot.jpeg"></div>
+                <div class="line"></div>
+              </ion-col>
+              <ion-col size="11" >
+                <ion-card class="approver_card">
+                  <ion-card-content class="ion-no-padding">
+                    <ion-row style="width:100%;height:auto;padding:5px;background-color:rgb(230, 232, 254)">
+                      <ion-col size="6">{{dat.status}}</ion-col>
+                      <ion-col class="ion-text-right">
+                        <ion-icon name="attach-outline" (click)="viewAttachment(dat.ptw_attach)"></ion-icon>
+                      </ion-col>
+                    </ion-row>
+                    <ion-row>
+                      <ion-col size="4" color="medium">Approver By</ion-col>
+                      <ion-col>{{dat.ap_name}} {{dat.ap_lname}}</ion-col>
+                    </ion-row>
+                    <ion-row>
+                      <ion-col size="6" color="medium">Approver Date</ion-col>
+                      <ion-col>{{dat.created_at}}</ion-col>
+                    </ion-row>
+                    <ion-row>
+                      <ion-col size="6" color="medium">Remark</ion-col>
+                      <ion-col>{{dat.ptw_remark}}</ion-col>
+                    </ion-row>
+                  </ion-card-content>
+                </ion-card>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+
+
+<!--
+        <ion-card *ngFor="let dat of logs" class="approver_card">
+          <ion-card-content class="ion-no-padding">
+            <ion-row style="width:100%;height:auto;padding:5px;background-color:rgb(230, 232, 254)">
+              <ion-col size="6">{{dat.status}}</ion-col>
+              <ion-col class="ion-text-right">
+                <ion-icon name="attach-outline" (click)="viewAttachment(dat.ptw_attach)"></ion-icon>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="6" color="medium">Approver By</ion-col>
+              <ion-col size="6">{{dat.ap_name}} {{dat.ap_lname}}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="6" color="medium">Approver Date</ion-col>
+              <ion-col>{{dat.created_at}}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="6" color="medium">Remark</ion-col>
+              <ion-col size="6">{{dat.ptw_remark}}</ion-col>
+            </ion-row>
+          </ion-card-content>
+        </ion-card> -->
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

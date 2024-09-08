@@ -16,6 +16,7 @@ import { PtwUploadComponent } from './ptw-upload/ptw-upload.component';
 import { LogsComponent } from './logs/logs.component';
 import { ActionableComponent } from './actionable/actionable.component';
 import { FillQusComponent } from './fill-qus/fill-qus.component';
+import { ClosePmComponent } from './close-pm/close-pm.component';
 
 @NgModule({
   imports: [
@@ -35,6 +36,8 @@ import { FillQusComponent } from './fill-qus/fill-qus.component';
     PtwUploadComponent,
     LogsComponent,
     ActionableComponent,
-    FillQusComponent]
+    FillQusComponent,
+    ClosePmComponent
+  ]
 })
 export class PmCalPageModule {}

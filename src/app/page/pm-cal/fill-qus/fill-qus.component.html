@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
@@ -25,7 +25,7 @@
     </ion-item>
   </ion-toolbar>
 </ion-header>
-<ion-content>
+<ion-content class="modal-content1">
   <ion-card *ngFor="let dat of questionList;let i = index" [ngClass]="{redBorder: dat.isNotFill}" style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;padding:10px;margin:20px;border-radius: 10px;">
     <div id={{i}}></div>
     <ion-row >
@@ -37,10 +37,13 @@
       <ion-col size="12">
         <ion-text color="primary-dark"> {{dat.q_desc}}</ion-text>
       </ion-col>
+      <ion-col size="12" style="display:flex;justify-content: right;">
+        <div (click)="openModal(dat)" style="height:24px;width:24px;border-radius: 50%;color:white;background-color: var(--ion-color-primary);" class="center">?</div>
+      </ion-col>
     </ion-row>
 
     <ion-radio-group color="none" mode="md" [(ngModel)]="dat.rspns"  (ionChange)="changeOptionResponse(dat, $event)" >
-      <ion-item class="radioButton" *ngFor="let opt of dat.options" >
+      <ion-item class="radioButton" *ngFor="let opt of dat.options" [ngClass]="{'selectedRadioButton': opt.optn_id ===  dat.rspns }">
         <ion-label>{{opt.optn_desc}}</ion-label>
         <ion-radio slot="end" [value]="opt.optn_id"></ion-radio>
       </ion-item>
@@ -54,18 +57,52 @@
     </section>
     <ion-row>
       <ion-col size="6" >
-        <ion-button [disabled]="!dat.rspns" [ngClass]="{redBorder: dat.is_doc_mandatory === 1 && (!dat.imagename && !dat.attachment)}" [color]="!dat.imagename ? 'primary': 'success'" [fill]="!dat.imagename ? 'outline' : 'solid' " (click)="presentActionSheet(dat, 1)">
-          IMG
-          <ion-icon [name]="!dat.imagename ?  'attach-outline': 'checkmark-done-outline' " slot="end" *ngIf="!dat.imagename"></ion-icon>
+        <ion-button [disabled]="!dat.rspns"
+
+        [color]="dat.is_doc_mandatory === 1 && (!dat.imagename && !dat.attachment1) ? 'danger': (dat.imagename || dat.attachment1) ? 'success': 'primary' "
+        [fill]="dat.is_doc_mandatory === 1 && (!dat.imagename && !dat.attachment1) ? 'outline': 'solid'"
+        (click)="presentActionSheet(dat, 1)">
+        IMG
+        <ion-icon [name]="!dat.imagename ?  'attach-outline': 'checkmark-done-outline' " slot="end" *ngIf="!dat.imagename"></ion-icon>
         </ion-button>
       </ion-col>
-      <ion-col *ngIf="dat.attachment" class="ion-text-right">
-        <ion-button color="danger" (click)="viewDocs(dat.attachment)" fill="clear">
+      <ion-col *ngIf="dat.attachment1" class="ion-text-right">
+        <ion-button color="danger" (click)="viewDocs(dat.attachment1)" fill="clear">
           <ion-icon name="attach-outline"></ion-icon>
         </ion-button>
       </ion-col>
     </ion-row>
   </ion-card>
+  <ion-modal [isOpen]="isOpen" [initialBreakpoint]="0.3" (willDismiss)="onWillDismiss()">
+    <ng-template>
+      <ion-content class="ion-padding-start">
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Requirement</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.requirement}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Sla</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.sla}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Critical Desc</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.critical_desc}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Scope Desc</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.scope_desc}}</ion-col>
+        </ion-row>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
 <ion-footer >
   <ion-toolbar color="primary-dark" style="padding: 0px 10px">
