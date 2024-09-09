@@ -249,7 +249,9 @@ export class PmCalPage implements OnInit {
   async uploadPtw(dat: any) {
     const modal = await this.modalCtrl.create({
       component: PtwUploadComponent,
-      cssClass: 'my-modal2',
+      cssClass: 'my-modal-bottom',
+      initialBreakpoint: 0.5, // Set to 50% of the screen height
+      breakpoints: [0, 0.5, 1],
       componentProps : {
         data: dat
       }

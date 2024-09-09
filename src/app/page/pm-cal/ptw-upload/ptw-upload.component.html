@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar >
     <ion-title>Upload PTW</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="closeModal(null, false)">
@@ -9,13 +9,17 @@
   </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding">
-  <ion-item>
-    <ion-label position="floating">Enter Remarks <ion-text color="danger">*</ion-text> </ion-label>
-    <ion-textarea rows="4" [(ngModel)]="remark"></ion-textarea>
-  </ion-item>
+  <section class="inputbox">
+    <ion-text color="primary" >Enter Remark</ion-text>
+    <ion-item lines="none">
+      <ion-textarea rows="3" type="text" placeholder="Enter Remark here..." [(ngModel)]="remark"> </ion-textarea>
+    </ion-item>
+  </section>
   <ion-row>
     <ion-col size="4">
-      <ion-button size="small" [color]="img_temp ? 'success': 'primary' " fill="outline" (click)="presentActionSheet()">Photo</ion-button>
+      <ion-button [color]="img_temp ? 'success': 'primary' " fill="outline" (click)="presentActionSheet()">
+        Photo  <ion-icon [name]="img_temp ? 'checkmark-done-outline' : 'attach-outline'"></ion-icon>
+      </ion-button>
     </ion-col>
     <ion-col size="8" class="ion-text-right">
       <label for="choose-file3" class="custom-file-upload" id="choose-file-label"> Upload Document </label><br><ion-text color="danger" style="font-size:10px">{{doc_temp}}</ion-text>
@@ -25,7 +29,7 @@
   </ion-row>
   <ion-row>
     <ion-col class="ion-text-center">
-      <ion-button color="primary" expand="block" (click)="uploadPtw()">Submit</ion-button>
+      <ion-button color="primary" expand="block" (click)="uploadPtw()">Submit <ion-icon name="chevron-forward-outline" slot="end"></ion-icon></ion-button>
     </ion-col>
   </ion-row>
 </ion-content>

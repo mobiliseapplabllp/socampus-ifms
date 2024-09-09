@@ -116,6 +116,10 @@ ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
   padding: 25px;
 }
 
+.my-modal-bottom {
+  --border-radius: 20px;
+}
+
 .custom-otp-container {
   display: flex;
   justify-content: space-between;
