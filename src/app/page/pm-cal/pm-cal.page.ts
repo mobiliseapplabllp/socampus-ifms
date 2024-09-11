@@ -38,13 +38,15 @@ export class PmCalPage implements OnInit {
   lastPage: any;
   currentPage = 1;
   myWorkOrder: any = [];
-   selectedPms: any = [];
-   searchBy: any;
-   searchValue: any;searchValueDesc: any;
-   selectedObj: any = {};
-   countObj: any = {};
+  selectedPms: any = [];
+  searchBy: any;
+  searchValue: any;searchValueDesc: any;
+  selectedObj: any = {};
+  countObj: any = {};
   isPreOpen!: boolean;
+  isCloseAction!: boolean;
   logs: any = [];
+  closeRemark!: string
   constructor(
     private loadingController: LoadingController,
     private httpPms: PmCalService,
@@ -168,6 +170,46 @@ export class PmCalPage implements OnInit {
     this.actionPmCopy = [];
     this.closePm = [];
     this.closePmCopy = [];
+  }
+
+  multiCancel() {
+    this.isCloseAction = true;
+  }
+
+  multiCancelAction() {
+    if (!this.closeRemark) {
+      this.common.presentToast('Please Enter Remark', 'warning');
+      return;
+    }
+    let submitObj: any, arr =this.openPm.filter((val: any) => val.isSelect == true).map((item: any) => item.id);
+    submitObj = {
+      id: arr,
+      data: {
+        cancel_remark: this.closeRemark
+      }
+    }
+    this.presentLoading().then(preLoad => {
+      this.httpPms.closePms(submitObj).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            this.closeRemark = '';
+            this.isCloseAction = false;
+            this.openPm = this.openPm.filter((item: any) => !arr.includes(item.id));
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+
   }
 
   multiAssign() {
@@ -511,6 +553,10 @@ export class PmCalPage implements OnInit {
     this.isPreOpen = false;
     this.selectedData = [];
     this.logs = [];
+  }
+
+  onWillDismissClose() {
+    this.isCloseAction = false;
   }
 
 

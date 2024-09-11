@@ -17,9 +17,12 @@
         <ion-label>CLOSED({{countObj.closeddWo}})</ion-label>
       </ion-segment-button>
     </ion-segment>
-    <ion-row *ngIf="selectedPms.length > 0">
-      <ion-col class="ion-text-right">
-        <ion-button size="small" (click)="multiAssign()">Assign <ion-icon name="arrow-forward-outline" slot="end"></ion-icon></ion-button>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="selectedPms.length > 0">
+    <ion-row >
+      <ion-col  class="ion-text-right">
+        <ion-button size="small" (click)="multiCancel()">Cancel </ion-button>
+        <ion-button size="small" (click)="multiAssign()">Assign </ion-button>
       </ion-col>
     </ion-row>
   </ion-toolbar>
@@ -218,7 +221,7 @@
       </ion-header>
       <ion-content>
         <div style="padding:16px">
-          <ion-grid style="border:1px solid red">
+          <ion-grid>
             <ion-row class="row" *ngFor="let dat of logs">
               <ion-col size="1" class="ion-padding-start">
                 <div class="images"> <img src="assets/img/dot.jpeg"></div>
@@ -251,31 +254,36 @@
             </ion-row>
           </ion-grid>
         </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 
-
-<!--
-        <ion-card *ngFor="let dat of logs" class="approver_card">
-          <ion-card-content class="ion-no-padding">
-            <ion-row style="width:100%;height:auto;padding:5px;background-color:rgb(230, 232, 254)">
-              <ion-col size="6">{{dat.status}}</ion-col>
-              <ion-col class="ion-text-right">
-                <ion-icon name="attach-outline" (click)="viewAttachment(dat.ptw_attach)"></ion-icon>
-              </ion-col>
-            </ion-row>
-            <ion-row>
-              <ion-col size="6" color="medium">Approver By</ion-col>
-              <ion-col size="6">{{dat.ap_name}} {{dat.ap_lname}}</ion-col>
-            </ion-row>
-            <ion-row>
-              <ion-col size="6" color="medium">Approver Date</ion-col>
-              <ion-col>{{dat.created_at}}</ion-col>
-            </ion-row>
-            <ion-row>
-              <ion-col size="6" color="medium">Remark</ion-col>
-              <ion-col size="6">{{dat.ptw_remark}}</ion-col>
-            </ion-row>
-          </ion-card-content>
-        </ion-card> -->
+  <ion-modal [isOpen]="isCloseAction" [initialBreakpoint]="0.5" [breakpoints]="[0.5,0.8, 1]" (willDismiss)="onWillDismissClose()">
+    <ng-template>
+      <ion-header>
+        <ion-item lines="none">
+          <ion-label>
+            <h2><ion-text color="primary-dark">Close WO</ion-text></h2>
+          </ion-label>
+          <ion-buttons slot="end">
+            <ion-button (click)="isCloseAction = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-item>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <section class="inputbox">
+          <ion-text color="primary" >Enter Remark</ion-text>
+          <ion-item lines="none">
+            <ion-textarea rows="3" type="text" placeholder="Enter Remark here..." [(ngModel)]="closeRemark"> </ion-textarea>
+          </ion-item>
+        </section>
+        <ion-row>
+          <ion-col >
+            <ion-button expand="block" (click)="multiCancelAction()">Submit</ion-button>
+          </ion-col>
+        </ion-row>
       </ion-content>
     </ng-template>
   </ion-modal>

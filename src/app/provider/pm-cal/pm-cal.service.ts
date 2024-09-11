@@ -64,6 +64,10 @@ export class PmCalService {
     return this.https.post(environment.url + 'pmscal/schedule/update_user_action', formData)
   }
 
+  closePms(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'pmscal/cancel_wo_action', formData);
+  }
+
   verifyBarcode(barcode: any, sid: any) {
     return this.https.get(environment.url + 'verify_pms_barcode_sales.php?barcode_no=' + barcode + '&schedule_id=' + sid);
   }
