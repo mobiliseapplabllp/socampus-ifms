@@ -8,6 +8,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
+import { count } from 'console';
 
 @Component({
   selector: 'app-pm-report',
@@ -28,6 +29,7 @@ export class PmReportComponent  implements OnInit {
   isOpen = false;
   questionList: any = [];
   category: any = [];
+  selectedCategory = 0;
   constructor(
     private activeroute: ActivatedRoute,
     private alertController: AlertController,
@@ -151,8 +153,12 @@ export class PmReportComponent  implements OnInit {
           this.myCategory.forEach((element: any) => {
             element.is_applicable_temp = element.is_applicable === 1 ? true: false;
             element.total_questions = element.qus.length;
-            let total_action = 0;
+            let total_action = 0, count = 0;
             element.responded_questions = total_action;
+            count = count + 1
+            if(element.is_applicable === 1) {
+
+            }
             element.qus.forEach((el: any) => {
               if (el.response) {
                 total_action = total_action + 1;
@@ -162,7 +168,9 @@ export class PmReportComponent  implements OnInit {
                 element.responded_questions = total_action;
               }
             });
+            this.selectedCategory = count
           });
+
           console.log(this.myCategory);
           // this.myCategory.forEach((element: any) => {
           //   element.is_applicable === '' ? element.is_applicable = 3: element.is_applicable

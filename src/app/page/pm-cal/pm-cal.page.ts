@@ -172,15 +172,17 @@ export class PmCalPage implements OnInit {
     this.closePmCopy = [];
   }
 
+
+  singleCancel(data: any) {
+    this.isCloseAction = true;
+    data.isSelect = true;
+  }
+
   multiCancel() {
     this.isCloseAction = true;
   }
 
-  multiCancelAction() {
-    if (!this.closeRemark) {
-      this.common.presentToast('Please Enter Remark', 'warning');
-      return;
-    }
+  filterIds() {
     let submitObj: any, arr =this.openPm.filter((val: any) => val.isSelect == true).map((item: any) => item.id);
     submitObj = {
       id: arr,
@@ -188,6 +190,15 @@ export class PmCalPage implements OnInit {
         cancel_remark: this.closeRemark
       }
     }
+    this.multiCancelAction(submitObj);
+  }
+
+  multiCancelAction(submitObj: any) {
+    if (!this.closeRemark) {
+      this.common.presentToast('Please Enter Remark', 'warning');
+      return;
+    }
+
     this.presentLoading().then(preLoad => {
       this.httpPms.closePms(submitObj).subscribe({
         next:(data: any) => {
@@ -195,7 +206,7 @@ export class PmCalPage implements OnInit {
             this.common.presentToast(data.msg, 'success');
             this.closeRemark = '';
             this.isCloseAction = false;
-            this.openPm = this.openPm.filter((item: any) => !arr.includes(item.id));
+            this.openPm = this.openPm.filter((item: any) => !submitObj.id.includes(item.id));
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -226,7 +237,9 @@ export class PmCalPage implements OnInit {
   async pmAssign(dat: any) {
     const modal = await this.modalCtrl.create({
       component: PmAssignComponent,
-      cssClass: 'my-modal',
+      cssClass: 'my-modal-bottom',
+      initialBreakpoint: 0.8, // Set to 50% of the screen height
+      breakpoints: [0.8],
       componentProps: { data: dat }
     });
     modal.onWillDismiss().then(disModal => {
@@ -292,8 +305,8 @@ export class PmCalPage implements OnInit {
     const modal = await this.modalCtrl.create({
       component: PtwUploadComponent,
       cssClass: 'my-modal-bottom',
-      initialBreakpoint: 0.5, // Set to 50% of the screen height
-      breakpoints: [0, 0.5, 1],
+      initialBreakpoint: 0.6, // Set to 50% of the screen height
+      breakpoints: [0, 0.6, 1],
       componentProps : {
         data: dat
       }
@@ -354,6 +367,7 @@ export class PmCalPage implements OnInit {
   }
 
   changeSeg(ev: any) {
+    this.selectedPms = [];
     if (ev.target.value == 'open') {
       this.lastSegment = 1;
       this.getPm(this.lastSegment);
@@ -545,7 +559,6 @@ export class PmCalPage implements OnInit {
   openModal(data: any) {
     this.isPreOpen = true;
     this.selectedData = data;
-
     this.getPpmPending(this.selectedData.id);
   }
 

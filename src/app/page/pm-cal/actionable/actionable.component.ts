@@ -78,10 +78,11 @@ export class ActionableComponent  implements OnInit {
             this.arrangeArr(data.data.categories);
             let originalarr = data.data.categories;
             this.actionableArr = originalarr.reduce((acc: any, curr: any) => {
-              let qusWithCatDesc = curr.qus.filter((qusItem: any) => qusItem.isDtlShow && qusItem.status === 0)
-                .map((qusItem: any) => ({
+              let qusWithCatDesc = curr.qus.filter((qusItem: any, index: number) => qusItem.isDtlShow && qusItem.status === 0)
+                .map((qusItem: any, index: any) => ({
                   ...qusItem,
-                  cat_desc: curr.cat_desc
+                  cat_desc: curr.cat_desc,
+                  index: index
                 }));
               return acc.concat(qusWithCatDesc);
             }, []);
@@ -124,10 +125,11 @@ export class ActionableComponent  implements OnInit {
         next:(data) =>{
           if (data.status) {
             const originalarr = data.data?.categories;
-            this.actionableArr = originalarr.reduce((acc: any, curr: any) => {
+            this.actionableArr = originalarr.reduce((acc: any, curr: any, index: number) => {
               let qusWithCatDesc = curr.qus.map((qusItem: any) => ({
                 ...qusItem,
-                cat_desc: curr.cat_desc
+                cat_desc: curr.cat_desc,
+                index: index
               }));
               return acc.concat(qusWithCatDesc);
             }, []);

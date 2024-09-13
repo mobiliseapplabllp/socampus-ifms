@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-title>Assign</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="closeModal(null, false)">
@@ -17,7 +17,7 @@
     <ion-label class="ion-text-wrap">
       {{dat.label}}
     </ion-label>
-    <ion-button slot="end" color="primary" (click)="submit(dat)">
+    <ion-button slot="end" fill="outline" color="primary" (click)="submit(dat)">
       Assign
     </ion-button>
   </ion-item>

@@ -32,8 +32,8 @@ export class AppComponent {
     private loadingController: LoadingController,
     private common: CommonService) {
       this.platform.ready().then(res => {
-        this.initApp()
-        this.getUserData();
+        // this.initApp()
+        // this.getUserData();
       });
   }
 
@@ -51,6 +51,7 @@ export class AppComponent {
       this.router.navigateByUrl('/login/splash');
       this.initIdle();
     }
+    return;
     const isLogin = localStorage.getItem('isAlreadyLogin');
     if (!isLogin) {
       this.router.navigateByUrl('/login', { replaceUrl: true });

@@ -58,7 +58,6 @@
     <ion-row>
       <ion-col size="6" >
         <ion-button [disabled]="!dat.rspns"
-
         [color]="dat.is_doc_mandatory === 1 && (!dat.imagename && !dat.attachment1) ? 'danger': (dat.imagename || dat.attachment1) ? 'success': 'primary' "
         [fill]="dat.is_doc_mandatory === 1 && (!dat.imagename && !dat.attachment1) ? 'outline': 'solid'"
         (click)="presentActionSheet(dat, 1)">
@@ -75,6 +74,16 @@
   </ion-card>
   <ion-modal [isOpen]="isOpen" [initialBreakpoint]="0.3" (willDismiss)="onWillDismiss()">
     <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>More Information</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isOpen = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
       <ion-content class="ion-padding-start">
         <ion-row>
           <ion-col size="4">

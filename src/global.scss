@@ -117,8 +117,23 @@ ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
 }
 
 .my-modal-bottom {
-  --border-radius: 20px;
+  --border-radius: 20px 20px 0px 0px;
 }
+
+.my-modal-btm {
+  --height: 50%;
+  --border-radius: 5px;
+  padding: 25px;
+  border:2px solid green;
+  .dialog {
+    position: absolute !important;
+    bottom: 0px !important;
+  }
+  .ion-page {
+    border:2px solid blue;
+  }
+}
+
 
 .custom-otp-container {
   display: flex;

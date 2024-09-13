@@ -5,6 +5,11 @@
   max-height: 150px;
 }
 
+ion-modal {
+  --border-radius: 20px 20px 0 0; /* Apply border-radius to the top */
+}
+
+
 .circle-bg {
   fill: none;
   stroke: #606db9a6;

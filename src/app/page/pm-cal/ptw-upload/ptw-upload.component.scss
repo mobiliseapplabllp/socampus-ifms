@@ -1,9 +1,19 @@
 .custom-file-upload{
-  padding: 8px;
-  border-radius: 5px;
+  padding: 6px 16px;
+  border-radius: 26px;
   border: 2px solid var(--ion-color-primary);
   display: inline-block;
   color:var(--ion-color-primary);
-  // padding: 6px 12px;
   cursor: pointer;
+  margin-top:3px;
+}
+
+.custom-file-upload-succ {
+  padding: 6px 16px;
+  border-radius: 26px;
+  border: 2px solid var(--ion-color-success);
+  display: inline-block;
+  color:var(--ion-color-success);
+  cursor: pointer;
+  margin-top:3px;
 }
