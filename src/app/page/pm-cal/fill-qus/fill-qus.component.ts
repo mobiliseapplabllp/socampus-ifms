@@ -347,7 +347,7 @@ export class FillQusComponent  implements OnInit {
           index = i;
           this.common.presentToast(`Please Add Remark for Question No ${i+1}`, 'warning');
           break;
-        } else if (this.questionList[i].is_rmrk_mandatory === 1 && (!this.questionList[i].attachment1 && !this.questionList[i].imagename )) {
+        } else if (this.questionList[i].is_doc_mandatory === 1 && (!this.questionList[i].attachment1 && !this.questionList[i].imagename )) {
           index = i;
           this.common.presentToast(`Please Add Attachment for Question No ${i+1}`, 'warning');
           break;

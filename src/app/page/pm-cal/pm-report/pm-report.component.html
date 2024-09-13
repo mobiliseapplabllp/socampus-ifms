@@ -23,7 +23,7 @@
       <ion-col size="9">Question</ion-col>
       <ion-col size="3" class="ion-text-right ion-padding-right">{{dat.responded_questions}}/{{dat.total_questions}}</ion-col>
       <ion-col size="12">
-        <ion-progress-bar [color]="dat.responded_questions === dat.total_questions ? 'primary': 'warning' " [value]="(dat.responded_questions * 100 / dat.total_questions)/100 "></ion-progress-bar>
+        <ion-progress-bar [color]="dat.responded_questions === dat.total_questions ? 'success': 'warning' " [value]="(dat.responded_questions * 100 / dat.total_questions)/100 "></ion-progress-bar>
       </ion-col>
     </ion-row>
   </ion-card>

@@ -111,7 +111,7 @@
             </section>
             <ion-popover trigger="actionable-date" >
               <ng-template>
-                <ion-datetime #popoverDatetime presentation="date" formControlName="rspns_date" (ionChange)="changeDate()"></ion-datetime>
+                <ion-datetime #popoverDatetime presentation="date" [min]="minDate" [max]="maxDate" formControlName="rspns_date" (ionChange)="changeDate()"></ion-datetime>
               </ng-template>
             </ion-popover>
             <ion-row>
@@ -133,7 +133,7 @@
     </ng-template>
   </ion-modal>
 
-  <ion-modal class="previous" [isOpen]="isPreOpen" [initialBreakpoint]="0.5" [breakpoints]="[0.5, 0.8, 1]" (willDismiss)="onWillPresent()">
+  <ion-modal class="previous" [isOpen]="isPreOpen" [initialBreakpoint]="0.5" [breakpoints]="[0.8, 1]" (willDismiss)="onWillPresent()">
     <ng-template>
       <ion-header>
         <ion-toolbar >
@@ -146,24 +146,34 @@
         </ion-toolbar>
       </ion-header>
       <ion-content style="--background: #dbdbdb; overflow: scroll;">
-        <ion-card *ngIf="questionList.response_txn.length > 0">
-          <ion-card-header >Logs</ion-card-header>
-          <ion-card-content>
-            <ion-item *ngFor="let dat of questionList.response_txn">
-              <ion-label>
-                <h2>{{dat.remark}}</h2>
-                <p>{{dat.action_date}}</p>
-                <p>{{dat.emp_name}}</p>
-              </ion-label>
-              <ion-buttons slot="end">
-                <ion-button (click)="openDoc(dat.artifact)">
-                  <ion-icon name="attach-outline"></ion-icon>
-                </ion-button>
-              </ion-buttons>
-            </ion-item>
-          </ion-card-content>
-        </ion-card>
-
+        <div style="padding:16px" *ngIf="questionList.response_txn.length > 0">
+          <ion-grid>
+            <ion-row class="row" *ngFor="let dat of questionList.response_txn">
+              <ion-col size="1" class="ion-padding-start">
+                <div class="images"> <img src="assets/img/dot.jpeg"></div>
+                <div class="line"></div>
+              </ion-col>
+              <ion-col size="11" >
+                <ion-grid class="cards">
+                  <ion-row>
+                    <ion-col size="6">{{dat.action_date}}</ion-col>
+                    <ion-col class="ion-text-right" size="6">
+                      <ion-icon name="attach-outline" style="font-size:20px" (click)="openDoc(dat.artifact)"></ion-icon>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="6" color="medium">Response</ion-col>
+                    <ion-col>{{dat.corrective_action}}</ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="6" color="medium">Remark</ion-col>
+                    <ion-col>{{dat.remark}}</ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
         <ion-card>
           <ion-card-header color="primary">Original Response</ion-card-header>
           <ion-card-content>

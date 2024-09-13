@@ -16,6 +16,10 @@ export class ViewReportComponent  implements OnInit {
   //
   // fillReport: any = [];
   // @ViewChildren("a") private itemlist!: QueryList<ElementRef>;
+  responseList: any = [];
+  isPreOpen!: boolean;
+  isOpen!: boolean;
+  data: any;
   constructor(
     private activeroute: ActivatedRoute,
     private httpPms: PmCalService,
@@ -35,8 +39,25 @@ export class ViewReportComponent  implements OnInit {
     });
   }
 
+  openPreviousModal(data: any) {
+    console.log(data);
+    this.responseList = data.response_txn;
+    this.isPreOpen = true;
+  }
+
+  openModal(data: any) {
+    console.log(data);
+    this.isOpen = true;
+    this.data = data;
+  }
+
   viewDocs(url: string) {
     this.common.openDoc(url);
+  }
+
+  onWillDismiss() {
+    this.isOpen = false;
+    this.data = [];
   }
 
   // getScheduleUser() {

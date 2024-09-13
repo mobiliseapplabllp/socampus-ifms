@@ -25,8 +25,8 @@
     </ion-item>
   </ion-toolbar>
 </ion-header>
-<ion-content>
-  <ion-card *ngFor="let dat of requestedData.qus;let i = index" [ngClass]="{redBorder: dat.isDtlShow && dat.status === 0}" style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;padding:10px;margin:20px;border-radius: 10px;">
+<ion-content class="main-class">
+  <ion-card *ngFor="let dat of requestedData.qus;let i = index" [ngClass]="{redBorder: dat.isDtlShow && dat.status === 0}" style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;padding:10px;margin:0px 20px 20px 20px;border-radius: 10px;">
     <div id={{i}}></div>
     <ion-row >
       <ion-col size="6">
@@ -36,6 +36,12 @@
         <ion-text color="primary">Scope -</ion-text> <ion-text color="primary-dark">{{dat.scope_desc}}</ion-text> </ion-col>
       <ion-col size="12">
         <ion-text color="primary-dark"> {{dat.q_desc}}</ion-text>
+      </ion-col>
+      <ion-col size="6" *ngIf="dat.response_txn.length > 0">
+        <a (click)="openPreviousModal(dat)"><u>Previous Response</u></a>
+      </ion-col>
+      <ion-col style="display:flex;justify-content: right;">
+        <div (click)="openModal(dat)" style="height:24px;width:24px;border-radius: 50%;color:white;background-color: var(--ion-color-primary);" class="center">?</div>
       </ion-col>
     </ion-row>
 
@@ -60,7 +66,97 @@
       </ion-col>
     </ion-row>
   </ion-card>
+
+  <ion-modal class="previous" [isOpen]="isPreOpen" [initialBreakpoint]="0.5" [breakpoints]="[0.8, 1]">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar >
+          <ion-title>Previous Response</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isPreOpen = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content style="--background: #dbdbdb; overflow: scroll;">
+        <div style="padding:16px" >
+          <ion-grid>
+            <ion-row class="row" *ngFor="let dat of responseList">
+              <ion-col size="1" class="ion-padding-start">
+                <div class="images"> <img src="assets/img/dot.jpeg"></div>
+                <div class="line"></div>
+              </ion-col>
+              <ion-col size="11" >
+                <ion-grid class="cards">
+                  <ion-row>
+                    <ion-col size="6">{{dat.action_date}}</ion-col>
+                    <ion-col class="ion-text-right" size="6">
+                      <ion-icon name="attach-outline" style="font-size:20px" (click)="viewDocs(dat.artifact)"></ion-icon>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="6" color="medium">Response</ion-col>
+                    <ion-col>{{dat.corrective_action}}</ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="6" color="medium">Remark</ion-col>
+                    <ion-col>{{dat.remark}}</ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal class="more-info" [isOpen]="isOpen" [initialBreakpoint]="0.3" (willDismiss)="onWillDismiss()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>More Information</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isOpen = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding-start">
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Requirement</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.requirement}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Sla</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.sla}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Critical Desc</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.critical_desc}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Scope Desc</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.scope_desc}}</ion-col>
+        </ion-row>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>
+
+
+
 <!-- <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">

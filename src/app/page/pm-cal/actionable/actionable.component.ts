@@ -26,7 +26,8 @@ export class ActionableComponent  implements OnInit {
   formData = new FormData();
   isImgUpload!: boolean;
   loading: any;
-
+  maxDate = moment().format('YYYY-MM-DD');
+  minDate!: string;
   constructor(
     private activeroute: ActivatedRoute,
     private httpPms: PmCalService,
@@ -161,10 +162,10 @@ export class ActionableComponent  implements OnInit {
     }
   }
 
-  openActionModal(data: any) {
+  openActionModal(data: any)   {
     this.questionList = data;
-    console.log(this.questionList);
     this.isOpen = true;
+    this.minDate = moment(this.questionList.created_at).format('YYYY-MM-DD');
   }
 
   openPreRes(data: any) {
@@ -177,7 +178,7 @@ export class ActionableComponent  implements OnInit {
 
   onWillPresent() {
     this.isPreOpen = false;
-    this.initializeForm();
+    // this.initializeForm();
   }
 
   submitActionable() {
@@ -261,5 +262,7 @@ export class ActionableComponent  implements OnInit {
   openDoc(url: string) {
     this.common.openDoc(url);
   }
+
+
 
 }

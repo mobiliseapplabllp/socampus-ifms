@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingController, ModalController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -237,9 +237,9 @@ export class PmCalPage implements OnInit {
   async pmAssign(dat: any) {
     const modal = await this.modalCtrl.create({
       component: PmAssignComponent,
-      cssClass: 'my-modal-bottom',
-      initialBreakpoint: 0.8, // Set to 50% of the screen height
-      breakpoints: [0.8],
+      cssClass: 'my-modal-btm',
+      // initialBreakpoint: 0.8, // Set to 50% of the screen height
+      // breakpoints: [0.8],
       componentProps: { data: dat }
     });
     modal.onWillDismiss().then(disModal => {
