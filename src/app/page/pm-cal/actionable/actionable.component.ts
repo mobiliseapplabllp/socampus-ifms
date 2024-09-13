@@ -39,7 +39,6 @@ export class ActionableComponent  implements OnInit {
   ngOnInit() {
     this.activeroute.queryParams.subscribe((res: any) => {
       this.requestedData = JSON.parse(res.data);
-      console.log(this.requestedData);
     });
     this.initializeForm();
   }
