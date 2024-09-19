@@ -5,8 +5,8 @@
     </ion-buttons>
     <ion-title>PPM</ion-title>
     <ion-buttons slot="end" *ngIf="selectedPms.length > 0">
-      <ion-button fill="outline" shape="round" size="small" (click)="multiCancel()">Cancel </ion-button>
-      <ion-button fill="outline" shape="round" size="small" (click)="multiAssign()">ReAssign </ion-button>
+      <ion-button fill="outline" shape="round" size="small" (click)="multiCancel()" class="ion-text-capitalize">Cancel </ion-button>
+      <ion-button fill="outline" shape="round" size="small" (click)="multiAssign()" class="ion-text-capitalize">ReAssign </ion-button>
     </ion-buttons>
   </ion-toolbar>
   <ion-toolbar>
@@ -81,13 +81,17 @@
             <ion-col size="5">Date</ion-col>
             <ion-col>{{dat.log_date}}</ion-col>
           </ion-row>
-          <ion-row>
+          <ion-row *ngIf="dat.ext_asset_id">
             <ion-col size="5">Asset ID</ion-col>
-            <ion-col>{{dat.pc_ext_id}}</ion-col>
+            <ion-col>{{dat.ext_asset_id}}</ion-col>
           </ion-row>
-          <ion-row>
+          <ion-row *ngIf="dat.ext_asset_id">
             <ion-col size="5">Device</ion-col>
             <ion-col>{{dat.subgrp_desc}}</ion-col>
+          </ion-row>
+          <ion-row *ngIf="!dat.ext_asset_id">
+            <ion-col size="5">Checklist Desc</ion-col>
+            <ion-col>{{dat.chklist_desc}}</ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="5">Assigned To</ion-col>
@@ -96,13 +100,19 @@
           <ion-row *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
             <ion-col size="5">Ptw Status</ion-col>
             <ion-col>
-              <u><ion-text (click)="openModal(dat)" color="success">In Approval</ion-text> </u>
+              <u><ion-text (click)="openModal(dat)" color="primary-dark">In Approval</ion-text> </u>
             </ion-col>
           </ion-row>
           <ion-row *ngIf="dat.ptw_status === '0' && dat.ptw_mandatory === 1 ">
             <ion-col size="5">Ptw Status</ion-col>
             <ion-col>
               <u><ion-text (click)="openModal(dat)" color="danger">Rejected</ion-text> </u>
+            </ion-col>
+          </ion-row>
+          <ion-row *ngIf="dat.ptw_status === '1' && dat.ptw_mandatory === 1 ">
+            <ion-col size="5">Ptw Status</ion-col>
+            <ion-col>
+              <u><ion-text (click)="openModal(dat)" color="success">Approved</ion-text> </u>
             </ion-col>
           </ion-row>
           <ion-row style="border-top: 1px solid #c2c2c2ab">
@@ -246,7 +256,7 @@
     </div>
   </div>
 
-  <ion-modal [isOpen]="isPreOpen" [initialBreakpoint]="0.8" [breakpoints]="[0.8, 1]" (willDismiss)="onWillDismiss()">
+  <ion-modal class="previous" [isOpen]="isPreOpen" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismiss()">
     <ng-template>
       <ion-header>
         <ion-item lines="none">
@@ -266,7 +276,7 @@
           <ion-grid>
             <ion-row class="row" *ngFor="let dat of logs">
               <ion-col size="1" class="ion-padding-start">
-                <div class="images"> <img src="assets/img/dot.jpeg"></div>
+                <div class="images"> <img [src]="dat.status_id === '0' ? 'assets/img/red_dot.jpg' : 'assets/img/dot.jpeg'"></div>
                 <div class="line"></div>
               </ion-col>
               <ion-col size="11" >
@@ -277,19 +287,19 @@
                       <ion-col class="ion-text-center" size="2">
                         <ion-icon name="attach-outline" style="font-size:20px" (click)="viewAttachment(dat.ptw_attach)"></ion-icon>
                       </ion-col>
-                      <ion-col class="ion-text-right">{{dat.created_at | date: 'dd MMM'}}</ion-col>
+                      <ion-col class="ion-text-right">{{dat.created_at_tmp}}</ion-col>
                     </ion-row>
                     <ion-row>
                       <ion-col size="6" color="medium">Approver By</ion-col>
-                      <ion-col>{{dat.ap_name}} {{dat.ap_lname}}</ion-col>
+                      <ion-col size="6">{{dat.ap_name}} {{dat.ap_lname}}</ion-col>
                     </ion-row>
                     <ion-row>
                       <ion-col size="6" color="medium">Approver Date</ion-col>
-                      <ion-col>{{dat.created_at}}</ion-col>
+                      <ion-col size="6">{{dat.created_at}}</ion-col>
                     </ion-row>
                     <ion-row>
                       <ion-col size="6" color="medium">Remark</ion-col>
-                      <ion-col>{{dat.ptw_remark}}</ion-col>
+                      <ion-col size="6">{{dat.ptw_remark}}</ion-col>
                     </ion-row>
                   </ion-card-content>
                 </ion-card>
@@ -301,7 +311,7 @@
     </ng-template>
   </ion-modal>
 
-  <ion-modal [isOpen]="isCloseAction" [initialBreakpoint]="0.4" [breakpoints]="[0.3, 0.4]" (willDismiss)="onWillDismissClose()">
+  <ion-modal class="cancel" [isOpen]="isCloseAction" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismissClose()">
     <ng-template>
       <ion-header>
         <ion-toolbar>
@@ -314,18 +324,18 @@
         </ion-toolbar>
       </ion-header>
       <ion-content class="ion-padding">
-        <section class="inputbox" >
+        <section class="inputbox" style="height:100%;">
           <ion-text color="primary" >Enter Remark</ion-text>
           <ion-item lines="none" style="border:2px solid rgba(42, 41, 92, 0.20);">
             <ion-textarea rows="3" type="text" placeholder="Enter Remark here..." [(ngModel)]="closeRemark"> </ion-textarea>
           </ion-item>
         </section>
-        <ion-row>
-          <ion-col >
-            <ion-button expand="block" color="primary-dark" (click)="filterIds()">Submit</ion-button>
-          </ion-col>
-        </ion-row>
       </ion-content>
+      <ion-footer>
+        <ion-toolbar style="padding-left: 16px; padding-right:16px">
+          <ion-button expand="block" color="primary" (click)="filterIds()">Submit</ion-button>
+        </ion-toolbar>
+      </ion-footer>
     </ng-template>
   </ion-modal>
 </ion-content>

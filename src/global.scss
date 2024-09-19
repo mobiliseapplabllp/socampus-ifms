@@ -124,20 +124,28 @@ ion-segment-button {
   --border-radius: 20px 20px 0px 0px;
 }
 
-.my-modal-btm .modal-wrapper {
-  position: absolute;
-  bottom: 0px !important;
-  top: auto; /* Ensure it is not centered */
-  height: 50%; /* Set the height to 50% */
-  width: 100%; /* Full width of the modal */
-  border-radius: 16px 16px 0 0; /* Rounded top corners */
-  margin: 0; /* Remove any default margin */
-  padding: 0;
+// .my-modal-btm .modal-wrapper {
+//   position: absolute;
+//   bottom: 0px !important;
+//   top: auto; /* Ensure it is not centered */
+//   height: 50%; /* Set the height to 50% */
+//   width: 100%; /* Full width of the modal */
+//   border-radius: 16px 16px 0 0; /* Rounded top corners */
+//   margin: 0; /* Remove any default margin */
+//   padding: 0;
+// }
+
+.my-modal-ptw {
+  --width: 100%;
+  --height:50%;
+  --border-radius: 16px 16px 0 0; /* Rounded top corners */
+  --top: auto;
+  --bottom: 0px !important;
 }
 
 .my-modal-btm {
   --width: 100%;
-  --height: 50%;
+  --height: 80%;
   --border-radius: 16px 16px 0 0; /* Rounded top corners */
   --top: auto;
   --bottom: 0px !important;

@@ -30,6 +30,7 @@ export class LogsComponent  implements OnInit {
         next:(data) => {
           if (data.status) {
             this.List = data.data
+
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

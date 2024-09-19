@@ -9,6 +9,7 @@ import { PmAssignComponent } from './pm-assign/pm-assign.component';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { PtwUploadComponent } from './ptw-upload/ptw-upload.component';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
+import * as moment from 'moment';
 @Component({
   selector: 'app-pm-cal',
   templateUrl: './pm-cal.page.html',
@@ -238,8 +239,8 @@ export class PmCalPage implements OnInit {
     const modal = await this.modalCtrl.create({
       component: PmAssignComponent,
       cssClass: 'my-modal-btm',
-      // initialBreakpoint: 0.8, // Set to 50% of the screen height
-      // breakpoints: [0.8],
+      initialBreakpoint: 1,
+      breakpoints: [1],
       componentProps: { data: dat }
     });
     modal.onWillDismiss().then(disModal => {
@@ -304,9 +305,9 @@ export class PmCalPage implements OnInit {
   async uploadPtw(dat: any) {
     const modal = await this.modalCtrl.create({
       component: PtwUploadComponent,
-      cssClass: 'my-modal-bottom',
-      initialBreakpoint: 0.6, // Set to 50% of the screen height
-      breakpoints: [0, 0.6, 1],
+      cssClass: 'my-modal-ptw',
+      initialBreakpoint: 1, // Set to 50% of the screen height
+      breakpoints: [1],
       componentProps : {
         data: dat
       }
@@ -377,7 +378,9 @@ export class PmCalPage implements OnInit {
     } else if (ev.target.value == 'closed') {
       this.lastSegment = 3;
       this.getPm(this.lastSegment);
-    } else if (ev.target.value == 'mywo') {}
+    } else if (ev.target.value == 'mywo') {
+
+    }
   }
 
   async presentActionSheet(data: any) {
@@ -579,6 +582,9 @@ export class PmCalPage implements OnInit {
         next:(data) => {
           if (data.status) {
             this.logs = data.data;
+            for (var i = 0; i < this.logs.length; i++) {
+              this.logs[i].created_at_tmp = moment(this.logs[i].created_at).format('dd-MMM');
+            }
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -594,7 +600,4 @@ export class PmCalPage implements OnInit {
     })
 
   }
-
-
-
 }
