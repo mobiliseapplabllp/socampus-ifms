@@ -274,10 +274,10 @@
       <ion-content>
         <div style="padding:16px">
           <ion-grid>
-            <ion-row class="row" *ngFor="let dat of logs">
+            <ion-row class="row" *ngFor="let dat of logs; let i = index">
               <ion-col size="1" class="ion-padding-start">
                 <div class="images"> <img [src]="dat.status_id === '0' ? 'assets/img/red_dot.jpg' : 'assets/img/dot.jpeg'"></div>
-                <div class="line"></div>
+                <div class="line" [hidden] = "i === (logs.length - 1) "></div>
               </ion-col>
               <ion-col size="11" >
                 <ion-card class="approver_card">
@@ -290,11 +290,11 @@
                       <ion-col class="ion-text-right">{{dat.created_at_tmp}}</ion-col>
                     </ion-row>
                     <ion-row>
-                      <ion-col size="6" color="medium">Approver By</ion-col>
+                      <ion-col size="6" color="medium">{{dat.status_id === '0' ? 'Rejected By': 'Approve by'}}</ion-col>
                       <ion-col size="6">{{dat.ap_name}} {{dat.ap_lname}}</ion-col>
                     </ion-row>
                     <ion-row>
-                      <ion-col size="6" color="medium">Approver Date</ion-col>
+                      <ion-col size="6" color="medium">{{dat.status_id === '0' ? 'Rejected Date': 'Approve by'}}</ion-col>
                       <ion-col size="6">{{dat.created_at}}</ion-col>
                     </ion-row>
                     <ion-row>

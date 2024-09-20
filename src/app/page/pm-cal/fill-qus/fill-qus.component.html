@@ -43,7 +43,7 @@
     </ion-row>
 
     <ion-radio-group color="none" mode="md" [(ngModel)]="dat.rspns"  (ionChange)="changeOptionResponse(dat, $event)" >
-      <ion-item class="radioButton" *ngFor="let opt of dat.options" [ngClass]="{'selectedRadioButton': opt.optn_id ===  dat.rspns }">
+      <ion-item class="radioButton" lines="none" *ngFor="let opt of dat.options" [ngClass]="{'selectedRadioButton': opt.optn_id ===  dat.rspns }">
         <ion-label>{{opt.optn_desc}}</ion-label>
         <ion-radio slot="end" [value]="opt.optn_id"></ion-radio>
       </ion-item>
@@ -72,9 +72,9 @@
       </ion-col>
     </ion-row>
   </ion-card>
-  <ion-modal [isOpen]="isOpen" [initialBreakpoint]="0.3" (willDismiss)="onWillDismiss()">
+  <ion-modal [isOpen]="isOpen" class="more-info" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismiss()">
     <ng-template>
-      <ion-header>
+      <ion-header class="ion-no-border">
         <ion-toolbar>
           <ion-title>More Information</ion-title>
           <ion-buttons slot="end">
@@ -84,32 +84,29 @@
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding-start">
+      <ion-content class="ion-padding-start more-info">
         <ion-row>
-          <ion-col size="4">
-            <ion-text color="primary">Requirement</ion-text>
-          </ion-col>
-          <ion-col size="8">{{data.requirement}}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4">
-            <ion-text color="primary">Sla</ion-text>
-          </ion-col>
-          <ion-col size="8">{{data.sla}}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4">
-            <ion-text color="primary">Critical Desc</ion-text>
-          </ion-col>
+          <ion-col size="4">Critical Desc</ion-col>
           <ion-col size="8">{{data.critical_desc}}</ion-col>
         </ion-row>
         <ion-row>
-          <ion-col size="4">
-            <ion-text color="primary">Scope Desc</ion-text>
-          </ion-col>
+          <ion-col size="4">Scope Desc</ion-col>
           <ion-col size="8">{{data.scope_desc}}</ion-col>
         </ion-row>
+        <ion-row>
+          <ion-col size="4">Sla</ion-col>
+          <ion-col size="8">{{data.sla}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">Requirement</ion-col>
+          <ion-col size="8">{{data.requirement}}</ion-col>
+        </ion-row>
       </ion-content>
+      <ion-footer>
+        <ion-toolbar style="padding-left:10px;padding-right:10px">
+          <ion-button expand="block">Continue</ion-button>
+        </ion-toolbar>
+      </ion-footer>
     </ng-template>
   </ion-modal>
 </ion-content>

@@ -8,10 +8,10 @@
   <ion-toolbar>
     <ion-segment [(ngModel)]='status' mode="md" color="primary">
       <ion-segment-button value="actionable">
-        <ion-label>ACTIONABLE</ion-label>
+        <ion-label class="ion-text-capitalize">Actionable</ion-label>
       </ion-segment-button>
       <ion-segment-button value="all_res">
-        <ion-label>ALL RESPONSE</ion-label>
+        <ion-label>All Response</ion-label>
       </ion-segment-button>
     </ion-segment>
   </ion-toolbar>
@@ -30,8 +30,10 @@
             </ion-button>
           </ion-buttons>
         </ion-item>
-        <ion-row >
-          <ion-col class="ion-padding-start">{{dat.q_desc}}</ion-col>
+        <ion-row class="ion-no-padding">
+          <ion-col style="padding-top:2px;padding-left:16px">
+            {{dat.q_desc}}
+          </ion-col>
         </ion-row>
       </ion-card>
     </div>
@@ -48,9 +50,9 @@
           </ion-buttons>
         </ion-item>
         <ion-row >
-          <ion-col size="9">Question</ion-col>
+          <ion-col size="9" style="padding-left:16px">Question</ion-col>
           <ion-col size="3" class="ion-text-right ion-padding-right">{{dat.action_done}}/{{dat.total_length}}</ion-col>
-          <ion-col size="12">
+          <ion-col size="12" class="ion-padding-left ion-padding-right">
             <ion-progress-bar [color]="dat.action_done ===  dat.total_length ? 'primary': 'warning'" [value]="(dat.action_done * 100 / dat.total_length) / 100"></ion-progress-bar>
           </ion-col>
         </ion-row>
@@ -90,7 +92,7 @@
             </ion-row>
 
             <ion-radio-group color="none" mode="md" formControlName="corrective_action">
-              <ion-item class="radioButton" *ngFor="let opt of questionList.options" >
+              <ion-item class="radioButton" lines="none" *ngFor="let opt of questionList.options" >
                 <ion-label>{{opt.optn_desc}}</ion-label>
                 <ion-radio slot="end" [value]="opt.optn_id"></ion-radio>
               </ion-item>
