@@ -2,10 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { db } from '../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
-import { AlertController, ModalController, Platform,  } from '@ionic/angular';
+import { AlertController, LoadingController, ModalController, Platform,  } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { SosComponent } from './sos/sos.component';
 import { App } from '@capacitor/app';
+import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
+import { CambroStatusComponent } from './cambro-status/cambro-status.component';
+import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -24,12 +27,16 @@ export class ListMasterPage implements OnInit {
   appUpdate: any = {};
   currentVersion!: string;
   isAndroid!: boolean;
+  isScanQr!: boolean;
+  loading: any;
   constructor(
     private common: CommonService,
     private alertController: AlertController,
     private router: Router,
     private modalCtrl: ModalController,
-    private platform: Platform) {
+    private platform: Platform,
+    private httpTo: TodayOrderService,
+    private loadingController: LoadingController) {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
@@ -63,21 +70,82 @@ export class ListMasterPage implements OnInit {
     }
   }
 
-  openBarcode() {}
+  openBarcode() {
+    this.isScanQr = true;
+    this.router.navigateByUrl('/barcode');
+  }
 
   ionViewWillEnter() {
-    this.subs = this.common.getHomeLoadStatus().subscribe(val => {
-      if (val) {
-        this.changeEvent();
+    if (this.isScanQr) {
+      let bar = this.common.getBarcode();
+      if (bar) {
+        this.isScanQr = false;
+        this.common.setBarcode('');
+        this.presentLoading().then(preLoad => {
+          this.httpTo.getCambroStatus(bar).subscribe({
+            next:(data) => {
+              if (data.status) {
+                this.openCambroStatus(data.data)
+              } else {
+                this.common.presentToast(data.msg, 'warning');
+              }
+            },
+            error:() => {
+              this.dismissloading();
+              this.common.presentToast(environment.errMsg, 'danger');
+            },
+            complete:() => {
+              this.dismissloading();
+            }
+          });
+        })
+      }
+    } else {
+      this.subs = this.common.getHomeLoadStatus().subscribe(val => {
+        if (val) {
+          this.changeEvent();
+        }
+      });
+      this.didEnter = true;
+      setTimeout(() => {
+        this.subs.unsubscribe();
+        this.didEnter = false;
+      }, 1500);
+      this.getHomeLoad();
+    }
+  }
+
+  async openCambroStatus(data: any) {
+    const modal = await this.modalCtrl.create({
+      component: CambroStatusComponent,
+      cssClass: 'my-modal',
+      backdropDismiss:false,
+      componentProps: {
+        data: data
       }
     });
-    this.didEnter = true;
-    setTimeout(() => {
-      this.subs.unsubscribe();
-      this.didEnter = false;
-    }, 1500);
-    this.getHomeLoad();
+    modal.onWillDismiss().then(disModal => {
+      console.log(disModal);
+      if (disModal.role == 'true') {
+      }
+    });
+    modal.present();
   }
+
+  async presentLoading() {
+    this.loading = await this.loadingController.create({
+      cssClass: 'my-custom-class',
+      message: 'Please wait...',
+    });
+    await this.loading.present();
+  }
+
+  async dismissloading() {
+    if (this.loading) {
+      this.loading.dismiss();
+    }
+  }
+
 
   getHomeLoad() {
     this.common.checkInternet().then(res => {

@@ -13,7 +13,7 @@
               <ion-img [src]="val.icon_path" style="height:35px;width:35px"></ion-img>
             </div>
             <div style="min-height:20px;width:100%" class="center">
-              <ion-text color="primary" style="font-weight: 500;"> {{val.smnu_desc}} </ion-text>
+              <ion-text color="primary" style="font-weight: 500;"> {{val.smnu_desc | substring: '10'}} </ion-text>
             </div>
           </ion-card>
         </ion-col>

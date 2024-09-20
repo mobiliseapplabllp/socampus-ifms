@@ -19,6 +19,7 @@ import { PendingTaskComponent } from './pending-task/pending-task.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ComplaintPageModule } from '../complaint/complaint.module';
 import { SosComponent } from './sos/sos.component';
+import { CambroStatusComponent } from './cambro-status/cambro-status.component';
 
 @NgModule({
   imports: [
@@ -37,7 +38,8 @@ import { SosComponent } from './sos/sos.component';
     PendingTaskComponent,
     ChartDashboardComponent,
     OfflineDataComponent,
-    SosComponent
+    SosComponent,
+    CambroStatusComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
