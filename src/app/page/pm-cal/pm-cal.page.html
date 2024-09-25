@@ -284,22 +284,22 @@
                   <ion-card-content class="ion-no-padding">
                     <ion-row style="width:100%;height:auto;padding:5px;background-color:rgb(230, 232, 254)">
                       <ion-col size="6">{{dat.status}}</ion-col>
-                      <ion-col class="ion-text-center" size="2">
-                        <ion-icon name="attach-outline" style="font-size:20px" (click)="viewAttachment(dat.ptw_attach)"></ion-icon>
+                      <ion-col class="ion-text-right" size="6" *ngIf="dat.attach !== ''">
+                        <ion-icon name="attach-outline" style="font-size:20px" (click)="viewAttachment(dat.attach)"></ion-icon>
                       </ion-col>
-                      <ion-col class="ion-text-right">{{dat.created_at_tmp}}</ion-col>
+                      <!-- <ion-col class="ion-text-right">{{dat.date}}</ion-col> -->
                     </ion-row>
                     <ion-row>
                       <ion-col size="6" color="medium">{{dat.status_id === '0' ? 'Rejected By': 'Approve by'}}</ion-col>
-                      <ion-col size="6">{{dat.ap_name}} {{dat.ap_lname}}</ion-col>
+                      <ion-col size="6">{{dat.action_by}}</ion-col>
                     </ion-row>
                     <ion-row>
-                      <ion-col size="6" color="medium">{{dat.status_id === '0' ? 'Rejected Date': 'Approve by'}}</ion-col>
-                      <ion-col size="6">{{dat.created_at}}</ion-col>
+                      <ion-col size="6" color="medium">Date Time</ion-col>
+                      <ion-col size="6">{{dat.date}}</ion-col>
                     </ion-row>
                     <ion-row>
                       <ion-col size="6" color="medium">Remark</ion-col>
-                      <ion-col size="6">{{dat.ptw_remark}}</ion-col>
+                      <ion-col size="6">{{dat.remark}}</ion-col>
                     </ion-row>
                   </ion-card-content>
                 </ion-card>

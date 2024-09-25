@@ -39,6 +39,10 @@ export class ViewReportComponent  implements OnInit {
     });
   }
 
+  onWillDismissPre() {
+    this.isPreOpen = false;
+  }
+
   openPreviousModal(data: any) {
     console.log(data);
     this.responseList = data.response_txn;

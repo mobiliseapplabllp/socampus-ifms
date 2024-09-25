@@ -37,7 +37,7 @@
       <ion-col size="12">
         <ion-text color="primary-dark"> {{dat.q_desc}}</ion-text>
       </ion-col>
-      <ion-col size="6" *ngIf="dat.response_txn.length > 0">
+      <ion-col size="6" >
         <a (click)="openPreviousModal(dat)"><u>Previous Response</u></a>
       </ion-col>
       <ion-col style="display:flex;justify-content: right;">
@@ -67,7 +67,7 @@
     </ion-row>
   </ion-card>
 
-  <ion-modal class="previous" [isOpen]="isPreOpen" [initialBreakpoint]="0.5" [breakpoints]="[0.8, 1]">
+  <ion-modal class="previous" [isOpen]="isPreOpen" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismissPre()" >
     <ng-template>
       <ion-header>
         <ion-toolbar >
@@ -112,7 +112,7 @@
     </ng-template>
   </ion-modal>
 
-  <ion-modal class="more-info" [isOpen]="isOpen" [initialBreakpoint]="0.3" (willDismiss)="onWillDismiss()">
+  <ion-modal class="more-info" [isOpen]="isOpen" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismiss()">
     <ng-template>
       <ion-header>
         <ion-toolbar>

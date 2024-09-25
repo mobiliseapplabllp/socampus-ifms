@@ -38,7 +38,7 @@
       </ion-card>
     </div>
     <div *ngSwitchCase="'all_res'">
-      <ion-card *ngFor="let dat of allRes; let ind = index" (click)="viewReport(dat)" style="border-left:5px solid rgb(143, 6, 249);box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;padding-bottom:10px">
+      <ion-card *ngFor="let dat of allRes; let ind = index" (click)="viewReport(dat)" [ngClass]="{'disabled': dat.is_applicable === 'Not Applicable'}" style="border-left:5px solid rgb(143, 6, 249);box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;padding-bottom:10px">
         <ion-item>
           <ion-label class="ion-text-wrap">
             <h2>{{dat.cat_desc}}</h2>
@@ -50,10 +50,11 @@
           </ion-buttons>
         </ion-item>
         <ion-row >
-          <ion-col size="9" style="padding-left:16px">Question</ion-col>
-          <ion-col size="3" class="ion-text-right ion-padding-right">{{dat.action_done}}/{{dat.total_length}}</ion-col>
+          <ion-col size="6" style="padding-left:16px">Question</ion-col>
+          <ion-col size="6" class="ion-text-right ion-padding-right" *ngIf="dat.is_applicable !== 'Not Applicable'">{{dat.action_done}}/{{dat.total_length}}</ion-col>
+          <ion-col size="6" class="ion-text-right ion-padding-right" *ngIf="dat.is_applicable === 'Not Applicable'">Not Applicable</ion-col>
           <ion-col size="12" class="ion-padding-left ion-padding-right">
-            <ion-progress-bar [color]="dat.action_done ===  dat.total_length ? 'primary': 'warning'" [value]="(dat.action_done * 100 / dat.total_length) / 100"></ion-progress-bar>
+            <ion-progress-bar [color]="dat.is_applicable === 'Not Applicable' ? 'medium': dat.action_done ===  dat.total_length ? 'primary': 'warning'" [value]="(dat.action_done * 100 / dat.total_length) / 100"></ion-progress-bar>
           </ion-col>
         </ion-row>
       </ion-card>
@@ -86,8 +87,11 @@
               <ion-col size="12">
                 <ion-text color="primary-dark"> {{questionList.q_desc}}</ion-text>
               </ion-col>
-              <ion-col size="12">
+              <ion-col size="6">
                 <a (click)="isPreOpen = true"><u>Previous Response</u></a>
+              </ion-col>
+              <ion-col size="6" style="display:flex;justify-content: right;">
+                <div (click)="openModalInfo(questionList)" style="height:24px;width:24px;border-radius: 50%;color:white;background-color: var(--ion-color-primary);" class="center">?</div>
               </ion-col>
             </ion-row>
 
@@ -135,7 +139,7 @@
     </ng-template>
   </ion-modal>
 
-  <ion-modal class="previous" [isOpen]="isPreOpen" [initialBreakpoint]="0.5" [breakpoints]="[0.8, 1]" (willDismiss)="onWillPresent()">
+  <ion-modal class="previous" [isOpen]="isPreOpen" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillPresent()">
     <ng-template>
       <ion-header>
         <ion-toolbar >
@@ -147,7 +151,43 @@
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content style="--background: #dbdbdb; overflow: scroll;">
+      <ion-content>
+        <div style="padding:16px">
+          <ion-grid>
+            <ion-row class="row" *ngFor="let dat of questionList.response_txn; let i = index">
+              <ion-col size="1" class="ion-padding-start">
+                <div class="images"> <img [src]="dat.original_rspns ? 'assets/img/red_dot.jpg' : 'assets/img/dot.jpeg'"></div>
+                <div class="line" [hidden] = "i === (questionList.response_txn.length - 1) "></div>
+              </ion-col>
+              <ion-col size="11" >
+                <ion-card class="approver_card">
+                  <ion-card-content class="ion-no-padding">
+                    <ion-row style="width:100%;height:auto;padding:5px;background-color:rgb(230, 232, 254)">
+                      <ion-col size="6">{{dat.original_rspns ? 'Original Response': 'Previous Response'}}</ion-col>
+                      <ion-col class="ion-text-right">{{dat.created_at}}</ion-col>
+                    </ion-row>
+                    <ion-row>
+                      <ion-col size="6" color="medium">Response</ion-col>
+                      <ion-col size="6">{{dat.corrective_action}}</ion-col>
+                    </ion-row>
+                    <ion-row>
+                      <ion-col size="6" color="medium">Remark</ion-col>
+                      <ion-col size="6">{{dat.remark}}</ion-col>
+                    </ion-row>
+                    <ion-row>
+                      <ion-col size="6" color="medium">Attachment</ion-col>
+                      <ion-col size="6">
+                        <ion-icon name="attach-outline" style="font-size:20px" (click)="openDoc(dat.artifact)"></ion-icon>
+                      </ion-col>
+                    </ion-row>
+                  </ion-card-content>
+                </ion-card>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+      </ion-content>
+      <!-- <ion-content style="--background: #dbdbdb; overflow: scroll;">
         <div style="padding:16px" *ngIf="questionList.response_txn.length > 0">
           <ion-grid>
             <ion-row class="row" *ngFor="let dat of questionList.response_txn">
@@ -196,7 +236,45 @@
             </ion-row>
           </ion-card-content>
         </ion-card>
+      </ion-content> -->
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="isMoreInfo" class="more-info" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismissMoreInfo()">
+    <ng-template>
+      <ion-header class="ion-no-border">
+        <ion-toolbar>
+          <ion-title>More Information</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isMoreInfo = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding-start">
+        <ion-row>
+          <ion-col size="4">Critical Desc</ion-col>
+          <ion-col size="8">{{data.critical_desc}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">Scope Desc</ion-col>
+          <ion-col size="8">{{data.scope_desc}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">Sla</ion-col>
+          <ion-col size="8">{{data.sla}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">Requirement</ion-col>
+          <ion-col size="8">{{data.requirement}}</ion-col>
+        </ion-row>
       </ion-content>
+      <ion-footer>
+        <ion-toolbar style="padding-left:10px;padding-right:10px">
+          <ion-button expand="block" (click)="isMoreInfo = false">Continue</ion-button>
+        </ion-toolbar>
+      </ion-footer>
     </ng-template>
   </ion-modal>
 </ion-content>

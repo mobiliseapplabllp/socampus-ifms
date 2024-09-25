@@ -21,6 +21,7 @@ export class ActionableComponent  implements OnInit {
   allRes: any = [];
   isOpen = false;
   isPreOpen = false;
+  isMoreInfo = false;
   questionList: any;
   previousRes: any = [];
   formData = new FormData();
@@ -28,6 +29,7 @@ export class ActionableComponent  implements OnInit {
   loading: any;
   maxDate = moment().format('YYYY-MM-DD');
   minDate!: string;
+  data: any = [];
   constructor(
     private activeroute: ActivatedRoute,
     private httpPms: PmCalService,
@@ -162,8 +164,22 @@ export class ActionableComponent  implements OnInit {
     }
   }
 
+  openModalInfo(data: any) {
+    console.log(data);
+    this.isMoreInfo = true;
+    this.data = data;
+  }
+
+
   openActionModal(data: any)   {
     this.questionList = data;
+    const obj = {
+      corrective_action: data.rspns,
+      remark: data.remark,
+      artifact: data.attachment1,
+      original_rspns: true
+    }
+    this.questionList.response_txn.push(obj);
     this.isOpen = true;
     this.minDate = moment(this.questionList.created_at).format('YYYY-MM-DD');
   }
@@ -179,6 +195,10 @@ export class ActionableComponent  implements OnInit {
   onWillPresent() {
     this.isPreOpen = false;
     // this.initializeForm();
+  }
+
+  onWillDismissMoreInfo() {
+    this.isMoreInfo = false;
   }
 
   submitActionable() {

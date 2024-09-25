@@ -581,10 +581,32 @@ export class PmCalPage implements OnInit {
       this.httpPms.PpmPtwApproval(id).subscribe({
         next:(data) => {
           if (data.status) {
-            this.logs = data.data;
-            for (var i = 0; i < this.logs.length; i++) {
-              this.logs[i].created_at_tmp = moment(this.logs[i].created_at).format('dd-MMM');
+            const tmp = data.data;
+            for (var i = 0; i < tmp.length; i++) {
+              let status = tmp[i].status_id;
+
+              if(status !== ""){
+                this.logs.push({
+                  'status' :  (status == "0")?'Rejected':"Approved",
+                  'status_id':tmp[i].status_id,
+                  'date':tmp[i].appr_date,
+                  'action_by':tmp[i].ap_username+' '+tmp[i].approver,
+                  'remark':tmp[i].remark,
+                  'attach':'',
+                  // 'ind':i+2
+                });
+              }
+              this.logs.push({
+                'status' :  'Request Raised',
+                'status_id':"",
+                'date':tmp[i].created_at,
+                'action_by':tmp[i].username+' '+tmp[i].creater,
+                'remark':tmp[i].ptw_remark,
+                'attach':tmp[i].ptw_attach,
+                // 'ind':i+1
+              });
             }
+
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
