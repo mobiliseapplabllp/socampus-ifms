@@ -19,6 +19,7 @@
       <ion-col size="6" style="display: flex;align-items: center;">
         <div>
           <p>ORD ID: {{dat.order_id}}</p>
+          <p>Type: {{dat.type_desc}} </p>
           <p>PC Name: {{dat.pc_desc}} </p>
           <p *ngIf="id === '2'">No of Boxes: <span style="color:green">{{dat.rec_camro_box}}</span>/{{dat.total_camro_box}} </p>
           <p *ngIf="id === '1'">No of Boxes: {{dat.total_camro_box}} </p>

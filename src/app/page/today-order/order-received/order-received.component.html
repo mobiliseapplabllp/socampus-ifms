@@ -3,13 +3,13 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>Order Received</ion-title>
+    <ion-title>Order Receive</ion-title>
   </ion-toolbar>
 </ion-header>
 <ion-content>
   <ion-card class="topCard">
     <ion-row>
-      <ion-col size="7">
+      <!-- <ion-col size="7">
         <div>
           <p>Order Summary</p>
           <p>ORD ID: {{requestedData.order_id}}</p>
@@ -22,6 +22,34 @@
           <p>Cambro Box:</p>
           <span class="ion-text-center">{{requestedData.rec_camro_box}}/{{requestedData.total_camro_box}}</span>
         </div>
+      </ion-col> -->
+      <ion-col size="12">
+        <ion-text color="light">PC Name</ion-text><br>
+        <ion-text color="light">{{requestedData.pc_ext_id}} {{requestedData.pc_desc}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="light">ORD ID</ion-text><br>
+        <ion-text color="light">{{requestedData.order_id}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="light">Total Receipe</ion-text><br>
+        <ion-text color="light">{{updateArr.length}}</ion-text>
+      </ion-col>
+      <!-- <ion-col size="6">
+        <ion-text color="light">Expt Preparation Time</ion-text><br>
+        <ion-text color="light">{{requestedData.expected_preparation_time}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="light">Expt Packing Time</ion-text><br>
+        <ion-text color="light">{{requestedData.expected_packing_time}}</ion-text>
+      </ion-col> -->
+      <ion-col size="6">
+        <ion-text color="light">Dispatch Time</ion-text><br>
+        <ion-text color="light">{{requestedData.dispatch_time}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="light">Expt Delivery Time</ion-text><br>
+        <ion-text color="light">{{requestedData.expected_site_dlvry_time}}</ion-text>
       </ion-col>
     </ion-row>
   </ion-card>

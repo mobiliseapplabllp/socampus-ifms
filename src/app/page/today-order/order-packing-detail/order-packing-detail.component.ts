@@ -40,6 +40,7 @@ export class OrderPackingDetailComponent  implements OnInit {
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
+      console.log(this.requestedData);
     });
     this.getDispathOrderDetail(this.requestedData.order_id);
     this.getPackingType();

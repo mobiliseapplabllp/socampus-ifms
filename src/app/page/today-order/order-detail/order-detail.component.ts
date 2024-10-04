@@ -37,6 +37,7 @@ export class OrderDetailComponent  implements OnInit {
     this.common.setBarcode('');
     this.activeRoute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
+      console.log(this.requestedData);
     });
     db.orderDispatch.filter(order => order.date !== this.todayDate).delete().then(res => {
       this.getOrderDetail();
