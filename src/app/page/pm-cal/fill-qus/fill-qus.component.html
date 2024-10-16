@@ -35,7 +35,7 @@
       <ion-col size="6" class="ion-text-right ion-padding-right" style="display: flex; justify-content: end;">
         <ion-text color="primary">Scope -</ion-text> <ion-text color="primary-dark">{{dat.scope_desc}}</ion-text> </ion-col>
       <ion-col size="12">
-        <ion-text color="primary-dark"> {{dat.q_desc}}</ion-text>
+        <ion-text color="primary-dark" [innerHTML]="dat.q_desc"></ion-text>
       </ion-col>
       <ion-col size="12" style="display:flex;justify-content: right;">
         <div (click)="openModal(dat)" style="height:24px;width:24px;border-radius: 50%;color:white;background-color: var(--ion-color-primary);" class="center">?</div>
