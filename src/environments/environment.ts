@@ -4,12 +4,12 @@
 
 export const environment = {
   production: false,
-  url: 'https://hr-access.herokuapp.com/https://socampusuatbe.mobilisepro.com/api/',
-  url1: 'https://hr-access.herokuapp.com/https://socampusuatbe.mobilisepro.com/',
-  url2: 'https://socampusuatbe.mobilisepro.com/',
-  // url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/backend/api/',
-  // url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/',
-  // url2: 'https://socampus.mobilisepro.com/',
+  // url: 'https://hr-access.herokuapp.com/https://socampusuatbe.mobilisepro.com/api/',
+  // url1: 'https://hr-access.herokuapp.com/https://socampusuatbe.mobilisepro.com/',
+  // url2: 'https://socampusuatbe.mobilisepro.com/',
+  url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/backend/api/',
+  url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/',
+  url2: 'https://socampus.mobilisepro.com/',
   // url: 'http://192.168.1.27/ifms-backend/api/',
   // url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://ifmsuat.mobilisepro.com/',
   // url2: 'http://192.168.1.27/ifms-backend/api/',
