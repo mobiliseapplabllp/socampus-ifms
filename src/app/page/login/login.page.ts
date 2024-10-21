@@ -170,6 +170,23 @@ export class LoginPage implements OnInit {
     });
   }
 
+  openKeyClock() {
+    let browser = this.iab.create(environment.ssoUrl + 'ssoGates/saml3/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let count = 0;
+    browser.on('loadstart').subscribe(data => {
+      if (data.url.match(environment.ssoUrl + '#/auth/ssoGates/')) {
+        count = count + 1;
+        let url, token
+        url = data.url;
+        token = url.split('ssoGates/')[1];
+        browser.close();
+        if (count <= 1) {
+          this.getSsoEnc(token);
+        }
+      }
+    });
+  }
+
   getSsoEnc(token: string) {
     this.isHidden = !this.isHidden;
     this.presentLoading().then(preLoad => {
