@@ -55,7 +55,7 @@ export class LoginService {
     let param: any = new HttpParams();
     param = param.append('data', data);
     param = param.append('fcm_token', fcm_token);
-    return this.https.get(`${environment.url}/ssoGatesLoginDetails`,{
+    return this.https.get(`${environment.url}ssoGatesLoginDetails`,{
       params: param,
     });
   }

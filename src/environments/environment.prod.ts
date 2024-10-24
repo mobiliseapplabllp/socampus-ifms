@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  url: 'https://hr-access.herokuapp.com/https://socampusstaging.mobilisepro.com/be/api/',
-  url1: 'https://hr-access.herokuapp.com/https://socampusstaging.mobilisepro.com/',
+  url: 'https://apac-ad81b25ce966.herokuapp.com/https://socampusstaging.mobilisepro.com/be/api/',
+  url1: 'https://apac-ad81b25ce966.herokuapp.com/https://socampusstaging.mobilisepro.com/',
   url2: 'https://socampusstaging.mobilisepro.com/',
   ssoUrl: 'https://socampusstaging.mobilisepro.com/',
   // url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/backend/api/',
