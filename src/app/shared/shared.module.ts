@@ -20,6 +20,7 @@ import { VideoComponent } from './video/video.component';
 import { CaptureComponent } from './capture/capture.component';
 import { TimesPipe } from '../pipes/times.pipe';
 import { VideoPlayComponent } from './video-play/video-play.component';
+import { BlockComponent } from './block/block.component';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -38,7 +39,8 @@ import { VideoPlayComponent } from './video-play/video-play.component';
     VideoComponent,
     CaptureComponent,
     TimesPipe,
-    VideoPlayComponent
+    VideoPlayComponent,
+    BlockComponent
 
   ],
   imports: [
@@ -64,7 +66,8 @@ import { VideoPlayComponent } from './video-play/video-play.component';
     PhotoViewComponent,
     VideoComponent,
     CaptureComponent,
-    VideoPlayComponent
+    VideoPlayComponent,
+    BlockComponent
   ],
   exports: [
     VideoComponent,

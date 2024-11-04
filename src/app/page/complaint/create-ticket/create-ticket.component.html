@@ -76,6 +76,7 @@
             <p>{{dat.client_asset_id}}</p>
             <p><b>Serial No:</b> {{dat.serial_no}}</p>
             <p><b>Device Name: </b>{{dat.subgrp_desc}}</p>
+            <p><b>Block: </b>{{dat.block_desc}}</p>
             <p><b>Location: </b>{{dat.location_desc}}</p>
             <p><b>Floor: </b>{{dat.floor_desc}}</p>
             <p><b>Building: </b>{{dat.building_desc}}</p>
@@ -86,12 +87,17 @@
             <ion-label position="floating">Select Site  <ion-text color="danger">*</ion-text> </ion-label>
             <ion-input type="text" formControlName="pc_id_desc" readonly></ion-input>
           </ion-item>
+          <ion-item>
+            <ion-label position="floating">Block <ion-text color="danger">*</ion-text></ion-label>
+            <ion-select interface="action-sheet" mode="ios" formControlName="block_id" (ionChange)="changeBlock($event)">
+              <ion-select-option *ngFor="let dat of blockArr" [value]="dat.value">{{dat.label}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
           <ion-item (click)="openBuilding()">
             <ion-label position="floating">Building  <ion-text color="danger">*</ion-text> </ion-label>
             <ion-input type="text" formControlName="bldg_id_desc" readonly></ion-input>
-            <!-- <ion-select interface="action-sheet" mode="ios" formControlName="bldg_id" (ionChange)="changeBuilding($event)">
-              <ion-select-option *ngFor="let dat of buildingArr" [value]="dat.value">{{dat.label}}</ion-select-option>
-            </ion-select> -->
+
           </ion-item>
           <ion-item (click)="openFloorModal()">
             <ion-label position="floating">Floor  <ion-text color="danger">*</ion-text> </ion-label>
@@ -114,6 +120,12 @@
         <ion-item (click)="openRoName()">
           <ion-label position="floating">Select Site <ion-text color="danger">*</ion-text> </ion-label>
           <ion-input type="text" formControlName="pc_id_desc" readonly></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Block <ion-text color="danger">*</ion-text></ion-label>
+          <ion-select interface="action-sheet" mode="ios" formControlName="block_id" (ionChange)="changeBlock($event)">
+            <ion-select-option *ngFor="let dat of blockArr" [value]="dat.value">{{dat.label}}</ion-select-option>
+          </ion-select>
         </ion-item>
         <ion-item (click)="openBuilding()">
           <ion-label position="floating">Building  <ion-text color="danger">*</ion-text> </ion-label>

@@ -14,6 +14,7 @@ import { QuerySubCat2Component } from 'src/app/shared/query-sub-cat2/query-sub-c
 import { BuildingComponent } from 'src/app/shared/building/building.component';
 import { FloorComponent } from 'src/app/shared/floor/floor.component';
 import { LocationComponent } from 'src/app/shared/location/location.component';
+import { BlockComponent } from 'src/app/shared/block/block.component';
 @Component({
   selector: 'app-ticket-type',
   templateUrl: './ticket-type.component.html',
@@ -65,6 +66,7 @@ export class TicketTypeComponent  implements OnInit {
        if (this.allData?.source !== 'QRCODE') {
          this.isShowBuilding = true;
        }
+       console.log(this.allData);
        this.getRequestType(this.allData.tkts_issue_id);
     });
     // this.httpCommon.setHomeLoadStatus(true);
@@ -80,6 +82,8 @@ export class TicketTypeComponent  implements OnInit {
       barcode: [''],
       category: [''],
       category_desc: [''],
+      block_id_desc: [''],
+      block_id: [''],
       bldg_id: [''],
       bldg_id_desc: [''],
       floor_id: [''],
@@ -114,6 +118,9 @@ export class TicketTypeComponent  implements OnInit {
       this.ticketForm.get('subcat1_id')?.setValue(this.allData.subcat1_id);
       this.ticketForm.get('subcat2_id_desc')?.setValue(this.allData.subcat2_desc);
       this.ticketForm.get('subcat2_id')?.setValue(this.allData.subcat2_id);
+
+      this.ticketForm.get('block_id_desc')?.setValue(this.allData.block_desc);
+      this.ticketForm.get('block_id')?.setValue(this.allData.block_id);
 
       this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id);
       this.ticketForm.get('bldg_id_desc')?.setValue(this.allData.building_desc);
@@ -441,16 +448,44 @@ export class TicketTypeComponent  implements OnInit {
     return await modal.present();
   }
 
-  async openBuilding() {
+  async openBlock() {
     if (!this.allData.pc_id) {
       this.httpCommon.presentToast('PC Id is Missing', 'warning');
+      return;
+    }
+    const modal = await this.modalCtrl.create({
+      component: BlockComponent,
+      cssClass: 'my-modal',
+      componentProps : {
+        allData: this.allData
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        this.ticketForm.get('block_id_desc')?.setValue(disModal.data.label);
+        this.ticketForm.get('block_id')?.setValue(disModal.data.value);
+        this.ticketForm.get('bldg_id_desc')?.setValue('');
+        this.ticketForm.get('bldg_id')?.setValue('');
+        this.ticketForm.get('floor_id_desc')?.setValue('');
+        this.ticketForm.get('floor_id')?.setValue('');
+        this.ticketForm.get('loc_code_desc')?.setValue('');
+        this.ticketForm.get('loc_code')?.setValue('');
+      }
+    });
+    return await modal.present();
+  }
+
+  async openBuilding() {
+    console.log(this.ticketForm.value);
+    if (!this.ticketForm.value.block_id) {
+      this.httpCommon.presentToast('Block Id is Missing', 'warning');
       return;
     }
     const modal = await this.modalCtrl.create({
       component: BuildingComponent,
       cssClass: 'my-modal',
       componentProps : {
-        id: this.allData.pc_id
+        id: this.ticketForm.value.block_id
       }
     });
     modal.onWillDismiss().then(disModal => {
@@ -461,13 +496,6 @@ export class TicketTypeComponent  implements OnInit {
         this.ticketForm.get('floor_id')?.setValue('');
         this.ticketForm.get('loc_code_desc')?.setValue('');
         this.ticketForm.get('loc_code')?.setValue('');
-        // this.ticketForm.get('category_desc')?.setValue('');
-        // this.ticketForm.get('category')?.setValue('');
-        // this.ticketForm.get('subcat1_id_desc')?.setValue('');
-        // this.ticketForm.get('subcat1_id')?.setValue('');
-        // this.ticketForm.get('subcat2_id_desc')?.setValue('');
-        // this.ticketForm.get('subcat2_id')?.setValue('');
-        // this.getBuilding(disModal.data.value);
       }
     });
     return await modal.present();

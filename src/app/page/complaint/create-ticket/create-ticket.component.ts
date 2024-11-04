@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { BuildingComponent } from 'src/app/shared/building/building.component';
 import { FloorComponent } from 'src/app/shared/floor/floor.component';
 import { LocationComponent } from 'src/app/shared/location/location.component';
+import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 @Component({
   selector: 'app-create-ticket',
   templateUrl: './create-ticket.component.html',
@@ -26,6 +27,7 @@ export class CreateTicketComponent  implements OnInit {
   isImageUpload = false;
   loading: any;
   fileName: any;
+  blockArr: any = [];
   buildingArr: any = [];
   floorArr: any = [];
   locationArr: any = [];
@@ -50,7 +52,8 @@ export class CreateTicketComponent  implements OnInit {
     private navCtrl: NavController,
     private modalController: ModalController,
     private loadingController: LoadingController,
-    private router: Router
+    private router: Router,
+    private httpAsset: MyAssetGetService
   ) { }
 
   ngOnInit() {
@@ -81,6 +84,7 @@ export class CreateTicketComponent  implements OnInit {
       multi_barcode: [''],
       pc_id: [''],
       pc_id_desc: [''],
+      block_id: [''],
       bldg_id: [''],
       bldg_id_desc: [''],
       floor_id: [''],
@@ -416,6 +420,22 @@ export class CreateTicketComponent  implements OnInit {
     }
   }
 
+  changeBlock(ev: any) {
+    console.log(ev.target.value);
+    this.createForm.get('bldg_id_desc')?.setValue('');
+    this.createForm.get('bldg_id')?.setValue('');
+    this.createForm.get('floor_id_desc')?.setValue('');
+    this.createForm.get('floor_id')?.setValue('');
+    this.createForm.get('loc_code_desc')?.setValue('');
+    this.createForm.get('loc_code')?.setValue('');
+    this.createForm.get('category_desc')?.setValue('');
+    this.createForm.get('category')?.setValue('');
+    this.createForm.get('subcat1_id_desc')?.setValue('');
+    this.createForm.get('subcat1_id')?.setValue('');
+    this.createForm.get('subcat2_id_desc')?.setValue('');
+    this.createForm.get('subcat2_id')?.setValue('');
+  }
+
   submit() {
     for (let key in this.createForm.value)  {
       if (!this.createForm.value[key]) {
@@ -555,6 +575,7 @@ export class CreateTicketComponent  implements OnInit {
         this.createForm.get('pc_id_desc')?.setValue(disModal.data.label);
         this.createForm.get('pc_id')?.setValue(disModal.data.value);
 
+        this.createForm.get('block_id')?.setValue('');
         this.createForm.get('bldg_id_desc')?.setValue('');
         this.createForm.get('bldg_id')?.setValue('');
         this.createForm.get('floor_id_desc')?.setValue('');
@@ -568,22 +589,22 @@ export class CreateTicketComponent  implements OnInit {
         this.createForm.get('subcat1_id')?.setValue('');
         this.createForm.get('subcat2_id_desc')?.setValue('');
         this.createForm.get('subcat2_id')?.setValue('');
-        // this.getBuilding(disModal.data.value);
+        this.getBlock(disModal.data.value);
       }
     });
     return await modal.present();
   }
 
   async openBuilding() {
-    if (!this.createForm.value.pc_id) {
-      this.httpCommon.presentToast('Please Select Site', 'warning');
+    if (!this.createForm.value.block_id) {
+      this.httpCommon.presentToast('Please Select Block', 'warning');
       return;
     }
     const modal = await this.modalController.create({
       component: BuildingComponent,
       cssClass: 'my-modal',
       componentProps : {
-        id: this.createForm.value.pc_id
+        id: this.createForm.value.block_id
       }
     });
     modal.onWillDismiss().then(disModal => {
@@ -606,6 +627,28 @@ export class CreateTicketComponent  implements OnInit {
       }
     });
     return await modal.present();
+  }
+
+  getBlock(id: any) {
+    this.presentLoading().then(preLoad => {
+      this.httpAsset.getBlock(id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.blockArr = data.data;
+          } else {
+            this.httpCommon.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.httpCommon.presentToast(environment.errMsg, 'danger');
+          this.dismissloading();
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+
   }
 
 
