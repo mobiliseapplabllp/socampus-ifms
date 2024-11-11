@@ -207,8 +207,25 @@ export class LoginPage implements OnInit {
     });
   }
 
+  test2() {
+    let browser = this.iab.create('https://accessindstaging.mobilisepro.com/ssoGates/saml3/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let count = 0;
+    browser.on('loadstart').subscribe(data => {
+      if (data.url.match(environment.ssoUrl + '#/auth/ssoGates/')) {
+        count = count + 1;
+        let url, token
+        url = data.url;
+        token = url.split('ssoGates/')[1];
+        browser.close();
+        if (count <= 1) {
+          this.getSsoEnc(token);
+        }
+      }
+    });
+  }
+
   test() {
-    let browser = this.iab.create('https://mobilise.co.in/', '_blank', 'location=no,zoom=yes');
+    let browser = this.iab.create('https://access.apac.sodexo.com/ssoGates/saml3/index.php?sso', '_blank', 'location=no,zoom=yes');
     let count = 0;
     browser.on('loadstart').subscribe(data => {
       if (data.url.match(environment.ssoUrl + '#/auth/ssoGates/')) {
