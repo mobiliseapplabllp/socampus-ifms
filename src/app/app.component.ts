@@ -41,7 +41,8 @@ export class AppComponent {
   }
 
   initApp() {
-    if (this.platform.is('capacitor')) {
+
+    if (this.platform.is('capacitor')){
       StatusBar.setOverlaysWebView({overlay: false});
       StatusBar.setBackgroundColor({'color': '#040E51'})
       App.getInfo().then(res => {
