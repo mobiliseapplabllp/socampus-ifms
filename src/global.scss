@@ -83,6 +83,11 @@
   src: url(assets/sansa_pro/sansapro_semibold.otf);
 }
 
+.blurred {
+  filter: blur(10px);
+}
+
+
 ion-content {
   font-family: 'opensans_semibold' !important;
 }

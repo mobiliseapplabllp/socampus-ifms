@@ -11,6 +11,12 @@
       "launchShowDuration": 10000,
       "autoHide": false,
       "backgroundColor": "#283897"
+    },
+    "PrivacyScreen": {
+      "enable": true,
+      "imageName": "Splashscreen",
+      "contentMode": "scaleAspectFit",
+      "preventScreenshots": false
     }
   }
 }
