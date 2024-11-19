@@ -6,6 +6,7 @@ import { AlertController, ModalController, Platform,  } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { SosComponent } from './sos/sos.component';
 import { App } from '@capacitor/app';
+import { LoginService } from 'src/app/provider/login/login.service';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -29,7 +30,8 @@ export class ListMasterPage implements OnInit {
     private alertController: AlertController,
     private router: Router,
     private modalCtrl: ModalController,
-    private platform: Platform) {
+    private platform: Platform,
+    private httpLogin: LoginService) {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
@@ -46,12 +48,46 @@ export class ListMasterPage implements OnInit {
           const curVersion = res.version.toString();
           this.currentVersion = curVersion.toString();
           if (this.appUpdate.is_view && this.appUpdate.forceupdate && (this.appUpdate.vesrion !== this.currentVersion)) {
-            // this.downloadApp(this.appUpdate.url);
+            this.openPlayStore(this.appUpdate.url);
             this.common.presentToast('Please Update your App', 'warning');
+          } else if (!this.appUpdate.status) {
+            this.getAppVersion();
           }
         });
       }
     });
+  }
+
+  getAppVersion() {
+    let platform;
+    if (this.platform.is('android')) {
+      platform = 'android';
+    } else if (this.platform.is('ios')) {
+      platform = 'ios';
+    } else {
+      platform = 'android'
+    }
+    this.httpLogin.getAppVersion(platform).subscribe({
+      next:(data) => {
+        this.appUpdate = data;
+        if (this.appUpdate.is_view && this.appUpdate.forceupdate && (this.appUpdate.vesrion !== this.currentVersion)) {
+          this.openPlayStore(this.appUpdate.url);
+          this.common.presentToast('Please Update your App', 'warning');
+        }
+      },
+      error:() => {
+
+      },
+      complete:() => {
+
+      }
+    })
+  }
+
+
+
+  openPlayStore(url: string) {
+    window.open(url);
   }
 
   downloadApp(url: string) {

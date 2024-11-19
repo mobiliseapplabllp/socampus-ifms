@@ -8,6 +8,7 @@ import { environment } from 'src/environments/environment';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 import { env } from 'process';
+import { App } from '@capacitor/app';
 
 @Component({
   selector: 'app-login',
@@ -36,6 +37,8 @@ export class LoginPage implements OnInit {
   };
   otp: any;
   sendMobileMsg!: string;
+  appUpdate: any = [];
+  currentVersion: any = [];
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -190,7 +193,8 @@ export class LoginPage implements OnInit {
               localStorage.setItem('enc_id', this.userValue.enc_id);
               localStorage.setItem('user', JSON.stringify(this.userValue.user));
               localStorage.setItem('isAlreadyLogin', 'true');
-              this.multiFactorSubmit();
+              // this.multiFactorSubmit();
+              this.checkAppUpdate();
             }
           }
         },
@@ -229,7 +233,8 @@ export class LoginPage implements OnInit {
             localStorage.setItem('enc_id', data.enc_id);
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('isAlreadyLogin', 'true');
-            this.multiFactorSubmit();
+            this.checkAppUpdate();
+            // this.multiFactorSubmit();
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -243,9 +248,32 @@ export class LoginPage implements OnInit {
         }
       });
     })
-
   }
 
+  checkAppUpdate() {
+    this.common.getAppVersionObs().subscribe(data => {
+      this.appUpdate = data;
+      if (this.platform.is('android')) {
+        this.isAndroid = true;
+        App.getInfo().then(res => {
+          const curVersion = res.version.toString();
+          this.currentVersion = curVersion.toString();
+          if (this.appUpdate.is_view && this.appUpdate.forceupdate && (this.appUpdate.vesrion !== this.currentVersion)) {
+            this.openPlayStore(this.appUpdate.url);
+            this.common.presentToast('Please Update your App', 'warning');
+          } else {
+            this.multiFactorSubmit();
+          }
+        });
+      } else {
+        this.multiFactorSubmit();
+      }
+    });
+  }
+
+  openPlayStore(url: string) {
+    window.open(url);
+  }
 
   multiFactorSubmit() {
     this.router.navigateByUrl('/list-master', { replaceUrl: true });

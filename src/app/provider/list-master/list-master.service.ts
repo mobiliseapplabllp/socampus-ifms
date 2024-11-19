@@ -17,7 +17,7 @@ export class ListMasterService {
 
   getMenuDetail() {
     return new Promise(resolve => {
-      this.https.get(environment.url + 'setups/app-menu/get_mobile_app_mnu').subscribe({
+      this.https.get(environment.url + 'setups/app-menu/get_mobile_app_mnu?app=app').subscribe({
         next:(data) => {
           this.data = data;
           this.myMenuTemp.next(this.data.data[0].submenu);
