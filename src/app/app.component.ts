@@ -10,6 +10,8 @@ import { CommonService } from './provider/common/common.service';
 import { environment } from 'src/environments/environment';
 import { checklist, db } from './provider/local-db/local-db.service';
 import { PrivacyScreen } from '@capacitor-community/privacy-screen';
+import { CapacitorCookies } from '@capacitor/core';
+
 
 @Component({
   selector: 'app-root',
@@ -34,15 +36,18 @@ export class AppComponent {
     private common: CommonService,
     private zone: NgZone) {
       this.platform.ready().then(res => {
-        PrivacyScreen.enable();
         this.initApp()
         this.getUserData();
+        // setTimeout(() => {
+        //   CapacitorCookies.clearAllCookies();
+        // }, 10000);
       });
   }
 
   initApp() {
     this.getAppVersion();
     if (this.platform.is('capacitor')){
+      PrivacyScreen.enable();
       StatusBar.setOverlaysWebView({overlay: false});
       StatusBar.setBackgroundColor({'color': '#040E51'})
       App.getInfo().then(res => {
@@ -243,6 +248,7 @@ export class AppComponent {
 
   async reset() {
     localStorage.clear();
+    CapacitorCookies.clearAllCookies();
     await db.checklist.clear();
     if (this.platform.is('android')) {
       App.exitApp();
