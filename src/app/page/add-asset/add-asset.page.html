@@ -253,9 +253,9 @@
               <ion-label color="primary" position="floating">Purchase Date</ion-label>
               <ion-input type="text" [value]="addAsset.value.pur_date | date"   placeholder="Select Date"  readonly></ion-input>
             </ion-item>
-            <ion-popover trigger="asset-pur-date" >
+            <ion-popover trigger="asset-pur-date" mode="md">
               <ng-template>
-                <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" [max]="currentDate" formControlName="pur_date" (ionChange)="changeDate('pur_date')"></ion-datetime>
+                <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" [max]="currentDate" formControlName="pur_date" (ionChange)="changeDate('pur_date')" [showDefaultButtons]="true"></ion-datetime>
               </ng-template>
             </ion-popover>
           </ion-col>
@@ -277,9 +277,9 @@
               <ion-label color="primary" position="floating">Install Date</ion-label>
               <ion-input type="text" [value]="addAsset.value.install_date | date"   placeholder="Select Date"  readonly></ion-input>
             </ion-item>
-            <ion-popover trigger="asset-install-date" >
+            <ion-popover trigger="asset-install-date" mode="md">
               <ng-template>
-                <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" formControlName="install_date" (ionChange)="changeDate()"></ion-datetime>
+                <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" formControlName="install_date" (ionChange)="changeDate()" [showDefaultButtons]="true"></ion-datetime>
               </ng-template>
             </ion-popover>
           </ion-col>
@@ -356,9 +356,9 @@
               <ion-label color="primary" position="floating">Start Date</ion-label>
               <ion-input type="text" [value]="addAsset.value.warranty_start_date | date"   placeholder="Select Date"  readonly></ion-input>
             </ion-item>
-            <ion-popover trigger="asset-warranty-start-date" >
+            <ion-popover trigger="asset-warranty-start-date" mode="md">
               <ng-template>
-                <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" formControlName="warranty_start_date" (ionChange)="changeDate('from')"></ion-datetime>
+                <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" formControlName="warranty_start_date" (ionChange)="changeDate('from')" [showDefaultButtons]="true"></ion-datetime>
               </ng-template>
             </ion-popover>
           </ion-col>
@@ -367,9 +367,9 @@
               <ion-label color="primary" position="floating">End Date</ion-label>
               <ion-input type="text" [value]="addAsset.value.warranty_end_date | date"   placeholder="Select Date"  readonly></ion-input>
             </ion-item>
-            <ion-popover trigger="asset-warranty-end-date" >
+            <ion-popover trigger="asset-warranty-end-date" mode="md">
               <ng-template>
-                <ion-datetime #popoverDatetime max="2099" [min]="addAsset.value.warranty_start_date" presentation="date" size="cover" formControlName="warranty_end_date" (ionChange)="changeDate('to')"></ion-datetime>
+                <ion-datetime #popoverDatetime max="2099" [min]="addAsset.value.warranty_start_date" presentation="date" size="cover" formControlName="warranty_end_date" (ionChange)="changeDate('to')" [showDefaultButtons]="true"></ion-datetime>
               </ng-template>
             </ion-popover>
           </ion-col>

@@ -71,7 +71,8 @@ export class ComplaintService {
   }
 
   getResolvedTicket(): Observable<any> {
-    return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=40&page=1&status=4')
+    // return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=40&page=1&status=4')
+    return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=40&page=1&status=4,6') //when backend api is ready then we will send
   }
 
   searchTicketFromServer(key: any, value: any): Observable<any> {
