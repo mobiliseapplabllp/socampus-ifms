@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  url: 'https://hr-access.herokuapp.com/https://socampusuatbe.mobilisepro.com/api/',
-  url1: 'https://hr-access.herokuapp.com/https://socampusuatbe.mobilisepro.com/',
+  url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampusuatbe.mobilisepro.com/api/',
+  url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampusuatbe.mobilisepro.com/',
   url2: 'https://socampusuatbe.mobilisepro.com/',
   ssoUrl: 'https://socampusuat.mobilisepro.com/',
   // url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/backend/api/',
