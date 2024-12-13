@@ -38,9 +38,6 @@ export class AppComponent {
       this.platform.ready().then(res => {
         this.initApp()
         this.getUserData();
-        // setTimeout(() => {
-        //   CapacitorCookies.clearAllCookies();
-        // }, 10000);
       });
   }
 

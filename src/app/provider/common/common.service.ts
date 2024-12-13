@@ -73,6 +73,8 @@ export class CommonService {
     }
   }
 
+
+
   async checkInternet() {
     return new Promise(async resolve => {
       const status = await Network.getStatus();
