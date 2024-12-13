@@ -26,7 +26,7 @@ export class FillReportComponent  implements OnInit {
   schedule_id: any;
   loading: any;
   remark: any;
-  signatureBase64!: string;
+  signatureBase64!: any;
   schedule_status: any;
   sign_attachment: any;
   on_behalf: any;
@@ -82,12 +82,14 @@ export class FillReportComponent  implements OnInit {
     this.temp = this.scheduleArr1$.subscribe({
       next:(data) => {
         this.scheduleArr = [...data];
+        console.log(this.scheduleArr);
         this.schedule_status = this.scheduleArr[0].schedule_status
         this.remark =this.scheduleArr[0].final_remark;
         this.signatureBase64 =this.scheduleArr[0].base64_sign;
         this.offline_save = this.scheduleArr[0].offline_save
       },
     });
+
 
     setTimeout(() => {
       this.temp.unsubscribe();
@@ -459,6 +461,14 @@ export class FillReportComponent  implements OnInit {
     }, 500);
   }
 
+  async viewSign() {
+    if (this.signatureBase64.startsWith('uploads/')) {
+      this.common.setImageCondition(this.signatureBase64, 'blob', 'PRIVATE');
+    } else {
+      this.common.imageView(this.signatureBase64, '');
+    }
+  }
+
   async openSign() {
     const modal = await this.modalCtrl.create({
       component: SignatureComponent,
@@ -539,7 +549,7 @@ export class FillReportComponent  implements OnInit {
     }
   }
 
-  viewDocs(obj: any) {
+  viewDocs(obj: any, blobType: string) {
     let type = typeof(obj);
     if(type === 'object') {
       this.openPhotoViewer(obj);
@@ -548,7 +558,7 @@ export class FillReportComponent  implements OnInit {
         this.common.presentToast('Internet Not Working', 'warning');
         return;
       }
-      this.common.openDoc(obj);
+      this.common.setImageCondition(obj, 'blob', blobType)
     }
   }
 

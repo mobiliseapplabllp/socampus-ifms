@@ -200,7 +200,8 @@ export class PmCalPage implements OnInit {
   cretePM() { }
 
   viewAttachment(url: string) {
-    this.common.openDoc(url);
+    // this.common.openDoc(url);
+    this.common.setImageCondition(url, 'blob');
   }
 
   openFillReport(data: any) {
