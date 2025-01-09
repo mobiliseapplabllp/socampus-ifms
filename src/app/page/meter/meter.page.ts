@@ -374,8 +374,6 @@ export class MeterPage implements OnInit {
         return (dat.make.toLowerCase().indexOf(ev.target.value.toLowerCase()) > -1);
       } else if (dat.ext_id.toLowerCase().indexOf(ev.target.value.toLowerCase())> -1) {
         return (dat.ext_id.toLowerCase().indexOf(ev.target.value.toLowerCase()) > -1);
-      } else if (dat.wo_id.toLowerCase().indexOf(ev.target.value.toLowerCase())> -1) {
-        return (dat.wo_id.toLowerCase().indexOf(ev.target.value.toLowerCase()) > -1);
       }
       return;
     });
