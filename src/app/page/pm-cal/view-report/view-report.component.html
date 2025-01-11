@@ -105,7 +105,7 @@
                 <ion-text color="primary">Original Attachment</ion-text><br>
               </ion-col>
               <ion-col>
-                <ion-button *ngIf="val.attachment1" fill="clear" (click)="viewDocs(val.attachment1)">
+                <ion-button *ngIf="val.attachment1" fill="clear" (click)="viewDocs(val.attachment1, val.attachment1_blob_type)">
                   <ion-icon name="attach-outline"></ion-icon>
                 </ion-button>
               </ion-col>
@@ -161,7 +161,7 @@
                     <ion-text color="primary">Evidence</ion-text>
                   </ion-col>
                   <ion-col>
-                    <ion-button fill="clear" (click)="viewDocs(txt.artifact)">
+                    <ion-button fill="clear" (click)="viewDocs(txt.artifact, txt.artifact_blob_type)">
                       <ion-icon name="attach-outline"></ion-icon>
                     </ion-button>
                   </ion-col>

@@ -39,6 +39,7 @@ export class LoginPage implements OnInit {
   sendMobileMsg!: string;
   appUpdate: any = [];
   currentVersion: any = [];
+  isProduction = environment.production;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -171,6 +172,43 @@ export class LoginPage implements OnInit {
         }
       }
     });
+
+    browser.on('loaderror').subscribe(error => {
+      console.error('InAppBrowser error:', error);
+
+      // Display an error message to the user
+      alert(JSON.stringify(error));
+
+      // Optionally, you can close the InAppBrowser here if necessary
+      browser.close();
+    });
+  }
+
+  openKeyClock() {
+    let browser = this.iab.create(environment.ssoUrl + 'ssoGates/saml3/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let count = 0;
+    browser.on('loadstart').subscribe(data => {
+      if (data.url.match(environment.ssoUrl + '#/auth/ssoGates/')) {
+        count = count + 1;
+        let url, token
+        url = data.url;
+        token = url.split('ssoGates/')[1];
+        browser.close();
+        if (count <= 1) {
+          this.getSsoEnc(token);
+        }
+      }
+    });
+
+    browser.on('loaderror').subscribe(error => {
+      console.error('InAppBrowser error:', error);
+
+      // Display an error message to the user
+      alert(JSON.stringify(error));
+
+      // Optionally, you can close the InAppBrowser here if necessary
+      browser.close();
+    });
   }
 
   getSsoEnc(token: string) {
@@ -295,5 +333,11 @@ export class LoginPage implements OnInit {
 
   openPage(url: any) {
     this.router.navigateByUrl(url);
+  }
+
+  changeAuth() {
+    if (!this.isProduction) {
+      this.viewCondition = 'login';
+    }
   }
 }

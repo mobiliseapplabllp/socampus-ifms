@@ -26,6 +26,7 @@
     "@awesome-cordova-plugins/media-capture": "^6.7.0",
     "@capacitor-community/barcode-scanner": "^4.0.1",
     "@capacitor-community/camera-preview": "^5.0.0",
+    "@capacitor-community/privacy-screen": "^5.2.1",
     "@capacitor-community/speech-recognition": "^5.0.0",
     "@capacitor-community/text-to-speech": "^3.0.1",
     "@capacitor/android": "^4.7.0",

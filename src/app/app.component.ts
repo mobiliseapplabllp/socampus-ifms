@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { LoginService } from './provider/login/login.service';
 import { App } from '@capacitor/app';
 import { Router } from '@angular/router';
@@ -9,6 +9,9 @@ import { UserIdleService } from 'angular-user-idle';
 import { CommonService } from './provider/common/common.service';
 import { environment } from 'src/environments/environment';
 import { checklist, db } from './provider/local-db/local-db.service';
+import { PrivacyScreen } from '@capacitor-community/privacy-screen';
+import { CapacitorCookies } from '@capacitor/core';
+
 
 @Component({
   selector: 'app-root',
@@ -30,7 +33,8 @@ export class AppComponent {
     private alertController: AlertController,
     private httpLogin: LoginService,
     private loadingController: LoadingController,
-    private common: CommonService) {
+    private common: CommonService,
+    private zone: NgZone) {
       this.platform.ready().then(res => {
         this.initApp()
         this.getUserData();
@@ -39,7 +43,8 @@ export class AppComponent {
 
   initApp() {
     this.getAppVersion();
-    if (this.platform.is('capacitor')) {
+    if (this.platform.is('capacitor')){
+      PrivacyScreen.enable();
       StatusBar.setOverlaysWebView({overlay: false});
       StatusBar.setBackgroundColor({'color': '#040E51'})
       App.getInfo().then(res => {
@@ -241,6 +246,7 @@ export class AppComponent {
 
   async reset() {
     localStorage.clear();
+    CapacitorCookies.clearAllCookies();
     await db.checklist.clear();
     if (this.platform.is('android')) {
       App.exitApp();

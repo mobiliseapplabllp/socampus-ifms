@@ -82,8 +82,9 @@ export class ViewReportComponent  implements OnInit {
     this.loading.dismiss();
   }
 
-  viewDocs(url: string) {
-    this.common.openDoc(url)
+  viewDocs(url: string, blobType: string) {
+    // this.common.openDoc(url)
+    this.common.setImageCondition(url, 'blob', blobType)
   }
 
   async addResponse(data: any, createAt: any) {
