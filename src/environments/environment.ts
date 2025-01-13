@@ -8,7 +8,7 @@ export const environment = {
   // url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampusdev.mobilisepro.com/',
   // url2: 'https://socampusdev.mobilisepro.com/',
   // ssoUrl: 'https://socampusdev.mobilisepro.com/',
-  url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/backend/api/',
+  url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/be/api/',
   url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/',
   url2: 'https://socampus.mobilisepro.com/',
   ssoUrl: 'https://socampus.mobilisepro.com/',
