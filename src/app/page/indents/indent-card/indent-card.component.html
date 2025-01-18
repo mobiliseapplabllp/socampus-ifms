@@ -107,7 +107,7 @@
     </ion-row>
     <ion-row >
       <ion-col class="ion-text-right">
-        <ion-button *ngIf="data.attachment1" fill="outline" size="small" fill="outline" color="danger" (click)="openDoc(data.attachment1)" >Attachment</ion-button>
+        <ion-button *ngIf="data.attachment1" fill="outline" size="small" fill="outline" color="danger" (click)="openDoc(data.attachment1, data.attachment1_blob_type)" >Attachment</ion-button>
         <ion-button fill="solid" size="small" (click)="cancel(data)" [hidden]="type === 'not_pending'">Cancel</ion-button>
       </ion-col>
     </ion-row>

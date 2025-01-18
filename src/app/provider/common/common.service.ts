@@ -91,7 +91,7 @@ export class CommonService {
   openImg(url: string, blobType: string) {
     const formData = new FormData();
     formData.append('url', url);
-    formData.append('blob_name', blobType);
+    formData.append('blob_name', blobType || 'PRIVATE');
     this.presentLoading().then(preLoad => {
       this.http.post(environment.url + 'blob-url', formData).subscribe({
         next:(data: any) => {
@@ -141,10 +141,6 @@ export class CommonService {
     }
   }
 
-
-
-
-
   async checkInternet() {
     return new Promise(async resolve => {
       const status = await Network.getStatus();
@@ -154,7 +150,7 @@ export class CommonService {
 
   decryptValue(encryptedValue: string) {
     var encrypted: any, iv, value, key, key1, decrypted,decrypted1,regex,matches,extractedString
-    encrypted = decodeURIComponent(encryptedValue);
+    encrypted = decodeURIComponent(decodeURIComponent(encryptedValue)); // double decodeURIComponent punit ne lagwai hai kyuki kuch QR Code m double encode lga hua hai pta nhi kese
     try {
       encrypted = atob(encrypted);
       encrypted = JSON.parse(encrypted);

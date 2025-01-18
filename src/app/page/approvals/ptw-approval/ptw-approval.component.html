@@ -44,7 +44,7 @@
           <ion-text color="medium">{{dat.ptw_remark}}</ion-text>
         </ion-col>
         <ion-col *ngIf="dat.ptw_attach">
-          <ion-button color="secondary" shape="round" fill="clear" (click)="openDoc(dat.ptw_attach)">View <ion-icon name="attach-outline" slot="end"></ion-icon> </ion-button>
+          <ion-button color="secondary" shape="round" fill="clear" (click)="openDoc(dat.ptw_attach, dat.ptw_attach_blob_type)">View <ion-icon name="attach-outline" slot="end"></ion-icon> </ion-button>
         </ion-col>
       </ion-row>
       <ion-row>

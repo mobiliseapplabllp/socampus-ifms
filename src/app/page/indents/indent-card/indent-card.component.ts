@@ -20,8 +20,8 @@ export class IndentCardComponent implements OnInit {
 
   ngOnInit() {}
 
-  openDoc(url: string) {
-    this.common.openDoc(url);
+  openDoc(url: string, blobType: string) {
+    this.common.openImg(url, blobType);
   }
 
   cancel(data: any) {

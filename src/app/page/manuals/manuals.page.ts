@@ -96,7 +96,7 @@ export class ManualsPage implements OnInit {
     })
   }
 
-  openDoc(url: string) {
+  openDoc(url: string, blobType: string) {
     this.common.openDoc(url);
   }
 

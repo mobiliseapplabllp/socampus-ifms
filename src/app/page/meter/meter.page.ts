@@ -54,8 +54,10 @@ export class MeterPage implements OnInit {
   }
 
   getPendingWOusingBarcode(url: string) {
+    let updatedUrl = url.replace(/(https?:\/\/[^/]+)/, '$1/be');
+    console.log(updatedUrl)
     this.presentLoading().then(preLoad => {
-      this.httpMeter.getPendingWoBarcode(url).subscribe({
+      this.httpMeter.getPendingWoBarcode(updatedUrl).subscribe({
         next:(data) => {
           if (data.status) {
             this.meterInfo = data.data;

@@ -48,7 +48,6 @@ export class LogsComponent  implements OnInit {
   }
 
   openDoc(url: string, blobType:string) {
-    // this.common.openDoc(url);
     this.common.setImageCondition(url, 'blob', blobType);
   }
 

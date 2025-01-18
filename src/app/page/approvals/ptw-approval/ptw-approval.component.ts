@@ -52,8 +52,8 @@ export class PtwApprovalComponent  implements OnInit {
     })
   }
 
-  openDoc(url: string) {
-    this.common.openDoc(url);
+  openDoc(url: string, blobType: string) {
+    this.common.openImg(url, blobType);
   }
 
   async presentLoading() {

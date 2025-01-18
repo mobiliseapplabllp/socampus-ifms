@@ -44,7 +44,7 @@ export class PpmPtwComponent  implements OnInit {
   }
 
   openDoc(url: string) {
-    this.common.openDoc(url);
+    this.common.openImg(url, '');
   }
 
   async presentLoading() {

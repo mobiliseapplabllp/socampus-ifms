@@ -74,12 +74,12 @@
     </ion-row>
     <ion-row >
       <ion-col class="ion-text-right">
-        <ion-button color="danger" [hidden]="!dat.ticket_file" size="small" fill="outline" (click)="viewDoc(dat.ticket_file)">
+        <ion-button color="danger" [hidden]="!dat.ticket_file" size="small" fill="outline" (click)="viewDoc(dat.ticket_file, dat.ticket_file_blob_type)">
           <ion-text *ngIf="dat.txn_desc === '#Video uploaded'">Video</ion-text>
           <ion-text *ngIf="dat.txn_desc !== '#Video uploaded'">Img1 <ion-icon name="attach-outline" slot="end"></ion-icon></ion-text>
           <ion-icon name="attach-outline" slot="end"></ion-icon>
         </ion-button>
-        <ion-button color="danger" [hidden]="!dat.oth_file" size="small" fill="outline" (click)="viewDoc(dat.oth_file)">Img2 <ion-icon name="attach-outline" slot="end"></ion-icon> </ion-button>
+        <ion-button color="danger" [hidden]="!dat.oth_file" size="small" fill="outline" (click)="viewDoc(dat.oth_file, dat.ticket_file_blob_type)">Img2 <ion-icon name="attach-outline" slot="end"></ion-icon> </ion-button>
       </ion-col>
     </ion-row>
   </ion-card>

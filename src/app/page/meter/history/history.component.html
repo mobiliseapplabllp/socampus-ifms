@@ -59,7 +59,7 @@
         <ion-col size="6">
           <ion-text color="primary">Reading</ion-text><br>
           <ion-text>{{dat.reading}}</ion-text>
-          <ion-button size="small" fill="clear" *ngIf="dat.img1" (click)="openDoc(dat.img1)">
+          <ion-button size="small" fill="clear" *ngIf="dat.img1" (click)="openDoc(dat.img1, dat.img1_blob_type)">
             <ion-icon name="attach-outline"></ion-icon>
           </ion-button>
         </ion-col>
@@ -76,7 +76,7 @@
         <ion-col size="6">
           <ion-text color="primary">Reading</ion-text><br>
           <ion-text>{{dat.gen_reading}}</ion-text>
-          <ion-button size="small" fill="clear" *ngIf="dat.img2" (click)="openDoc(dat.img2)">
+          <ion-button size="small" fill="clear" *ngIf="dat.img2" (click)="openDoc(dat.img2, dat.img2_blob_type)">
             <ion-icon name="attach-outline"></ion-icon>
           </ion-button>
         </ion-col>
@@ -93,7 +93,7 @@
         <ion-col size="6">
           <ion-text color="primary">Reading</ion-text><br>
           <ion-text>{{dat.oth_reading}}</ion-text>
-          <ion-button size="small" fill="clear" *ngIf="dat.img3" (click)="openDoc(dat.img3)">
+          <ion-button size="small" fill="clear" *ngIf="dat.img3" (click)="openDoc(dat.img3, dat.img3_blob_type)">
             <ion-icon name="attach-outline"></ion-icon>
           </ion-button>
         </ion-col>

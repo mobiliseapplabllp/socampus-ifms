@@ -165,7 +165,7 @@ export class ComplaintCardsComponent  implements OnInit {
         next:(data) => {
           this.dismissLoading();
           if (data.status) {
-            this.common.openDoc(data.url)
+            this.common.openImg(data.url, data.blob_type)
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

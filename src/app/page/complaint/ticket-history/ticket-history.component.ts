@@ -68,13 +68,13 @@ export class TicketHistoryComponent  implements OnInit {
     modal.present();
   }
 
-  viewDoc(url: any) {
+  viewDoc(url: any, blobType: string) {
     const urlParts = url.split('?')[0];
     const filename = urlParts.split('.').pop();
     if (filename === 'mp4') {
       this.videoPlay(url);
     } else {
-      this.common.openDoc(url);
+      this.common.openImg(url, blobType)
     }
 
 

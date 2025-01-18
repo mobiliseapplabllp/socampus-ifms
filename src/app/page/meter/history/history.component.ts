@@ -81,8 +81,8 @@ export class HistoryComponent implements OnInit {
     }
   }
 
-  openDoc(url: any) {
-    this.common.openDoc(url);
+  openDoc(url: any, blobType: string) {
+    this.common.openImg(url, blobType);
   }
 
   meterReadingHistory(dat: any) {
