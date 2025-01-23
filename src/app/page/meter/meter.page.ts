@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { MeterService } from 'src/app/provider/meter/meter.service';
+import { last } from 'rxjs';
 @Component({
   selector: 'app-meter',
   templateUrl: './meter.page.html',
@@ -54,10 +55,14 @@ export class MeterPage implements OnInit {
   }
 
   getPendingWOusingBarcode(url: string) {
-    let updatedUrl = url.replace(/(https?:\/\/[^/]+)/, '$1/be');
-    console.log(updatedUrl)
+    let lastEncryptedString = url.split('meter-schedule-by-qrcode/').pop() || '';
+    if (!lastEncryptedString) {
+      this.common.presentToastWithOk('QR Code URL is Invalid ' + url, 'warning');
+      return;
+    }
+    let fullUrl = environment.url + 'meter/ifms/meter-schedule-by-qrcode/' + lastEncryptedString
     this.presentLoading().then(preLoad => {
-      this.httpMeter.getPendingWoBarcode(updatedUrl).subscribe({
+      this.httpMeter.getPendingWoBarcode(fullUrl).subscribe({
         next:(data) => {
           if (data.status) {
             this.meterInfo = data.data;
