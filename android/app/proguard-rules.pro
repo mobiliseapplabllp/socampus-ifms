@@ -1,46 +1,21 @@
-# Preserve Firebase classes from obfuscation
--keep class com.google.firebase.** { *; }
--keep class com.google.android.gms.** { *; }
+# Add project specific ProGuard rules here.
+# You can control the set of applied configuration files using the
+# proguardFiles setting in build.gradle.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
 
-# Firebase Analytics specific rules
--keep class com.google.firebase.analytics.** { *; }
--keep class com.google.android.gms.measurement.** { *; }
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+#   public *;
+#}
 
-# Firebase Cloud Messaging (FCM) specific rules
--keep class com.google.firebase.messaging.** { *; }
--keep class com.google.android.gms.gcm.** { *; }
+# Uncomment this to preserve the line number information for
+# debugging stack traces.
+#-keepattributes SourceFile,LineNumberTable
 
-# Firebase Realtime Database specific rules
--keep class com.google.firebase.database.** { *; }
-
-# Firebase Firestore specific rules
--keep class com.google.firebase.firestore.** { *; }
-
-# Firebase Authentication specific rules
--keep class com.google.firebase.auth.** { *; }
-
-# Firebase Remote Config specific rules
--keep class com.google.firebase.remoteconfig.** { *; }
-
-# Firebase Storage specific rules
--keep class com.google.firebase.storage.** { *; }
-
-# Firebase Functions specific rules
--keep class com.google.firebase.functions.** { *; }
-
-# Prevent Firebase from being stripped out
--dontwarn com.google.firebase.**
--dontwarn com.google.android.gms.**
-
-# Keep the class used for dynamic linking in Firebase SDK
--keep class com.google.firebase.dynamiclinks.** { *; }
-
-# Keep methods used for Firebase Installation (needed for persistence)
--keep class com.google.firebase.installations.** { *; }
-
-# Prevent optimization of Firebase services
--keep class com.google.firebase.messaging.FirebaseMessagingService { *; }
--keep class com.google.firebase.auth.FirebaseAuth { *; }
-
-# Keep all the methods required for Firebase Push Notifications
--keep class com.google.firebase.messaging.FirebaseMessaging { *; }
+# If you keep the line number information, uncomment this to
+# hide the original source file name.
+#-renamesourcefileattribute SourceFile
