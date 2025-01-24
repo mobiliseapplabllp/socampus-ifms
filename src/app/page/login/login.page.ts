@@ -340,4 +340,10 @@ export class LoginPage implements OnInit {
       this.viewCondition = 'login';
     }
   }
+
+  openBarcode() {
+    if (!this.isProduction) {
+      this.router.navigateByUrl('/barcode');
+    }
+  }
 }

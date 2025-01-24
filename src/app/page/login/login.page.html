@@ -41,16 +41,9 @@
             </h2>
             <form [formGroup]="loginForms" (ngSubmit)="onLogin()" mode="md">
               <section class="inputbox">
-                <ion-text color="primary" >Testing</ion-text>
-                <ion-item lines="none">
-                  <ion-input type="email" placeholder="Enter your User ID" [(ngModel)]="login.userid"  formControlName="userid"></ion-input>
-                </ion-item>
-              </section>
-
-              <section class="inputbox">
                 <ion-text color="primary" >User ID</ion-text>
                 <ion-item lines="none">
-                  <ion-input type="text" placeholder="Enter your User ID" [(ngModel)]="login.userid"  formControlName="userid"></ion-input>
+                  <ion-input type="email" placeholder="Enter your User ID" [(ngModel)]="login.userid"  formControlName="userid"></ion-input>
                 </ion-item>
               </section>
               <br>
@@ -124,7 +117,7 @@
         <div class="line"></div>
       </div>
       <ion-row >
-        <ion-col class="ion-text-center">
+        <ion-col class="ion-text-center" (click)="openBarcode()">
           <img src="assets/img/mobilise-logo.svg" style="height:50px;width:88px">
         </ion-col>
       </ion-row>

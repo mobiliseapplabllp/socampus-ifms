@@ -40,7 +40,7 @@
     </ion-item>
     <ion-item id="add-rspns-date">
       <ion-label color="primary" position="floating">Corrective Action Date</ion-label>
-      <ion-input type="text" [value]="addResponse.value.rspns_date | date"   placeholder="Action Date"  readonly></ion-input>
+      <ion-input type="email" [value]="addResponse.value.rspns_date | date"   placeholder="Action Date"  readonly></ion-input>
     </ion-item>
     <ion-popover trigger="add-rspns-date" >
       <ng-template>
@@ -49,7 +49,7 @@
     </ion-popover>
     <ion-item>
       <ion-label position="floating">Remark <ion-text color="danger">*</ion-text></ion-label>
-      <ion-input type="text" formControlName="remark"></ion-input>
+      <ion-input type="email" formControlName="remark"></ion-input>
     </ion-item>
     <ion-button size="small" fill="outline" (click)="presentActionSheet()" color="{{!isImgUpload ? 'danger' : 'success'}}">Attachment <ion-icon *ngIf="isImgUpload" name="checkmark-circle-outline"></ion-icon></ion-button>
     <ion-row>

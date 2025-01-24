@@ -8,7 +8,7 @@
 </ion-header>
 <ion-content class="ion-padding">
   <ion-item>
-    <ion-input type="text" placeholder="Searcy By..." (ionInput)="search($event)"> </ion-input>
+    <ion-input type="email" placeholder="Searcy By..." (ionInput)="search($event)"> </ion-input>
     <ion-button slot="end" class="ion-text-capitalize" (click)="sortArr()"> SORT <ion-icon [name]="isAscending ? 'chevron-up-sharp':'chevron-down-sharp' "></ion-icon> </ion-button>
   </ion-item>
   <ion-item *ngFor="let dat of assignUser" (click)="close(dat, true)" mode="md">

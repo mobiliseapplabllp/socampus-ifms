@@ -47,11 +47,11 @@
         <ion-col *ngIf="searchBy">
           <ion-item *ngIf="searchBy === 'wo_id'">
             <ion-label position="floating">Wo ID</ion-label>
-            <ion-input type="text" [(ngModel)]="searchValue"> </ion-input>
+            <ion-input type="email" [(ngModel)]="searchValue"> </ion-input>
           </ion-item>
           <ion-item *ngIf="searchBy === 'pc_id'" (click)="openRoName()">
             <ion-label position="floating">Select Site</ion-label>
-            <ion-input type="text" [(ngModel)]="searchValueDesc" readonly> </ion-input>
+            <ion-input type="email" [(ngModel)]="searchValueDesc" readonly> </ion-input>
           </ion-item>
         </ion-col>
       </ion-row>

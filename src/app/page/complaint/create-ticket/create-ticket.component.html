@@ -19,7 +19,7 @@
     <ion-card-content>
       <ion-item>
         <ion-label position="floating">Name <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="usr_name"></ion-input>
+        <ion-input type="email" formControlName="usr_name"></ion-input>
       </ion-item>
       <ion-item>
         <ion-label position="floating">Mobile No  </ion-label>
@@ -27,7 +27,7 @@
       </ion-item>
       <ion-item>
         <ion-label position="floating">Email  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="email"></ion-input>
+        <ion-input type="email" formControlName="email"></ion-input>
       </ion-item>
     </ion-card-content>
   </ion-card>
@@ -63,7 +63,7 @@
         </ion-item>
         <ion-item *ngIf="createForm.value.is_barcode ==='1'">
           <ion-label>Barcode No  <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="text" formControlName="barcode"></ion-input>
+          <ion-input type="email" formControlName="barcode"></ion-input>
           <ion-button color="danger" slot="end" (click)="searchBarcode()" *ngIf="!isSearchBarcode">
             <ion-icon name="search-outline"></ion-icon>
           </ion-button>
@@ -85,7 +85,7 @@
         <div *ngIf="createForm.value.is_barcode  === '0'">
           <ion-item  (click)="openRoName()">
             <ion-label position="floating">Select Site  <ion-text color="danger">*</ion-text> </ion-label>
-            <ion-input type="text" formControlName="pc_id_desc" readonly></ion-input>
+            <ion-input type="email" formControlName="pc_id_desc" readonly></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">Block <ion-text color="danger">*</ion-text></ion-label>
@@ -96,19 +96,19 @@
 
           <ion-item (click)="openBuilding()">
             <ion-label position="floating">Building  <ion-text color="danger">*</ion-text> </ion-label>
-            <ion-input type="text" formControlName="bldg_id_desc" readonly></ion-input>
+            <ion-input type="email" formControlName="bldg_id_desc" readonly></ion-input>
 
           </ion-item>
           <ion-item (click)="openFloorModal()">
             <ion-label position="floating">Floor  <ion-text color="danger">*</ion-text> </ion-label>
-            <ion-input type="text" formControlName="floor_id_desc" readonly></ion-input>
+            <ion-input type="email" formControlName="floor_id_desc" readonly></ion-input>
             <!-- <ion-select interface="action-sheet" mode="ios" formControlName="floor_id" (ionChange)="changeFloor($event)">
               <ion-select-option *ngFor="let dat of floorArr" [value]="dat.value">{{dat.label}}</ion-select-option>
             </ion-select> -->
           </ion-item>
           <ion-item (click)="openLocationModal()">
             <ion-label position="floating">Location  <ion-text color="danger">*</ion-text> </ion-label>
-            <ion-input type="text" formControlName="loc_code_desc" readonly></ion-input>
+            <ion-input type="email" formControlName="loc_code_desc" readonly></ion-input>
             <!-- <ion-select interface="action-sheet" mode="ios" formControlName="loc_code">
               <ion-select-option *ngFor="let dat of locationArr" [value]="dat.value">{{dat.label}}</ion-select-option>
             </ion-select> -->
@@ -119,7 +119,7 @@
       <div *ngIf="createForm.value.issue_id === 2">
         <ion-item (click)="openRoName()">
           <ion-label position="floating">Select Site <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="text" formControlName="pc_id_desc" readonly></ion-input>
+          <ion-input type="email" formControlName="pc_id_desc" readonly></ion-input>
         </ion-item>
         <ion-item>
           <ion-label position="floating">Block <ion-text color="danger">*</ion-text></ion-label>
@@ -129,36 +129,36 @@
         </ion-item>
         <ion-item (click)="openBuilding()">
           <ion-label position="floating">Building  <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="text" formControlName="bldg_id_desc" readonly></ion-input>
+          <ion-input type="email" formControlName="bldg_id_desc" readonly></ion-input>
           <!-- <ion-select interface="action-sheet" mode="ios" formControlName="bldg_id" (ionChange)="changeBuilding($event)">
             <ion-select-option *ngFor="let dat of buildingArr" [value]="dat.value">{{dat.label}}</ion-select-option>
           </ion-select> -->
         </ion-item>
         <ion-item (click)="openFloorModal()">
           <ion-label position="floating">Floor  <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="text" formControlName="floor_id_desc" readonly></ion-input>
+          <ion-input type="email" formControlName="floor_id_desc" readonly></ion-input>
           <!-- <ion-select interface="action-sheet" mode="ios" formControlName="floor_id" (ionChange)="changeFloor($event)">
             <ion-select-option *ngFor="let dat of floorArr" [value]="dat.value">{{dat.label}}</ion-select-option>
           </ion-select> -->
         </ion-item>
         <ion-item (click)="openLocationModal()">
           <ion-label position="floating">Location  <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="text" formControlName="loc_code_desc" readonly></ion-input>
+          <ion-input type="email" formControlName="loc_code_desc" readonly></ion-input>
           <!-- <ion-select interface="action-sheet" mode="ios" formControlName="loc_code">
             <ion-select-option *ngFor="let dat of locationArr" [value]="dat.value">{{dat.label}}</ion-select-option>
           </ion-select> -->
         </ion-item>
         <ion-item (click)="openCategory()">
           <ion-label position="floating">Query Category  <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="text" formControlName="category_desc" readonly></ion-input>
+          <ion-input type="email" formControlName="category_desc" readonly></ion-input>
         </ion-item>
         <ion-item (click)="openCategorySubCat()" *ngIf="allSubCat1.length > 0">
           <ion-label position="floating">Query Sub Category One  <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="text" formControlName="subcat1_id_desc" readonly></ion-input>
+          <ion-input type="email" formControlName="subcat1_id_desc" readonly></ion-input>
         </ion-item>
         <ion-item (click)="openCategorySubCat2()" *ngIf="allSubCat2.length > 0">
           <ion-label position="floating">Query Sub Category Two <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="text" formControlName="subcat2_id_desc" readonly></ion-input>
+          <ion-input type="email" formControlName="subcat2_id_desc" readonly></ion-input>
         </ion-item>
       </div>
     </ion-card-content>

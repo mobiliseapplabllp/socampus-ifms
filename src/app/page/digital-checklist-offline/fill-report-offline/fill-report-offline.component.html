@@ -37,7 +37,7 @@
         </ion-col>
       </ion-row>
       <ion-item [ngClass]="{redBorder: val.isRemarkMandatory === 1 && !val.remark }">
-        <ion-input type="text" [(ngModel)]="val.remark" [disabled]="!val.rspns" placeholder="Enter Remark" ></ion-input>
+        <ion-input type="email" [(ngModel)]="val.remark" [disabled]="!val.rspns" placeholder="Enter Remark" ></ion-input>
       </ion-item>
       <ion-row>
         <ion-col size="6" class="ion-no-padding" >
@@ -58,7 +58,7 @@
 
   <ion-item>
     <ion-label position="floating">Remark</ion-label>
-    <ion-input type="text" [(ngModel)]="allData.remark"></ion-input>
+    <ion-input type="email" [(ngModel)]="allData.remark"></ion-input>
   </ion-item>
 
   <ion-button (click)="openSign()" [fill]="signatureBase64 ? 'solid':'outline'">Signature <ion-icon name="checkmark-done-outline" slot="end" *ngIf="signatureBase64"></ion-icon></ion-button>

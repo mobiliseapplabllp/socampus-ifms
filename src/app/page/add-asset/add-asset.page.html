@@ -21,7 +21,7 @@
           <ion-col size="12">
             <ion-item (click)="openSiteModal()">
               <ion-label color="primary" position="floating">Select Site <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input type="text" formControlName="site_id_description" readonly></ion-input>
+              <ion-input type="email" formControlName="site_id_description" readonly></ion-input>
             </ion-item>
           </ion-col>
           <ion-col size="12">
@@ -45,13 +45,13 @@
           <ion-col>
             <ion-item (click)="openFloorModal()">
               <ion-label color="primary" position="floating">Floor <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input type="text" formControlName="floor_id_desc" readonly></ion-input>
+              <ion-input type="email" formControlName="floor_id_desc" readonly></ion-input>
             </ion-item>
           </ion-col>
           <ion-col>
             <ion-item (click)="openLocationModal()">
               <ion-label color="primary" position="floating">Location <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input type="text" formControlName="loc_id_desc" readonly></ion-input>
+              <ion-input type="email" formControlName="loc_id_desc" readonly></ion-input>
             </ion-item>
           </ion-col>
         </ion-row>
@@ -59,7 +59,7 @@
           <ion-col>
             <ion-item (click)="openDepartment()">
               <ion-label color="primary" position="floating">Department <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input type="text" formControlName="dept_id_desc" readonly></ion-input>
+              <ion-input type="email" formControlName="dept_id_desc" readonly></ion-input>
             </ion-item>
           </ion-col>
           <ion-col>
@@ -80,7 +80,7 @@
           <ion-col size="4">
             <ion-item>
               <ion-label position="floating">Prefix Barcode</ion-label>
-              <ion-input type="text" formControlName="ext_asset_id_pre" readonly></ion-input>
+              <ion-input type="email" formControlName="ext_asset_id_pre" readonly></ion-input>
             </ion-item>
           </ion-col>
           <ion-col size="8">
@@ -97,7 +97,7 @@
           <ion-col>
             <ion-item>
               <ion-label color="primary" position="floating">Client Asset Id <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input type="text" formControlName="client_asset_id" ></ion-input>
+              <ion-input type="email" formControlName="client_asset_id" ></ion-input>
             </ion-item>
           </ion-col>
         </ion-row>
@@ -154,7 +154,7 @@
           <ion-col>
             <ion-item (click)="openDeviceGroupModal()">
               <ion-label color="primary" position="floating">Device Group <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input type="text" formControlName="grp_id_desc" readonly></ion-input>
+              <ion-input type="email" formControlName="grp_id_desc" readonly></ion-input>
             </ion-item>
           </ion-col>
         </ion-row>
@@ -162,7 +162,7 @@
           <ion-col>
             <ion-item (click)="openDeviceName()">
               <ion-label color="primary" position="floating">Device Name <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input type="text" formControlName="subgrp_id_desc" readonly></ion-input>
+              <ion-input type="email" formControlName="subgrp_id_desc" readonly></ion-input>
             </ion-item>
           </ion-col>
           <ion-col>
@@ -179,7 +179,7 @@
           <ion-col>
             <ion-item>
               <ion-label color="primary" position="floating">Device Sub Cat Remark  <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input type="text" formControlName="device_sub_cate_remark" ></ion-input>
+              <ion-input type="email" formControlName="device_sub_cate_remark" ></ion-input>
             </ion-item>
           </ion-col>
         </ion-row>
@@ -187,13 +187,13 @@
           <ion-col>
             <ion-item>
               <ion-label color="primary" position="floating">Device Make</ion-label>
-              <ion-input type="text" formControlName="make"></ion-input>
+              <ion-input type="email" formControlName="make"></ion-input>
             </ion-item>
           </ion-col>
           <ion-col>
             <ion-item>
               <ion-label color="primary" position="floating">Device Model <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input type="text" formControlName="model"></ion-input>
+              <ion-input type="email" formControlName="model"></ion-input>
             </ion-item>
           </ion-col>
         </ion-row>
@@ -201,13 +201,13 @@
           <ion-col>
             <ion-item>
               <ion-label color="primary" position="floating">S.No <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input type="text" formControlName="serial_no"></ion-input>
+              <ion-input type="email" formControlName="serial_no"></ion-input>
             </ion-item>
           </ion-col>
           <ion-col>
             <ion-item (click)="openManufacturer()">
               <ion-label color="primary" position="floating">Manufacturer <ion-text color="danger">*</ion-text></ion-label>
-              <ion-input type="text" formControlName="manufacturer_id_desc" readonly></ion-input>
+              <ion-input type="email" formControlName="manufacturer_id_desc" readonly></ion-input>
             </ion-item>
           </ion-col>
         </ion-row>
@@ -215,7 +215,7 @@
           <ion-col>
             <ion-item>
               <ion-label color="primary" position="floating">Accessories</ion-label>
-              <ion-input type="text" formControlName="accessories"></ion-input>
+              <ion-input type="email" formControlName="accessories"></ion-input>
             </ion-item>
           </ion-col>
           <ion-col>
@@ -237,13 +237,13 @@
           <ion-col>
             <ion-item>
               <ion-label color="primary" position="floating">Ledger Reference</ion-label>
-              <ion-input type="text" formControlName="ledger_ref"></ion-input>
+              <ion-input type="email" formControlName="ledger_ref"></ion-input>
             </ion-item>
           </ion-col>
           <ion-col>
             <ion-item>
               <ion-label color="primary" position="floating">Purchase Order No</ion-label>
-              <ion-input type="text" formControlName="pur_order_no"></ion-input>
+              <ion-input type="email" formControlName="pur_order_no"></ion-input>
             </ion-item>
           </ion-col>
         </ion-row>
@@ -251,7 +251,7 @@
           <ion-col>
             <ion-item id="asset-pur-date">
               <ion-label color="primary" position="floating">Purchase Date</ion-label>
-              <ion-input type="text" [value]="addAsset.value.pur_date | date"   placeholder="Select Date"  readonly></ion-input>
+              <ion-input type="email" [value]="addAsset.value.pur_date | date"   placeholder="Select Date"  readonly></ion-input>
             </ion-item>
             <ion-popover trigger="asset-pur-date" mode="md">
               <ng-template>
@@ -275,7 +275,7 @@
           <ion-col>
             <ion-item id="asset-install-date">
               <ion-label color="primary" position="floating">Install Date</ion-label>
-              <ion-input type="text" [value]="addAsset.value.install_date | date"   placeholder="Select Date"  readonly></ion-input>
+              <ion-input type="email" [value]="addAsset.value.install_date | date"   placeholder="Select Date"  readonly></ion-input>
             </ion-item>
             <ion-popover trigger="asset-install-date" mode="md">
               <ng-template>
@@ -310,7 +310,7 @@
         </ion-row>
         <ion-item>
           <ion-label color="primary" position="floating">Install By  </ion-label>
-          <ion-input type="text" formControlName="install_by"></ion-input>
+          <ion-input type="email" formControlName="install_by"></ion-input>
         </ion-item>
         <ion-row>
           <ion-col class="ion-text-center">
@@ -354,7 +354,7 @@
           <ion-col>
             <ion-item id="asset-warranty-start-date">
               <ion-label color="primary" position="floating">Start Date</ion-label>
-              <ion-input type="text" [value]="addAsset.value.warranty_start_date | date"   placeholder="Select Date"  readonly></ion-input>
+              <ion-input type="email" [value]="addAsset.value.warranty_start_date | date"   placeholder="Select Date"  readonly></ion-input>
             </ion-item>
             <ion-popover trigger="asset-warranty-start-date" mode="md">
               <ng-template>
@@ -365,7 +365,7 @@
           <ion-col>
             <ion-item id="asset-warranty-end-date">
               <ion-label color="primary" position="floating">End Date</ion-label>
-              <ion-input type="text" [value]="addAsset.value.warranty_end_date | date"   placeholder="Select Date"  readonly></ion-input>
+              <ion-input type="email" [value]="addAsset.value.warranty_end_date | date"   placeholder="Select Date"  readonly></ion-input>
             </ion-item>
             <ion-popover trigger="asset-warranty-end-date" mode="md">
               <ng-template>
@@ -395,7 +395,7 @@
           <ion-col>
             <ion-item>
               <ion-label color="primary" position="floating">Vendor Name</ion-label>
-              <ion-input type="text" formControlName="vend_code"></ion-input>
+              <ion-input type="email" formControlName="vend_code"></ion-input>
             </ion-item>
           </ion-col>
           <ion-col>
@@ -412,7 +412,7 @@
           <ion-col>
             <ion-item>
               <ion-label color="primary" position="floating">Remark</ion-label>
-              <ion-input type="text" formControlName="remark"></ion-input>
+              <ion-input type="email" formControlName="remark"></ion-input>
             </ion-item>
           </ion-col>
         </ion-row>

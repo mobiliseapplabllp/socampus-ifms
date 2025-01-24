@@ -23,9 +23,6 @@ export class BarcodeComponent  implements OnInit {
       this.startScan();
     } else {
       let random = 'https://ifmsuat.mobilisepro.com/#/complaint-qr-code/eyJpdiI6IkphRmdjUUIya05DZGRQL0ttck9pYUE9PSIsInZhbHVlIjoiR0FCbDk5QTZ2ZlJsek1RdmIrbm5rQT09IiwibWFjIjoiMjdmYTBkOTY1MGI4YzZiYTJlNGJkN2RhYWYyOTYyOGE5NTQyMjlhY2JlYjdiNjUwODYwZGNkOWQ1NDc0NjU2NiJ9';
-      // let random = 'https://ifmsuat.mobilisepro.com/#/create-ticket-qr-code/eyJpdiI6Ii8xUmxlTjhyMkRFVUQ1WkVabHQvTmc9PSIsInZhbHVlIjoiVHhZUGJveXord3RqdjB0eHlYZDdjTjYwejArUXpuQ0lYMEUzdy96Wmp1ST0iLCJtYWMiOiI0ZGExYzc0MWQ3OGQ0ODU3ZjVjYjAzOGFiYTIzZDRhMTA0ZTExOTY2Yjc1NTY3ZGFjZDQ5MDFlNGQzYzlmZjk0In0%3D';
-      // https://ifmsuat.mobilisepro.com/#/complaint-qr-code/eyJpdiI6InZqV3ljU3gweE5mcDJuMm5DTHNTZWc9PSIsInZhbHVlIjoibEdNZlR5YVc3SDJFM1FxZGdwaXBrQT09IiwibWFjIjoiZGY0OGViNDdhYmFhN2M5NzY5NzFmMjIxNmJhZjY5OGYzYjBhZTAwNWZlM2U2YjNkMjAxMGNlNjYxNWIxM2VlNiJ9
-      // https://ifmsuat.mobilisepro.com/#/complaint-qr-code/eyJpdiI6Ikkwcnd4YlNZWlY1SUJXaTd6akRHUlE9PSIsInZhbHVlIjoiaHdBd3JVcDJiT09qY2M1NDV4dkZsQT09IiwibWFjIjoiOTdmMmM0YTM1NGZjYWYwNmI3NzI5OTZhNjg1NzMzMmJlODJiMDIyNjkzZTdiYmY4MzlmMGNmZjgyNjRiNzYxMyJ9
       this.barcodeNo = random;
       setTimeout(() => {
         this.common.setBarcode(this.barcodeNo);

@@ -9,7 +9,7 @@ import { UserIdleService } from 'angular-user-idle';
 import { CommonService } from './provider/common/common.service';
 import { environment } from 'src/environments/environment';
 import { checklist, db } from './provider/local-db/local-db.service';
-// import { PrivacyScreen } from '@capacitor-community/privacy-screen';
+import { PrivacyScreen } from '@capacitor-community/privacy-screen';
 import { CapacitorCookies } from '@capacitor/core';
 
 
@@ -44,7 +44,7 @@ export class AppComponent {
   initApp() {
     this.getAppVersion();
     if (this.platform.is('capacitor')){
-      // PrivacyScreen.enable();
+      PrivacyScreen.disable();
       StatusBar.setOverlaysWebView({overlay: false});
       StatusBar.setBackgroundColor({'color': '#040E51'})
       App.getInfo().then(res => {

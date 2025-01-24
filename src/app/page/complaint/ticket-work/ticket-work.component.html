@@ -101,11 +101,11 @@
             <div *ngIf="workSpace.value.status === 4">
               <ion-item>
                 <ion-label position="floating">Problem Reported By Customer <ion-text color="danger">*</ion-text></ion-label>
-                <ion-textarea type="text" rows="3" formControlName="problem_reported"></ion-textarea>
+                <ion-textarea type="email" rows="3" formControlName="problem_reported"></ion-textarea>
               </ion-item>
               <ion-item>
                 <ion-label position="floating">Action Taken By Engineer <ion-text color="danger">*</ion-text></ion-label>
-                <ion-textarea type="text" rows="3" formControlName="action_taken"></ion-textarea>
+                <ion-textarea type="email" rows="3" formControlName="action_taken"></ion-textarea>
               </ion-item>
               <ion-item>
                 <ion-button size="small" fill="outline" color="{{fileName ? 'success': 'danger'}}"  (click)="presentActionSheet('image')"> Image </ion-button>
@@ -114,7 +114,7 @@
 
               <!-- <ion-item [disabled]="isOtpSent">
                 <ion-label position="floating">Phone No</ion-label>
-                <ion-input type="text" [(ngModel)]="mobile" formControlName="phone_no" [disabled]="isOtpSent"></ion-input>
+                <ion-input type="email" [(ngModel)]="mobile" formControlName="phone_no" [disabled]="isOtpSent"></ion-input>
                 <ion-buttons slot="end">
                   <ion-button shape="round" [hidden]="isOtpSent" expand="block" [disabled]="!workSpace.value.phone_no" (click)="sendOtp()">Send OTP</ion-button>
                 </ion-buttons>

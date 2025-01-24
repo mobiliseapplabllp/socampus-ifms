@@ -113,7 +113,7 @@
           </ion-col>
         </ion-row>
         <ion-item [ngClass]="{redBorder: val.isRemarkMandatory === 1 && !val.remark }">
-          <ion-input type="text" [(ngModel)]="val.remark" placeholder="Enter Remark" (change)="changeRemark(val)" [disabled]="dat.schedule_status !== 'assigned' || !val.rspns || offline_save === 'true'"></ion-input>
+          <ion-input type="email" [(ngModel)]="val.remark" placeholder="Enter Remark" (change)="changeRemark(val)" [disabled]="dat.schedule_status !== 'assigned' || !val.rspns || offline_save === 'true'"></ion-input>
           <ion-buttons slot="end" [hidden]="dat.schedule_status !== 'assigned' || offline_save === 'true' " *ngIf="isInternet">
             <ion-button slot="icon-only" (click)="listenCondition(val)">
               <ion-icon name="mic-outline"></ion-icon>
@@ -141,7 +141,7 @@
   </div>
   <ion-item [ngClass]="{fullborder: remarkErr && !remark}">
     <ion-label position="floating">Remark</ion-label>
-    <ion-input type="text" [(ngModel)]="remark" [disabled]="schedule_status !== 'assigned' || offline_save === 'true' "></ion-input>
+    <ion-input type="email" [(ngModel)]="remark" [disabled]="schedule_status !== 'assigned' || offline_save === 'true' "></ion-input>
   </ion-item>
   <!-- <img [src]="signatureBase64" style="width:200px;height:200px;" *ngIf="(isInternet && signatureBase64) && schedule_status !== 'assigned' || offline_save === 'true' " style="border:1px solid black"> -->
   <ion-button color="success" size="small" (click)="viewSign()" *ngIf="(isInternet && signatureBase64) && schedule_status !== 'assigned' || offline_save === 'true' ">View Signature</ion-button>

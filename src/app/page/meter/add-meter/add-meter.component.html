@@ -19,7 +19,7 @@
       </ion-item> -->
       <ion-item (click)="openSiteModal()">
         <ion-label position="floating">Select Site  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="site_id_description" readonly></ion-input>
+        <ion-input type="email" formControlName="site_id_description" readonly></ion-input>
       </ion-item>
       <ion-item>
         <ion-label position="floating">Block <ion-text color="danger">*</ion-text> </ion-label>
@@ -55,19 +55,19 @@
         <ion-col size="5">
           <ion-item>
             <ion-label position="floating">Prefix <ion-text color="danger">*</ion-text> </ion-label>
-            <ion-input type="text" formControlName="ext_asset_id" readonly></ion-input>
+            <ion-input type="email" formControlName="ext_asset_id" readonly></ion-input>
           </ion-item>
         </ion-col>
         <ion-col size="7">
           <ion-item>
             <ion-label position="floating">Meter Id <ion-text color="danger">*</ion-text> </ion-label>
-            <ion-input type="text" formControlName="ext_id_temp" placeholder="6 Digit Only" maxlength="6" (ionChange)="changeMeterId()"></ion-input>
+            <ion-input type="email" formControlName="ext_id_temp" placeholder="6 Digit Only" maxlength="6" (ionChange)="changeMeterId()"></ion-input>
           </ion-item>
         </ion-col>
       </ion-row>
       <ion-item>
         <ion-label position="floating">Full Meter Id <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="ext_id" readonly></ion-input>
+        <ion-input type="email" formControlName="ext_id" readonly></ion-input>
       </ion-item>
 
       <ion-item>
@@ -80,7 +80,7 @@
 
       <ion-item *ngIf="addAsset.value.is_child_asset === '1' ">
         <ion-label position="floating">Asset Id</ion-label>
-        <ion-input type="text" formControlName="parent_asset_id" maxlength="10" placeholder="10 Digit only"></ion-input>
+        <ion-input type="email" formControlName="parent_asset_id" maxlength="10" placeholder="10 Digit only"></ion-input>
         <ion-button slot="end" (click)="searchParentId()" fill="outline">
           Verify
         </ion-button>
@@ -123,11 +123,11 @@
       </ion-item>
       <ion-item>
         <ion-label position="floating">Meter Name <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="meter_name"></ion-input>
+        <ion-input type="email" formControlName="meter_name"></ion-input>
       </ion-item>
       <ion-item>
         <ion-label position="floating">UOM <ion-text color="danger">*</ion-text> </ion-label>
-        <!-- <ion-input type="text"></ion-input> -->
+        <!-- <ion-input type="email"></ion-input> -->
         <ion-select interface="action-sheet" formControlName="uom_id" mode="ios">
           <ion-select-option *ngFor="let dat of uomMeter" [value]="dat.value"> {{dat.label}}</ion-select-option>
         </ion-select>
@@ -138,21 +138,21 @@
       </ion-item>
       <ion-item>
         <ion-label position="floating">Model <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="model"></ion-input>
+        <ion-input type="email" formControlName="model"></ion-input>
       </ion-item>
       <ion-item>
         <ion-label position="floating">Serial No <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="s_no"></ion-input>
+        <ion-input type="email" formControlName="s_no"></ion-input>
       </ion-item>
       <ion-item>
         <ion-label position="floating">Starting Reading <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="ideal_reading"></ion-input>
+        <ion-input type="email" formControlName="ideal_reading"></ion-input>
       </ion-item>
       <ion-row>
         <ion-col size="6">
           <ion-item id="add-meter-start-date">
             <ion-label color="primary" position="floating">Start Date <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input type="text"  placeholder="Select Date"  [value]="addAsset.value.start_date | date"  readonly></ion-input>
+            <ion-input type="email"  placeholder="Select Date"  [value]="addAsset.value.start_date | date"  readonly></ion-input>
           </ion-item>
           <ion-popover trigger="add-meter-start-date" >
             <ng-template>
@@ -163,7 +163,7 @@
         <ion-col size="6">
           <ion-item id="add-meter-start-time" >
             <ion-label position="floating">Start Time <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input type="text" [value]="addAsset.value.start_time"  readonly></ion-input>
+            <ion-input type="email" [value]="addAsset.value.start_time"  readonly></ion-input>
           </ion-item>
 
           <ion-modal trigger="add-meter-start-time" [cssClass]="'center1'">
@@ -175,7 +175,7 @@
       </ion-row>
       <ion-item>
         <ion-label position="floating">MNF Detail <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="mnf_details"></ion-input>
+        <ion-input type="email" formControlName="mnf_details"></ion-input>
       </ion-item>
     </ion-card-content>
   </ion-card>
@@ -204,12 +204,12 @@
           <ion-row >
             <ion-col size="6">
               <ion-item>
-                <ion-input type="text" placeholder="Min Reading" formControlName="cuns_min"></ion-input>
+                <ion-input type="email" placeholder="Min Reading" formControlName="cuns_min"></ion-input>
               </ion-item>
             </ion-col>
             <ion-col size="6">
               <ion-item>
-                <ion-input type="text" placeholder="Max Reading" formControlName="cuns_max"></ion-input>
+                <ion-input type="email" placeholder="Max Reading" formControlName="cuns_max"></ion-input>
               </ion-item>
             </ion-col>
           </ion-row>
@@ -221,7 +221,7 @@
             </ion-select>
           </ion-item>
           <ion-item *ngIf="addAsset.value.cons_mult_fact === '1' ">
-            <ion-input type="text" placeholder="Multi Factor Value" formControlName="cons_mult_fact_val"></ion-input>
+            <ion-input type="email" placeholder="Multi Factor Value" formControlName="cons_mult_fact_val"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">Reading Incremental  <ion-text color="danger">*</ion-text> </ion-label>
@@ -246,12 +246,12 @@
           <ion-row >
             <ion-col size="6">
               <ion-item>
-                <ion-input type="text" placeholder="Min Reading" formControlName="gen_min"></ion-input>
+                <ion-input type="email" placeholder="Min Reading" formControlName="gen_min"></ion-input>
               </ion-item>
             </ion-col>
             <ion-col size="6">
               <ion-item>
-                <ion-input type="text" placeholder="Max Reading" formControlName="gen_max"></ion-input>
+                <ion-input type="email" placeholder="Max Reading" formControlName="gen_max"></ion-input>
               </ion-item>
             </ion-col>
           </ion-row>
@@ -263,7 +263,7 @@
             </ion-select>
           </ion-item>
           <ion-item *ngIf="addAsset.value.gen_mult_fact === '1' ">
-            <ion-input type="text" placeholder="Multi Factor Value" formControlName="gen_mult_fact_val"></ion-input>
+            <ion-input type="email" placeholder="Multi Factor Value" formControlName="gen_mult_fact_val"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">Reading Incremental  <ion-text color="danger">*</ion-text> </ion-label>
@@ -288,12 +288,12 @@
           <ion-row >
             <ion-col size="6">
               <ion-item>
-                <ion-input type="text" placeholder="Min Reading" formControlName="oth_min"></ion-input>
+                <ion-input type="email" placeholder="Min Reading" formControlName="oth_min"></ion-input>
               </ion-item>
             </ion-col>
             <ion-col size="6">
               <ion-item>
-                <ion-input type="text" placeholder="Max Reading" formControlName="oth_max"></ion-input>
+                <ion-input type="email" placeholder="Max Reading" formControlName="oth_max"></ion-input>
               </ion-item>
             </ion-col>
           </ion-row>
@@ -305,7 +305,7 @@
             </ion-select>
           </ion-item>
           <ion-item *ngIf="addAsset.value.gen_mult_fact === '1' ">
-            <ion-input type="text" placeholder="Multi Factor Value" formControlName="oth_mult_fact_val"></ion-input>
+            <ion-input type="email" placeholder="Multi Factor Value" formControlName="oth_mult_fact_val"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">Reading Incremental  <ion-text color="danger">*</ion-text> </ion-label>
@@ -328,7 +328,7 @@
       <ion-row *ngIf="addAsset.value.mult_fact === '1'">
         <ion-col size="12">
           <ion-item>
-            <ion-input type="text" placeholder="Enter Multiple Factor Value" formControlName="mult_fact_val"></ion-input>
+            <ion-input type="email" placeholder="Enter Multiple Factor Value" formControlName="mult_fact_val"></ion-input>
           </ion-item>
         </ion-col>
       </ion-row> -->
@@ -349,7 +349,7 @@
       </ion-item>
 
       <ion-item *ngIf="addAsset.value.back_date === '1'">
-        <ion-input type="text" placeholder="How many Previous Days Capture allow" formControlName="back_days"></ion-input>
+        <ion-input type="email" placeholder="How many Previous Days Capture allow" formControlName="back_days"></ion-input>
       </ion-item>
 
       <ion-item>
@@ -361,7 +361,7 @@
       </ion-item>
 
       <ion-item *ngIf="addAsset.value.edit_allow === '1'">
-        <ion-input type="text" placeholder="How many Previous Days Update allow" formControlName="edit_allow_days"></ion-input>
+        <ion-input type="email" placeholder="How many Previous Days Update allow" formControlName="edit_allow_days"></ion-input>
       </ion-item>
 
       <ion-item>
@@ -397,7 +397,7 @@
         <ion-col size="6">
           <ion-item id="add-meter-frequency-from">
             <ion-label color="primary" position="floating">Frequency From </ion-label>
-            <ion-input type="text"  placeholder="Select Date"  [value]="fromDate | date"  readonly></ion-input>
+            <ion-input type="email"  placeholder="Select Date"  [value]="fromDate | date"  readonly></ion-input>
           </ion-item>
           <ion-popover trigger="add-meter-frequency-from" >
             <ng-template>
@@ -408,7 +408,7 @@
         <ion-col size="6">
           <ion-item id="add-meter-frequency-to">
             <ion-label color="primary" position="floating">Frequency To</ion-label>
-            <ion-input type="text"  placeholder="To Date" [value]="toDate | date"  readonly></ion-input>
+            <ion-input type="email"  placeholder="To Date" [value]="toDate | date"  readonly></ion-input>
           </ion-item>
           <ion-popover trigger="add-meter-frequency-to" >
             <ng-template>
@@ -431,7 +431,7 @@
         <ion-col size="5">
           <ion-item id="add-meter-from-time{{i}}" >
             <ion-label position="floating">From Time</ion-label>
-            <ion-input type="text" [(ngModel)]="dat.from_date_temp"  readonly></ion-input>
+            <ion-input type="email" [(ngModel)]="dat.from_date_temp"  readonly></ion-input>
           </ion-item>
 
           <ion-modal trigger="add-meter-from-time{{i}}" [cssClass]="'center1'">
@@ -443,7 +443,7 @@
         <ion-col size="5">
           <ion-item id="add-meter-from-to{{i}}" >
             <ion-label position="floating">To Time</ion-label>
-            <ion-input type="text" [(ngModel)]="dat.to_date_temp"  readonly></ion-input>
+            <ion-input type="email" [(ngModel)]="dat.to_date_temp"  readonly></ion-input>
           </ion-item>
 
           <ion-modal trigger="add-meter-from-to{{i}}" [cssClass]="'center1'">
@@ -462,7 +462,7 @@
 
       <ion-item>
         <ion-label position="floating">Remark</ion-label>
-        <ion-input type="text" [(ngModel)]="remark"></ion-input>
+        <ion-input type="email" [(ngModel)]="remark"></ion-input>
       </ion-item>
 
     </ion-card-content>
