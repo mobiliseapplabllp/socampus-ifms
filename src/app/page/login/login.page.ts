@@ -39,7 +39,7 @@ export class LoginPage implements OnInit {
   sendMobileMsg!: string;
   appUpdate: any = [];
   currentVersion: any = [];
-  isProduction = environment.production;
+  isProduction = environment.isProd;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,

@@ -9,6 +9,7 @@ import { CommonService } from 'src/app/provider/common/common.service';
 })
 export class BarcodeComponent  implements OnInit {
   barcodeNo: any;
+  torchStatus = false;
   constructor(
     private navCtrl: NavController,
     private platform: Platform,
@@ -73,5 +74,15 @@ export class BarcodeComponent  implements OnInit {
   stopScanner() {
     this.stopScan();
     this.navCtrl.pop();
+  }
+
+  torchToggle() {
+    if (this.torchStatus === false) {
+      BarcodeScanner.enableTorch();
+      this.torchStatus = true;
+    } else {
+      BarcodeScanner.disableTorch();
+      this.torchStatus = false;
+    }
   }
 }

@@ -346,7 +346,6 @@ export class DigitalChecklistPage implements OnInit {
     this.loading = await this.loadingController.create({
       cssClass: 'my-custom-class',
       message: message,
-      duration: 30000
     });
     await this.loading.present();
   }

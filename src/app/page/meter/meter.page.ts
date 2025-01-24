@@ -182,13 +182,13 @@ export class MeterPage implements OnInit {
 
   checkConsumptionCondition(dat: any) {
     if (dat.is_consumption == 1 && !dat.consumption_reading) {
-      this.common.presentToast('Consumption Reading is Mandatory', 'tertiary');
+      this.common.presentToast('Consumption Reading is Mandatory', 'warning');
       return false;
     } else if (dat.is_consumption == 1 && dat.is_remark_req == 1 && !dat.con_remark) {
-      this.common.presentToast('Consumption Remark is Mandatory', 'tertiary');
+      this.common.presentToast('Consumption Remark is Mandatory', 'warning');
       return false;
     } else if (dat.is_consumption == 1 && dat.is_img_req && !dat.isConsumptionImg) {
-      this.common.presentToast('Consumption Image is Mandatory', 'tertiary');
+      this.common.presentToast('Consumption Image is Mandatory', 'warning');
       return false;
     } else {
       return true;
@@ -206,13 +206,13 @@ export class MeterPage implements OnInit {
 
   checkGenertionCondition(dat: any) {
     if (dat.is_generation == 1 && !dat.generate_reading) {
-      this.common.presentToast('Generation Reading is Mandatory', 'tertiary');
+      this.common.presentToast('Generation Reading is Mandatory', 'warning');
       return false;
     } else if (dat.is_generation == 1 && dat.is_remark_req == 1 && !dat.gen_remark) {
-      this.common.presentToast('Generation Remark is Mandatory', 'tertiary');
+      this.common.presentToast('Generation Remark is Mandatory', 'warning');
       return false;
     } else if (dat.is_generation == 1 && dat.is_img_req && !dat.isGenerationImg) {
-      this.common.presentToast('Generation Image is Mandatory', 'tertiary');
+      this.common.presentToast('Generation Image is Mandatory', 'warning');
       return false;
     } else {
       return true;
@@ -230,13 +230,13 @@ export class MeterPage implements OnInit {
 
   checkOtherCondition(dat: any) {
     if (dat.oth_read == 1 && !dat.other_reading) {
-      this.common.presentToast('Other Reading is Mandatory', 'tertiary');
+      this.common.presentToast('Other Reading is Mandatory', 'warning');
       return false;
     } else if (dat.oth_read == 1 && dat.is_remark_req == 1 && !dat.oth_remark) {
-      this.common.presentToast('Other Remark is Mandatory', 'tertiary');
+      this.common.presentToast('Other Remark is Mandatory', 'warning');
       return false;
     } else if (dat.oth_read == 1 && dat.is_img_req && !dat.isOtherImg) {
-      this.common.presentToast('Other Image is Mandatory', 'tertiary');
+      this.common.presentToast('Other Image is Mandatory', 'warning');
       return false;
     } else {
       return true;
