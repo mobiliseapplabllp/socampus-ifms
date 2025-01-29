@@ -55,9 +55,9 @@ export class MeterPage implements OnInit {
   }
 
   getPendingWOusingBarcode(url: string) {
-    let lastEncryptedString = url.split('meter-schedule-by-qrcode/').pop() || '';
+    let lastEncryptedString = url.includes('meter-schedule-by-qrcode/') ? url.split('meter-schedule-by-qrcode/')[1] : '';
     if (!lastEncryptedString) {
-      this.common.presentToastWithOk('QR Code URL is Invalid ' + url, 'warning');
+      this.common.presentToast('You are scanning wrong QR', 'warning');
       return;
     }
     let fullUrl = environment.url + 'meter/ifms/meter-schedule-by-qrcode/' + lastEncryptedString
