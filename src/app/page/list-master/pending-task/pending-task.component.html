@@ -29,6 +29,12 @@
       <div *ngFor="let dat of pendingTicket; let i = index">
         <app-complaint-cards [data]="dat" [ticketType]="dat.status"  (greetEvent)="myCustom($event)"></app-complaint-cards>
       </div>
+      <div *ngIf="pendingTicket.length === 0 && isPendingTicketLoad">
+        <br>
+        <ion-row>
+          <ion-col class="ion-text-center">No tasks are assign to you.</ion-col>
+        </ion-row>
+      </div>
       <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)" *ngIf="pendingTicket.length > 0">
         <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
       </ion-infinite-scroll>
@@ -46,6 +52,12 @@
           <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize" >Fill</ion-button>
         </ion-item>
       </ion-card>
+      <div *ngIf="assignCheckList.length === 0">
+        <br>
+        <ion-row>
+          <ion-col class="ion-text-center">No tasks are assign to you.</ion-col>
+        </ion-row>
+      </div>
     </div>
     <div *ngSwitchCase= "'pms'">
       <ion-card *ngFor="let dat of pmsList; let i = index" >
@@ -106,8 +118,20 @@
           </ion-row>
         </ion-card-content>
       </ion-card>
+      <div *ngIf="pmsList.length === 0 && pmsListLoad">
+        <br>
+        <ion-row>
+          <ion-col class="ion-text-center">No tasks are assign to you.</ion-col>
+        </ion-row>
+      </div>
     </div>
     <div *ngSwitchCase= "'meter'">
+      <div *ngIf="meterInfo.length === 0 && meterInfoLoad">
+        <br>
+        <ion-row>
+          <ion-col class="ion-text-center">No tasks are assign to you.</ion-col>
+        </ion-row>
+      </div>
       <ion-card  *ngFor="let dat of meterInfo;let i = index" style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}" [ngStyle]="{'border-left': '3px solid ' + dat.color_code}">
         <ion-item>
           <ion-label class="ion-text-wrap">
