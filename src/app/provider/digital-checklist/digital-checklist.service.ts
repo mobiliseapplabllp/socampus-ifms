@@ -107,7 +107,7 @@ export class DigitalChecklistService {
   //     const { method, url, data, delayTime, id } = request;
 
   //     // Check if a delayTime is provided and if it's for the specific id
-  //     const delayObservable = url === 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/dash/mobile_app_engineer_dashboard'
+  //     const delayObservable = url === 'https://socampus-8db369a81c0c.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/dash/mobile_app_engineer_dashboard'
   //       ? of(null).pipe(delay(10000))
   //       : of(null);
 

@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  // url: 'https://hr-access.herokuapp.com/https://socampusstaging.mobilisepro.com/be/api/',
-  // url1: 'https://hr-access.herokuapp.com/https://socampusstaging.mobilisepro.com/',
+  // url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampusstaging.mobilisepro.com/be/api/',
+  // url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampusstaging.mobilisepro.com/',
   // url2: 'https://socampusstaging.mobilisepro.com/',
   // ssoUrl: 'https://socampusstaging.mobilisepro.com/',
   // isProd: false,
@@ -21,8 +21,8 @@ export const environment = {
   // url: 'http://192.168.1.27/ifms-backend/api/',
   // url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://ifmsuat.mobilisepro.com/',
   // url2: 'http://192.168.1.27/ifms-backend/api/',
-  // url: 'https://hr-access.herokuapp.com/https://bedemosocampus.mobilisepro.com/api/',
-  // url1: 'https://hr-access.herokuapp.com/https://bedemosocampus.mobilisepro.com/',
+  // url: 'https://socampus-8db369a81c0c.herokuapp.com/https://bedemosocampus.mobilisepro.com/api/',
+  // url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://bedemosocampus.mobilisepro.com/',
   // url2: 'https://bedemosocampus.mobilisepro.com/api/',
   // ssoUrl: 'https://bedemosocampus.mobilisepro.com/',
   db: 'socampuseng.db',
