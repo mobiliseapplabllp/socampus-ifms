@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { LoadingController, ModalController, Platform } from '@ionic/angular';
+import { ActionSheetController, LoadingController, ModalController, Platform } from '@ionic/angular';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -18,6 +18,7 @@ import { liveQuery } from 'dexie';
 import { db } from '../../../provider/local-db/local-db.service';
 import { PtwUploadComponent } from '../../pm-cal/ptw-upload/ptw-upload.component';
 import { LogsComponent } from '../../pm-cal/logs/logs.component';
+import { CameraComponent } from 'src/app/shared/camera/camera.component';
 @Component({
   selector: 'app-pending-task',
   templateUrl: './pending-task.component.html',
@@ -57,7 +58,8 @@ export class PendingTaskComponent  implements OnInit {
     private modalCtrl: ModalController,
     private httpMeter: MeterService,
     private router: Router,
-    private platform: Platform
+    private platform: Platform,
+    private actionSheetController: ActionSheetController
   ) { }
 
   ngOnInit() {
@@ -408,7 +410,7 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   openBarcode(type: string, dat: any) {
-    if (!this.platform.is('capacitor') && type === 'verify') {
+    if (!this.platform.is('capacitor') && (type === 'verify' || type === 'verify_meter')) {
       dat.isQrVerify = true;
       return;
     }
@@ -521,12 +523,71 @@ export class PendingTaskComponent  implements OnInit {
 
   checkPhotoCondition(dat: any, type: any) {
     if (dat.is_gllry_upld_allwd == 1) {
-      this.presentActionSheet(1, dat , type);
+      // this.presentActionSheet(1, dat , type);
+      this.customActionSheet(dat, type);
     } else if (dat.is_gllry_upld_allwd == 0) {
-      this.presentActionSheet(0, dat , type);
+      // this.presentActionSheet(0, dat , type);
+      this.openCustomCamera(dat, type);
     } else {
       alert('Gallery is Undefined ' + dat.is_gllry_upld_allwd);
     }
+  }
+
+  async customActionSheet(data: any, type: any) {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Choose Option',
+      cssClass: 'my-custom-class',
+      buttons: [{
+        text: 'Camera',
+        icon: 'camera-outline',
+        handler: async () => {
+          // this.openCamera('camera', val);
+          let obj = {
+            quality: 80,
+            allowEditing: false,
+            source: CameraSource.Camera,
+            resultType: CameraResultType.Uri,
+          }
+          const image = await Camera.getPhoto(obj);
+          this.readImg(image, data ,type)
+        }
+      }, {
+        text: 'Gallery',
+        icon: 'image-outline',
+        handler: async () => {
+          let obj = {
+            quality: 80,
+            allowEditing: false,
+            source: CameraSource.Photos,
+            resultType: CameraResultType.Uri,
+          }
+          const image = await Camera.getPhoto(obj);
+          this.readImg(image, data ,type)
+        }
+      }, {
+        text: 'Camera Preview',
+        icon: 'camera-reverse-outline',
+        handler: () => {
+          this.openCustomCamera(data, type);
+        }
+      }]
+    });
+    await actionSheet.present();
+  }
+
+  async openCustomCamera(data: any, type: string) {
+    const modal = await this.modalCtrl.create({
+      component: CameraComponent,
+      backdropDismiss:false,
+      componentProps: { }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+        let blob = disModal.data;
+        this.setImage(blob,  data, type);
+      }
+    });
+    modal.present();
   }
 
   async presentActionSheet(val: any, data: any, type: any) {
@@ -553,9 +614,13 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   async readImg(photo: any, data: any,type: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
     const response = await fetch(photo.webPath);
     const blob = await response.blob();
+    this.setImage(blob, data, type);
+  }
+
+  setImage(blob: any, data: any, type: string) {
+    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
     if (type == 'consumption') {
       this.formData.delete('img1');
       this.formData.append('img1', blob, random);

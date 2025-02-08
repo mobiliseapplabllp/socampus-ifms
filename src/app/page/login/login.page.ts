@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LoadingController, MenuController, Platform } from '@ionic/angular';
+import { LoadingController, MenuController, ModalController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { environment } from 'src/environments/environment';
@@ -9,6 +9,7 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 import { env } from 'process';
 import { App } from '@capacitor/app';
+import { CameraComponent } from 'src/app/shared/camera/camera.component';
 
 @Component({
   selector: 'app-login',
@@ -48,7 +49,8 @@ export class LoginPage implements OnInit {
     private router: Router,
     private loginPro: LoginService,
     private common: CommonService,
-    private iab: InAppBrowser) {
+    private iab: InAppBrowser,
+    private modalCtrl: ModalController) {
     this.loginForms = this.formbuilder.group({
       userid: ['', Validators.required],
       password: ['' , Validators.required],
@@ -346,4 +348,19 @@ export class LoginPage implements OnInit {
       this.router.navigateByUrl('/barcode');
     }
   }
+
+  async openCustomCamera() {
+      const modal = await this.modalCtrl.create({
+        component: CameraComponent,
+        backdropDismiss:false,
+        componentProps: { }
+      });
+      modal.onWillDismiss().then(disModal => {
+        if (disModal.role) {
+          let blob = disModal.data;
+          console.log(blob);
+        }
+      });
+      modal.present();
+    }
 }
