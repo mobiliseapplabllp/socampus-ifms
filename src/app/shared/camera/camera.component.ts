@@ -22,7 +22,7 @@ export class CameraComponent  implements OnInit {
   ionViewDidLoad() {}
 
   launchCamera() {
-    CameraPreview.start({parent: 'content', className: '', width: window.screen.width, height: window.screen.height-150, toBack: false,}).catch(res => {
+    CameraPreview.start({parent: 'content', className: '', width: window.screen.width, height: window.screen.height-150, toBack: false, disableAudio: true}).catch(res => {
       alert(JSON.stringify(res));
     });
     this.cameraActive = true;

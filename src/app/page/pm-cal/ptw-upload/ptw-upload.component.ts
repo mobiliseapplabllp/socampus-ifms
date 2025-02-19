@@ -4,6 +4,7 @@ import { Camera, CameraResultType } from '@capacitor/camera';
 import { environment } from 'src/environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-ptw-upload',
   templateUrl: './ptw-upload.component.html',
@@ -20,7 +21,8 @@ export class PtwUploadComponent  implements OnInit {
     private modalCtrl: ModalController,
     private loadingController: LoadingController,
     private common: CommonService,
-    private httpPms: PmCalService
+    private httpPms: PmCalService,
+    private cameraService: CameraService
   ) { }
 
   ngOnInit() {}
@@ -29,27 +31,37 @@ export class PtwUploadComponent  implements OnInit {
     this.modalCtrl.dismiss(data, status);
   }
 
-  async presentActionSheet() {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image)
-    };
-    takePicture();
+  presentActionSheet() {
+    this.cameraService.selectImage(['camera', 'gallery', 'outer'], (blob) => {
+      let blobImage, random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+      blobImage = blob
+      this.formData.delete('attach');
+      this.formData.append('attach', blob, random);
+      this.img_temp = random;
+      this.doc_temp = '';
+    });
   }
+  // async presentActionSheet() {
+  //   const takePicture = async () => {
+  //     const image = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri,
+  //     });
+  //     this.readImg(image)
+  //   };
+  //   takePicture();
+  // }
 
-  async readImg(photo: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    this.formData.delete('attach');
-    this.formData.append('attach', blob, random);
-    this.img_temp = random;
-    this.doc_temp = '';
-  }
+  // async readImg(photo: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   this.formData.delete('attach');
+  //   this.formData.append('attach', blob, random);
+  //   this.img_temp = random;
+  //   this.doc_temp = '';
+  // }
 
   changeFile(fileChangeEvent: any){
     const photo = fileChangeEvent.target.files[0];

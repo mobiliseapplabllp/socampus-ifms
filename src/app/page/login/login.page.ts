@@ -10,6 +10,7 @@ import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 import { env } from 'process';
 import { App } from '@capacitor/app';
 import { CameraComponent } from 'src/app/shared/camera/camera.component';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 
 @Component({
   selector: 'app-login',
@@ -200,6 +201,9 @@ export class LoginPage implements OnInit {
           this.getSsoEnc(token);
         }
       }
+      // else if (data.url.match(environment.ssoUrl || environment.ssoUrl + 'be/apiloading')) {
+      //   browser.close();
+      // }
     });
 
     browser.on('loaderror').subscribe(error => {

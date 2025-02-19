@@ -13,6 +13,7 @@ import { liveQuery } from 'dexie';
 import * as moment from 'moment';
 import { PhotoViewComponent } from 'src/app/shared/photo-view/photo-view.component';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-fill-report',
   templateUrl: './fill-report.component.html',
@@ -48,7 +49,8 @@ export class FillReportComponent  implements OnInit {
     private modalCtrl: ModalController,
     private platform: Platform,
     private alertController: AlertController,
-    private httpComplaint: ComplaintService
+    private httpComplaint: ComplaintService,
+    private cameraService: CameraService
   ) { }
 
   ngOnInit() {
@@ -322,30 +324,44 @@ export class FillReportComponent  implements OnInit {
     }
   }
 
-  async presentActionSheet(val: any, ind: any) {
-    var obj: any = {
-      quality: 80,
-      allowEditing: false,
-      resultType: CameraResultType.Uri,
-    }
+  presentActionSheet(val: any, ind: any) {
+    let obj: any = [];
     if (ind !== 1) {
-      obj.source = CameraSource.Camera
+      obj = ['outer'];
+    } else {
+      obj = ['camera', 'gallery', 'outer'];
     }
-    const takePicture = async () => {
-    const image = await Camera.getPhoto(obj);
-    this.readImg(image, val)
-    };
-    takePicture();
+    this.cameraService.selectImage(obj, (blob: any) => {
+      val.imagename = blob;
+      this.actionUpdateChecklist();
+      this.repeatLoop();
+    });
   }
 
-  async readImg(photo: any, val: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    val.imagename = blob;
-    this.actionUpdateChecklist();
-    this.repeatLoop();
-  }
+  // async presentActionSheet(val: any, ind: any) {
+  //   var obj: any = {
+  //     quality: 80,
+  //     allowEditing: false,
+  //     resultType: CameraResultType.Uri,
+  //   }
+  //   if (ind !== 1) {
+  //     obj.source = CameraSource.Camera
+  //   }
+  //   const takePicture = async () => {
+  //   const image = await Camera.getPhoto(obj);
+  //   this.readImg(image, val)
+  //   };
+  //   takePicture();
+  // }
+
+  // async readImg(photo: any, val: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   val.imagename = blob;
+  //   this.actionUpdateChecklist();
+  //   this.repeatLoop();
+  // }
 
   convertToFormData(data: any, formData?: FormData, parentKey?: string): FormData {
     formData = formData || new FormData();

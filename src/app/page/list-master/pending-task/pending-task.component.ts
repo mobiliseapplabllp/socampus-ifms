@@ -786,6 +786,7 @@ export class PendingTaskComponent  implements OnInit {
             dat.isRemove = true
             setTimeout(() => {
               this.meterInfo = this.meterInfo.filter((val: any) => val.wo_id !== obj.wo_id);
+              this.formData = new FormData();
             }, 500);
           } else {
             this.common.presentToast(data.msg, 'warning');
