@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>History</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close(null, false)">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card *ngFor="let dat of txnData">
+    <ion-row>
+      <ion-col size="5">Updated By</ion-col>
+      <ion-col>{{dat.name}} {{dat.lname}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="5">Datetime</ion-col>
+      <ion-col>{{dat.txn_date | date: 'dd MMM yyyy H:mm:ss'}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="5">Desc</ion-col>
+      <ion-col>{{dat.txn_desc}}</ion-col>
+    </ion-row>
+    <ion-row *ngIf="dat.document">
+      <ion-col>
+        <ion-button size="small" (click)="attachment(dat.document, dat.document_blob_type)" size="small" fill="outline" color="danger">View Attachment</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+</ion-content>

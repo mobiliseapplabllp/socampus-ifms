@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Details</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close(null, false)">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content style="font-size: 12px;">
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6">Ticket</ion-col>
+      <ion-col size="6">{{requestedData.ext_id}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Current Status</ion-col>
+      <ion-col size="6">{{requestedData.stage_desc}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Site</ion-col>
+      <ion-col size="6">{{requestedData.pc_ext_id}} {{requestedData.pc_desc}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Category</ion-col>
+      <ion-col size="6">{{requestedData.cat_desc}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Sub Category</ion-col>
+      <ion-col size="6">{{requestedData.subcat_desc}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Requestee Name</ion-col>
+      <ion-col size="6">{{requestedData.req_name}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Requestee Email</ion-col>
+      <ion-col size="6">{{requestedData.req_email}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Requestee Mobile</ion-col>
+      <ion-col size="6">{{requestedData.req_mobile}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Requestee Date</ion-col>
+      <ion-col size="6">{{requestedData.created_at}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Response Time</ion-col>
+      <ion-col size="6">{{requestedData.tckt_response}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Resolve Time</ion-col>
+      <ion-col size="6">{{requestedData.tckt_resolve}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Requested Age</ion-col>
+      <ion-col size="6">{{requestedData.request_age}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Urgency</ion-col>
+      <ion-col size="6">{{requestedData.priority}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Assigned To</ion-col>
+      <ion-col size="6">{{requestedData.lg_name}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">Billed To</ion-col>
+      <ion-col size="6">{{requestedData.billed_to}}</ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

@@ -178,11 +178,7 @@ export class LoginPage implements OnInit {
 
     browser.on('loaderror').subscribe(error => {
       console.error('InAppBrowser error:', error);
-
-      // Display an error message to the user
       alert(JSON.stringify(error));
-
-      // Optionally, you can close the InAppBrowser here if necessary
       browser.close();
     });
   }

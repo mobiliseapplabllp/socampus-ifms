@@ -1,0 +1,63 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Concierge Work</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card>
+    <ion-item >
+      <ion-label color="primary" position="floating">Status <ion-text color="danger">*</ion-text></ion-label>
+      <ion-select interface="action-sheet"  mode="ios" [(ngModel)]="status" (ionChange)="changeStatus($event)">
+        <ion-select-option *ngFor="let dat of statusData" [value]="dat.value">{{dat.label}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <div *ngIf="status === 3 ">
+      <ion-item >
+        <ion-label color="primary" position="floating">Remark <ion-text color="danger">*</ion-text></ion-label>
+        <ion-textarea rows="4" [(ngModel)]="remark" ></ion-textarea>
+      </ion-item>
+      <ion-button size="small" class="ion-padding-start" (click)="attachment('in_progress')" [color]="inProgressImage ? 'success' : 'primary' ">Attachment</ion-button>
+      <br>
+      <ion-row>
+        <ion-col size="6">
+          <ion-button color="primary" expand="block" (click)="actionInProgress()">Submit</ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button color="secondary" expand="block" (click)="assignUser()">Assign</ion-button>
+        </ion-col>
+      </ion-row>
+    </div>
+
+    <div *ngIf="status === 4 ">
+      <ion-item >
+        <ion-label color="primary" position="floating">Problem Reported <ion-text color="danger">*</ion-text></ion-label>
+        <ion-textarea rows="2" [(ngModel)]="problem_reported"></ion-textarea>
+      </ion-item>
+      <ion-item >
+        <ion-label color="primary" position="floating">Action Taken <ion-text color="danger">*</ion-text></ion-label>
+        <ion-textarea rows="2" [(ngModel)]="action_taken"></ion-textarea>
+      </ion-item>
+
+      <ion-item >
+        <ion-label color="primary" position="floating">Scope of Work <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet"  mode="ios" [(ngModel)]="scope_of_work">
+          <ion-select-option *ngFor="let dat of scopeOfWorkArr" [value]="dat.value">{{dat.label}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-button size="small" class="ion-padding-start" (click)="attachment('resolved')" [color]="resolveImage ? 'success' : 'primary' ">Attachment</ion-button>
+      <ion-row>
+        <ion-col size="6">
+          <ion-button color="primary" expand="block" (click)="actionResolve()">Submit</ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button color="secondary" expand="block"  (click)="assignUser()">Assign</ion-button>
+        </ion-col>
+      </ion-row>
+    </div>
+  </ion-card>
+
+</ion-content>

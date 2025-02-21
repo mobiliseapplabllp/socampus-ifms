@@ -163,6 +163,21 @@ section.inputbox {
   }
 }
 
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.my-modal-btm {
+  --width: 100%;
+  --height: 60%;
+  --border-radius: 16px 16px 0 0; /* Rounded top corners */
+  --top: auto;
+  --bottom: 0px !important;
+}
+
 // section.inputbox {
 //   padding:0px 10px !important;
 //   ion-text {
