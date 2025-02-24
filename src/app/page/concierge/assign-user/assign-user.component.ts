@@ -11,6 +11,9 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./assign-user.component.scss'],
 })
 export class AssignUserComponent  implements OnInit {
+  id: any;
+  tab: any;
+
   assignUsers: any = [];
   tckt: any = [];
   isSelect: any;
@@ -21,42 +24,65 @@ export class AssignUserComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.assignUsers);
-    console.log(this.tckt);
+    // console.log(this.assignUsers);
+    // console.log(this.tckt);
+    this.getSpecificTicket();
+  }
+
+  getSpecificTicket() {
+    const obj = {
+      tab: this.tab,
+      tckt: this.id,
+    }
+    this.common.presentLoading().then(preLoad => {
+      this.httpConcierge.getSpecificTicket(obj).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.assignUsers = data.data.assignUsers;
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.common.dismissloading();
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      });
+    })
   }
 
   close(data: any, status: any) {
     this.modalCtrl.dismiss(data, status);
   }
 
-  assign() {
-    if (!this.isSelect) {
-      this.common.presentToast('Please select user', 'warning');
-    } else {
-      const formData = new FormData();
-      formData.append('tckt', this.tckt);
-      formData.append('assign_to', this.isSelect);
-      formData.append('source', environment.source);
-      this.common.presentLoading().then(preLoad => {
-        this.httpConcierge.ticketAssign(formData).subscribe({
-          next:(data: any) => {
-            if (data.status) {
-              this.common.presentToast(data.msg, 'success');
-              this.close(null, true);
-            } else {
-              this.common.presentToast(data.msg, 'warning');
-            }
-          },
-          error:() => {
-            this.common.presentToast(environment.errMsg, 'danger');
-            this.common.dismissloading();
-          },
-          complete:() => {
-            this.common.dismissloading();
+  assign(dat: any) {
+    console.log(dat);
+    const formData = new FormData();
+    formData.append('tckt', this.id);
+    formData.append('assign_to', dat.id);
+    formData.append('source', environment.source);
+    this.common.presentLoading().then(preLoad => {
+      this.httpConcierge.ticketAssign(formData).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            this.close(null, true);
+          } else {
+            this.common.presentToast(data.msg, 'warning');
           }
-        });
+        },
+        error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.common.dismissloading();
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
       });
-    }
+    });
   }
 
 }

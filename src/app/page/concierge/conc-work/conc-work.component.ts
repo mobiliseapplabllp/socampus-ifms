@@ -6,7 +6,6 @@ import { CommonService } from 'src/app/provider/common/common.service';
 import { ConciergeService } from 'src/app/provider/concierge/concierge.service';
 import { environment } from 'src/environments/environment';
 import { AssignUserComponent } from '../assign-user/assign-user.component';
-
 @Component({
   selector: 'app-conc-work',
   templateUrl: './conc-work.component.html',
@@ -27,6 +26,8 @@ export class ConcWorkComponent  implements OnInit {
   resolveImage = false;
   formDataResolve = new FormData();
   assignUsers: any = [];
+  action = ''
+  segStatus = 'action';
   constructor(
     private activeRoute: ActivatedRoute,
     private common: CommonService,
@@ -37,6 +38,7 @@ export class ConcWorkComponent  implements OnInit {
     this.activeRoute.queryParams.subscribe((res) => {
       this.requestData = JSON.parse(res['data']);
       this.tab = res['tab'];
+      console.log(this.requestData);
     });
   }
 

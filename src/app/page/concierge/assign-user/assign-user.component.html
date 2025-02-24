@@ -1,6 +1,6 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Assign User</ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar >
+    <ion-title>Assign</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="close(null, false)">
         <ion-icon name="close-outline"></ion-icon>
@@ -9,7 +9,12 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-radio-group [(ngModel)]="isSelect">
+  <ion-item *ngFor="let dat of assignUsers;let i = index" lines="none">
+    <ion-avatar slot="start" class="center">{{i+1}}</ion-avatar>
+    <ion-label>{{dat.fname}}</ion-label>
+    <ion-button slot="end" size="small" fill="outline" (click)="assign(dat)">Assign</ion-button>
+  </ion-item>
+  <!-- <ion-radio-group [(ngModel)]="isSelect">
     <ion-item *ngFor="let dat of assignUsers">
       <ion-label>
         <h3>{{dat.fname}}</h3>
@@ -22,6 +27,6 @@
     <ion-col size="12" class="ion-text-center">
       <ion-button color="primary" (click)="assign()">Assign</ion-button>
     </ion-col>
-  </ion-row>
+  </ion-row> -->
 
 </ion-content>

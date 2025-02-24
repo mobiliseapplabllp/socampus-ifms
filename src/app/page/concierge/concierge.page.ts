@@ -6,6 +6,7 @@ import { ConcHistoryComponent } from './conc-history/conc-history.component';
 import { Router } from '@angular/router';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { environment } from 'src/environments/environment';
+import { AssignUserComponent } from './assign-user/assign-user.component';
 
 @Component({
   selector: 'app-concierge',
@@ -83,6 +84,27 @@ export class ConciergePage implements OnInit {
       componentProps: {
         id: data.id,
         tab: this.status
+      }
+    });
+    modal.present();
+  }
+
+  async assignUser(data: any) {
+    const modal = await this.modalCtrl.create({
+      component: AssignUserComponent,
+      mode: 'md',
+      cssClass: 'my-modal-btm',
+      initialBreakpoint: 1,
+      breakpoints: [1],
+      componentProps: {
+        id: data.id,
+        tab: this.status
+      }
+    });
+
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {
+        this.getTicketList(this.status);
       }
     });
     modal.present();

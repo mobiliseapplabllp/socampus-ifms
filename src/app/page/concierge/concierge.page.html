@@ -127,8 +127,8 @@
             </ion-row>
             <ion-row>
               <ion-col size="6">Urgency</ion-col>
-              <ion-col size="6">
-                <span [ngClass]="{'high': dat.priority === 'High', 'medium': dat.priority === 'Medium', 'low': dat.priority === 'Low'}">
+              <ion-col size="6" style="padding-bottom: 12px">
+                <span style="margin: 2px 5px;" [ngClass]="{'high': dat.priority === 'High', 'medium': dat.priority === 'Medium', 'low': dat.priority === 'Low'}">
                   {{dat.priority}}
                 </span>
 
@@ -136,7 +136,11 @@
             </ion-row>
             <ion-row>
               <ion-col size="6">Status</ion-col>
-              <ion-col size="6">{{dat.stage_desc}}</ion-col>
+              <ion-col size="6" style="padding-top: 2px;">
+                <span style="margin: 2px 5px;" [ngClass]="{'assigned': dat.stage_desc === 'Assigned', 'in_progress': dat.stage_desc === 'In progress'}">
+                  {{dat.stage_desc}}
+                </span>
+              </ion-col>
             </ion-row>
           </div>
           <ion-row style="border-top: 1px solid rgb(199, 197, 197);margin-top:10px">
@@ -144,10 +148,10 @@
               <ion-button size="small" shape="round" fill="outline" (click)="openHistory(dat)">History</ion-button>
             </ion-col>
             <ion-col size="4" class="ion-text-center">
-              <ion-button size="small" shape="round" fill="outline">Assign</ion-button>
+              <ion-button size="small" shape="round" fill="outline" (click)="assignUser(dat)">Assign</ion-button>
             </ion-col>
             <ion-col size="4" class="ion-text-center">
-              <ion-button size="small" shape="round" fill="outline">Work Now</ion-button>
+              <ion-button size="small" shape="round" fill="outline" (click)="workNow(dat)">Work Now</ion-button>
             </ion-col>
           </ion-row>
 

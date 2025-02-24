@@ -6,58 +6,225 @@
     <ion-title>Concierge Work</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content>
-  <ion-card>
-    <ion-item >
-      <ion-label color="primary" position="floating">Status <ion-text color="danger">*</ion-text></ion-label>
-      <ion-select interface="action-sheet"  mode="ios" [(ngModel)]="status" (ionChange)="changeStatus($event)">
-        <ion-select-option *ngFor="let dat of statusData" [value]="dat.value">{{dat.label}}</ion-select-option>
-      </ion-select>
-    </ion-item>
-    <div *ngIf="status === 3 ">
-      <ion-item >
-        <ion-label color="primary" position="floating">Remark <ion-text color="danger">*</ion-text></ion-label>
-        <ion-textarea rows="4" [(ngModel)]="remark" ></ion-textarea>
-      </ion-item>
-      <ion-button size="small" class="ion-padding-start" (click)="attachment('in_progress')" [color]="inProgressImage ? 'success' : 'primary' ">Attachment</ion-button>
-      <br>
-      <ion-row>
-        <ion-col size="6">
-          <ion-button color="primary" expand="block" (click)="actionInProgress()">Submit</ion-button>
-        </ion-col>
-        <ion-col size="6">
-          <ion-button color="secondary" expand="block" (click)="assignUser()">Assign</ion-button>
-        </ion-col>
-      </ion-row>
+<ion-content style="--background: var(--ion-color-light);">
+  <br>
+  <div style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;font-size:8px;background-color: white;">
+    <ion-row>
+      <ion-col size="6">
+        <ion-item lines="none">
+          <ion-thumbnail slot="start">
+            <img src="assets/conc/dash1.png">
+          </ion-thumbnail>
+          <ion-label>
+            <p>
+              <ion-text style="font-family: 'opensans_light' !important;">Date</ion-text>
+            </p>
+
+            <ion-text>{{requestData.created_at}}</ion-text>
+          </ion-label>
+        </ion-item>
+      </ion-col>
+      <ion-col size="6">
+        <ion-item lines="none">
+          <ion-thumbnail slot="start">
+            <img src="assets/conc/dash2.png">
+          </ion-thumbnail>
+          <ion-label>
+            <ion-text style="font-family: 'opensans_light' !important;">Requested By</ion-text><br>
+            <ion-text>{{requestData.req_name}}</ion-text>
+          </ion-label>
+        </ion-item>
+      </ion-col>
+      <ion-col size="6">
+        <ion-item lines="none">
+          <ion-thumbnail slot="start">
+            <img src="assets/conc/dash3.png">
+          </ion-thumbnail>
+          <ion-label>
+            <ion-text style="font-family: 'opensans_light' !important;">Assigned To</ion-text><br>
+            <ion-text>{{requestData.lg_name}} {{requestData.lg_username}}</ion-text>
+          </ion-label>
+        </ion-item>
+      </ion-col>
+      <ion-col size="6">
+        <ion-item lines="none">
+          <ion-thumbnail slot="start">
+            <img src="assets/conc/dash4.png">
+          </ion-thumbnail>
+          <ion-label>
+            <ion-text style="font-family: 'opensans_light' !important;">Priority</ion-text><br>
+            <ion-text>{{requestData.priority}}</ion-text>
+          </ion-label>
+        </ion-item>
+      </ion-col>
+      <ion-col size="6">
+        <ion-item lines="none">
+          <ion-thumbnail slot="start">
+            <img src="assets/conc/dash5.png">
+          </ion-thumbnail>
+          <ion-label>
+            <ion-text style="font-family: 'opensans_light' !important;">Status</ion-text><br>
+            <ion-text>{{requestData.stage_desc}}</ion-text>
+          </ion-label>
+        </ion-item>
+      </ion-col>
+      <ion-col size="6">
+        <ion-item lines="none">
+          <ion-thumbnail slot="start">
+            <img src="assets/conc/dash6.png">
+          </ion-thumbnail>
+          <ion-label>
+            <ion-text style="font-family: 'opensans_light' !important;">Case Age</ion-text><br>
+            <ion-text>{{requestData.request_age}}</ion-text>
+          </ion-label>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+  </div>
+  <br>
+  <div style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px">
+    <ion-accordion-group>
+      <ion-accordion value="first">
+        <ion-item slot="header">
+          <ion-label>
+            <ion-text color="primary">Case Description</ion-text>
+          </ion-label>
+        </ion-item>
+        <div class="ion-padding" slot="content">
+          <ion-text color="primary">{{requestData.remark}}</ion-text>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+  </div>
+  <br>
+
+  <ion-segment  [(ngModel)]='segStatus'>
+    <ion-segment-button value="action">
+      <ion-label>Action </ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="details">
+      <ion-label>Ticket Details </ion-label>
+    </ion-segment-button>
+  </ion-segment>
+  <div [ngSwitch]='segStatus'>
+    <div *ngSwitchCase= "'action'">
+      <ion-card>
+        <ion-item >
+          <ion-label color="primary" position="floating">Status <ion-text color="danger">*</ion-text></ion-label>
+          <ion-select interface="action-sheet"  mode="ios" [(ngModel)]="status" (ionChange)="changeStatus($event)">
+            <ion-select-option *ngFor="let dat of statusData" [value]="dat.value">{{dat.label}}</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <div *ngIf="status === 3 ">
+          <ion-item >
+            <ion-label color="primary" position="floating">Remark <ion-text color="danger">*</ion-text></ion-label>
+            <ion-textarea rows="4" [(ngModel)]="remark" ></ion-textarea>
+          </ion-item>
+          <ion-button size="small" class="ion-padding-start" (click)="attachment('in_progress')" [color]="inProgressImage ? 'success' : 'primary' ">Attachment</ion-button>
+          <br>
+          <ion-row>
+            <ion-col size="12">
+              <ion-button color="primary" expand="block" (click)="actionInProgress()">Submit</ion-button>
+            </ion-col>
+            <!-- <ion-col size="6">
+              <ion-button color="secondary" expand="block" (click)="assignUser()">Assign</ion-button>
+            </ion-col> -->
+          </ion-row>
+        </div>
+
+        <div *ngIf="status === 4 ">
+          <ion-item >
+            <ion-label color="primary" position="floating">Problem Reported <ion-text color="danger">*</ion-text></ion-label>
+            <ion-textarea rows="2" [(ngModel)]="problem_reported"></ion-textarea>
+          </ion-item>
+          <ion-item >
+            <ion-label color="primary" position="floating">Action Taken <ion-text color="danger">*</ion-text></ion-label>
+            <ion-textarea rows="2" [(ngModel)]="action_taken"></ion-textarea>
+          </ion-item>
+
+          <ion-item >
+            <ion-label color="primary" position="floating">Scope of Work <ion-text color="danger">*</ion-text></ion-label>
+            <ion-select interface="action-sheet"  mode="ios" [(ngModel)]="scope_of_work">
+              <ion-select-option *ngFor="let dat of scopeOfWorkArr" [value]="dat.value">{{dat.label}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-button size="small" class="ion-padding-start" (click)="attachment('resolved')" [color]="resolveImage ? 'success' : 'primary' ">Attachment</ion-button>
+          <ion-row>
+            <ion-col size="12">
+              <ion-button color="primary" expand="block" (click)="actionResolve()">Submit</ion-button>
+            </ion-col>
+            <!-- <ion-col size="6">
+              <ion-button color="secondary" expand="block"  (click)="assignUser()">Assign</ion-button>
+            </ion-col> -->
+          </ion-row>
+        </div>
+      </ion-card>
     </div>
-
-    <div *ngIf="status === 4 ">
-      <ion-item >
-        <ion-label color="primary" position="floating">Problem Reported <ion-text color="danger">*</ion-text></ion-label>
-        <ion-textarea rows="2" [(ngModel)]="problem_reported"></ion-textarea>
-      </ion-item>
-      <ion-item >
-        <ion-label color="primary" position="floating">Action Taken <ion-text color="danger">*</ion-text></ion-label>
-        <ion-textarea rows="2" [(ngModel)]="action_taken"></ion-textarea>
-      </ion-item>
-
-      <ion-item >
-        <ion-label color="primary" position="floating">Scope of Work <ion-text color="danger">*</ion-text></ion-label>
-        <ion-select interface="action-sheet"  mode="ios" [(ngModel)]="scope_of_work">
-          <ion-select-option *ngFor="let dat of scopeOfWorkArr" [value]="dat.value">{{dat.label}}</ion-select-option>
-        </ion-select>
-      </ion-item>
-
-      <ion-button size="small" class="ion-padding-start" (click)="attachment('resolved')" [color]="resolveImage ? 'success' : 'primary' ">Attachment</ion-button>
-      <ion-row>
-        <ion-col size="6">
-          <ion-button color="primary" expand="block" (click)="actionResolve()">Submit</ion-button>
-        </ion-col>
-        <ion-col size="6">
-          <ion-button color="secondary" expand="block"  (click)="assignUser()">Assign</ion-button>
-        </ion-col>
-      </ion-row>
+    <div *ngSwitchCase="'details'" class="ion-padding details">
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">Ticket</ion-col>
+          <ion-col size="6">{{requestData.ext_id}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Current Status</ion-col>
+          <ion-col size="6">{{requestData.stage_desc}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Site</ion-col>
+          <ion-col size="6">{{requestData.pc_ext_id}} {{requestData.pc_desc}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Category</ion-col>
+          <ion-col size="6">{{requestData.cat_desc}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Sub Category</ion-col>
+          <ion-col size="6">{{requestData.subcat_desc}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Requestee Name</ion-col>
+          <ion-col size="6">{{requestData.req_name}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Requestee Email</ion-col>
+          <ion-col size="6">{{requestData.req_email}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Requestee Mobile</ion-col>
+          <ion-col size="6">{{requestData.req_mobile}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Requestee Date</ion-col>
+          <ion-col size="6">{{requestData.created_at}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Response Time</ion-col>
+          <ion-col size="6">{{requestData.tckt_response}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Resolve Time</ion-col>
+          <ion-col size="6">{{requestData.tckt_resolve}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Requested Age</ion-col>
+          <ion-col size="6">{{requestData.request_age}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Urgency</ion-col>
+          <ion-col size="6">{{requestData.priority}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Assigned To</ion-col>
+          <ion-col size="6">{{requestData.lg_name}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">Billed To</ion-col>
+          <ion-col size="6">{{requestData.billed_to}}</ion-col>
+        </ion-row>
+      </ion-grid>
     </div>
-  </ion-card>
+  </div>
 
 </ion-content>
