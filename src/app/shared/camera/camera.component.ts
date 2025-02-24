@@ -54,6 +54,11 @@ export class CameraComponent  implements OnInit {
     await CameraPreview.flip();
   }
 
+  async closeAction(data: any, status: any) {
+    await CameraPreview.stop();
+    this.closeModal(data, status);
+  }
+
   async closeModal(data: any, status: any) {
     // await CameraPreview.stop();
     this.modal.dismiss(data, status)

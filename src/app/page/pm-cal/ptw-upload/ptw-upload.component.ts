@@ -68,7 +68,7 @@ export class PtwUploadComponent  implements OnInit {
     this.formData.delete('attach');
     this.formData.append('attach', photo, photo.name);
     this.img_temp = '';
-    this.doc_temp = 'Upload';
+    this.doc_temp = 'Uploaded';
   }
 
   uploadPtw() {

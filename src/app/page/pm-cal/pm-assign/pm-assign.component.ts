@@ -15,6 +15,7 @@ export class PmAssignComponent  implements OnInit {
   data: any;
   work_order: any = [];
   loading: any;
+  wo_no!: string;
   constructor(
     private httpPms: PmCalService,
     private loadingController: LoadingController,
@@ -25,10 +26,14 @@ export class PmAssignComponent  implements OnInit {
   ngOnInit() {
     if (this.data) {
       if (this.data.length) {
+        if (this.data.length === 1) {
+          this.wo_no = this.data[0].wo_no
+        }
         for (var i = 0 ; i < this.data.length; i++) {
           this.work_order.push(this.data[i]);
         }
       } else {
+        this.wo_no = this.data.wo_no
         this.work_order.push(this.data);
       }
     }

@@ -11,10 +11,15 @@ import { AddResponseComponent } from '../add-response/add-response.component';
   styleUrls: ['./view-report.component.scss'],
 })
 export class ViewReportComponent  implements OnInit {
-  loading: any;
   requestedData: any = [];
-  fillReport: any = [];
-  @ViewChildren("a") private itemlist!: QueryList<ElementRef>;
+  // loading: any;
+  //
+  // fillReport: any = [];
+  // @ViewChildren("a") private itemlist!: QueryList<ElementRef>;
+  responseList: any = [];
+  isPreOpen!: boolean;
+  isOpen!: boolean;
+  data: any;
   constructor(
     private activeroute: ActivatedRoute,
     private httpPms: PmCalService,
@@ -26,79 +31,108 @@ export class ViewReportComponent  implements OnInit {
   ngOnInit() {
     this.activeroute.queryParams.subscribe((res: any) => {
       this.requestedData = JSON.parse(res.data);
-    });
-    this.getScheduleUser();
-  }
-
-  getScheduleUser() {
-    this.presentLoading().then(preLoad => {
-      this.httpPms.getScheduleUser(this.requestedData.wo_id).subscribe(data => {
-        this.dismissloading();
-        this.fillReport = data.data.categories;
-        this.fillReport.forEach((element: any, index: any) => {
-          let count = 0;
-          element.qus.forEach((el: any) => {
-            if (el.isDtlShow && el.status == 0) {
-              count = count + 1;
-            }
-            element.pending_count = count;
-          });
-        });
-      })
-    }, err => {
-      this.dismissloading();
-      this.common.presentToast(environment.errMsg, 'danger');
+      // console.log(this.requestedData);
+      this.requestedData.qus.forEach((element: any) => {
+        element.optn_id = element.options.filter((val: any) => val.optn_desc === element.rspns)[0].optn_id
+      });
+      console.log(this.requestedData);
     });
   }
-  expand(data: any, index: any) {
-    data.isView = !data.isView;
-    for (let i = 0; i < this.fillReport.length; i++) {
-      if (i !== index) {
-        this.fillReport[i].isView = false;
-      } else {
-        setTimeout(() => {
-          const userToScrollOn = this.itemlist.toArray();
-          userToScrollOn[index].nativeElement.scrollIntoView({
-            behavior: 'smooth'
-          });
-        }, 4);
-      }
-    }
+
+  onWillDismissPre() {
+    this.isPreOpen = false;
   }
 
-  showMore(val: any) {
-    val.showMore = !val.showMore;
+  openPreviousModal(data: any) {
+    console.log(data);
+    this.responseList = data.response_txn;
+    this.isPreOpen = true;
   }
 
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
+  openModal(data: any) {
+    console.log(data);
+    this.isOpen = true;
+    this.data = data;
   }
 
-  async dismissloading() {
-    this.loading.dismiss();
-  }
-
-  viewDocs(url: string, blobType: string) {
+  viewDocs(url: string, blobType?: string) {
     this.common.setImageCondition(url, 'blob', blobType)
   }
 
-  async addResponse(data: any, createAt: any) {
-    const modal = await this.modalCtrl.create({
-      component: AddResponseComponent,
-      cssClass: 'my-modal',
-      componentProps: { requestedData: data, createAt: createAt }
-    });
-    modal.onWillDismiss().then((disModal: any) => {
-      if (disModal.role) {
-        this.getScheduleUser();
-      } else {
-      }
-    });
-    modal.present();
+  onWillDismiss() {
+    this.isOpen = false;
+    this.data = [];
   }
+
+  // getScheduleUser() {
+  //   this.presentLoading().then(preLoad => {
+  //     this.httpPms.getScheduleUser(this.requestedData.wo_id).subscribe(data => {
+  //       this.dismissloading();
+  //       this.fillReport = data.data.categories;
+  //       this.fillReport.forEach((element: any, index: any) => {
+  //         let count = 0;
+  //         element.qus.forEach((el: any) => {
+  //           if (el.isDtlShow && el.status == 0) {
+  //             count = count + 1;
+  //           }
+  //           element.pending_count = count;
+  //         });
+  //       });
+  //     })
+  //   }, err => {
+  //     this.dismissloading();
+  //     this.common.presentToast(environment.errMsg, 'danger');
+  //   });
+  // }
+  // expand(data: any, index: any) {
+  //   data.isView = !data.isView;
+  //   for (let i = 0; i < this.fillReport.length; i++) {
+  //     if (i !== index) {
+  //       this.fillReport[i].isView = false;
+  //     } else {
+  //       setTimeout(() => {
+  //         const userToScrollOn = this.itemlist.toArray();
+  //         userToScrollOn[index].nativeElement.scrollIntoView({
+  //           behavior: 'smooth'
+  //         });
+  //       }, 4);
+  //     }
+  //   }
+  // }
+
+  // showMore(val: any) {
+  //   val.showMore = !val.showMore;
+  // }
+
+  // async presentLoading() {
+  //   this.loading = await this.loadingController.create({
+  //     cssClass: 'my-custom-class',
+  //     message: 'Please wait...'
+  //   });
+  //   await this.loading.present();
+  // }
+
+  // async dismissloading() {
+  //   this.loading.dismiss();
+  // }
+
+  // viewDocs(url: string) {
+  //   this.common.openDoc(url)
+  // }
+
+  // async addResponse(data: any, createAt: any) {
+  //   const modal = await this.modalCtrl.create({
+  //     component: AddResponseComponent,
+  //     cssClass: 'my-modal',
+  //     componentProps: { requestedData: data, createAt: createAt }
+  //   });
+  //   modal.onWillDismiss().then((disModal: any) => {
+  //     if (disModal.role) {
+  //       this.getScheduleUser();
+  //     } else {
+  //     }
+  //   });
+  //   modal.present();
+  // }
 
 }

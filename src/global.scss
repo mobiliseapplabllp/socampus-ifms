@@ -96,6 +96,23 @@ ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
   font-family: 'opensans_semibold' !important;
 }
 
+ion-segment-button {
+  text-transform: none !important;
+}
+
+.selectedRadioButton {
+  border:2px solid var(--ion-color-success) !important;
+  border-radius: 10px;
+  margin-bottom:20px
+}
+
+
+.radioButton {
+  border:2px solid var(--ion-color-primary);
+  border-radius: 10px;
+  margin-bottom:20px
+}
+
 .my-modal{
   --height: 93%;
   --border-radius: 5px;
@@ -107,6 +124,38 @@ ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
   --border-radius: 5px;
   padding: 25px;
 }
+
+.my-modal-bottom {
+  --border-radius: 20px 20px 0px 0px;
+}
+
+// .my-modal-btm .modal-wrapper {
+//   position: absolute;
+//   bottom: 0px !important;
+//   top: auto; /* Ensure it is not centered */
+//   height: 50%; /* Set the height to 50% */
+//   width: 100%; /* Full width of the modal */
+//   border-radius: 16px 16px 0 0; /* Rounded top corners */
+//   margin: 0; /* Remove any default margin */
+//   padding: 0;
+// }
+
+.my-modal-ptw {
+  --width: 100%;
+  --height:50%;
+  --border-radius: 16px 16px 0 0; /* Rounded top corners */
+  --top: auto;
+  --bottom: 0px !important;
+}
+
+.my-modal-btm {
+  --width: 100%;
+  --height: 80%;
+  --border-radius: 16px 16px 0 0; /* Rounded top corners */
+  --top: auto;
+  --bottom: 0px !important;
+}
+
 
 .custom-otp-container {
   display: flex;

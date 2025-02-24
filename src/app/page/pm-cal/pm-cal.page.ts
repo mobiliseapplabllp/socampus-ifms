@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingController, ModalController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -9,6 +9,7 @@ import { PmAssignComponent } from './pm-assign/pm-assign.component';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { PtwUploadComponent } from './ptw-upload/ptw-upload.component';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
+import * as moment from 'moment';
 @Component({
   selector: 'app-pm-cal',
   templateUrl: './pm-cal.page.html',
@@ -27,6 +28,7 @@ export class PmCalPage implements OnInit {
   // counter = 0;
   // userInfo: any = [];
   // userName!: string;
+  selectedData: any = [];
   openPm: any = [];
   openPmCopy: any = [];
   actionPm: any = [];
@@ -37,18 +39,21 @@ export class PmCalPage implements OnInit {
   lastPage: any;
   currentPage = 1;
   myWorkOrder: any = [];
-   selectedPms: any = [];
-   searchBy: any;
-   searchValue: any;searchValueDesc: any;
-   selectedObj: any = {};
-   countObj: any = {};
+  selectedPms: any = [];
+  searchBy: any;
+  searchValue: any;searchValueDesc: any;
+  selectedObj: any = {};
+  countObj: any = {};
+  isPreOpen!: boolean;
+  isCloseAction!: boolean;
+  logs: any = [];
+  closeRemark!: string
   constructor(
     private loadingController: LoadingController,
     private httpPms: PmCalService,
     private common: CommonService,
     private modalCtrl: ModalController,
     private router: Router,
-    private httpDigital: DigitalChecklistService,
     private platform: Platform
   ) { }
 
@@ -168,6 +173,57 @@ export class PmCalPage implements OnInit {
     this.closePmCopy = [];
   }
 
+
+  singleCancel(data: any) {
+    this.isCloseAction = true;
+    data.isSelect = true;
+  }
+
+  multiCancel() {
+    this.isCloseAction = true;
+  }
+
+  filterIds() {
+    let submitObj: any, arr =this.openPm.filter((val: any) => val.isSelect == true).map((item: any) => item.id);
+    submitObj = {
+      id: arr,
+      data: {
+        cancel_remark: this.closeRemark
+      }
+    }
+    this.multiCancelAction(submitObj);
+  }
+
+  multiCancelAction(submitObj: any) {
+    if (!this.closeRemark) {
+      this.common.presentToast('Please Enter Remark', 'warning');
+      return;
+    }
+
+    this.presentLoading().then(preLoad => {
+      this.httpPms.closePms(submitObj).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            this.closeRemark = '';
+            this.isCloseAction = false;
+            this.openPm = this.openPm.filter((item: any) => !submitObj.id.includes(item.id));
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+
+  }
+
   multiAssign() {
     const obj =this.openPm.filter((val: any) => val.isSelect == true);
     this.pmAssign(obj);
@@ -182,7 +238,9 @@ export class PmCalPage implements OnInit {
   async pmAssign(dat: any) {
     const modal = await this.modalCtrl.create({
       component: PmAssignComponent,
-      cssClass: 'my-modal',
+      cssClass: 'my-modal-btm',
+      initialBreakpoint: 1,
+      breakpoints: [1],
       componentProps: { data: dat }
     });
     modal.onWillDismiss().then(disModal => {
@@ -204,12 +262,17 @@ export class PmCalPage implements OnInit {
   }
 
   openFillReport(data: any) {
-    if (data.ext_asset_id) {
-      this.selectedObj = data;
-      this.openBarcode(data)
+    if (this.platform.is('capacitor')) {
+      if (data.ext_asset_id) {
+        this.selectedObj = data;
+        this.openBarcode(data)
+      } else {
+        this.openPage(data);
+      }
     } else {
       this.openPage(data);
     }
+
   }
 
   openBarcode(data: any) {
@@ -242,7 +305,9 @@ export class PmCalPage implements OnInit {
   async uploadPtw(dat: any) {
     const modal = await this.modalCtrl.create({
       component: PtwUploadComponent,
-      cssClass: 'my-modal2',
+      cssClass: 'my-modal-ptw',
+      initialBreakpoint: 1, // Set to 50% of the screen height
+      breakpoints: [1],
       componentProps : {
         data: dat
       }
@@ -303,6 +368,7 @@ export class PmCalPage implements OnInit {
   }
 
   changeSeg(ev: any) {
+    this.selectedPms = [];
     if (ev.target.value == 'open') {
       this.lastSegment = 1;
       this.getPm(this.lastSegment);
@@ -312,7 +378,9 @@ export class PmCalPage implements OnInit {
     } else if (ev.target.value == 'closed') {
       this.lastSegment = 3;
       this.getPm(this.lastSegment);
-    } else if (ev.target.value == 'mywo') {}
+    } else if (ev.target.value == 'mywo') {
+
+    }
   }
 
   async presentActionSheet(data: any) {
@@ -475,4 +543,83 @@ export class PmCalPage implements OnInit {
     });
   }
 
+  openActionable(data: any) {
+    this.router.navigate(['/pm-calibration/actionable'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
+  }
+
+  openClose(data: any) {
+    this.router.navigate(['/pm-calibration/close-pm'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
+  }
+
+  openModal(data: any) {
+    this.isPreOpen = true;
+    this.selectedData = data;
+    this.getPpmPending(this.selectedData.id);
+  }
+
+  onWillDismiss() {
+    this.isPreOpen = false;
+    this.selectedData = [];
+    this.logs = [];
+  }
+
+  onWillDismissClose() {
+    this.isCloseAction = false;
+  }
+
+
+  getPpmPending(id: any) {
+    this.presentLoading().then(preLoad => {
+      this.httpPms.PpmPtwApproval(id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            const tmp = data.data;
+            for (var i = 0; i < tmp.length; i++) {
+              let status = tmp[i].status_id;
+
+              if(status !== ""){
+                this.logs.push({
+                  'status' :  (status == "0")?'Rejected':"Approved",
+                  'status_id':tmp[i].status_id,
+                  'date':tmp[i].appr_date,
+                  'action_by':tmp[i].ap_username+' '+tmp[i].approver,
+                  'remark':tmp[i].remark,
+                  'attach':'',
+                  // 'ind':i+2
+                });
+              }
+              this.logs.push({
+                'status' :  'Request Raised',
+                'status_id':"",
+                'date':tmp[i].created_at,
+                'action_by':tmp[i].username+' '+tmp[i].creater,
+                'remark':tmp[i].ptw_remark,
+                'attach':tmp[i].ptw_attach,
+                // 'ind':i+1
+              });
+            }
+
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+
+  }
 }
