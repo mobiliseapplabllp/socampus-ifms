@@ -50,15 +50,15 @@ export class PmReportComponent  implements OnInit {
       this.requestedData = JSON.parse(res['data']);
     });
 
-    if (this.platform.is('capacitor')) {
-      SpeechRecognition.checkPermissions().then(res => {
-        if (res.speechRecognition === 'granted') {
-          return
-        } else {
-          this.permission();
-        }
-      });
-    }
+    // if (this.platform.is('capacitor')) {
+    //   SpeechRecognition.checkPermissions().then(res => {
+    //     if (res.speechRecognition === 'granted') {
+    //       return
+    //     } else {
+    //       this.permission();
+    //     }
+    //   });
+    // }
   }
 
   ionViewDidEnter() {
@@ -95,8 +95,8 @@ export class PmReportComponent  implements OnInit {
   }
 
   openQusPage(data: any) {
-    console.log(data);
     if (!data.is_applicable_temp) {
+      this.common.presentToast('This category is not Applicable', 'warning');
       return;
     }
     data.wo_no = this.requestedData.wo_no;
@@ -151,7 +151,8 @@ export class PmReportComponent  implements OnInit {
           this.myCategory = data.data.categories;
           console.log(this.myCategory);
           this.myCategory.forEach((element: any) => {
-            element.is_applicable_temp = element.is_applicable === 1 ? true: false;
+            // element.is_applicable_temp = element.is_applicable === 1 ? true: false; // yeah dheeraj ne hatwai hai kyuki ab sare category bydefault enable hai
+            element.is_applicable_temp = true;
             element.total_questions = element.qus.length;
             let total_action = 0, count = 0;
             element.responded_questions = total_action;
@@ -482,7 +483,7 @@ export class PmReportComponent  implements OnInit {
   finalSubmit() {
     const NACat: any = [];
     for (var i = 0 ; i < this.myCategory.length; i++) {
-      if (this.myCategory[i].is_applicable === 1 && (this.myCategory[i].responded_questions !== this.myCategory[i].total_questions)) {
+      if (this.myCategory[i].responded_questions !== this.myCategory[i].total_questions) { // if (this.myCategory[i].is_applicable === 1 && (this.myCategory[i].responded_questions !== this.myCategory[i].total_questions)) {
         this.myCategory[i].isError = true;
         this.common.presentToast(`Please Response all Question for Category ${i+1}`, 'warning');
         return;

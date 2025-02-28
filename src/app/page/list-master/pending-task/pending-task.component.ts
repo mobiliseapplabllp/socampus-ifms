@@ -49,6 +49,12 @@ export class PendingTaskComponent  implements OnInit {
   TOTAL_CHECKLIST = 0;
   isLoop!: boolean;
   selected_date =  moment().format('YYYY-MM-DD');
+  isPreOpen = false;
+  selectedData: any = [];
+  logs: any = [];
+  closeRemark!: string;
+  isCloseAction = false;
+  selectedCancel: any = [];
   constructor(
     private loadingController: LoadingController,
     private httpCompalint: ComplaintService,
@@ -482,7 +488,9 @@ export class PendingTaskComponent  implements OnInit {
   async uploadPtw(dat: any) {
     const modal = await this.modalCtrl.create({
       component: PtwUploadComponent,
-      cssClass: 'my-modal2',
+      cssClass: 'my-modal-ptw',
+      initialBreakpoint: 1, // Set to 50% of the screen height
+      breakpoints: [1],
       componentProps : {
         data: dat
       }
@@ -495,9 +503,9 @@ export class PendingTaskComponent  implements OnInit {
     return await modal.present();
   }
 
-  viewAttachment(url: string) {
-    this.common.openDoc(url);
-  }
+  // viewAttachment(url: string) {
+  //   this.common.openDoc(url);
+  // }
 
   getPendingMeter() {
     this.presentLoading().then(preLoad => {
@@ -519,6 +527,59 @@ export class PendingTaskComponent  implements OnInit {
         }
       });
     })
+  }
+
+  onWillDismissClose() {
+    this.isCloseAction = false;
+    this.selectedCancel = [];
+  }
+
+  singleCancel(data: any) {
+    this.isCloseAction = true;
+    // data.isSelect = true;
+    this.selectedCancel = data;
+
+  }
+
+  filterIds() {
+    let submitObj: any;
+    submitObj = {
+      id: [this.selectedCancel.id],
+      data: {
+        cancel_remark: this.closeRemark
+      }
+    }
+    this.multiCancelAction(submitObj);
+  }
+
+  multiCancelAction(submitObj: any) {
+    if (!this.closeRemark) {
+      this.common.presentToast('Please Enter Remark', 'warning');
+      return;
+    }
+
+    this.presentLoading().then(preLoad => {
+      this.httpPm.closePms(submitObj).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            this.closeRemark = '';
+            this.isCloseAction = false;
+            this.pmsList = this.pmsList.filter((item: any) => !submitObj.id.includes(item.id));
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+
   }
 
   checkPhotoCondition(dat: any, type: any) {
@@ -803,13 +864,24 @@ export class PendingTaskComponent  implements OnInit {
     })
   }
 
-  checkPms(type: string, data: any) {
-    if (data.ext_asset_id) {
-      this.openBarcode(type, data);
+  checkPms(data: any) {
+    if (this.platform.is('capacitor')) {
+      if (data.ext_asset_id) {
+        this.qrType = 'pms';
+        this.qrObject = data;
+        this.openBarcodePage(data)
+      } else {
+        this.openFillReportPms(data);
+      }
     } else {
       this.openFillReportPms(data);
     }
   }
+
+  openBarcodePage(data: any) {
+    this.router.navigateByUrl('/barcode');
+  }
+
 
   openFillReportPms(dat: any) {
     this.router.navigate(['/pm-calibration/pm-report'], {
@@ -867,7 +939,9 @@ export class PendingTaskComponent  implements OnInit {
   async pmAssign(dat: any) {
     const modal = await this.modalCtrl.create({
       component: PmAssignComponent,
-      cssClass: 'my-modal',
+      cssClass: 'my-modal-btm',
+      initialBreakpoint: 1,
+      breakpoints: [1],
       componentProps: { data: dat }
     });
     modal.onWillDismiss().then(disModal => {
@@ -890,6 +964,73 @@ export class PendingTaskComponent  implements OnInit {
       }
     });
     modal.present();
+  }
+
+  openModal(data: any) {
+    this.isPreOpen = true;
+    this.selectedData = data;
+    this.getPpmPending(this.selectedData.id);
+  }
+
+  viewAttachment(url: string) {
+    this.common.setImageCondition(url, 'blob');
+  }
+
+  onWillDismiss() {
+    this.isPreOpen = false;
+    this.selectedData = [];
+    this.logs = [];
+  }
+
+
+  getPpmPending(id: any) {
+    this.presentLoading().then(preLoad => {
+      this.httpPm.PpmPtwApproval(id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            const tmp = data.data;
+            for (var i = 0; i < tmp.length; i++) {
+              let status = tmp[i].status_id;
+
+              if(status !== ""){
+                this.logs.push({
+                  'status' :  (status == "0")?'Rejected':"Approved",
+                  'status_id':tmp[i].status_id,
+                  'date':tmp[i].appr_date,
+                  'action_by':tmp[i].ap_username+' '+tmp[i].approver,
+                  'remark':tmp[i].remark,
+                  'attach':'',
+                  // 'ind':i+2
+                });
+              }
+              this.logs.push({
+                'status' :  'Request Raised',
+                'status_id':"",
+                'date':tmp[i].created_at,
+                'action_by':tmp[i].username+' '+tmp[i].creater,
+                'remark':tmp[i].ptw_remark,
+                'attach':tmp[i].ptw_attach,
+                // 'ind':i+1
+              });
+            }
+
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+  }
+
+  changeCheckbox(data: any) {
+
   }
 
   async presentLoading(msg?: string) {

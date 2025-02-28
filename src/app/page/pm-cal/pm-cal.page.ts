@@ -18,6 +18,7 @@ import * as moment from 'moment';
 export class PmCalPage implements OnInit {
   status = 'open';
   pmCal: any = [];
+  isSearch!:boolean;
   // pmCalCopy: any = [];
   // resolvedPm: any = [];
   // resolvedPmCopy: any = [];
@@ -320,6 +321,12 @@ export class PmCalPage implements OnInit {
     return await modal.present();
   }
 
+  changeSearchBy(ev: any) {
+    console.log(ev.target.value);
+    if (ev.target.value == 'all') {
+      this.getPm(1);
+    }
+  }
 
 
   searchWoFromServer(stage_id: any) {
@@ -348,6 +355,9 @@ export class PmCalPage implements OnInit {
         } else {
           this.pmCal = [];
         }
+      }, err => {
+        this.dismissloading();
+        this.common.presentToast(environment.errMsg, 'danger');
       });
 
     });
@@ -620,6 +630,5 @@ export class PmCalPage implements OnInit {
         }
       });
     })
-
   }
 }

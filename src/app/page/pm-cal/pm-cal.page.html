@@ -27,39 +27,42 @@
 <ion-content>
   <div [ngSwitch]='status' class="mostOuter">
     <div *ngSwitchCase="'open'">
-      <!-- <ion-row>
-        <ion-col>
-          <ion-item>
-            <ion-label position="floating">Search By</ion-label>
-            <ion-select interface="action-sheet" [(ngModel)]="searchBy" mode="ios">
-              <ion-select-option value="all">All</ion-select-option>
-              <ion-select-option value="pc_id"> Site</ion-select-option>
-              <ion-select-option value="wo_id">WO ID</ion-select-option>
-            </ion-select>
-          </ion-item>
-        </ion-col>
-        <ion-col *ngIf="searchBy">
-          <ion-item *ngIf="searchBy === 'wo_id'">
-            <ion-label position="floating">Wo ID</ion-label>
-            <ion-input type="email" [(ngModel)]="searchValue"> </ion-input>
-          </ion-item>
-          <ion-item *ngIf="searchBy === 'pc_id'" (click)="openRoName()">
-            <ion-label position="floating">Select Site</ion-label>
-            <ion-input type="email" [(ngModel)]="searchValueDesc" readonly> </ion-input>
-          </ion-item>
-        </ion-col>
-      </ion-row>
-      <ion-button *ngIf="searchBy" expand="block" (click)="searchWoFromServer(1)">Search <ion-icon name="search-outline" slot="end"></ion-icon></ion-button> -->
+      <div style="padding-left :10px;padding-right:10px" *ngIf="isSearch">
+        <ion-row>
+          <ion-col>
+            <ion-item>
+              <ion-label position="floating">Search By</ion-label>
+              <ion-select interface="action-sheet" [(ngModel)]="searchBy" mode="ios" (ionChange)="changeSearchBy($event)">
+                <ion-select-option value="all">All</ion-select-option>
+                <ion-select-option value="pc_id"> Site</ion-select-option>
+                <ion-select-option value="wo_id">WO ID</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+          <ion-col *ngIf="searchBy && searchBy !== 'all'">
+            <ion-item *ngIf="searchBy === 'wo_id'">
+              <ion-label position="floating">Wo ID</ion-label>
+              <ion-input type="email" [(ngModel)]="searchValue"> </ion-input>
+            </ion-item>
+            <ion-item *ngIf="searchBy === 'pc_id'" (click)="openRoName()">
+              <ion-label position="floating">Select Site</ion-label>
+              <ion-input type="email" [(ngModel)]="searchValueDesc" readonly> </ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-button *ngIf="searchBy" expand="block" (click)="searchWoFromServer(1)">Search <ion-icon name="search-outline" slot="end"></ion-icon></ion-button>
+      </div>
 
-      <section class="inputbox" style="margin:8px 10px;">
-        <ion-item lines="none" style="border:2px solid rgba(42, 41, 92, 0.20);">
+
+      <section class="inputbox" style="margin:8px 10px;" *ngIf="!isSearch" (click)="isSearch = true">
+        <ion-item lines="none" style="border:2px solid rgba(42, 41, 92, 0.20);" >
           <ion-icon name="search" slot="start"> </ion-icon>
-          <ion-input type="text" placeholder="Search"></ion-input>
+          <ion-input type="text" placeholder="Search" readonly></ion-input>
           <ion-icon name="options-outline" slot="end"></ion-icon>
         </ion-item>
       </section>
 
-      <div class="openWo"> <span class="title">2</span> <span class="val">Work Orders in progress </span></div>
+      <!-- <div class="openWo"> <span class="title">2</span> <span class="val">Work Orders in progress </span></div> -->
 
       <ion-card *ngFor="let dat of openPm; let i = index" class="cards" style="border-left:5px solid #915FC8" mode="md">
         <ion-grid >
@@ -122,9 +125,7 @@
               <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" size="small" fill="outline" *ngIf="((!dat.ptw_attach && dat.ptw_mandatory === 1) || (dat.ptw_status === '0' && dat.ptw_mandatory === 1 ))" expand="block" (click)="uploadPtw(dat)" >Upload PTW</ion-button>
               <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="openFillReport(dat)" *ngIf="(dat.ptw_attach !== '' && dat.ptw_status === '1') || dat.ptw_mandatory === 0">Fill Checklist</ion-button>
             </ion-col>
-            <!-- <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
-              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="openFillReport(dat)" *ngIf="(dat.ptw_attach !== '' && dat.ptw_status === '1') || dat.ptw_mandatory === 0">Fill Checklist</ion-button>
-            </ion-col> -->
+
           </ion-row>
         </ion-grid>
       </ion-card>
@@ -133,24 +134,7 @@
       </ion-infinite-scroll>
     </div>
     <div *ngSwitchCase="'actionable'">
-      <section class="inputbox" style="margin:8px 10px;">
-        <ion-item lines="none" style="border:2px solid rgba(42, 41, 92, 0.20);">
-          <ion-icon name="search" slot="start"> </ion-icon>
-          <ion-input type="text" (ionInput)="searchItem($event, 2)" placeholder="Search"></ion-input>
-          <ion-icon name="options-outline" slot="end"></ion-icon>
-        </ion-item>
-      </section>
-      <!-- <ion-toolbar>
-        <ion-searchbar mode="md" (ionChange)="searchItem($event, 2)" debounce="1000"></ion-searchbar>
-      </ion-toolbar> -->
       <ion-card *ngFor="let dat of actionPm; let i = index" class="cards" style="border-left:5px solid #E30000">
-        <!-- <ion-item>
-          <ion-label color="primary-dark">WO {{dat.wo_no}}</ion-label>
-          <ion-buttons slot="end">
-            <ion-text slot="end" class="center">{{dat.pending_action}}</ion-text>
-          </ion-buttons>
-        </ion-item> -->
-
         <ion-grid style="margin-left:10px;margin-right:10px;margin-top:0px">
           <ion-row>
             <ion-col style="color: var(--ion-color-primary-dark); font-size:16px">WO {{dat.wo_no}}</ion-col>
@@ -198,21 +182,7 @@
     </div>
     <!-- RESOLVED -->
     <div *ngSwitchCase="'closed'" class="openInner">
-      <section class="inputbox" style="margin:8px 10px;">
-        <ion-item lines="none" style="border:2px solid rgba(42, 41, 92, 0.20);">
-          <ion-icon name="search" slot="start"> </ion-icon>
-          <ion-input type="text" (ionInput)="searchItem($event, 3)" placeholder="Search"></ion-input>
-          <ion-icon name="options-outline" slot="end"></ion-icon>
-        </ion-item>
-      </section>
-      <!-- <ion-toolbar>
-        <ion-searchbar mode="md" (ionChange)="searchItem($event, 3)" debounce="1000"></ion-searchbar>
-      </ion-toolbar> -->
       <ion-card *ngFor="let dat of closePm; let i = index" class="cards" style="border-left:5px solid #915FC8">
-        <!-- <ion-item>
-          <ion-label color="primary-dark">WO {{dat.wo_no}}</ion-label>
-        </ion-item> -->
-
         <ion-grid style="margin-left:10px;margin-right:10px;margin-top:0px">
           <ion-row>
             <ion-col style="color: var(--ion-color-primary-dark); font-size:16px">WO {{dat.wo_no}}</ion-col>
