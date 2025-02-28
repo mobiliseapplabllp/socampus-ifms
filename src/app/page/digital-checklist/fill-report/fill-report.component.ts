@@ -327,7 +327,7 @@ export class FillReportComponent  implements OnInit {
   presentActionSheet(val: any, ind: any) {
     let obj: any = [];
     if (ind !== 1) {
-      obj = ['outer'];
+      obj = ['camera'];
     } else {
       obj = ['camera', 'gallery'];
     }

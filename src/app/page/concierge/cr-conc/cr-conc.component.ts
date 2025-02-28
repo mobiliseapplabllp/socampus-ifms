@@ -68,7 +68,7 @@ export class CrConcComponent  implements OnInit {
   }
 
   attachment() {
-    this.cameraService.selectImage(['camera', 'gallery', 'outer'], (blob: any) => {
+    this.cameraService.selectImage(['camera', 'gallery'], (blob: any) => {
       let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
       this.isAttachment = true;
       this.formData.delete('document');

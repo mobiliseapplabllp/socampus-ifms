@@ -32,7 +32,7 @@ export class PtwUploadComponent  implements OnInit {
   }
 
   presentActionSheet() {
-    this.cameraService.selectImage(['camera', 'gallery', 'outer'], (blob) => {
+    this.cameraService.selectImage(['camera', 'gallery'], (blob) => {
       let blobImage, random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
       blobImage = blob
       this.formData.delete('attach');

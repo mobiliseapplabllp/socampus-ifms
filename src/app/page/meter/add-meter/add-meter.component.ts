@@ -10,7 +10,8 @@ import * as moment from 'moment';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
 import { AssignToComponent } from '../assign-to/assign-to.component';
 import { EscalateToComponent } from '../escalate-to/escalate-to.component';
-import { Camera, CameraResultType } from '@capacitor/camera';
+import { CameraService } from 'src/app/provider/camera/camera.service';
+// import { Camera, CameraResultType } from '@capacitor/camera';
 @Component({
   selector: 'app-add-meter',
   templateUrl: './add-meter.component.html',
@@ -52,7 +53,8 @@ export class AddMeterComponent implements OnInit {
     private formbuilder: FormBuilder,
     private httpMeter: MeterService,
     private navCtrl: NavController,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -508,38 +510,57 @@ export class AddMeterComponent implements OnInit {
   }
 
   async presentActionSheet(imageno: any) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
+    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+      if (imageno === 1) {
+        this.formData.delete('photo1');
+        this.formData.append('photo1', blob, random);
+        this.img1 = random;
+      } else  if (imageno === 2) {
+        this.formData.delete('photo2');
+        this.formData.append('photo2', blob, random);
+        this.img2 = random;
+      } else if (imageno === 3) {
+        this.formData.delete('photo3');
+        this.formData.append('photo3', blob, random);
+        this.img3 = random;
+      }
+      this.presentLoading().then(preLoad => {
+        this.dismissloading();
       });
-      this.readImg(image, imageno);
-    };
-    takePicture();
+    });
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   });
+    //   this.readImg(image, imageno);
+    // };
+    // takePicture();
   }
 
-  async readImg(photo: any, imageno: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    if (imageno === 1) {
-      this.formData.delete('photo1');
-      this.formData.append('photo1', blob, random + '.jpg');
-      this.img1 = random;
-    } else  if (imageno === 2) {
-      this.formData.delete('photo2');
-      this.formData.append('photo2', blob, random + '.jpg');
-      this.img2 = random;
-    } else if (imageno === 3) {
-      this.formData.delete('photo3');
-      this.formData.append('photo3', blob, random + '.jpg');
-      this.img3 = random;
-    }
-    this.presentLoading().then(preLoad => {
-      this.dismissloading();
-    });
-  }
+  // async readImg(photo: any, imageno: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   if (imageno === 1) {
+  //     this.formData.delete('photo1');
+  //     this.formData.append('photo1', blob, random + '.jpg');
+  //     this.img1 = random;
+  //   } else  if (imageno === 2) {
+  //     this.formData.delete('photo2');
+  //     this.formData.append('photo2', blob, random + '.jpg');
+  //     this.img2 = random;
+  //   } else if (imageno === 3) {
+  //     this.formData.delete('photo3');
+  //     this.formData.append('photo3', blob, random + '.jpg');
+  //     this.img3 = random;
+  //   }
+  //   this.presentLoading().then(preLoad => {
+  //     this.dismissloading();
+  //   });
+  // }
 
   changePhoto(event: any, index: any): void {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'

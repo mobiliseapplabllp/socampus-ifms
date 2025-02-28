@@ -22,6 +22,8 @@ import { TimesPipe } from '../pipes/times.pipe';
 import { VideoPlayComponent } from './video-play/video-play.component';
 import { BlockComponent } from './block/block.component';
 import { ImageViewComponent } from './image-view/image-view.component';
+import { PdfViewComponent } from './pdf-view/pdf-view.component';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -42,7 +44,8 @@ import { ImageViewComponent } from './image-view/image-view.component';
     TimesPipe,
     VideoPlayComponent,
     BlockComponent,
-    ImageViewComponent
+    ImageViewComponent,
+    PdfViewComponent
 
   ],
   imports: [
@@ -51,6 +54,7 @@ import { ImageViewComponent } from './image-view/image-view.component';
     IonicModule,
     FormsModule,
     ReactiveFormsModule,
+    PdfViewerModule
   ],
   entryComponents: [
     SignatureComponent,
@@ -70,7 +74,8 @@ import { ImageViewComponent } from './image-view/image-view.component';
     CaptureComponent,
     VideoPlayComponent,
     BlockComponent,
-    ImageViewComponent
+    ImageViewComponent,
+    PdfViewComponent
   ],
   exports: [
     VideoComponent,

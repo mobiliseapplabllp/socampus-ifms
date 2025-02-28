@@ -5,7 +5,7 @@ import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { environment } from 'src/environments/environment';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 
 @Component({
   selector: 'app-fill-qus',
@@ -26,7 +26,8 @@ export class FillQusComponent  implements OnInit {
     private common: CommonService,
     private loadingController: LoadingController,
     private platform: Platform,
-    private navCtrl: NavController
+    private navCtrl: NavController,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -128,15 +129,6 @@ export class FillQusComponent  implements OnInit {
       q_max_score: data.q_max_score,
       rspns_source: environment.source
     }
-    // let rspns_count = 0;
-    // this.category.qus.forEach((element: any) => {
-    //   if (element.response?.optn_id) {
-    //     rspns_count = rspns_count + 1;
-    //     this.category.rspns_count = rspns_count;
-    //   }
-    // });
-    // this.category.progress = Math.round(this.category.rspns_count * 100 / this.category.qus.length);
-    // this.category.progress1 = this.category.progress / 100
     this.submitResponseAction(obj, data)
   }
 
@@ -223,61 +215,97 @@ export class FillQusComponent  implements OnInit {
       });
     });
   }
-  async presentActionSheet(val: any, ind: any) {
-    var obj: any = {}
+  async presentActionSheet(data: any, ind: any) {
+    let obj: any = []
     if (ind === 1) {
-      obj = {
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      }
+      obj = ['Camera', 'Gallery'];
     } else {
-      obj = {
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera,
-      }
+      obj = ['Camera'];
     }
-    const takePicture = async () => {
-      const image = await Camera.getPhoto(obj);
-      this.readImg(image, val)
-    };
-    takePicture();
-  }
-
-  async readImg(photo: any, data: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    let formData = new FormData();
-    formData.append('wo_id', this.requestedData.wo_id);
-    formData.append('q_id',  data.q_id);
-    formData.append('rspns_source', environment.source);
-    formData.append('attachment2', blob, random);
-    data.imagename = '';
-    this.presentLoading('Please Wait..').then(preLoad => {
-      this.httpPms.scheduleResponseActionDoc(formData).subscribe({
-        next:(dat) => {
-          if (dat.status) {
-            data.imagename = 'Uploaded';
-            data.isNotFill = false;
-            this.common.presentToast(dat.msg, 'success');
-            this.repeatLoop();
-          } else {
-            this.common.presentToast(dat.msg, 'warning');
+    this.camera.selectImage(obj, (blob) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+      let formData = new FormData();
+      formData.append('wo_id', this.requestedData.wo_id);
+      formData.append('q_id',  data.q_id);
+      formData.append('rspns_source', environment.source);
+      formData.append('attachment2', blob, random);
+      data.imagename = '';
+      this.presentLoading('Please Wait..').then(preLoad => {
+        this.httpPms.scheduleResponseActionDoc(formData).subscribe({
+          next:(dat) => {
+            if (dat.status) {
+              data.imagename = 'Uploaded';
+              data.isNotFill = false;
+              this.common.presentToast(dat.msg, 'success');
+              this.repeatLoop();
+            } else {
+              this.common.presentToast(dat.msg, 'warning');
+            }
+          },
+          error:() => {
+            this.dismissloading();
+            this.common.presentToast(environment.errMsg, 'danger');
+          },
+          complete:() => {
+            this.dismissloading();
           }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
+        });
       });
     });
+    // var obj: any = {}
+    // if (ind === 1) {
+    //   obj = {
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   }
+    // } else {
+    //   obj = {
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //     source: CameraSource.Camera,
+    //   }
+    // }
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto(obj);
+    //   this.readImg(image, val)
+    // };
+    // takePicture();
   }
+
+  // async readImg(photo: any, data: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   let formData = new FormData();
+  //   formData.append('wo_id', this.requestedData.wo_id);
+  //   formData.append('q_id',  data.q_id);
+  //   formData.append('rspns_source', environment.source);
+  //   formData.append('attachment2', blob, random);
+  //   data.imagename = '';
+  //   this.presentLoading('Please Wait..').then(preLoad => {
+  //     this.httpPms.scheduleResponseActionDoc(formData).subscribe({
+  //       next:(dat) => {
+  //         if (dat.status) {
+  //           data.imagename = 'Uploaded';
+  //           data.isNotFill = false;
+  //           this.common.presentToast(dat.msg, 'success');
+  //           this.repeatLoop();
+  //         } else {
+  //           this.common.presentToast(dat.msg, 'warning');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.common.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     });
+  //   });
+  // }
 
   viewDocs(url: string) {
     this.common.openDoc(url);
@@ -318,20 +346,6 @@ export class FillQusComponent  implements OnInit {
   repeatLoop() {
 
   }
-
-  // if (this.scheduleArr[i].qus[j].isRemarkMandatory == 1 && !this.scheduleArr[i].qus[j].remark) {
-  //   this.common.presentToast(`Please Add Remark for Question No ${j+1}`, 'warning');
-  //   this.scheduleArr[i].qus[j].isNotFill = true;
-  //   this.scroll(j);
-  //   return;
-  // } else if(this.scheduleArr[i].qus[j].isDocMandatory == 1 && !this.scheduleArr[i].qus[j].imagename) {
-  //   this.common.presentToast(`Please Add Attachment for Question No ${j+1}`, 'warning');
-  //   this.scheduleArr[i].qus[j].isNotFill = true;
-  //   this.scroll(j);
-  //   return;
-  // } else {
-  //   this.scheduleArr[i].qus[j].isNotFill = false;
-  // }
 
   submit() {
     let index = -1;

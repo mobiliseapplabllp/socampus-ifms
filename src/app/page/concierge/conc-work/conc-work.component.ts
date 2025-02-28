@@ -142,7 +142,7 @@ export class ConcWorkComponent  implements OnInit {
   }
 
   attachment(type: string) {
-    this.camera.selectImage(['camera', 'gallery', 'outer'], (blob: any) => {
+    this.camera.selectImage(['camera', 'gallery'], (blob: any) => {
       let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
       if (type == 'in_progress') {
         this.formDataInProgress.delete('document');

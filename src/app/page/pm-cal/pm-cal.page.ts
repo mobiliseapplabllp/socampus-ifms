@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingController, ModalController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -6,10 +6,9 @@ import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
 import { environment } from 'src/environments/environment';
 import { PmAssignComponent } from './pm-assign/pm-assign.component';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { PtwUploadComponent } from './ptw-upload/ptw-upload.component';
-import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
-import * as moment from 'moment';
+import { CameraService } from 'src/app/provider/camera/camera.service';
+
 @Component({
   selector: 'app-pm-cal',
   templateUrl: './pm-cal.page.html',
@@ -19,16 +18,7 @@ export class PmCalPage implements OnInit {
   status = 'open';
   pmCal: any = [];
   isSearch!:boolean;
-  // pmCalCopy: any = [];
-  // resolvedPm: any = [];
-  // resolvedPmCopy: any = [];
   loading: any;
-  // userData: any = [];
-  // pmCalBoolean!: boolean;
-  // pmCalResBoolean!: boolean;
-  // counter = 0;
-  // userInfo: any = [];
-  // userName!: string;
   selectedData: any = [];
   openPm: any = [];
   openPmCopy: any = [];
@@ -55,8 +45,8 @@ export class PmCalPage implements OnInit {
     private common: CommonService,
     private modalCtrl: ModalController,
     private router: Router,
-    private platform: Platform
-  ) { }
+    private platform: Platform,
+    private camera: CameraService) { }
 
   ngOnInit() {
     this.common.setBarcode('');
@@ -394,22 +384,18 @@ export class PmCalPage implements OnInit {
   }
 
   async presentActionSheet(data: any) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image, data)
-    };
-    takePicture();
-  }
-
-  async readImg(photo: any, data: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    let formData = new FormData();
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 90,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   });
+    //   this.readImg(image, data)
+    // };
+    // takePicture();
+    this.camera.selectImage(['camera', 'gallery'], (blob) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+      let formData = new FormData();
       formData.append('attach', blob, random);
       formData.append('id', data.id)
       data.imgname_tmp = random;
@@ -430,7 +416,35 @@ export class PmCalPage implements OnInit {
           this.common.presentToast(environment.errMsg, 'danger');
         });
       })
+    });
   }
+
+  // async readImg(photo: any, data: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   let formData = new FormData();
+  //     formData.append('attach', blob, random);
+  //     formData.append('id', data.id)
+  //     data.imgname_tmp = random;
+  //     data.docname_tmp = '';
+  //     this.presentLoading().then(preLoad => {
+  //       this.httpPms.uploadPtw(formData).subscribe(res => {
+  //         this.dismissloading();
+  //         if (res.status) {
+  //           this.common.presentToast(res.msg, 'success');
+  //           data.ptw_attach = res.ptw_attach
+  //           data.showPtw =  false
+  //         } else {
+  //           this.common.presentToast(res.msg, 'warning');
+  //         }
+  //       }, err => {
+  //         data.imgname_tmp = ''
+  //         this.dismissloading();
+  //         this.common.presentToast(environment.errMsg, 'danger');
+  //       });
+  //     })
+  // }
 
 
   changeFile(fileChangeEvent: any, data: any){

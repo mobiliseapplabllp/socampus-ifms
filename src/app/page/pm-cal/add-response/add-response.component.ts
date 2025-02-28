@@ -2,10 +2,11 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonDatetime, LoadingController, ModalController } from '@ionic/angular';
 import * as moment from 'moment';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { environment } from 'src/environments/environment';
-import { Camera, CameraResultType } from '@capacitor/camera';
+// import { Camera, CameraResultType } from '@capacitor/camera';
 @Component({
   selector: 'app-add-response',
   templateUrl: './add-response.component.html',
@@ -28,7 +29,8 @@ export class AddResponseComponent  implements OnInit {
     private modalCtrl: ModalController,
     private httpCommon: CommonService,
     private httpPms: PmCalService,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -111,28 +113,25 @@ export class AddResponseComponent  implements OnInit {
   }
 
   async presentActionSheet() {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image)
-    };
-    takePicture();
-  }
-
-  async readImg(photo: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    this.isImgUpload = true;
-    this.formData.delete('artifact');
-    this.formData.append('artifact', blob, random);
-    this.presentLoading().then(preLoad => {
-      setTimeout(() => {
-        this.dismissloading();
-      }, 500);
-    })
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 90,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   });
+    //   this.readImg(image)
+    // };
+    // takePicture();
+    this.camera.selectImage(['camera', 'gallery'], (blob) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+      this.isImgUpload = true;
+      this.formData.delete('artifact');
+      this.formData.append('artifact', blob, random);
+      this.presentLoading().then(preLoad => {
+        setTimeout(() => {
+          this.dismissloading();
+        }, 500);
+      })
+    });
   }
 }

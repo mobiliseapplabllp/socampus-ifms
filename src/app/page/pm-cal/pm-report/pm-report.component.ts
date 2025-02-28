@@ -4,11 +4,10 @@ import { AlertController, LoadingController, ModalController, NavController, Pla
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { environment } from 'src/environments/environment';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
-import { count } from 'console';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 
 @Component({
   selector: 'app-pm-report',
@@ -41,7 +40,8 @@ export class PmReportComponent  implements OnInit {
     private httpDigital: DigitalChecklistService,
     private platform: Platform,
     private modal: ModalController,
-    private router: Router) {
+    private router: Router,
+    private camera: CameraService) {
 
   }
 
@@ -424,61 +424,97 @@ export class PmReportComponent  implements OnInit {
     });
   }
 
-  async presentActionSheet(val: any, ind: any) {
-    var obj: any = {}
+  async presentActionSheet(data: any, ind: any) {
+    let obj: any = [];
     if (ind === 1) {
-      obj = {
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      }
+      obj = ['camera', 'gallery'];
     } else {
-      obj = {
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera,
-      }
+      obj = ['camera'];
     }
-    const takePicture = async () => {
-      const image = await Camera.getPhoto(obj);
-      this.readImg(image, val)
-    };
-    takePicture();
-  }
-
-  async readImg(photo: any, data: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    let formData = new FormData();
-    formData.append('wo_id', this.requestedData.wo_id);
-    formData.append('q_id',  data.q_id);
-    formData.append('rspns_source', environment.source);
-    formData.append('attachment2', blob, random);
-    data.imagename = '';
-    this.presentLoading('Please Wait..').then(preLoad => {
-      this.httpPmCal.scheduleResponseActionDoc(formData).subscribe({
-        next:(dat) => {
-          if (dat.status) {
-            data.imagename = 'Uploaded';
-            data.isNotFill = false;
-            this.httpCommon.presentToast(dat.msg, 'success');
-            this.repeatLoop();
-          } else {
-            this.httpCommon.presentToast(dat.msg, 'warning');
+    this.camera.selectImage(obj, (blob) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+      let formData = new FormData();
+      formData.append('wo_id', this.requestedData.wo_id);
+      formData.append('q_id',  data.q_id);
+      formData.append('rspns_source', environment.source);
+      formData.append('attachment2', blob, random);
+      data.imagename = '';
+      this.presentLoading('Please Wait..').then(preLoad => {
+        this.httpPmCal.scheduleResponseActionDoc(formData).subscribe({
+          next:(dat) => {
+            if (dat.status) {
+              data.imagename = 'Uploaded';
+              data.isNotFill = false;
+              this.httpCommon.presentToast(dat.msg, 'success');
+              this.repeatLoop();
+            } else {
+              this.httpCommon.presentToast(dat.msg, 'warning');
+            }
+          },
+          error:() => {
+            this.dismissloading();
+            this.httpCommon.presentToast(environment.errMsg, 'danger');
+          },
+          complete:() => {
+            this.dismissloading();
           }
-        },
-        error:() => {
-          this.dismissloading();
-          this.httpCommon.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
+        });
       });
     });
+    // var obj: any = {}
+    // if (ind === 1) {
+    //   obj = {
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   }
+    // } else {
+    //   obj = {
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //     source: CameraSource.Camera,
+    //   }
+    // }
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto(obj);
+    //   this.readImg(image, val)
+    // };
+    // takePicture();
   }
+
+  // async readImg(photo: any, data: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   let formData = new FormData();
+  //   formData.append('wo_id', this.requestedData.wo_id);
+  //   formData.append('q_id',  data.q_id);
+  //   formData.append('rspns_source', environment.source);
+  //   formData.append('attachment2', blob, random);
+  //   data.imagename = '';
+  //   this.presentLoading('Please Wait..').then(preLoad => {
+  //     this.httpPmCal.scheduleResponseActionDoc(formData).subscribe({
+  //       next:(dat) => {
+  //         if (dat.status) {
+  //           data.imagename = 'Uploaded';
+  //           data.isNotFill = false;
+  //           this.httpCommon.presentToast(dat.msg, 'success');
+  //           this.repeatLoop();
+  //         } else {
+  //           this.httpCommon.presentToast(dat.msg, 'warning');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.httpCommon.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     });
+  //   });
+  // }
 
   finalSubmit() {
     const NACat: any = [];

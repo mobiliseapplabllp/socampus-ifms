@@ -5,8 +5,8 @@ import * as moment from 'moment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { environment } from 'src/environments/environment';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-actionable',
   templateUrl: './actionable.component.html',
@@ -36,7 +36,8 @@ export class ActionableComponent  implements OnInit {
     private loadingController: LoadingController,
     private common: CommonService,
     private formbuilder: FormBuilder,
-    private router: Router
+    private router: Router,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -254,30 +255,41 @@ export class ActionableComponent  implements OnInit {
   }
 
   async presentActionSheet() {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image)
-    };
-    takePicture();
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 90,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   });
+    //   this.readImg(image)
+    // };
+    // takePicture();
+    this.camera.selectImage(['camera', 'gallery'], (blob) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+      this.isImgUpload = true;
+      this.formData.delete('artifact');
+      this.formData.append('artifact', blob, random);
+      this.presentLoading().then(preLoad => {
+        setTimeout(() => {
+          this.dismissloading();
+        }, 500);
+      })
+    });
   }
 
-  async readImg(photo: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    this.isImgUpload = true;
-    this.formData.delete('artifact');
-    this.formData.append('artifact', blob, random);
-    this.presentLoading().then(preLoad => {
-      setTimeout(() => {
-        this.dismissloading();
-      }, 500);
-    })
-  }
+  // async readImg(photo: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   this.isImgUpload = true;
+  //   this.formData.delete('artifact');
+  //   this.formData.append('artifact', blob, random);
+  //   this.presentLoading().then(preLoad => {
+  //     setTimeout(() => {
+  //       this.dismissloading();
+  //     }, 500);
+  //   })
+  // }
 
   openDoc(url: string) {
     this.common.openDoc(url);
