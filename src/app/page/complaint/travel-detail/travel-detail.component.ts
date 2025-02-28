@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { LoadingController, ModalController } from '@ionic/angular';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+// import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 @Component({
   selector: 'app-travel-detail',
   templateUrl: './travel-detail.component.html',
@@ -26,7 +27,8 @@ export class TravelDetailComponent  implements OnInit {
     private modalCtrl: ModalController,
     private httpComplaint: ComplaintService,
     private loadingController: LoadingController,
-    private common: CommonService
+    private common: CommonService,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -79,36 +81,51 @@ export class TravelDetailComponent  implements OnInit {
     this.modalCtrl.dismiss(data, status);
   }
 
-  async presentActionSheet(val: any) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera
+  async presentActionSheet(imageno: any) {
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //     source: CameraSource.Camera
+    //   });
+    //   this.readImg(image, val)
+    // };
+    // takePicture();
+    this.camera.selectImage(['camera'], (blob) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+      if (imageno === 1) {
+        this.img1 = random;
+        this.formData.delete('travelImg1');
+        this.formData.append('travelImg1', blob, random);
+      } else if (imageno === 2) {
+        this.img2 = random;
+        this.formData.delete('travelImg2');
+        this.formData.append('travelImg2', blob, random );
+      }
+      this.presentLoading().then(preLoad => {
+        this.dismissloading();
       });
-      this.readImg(image, val)
-    };
-    takePicture();
-  }
-
-  async readImg(photo: any, imageno: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    if (imageno === 1) {
-      this.img1 = random;
-      this.formData.delete('travelImg1');
-      this.formData.append('travelImg1', blob, random);
-    } else if (imageno === 2) {
-      this.img2 = random;
-      this.formData.delete('travelImg2');
-      this.formData.append('travelImg2', blob, random );
-    }
-    this.presentLoading().then(preLoad => {
-      this.dismissloading();
     });
   }
+
+  // async readImg(photo: any, imageno: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   if (imageno === 1) {
+  //     this.img1 = random;
+  //     this.formData.delete('travelImg1');
+  //     this.formData.append('travelImg1', blob, random);
+  //   } else if (imageno === 2) {
+  //     this.img2 = random;
+  //     this.formData.delete('travelImg2');
+  //     this.formData.append('travelImg2', blob, random );
+  //   }
+  //   this.presentLoading().then(preLoad => {
+  //     this.dismissloading();
+  //   });
+  // }
 
   submit() {
     if (!this.travelType) {

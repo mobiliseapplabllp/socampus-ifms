@@ -329,7 +329,7 @@ export class FillReportComponent  implements OnInit {
     if (ind !== 1) {
       obj = ['outer'];
     } else {
-      obj = ['camera', 'gallery', 'outer'];
+      obj = ['camera', 'gallery'];
     }
     this.cameraService.selectImage(obj, (blob: any) => {
       val.imagename = blob;

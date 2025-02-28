@@ -5,12 +5,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MeterService } from 'src/app/provider/meter/meter.service';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { DaysComponent } from '../days/days.component';
 import * as moment from 'moment';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
 import { AssignToComponent } from '../assign-to/assign-to.component';
 import { EscalateToComponent } from '../escalate-to/escalate-to.component';
+import { Camera, CameraResultType } from '@capacitor/camera';
 @Component({
   selector: 'app-add-meter',
   templateUrl: './add-meter.component.html',
@@ -57,9 +57,7 @@ export class AddMeterComponent implements OnInit {
 
   ngOnInit() {
     this.initForm();
-    // this.getFacilityType();
     this.getEquipStatus();
-    // this.getMeterType();
     this.getUomMeter();
   }
 
@@ -107,9 +105,6 @@ export class AddMeterComponent implements OnInit {
       oth_mult_fact: [''],
       oth_mult_fact_val: [''],
       oth_inc: [''],
-      // mult_fact: ['', Validators.required],
-      // mult_fact_val: [''],
-      // inc: ['', Validators.required],
       back_date: ['', Validators.required],
       back_days: [''],
       edit_allow: ['', Validators.required],

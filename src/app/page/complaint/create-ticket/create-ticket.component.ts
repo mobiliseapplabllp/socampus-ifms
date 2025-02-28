@@ -6,7 +6,6 @@ import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
 import { ResponseModalComponent } from '../response-modal/response-modal.component';
 import { CostCenterComponent } from '../../../shared/cost-center/cost-center.component';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { QueryCatComponent } from 'src/app/shared/query-cat/query-cat.component';
 import { QuerySubCatComponent } from 'src/app/shared/query-sub-cat/query-sub-cat.component';
 import { QuerySubCat2Component } from 'src/app/shared/query-sub-cat2/query-sub-cat2.component';
@@ -15,6 +14,7 @@ import { BuildingComponent } from 'src/app/shared/building/building.component';
 import { FloorComponent } from 'src/app/shared/floor/floor.component';
 import { LocationComponent } from 'src/app/shared/location/location.component';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-create-ticket',
   templateUrl: './create-ticket.component.html',
@@ -53,7 +53,8 @@ export class CreateTicketComponent  implements OnInit {
     private modalController: ModalController,
     private loadingController: LoadingController,
     private router: Router,
-    private httpAsset: MyAssetGetService
+    private httpAsset: MyAssetGetService,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -519,28 +520,37 @@ export class CreateTicketComponent  implements OnInit {
 
 
   async openCamera() {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image)
-    };
-    takePicture();
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   });
+    //   this.readImg(image)
+    // };
+    // takePicture();
+    this.camera.selectImage(['camera', 'gallery'], (blob: any) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+      this.formData.delete('img[]');
+      this.formData.append('img[]', blob, random);
+      this.fileName = random
+      this.presentLoading().then(preLoad => {
+        this.dismissloading();
+      })
+    });
   }
 
-  async readImg(photo: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    this.formData.delete('img[]');
-    this.formData.append('img[]', blob, random);
-    this.fileName = random
-    this.presentLoading().then(preLoad => {
-      this.dismissloading();
-    })
-  }
+  // async readImg(photo: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   this.formData.delete('img[]');
+  //   this.formData.append('img[]', blob, random);
+  //   this.fileName = random
+  //   this.presentLoading().then(preLoad => {
+  //     this.dismissloading();
+  //   })
+  // }
 
   changePhoto(event: any): void {
     if (event.target.files.length > 0) {

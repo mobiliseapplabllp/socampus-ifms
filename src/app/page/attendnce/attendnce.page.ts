@@ -7,7 +7,7 @@ import { CommonService } from 'src/app/provider/common/common.service';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
 import { environment } from 'src/environments/environment';
 import { Geolocation } from '@capacitor/geolocation';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 declare var google: any;
 @Component({
   selector: 'app-attendnce',
@@ -42,7 +42,8 @@ export class AttendncePage implements OnInit {
     private navCtrl: NavController,
     private router: Router,
     private httpAttendance: AttendanceService,
-    private platform: Platform
+    private platform: Platform,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -133,22 +134,8 @@ export class AttendncePage implements OnInit {
   }
 
   async presentActionSheet(val: any) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 70,
-        allowEditing: false,
-        source: CameraSource.Camera,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image, val)
-    };
-    takePicture();
-  }
-
-  async readImg(photo: any, val: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
+    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
       this.formData.delete('photo',);
       this.formData.delete('emp_id');
       this.formData.delete('att_date');
@@ -188,7 +175,63 @@ export class AttendncePage implements OnInit {
           }
         });
       });
+    });
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 70,
+    //     allowEditing: false,
+    //     source: CameraSource.Camera,
+    //     resultType: CameraResultType.Uri,
+    //   });
+    //   this.readImg(image, val)
+    // };
+    // takePicture();
   }
+
+  // async readImg(photo: any, val: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //     this.formData.delete('photo',);
+  //     this.formData.delete('emp_id');
+  //     this.formData.delete('att_date');
+  //     this.formData.delete('att_lattitude');
+  //     this.formData.delete('att_longitude');
+  //     this.formData.delete('att_time');
+  //     this.formData.delete('att_type');
+
+  //     this.formData.append('photo', blob, random);
+  //     this.formData.append('emp_id', this.userData.id);
+  //     this.formData.append('att_date', moment().format('yyyy-MM-DD'));
+  //     this.formData.append('att_lattitude', this.latitude);
+  //     this.formData.append('att_longitude', this.longitude);
+  //     this.formData.append('att_time', this.currentTime);
+  //     this.formData.append('att_type', val);
+  //     if (val === 'OUT') {
+  //       this.formData.append('id', this.att_id);
+  //     }
+  //     this.presentLoading().then(preLoad => {
+  //       this.httpAttendance.punchInOutAction(this.formData).then((res: any) => {
+  //         this.dismissloading();
+  //         this.result = res;
+  //         if (this.result === false) {
+  //           this.common.presentToast(environment.errMsg, 'danger');
+  //         } else {
+  //           if (this.result.status === true) {
+  //             this.common.presentToast(this.result.msg, 'success');
+  //             if (val === 'IN') {
+  //               this.attendanceStatus = true;
+  //             } else if (val === 'OUT') {
+  //               this.attendanceStatus = false;
+  //             }
+  //             this.navCtrl.pop();
+  //           } else if (this.result.status === false) {
+  //             this.common.presentToast(this.result.msg, 'warning');
+  //           }
+  //         }
+  //       });
+  //     });
+  // }
 
   async presentLoading() {
     this.loading = await this.loadingController.create({

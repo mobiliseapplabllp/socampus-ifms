@@ -12,6 +12,7 @@ import { InstructionModalComponent } from '../instruction-modal/instruction-moda
 import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
 import { Filesystem } from '@capacitor/filesystem';
 import { CaptureComponent } from 'src/app/shared/capture/capture.component';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 
 @Component({
   selector: 'app-ticket-work',
@@ -73,6 +74,7 @@ export class TicketWorkComponent  implements OnInit {
     private loadingController: LoadingController,
     private mediaCapture: MediaCapture,
     private modalController: ModalController,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -490,35 +492,51 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   async presentActionSheet(val: string) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image, val)
-    };
-    takePicture();
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   });
+    //   this.readImg(image, val)
+    // };
+    // takePicture();
+    this.camera.selectImage(['camera', 'gallery'], (blob: any) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+      if (val === 'image') {
+        this.formData.delete('img[]');
+        this.formData.append('img[]', blob, random);
+        this.fileName = random;
+      } else if (val === 'ppe') {
+        this.formData.delete('ppeKitAttach');
+        this.formData.append('ppeKitAttach', blob, random);
+        this.ppeFileName = random;
+      }
+
+      this.presentLoading().then(preLoad => {
+        this.dismissLoading();
+      })
+    });
   }
 
-  async readImg(photo: any, val: string) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    if (val === 'image') {
-      this.formData.delete('img[]');
-      this.formData.append('img[]', blob, random);
-      this.fileName = random;
-    } else if (val === 'ppe') {
-      this.formData.delete('ppeKitAttach');
-      this.formData.append('ppeKitAttach', blob, random);
-      this.ppeFileName = random;
-    }
+  // async readImg(photo: any, val: string) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   if (val === 'image') {
+  //     this.formData.delete('img[]');
+  //     this.formData.append('img[]', blob, random);
+  //     this.fileName = random;
+  //   } else if (val === 'ppe') {
+  //     this.formData.delete('ppeKitAttach');
+  //     this.formData.append('ppeKitAttach', blob, random);
+  //     this.ppeFileName = random;
+  //   }
 
-    this.presentLoading().then(preLoad => {
-      this.dismissLoading();
-    })
-  }
+  //   this.presentLoading().then(preLoad => {
+  //     this.dismissLoading();
+  //   })
+  // }
 
   async presentLoading() {
     this.loading = await this.loadingController.create({

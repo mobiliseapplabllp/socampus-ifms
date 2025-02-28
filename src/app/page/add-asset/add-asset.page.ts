@@ -8,13 +8,13 @@ import { environment } from 'src/environments/environment';
 import { AssetDepartmentComponent } from './asset-department/asset-department.component';
 import { AssetDevicenameComponent } from './asset-devicename/asset-devicename.component';
 import { AssetManufacturerComponent } from './asset-manufacturer/asset-manufacturer.component';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { Router } from '@angular/router';
 import * as moment from 'moment';
 import { FloorComponent } from 'src/app/shared/floor/floor.component';
 import { LocationComponent } from 'src/app/shared/location/location.component';
 import { DeviceGroupComponent } from 'src/app/shared/device-group/device-group.component';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-add-asset',
   templateUrl: './add-asset.page.html',
@@ -76,7 +76,8 @@ export class AddAssetPage implements OnInit {
     private modalController: ModalController,
     private httpCommon: CommonService,
     private loadingController: LoadingController,
-    private router: Router) {
+    private router: Router,
+    private camera: CameraService) {
     this.addAsset = this.formbuilder.group({
       faciity_type: [''],
       site_id_description:[''],
@@ -289,76 +290,120 @@ export class AddAssetPage implements OnInit {
     this.router.navigateByUrl('/barcode');
   }
 
-  async presentActionSheet(val: any) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image, val)
-    };
-    takePicture();
-  }
-
-  async readImg(photo: any, imageno: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-
-    if (imageno === 1) {
-      this.img1 = random;
-      this.formData.delete('asset_img');
-      this.formData.append('asset_img', blob, random);
-      this.presentLoading().then(preLoad => {
-        this.dismissloading();
+  async presentActionSheet(imageno: any) {
+    this.camera.selectImage(['camera', 'gallery'], (blob: any) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+      if (imageno === 1) {
+        this.img1 = random;
+        this.formData.delete('asset_img');
+        this.formData.append('asset_img', blob, random);
+        this.presentLoading().then(preLoad => {
+          this.dismissloading();
+          return;
+        });
         return;
-      });
-      return;
-    }
-    if (imageno === 2) {
-      this.img2 = random;
-      this.formData.delete('asset_img2');
-      this.formData.append('asset_img2', blob, random );
-      this.presentLoading().then(preLoad => {
-        this.dismissloading();
+      }
+      if (imageno === 2) {
+        this.img2 = random;
+        this.formData.delete('asset_img2');
+        this.formData.append('asset_img2', blob, random );
+        this.presentLoading().then(preLoad => {
+          this.dismissloading();
+          return;
+        });
         return;
-      });
-      return;
-    }
-    if (imageno === 3) {
-      this.img3 = random;
-      this.formData.delete('asset_img3');
-      this.formData.append('asset_img3', blob, random);
-      this.presentLoading().then(preLoad => {
-        this.dismissloading();
+      }
+      if (imageno === 3) {
+        this.img3 = random;
+        this.formData.delete('asset_img3');
+        this.formData.append('asset_img3', blob, random);
+        this.presentLoading().then(preLoad => {
+          this.dismissloading();
+          return;
+        });
         return;
-      });
-      return;
-    }
-    if (imageno === 4) {
-      this.img4 = random;
-      this.formData.delete('pur_invoice');
-      this.formData.append('pur_invoice', blob, random);
-      this.presentLoading().then(preLoad => {
-        this.dismissloading();
+      }
+      if (imageno === 4) {
+        this.img4 = random;
+        this.formData.delete('pur_invoice');
+        this.formData.append('pur_invoice', blob, random);
+        this.presentLoading().then(preLoad => {
+          this.dismissloading();
+          return;
+        });
         return;
-      });
-      return;
-    }
-    let barcode, formData
-    barcode = this.addAsset.value.unique_no;
-    formData = new FormData();
-    formData.append('photo', blob, random);
-    formData.append('barcodeno', barcode);
-
-
-    this.presentLoading().then(preLoad => {
-      setTimeout(() => {
-        this.dismissloading();
-      }, 500)
+      }
     });
+
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   });
+    //   this.readImg(image, val)
+    // };
+    // takePicture();
   }
+
+  // async readImg(photo: any, imageno: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+
+  //   if (imageno === 1) {
+  //     this.img1 = random;
+  //     this.formData.delete('asset_img');
+  //     this.formData.append('asset_img', blob, random);
+  //     this.presentLoading().then(preLoad => {
+  //       this.dismissloading();
+  //       return;
+  //     });
+  //     return;
+  //   }
+  //   if (imageno === 2) {
+  //     this.img2 = random;
+  //     this.formData.delete('asset_img2');
+  //     this.formData.append('asset_img2', blob, random );
+  //     this.presentLoading().then(preLoad => {
+  //       this.dismissloading();
+  //       return;
+  //     });
+  //     return;
+  //   }
+  //   if (imageno === 3) {
+  //     this.img3 = random;
+  //     this.formData.delete('asset_img3');
+  //     this.formData.append('asset_img3', blob, random);
+  //     this.presentLoading().then(preLoad => {
+  //       this.dismissloading();
+  //       return;
+  //     });
+  //     return;
+  //   }
+  //   if (imageno === 4) {
+  //     this.img4 = random;
+  //     this.formData.delete('pur_invoice');
+  //     this.formData.append('pur_invoice', blob, random);
+  //     this.presentLoading().then(preLoad => {
+  //       this.dismissloading();
+  //       return;
+  //     });
+  //     return;
+  //   }
+  //   let barcode, formData
+  //   barcode = this.addAsset.value.unique_no;
+  //   formData = new FormData();
+  //   formData.append('photo', blob, random);
+  //   formData.append('barcodeno', barcode);
+
+
+  //   this.presentLoading().then(preLoad => {
+  //     setTimeout(() => {
+  //       this.dismissloading();
+  //     }, 500)
+  //   });
+  // }
 
 
   async openSiteModal() {

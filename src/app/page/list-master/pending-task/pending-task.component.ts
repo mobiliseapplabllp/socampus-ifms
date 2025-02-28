@@ -13,12 +13,13 @@ import { SiteDetailComponent } from '../../complaint/site-detail/site-detail.com
 import { TicketHistoryComponent } from '../../complaint/ticket-history/ticket-history.component';
 import { TicketTypeComponent } from '../../complaint/ticket-type/ticket-type.component';
 import { Router } from '@angular/router';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+// import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { liveQuery } from 'dexie';
 import { db } from '../../../provider/local-db/local-db.service';
 import { PtwUploadComponent } from '../../pm-cal/ptw-upload/ptw-upload.component';
 import { LogsComponent } from '../../pm-cal/logs/logs.component';
 import { CameraComponent } from 'src/app/shared/camera/camera.component';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-pending-task',
   templateUrl: './pending-task.component.html',
@@ -65,7 +66,7 @@ export class PendingTaskComponent  implements OnInit {
     private httpMeter: MeterService,
     private router: Router,
     private platform: Platform,
-    private actionSheetController: ActionSheetController
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -583,101 +584,22 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   checkPhotoCondition(dat: any, type: any) {
+    let obj: any = []
     if (dat.is_gllry_upld_allwd == 1) {
-      // this.presentActionSheet(1, dat , type);
-      this.customActionSheet(dat, type);
+      obj = ['camera', 'gallery'];
+      this.customActionSheet(obj, dat, type);
     } else if (dat.is_gllry_upld_allwd == 0) {
-      // this.presentActionSheet(0, dat , type);
-      this.openCustomCamera(dat, type);
+      obj ['camera'];
+      this.customActionSheet(obj, dat, type);
     } else {
       alert('Gallery is Undefined ' + dat.is_gllry_upld_allwd);
     }
   }
 
-  async customActionSheet(data: any, type: any) {
-    const actionSheet = await this.actionSheetController.create({
-      header: 'Choose Option',
-      cssClass: 'my-custom-class',
-      buttons: [{
-        text: 'Camera',
-        icon: 'camera-outline',
-        handler: async () => {
-          // this.openCamera('camera', val);
-          let obj = {
-            quality: 80,
-            allowEditing: false,
-            source: CameraSource.Camera,
-            resultType: CameraResultType.Uri,
-          }
-          const image = await Camera.getPhoto(obj);
-          this.readImg(image, data ,type)
-        }
-      }, {
-        text: 'Gallery',
-        icon: 'image-outline',
-        handler: async () => {
-          let obj = {
-            quality: 80,
-            allowEditing: false,
-            source: CameraSource.Photos,
-            resultType: CameraResultType.Uri,
-          }
-          const image = await Camera.getPhoto(obj);
-          this.readImg(image, data ,type)
-        }
-      }, {
-        text: 'Camera Preview',
-        icon: 'camera-reverse-outline',
-        handler: () => {
-          this.openCustomCamera(data, type);
-        }
-      }]
+  async customActionSheet(obj: any, data: any, type: any) {
+    this.camera.selectImage(obj, (blob: Blob) => {
+      this.setImage(blob, data, type);
     });
-    await actionSheet.present();
-  }
-
-  async openCustomCamera(data: any, type: string) {
-    const modal = await this.modalCtrl.create({
-      component: CameraComponent,
-      backdropDismiss:false,
-      componentProps: { }
-    });
-    modal.onWillDismiss().then(disModal => {
-      if (disModal.role) {
-        let blob = disModal.data;
-        this.setImage(blob,  data, type);
-      }
-    });
-    modal.present();
-  }
-
-  async presentActionSheet(val: any, data: any, type: any) {
-    const takePicture = async () => {
-      var obj: any = {};
-      if (val === 1) {
-        obj = {
-          quality: 80,
-          allowEditing: false,
-          resultType: CameraResultType.Uri,
-        }
-      } else {
-        obj = {
-          quality: 80,
-          allowEditing: false,
-          source: CameraSource.Camera,
-          resultType: CameraResultType.Uri,
-        }
-      }
-      const image = await Camera.getPhoto(obj);
-      this.readImg(image, data ,type)
-    };
-    takePicture();
-  }
-
-  async readImg(photo: any, data: any,type: any) {
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    this.setImage(blob, data, type);
   }
 
   setImage(blob: any, data: any, type: string) {

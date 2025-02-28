@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActionSheetController, ModalController } from '@ionic/angular';
+import { ActionSheetController, ModalController, Platform } from '@ionic/angular';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { CameraComponent } from 'src/app/shared/camera/camera.component';
 
@@ -10,9 +10,15 @@ export class CameraService {
 
   constructor(
     private modalCtrl: ModalController,
-    private actionSheetCtrl: ActionSheetController) { }
+    private actionSheetCtrl: ActionSheetController,
+    private platform: Platform) { }
 
   async selectImage(options: string[], callback: (blob: Blob) => void) {
+    if (this.platform.is('android')) {
+      options = options.map(item => (item === 'camera' ? 'outer' : item));
+    } else {
+      options = options.filter(item => item !== 'outer');
+    }
     if (options.length === 1) {
       const option = options[0];
       if (option === 'camera') {
@@ -31,18 +37,19 @@ export class CameraService {
         handler: () => this.openCamera(CameraSource.Camera, callback)
       });
     }
+    if (options.includes('outer')) {
+      actionButtons.push({
+        text: 'Camera',
+        handler: () => this.openOuterCamera(callback)
+      });
+    }
     if (options.includes('gallery')) {
       actionButtons.push({
         text: 'Gallery',
         handler: () => this.openCamera(CameraSource.Photos, callback)
       });
     }
-    if (options.includes('outer')) {
-      actionButtons.push({
-        text: 'Custom Camera',
-        handler: () => this.openOuterCamera(callback)
-      });
-    }
+
 
     const actionSheet = await this.actionSheetCtrl.create({
       header: 'Select Image Source',
