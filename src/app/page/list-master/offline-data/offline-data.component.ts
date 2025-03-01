@@ -4,7 +4,7 @@ import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { checklist, db } from '../../../provider/local-db/local-db.service';
 import { environment } from 'src/environments/environment';
-import { AlertController, LoadingController, NavController } from '@ionic/angular';
+import { AlertController, NavController } from '@ionic/angular';
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-offline-data',
@@ -19,7 +19,6 @@ export class OfflineDataComponent  implements OnInit {
   constructor(
     private common: CommonService,
     private httpDigi: DigitalChecklistService,
-    private loadingController: LoadingController,
     private httpDigital: DigitalChecklistService,
     private navCtrl: NavController,
     private alertController: AlertController,
@@ -47,7 +46,7 @@ export class OfflineDataComponent  implements OnInit {
 
   submitDc(dat: any) {
     const formData = this.convertToFormData(dat);
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpDigital.finalSubmitCheckList(formData).subscribe({
         next:(data) => {
           if (data.status) {
@@ -60,11 +59,11 @@ export class OfflineDataComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     });
@@ -118,7 +117,7 @@ export class OfflineDataComponent  implements OnInit {
       url: environment.url + 'digicheck/offlineapp/saveAllPendingChecklist',
       data: this.convertToFormData(item)
     }));
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpDigi.postDynamicData(output).subscribe({
         next:(data) => {
           for (var i = 0; i < data.length;i++) {
@@ -133,11 +132,11 @@ export class OfflineDataComponent  implements OnInit {
           }
         },
         error:(err) => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     })
@@ -182,19 +181,5 @@ export class OfflineDataComponent  implements OnInit {
       }
     }
     return formData;
-  }
-
-  async presentLoading(msg?: string) {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please Wait...',
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
   }
 }

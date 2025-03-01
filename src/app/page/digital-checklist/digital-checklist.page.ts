@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, IonDatetime, IonSlides, LoadingController, Platform } from '@ionic/angular';
+import { AlertController, IonDatetime, IonSlides, Platform } from '@ionic/angular';
 import * as moment from 'moment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
@@ -64,7 +64,6 @@ export class DigitalChecklistPage implements OnInit {
     private common: CommonService,
     private router: Router,
     private httpDigital: DigitalChecklistService,
-    private loadingController: LoadingController,
     private platform: Platform,
     private alertController: AlertController) {
   }
@@ -89,7 +88,7 @@ export class DigitalChecklistPage implements OnInit {
 
   ionViewDidLeave() {
     this.common.setBarcode('');
-    this.dismissloading();
+    this.common.dismissloading();
   }
 
   ionViewDidEnter() {
@@ -214,9 +213,9 @@ export class DigitalChecklistPage implements OnInit {
         }
         this.assignCheckList = [];
         this.attendedCheckList = [];
-        this.presentLoading('Deleteing Data from Local Database').then(preLoad => {
+        this.common.presentLoading('Deleteing Data from Local Database').then(preLoad => {
           db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
-            this.dismissloading();
+            this.common.dismissloading();
             this.offset = 0;
             this.TOTAL_CHECKLIST = 0;
             this.getOfflineCheckListFromServer(this.selectedDate, 0);
@@ -232,11 +231,11 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   checkCurrentDateDG(date: string) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
       const sub = friendsObservable.subscribe({
         next:(data) => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.allChecklist = data;
           this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
           this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
@@ -266,7 +265,7 @@ export class DigitalChecklistPage implements OnInit {
     } else {
       msg = 'Please Wait, Application is Fetching your Data ';
     }
-    this.presentLoading(msg).then(preLoad => {
+    this.common.presentLoading(msg).then(preLoad => {
       this.httpDigital.getOfflineCheckListFromServer(date, offset).subscribe({
         next:(data: any) => {
           if (data.status) {
@@ -282,11 +281,11 @@ export class DigitalChecklistPage implements OnInit {
               this.checkCurrentDateDG(this.selectedDate);
             }
           } else {
-            this.presentLoading().then(preLoad => {
+            this.common.presentLoading().then(preLoad => {
               const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
               const sub = friendsObservable.subscribe({
                 next:(data) => {
-                  this.dismissloading();
+                  this.common.dismissloading();
                   this.allChecklist = data;
                   this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
                   this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
@@ -299,11 +298,11 @@ export class DigitalChecklistPage implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
@@ -334,26 +333,6 @@ export class DigitalChecklistPage implements OnInit {
 
   openPage(url: string) {
     this.router.navigateByUrl(url);
-  }
-
-  async presentLoading(msg?: any) {
-    let message;
-    if(msg) {
-      message = msg
-    } else {
-      message = 'Please Wait.';
-    }
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: message,
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
   }
 
   changeDateComponent(ev: any) {
@@ -436,7 +415,7 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   // verifyBarcode(obj: any){
-  //   this.presentLoading().then(preLoad => {
+  //   this.common.presentLoading().then(preLoad => {
   //     this.httpDigital.verifyAssetByQr(obj).subscribe({
   //       next:(dat: any) => {
   //         if (dat.status) {
@@ -446,10 +425,10 @@ export class DigitalChecklistPage implements OnInit {
   //           this.common.presentToast(dat.msg, 'warning');
   //         }
   //       }, error:() => {
-  //         this.dismissloading();
+  //         this.common.dismissloading();
   //         this.common.presentToast(environment.errMsg, 'danger');
   //       }, complete:() => {
-  //         this.dismissloading();
+  //         this.common.dismissloading();
   //       }
   //     })
   //   })

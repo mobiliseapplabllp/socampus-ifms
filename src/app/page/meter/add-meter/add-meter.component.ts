@@ -11,7 +11,6 @@ import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.comp
 import { AssignToComponent } from '../assign-to/assign-to.component';
 import { EscalateToComponent } from '../escalate-to/escalate-to.component';
 import { CameraService } from 'src/app/provider/camera/camera.service';
-// import { Camera, CameraResultType } from '@capacitor/camera';
 @Component({
   selector: 'app-add-meter',
   templateUrl: './add-meter.component.html',

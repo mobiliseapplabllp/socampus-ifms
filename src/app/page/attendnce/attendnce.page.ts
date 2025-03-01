@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController, ModalController, NavController, Platform, ToastController } from '@ionic/angular';
+import { ModalController, NavController, Platform, ToastController } from '@ionic/angular';
 import * as moment from 'moment';
 import { AttendanceService } from 'src/app/provider/attendance/attendance.service';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -36,7 +36,6 @@ export class AttendncePage implements OnInit {
   att_id: any;
   checkLastAttendanceStatus!: boolean;
   constructor(
-    private loadingController: LoadingController,
     private modalController: ModalController,
     private common: CommonService,
     private navCtrl: NavController,
@@ -90,7 +89,7 @@ export class AttendncePage implements OnInit {
   }
 
   checkAttendance(pc_id: any) {
-    this.presentLoading().then(() => {
+    this.common.presentLoading().then(() => {
       this.httpAttendance.checkTodayAttendance(pc_id).subscribe({
         next:(data) => {
           this.checkLastAttendanceStatus = true;
@@ -107,11 +106,11 @@ export class AttendncePage implements OnInit {
         },
         error:() => {
           this.checkLastAttendanceStatus = true;
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     });
@@ -154,9 +153,9 @@ export class AttendncePage implements OnInit {
       if (val === 'OUT') {
         this.formData.append('id', this.att_id);
       }
-      this.presentLoading().then(preLoad => {
+      this.common.presentLoading().then(preLoad => {
         this.httpAttendance.punchInOutAction(this.formData).then((res: any) => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.result = res;
           if (this.result === false) {
             this.common.presentToast(environment.errMsg, 'danger');
@@ -210,9 +209,9 @@ export class AttendncePage implements OnInit {
   //     if (val === 'OUT') {
   //       this.formData.append('id', this.att_id);
   //     }
-  //     this.presentLoading().then(preLoad => {
+  //     this.common.presentLoading().then(preLoad => {
   //       this.httpAttendance.punchInOutAction(this.formData).then((res: any) => {
-  //         this.dismissloading();
+  //         this.common.dismissloading();
   //         this.result = res;
   //         if (this.result === false) {
   //           this.common.presentToast(environment.errMsg, 'danger');
@@ -232,20 +231,6 @@ export class AttendncePage implements OnInit {
   //       });
   //     });
   // }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
-  }
 
   async openRoName() {
     const modal = await this.modalController.create({

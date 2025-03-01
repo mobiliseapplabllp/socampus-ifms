@@ -1,11 +1,10 @@
 import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AlertController, LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
+import { AlertController, ModalController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { SignatureComponent } from 'src/app/shared/signature/signature.component';
 import { environment } from 'src/environments/environment';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { checklist, db } from '../../../provider/local-db/local-db.service';
@@ -45,7 +44,6 @@ export class FillReportComponent  implements OnInit {
     private httpDigital: DigitalChecklistService,
     private common: CommonService,
     private navCtrl: NavController,
-    private loadingController: LoadingController,
     private modalCtrl: ModalController,
     private platform: Platform,
     private alertController: AlertController,
@@ -202,7 +200,7 @@ export class FillReportComponent  implements OnInit {
         voiceResponse = res.matches[0].toLocaleLowerCase();
         this.listenAction(val, voiceResponse);
       } else {
-        this.presentLoading('Translate String to  English Language').then(preLoad => {
+        this.common.presentLoading('Translate String to  English Language').then(preLoad => {
           this.httpDigital.googleTranslate([voiceResponseTemp], 'en').subscribe({
             next:(translateText) => {
               voiceResponse = translateText.data.translations[0].translatedText;
@@ -210,10 +208,10 @@ export class FillReportComponent  implements OnInit {
             },
             error:() => {
               this.common.presentToast(environment.errMsg, 'danger');
-              this.dismissloading();
+              this.common.dismissloading();
             },
             complete:() => {
-              this.dismissloading();
+              this.common.dismissloading();
             }
           });
         });
@@ -390,7 +388,7 @@ export class FillReportComponent  implements OnInit {
   submitAction() {
     this.scheduleArr[0].offline_save = 'false'
     const formData = this.convertToFormData(this.scheduleArr[0]);
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpDigital.finalSubmitCheckList(formData).subscribe({
         next:(data) => {
           if (data.status) {
@@ -404,11 +402,11 @@ export class FillReportComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     })
@@ -513,7 +511,7 @@ export class FillReportComponent  implements OnInit {
   }
 
   translate(data: any, lang: string) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpDigital.googleTranslate(data, lang).subscribe({
         next:(translateText) => {
           const optionArr = translateText.data.translations.slice(-3);
@@ -534,35 +532,14 @@ export class FillReportComponent  implements OnInit {
           this.selectedLanguage = lang;
         },
         error:(err) => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToastWithOk(JSON.stringify(err), 'warning');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     });
-  }
-
-  async presentLoading(msg?: string) {
-    let message;
-    if (!msg) {
-      message = 'Please Wait...';
-    } else {
-      message = msg
-    }
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: message,
-      duration: 20000
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
   }
 
   viewDocs(obj: any, blobType: string) {
@@ -664,7 +641,7 @@ export class FillReportComponent  implements OnInit {
   }
 
   actionComplaint(formData: any) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpComplaint.createTicketAction(formData).subscribe({
         next:(data) => {
           if (data.status) {
@@ -679,18 +656,18 @@ export class FillReportComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
   }
 
   updateTicket(formData: any) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpDigital.updateTktToSchedule(formData).subscribe({
         next:(data) => {
           if (data.status) {
@@ -702,11 +679,11 @@ export class FillReportComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg + ' Err: Ticket Update API', 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     })

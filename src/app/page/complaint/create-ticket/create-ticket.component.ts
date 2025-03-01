@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
+import { ModalController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
@@ -51,7 +51,6 @@ export class CreateTicketComponent  implements OnInit {
     private httpCommon: CommonService,
     private navCtrl: NavController,
     private modalController: ModalController,
-    private loadingController: LoadingController,
     private router: Router,
     private httpAsset: MyAssetGetService,
     private camera: CameraService
@@ -130,7 +129,7 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   getLocationQrData(type: string, enc_key: string) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComp.getSiteDetailUsingBarcode(type, enc_key).subscribe({
         next:(data) => {
           if (data.status) {
@@ -170,11 +169,11 @@ export class CreateTicketComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       })
     });
@@ -201,9 +200,9 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   getIssueType() {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComp.getIssueType().subscribe(data => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         if (data.status) {
           this.allIssueType = data.data;
         }
@@ -212,7 +211,7 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   getRequestType(id: any) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComp.getRequestType(id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -222,11 +221,11 @@ export class CreateTicketComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     });
@@ -288,7 +287,7 @@ export class CreateTicketComponent  implements OnInit {
     }
     this.resetField();
     if (this.createForm.value.issue_id == 2 && this.createForm.value.pc_id) {
-      this.presentLoading().then(preLoad => {
+      this.httpCommon.presentLoading().then(preLoad => {
         this.httpComp.getQueryCategoryTicket(this.createForm.value.issue_id, this.createForm.value.pc_id).subscribe({
           next:(data) => {
             if (data.status) {
@@ -296,11 +295,11 @@ export class CreateTicketComponent  implements OnInit {
             }
           },
           error:() => {
-            this.dismissloading();
+            this.httpCommon.dismissloading();
             this.httpCommon.presentToast(environment.errMsg, 'danger');
           },
           complete:() => {
-            this.dismissloading();
+            this.httpCommon.dismissloading();
           }
         })
       });
@@ -362,9 +361,9 @@ export class CreateTicketComponent  implements OnInit {
     }
     this.createForm.get('subcat1_id')?.setValue('');
     this.createForm.get('subcat2_id')?.setValue('');
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComp.getQuerySubCat1(ev).subscribe(data => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         if (data.status) {
           this.allSubCat1 = data.data;
         }
@@ -399,9 +398,9 @@ export class CreateTicketComponent  implements OnInit {
       return;
     }
     this.createForm.get('subcat2_id')?.setValue('');
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComp.getQuerySubCat2(ev).subscribe(data => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         if (data.status) {
           this.allSubCat2 = data.data;
         }
@@ -470,9 +469,9 @@ export class CreateTicketComponent  implements OnInit {
         this.formData.append('barcodes[]', this.barcodeList[i].ext_asset_id);
       }
     }
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComp.createMultipleTicketAction(this.formData).subscribe(data => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         if(data.status) {
 
           this.openResponseModal(data.resData);
@@ -484,7 +483,7 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   ticketAction() {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComp.createTicketAction(this.formData).subscribe({
         next:(data) => {
           if (data.status) {
@@ -495,11 +494,11 @@ export class CreateTicketComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'warning');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     })
@@ -534,8 +533,8 @@ export class CreateTicketComponent  implements OnInit {
       this.formData.delete('img[]');
       this.formData.append('img[]', blob, random);
       this.fileName = random
-      this.presentLoading().then(preLoad => {
-        this.dismissloading();
+      this.httpCommon.presentLoading().then(preLoad => {
+        this.httpCommon.dismissloading();
       })
     });
   }
@@ -547,8 +546,8 @@ export class CreateTicketComponent  implements OnInit {
   //   this.formData.delete('img[]');
   //   this.formData.append('img[]', blob, random);
   //   this.fileName = random
-  //   this.presentLoading().then(preLoad => {
-  //     this.dismissloading();
+  //   this.httpCommon.presentLoading().then(preLoad => {
+  //     this.httpCommon.dismissloading();
   //   })
   // }
 
@@ -560,18 +559,6 @@ export class CreateTicketComponent  implements OnInit {
       this.formData.append('img[]', file, random);
       this.fileName = 'a.png';
     }
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    this.loading.dismiss();
   }
 
   async openRoName() {
@@ -640,7 +627,7 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   getBlock(id: any) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpAsset.getBlock(id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -651,10 +638,10 @@ export class CreateTicketComponent  implements OnInit {
         },
         error:() => {
           this.httpCommon.presentToast(environment.errMsg, 'danger');
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     })
@@ -664,7 +651,7 @@ export class CreateTicketComponent  implements OnInit {
 
 
   // getBuilding(id: any) {
-  //   this.presentLoading().then(preLoad => {
+  //   this.httpCommon.presentLoading().then(preLoad => {
   //     this.httpComp.getBuildingList(id).subscribe({
   //       next:(data: any) => {
   //         if (data.status) {
@@ -674,11 +661,11 @@ export class CreateTicketComponent  implements OnInit {
   //         }
   //       },
   //       error:() => {
-  //         this.dismissloading();
+  //         this.httpCommon.dismissloading();
   //         this.httpCommon.presentToast(environment.errMsg, 'danger');
   //       },
   //       complete:() => {
-  //         this.dismissloading();
+  //         this.httpCommon.dismissloading();
   //       }
   //     })
   //   })
@@ -693,7 +680,7 @@ export class CreateTicketComponent  implements OnInit {
   // }
 
   // getFloorList(id: any) {
-  //   this.presentLoading().then(preLoad => {
+  //   this.httpCommon.presentLoading().then(preLoad => {
   //     this.httpComp.getFloorList(id).subscribe({
   //       next:(data: any) => {
   //         if (data.status) {
@@ -703,11 +690,11 @@ export class CreateTicketComponent  implements OnInit {
   //         }
   //       },
   //       error:() => {
-  //         this.dismissloading();
+  //         this.httpCommon.dismissloading();
   //         this.httpCommon.presentToast(environment.errMsg, 'danger');
   //       },
   //       complete:() => {
-  //         this.dismissloading();
+  //         this.httpCommon.dismissloading();
   //       }
   //     })
   //   })
@@ -750,7 +737,7 @@ export class CreateTicketComponent  implements OnInit {
   // }
 
   // getLocation(id: any) {
-  //   this.presentLoading().then(preLoad => {
+  //   this.httpCommon.presentLoading().then(preLoad => {
   //     this.httpComp.getLocationList(id).subscribe({
   //       next:(data) => {
   //         if (data.status) {
@@ -760,11 +747,11 @@ export class CreateTicketComponent  implements OnInit {
   //         }
   //       },
   //       error:() => {
-  //         this.dismissloading();
+  //         this.httpCommon.dismissloading();
   //         this.httpCommon.presentToast(environment.errMsg, 'danger');
   //       },
   //       complete:() => {
-  //         this.dismissloading();
+  //         this.httpCommon.dismissloading();
   //       }
   //     })
   //   })
@@ -808,12 +795,12 @@ export class CreateTicketComponent  implements OnInit {
       },
       error:() => {
         this.isSearchBarcode = false;
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         this.httpCommon.presentToast(environment.errMsg, 'danger');
       },
       complete:() => {
         this.isSearchBarcode = false;
-        this.dismissloading();
+        this.httpCommon.dismissloading();
       }
     });
   }

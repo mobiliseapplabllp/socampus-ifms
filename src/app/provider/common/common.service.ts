@@ -146,9 +146,15 @@ export class CommonService {
     return await modal.present();
   }
 
-  async presentLoading() {
+  async presentLoading(msg?: string) {
+    let message;
+    if(msg) {
+      message = msg
+    } else {
+      message = 'Please Wait.';
+    }
     this.loading = await this.loadingController.create({
-      message: 'Please wait...',
+      message: message,
     });
     await this.loading.present();
   }

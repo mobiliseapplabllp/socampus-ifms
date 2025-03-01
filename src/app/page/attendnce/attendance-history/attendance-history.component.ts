@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { AttendanceService } from 'src/app/provider/attendance/attendance.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
@@ -34,14 +34,13 @@ export class AttendanceHistoryComponent  implements OnInit {
   constructor(
     private httpAttendance: AttendanceService,
     private httpCommon: CommonService,
-    private loadingController: LoadingController,
     private modalController: ModalController
   ) { }
 
   ngOnInit() { }
 
   ionViewDidLeave() {
-    this.dismissloading();
+    this.httpCommon.dismissloading();
   }
 
   ionViewDidEnter() {
@@ -52,9 +51,9 @@ export class AttendanceHistoryComponent  implements OnInit {
     if (!this.pc_id || !this.currentMonth) {
       return;
     }
-    this.presentLoading().then(load => {
+    this.httpCommon.presentLoading().then(load => {
       this.httpAttendance.getAttendanceHistory(this.currentMonth, this.pc_id).subscribe(data => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         this.result = data;
         if (this.result.status == true) {
           this.myAttendance = this.result.data;
@@ -65,22 +64,10 @@ export class AttendanceHistoryComponent  implements OnInit {
           this.httpCommon.presentToast(this.result.msg, 'warning');
         }
       }, err => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         this.httpCommon.presentToast(environment.errMsg, 'danger');
       });
     });
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    this.loading.dismiss();
   }
 
   expand(data: any, index: any) {

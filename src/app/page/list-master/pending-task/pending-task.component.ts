@@ -1,5 +1,5 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { ActionSheetController, LoadingController, ModalController, Platform } from '@ionic/angular';
+import { Component, Input, OnInit } from '@angular/core';
+import { ModalController, Platform } from '@ionic/angular';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -13,12 +13,10 @@ import { SiteDetailComponent } from '../../complaint/site-detail/site-detail.com
 import { TicketHistoryComponent } from '../../complaint/ticket-history/ticket-history.component';
 import { TicketTypeComponent } from '../../complaint/ticket-type/ticket-type.component';
 import { Router } from '@angular/router';
-// import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { liveQuery } from 'dexie';
 import { db } from '../../../provider/local-db/local-db.service';
 import { PtwUploadComponent } from '../../pm-cal/ptw-upload/ptw-upload.component';
 import { LogsComponent } from '../../pm-cal/logs/logs.component';
-import { CameraComponent } from 'src/app/shared/camera/camera.component';
 import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-pending-task',
@@ -57,7 +55,6 @@ export class PendingTaskComponent  implements OnInit {
   isCloseAction = false;
   selectedCancel: any = [];
   constructor(
-    private loadingController: LoadingController,
     private httpCompalint: ComplaintService,
     private common: CommonService,
     private httpDigital: DigitalChecklistService,
@@ -88,54 +85,101 @@ export class PendingTaskComponent  implements OnInit {
       this.getData();
     }
     if (this.didEnter) {
-      let split, ecn_key, val ,bar = this.common.getBarcode();
+      const barcode = this.common.getBarcode();
+
+    if (barcode) {
       this.common.setBarcode('');
-      if (bar && this.qrType === 'verify') {
-        this.qrType = '';
-        split = bar.split('/');
-        if (split.length === 6) {
-          ecn_key = split[5];
-          val = this.common.decryptValue(ecn_key);
-          if (this.qrObject.barcode === val) {
+
+      const split = barcode.split('/');
+      const ecnKey = split[split.length - 1];
+      const decryptedValue = this.common.decryptValue(ecnKey);
+
+      switch (this.qrType) {
+        case 'verify':
+          this.qrType = '';
+          if (this.qrObject.barcode === decryptedValue) {
             this.openFillReport(this.qrObject);
           } else {
-            this.common.presentToastWithOk('You are Scan Wrong QR Code ' + val, 'warning');
+            this.common.presentToastWithOk(`You scanned the wrong QR Code: ${decryptedValue}`, 'warning');
           }
-        } else {
-          this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-        }
-      } else if (bar && this.qrType === 'verify_meter') {
-        split = bar.split('/');
-        ecn_key = split[split.length - 1];
-        val = this.common.decryptValue(ecn_key);
-        if (this.qrObject.ext_id === val) {
-          this.qrObject.isQrVerify = true;
-        } else {
-          this.common.presentToastWithOk(`You are Scanning Wrong QR Code. ${val}`, 'warning');
-        }
-      } else if (bar && this.qrType === 'pms') {
-        split = bar.split('/');
-        ecn_key = split[split.length - 1];
-        val = this.common.decryptValue(ecn_key);
-        if (this.qrObject.ext_asset_id === val) {
-          this.openFillReportPms(this.qrObject);
-        } else {
-          this.common.presentToastWithOk(`You are Scanning Wrong Asset QR Code. ${val}`, 'warning');
-        }
-      } else if (bar && this.qrType === 'loc-verify') {
-        split = bar.split('/');
-        if (split.length === 6) {
-          ecn_key = split[5];
-          let val = this.common.decryptValue(ecn_key);
-          if (this.qrObject.loc_id === parseInt(val, 10)) {
+          break;
+
+        case 'verify_meter':
+          if (this.qrObject.ext_id === decryptedValue) {
+            this.qrObject.isQrVerify = true;
+          } else {
+            this.common.presentToastWithOk(`You scanned the wrong QR Code: ${decryptedValue}`, 'warning');
+          }
+          break;
+
+        case 'pms':
+          if (this.qrObject.ext_asset_id === decryptedValue) {
+            this.openFillReportPms(this.qrObject);
+          } else {
+            this.common.presentToastWithOk(`You scanned the wrong asset QR Code: ${decryptedValue}`, 'warning');
+          }
+          break;
+
+        case 'loc-verify':
+          if (this.qrObject.loc_id === parseInt(decryptedValue, 10)) {
             this.openFillReport(this.qrObject);
           } else {
-            this.common.presentToast('You are Scan Wrong Location QR Code ' + val, 'warning');
+            this.common.presentToast(`You scanned the wrong location QR Code: ${decryptedValue}`, 'warning');
           }
-        } else {
-          this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-        }
+          break;
+
+        default:
+          this.common.presentToast('Unknown QR Type', 'warning');
       }
+    }
+
+
+      // if (bar && this.qrType === 'verify') {
+      //   this.qrType = '';
+      //   split = bar.split('/');
+      //   if (split.length === 6) {
+      //     ecn_key = split[5];
+      //     val = this.common.decryptValue(ecn_key);
+      //     if (this.qrObject.barcode === val) {
+      //       this.openFillReport(this.qrObject);
+      //     } else {
+      //       this.common.presentToastWithOk('You are Scan Wrong QR Code ' + val, 'warning');
+      //     }
+      //   } else {
+      //     this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+      //   }
+      // } else if (bar && this.qrType === 'verify_meter') {
+      //   split = bar.split('/');
+      //   ecn_key = split[split.length - 1];
+      //   val = this.common.decryptValue(ecn_key);
+      //   if (this.qrObject.ext_id === val) {
+      //     this.qrObject.isQrVerify = true;
+      //   } else {
+      //     this.common.presentToastWithOk(`You are Scanning Wrong QR Code. ${val}`, 'warning');
+      //   }
+      // } else if (bar && this.qrType === 'pms') {
+      //   split = bar.split('/');
+      //   ecn_key = split[split.length - 1];
+      //   val = this.common.decryptValue(ecn_key);
+      //   if (this.qrObject.ext_asset_id === val) {
+      //     this.openFillReportPms(this.qrObject);
+      //   } else {
+      //     this.common.presentToastWithOk(`You are Scanning Wrong Asset QR Code. ${val}`, 'warning');
+      //   }
+      // } else if (bar && this.qrType === 'loc-verify') {
+      //   split = bar.split('/');
+      //   if (split.length === 6) {
+      //     ecn_key = split[5];
+      //     let val = this.common.decryptValue(ecn_key);
+      //     if (this.qrObject.loc_id === parseInt(val, 10)) {
+      //       this.openFillReport(this.qrObject);
+      //     } else {
+      //       this.common.presentToast('You are Scan Wrong Location QR Code ' + val, 'warning');
+      //     }
+      //   } else {
+      //     this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+      //   }
+      // }
     }
   }
 
@@ -173,11 +217,11 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   checkCurrentDateDG(date: string) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
       const sub = friendsObservable.subscribe({
         next:(data) => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.allChecklist = data;
           this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
           this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
@@ -206,7 +250,7 @@ export class PendingTaskComponent  implements OnInit {
     } else {
       msg = 'Please Wait, Application is Fetching your Data ';
     }
-    this.presentLoading(msg).then(preLoad => {
+    this.common.presentLoading(msg).then(preLoad => {
       this.httpDigital.getOfflineCheckListFromServer(date, offset).subscribe({
         next:(data: any) => {
           if (data.status) {
@@ -222,11 +266,11 @@ export class PendingTaskComponent  implements OnInit {
               this.checkCurrentDateDG(date);
             }
           } else {
-            this.presentLoading().then(preLoad => {
+            this.common.presentLoading().then(preLoad => {
               const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
               const sub = friendsObservable.subscribe({
                 next:(data) => {
-                  this.dismissloading();
+                  this.common.dismissloading();
                   this.allChecklist = data;
                   this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
                   this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
@@ -239,11 +283,11 @@ export class PendingTaskComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
@@ -273,12 +317,12 @@ export class PendingTaskComponent  implements OnInit {
         // }
       },
       error:() => {
-        this.dismissloading();
+        this.common.dismissloading();
         this.common.presentToast(environment.errMsg, 'warning');
       },
       complete:() => {
         this.isPendingTicketLoad = true;
-        this.dismissloading();
+        this.common.dismissloading();
       }
     });
   }
@@ -304,7 +348,7 @@ export class PendingTaskComponent  implements OnInit {
   fsr(ticket_id: number) {}
 
   async work_now(allData: any) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpCompalint.checkTicketConfirm(allData.tkts_id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -314,11 +358,11 @@ export class PendingTaskComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     });
@@ -357,7 +401,7 @@ export class PendingTaskComponent  implements OnInit {
     this.allChecklist = [];
     this.assignCheckList = [];
     this.attendedCheckList = [];
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpDigital.getScheduleHistory(date).subscribe({
         next:(data) => {
           if (data.status) {
@@ -369,18 +413,18 @@ export class PendingTaskComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger')
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
   }
 
   getPendingPms(){
-    this.presentLoading().then(() => {
+    this.common.presentLoading().then(() => {
       this.httpPm.getPm(1, 1).subscribe({
         next:(dat) => {
           if (dat.status) {
@@ -392,12 +436,12 @@ export class PendingTaskComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'warning');
         },
         complete:() => {
           this.pmsListLoad = true;
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     });
@@ -460,37 +504,11 @@ export class PendingTaskComponent  implements OnInit {
     });
   }
 
-  // openFillReport(data: any) {
-  //   const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
-  //   const currentDate = moment(moment().format('YYYY-MM-DD'));
-  //   if (!currentDate.isSame(pastDate)) {
-  //     this.common.presentToast('You can fill only Current Date Checklist', 'warning');
-  //     return;
-  //   }
-  //   const pastDateTime = moment(data.sch_dateTime);
-  //   const currentDateTime = moment();
-  //   const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
-  //   if (!isCurrentDatetimeBigger) {
-  //     this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
-  //     return;
-  //   }
-  //   this.openPageUrl(data);
-  // }
-
-  // openPageUrl(data: any) {
-  //   this.router.navigate(['/digital-checklist/fill-report/'], {
-  //     queryParams: {
-  //       isOnBehalf: 0,
-  //       schedule_id: data.schedule_id
-  //     }
-  //   });
-  // }
-
   async uploadPtw(dat: any) {
     const modal = await this.modalCtrl.create({
       component: PtwUploadComponent,
       cssClass: 'my-modal-ptw',
-      initialBreakpoint: 1, // Set to 50% of the screen height
+      initialBreakpoint: 1,
       breakpoints: [1],
       componentProps : {
         data: dat
@@ -509,7 +527,7 @@ export class PendingTaskComponent  implements OnInit {
   // }
 
   getPendingMeter() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpMeter.getPendingWo().subscribe({
         next:(data) => {
           if (data.status) {
@@ -519,11 +537,11 @@ export class PendingTaskComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.meterInfoLoad = true;
         }
       });
@@ -559,7 +577,7 @@ export class PendingTaskComponent  implements OnInit {
       return;
     }
 
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpPm.closePms(submitObj).subscribe({
         next:(data: any) => {
           if (data.status) {
@@ -572,11 +590,11 @@ export class PendingTaskComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
@@ -632,9 +650,9 @@ export class PendingTaskComponent  implements OnInit {
         }
       }
     }
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       setTimeout(() => {
-        this.dismissloading();
+        this.common.dismissloading();
       }, 500)
     })
   }
@@ -699,15 +717,6 @@ export class PendingTaskComponent  implements OnInit {
     } else {
       return true;
     }
-    // if (!dat.consumption_reading) {
-    //   alert('Please Enter Consumption Reading');
-    //   return false;
-    // } else if (dat.is_img_req == 1 && !dat.isConsumptionImg) {
-    //   alert('Consumption Image is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
 
   checkGenertionCondition(dat: any) {
@@ -723,15 +732,6 @@ export class PendingTaskComponent  implements OnInit {
     } else {
       return true;
     }
-    // if (!dat.generate_reading) {
-    //   alert('Please Enter Generate Reading');
-    //   return false;
-    // } else if (dat.is_img_req == 1 && !dat.isGenerationImg) {
-    //   alert('Generation Image is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
 
   checkOtherCondition(dat: any) {
@@ -747,21 +747,14 @@ export class PendingTaskComponent  implements OnInit {
     } else {
       return true;
     }
-    // if (!dat.other_reading && dat.oth_read == 1) {
-    //   alert('Other Reading is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
-
 
   save(obj: any, dat: any) {
     for (let key in obj) {
       this.formData.delete(key);
       this.formData.append(key, obj[key]);
     }
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpMeter.updateReading(this.formData).subscribe({
         next:(data) => {
           if (data.status) {
@@ -777,10 +770,10 @@ export class PendingTaskComponent  implements OnInit {
         },
         error:() => {
           this.common.presentToast(environment.errMsg, 'danger');
-          this.dismissloading();
+          this.common.dismissloading();
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     })
@@ -791,7 +784,7 @@ export class PendingTaskComponent  implements OnInit {
       if (data.ext_asset_id) {
         this.qrType = 'pms';
         this.qrObject = data;
-        this.openBarcodePage(data)
+        this.router.navigateByUrl('/barcode');
       } else {
         this.openFillReportPms(data);
       }
@@ -799,11 +792,6 @@ export class PendingTaskComponent  implements OnInit {
       this.openFillReportPms(data);
     }
   }
-
-  openBarcodePage(data: any) {
-    this.router.navigateByUrl('/barcode');
-  }
-
 
   openFillReportPms(dat: any) {
     this.router.navigate(['/pm-calibration/pm-report'], {
@@ -813,31 +801,18 @@ export class PendingTaskComponent  implements OnInit {
     });
   }
 
-  //   openFillReport(data: any) {
-  //   if (data.ext_asset_id) {
-  //     this.selectedObj = data;
-  //     this.openBarcode(data)
-  //   } else {
-  //     this.openPage(data);
-  //   }
+  // openPage(data: any) {
+  //   this.router.navigate(['/pm-calibration/pm-report'], {
+  //     queryParams: {
+  //       data: JSON.stringify(data),
+  //     }
+  //   });
   // }
-
-  // openBarcode(data: any) {
-  //   this.router.navigateByUrl('/barcode');
-  // }
-
-  openPage(data: any) {
-    this.router.navigate(['/pm-calibration/pm-report'], {
-      queryParams: {
-        data: JSON.stringify(data),
-      }
-    });
-  }
 
   changePendingTask() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.pendingTask = !this.pendingTask;
-      this.dismissloading();
+      this.common.dismissloading();
     })
   }
 
@@ -904,9 +879,8 @@ export class PendingTaskComponent  implements OnInit {
     this.logs = [];
   }
 
-
   getPpmPending(id: any) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpPm.PpmPtwApproval(id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -941,11 +915,11 @@ export class PendingTaskComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     })
@@ -955,23 +929,4 @@ export class PendingTaskComponent  implements OnInit {
 
   }
 
-  async presentLoading(msg?: string) {
-    let message;
-    if (msg) {
-      message = msg;
-    } else {
-      message = 'Please Wait'
-    }
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: message,
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
-  }
 }

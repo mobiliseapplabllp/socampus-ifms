@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, NavController } from '@ionic/angular';
+import { NavController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { environment } from 'src/environments/environment';
@@ -31,21 +31,20 @@ export class ForgotPasswordPage implements OnInit {
   pageStatus = 1;
   animation = false;
   constructor(
-    private loadingController: LoadingController,
     private httpLogin: LoginService,
     private httpNotify: CommonService,
-    private navCtrl: NavController
-  ) {}
+    private navCtrl: NavController,
+    private common: CommonService) {}
 
   ngOnInit() {
 
   }
 
   sendOtp() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.isOtpSent = false;
       this.httpLogin.forgotPass(this.empid).then(res => {
-        this.dismissloading();
+        this.common.dismissloading();
         this.result = res;
         if (this.result === false) {
           this.httpNotify.presentToast(environment.errMsg, 'danger');
@@ -76,9 +75,9 @@ export class ForgotPasswordPage implements OnInit {
 
   validateOtp() {
     this.isNewPass = false;
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpLogin.validateOtp(this.empid, this.myOtp).then((res: any) => {
-        this.dismissloading();
+        this.common.dismissloading();
         this.result = res;
         if (this.result === false) {
           this.httpNotify.presentToast(environment.errMsg, 'danger');
@@ -105,27 +104,14 @@ export class ForgotPasswordPage implements OnInit {
     this.navCtrl.pop();
   }
 
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      message: 'Please wait...',
-    });
-    await this.loading.present();
-  }
-
-  dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
-  }
-
   changePass() {
     this.confirmPassword = '';
   }
 
   changePassword() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpLogin.changePassword(this.empid, this.myOtp, this.newPassword).then(res => {
-        this.dismissloading();
+        this.common.dismissloading();
         this.result = res;
         if (this.result === false) {
           this.httpNotify.presentToast(environment.errMsg, 'danger');

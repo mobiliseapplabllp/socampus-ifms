@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { CameraService } from 'src/app/provider/camera/camera.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
-// import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 @Component({
   selector: 'app-travel-detail',
   templateUrl: './travel-detail.component.html',
@@ -26,7 +25,6 @@ export class TravelDetailComponent  implements OnInit {
   constructor(
     private modalCtrl: ModalController,
     private httpComplaint: ComplaintService,
-    private loadingController: LoadingController,
     private common: CommonService,
     private camera: CameraService
   ) { }
@@ -36,7 +34,7 @@ export class TravelDetailComponent  implements OnInit {
   }
 
   getTravelType() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpComplaint.getTravelType(this.tkts_id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -49,11 +47,11 @@ export class TravelDetailComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
@@ -61,20 +59,6 @@ export class TravelDetailComponent  implements OnInit {
 
   changeTravel(ev: any) {
     this.selectedTravel = this.travelMode.filter((val: any) => val.value === ev.target.value)[0];
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
   }
 
   closeModal(data: any, status: any) {
@@ -103,8 +87,8 @@ export class TravelDetailComponent  implements OnInit {
         this.formData.delete('travelImg2');
         this.formData.append('travelImg2', blob, random );
       }
-      this.presentLoading().then(preLoad => {
-        this.dismissloading();
+      this.common.presentLoading().then(preLoad => {
+        this.common.dismissloading();
       });
     });
   }
@@ -122,8 +106,8 @@ export class TravelDetailComponent  implements OnInit {
   //     this.formData.delete('travelImg2');
   //     this.formData.append('travelImg2', blob, random );
   //   }
-  //   this.presentLoading().then(preLoad => {
-  //     this.dismissloading();
+  //   this.common.presentLoading().then(preLoad => {
+  //     this.common.dismissloading();
   //   });
   // }
 
@@ -150,7 +134,7 @@ export class TravelDetailComponent  implements OnInit {
       this.formData.append('startTravel', '1');
       this.formData.append('ticketId', this.tkts_id);
       this.formData.append('travelNote', this.travelNote);
-      this.presentLoading().then(preLoad => {
+      this.common.presentLoading().then(preLoad => {
         this.httpComplaint.submitTravelInfo(this.formData).subscribe({
           next:(data) => {
             if(data.status) {
@@ -162,11 +146,11 @@ export class TravelDetailComponent  implements OnInit {
             }
           },
           error:() => {
-            this.dismissloading();
+            this.common.dismissloading();
             this.common.presentToast(environment.errMsg, 'danger');
           },
           complete:() => {
-            this.dismissloading();
+            this.common.dismissloading();
           }
         })
       });

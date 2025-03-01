@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ListMasterService } from 'src/app/provider/list-master/list-master.service';
 
@@ -41,7 +40,6 @@ export class MenuComponent  implements OnInit {
   isQrScanning = false;
   isInternet!: boolean;
   constructor(
-    private loadingController: LoadingController,
     private httpList: ListMasterService,
     private router: Router,
     private common: CommonService,
@@ -74,16 +72,16 @@ export class MenuComponent  implements OnInit {
   }
 
   getMenuDetail() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpList.getMenuDetail().then(data => {
-        this.dismissloading();
+        this.common.dismissloading();
         this.result = data;
         if (this.result.status == true) {
           this.chunkedArray(this.result.data[0].submenu)
           localStorage.setItem('home_menu', JSON.stringify(this.result.data[0].submenu));
         }
       }, err => {
-        this.dismissloading();
+        this.common.dismissloading();
       });
     });
   }
@@ -102,20 +100,6 @@ export class MenuComponent  implements OnInit {
     this.menuNew = [];
     for (var i = 0 ; i < this.menuTemp.length; i++) {
       this.menuNew.push({menu: this.menuTemp[i]});
-    }
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...',
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
     }
   }
 

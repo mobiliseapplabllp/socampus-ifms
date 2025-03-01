@@ -6,7 +6,6 @@ import { CameraService } from 'src/app/provider/camera/camera.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { environment } from 'src/environments/environment';
-// import { Camera, CameraResultType } from '@capacitor/camera';
 @Component({
   selector: 'app-add-response',
   templateUrl: './add-response.component.html',
