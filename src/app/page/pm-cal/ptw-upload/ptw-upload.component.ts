@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { LoadingController, ModalController } from '@ionic/angular';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { environment } from 'src/environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-ptw-upload',
   templateUrl: './ptw-upload.component.html',
@@ -20,7 +20,8 @@ export class PtwUploadComponent  implements OnInit {
     private modalCtrl: ModalController,
     private loadingController: LoadingController,
     private common: CommonService,
-    private httpPms: PmCalService
+    private httpPms: PmCalService,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {}
@@ -30,23 +31,15 @@ export class PtwUploadComponent  implements OnInit {
   }
 
   async presentActionSheet() {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image)
-    };
-    takePicture();
+    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
+      this.readImg(blob)
+    });
   }
 
   async readImg(photo: any) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     this.formData.delete('attach');
-    this.formData.append('attach', blob, random);
+    this.formData.append('attach', photo, random);
     this.img_temp = random;
     this.doc_temp = '';
   }

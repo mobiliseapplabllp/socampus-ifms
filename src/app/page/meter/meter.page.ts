@@ -4,9 +4,9 @@ import { ModalController, LoadingController, Platform } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { MeterService } from 'src/app/provider/meter/meter.service';
 import { last } from 'rxjs';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-meter',
   templateUrl: './meter.page.html',
@@ -25,7 +25,8 @@ export class MeterPage implements OnInit {
     private common: CommonService,
     private loadingController: LoadingController,
     private httpMeter: MeterService,
-    private platform: Platform
+    private platform: Platform,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -291,32 +292,19 @@ export class MeterPage implements OnInit {
   }
 
   async presentActionSheet(val: any, data: any, type: any) {
-    const takePicture = async () => {
-      var obj: any = {};
-      if (val === 1) {
-        obj = {
-          quality: 80,
-          allowEditing: false,
-          resultType: CameraResultType.Uri,
-        }
-      } else {
-        obj = {
-          quality: 80,
-          allowEditing: false,
-          source: CameraSource.Camera,
-          resultType: CameraResultType.Uri,
-        }
-      }
-      const image = await Camera.getPhoto(obj);
-      this.readImg(image, data ,type)
-    };
-    takePicture();
+    let obj: any = [];
+    if (val === 1) {
+      obj = ['camera', 'gallery'];
+    } else {
+      obj = ['camera'];
+    }
+    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
+      this.readImg(blob, data ,type)
+    });
   }
 
-  async readImg(photo: any, data: any,type: any) {
+  async readImg(blob: any, data: any,type: any) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     if (type == 'consumption') {
         this.formData.delete('img1');
         this.formData.append('img1', blob, random);

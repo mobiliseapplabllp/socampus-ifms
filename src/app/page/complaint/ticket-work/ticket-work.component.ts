@@ -5,13 +5,13 @@ import { ActionSheetController, AlertController, LoadingController, ModalControl
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { SignatureComponent } from 'src/app/shared/signature/signature.component';
 import { InstructionModalComponent } from '../instruction-modal/instruction-modal.component';
 import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
 import { Filesystem } from '@capacitor/filesystem';
 import { CaptureComponent } from 'src/app/shared/capture/capture.component';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 
 @Component({
   selector: 'app-ticket-work',
@@ -73,6 +73,7 @@ export class TicketWorkComponent  implements OnInit {
     private loadingController: LoadingController,
     private mediaCapture: MediaCapture,
     private modalController: ModalController,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -490,28 +491,20 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   async presentActionSheet(val: string) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image, val)
-    };
-    takePicture();
+    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
+      this.readImg(blob, val);
+    });
   }
 
   async readImg(photo: any, val: string) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     if (val === 'image') {
       this.formData.delete('img[]');
-      this.formData.append('img[]', blob, random);
+      this.formData.append('img[]', photo, random);
       this.fileName = random;
     } else if (val === 'ppe') {
       this.formData.delete('ppeKitAttach');
-      this.formData.append('ppeKitAttach', blob, random);
+      this.formData.append('ppeKitAttach', photo, random);
       this.ppeFileName = random;
     }
 

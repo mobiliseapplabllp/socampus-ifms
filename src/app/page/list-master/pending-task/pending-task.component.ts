@@ -13,11 +13,11 @@ import { SiteDetailComponent } from '../../complaint/site-detail/site-detail.com
 import { TicketHistoryComponent } from '../../complaint/ticket-history/ticket-history.component';
 import { TicketTypeComponent } from '../../complaint/ticket-type/ticket-type.component';
 import { Router } from '@angular/router';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { liveQuery } from 'dexie';
 import { db } from '../../../provider/local-db/local-db.service';
 import { PtwUploadComponent } from '../../pm-cal/ptw-upload/ptw-upload.component';
 import { LogsComponent } from '../../pm-cal/logs/logs.component';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-pending-task',
   templateUrl: './pending-task.component.html',
@@ -57,7 +57,8 @@ export class PendingTaskComponent  implements OnInit {
     private modalCtrl: ModalController,
     private httpMeter: MeterService,
     private router: Router,
-    private platform: Platform
+    private platform: Platform,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -530,32 +531,20 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   async presentActionSheet(val: any, data: any, type: any) {
-    const takePicture = async () => {
-      var obj: any = {};
-      if (val === 1) {
-        obj = {
-          quality: 80,
-          allowEditing: false,
-          resultType: CameraResultType.Uri,
-        }
-      } else {
-        obj = {
-          quality: 80,
-          allowEditing: false,
-          source: CameraSource.Camera,
-          resultType: CameraResultType.Uri,
-        }
-      }
-      const image = await Camera.getPhoto(obj);
-      this.readImg(image, data ,type)
-    };
-    takePicture();
+    let obj: any = [];
+    if (val === 1) {
+      obj = ['camera', 'gallery'];
+    } else {
+      obj = ['camera'];
+    }
+    this.camera.selectImage(obj, (blob: Blob) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+      this.readImg(blob, data ,type)
+    });
   }
 
-  async readImg(photo: any, data: any,type: any) {
+  async readImg(blob: any, data: any,type: any) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     if (type == 'consumption') {
       this.formData.delete('img1');
       this.formData.append('img1', blob, random);

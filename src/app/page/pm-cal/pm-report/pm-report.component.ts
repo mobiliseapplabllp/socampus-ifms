@@ -4,10 +4,10 @@ import { AlertController, LoadingController, NavController, Platform } from '@io
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { environment } from 'src/environments/environment';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-pm-report',
   templateUrl: './pm-report.component.html',
@@ -33,7 +33,8 @@ export class PmReportComponent  implements OnInit {
     private navCtrl: NavController,
     private common: CommonService,
     private httpDigital: DigitalChecklistService,
-    private platform: Platform) {
+    private platform: Platform,
+    private camera: CameraService) {
 
   }
 
@@ -306,32 +307,19 @@ export class PmReportComponent  implements OnInit {
   }
 
   async presentActionSheet(val: any, ind: any) {
-    var obj: any = {}
+    let obj: any = [];
     if (ind === 1) {
-      obj = {
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      }
+      obj = ['camera', 'gallery'];
     } else {
-      obj = {
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera,
-      }
+      obj = ['camera']
     }
-    const takePicture = async () => {
-      const image = await Camera.getPhoto(obj);
-      this.readImg(image, val)
-    };
-    takePicture();
+    this.camera.selectImage(obj, (blob: Blob) => {
+      this.readImg(blob, val)
+    });
   }
 
-  async readImg(photo: any, data: any) {
+  async readImg(blob: any, data: any) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     let formData = new FormData();
     formData.append('wo_id', this.requestedData.wo_id);
     formData.append('q_id',  data.q_id);

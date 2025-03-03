@@ -6,9 +6,9 @@ import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
 import { environment } from 'src/environments/environment';
 import { PmAssignComponent } from './pm-assign/pm-assign.component';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { PtwUploadComponent } from './ptw-upload/ptw-upload.component';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-pm-cal',
   templateUrl: './pm-cal.page.html',
@@ -49,7 +49,8 @@ export class PmCalPage implements OnInit {
     private modalCtrl: ModalController,
     private router: Router,
     private httpDigital: DigitalChecklistService,
-    private platform: Platform
+    private platform: Platform,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -316,21 +317,13 @@ export class PmCalPage implements OnInit {
   }
 
   async presentActionSheet(data: any) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image, data)
-    };
-    takePicture();
+    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
+      this.readImg(blob, data)
+    });
   }
 
-  async readImg(photo: any, data: any) {
+  async readImg(blob: any, data: any) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     let formData = new FormData();
       formData.append('attach', blob, random);
       formData.append('id', data.id)

@@ -7,7 +7,7 @@ import { CommonService } from 'src/app/provider/common/common.service';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
 import { environment } from 'src/environments/environment';
 import { Geolocation } from '@capacitor/geolocation';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 declare var google: any;
 @Component({
   selector: 'app-attendnce',
@@ -42,7 +42,8 @@ export class AttendncePage implements OnInit {
     private navCtrl: NavController,
     private router: Router,
     private httpAttendance: AttendanceService,
-    private platform: Platform
+    private platform: Platform,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -133,22 +134,13 @@ export class AttendncePage implements OnInit {
   }
 
   async presentActionSheet(val: any) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 70,
-        allowEditing: false,
-        source: CameraSource.Camera,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image, val)
-    };
-    takePicture();
+    this.camera.selectImage(['camera'], (blob: Blob) => {
+      this.readImg(blob, val);
+    });
   }
 
   async readImg(photo: any, val: any) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
       this.formData.delete('photo',);
       this.formData.delete('emp_id');
       this.formData.delete('att_date');
@@ -157,7 +149,7 @@ export class AttendncePage implements OnInit {
       this.formData.delete('att_time');
       this.formData.delete('att_type');
 
-      this.formData.append('photo', blob, random);
+      this.formData.append('photo', photo, random);
       this.formData.append('emp_id', this.userData.id);
       this.formData.append('att_date', moment().format('yyyy-MM-DD'));
       this.formData.append('att_lattitude', this.latitude);

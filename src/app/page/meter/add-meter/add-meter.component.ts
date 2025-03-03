@@ -5,12 +5,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MeterService } from 'src/app/provider/meter/meter.service';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { DaysComponent } from '../days/days.component';
 import * as moment from 'moment';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
 import { AssignToComponent } from '../assign-to/assign-to.component';
 import { EscalateToComponent } from '../escalate-to/escalate-to.component';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-add-meter',
   templateUrl: './add-meter.component.html',
@@ -52,7 +52,8 @@ export class AddMeterComponent implements OnInit {
     private formbuilder: FormBuilder,
     private httpMeter: MeterService,
     private navCtrl: NavController,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -513,21 +514,13 @@ export class AddMeterComponent implements OnInit {
   }
 
   async presentActionSheet(imageno: any) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image, imageno);
-    };
-    takePicture();
+    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
+      this.readImg(blob, imageno);
+    });
   }
 
-  async readImg(photo: any, imageno: any) {
+  async readImg(blob: any, imageno: any) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     if (imageno === 1) {
       this.formData.delete('photo1');
       this.formData.append('photo1', blob, random + '.jpg');

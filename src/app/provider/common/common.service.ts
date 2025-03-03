@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ImageViewComponent } from 'src/app/shared/image-view/image-view.component';
+import { PdfViewComponent } from 'src/app/shared/pdf-view/pdf-view.component';
 @Injectable({
   providedIn: 'root'
 })
@@ -96,10 +97,21 @@ export class CommonService {
       this.http.post(environment.url + 'blob-url', formData).subscribe({
         next:(data: any) => {
           if (data.status) {
-            const base64 = 'data:' + data.contentType + ';base64,' + data.base64;
-            this.imageView(base64, null);
-          } else {
-            this.presentToast(data.msg, 'warning');
+            const filePath = data.name
+            const extension = filePath.split('.').pop();
+            if (extension === 'pdf') {
+              this.pdfView('data:application/pdf;base64,' + data.base64);
+            } else {
+              this.imageView('data:' + data.contentType + ';base64,' + data.base64, null);
+            }
+            // const base64 = 'data:' + data.contentType + ';base64,' + data.base64;
+            // this.imageView(base64, null);
+            // if (data.status) {
+            //   const base64 = 'data:' + data.contentType + ';base64,' + data.base64;
+            //   this.imageView(base64, null);
+            // } else {
+            //   this.presentToast(data.msg, 'warning');
+            // }
           }
         },
         error:() => {
@@ -111,6 +123,16 @@ export class CommonService {
         }
       });
     });
+  }
+
+  async pdfView(pdfSrc: string) {
+    const modal = await this.modalCtrl.create({
+      component: PdfViewComponent,
+      componentProps: {
+        pdfSrc: pdfSrc,
+      }
+    });
+    modal.present();
   }
 
   async imageView(base64: any, blob: any) {

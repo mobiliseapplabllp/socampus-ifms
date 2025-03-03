@@ -5,7 +5,6 @@ import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { SignatureComponent } from 'src/app/shared/signature/signature.component';
 import { environment } from 'src/environments/environment';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { checklist, db } from '../../../provider/local-db/local-db.service';
@@ -13,6 +12,7 @@ import { liveQuery } from 'dexie';
 import * as moment from 'moment';
 import { PhotoViewComponent } from 'src/app/shared/photo-view/photo-view.component';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-fill-report',
   templateUrl: './fill-report.component.html',
@@ -48,7 +48,8 @@ export class FillReportComponent  implements OnInit {
     private modalCtrl: ModalController,
     private platform: Platform,
     private alertController: AlertController,
-    private httpComplaint: ComplaintService
+    private httpComplaint: ComplaintService,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -323,26 +324,19 @@ export class FillReportComponent  implements OnInit {
   }
 
   async presentActionSheet(val: any, ind: any) {
-    var obj: any = {
-      quality: 80,
-      allowEditing: false,
-      resultType: CameraResultType.Uri,
+    let obj: any = [];
+    if (ind ! == 1) {
+      obj = ['camera']
+    } else {
+      obj = ['camera', 'gallery'];
     }
-    if (ind !== 1) {
-      obj.source = CameraSource.Camera
-    }
-    const takePicture = async () => {
-    const image = await Camera.getPhoto(obj);
-    this.readImg(image, val)
-    };
-    takePicture();
+    this.camera.selectImage(obj, (blob: Blob) => {
+      this.readImg(blob, val)
+    });
   }
 
   async readImg(photo: any, val: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
-    val.imagename = blob;
+    val.imagename = photo;
     this.actionUpdateChecklist();
     this.repeatLoop();
   }
