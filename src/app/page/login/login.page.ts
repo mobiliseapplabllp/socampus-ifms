@@ -9,6 +9,7 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 import { env } from 'process';
 import { App } from '@capacitor/app';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 
 @Component({
   selector: 'app-login',
@@ -48,7 +49,8 @@ export class LoginPage implements OnInit {
     private router: Router,
     private loginPro: LoginService,
     private common: CommonService,
-    private iab: InAppBrowser) {
+    private iab: InAppBrowser,
+    private camera: CameraService) {
     this.loginForms = this.formbuilder.group({
       userid: ['', Validators.required],
       password: ['' , Validators.required],
@@ -198,6 +200,9 @@ export class LoginPage implements OnInit {
           this.getSsoEnc(token);
         }
       }
+      if (data.url === environment.ssoUrl || data.url === environment.ssoUrl + 'be/apiloading') {
+        browser.close();
+      }
     });
 
     browser.on('loaderror').subscribe(error => {
@@ -343,7 +348,11 @@ export class LoginPage implements OnInit {
 
   openBarcode() {
     if (!this.isProduction) {
-      this.router.navigateByUrl('/barcode');
+      // this.router.navigateByUrl('/barcode');
+      this.camera.selectImage(['camera'], (blob: any) => {
+        let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+
+      });
     }
   }
 }

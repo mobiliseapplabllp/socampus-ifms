@@ -22,14 +22,14 @@ export class CameraComponent  implements OnInit {
   ionViewDidLoad() {}
 
   launchCamera() {
-    CameraPreview.start({parent: 'content', className: '', width: window.screen.width, height: window.screen.height-150, toBack: false, disableAudio: true}).catch(res => {
+    CameraPreview.start({parent: 'content', className: '', width: window.screen.width, height: window.screen.height-150, toBack: false, disableAudio: true, disableExifHeaderStripping: false}).catch(res => {
       alert(JSON.stringify(res));
     });
     this.cameraActive = true;
   }
 
   async takePicture() {
-    const result = await CameraPreview.capture({quality: 50});
+    const result = await CameraPreview.capture({quality: 70});
     const base64Response = await fetch(`data:image/jpeg;base64,${result.value}`);
     this.finalBlob = await base64Response.blob();
     this.finalImage = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(this.finalBlob));;

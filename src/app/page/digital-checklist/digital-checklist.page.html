@@ -65,7 +65,7 @@
             <ion-label class="ion-text-wrap">
               <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
               <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
-              <p><b>{{dat.location_desc}}</b></p>
+              <p><b>({{dat.scheduler_id}}) {{dat.location_desc}}</b></p>
               <p><b>{{dat.barcode}}</b></p>
             </ion-label>
             <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize" >Fill</ion-button>
@@ -82,7 +82,7 @@
             <ion-label class="ion-text-wrap">
               <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
               <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
-              <p><b>{{dat.location_desc}}</b></p>
+              <p><b>({{dat.scheduler_id}}) {{dat.location_desc}}</b></p>
               <p><b>{{dat.barcode}}</b></p>
             </ion-label>
             <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize">View</ion-button>
