@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MeterService } from 'src/app/provider/meter/meter.service';
-import { last } from 'rxjs';
 import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-meter',
@@ -178,7 +177,6 @@ export class MeterPage implements OnInit {
     } else {
       dat.isQrVerify = true;
     }
-
   }
 
   checkConsumptionCondition(dat: any) {
@@ -194,15 +192,6 @@ export class MeterPage implements OnInit {
     } else {
       return true;
     }
-    // if (!dat.consumption_reading) {
-    //   alert('Please Enter Consumption Reading');
-    //   return false;
-    // } else if (dat.is_img_req == 1 && !dat.isConsumptionImg) {
-    //   alert('Consumption Image is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
 
   checkGenertionCondition(dat: any) {
@@ -218,15 +207,6 @@ export class MeterPage implements OnInit {
     } else {
       return true;
     }
-    // if (!dat.generate_reading) {
-    //   alert('Please Enter Generate Reading');
-    //   return false;
-    // } else if (dat.is_img_req == 1 && !dat.isGenerationImg) {
-    //   alert('Generation Image is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
 
   checkOtherCondition(dat: any) {
@@ -242,12 +222,6 @@ export class MeterPage implements OnInit {
     } else {
       return true;
     }
-    // if (!dat.other_reading && dat.oth_read == 1) {
-    //   alert('Other Reading is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
 
   save(obj: any, dat: any) {

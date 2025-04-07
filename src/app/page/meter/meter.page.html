@@ -24,7 +24,6 @@
   </ion-fab> -->
   <ion-card  *ngFor="let dat of meterInfo;let i = index" style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}" [ngStyle]="{'border-left': '3px solid ' + dat.color_code}">
     <ion-item>
-      <!-- <img src="assets/img/meter-left1.jpeg" style="height:100px;width:auto;margin-right:10px" slot="start" > -->
       <ion-label class="ion-text-wrap">
         <p><ion-text color="dark">Meter ID:</ion-text> {{dat.ext_id}}</p>
         <p><ion-text color="dark">Reading ID:</ion-text> {{dat.wo_id}}</p>
