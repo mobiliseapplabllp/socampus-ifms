@@ -46,7 +46,7 @@ export class TokenInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     if (!localStorage.getItem('token1')) {
       const mod = request.clone({
-        headers: request.headers.set('Referer1', environment.ssoUrl)
+        headers: request.headers.set('Referer1', environment.referUrl)
       })
       return next.handle(mod);
     } else {
@@ -59,13 +59,14 @@ export class TokenInterceptor implements HttpInterceptor {
             if (err.status !== 401) {
             return;
             }
+            localStorage.clear();
             alert('Your Session is timeout please login again');
             this.router.navigateByUrl('/login',{replaceUrl: true});
           }
         }));
       } else {
         const userToken = localStorage.getItem('token1');
-        const modifiedReq = request.clone({headers: request.headers.set('Authorization', `Bearer ${userToken}`).set('Accept', 'application/json').set('Referer1', environment.ssoUrl)});
+        const modifiedReq = request.clone({headers: request.headers.set('Authorization', `Bearer ${userToken}`).set('Accept', 'application/json').set('Referer1', environment.referUrl)});
         return next.handle(modifiedReq).pipe(tap(() => {},
           (err: any) => {
           if (err instanceof HttpErrorResponse) {

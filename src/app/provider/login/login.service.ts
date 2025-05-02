@@ -51,10 +51,13 @@ export class LoginService {
     });
   }
 
-  ssoGatesLoginDetails(data: any, fcm_token: string): Observable<any> {
+  ssoGatesLoginDetails(data: any, fcm_token: string, appVersion: string, isAndroid: boolean): Observable<any> {
     let param: any = new HttpParams();
     param = param.append('data', data);
     param = param.append('fcm_token', fcm_token);
+    param = param.append('source', environment.source);
+    param = param.append('app_version', appVersion);
+    param = param.append('is_android', isAndroid);
     return this.https.get(`${environment.url}ssoGatesLoginDetails`,{
       params: param,
     });
@@ -84,6 +87,18 @@ export class LoginService {
 
   refreshToken(): Observable<any> {
     return this.https.get(environment.url + 'refresh');
+  }
+
+  logout(ips: string): Observable<any> {
+    const obj = {
+      ip: ips,
+      source: environment.source
+    }
+    return this.https.post(environment.url + 'logout', obj);
+  }
+
+  loginPingApi(): Observable<any> {
+    return this.https.get(environment.url + 'login_ping');
   }
 
   changePassword(userid: any, otp1: any, pass: any ) {
