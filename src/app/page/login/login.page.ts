@@ -355,4 +355,12 @@ export class LoginPage implements OnInit {
       });
     }
   }
+
+  dummyLogin() {
+    if (this.isProduction) {
+      return;
+    }
+    let token = 'mO3pEmclLk6HCNUt9n3-tllTMVNUVWZWVGVGVGRUbUFzRlh6VjVDOWQ0SmdsZ0tPaUNzSVQrUGNLbHpSRVBxR0lRWnBqemVnWm81YkgvWUxheXZaTXphVUluR09XZjl5ZDBqREFaMzg3WnhDaXo1cS8xTkZBUUFTVWZTY1BhVmpnVkU2Slg3dFR2TnRBZUdD';
+    this.getSsoEnc(token);
+  }
 }
