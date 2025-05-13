@@ -486,7 +486,7 @@ export class PmReportComponent  implements OnInit {
       prompt: val.q_desc,
       partialResults: true,
       popup: true,
-    }).then(res => {
+    }).then((res: any) => {
       let voiceResponse, voiceResponseTemp: any;
       voiceResponseTemp = res.matches[0];
       if (this.selectedLanguage == 'en' || val.tempoutput === 'remark') {
