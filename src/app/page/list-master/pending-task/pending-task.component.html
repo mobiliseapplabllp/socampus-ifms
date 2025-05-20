@@ -101,20 +101,13 @@
             <ion-col size="4">
               <ion-button class="ion-text-capitalize" color="secondary" size="small" expand="block" (click)="pmAssign(dat)"> Assign </ion-button>
             </ion-col>
-            <ion-col size="4">
-              <div *ngIf="dat.can_fill_chklist && dat.stage_id === 1 ">
-                <ion-button class="ion-text-capitalize" size="small" color="danger" *ngIf="((!dat.ptw_attach && dat.ptw_mandatory === 1) || (dat.ptw_status === '0' && dat.ptw_mandatory === 1 ))" expand="block" (click)="uploadPtw(dat)" >Upload PTW</ion-button>
-              </div>
-            </ion-col>
-            <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
+            <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1 ">
+              <ion-button class="ion-text-capitalize" size="small" color="danger" *ngIf="((!dat.ptw_attach && dat.ptw_mandatory === 1) || (dat.ptw_status === '0' && dat.ptw_mandatory === 1 ))" expand="block" (click)="uploadPtw(dat, 'ptw')" >Upload PTW</ion-button>              
               <ion-button class="ion-text-capitalize" color="tertiary" size="small" expand="block" (click)="checkPms('pms', dat)" *ngIf="(dat.ptw_attach !== '' && dat.ptw_status === '1') || dat.ptw_mandatory === 0">Fill Checklist  </ion-button>
             </ion-col>
-            <!-- <ion-col size="6" *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
-              <ion-button size="small" expand="block" color="warning">PTW In Approval </ion-button>
-            </ion-col>
-            <ion-col size="6" *ngIf="dat.ptw_status === '0' && dat.ptw_mandatory === 1 ">
-              <ion-button size="small" expand="block" color="danger">PTW Rejected </ion-button>
-            </ion-col> -->
+            <ion-col *ngIf="dat.wo_for === 1">
+              <ion-button size="small" expand="block" class="ion-text-capitalize" (click)="uploadPtw(dat , 'vendor')" >Upload Certificate</ion-button>
+            </ion-col>            
           </ion-row>
         </ion-card-content>
       </ion-card>

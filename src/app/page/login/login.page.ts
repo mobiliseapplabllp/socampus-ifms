@@ -347,6 +347,7 @@ export class LoginPage implements OnInit {
   }
 
   openBarcode() {
+    return;
     if (!this.isProduction) {
       // this.router.navigateByUrl('/barcode');
       this.camera.selectImage(['camera'], (blob: any) => {

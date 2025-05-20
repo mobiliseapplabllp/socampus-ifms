@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { env } from 'process';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 @Injectable({
@@ -57,8 +58,9 @@ export class PmCalService {
     return this.https.get(environment.url + 'verify_pms_barcode_sales.php?barcode_no=' + barcode + '&schedule_id=' + sid);
   }
 
-  getAllEmployee(): Observable<any> {
-    return this.https.get(environment.url + 'setups/teams/get_team_members');
+  getAllEmployee(pc_id: any): Observable<any> {
+    // return this.https.get(environment.url + 'setups/teams/get_team_members');
+    return this.https.get(environment.url + 'setups/teams/ppm/get_site_team_members?pc_id=' + pc_id);
   }
 
   getAssets(wo_id: any): Observable<any> {
@@ -89,8 +91,14 @@ export class PmCalService {
     return this.https.get(environment.url + 'pmscal/get_My_work_order?limit=10&page=1');
   }
 
-  uploadPtw(formdata: any): Observable<any> {
-    return this.https.post(environment.url + 'pmscal/uploadPTW', formdata);
+  uploadPtw(formdata: any, req_for?: string): Observable<any> {
+    let url: string;
+    if (req_for === 'vendor') {
+      url = environment.url + 'pmscal/uploadVendorProof';
+    } else {
+      url = environment.url + 'pmscal/uploadPTW';
+    }
+    return this.https.post(url, formdata);
   }
 
   resolvePmCal(remarks: any, ticketInfo: any, empID: any, img: any, completionDate: any) {

@@ -22,7 +22,7 @@ export class PmAssignComponent  implements OnInit {
     private modalCtrl: ModalController
   ) { }
 
-  ngOnInit() {
+  ngOnInit() {    
     if (this.data) {
       if (this.data.length) {
         for (var i = 0 ; i < this.data.length; i++) {
@@ -38,7 +38,7 @@ export class PmAssignComponent  implements OnInit {
 
   getAllEmp() {
     this.presentLoading().then(preLoad => {
-      this.httpPms.getAllEmployee().subscribe({
+      this.httpPms.getAllEmployee(this.data.pc_id).subscribe({
         next:(data) => {
           if (data.status) {
             this.allTeamMember = data.data;

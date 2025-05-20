@@ -240,23 +240,26 @@ export class PmCalPage implements OnInit {
     return await modal.present();
   }
 
-  async uploadPtw(dat: any) {
+  async uploadPtw(dat: any, type: string) {    
     const modal = await this.modalCtrl.create({
       component: PtwUploadComponent,
       cssClass: 'my-modal2',
       componentProps : {
-        data: dat
+        data: dat,
+        req_for: type
       }
     });
     modal.onWillDismiss().then(disModal => {
       if (disModal.role) {
-        dat.ptw_attach = disModal.data.ptw_attach
+        if (type === 'vendor') {
+          this.openPm = this.openPm.filter((val: any) => val.id !== dat.id);
+        } else {
+          dat.ptw_attach = disModal.data.ptw_attach
+        }        
       }
     });
     return await modal.present();
   }
-
-
 
   searchWoFromServer(stage_id: any) {
     if (this.searchBy == 'all') {

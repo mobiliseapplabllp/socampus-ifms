@@ -478,18 +478,23 @@ export class PendingTaskComponent  implements OnInit {
   //   });
   // }
 
-  async uploadPtw(dat: any) {
+  async uploadPtw(dat: any, type: string) {    
     const modal = await this.modalCtrl.create({
       component: PtwUploadComponent,
       cssClass: 'my-modal2',
       componentProps : {
-        data: dat
+        data: dat,
+        req_for: type
       }
     });
     modal.onWillDismiss().then(disModal => {
-      if (disModal.role) {
-        dat.ptw_attach = disModal.data.ptw_attach
-      }
+      if (disModal.role) {        
+        if (type === 'vendor') {
+          this.pmsList = this.pmsList.filter((val: any) => val.id !== dat.id);
+        } else {
+          dat.ptw_attach = disModal.data.ptw_attach
+        }        
+      }      
     });
     return await modal.present();
   }

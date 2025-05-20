@@ -16,6 +16,7 @@ export class PtwUploadComponent  implements OnInit {
   img_temp!: string;
   doc_temp!: string;
   remark!: string;
+  req_for!: string;
   constructor(
     private modalCtrl: ModalController,
     private loadingController: LoadingController,
@@ -24,7 +25,8 @@ export class PtwUploadComponent  implements OnInit {
     private camera: CameraService
   ) { }
 
-  ngOnInit() {}
+  ngOnInit() {    
+  }
 
   closeModal(data:any, status: any) {
     this.modalCtrl.dismiss(data, status);
@@ -61,14 +63,19 @@ export class PtwUploadComponent  implements OnInit {
       this.formData.delete('id');
       this.formData.delete('remark');
       this.formData.delete('pc_id');
-      this.formData.delete('source');
+      this.formData.delete('source');      
 
       this.formData.append('id', this.data.id);
       this.formData.append('remark', this.remark);
-      this.formData.append('pc_id', this.data.pc_id);
+      this.formData.append('pc_id', this.data.pc_id);      
       this.formData.append('source', environment.source);
+      if (this.req_for === 'vendor') {
+        this.formData.delete('rsp_vnd_id');
+        this.formData.append('rsp_vnd_id', this.data.vnd_id)
+      }      
+      // rsp_vnd_id;
       this.presentLoading().then(preLoad => {
-        this.httpPms.uploadPtw(this.formData).subscribe({
+        this.httpPms.uploadPtw(this.formData, this.req_for).subscribe({
           next:(res) => {
             if (res.status) {
               this.common.presentToast(res.msg, 'success');

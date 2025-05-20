@@ -1,6 +1,6 @@
 <ion-header mode="md">
   <ion-toolbar color="primary">
-    <ion-title>Upload PTW</ion-title>
+    <ion-title>{{req_for === 'vendor' ?  'Upload Certificate': 'Upload PTW' }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="closeModal(null, false)">
         <ion-icon name="close-outline"></ion-icon>
