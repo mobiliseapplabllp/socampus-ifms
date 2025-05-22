@@ -104,8 +104,18 @@ export class PmCalService {
     return this.https.get(environment.url + 'pmscal/get_My_work_order?limit=10&page=1');
   }
 
-  uploadPtw(formdata: any): Observable<any> {
-    return this.https.post(environment.url + 'pmscal/uploadPTW', formdata);
+  // uploadPtw(formdata: any): Observable<any> {
+  //   return this.https.post(environment.url + 'pmscal/uploadPTW', formdata);
+  // }
+
+  uploadPtw(formdata: any, req_for?: string): Observable<any> {
+    let url: string;
+    if (req_for === 'vendor') {
+      url = environment.url + 'pmscal/uploadVendorProof';
+    } else {
+      url = environment.url + 'pmscal/uploadPTW';
+    }
+    return this.https.post(url, formdata);
   }
 
   resolvePmCal(remarks: any, ticketInfo: any, empID: any, img: any, completionDate: any) {

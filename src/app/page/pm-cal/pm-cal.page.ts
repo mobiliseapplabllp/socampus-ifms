@@ -37,6 +37,7 @@ export class PmCalPage implements OnInit {
   countObj: any = {};
   isPreOpen!: boolean;
   isCloseAction!: boolean;
+  isDetailsAction!: boolean;
   logs: any = [];
   closeRemark!: string
   constructor(
@@ -293,23 +294,47 @@ export class PmCalPage implements OnInit {
     return await modal.present();
   }
 
-  async uploadPtw(dat: any) {
+
+   async uploadPtw(dat: any, type: string) {    
     const modal = await this.modalCtrl.create({
       component: PtwUploadComponent,
       cssClass: 'my-modal-ptw',
       initialBreakpoint: 1, // Set to 50% of the screen height
       breakpoints: [1],
       componentProps : {
-        data: dat
+        data: dat,
+        req_for: type
       }
     });
     modal.onWillDismiss().then(disModal => {
       if (disModal.role) {
-        dat.ptw_attach = disModal.data.ptw_attach
+        if (type === 'vendor') {
+          this.openPm = this.openPm.filter((val: any) => val.id !== dat.id);
+        } else {
+          dat.ptw_attach = disModal.data.ptw_attach
+        }        
       }
     });
     return await modal.present();
   }
+
+  // async uploadPtw(dat: any) {
+  //   const modal = await this.modalCtrl.create({
+  //     component: PtwUploadComponent,
+  //     cssClass: 'my-modal-ptw',
+  //     initialBreakpoint: 1, // Set to 50% of the screen height
+  //     breakpoints: [1],
+  //     componentProps : {
+  //       data: dat
+  //     }
+  //   });
+  //   modal.onWillDismiss().then(disModal => {
+  //     if (disModal.role) {
+  //       dat.ptw_attach = disModal.data.ptw_attach
+  //     }
+  //   });
+  //   return await modal.present();
+  // }
 
   changeSearchBy(ev: any) {
     console.log(ev.target.value);
@@ -599,6 +624,16 @@ export class PmCalPage implements OnInit {
     this.isCloseAction = false;
   }
 
+  onWillDismissDetails() {
+    this.selectedData = [];
+    this.isDetailsAction = false;
+  }
+
+  openDetailsModal(data: any) {
+    this.selectedData = data;
+    this.isDetailsAction = true;
+    console.log(this.selectedData);
+  }
 
   getPpmPending(id: any) {
     this.presentLoading().then(preLoad => {

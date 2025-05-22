@@ -74,11 +74,11 @@
           </ion-row>
           <ion-row>
             <ion-col size="5">Site Name</ion-col>
-            <ion-col>{{dat.pc_desc}}</ion-col>
+            <ion-col>{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="5">Date</ion-col>
-            <ion-col>{{dat.log_date}}</ion-col>
+            <ion-col>{{dat.start_date}}</ion-col>
           </ion-row>
           <ion-row *ngIf="dat.ext_asset_id">
             <ion-col size="5">Asset ID</ion-col>
@@ -95,6 +95,11 @@
           <ion-row>
             <ion-col size="5">Assigned To</ion-col>
             <ion-col>{{dat.user}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-right" style="color: blue">
+              <u><a (click)="openDetailsModal(dat)">Details</a></u>
+            </ion-col>
           </ion-row>
           <ion-row *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
             <ion-col size="5">Ptw Status</ion-col>
@@ -122,10 +127,12 @@
               <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="pmAssign(dat)"> ReAssign </ion-button>
             </ion-col>
             <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1 ">
-              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" size="small" fill="outline" *ngIf="((!dat.ptw_attach && dat.ptw_mandatory === 1) || (dat.ptw_status === '0' && dat.ptw_mandatory === 1 ))" expand="block" (click)="uploadPtw(dat)" >Upload PTW</ion-button>
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" size="small" fill="outline" *ngIf="((!dat.ptw_attach && dat.ptw_mandatory === 1) || (dat.ptw_status === '0' && dat.ptw_mandatory === 1 ))" expand="block" (click)="uploadPtw(dat, 'ptw')" >Upload PTW</ion-button>
               <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="openFillReport(dat)" *ngIf="(dat.ptw_attach !== '' && dat.ptw_status === '1') || dat.ptw_mandatory === 0">Fill Checklist</ion-button>
             </ion-col>
-
+            <ion-col *ngIf="dat.wo_for === 1" size="4">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="uploadPtw(dat , 'vendor')" >Certificate</ion-button>
+            </ion-col>
           </ion-row>
         </ion-grid>
       </ion-card>
@@ -145,7 +152,7 @@
           </ion-row>
           <ion-row>
             <ion-col size="5">Date</ion-col>
-            <ion-col>{{dat.log_date}}</ion-col>
+            <ion-col>{{dat.start_date}}</ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="5">Asset ID</ion-col>
@@ -192,8 +199,8 @@
             <ion-col>{{dat.pc_desc}}</ion-col>
           </ion-row>
           <ion-row>
-            <ion-col size="5">Date</ion-col>
-            <ion-col>{{dat.log_date}}</ion-col>
+            <ion-col size="5">Schedule Date</ion-col>
+            <ion-col>{{dat.start_date}}</ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="5">Asset ID</ion-col>
@@ -302,6 +309,69 @@
           <ion-button expand="block" color="primary" (click)="filterIds()">Submit</ion-button>
         </ion-toolbar>
       </ion-footer>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal class="details" [isOpen]="isDetailsAction" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismissDetails()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar >
+          <ion-title>Details</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isDetailsAction = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content> 
+        <ion-card class="cards ion-padding">
+          <ion-row>
+            <ion-col size="4">Block</ion-col>
+            <ion-col>{{selectedData.block}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Building</ion-col>
+            <ion-col>{{selectedData.building}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Floor</ion-col>
+            <ion-col>{{selectedData.floor}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Location</ion-col>
+            <ion-col>{{selectedData.location}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Creation Date</ion-col>
+            <ion-col>{{selectedData.log_date}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Last PPM</ion-col>
+            <ion-col>{{selectedData.last_pms}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Overdue Days</ion-col>
+            <ion-col>{{selectedData.overdueDays}} </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Completion Date</ion-col>
+            <ion-col>{{selectedData.closed_date}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Team Leader</ion-col>
+            <ion-col>{{selectedData.team_leader}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Created By</ion-col>
+            <ion-col>{{selectedData.creator}}</ion-col>
+          </ion-row>
+            <ion-row>
+            <ion-col size="4">Remark</ion-col>
+            <ion-col>{{selectedData.remark}}</ion-col>
+          </ion-row>
+        </ion-card>        
+      </ion-content>
     </ng-template>
   </ion-modal>
 </ion-content>
