@@ -218,9 +218,9 @@ export class FillQusComponent  implements OnInit {
   async presentActionSheet(data: any, ind: any) {
     let obj: any = []
     if (ind === 1) {
-      obj = ['Camera', 'Gallery'];
+      obj = ['camera', 'gallery'];
     } else {
-      obj = ['Camera'];
+      obj = ['camera'];
     }
     this.camera.selectImage(obj, (blob) => {
       let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
