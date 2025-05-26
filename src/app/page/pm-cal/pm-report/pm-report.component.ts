@@ -91,7 +91,6 @@ export class PmReportComponent  implements OnInit {
         }
       });
     })
-
   }
 
   openQusPage(data: any) {
@@ -170,9 +169,9 @@ export class PmReportComponent  implements OnInit {
               }
             });
             this.selectedCategory = count
-          });
+          });          
+          this.myCategory = this.myCategory.filter((val: any) => val.total_questions > 0);
 
-          console.log(this.myCategory);
           // this.myCategory.forEach((element: any) => {
           //   element.is_applicable === '' ? element.is_applicable = 3: element.is_applicable
           //   element.is_applicable_temp = element.is_applicable === 1 ? true: false;

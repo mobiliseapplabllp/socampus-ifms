@@ -68,7 +68,7 @@
             <ion-col size="1" class="center">
               <ion-checkbox [(ngModel)]="dat.isSelect" color="primary-dark" (click)="changeCheckbox(dat.isSelect)"></ion-checkbox>
             </ion-col>
-            <ion-col style="color: var(--ion-color-primary-dark); font-size:16px" (click)="openFillReport(dat)">WO {{dat.wo_no}}</ion-col>
+            <ion-col style="color: var(--ion-color-primary-dark); font-size:16px">WO {{dat.wo_no}}</ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="5">Site Name</ion-col>
@@ -331,19 +331,19 @@
         <ion-card class="cards ion-padding">
           <ion-row>
             <ion-col size="4">Block</ion-col>
-            <ion-col>{{selectedData.block}}</ion-col>
+            <ion-col>{{selectedData.block_name}}</ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="4">Building</ion-col>
-            <ion-col>{{selectedData.building}}</ion-col>
+            <ion-col>{{selectedData.building_name}}</ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="4">Floor</ion-col>
-            <ion-col>{{selectedData.floor}}</ion-col>
+            <ion-col>{{selectedData.floor_name}}</ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="4">Location</ion-col>
-            <ion-col>{{selectedData.location}}</ion-col>
+            <ion-col>{{selectedData.location_desc}}</ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="4">Creation Date</ion-col>

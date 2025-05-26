@@ -11,15 +11,13 @@
 </ion-header>
 <ion-content>
   <ion-row>
-    <ion-col size="6" class="ion-padding-start ion-padding-top"> Category({{myCategory.length}})</ion-col>
-    <!-- <ion-col size="6" class="ion-text-right ion-padding-end ion-padding-top">Selected({{selectedCategory}})</ion-col> -->
+    <ion-col size="6" class="ion-padding-start ion-padding-top"> Category({{myCategory.length}})</ion-col>    
   </ion-row>
   <ion-card (click)="openQusPage(dat)" *ngFor="let dat of myCategory; let ind = index" [ngClass]="{fullborder: dat.isError === true}" style="border-left:5px solid #915FC8;box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;">
     <ion-item>
-      <ion-label class="ion-text-wrap">{{ind+1}}. {{dat.cat_desc}}</ion-label>
-      <!-- <ion-toggle slot="end" [(ngModel)]="dat.is_applicable_temp" (ionChange)="changeToggle(dat, ind)"></ion-toggle> -->
+      <ion-label class="ion-text-wrap">{{ind+1}}. {{dat.cat_desc}}</ion-label>      
     </ion-item>
-    <ion-row ><!--[ngClass]="{'disabled-card': !dat.is_applicable_temp}"-->
+    <ion-row >
       <ion-col size="9">Question</ion-col>
       <ion-col size="3" class="ion-text-right ion-padding-right">{{dat.responded_questions}}/{{dat.total_questions}}</ion-col>
       <ion-col size="12">
