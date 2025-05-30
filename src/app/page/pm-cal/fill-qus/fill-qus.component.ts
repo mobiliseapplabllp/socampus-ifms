@@ -33,6 +33,7 @@ export class FillQusComponent  implements OnInit {
   ngOnInit() {
     this.activeroute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
+      console.log(this.requestedData);
       this.questionList = this.requestedData.qus;
       this.questionList.forEach((el: any) => {
         const obj = el.options.filter((val: any) => val.optn_id === el.rspns)[0];
@@ -122,7 +123,8 @@ export class FillQusComponent  implements OnInit {
       return;
     }
     const obj = {
-      wo_id: this.requestedData.wo_id,
+      // wo_id: this.requestedData.wo_id,
+      wo_id: this.requestedData.id,
       rspns: data.rspns,
       q_id: data.q_id,
       q_type: data.q_type,
@@ -177,7 +179,7 @@ export class FillQusComponent  implements OnInit {
   changeRemark(data: any) {
     this.loop = false;
     const obj1 = {
-      wo_id: this.requestedData.wo_id,
+      wo_id: this.requestedData.id,
       remark: data.remark,
       q_id: data.q_id,
       rspns_source: environment.source
@@ -225,7 +227,7 @@ export class FillQusComponent  implements OnInit {
     this.camera.selectImage(obj, (blob) => {
       let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
       let formData = new FormData();
-      formData.append('wo_id', this.requestedData.wo_id);
+      formData.append('wo_id', this.requestedData.id);
       formData.append('q_id',  data.q_id);
       formData.append('rspns_source', environment.source);
       formData.append('attachment2', blob, random);

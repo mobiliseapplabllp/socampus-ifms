@@ -93,12 +93,7 @@
           <ion-row>
             <ion-col size="5">Assigned To</ion-col>
             <ion-col>{{dat.user}}</ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col class="ion-text-right" style="color: blue">
-              <u><a (click)="openDetailsModal(dat)">Details</a></u>
-            </ion-col>
-          </ion-row>
+          </ion-row>          
           <ion-row *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
             <ion-col size="5">Ptw Status</ion-col>
             <ion-col>
@@ -117,7 +112,26 @@
               <u><ion-text (click)="openModal(dat)" color="success">Approved</ion-text> </u>
             </ion-col>
           </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-right" style="color: blue">
+              <u><a (click)="openDetailsModal(dat)">Details</a></u>
+            </ion-col>
+          </ion-row>
           <ion-row style="border-top: 1px solid #c2c2c2ab">
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" (click)="singleCancel(dat)" color="primary-dark" shape="round" fill="outline" size="small" expand="block" *ngIf="dat.can_cancel_wo_btn"> Cancel </ion-button>
+            </ion-col>
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="pmAssign(dat)" *ngIf="dat.can_assign_wo_btn"> ReAssign </ion-button>
+            </ion-col>
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" size="small" fill="outline" expand="block" (click)="uploadPtw(dat, 'ptw')"  *ngIf="dat.is_for_ptw_upload_btn">Upload PTW</ion-button>
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="openFillReport(dat)" *ngIf="dat.can_fill_chklist_btn">Fill Checklist</ion-button>
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="uploadPtw(dat , 'vendor')" *ngIf="dat.is_sr_btn">Upload SR</ion-button>
+            </ion-col>            
+          </ion-row>
+
+          <!-- <ion-row style="border-top: 1px solid #c2c2c2ab">
             <ion-col size="4">
               <ion-button class="ion-text-capitalize" (click)="singleCancel(dat)" color="primary-dark" shape="round" fill="outline" size="small" expand="block" > Cancel </ion-button>
             </ion-col>
@@ -131,7 +145,7 @@
             <ion-col *ngIf="dat.wo_for === 1" size="4">
               <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="uploadPtw(dat , 'vendor')" >Upload SR</ion-button>
             </ion-col>
-          </ion-row>
+          </ion-row> -->
         </ion-grid>
       </ion-card>
       <ion-infinite-scroll [hidden]="currentPage > lastPage" *ngIf="openPm.length > 0"  threshold="100px" (ionInfinite)="loadData($event, 1)">

@@ -100,6 +100,7 @@ export class PmReportComponent  implements OnInit {
     }
     data.wo_no = this.requestedData.wo_no;
     data.wo_id = this.requestedData.wo_id
+    data.id = this.requestedData.id;
     this.router.navigate(['/pm-calibration/fill-qus'], {
       queryParams: {
         data: JSON.stringify(data),
@@ -552,7 +553,8 @@ export class PmReportComponent  implements OnInit {
     // }
     const obj: any = {
       status: 2,
-      wo_id: this.requestedData.wo_id,
+      // wo_id: this.requestedData.wo_id, //yeah hatwai hai backend k hisab se 
+      wo_id: this.requestedData.id,
       source: environment.source,
       na_cat: NACat
     };

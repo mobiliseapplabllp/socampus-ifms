@@ -36,7 +36,7 @@ export class ClosePmComponent  implements OnInit {
 
   getScheduleUser() {
     this.presentLoading().then(preLoad => {
-      this.httpPms.getScheduleUser(this.requestedData.wo_id).subscribe({
+      this.httpPms.getScheduleUser(this.requestedData.id).subscribe({
         next:(data) => {
           if (data.status) {
             this.arrangeArr(data.data.categories);

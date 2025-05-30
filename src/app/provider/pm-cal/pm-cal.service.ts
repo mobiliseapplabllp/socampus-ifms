@@ -37,7 +37,8 @@ export class PmCalService {
   searchTicketFromServer(key: any, value: any): Observable<any> {
     let url;
     url = 'limit=40&page=1&' + key + '=' + value + '&shource_from=app';
-    return this.https.get(environment.url + 'pmscal/get_work_order?' + url);
+    return this.https.get(environment.url + 'pmscal/get_ppm_work_area_work_order?' + url);
+    // return this.https.get(environment.url + 'pmscal/get_work_order?' + url);
   }
 
   getCategory(cat_id: any): Observable<any> {
@@ -72,8 +73,9 @@ export class PmCalService {
     return this.https.get(environment.url + 'verify_pms_barcode_sales.php?barcode_no=' + barcode + '&schedule_id=' + sid);
   }
 
-  getAllEmployee(): Observable<any> {
-    return this.https.get(environment.url + 'setups/teams/get_team_members');
+  getAllEmployee(pc_id: any): Observable<any> {
+    // return this.https.get(environment.url + 'setups/teams/get_team_members');
+    return this.https.get(environment.url + 'setups/teams/ppm/get_site_team_members?pc_id=' + pc_id);
   }
 
   getAssets(wo_id: any): Observable<any> {

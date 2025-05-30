@@ -43,6 +43,7 @@ export class ActionableComponent  implements OnInit {
   ngOnInit() {
     this.activeroute.queryParams.subscribe((res: any) => {
       this.requestedData = JSON.parse(res.data);
+      console.log(this.requestedData);
     });
     this.initializeForm();
   }
@@ -60,6 +61,7 @@ export class ActionableComponent  implements OnInit {
   viewReport(data: any) {
     console.log(data);
     data.wo_no = this.requestedData.wo_no
+    data.id = this.requestedData.id
     this.router.navigate(['/pm-calibration/view-report'], {
       queryParams: {
         data: JSON.stringify(data),
@@ -75,7 +77,7 @@ export class ActionableComponent  implements OnInit {
 
   getScheduleUser() {
     this.presentLoading().then(preLoad => {
-      this.httpPms.getScheduleUser(this.requestedData.wo_id).subscribe({
+      this.httpPms.getScheduleUser(this.requestedData.id).subscribe({
         next:(data) => {
           if (data.status) {
             this.arrangeArr(data.data.categories);
@@ -223,7 +225,9 @@ export class ActionableComponent  implements OnInit {
     this.addResponse.get('rspns_date')?.setValue(moment(date).format('YYYY-MM-DD'));
     this.formData.delete('wo_id');
     this.formData.delete('rspns_id');
-    this.formData.append('wo_id', this.questionList.wo_id);
+    // this.formData.append('wo_id', this.questionList.wo_id);
+    this.formData.append('wo_id', this.requestedData.wo_id);
+    
     this.formData.append('rspns_id', this.questionList.rspns_id);
     for (let key in this.addResponse.value) {
       this.formData.delete(key);

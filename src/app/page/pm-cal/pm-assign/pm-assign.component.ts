@@ -24,6 +24,7 @@ export class PmAssignComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
+    console.log(this.data);
     if (this.data) {
       if (this.data.length) {
         if (this.data.length === 1) {
@@ -43,7 +44,7 @@ export class PmAssignComponent  implements OnInit {
 
   getAllEmp() {
     this.presentLoading().then(preLoad => {
-      this.httpPms.getAllEmployee().subscribe({
+      this.httpPms.getAllEmployee(this.data.pc_id).subscribe({
         next:(data) => {
           if (data.status) {
             this.allTeamMember = data.data;

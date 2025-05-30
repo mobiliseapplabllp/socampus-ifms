@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title id="open-modal" > WO-{{requestedData.wo_no}} </ion-title>
+    <ion-title id="open-modal" >{{requestedData.wo_no}} </ion-title>
     <ion-buttons slot="end" *ngIf="loop">
       <ion-button (click)="stopSpeaker()" color="danger">Stop <ion-icon name="volume-high-outline" slot="end"></ion-icon></ion-button>
     </ion-buttons>

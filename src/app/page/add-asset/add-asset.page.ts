@@ -748,12 +748,13 @@ export class AddAssetPage implements OnInit {
   }
 
   checkPmsCondition() {
-    if (this.addAsset.value.is_pms === '1' && !this.addAsset.value.pms_freq) {
-      alert('Please Enter PMS Frequency');
-      return false;
-    } else {
-      return true
-    }
+    return true;
+    // if (this.addAsset.value.is_pms === '1' && !this.addAsset.value.pms_freq) {
+    //   alert('Please Enter PMS Frequency');
+    //   return false;
+    // } else {
+    //   return true
+    // }
   }
 
   changeWarranty() {
