@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>History</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close(null, false)">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-grid>
+    <ion-row class="row" *ngFor="let dat of txnData; let i = index">
+      <ion-col size="1" class="ion-padding-start">
+        <div class="images"> <img src="assets/img/dot.jpeg"></div>
+        <div class="line" [hidden] = "i === (txnData.length - 1) "></div>
+      </ion-col>
+      <ion-col size="11" >
+        <ion-card class="approver_card">
+          <ion-card-content class="ion-no-padding">
+            <ion-row>
+              <ion-col size="6" class="ion-padding-start">Response 1</ion-col>
+              <ion-col size="6" class="ion-text-right ion-padding-end"> {{dat.txn_date}}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col class="ion-padding-start ion-padding-end">{{dat.txn_desc}}</ion-col>
+            </ion-row>
+            <!-- <ion-row style="width:100%;height:auto;padding:5px;background-color:rgb(230, 232, 254)">
+              <ion-col size="6">{{dat.status}}</ion-col>
+              <ion-col class="ion-text-right" size="6" *ngIf="dat.attach !== ''">
+                <ion-icon name="attach-outline" style="font-size:20px"></ion-icon>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="6" color="medium">{{dat.status_id === '0' ? 'Rejected By': 'Approve by'}}</ion-col>
+              <ion-col size="6">{{dat.action_by}}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="6" color="medium">Date Time</ion-col>
+              <ion-col size="6">{{dat.date}}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="6" color="medium">Remark</ion-col>
+              <ion-col size="6">{{dat.remark}}</ion-col>
+            </ion-row> -->
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <!-- <ion-card *ngFor="let dat of txnData">
+    <ion-row>
+      <ion-col size="5">Updated By</ion-col>
+      <ion-col>{{dat.name}} {{dat.lname}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="5">Datetime</ion-col>
+      <ion-col>{{dat.txn_date | date: 'dd MMM yyyy H:mm:ss'}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="5">Desc</ion-col>
+      <ion-col>{{dat.txn_desc}}</ion-col>
+    </ion-row>
+    <ion-row *ngIf="dat.document">
+      <ion-col>
+        <ion-button size="small" (click)="attachment(dat.document, dat.document_blob_type)" size="small" fill="outline" color="danger">View Attachment</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-card> -->
+</ion-content>

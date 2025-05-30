@@ -9,7 +9,7 @@ import { LoginPageRoutingModule } from './login-routing.module';
 import { LoginPage } from './login.page';
 import { NgOtpInputModule } from  'ng-otp-input';
 import { SplashComponent } from './splash/splash.component';
-// import { SharedModule } from 'src/app/shared/shared.module';
+import { SharedModule } from 'src/app/shared/shared.module';
 
 @NgModule({
   imports: [
@@ -18,8 +18,8 @@ import { SplashComponent } from './splash/splash.component';
     IonicModule,
     ReactiveFormsModule,
     LoginPageRoutingModule,
-    NgOtpInputModule
-    // SharedModule
+    NgOtpInputModule,
+    SharedModule
   ],
   declarations: [
     LoginPage,

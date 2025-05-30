@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { FillReportOfflineComponent } from './fill-report-offline.component';
+import { ClosePmComponent } from './close-pm.component';
 
-describe('FillReportOfflineComponent', () => {
-  let component: FillReportOfflineComponent;
-  let fixture: ComponentFixture<FillReportOfflineComponent>;
+describe('ClosePmComponent', () => {
+  let component: ClosePmComponent;
+  let fixture: ComponentFixture<ClosePmComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ FillReportOfflineComponent ],
+      declarations: [ ClosePmComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(FillReportOfflineComponent);
+    fixture = TestBed.createComponent(ClosePmComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

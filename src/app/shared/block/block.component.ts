@@ -21,8 +21,7 @@ export class BlockComponent  implements OnInit {
     private modalCtrl: ModalController
   ) { }
 
-  ngOnInit() {
-    console.log(this.allData);
+  ngOnInit() {    
     this.getBlock();
   }
 

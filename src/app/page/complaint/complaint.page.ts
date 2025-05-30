@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
@@ -46,7 +46,6 @@ export class ComplaintPage implements OnInit {
     private httpCompalint: ComplaintService,
     private httpCommon: CommonService,
     private router: Router,
-    private loadingController: LoadingController,
     private modalController: ModalController
   ) { }
 
@@ -152,7 +151,7 @@ saveBlobAsFile(blob: any, fileName: any) {
   }
 
   getTicketMaster(status: any, page: any) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpCompalint.getTicketMaster(status, page).subscribe({
         next:(data) => {
           if (data.status) {
@@ -165,11 +164,11 @@ saveBlobAsFile(blob: any, fileName: any) {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'warning');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     });
@@ -189,9 +188,9 @@ saveBlobAsFile(blob: any, fileName: any) {
       this.getTicketMaster(null, 1);
       return;
     }
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpCompalint.searchTicketFromServer(this.searchBy, this.searchValue).subscribe(data => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         if (data.status) {
           this.page = this.page + 1;
           this.tickets = data.data.data;
@@ -224,20 +223,9 @@ saveBlobAsFile(blob: any, fileName: any) {
     });
   }
 
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    this.loading.dismiss();
-  }
   changeSegment(ev: any) {
     if (ev.target.value == 'resolved') {
-      this.presentLoading().then(preLoad => {
+      this.httpCommon.presentLoading().then(preLoad => {
         this.resolveTicket = [];
         this.httpCompalint.getResolvedTicket().subscribe({
           next:(data) => {
@@ -248,11 +236,11 @@ saveBlobAsFile(blob: any, fileName: any) {
             }
           },
           error:() => {
-            this.dismissloading();
+            this.httpCommon.dismissloading();
             this.httpCommon.presentToast(environment.errMsg, 'danger');
           },
           complete:() => {
-            this.dismissloading();
+            this.httpCommon.dismissloading();
           }
         });
       });

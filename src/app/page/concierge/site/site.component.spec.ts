@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { DigitalChecklistOfflinePage } from './digital-checklist-offline.page';
+import { SiteComponent } from './site.component';
 
-describe('DigitalChecklistOfflinePage', () => {
-  let component: DigitalChecklistOfflinePage;
-  let fixture: ComponentFixture<DigitalChecklistOfflinePage>;
+describe('SiteComponent', () => {
+  let component: SiteComponent;
+  let fixture: ComponentFixture<SiteComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ DigitalChecklistOfflinePage ],
+      declarations: [ SiteComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DigitalChecklistOfflinePage);
+    fixture = TestBed.createComponent(SiteComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

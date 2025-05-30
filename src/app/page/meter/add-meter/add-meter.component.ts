@@ -58,9 +58,7 @@ export class AddMeterComponent implements OnInit {
 
   ngOnInit() {
     this.initForm();
-    // this.getFacilityType();
     this.getEquipStatus();
-    // this.getMeterType();
     this.getUomMeter();
   }
 
@@ -108,9 +106,6 @@ export class AddMeterComponent implements OnInit {
       oth_mult_fact: [''],
       oth_mult_fact_val: [''],
       oth_inc: [''],
-      // mult_fact: ['', Validators.required],
-      // mult_fact_val: [''],
-      // inc: ['', Validators.required],
       back_date: ['', Validators.required],
       back_days: [''],
       edit_allow: ['', Validators.required],

@@ -1,168 +1,205 @@
-<ion-header>
-  <ion-toolbar color="primary">
+<ion-header class="ion-no-border">
+  <ion-toolbar [color]="selectedPms.length > 0 ? 'light': 'primary'" >
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>i-FMS</ion-title>
+    <ion-title>PPM</ion-title>
+    <ion-buttons slot="end" *ngIf="selectedPms.length > 0">
+      <ion-button fill="outline" shape="round" size="small" (click)="multiCancel()" class="ion-text-capitalize">Cancel </ion-button>
+      <ion-button fill="outline" shape="round" size="small" (click)="multiAssign()" class="ion-text-capitalize">ReAssign </ion-button>
+    </ion-buttons>
   </ion-toolbar>
   <ion-toolbar>
-    <ion-segment value="all" [(ngModel)]='status' color="primary" (ionChange)="changeSeg($event)" scrollable="true">
+    <ion-segment value="all" [(ngModel)]='status' mode="md" color="primary-dark" (ionChange)="changeSeg($event)" scrollable="true">
       <ion-segment-button value="open">
-        <ion-label>ASSIGN({{countObj.assignedWo}})</ion-label>
+        <ion-label>ASSIGN ({{countObj.assignedWo}})</ion-label>
       </ion-segment-button>
       <ion-segment-button value="actionable">
-        <ion-label>ACTIONABLE({{countObj.actionable}})</ion-label>
+        <ion-label>ACTIONABLE ({{countObj.actionable}})</ion-label>
       </ion-segment-button>
       <ion-segment-button value="closed">
-        <ion-label>CLOSED({{countObj.closeddWo}})</ion-label>
+        <ion-label>CLOSED ({{countObj.closeddWo}})</ion-label>
       </ion-segment-button>
     </ion-segment>
-    <ion-row *ngIf="selectedPms.length > 0">
-      <ion-col class="ion-text-right">
-        <ion-button size="small" (click)="multiAssign()">Assign <ion-icon name="arrow-forward-outline" slot="end"></ion-icon></ion-button>
-      </ion-col>
-    </ion-row>
   </ion-toolbar>
-</ion-header>
 
+</ion-header>
 <ion-content>
-  <!-- <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
-    <ion-fab-button fill="clear" color="primary" (click)="cretePM()">
-      <ion-icon name="add-outline"></ion-icon>
-    </ion-fab-button>
-  </ion-fab> -->
   <div [ngSwitch]='status' class="mostOuter">
     <div *ngSwitchCase="'open'">
-      <ion-row>
-        <ion-col>
-          <ion-item>
-            <ion-label position="floating">Search By</ion-label>
-            <ion-select interface="action-sheet" [(ngModel)]="searchBy" mode="ios">
-              <ion-select-option value="all">All</ion-select-option>
-              <ion-select-option value="pc_id"> Site</ion-select-option>
-              <ion-select-option value="wo_id">WO ID</ion-select-option>
-            </ion-select>
-          </ion-item>
-        </ion-col>
-        <ion-col *ngIf="searchBy">
-          <ion-item *ngIf="searchBy === 'wo_id'">
-            <ion-label position="floating">Wo ID</ion-label>
-            <ion-input type="email" [(ngModel)]="searchValue"> </ion-input>
-          </ion-item>
-          <ion-item *ngIf="searchBy === 'pc_id'" (click)="openRoName()">
-            <ion-label position="floating">Select Site</ion-label>
-            <ion-input type="email" [(ngModel)]="searchValueDesc" readonly> </ion-input>
-          </ion-item>
-        </ion-col>
-      </ion-row>      
-      <ion-button *ngIf="searchBy" class="ion-margin-start ion-margin-end" expand="block" (click)="searchWoFromServer(1)">Search <ion-icon name="search-outline" slot="end"></ion-icon></ion-button>
-      <ion-card *ngFor="let dat of openPm; let i = index" >
-        <ion-card-header color="primary" style="padding:0px">
-          <ion-row class="ion-no-padding">
-            <ion-col size="1" class="center">
-              <ion-checkbox color="danger" [(ngModel)]="dat.isSelect" (click)="changeCheckbox(dat.isSelect)"></ion-checkbox>
-            </ion-col>
-            <ion-col size="7" style="display: flex;align-items: center;">
-              <b>{{i+1}}. {{dat.pc_desc}} ( {{dat.chklist_desc}} )</b>
-            </ion-col>
-            <ion-col size="4" class="center">
-              {{dat.log_date}}
-            </ion-col>
-            <ion-col size=""></ion-col>
-          </ion-row>
-        </ion-card-header>
-        <ion-card-content style="background-color: var(--ion-color-light);padding-bottom: 0px !important;">
+      <div style="padding-left :10px;padding-right:10px" *ngIf="isSearch">
+        <ion-row>
+          <ion-col>
+            <ion-item>
+              <ion-label position="floating">Search By</ion-label>
+              <ion-select interface="action-sheet" [(ngModel)]="searchBy" mode="ios" (ionChange)="changeSearchBy($event)">
+                <ion-select-option value="all">All</ion-select-option>
+                <ion-select-option value="pc_id"> Site</ion-select-option>
+                <ion-select-option value="wo_id">WO ID</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+          <ion-col *ngIf="searchBy && searchBy !== 'all'">
+            <ion-item *ngIf="searchBy === 'wo_id'">
+              <ion-label position="floating">Wo ID</ion-label>
+              <ion-input type="email" [(ngModel)]="searchValue"> </ion-input>
+            </ion-item>
+            <ion-item *ngIf="searchBy === 'pc_id'" (click)="openRoName()">
+              <ion-label position="floating">Select Site</ion-label>
+              <ion-input type="email" [(ngModel)]="searchValueDesc" readonly> </ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-button *ngIf="searchBy" expand="block" (click)="searchWoFromServer(1)">Search <ion-icon name="search-outline" slot="end"></ion-icon></ion-button>
+      </div>
+
+
+      <section class="inputbox" style="margin:8px 10px;" *ngIf="!isSearch" (click)="isSearch = true">
+        <ion-item lines="none" style="border:2px solid rgba(42, 41, 92, 0.20);" >
+          <ion-icon name="search" slot="start"> </ion-icon>
+          <ion-input type="text" placeholder="Search" readonly></ion-input>
+          <ion-icon name="options-outline" slot="end"></ion-icon>
+        </ion-item>
+      </section>
+      <!-- <div class="openWo"> <span class="title">2</span> <span class="val">Work Orders in progress </span></div> -->
+      <ion-card *ngFor="let dat of openPm; let i = index" class="cards" style="border-left:5px solid #915FC8" mode="md">
+        <ion-grid >
           <ion-row>
-            <ion-col size="6">
-              <ion-text color="medium">WO </ion-text><br>
-              <ion-text color="dark">{{dat.wo_no}}</ion-text>
+            <ion-col size="1" class="center">
+              <ion-checkbox [(ngModel)]="dat.isSelect" color="primary-dark" (click)="changeCheckbox(dat.isSelect)"></ion-checkbox>
             </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Asset Id</ion-text><br>
-              <ion-text color="dark">{{dat.ext_asset_id || 'NA'}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Asset Name</ion-text><br>
-              <ion-text color="dark">{{dat.subgrp_desc || 'NA'}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Assigned To</ion-text><br>
-              <ion-text color="dark">{{dat.user}}-{{dat.username}}</ion-text>
+            <ion-col style="color: var(--ion-color-primary-dark); font-size:16px">WO {{dat.wo_no}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Site Name</ion-col>
+            <ion-col>{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Schedule Date</ion-col>
+            <ion-col>{{dat.start_date}}</ion-col>
+          </ion-row>
+          <ion-row *ngIf="dat.ext_asset_id">
+            <ion-col size="5">Asset ID</ion-col>
+            <ion-col>{{dat.ext_asset_id}}</ion-col>
+          </ion-row>
+          <ion-row *ngIf="dat.ext_asset_id">
+            <ion-col size="5">Device</ion-col>
+            <ion-col>{{dat.subgrp_desc}}</ion-col>
+          </ion-row>
+          <ion-row *ngIf="!dat.ext_asset_id">
+            <ion-col size="5">Checklist Desc</ion-col>
+            <ion-col>{{dat.chklist_desc}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Assigned To</ion-col>
+            <ion-col>{{dat.user}}</ion-col>
+          </ion-row>          
+          <ion-row *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
+            <ion-col size="5">Ptw Status</ion-col>
+            <ion-col>
+              <u><ion-text (click)="openModal(dat)" color="primary-dark">In Approval</ion-text> </u>
             </ion-col>
           </ion-row>
-          <ion-row >
-            <ion-col size="4">
-              <ion-button class="ion-text-capitalize" color="secondary" size="small" expand="block" (click)="pmAssign(dat)"> Assign </ion-button>
-            </ion-col>
-            <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1 ">
-              <ion-button class="ion-text-capitalize" size="small" color="danger" *ngIf="((!dat.ptw_attach && dat.ptw_mandatory === 1) || (dat.ptw_status === '0' && dat.ptw_mandatory === 1 ))" expand="block" (click)="uploadPtw(dat , 'ptw')" >Upload PTW</ion-button>              
-              <ion-button class="ion-text-capitalize" color="tertiary" size="small" expand="block" (click)="openFillReport(dat)" *ngIf="(dat.ptw_attach !== '' && dat.ptw_status === '1') || dat.ptw_mandatory === 0">Fill Checklist  </ion-button>
-            </ion-col>
-            <!-- <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1">              
-            </ion-col> -->
-            <ion-col size="6" *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
-              <ion-button size="small" expand="block" color="warning">PTW In Approval </ion-button>
-            </ion-col>
-            <ion-col size="6" *ngIf="dat.ptw_status === '0' && dat.ptw_mandatory === 1 ">
-              <ion-button size="small" expand="block" color="danger">PTW Rejected </ion-button>
-            </ion-col>
-            <ion-col *ngIf="dat.wo_for === 1">
-              <ion-button size="small" expand="block" class="ion-text-capitalize" (click)="uploadPtw(dat , 'vendor')" >Upload Certificate</ion-button>
-            </ion-col>
+          <ion-row *ngIf="dat.ptw_status === '0' && dat.ptw_mandatory === 1 ">
+            <ion-col size="5">Ptw Status</ion-col>
+            <ion-col>
+              <u><ion-text (click)="openModal(dat)" color="danger">Rejected</ion-text> </u>
+            </ion-col>            
 
           </ion-row>
-        </ion-card-content>
+          <ion-row *ngIf="dat.ptw_status === '1' && dat.ptw_mandatory === 1 ">
+            <ion-col size="5">Ptw Status</ion-col>
+            <ion-col>
+              <u><ion-text (click)="openModal(dat)" color="success">Approved</ion-text> </u>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-right" style="color: blue">
+              <u><a (click)="openDetailsModal(dat)">Details</a></u>
+            </ion-col>
+          </ion-row>
+          <ion-row style="border-top: 1px solid #c2c2c2ab">
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" (click)="singleCancel(dat)" color="primary-dark" shape="round" fill="outline" size="small" expand="block" *ngIf="dat.can_cancel_wo_btn"> Cancel </ion-button>
+            </ion-col>
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="pmAssign(dat)" *ngIf="dat.can_assign_wo_btn"> ReAssign </ion-button>
+            </ion-col>
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" size="small" fill="outline" expand="block" (click)="uploadPtw(dat, 'ptw')"  *ngIf="dat.is_for_ptw_upload_btn">Upload PTW</ion-button>
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="openFillReport(dat)" *ngIf="dat.can_fill_chklist_btn">Fill Checklist</ion-button>
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="uploadPtw(dat , 'vendor')" *ngIf="dat.is_sr_btn">Upload SR</ion-button>
+            </ion-col>            
+          </ion-row>
+
+          <!-- <ion-row style="border-top: 1px solid #c2c2c2ab">
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" (click)="singleCancel(dat)" color="primary-dark" shape="round" fill="outline" size="small" expand="block" > Cancel </ion-button>
+            </ion-col>
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="pmAssign(dat)"> ReAssign </ion-button>
+            </ion-col>
+            <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1 ">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" size="small" fill="outline" *ngIf="((!dat.ptw_attach && dat.ptw_mandatory === 1) || (dat.ptw_status === '0' && dat.ptw_mandatory === 1 ))" expand="block" (click)="uploadPtw(dat, 'ptw')" >Upload PTW</ion-button>
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="openFillReport(dat)" *ngIf="(dat.ptw_attach !== '' && dat.ptw_status === '1') || dat.ptw_mandatory === 0">Fill Checklist</ion-button>
+            </ion-col>
+            <ion-col *ngIf="dat.wo_for === 1" size="4">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="uploadPtw(dat , 'vendor')" >Upload SR</ion-button>
+            </ion-col>
+          </ion-row> -->
+        </ion-grid>
       </ion-card>
       <ion-infinite-scroll [hidden]="currentPage > lastPage" *ngIf="openPm.length > 0"  threshold="100px" (ionInfinite)="loadData($event, 1)">
         <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
       </ion-infinite-scroll>
     </div>
     <div *ngSwitchCase="'actionable'">
-      <ion-toolbar>
-        <ion-searchbar mode="md" (ionChange)="searchItem($event, 2)" debounce="1000"></ion-searchbar>
-      </ion-toolbar>
-      <ion-card class="myCard" *ngFor="let dat of actionPm; let i = index" >
-        <ion-card-header color="primary" class="ion-no-padding">
-          <ion-item color="none" lines="none">
-             <b>{{i+1}}. {{dat.pc_desc}} ({{dat.chklist_desc}})</b>
-            <ion-text slot="end" class="center">{{dat.pending_action}}</ion-text>
-          </ion-item>
-        </ion-card-header>
-        <ion-card-content class="ion-padding-start ion-padding-end" style="background-color: var(--ion-color-light);padding-bottom:0px !important">
+      <ion-card *ngFor="let dat of actionPm; let i = index" class="cards" style="border-left:5px solid #E30000">
+        <ion-grid style="margin-left:10px;margin-right:10px;margin-top:0px">
           <ion-row>
-            <ion-col size="6">
-              <ion-text color="medium">WO </ion-text><br>
-              <ion-text color="dark">{{dat.wo_no}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Date</ion-text><br>
-              <ion-text color="dark">{{dat.log_date}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Asset Id</ion-text><br>
-              <ion-text color="dark">{{dat.ext_asset_id || 'NA'}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Asset Name</ion-text><br>
-              <ion-text color="dark">{{dat.subgrp_desc || 'NA'}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Assigned To</ion-text><br>
-              <ion-text color="dark">{{dat.user}}-{{dat.username}}</ion-text>
+            <ion-col style="color: var(--ion-color-primary-dark); font-size:16px">WO {{dat.wo_no}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Site Name</ion-col>
+            <ion-col>{{dat.pc_desc}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Schedule Date</ion-col>
+            <ion-col>{{dat.start_date}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Asset ID</ion-col>
+            <ion-col>{{dat.pc_ext_id}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Device</ion-col>
+            <ion-col>Device</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Assigned To</ion-col>
+            <ion-col>{{dat.user}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Pending Actionable</ion-col>
+            <ion-col style="color:var(--ion-color-danger)">{{dat.pending_action}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-right" style="color: blue">
+              <u><a (click)="openDetailsModal(dat)">Details</a></u>
             </ion-col>
           </ion-row>
           <ion-row>
-            <ion-col>
-              <ion-button size="small" fill="outline" (click)="pmAssign(dat)" expand="block">Assign</ion-button>
+            <ion-col size="4">
+              <ion-button size="small" fill="outline" color="primary-dark" expand="block" shape="round" (click)="pmAssign(dat)" >Assign</ion-button>
             </ion-col>
-            <ion-col>
-              <ion-button class="ion-text-capitalize" size="small" color="medium" *ngIf="dat.ptw_attach" expand="block" (click)="viewAttachment(dat.ptw_attach)" >PTW Img</ion-button>
+            <ion-col size="4">
+              <ion-button size="small" fill="outline" color="primary-dark" expand="block" shape="round" (click)="viewAttachment(dat.ptw_attach)" *ngIf="dat.ptw_attach"  >PTW Img</ion-button>
             </ion-col>
-            <ion-col>
-              <ion-button size="small"  color="success" (click)="openViewReport(dat)" expand="block">View Report</ion-button>
+            <ion-col size="4">
+              <ion-button size="small" fill="outline" color="primary-dark" expand="block" shape="round" (click)="openActionable(dat)" >RESUME</ion-button>
             </ion-col>
           </ion-row>
-        </ion-card-content>
+        </ion-grid>
       </ion-card>
       <ion-infinite-scroll *ngIf="actionPm.length > 0" [hidden]="currentPage > lastPage" threshold="100px" (ionInfinite)="loadData($event, 2)">
         <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
@@ -170,130 +207,197 @@
     </div>
     <!-- RESOLVED -->
     <div *ngSwitchCase="'closed'" class="openInner">
-      <ion-toolbar>
-        <ion-searchbar mode="md" (ionChange)="searchItem($event, 3)" debounce="1000"></ion-searchbar>
-      </ion-toolbar>
-      <ion-card class="myCard" *ngFor="let dat of closePm; let i = index" >
-        <ion-card-header color="primary">
-          <ion-text> <b>{{i+1}}. {{dat.pc_desc}} ( {{dat.chklist_desc}} )</b> </ion-text>
-        </ion-card-header>
-        <ion-card-content class="ion-padding-start ion-padding-end" style="background-color: var(--ion-color-light);padding-bottom:0px !important">
+      <ion-card *ngFor="let dat of closePm; let i = index" class="cards" style="border-left:5px solid #915FC8">
+        <ion-grid style="margin-left:10px;margin-right:10px;margin-top:0px">
           <ion-row>
-            <ion-col size="6">
-              <ion-text color="medium">WO </ion-text><br>
-              <ion-text color="dark">{{dat.wo_no}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Date</ion-text><br>
-              <ion-text color="dark">{{dat.log_date}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <div>
-                <ion-text color="medium">Asset Id</ion-text><br>
-                <ion-text color="dark">{{dat.ext_asset_id || 'NA'}}</ion-text>
-              </div>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Asset Name</ion-text><br>
-              <ion-text>{{dat.subgrp_desc || 'NA'}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="medium">Closed Date</ion-text><br>
-              <ion-text color="dark">{{dat.closed_date}}</ion-text>
-            </ion-col>
+            <ion-col style="color: var(--ion-color-primary-dark); font-size:16px">WO {{dat.wo_no}}</ion-col>
           </ion-row>
           <ion-row>
-            <ion-col>
-              <ion-button class="ion-text-capitalize" size="small" color="medium" *ngIf="dat.ptw_attach" expand="block" (click)="viewAttachment(dat.ptw_attach)" >PTW Img</ion-button>
-            </ion-col>
-            <ion-col class="ion-text-right">
-              <ion-button size="small"  color="tertiary" (click)="openViewReport(dat)" >
+            <ion-col size="5">Site Name</ion-col>
+            <ion-col>{{dat.pc_desc}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Schedule Date</ion-col>
+            <ion-col>{{dat.start_date}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Asset ID</ion-col>
+            <ion-col>{{dat.pc_ext_id}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Device</ion-col>
+            <ion-col>Device</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Assigned To</ion-col>
+            <ion-col>{{dat.user}}</ion-col>
+          </ion-row>
+          <ion-row *ngIf="dat.is_sr_report_btn">
+            <ion-col size="5">Closed Remark</ion-col>
+            <ion-col>{{dat.vendor_rmrk}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-right" >
+              <ion-button size="small" fill="outline" shape="round" color="primary-dark" *ngIf="dat.is_sr_report_btn" (click)="openDoc(dat.vendor_logo, dat.ptw_attach_blob_type)">
+                View SR <ion-icon name="share-outline" slot="end"></ion-icon>
+              </ion-button>
+              <ion-button size="small" fill="outline" shape="round" color="primary-dark" (click)="openClose(dat)" *ngIf="dat.is_check_report_btn">
                 Check Report <ion-icon name="share-outline" slot="end"></ion-icon>
               </ion-button>
             </ion-col>
           </ion-row>
-        </ion-card-content>
+        </ion-grid>
       </ion-card>
       <ion-infinite-scroll threshold="100px" [hidden]="currentPage > lastPage" (ionInfinite)="loadData($event, 3)" *ngIf="closePm.length > 0" >
         <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
       </ion-infinite-scroll>
     </div>
-    <div *ngSwitchCase="'mywo'">
-      <ion-card class="myCard" *ngFor="let dat of myWorkOrder; let i = index" >
-        <ion-card-header color="primary">
-          <ion-text> <b>{{i+1}}. {{dat.pc_desc}} ( {{dat.chklist_desc}} )</b> </ion-text>
-        </ion-card-header>
-        <ion-card-content class="ion-padding" style="background-color: var(--ion-color-light)">
-          <ion-row>
-            <ion-col size="6">
-              <div>
-                <ion-text>
-                  <b>WO</b>
-                </ion-text><br>
-                {{dat.wo_no}}
-              </div>
-            </ion-col>
-            <ion-col>
-              <div>
-                <ion-text>
-                  <b>Status</b>
-                </ion-text><br>
-                {{dat.status_desc}}
-              </div>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="6">
-              <div>
-                <ion-text>
-                  <b>Mobile No</b>
-                </ion-text><br>
-                <a href="tel:{{dat.ro_cont_no}}" class="button button-positive">
-                  {{dat.ro_cont_no}}
-                </a>
-
-              </div>
-            </ion-col>
-            <ion-col size="6">
-              <div>
-                <ion-text>
-                  <b>Cluster</b>
-                </ion-text><br>
-                {{dat.rgn_name}}
-              </div>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col>
-              <div>
-                <ion-text>
-                  <b>Last PMS</b>
-                </ion-text><br>
-                {{dat.last_pms}}
-              </div>
-            </ion-col>
-
-            <ion-col>
-              <div>
-                <ion-text>
-                  <b>Date</b>
-                </ion-text><br>
-                {{dat.log_date}}
-              </div>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col>
-              <div>
-                <ion-text>
-                  <b>RO Code</b>
-                </ion-text><br>
-                {{dat.pc_ext_id}}
-              </div>
-            </ion-col>
-          </ion-row>
-        </ion-card-content>
-      </ion-card>
-    </div>
   </div>
+
+  <ion-modal class="previous" [isOpen]="isPreOpen" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismiss()">
+    <ng-template>
+      <ion-header>
+        <ion-item lines="none">
+          <ion-label>
+            <h2><ion-text color="primary-dark">{{selectedData.wo_no}}</ion-text></h2>
+            <p ><ion-text color="primary-dark" style="font-family: 'opensans_light' !important;">Approver Transaction</ion-text></p>
+          </ion-label>
+          <ion-buttons slot="end">
+            <ion-button (click)="isPreOpen = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-item>
+      </ion-header>
+      <ion-content>
+        <div style="padding:16px">
+          <ion-grid>
+            <ion-row class="row" *ngFor="let dat of logs; let i = index">
+              <ion-col size="1" class="ion-padding-start">
+                <div class="images"> <img [src]="dat.status_id === '0' ? 'assets/img/red_dot.jpg' : 'assets/img/dot.jpeg'"></div>
+                <div class="line" [hidden] = "i === (logs.length - 1) "></div>
+              </ion-col>
+              <ion-col size="11" >
+                <ion-card class="approver_card">
+                  <ion-card-content class="ion-no-padding">
+                    <ion-row style="width:100%;height:auto;padding:5px;background-color:rgb(230, 232, 254)">
+                      <ion-col size="6">{{dat.status}}</ion-col>
+                      <ion-col class="ion-text-right" size="6" *ngIf="dat.attach !== ''">
+                        <ion-icon name="attach-outline" style="font-size:20px" (click)="viewAttachment(dat.attach)"></ion-icon>
+                      </ion-col>
+                      <!-- <ion-col class="ion-text-right">{{dat.date}}</ion-col> -->
+                    </ion-row>
+                    <ion-row>
+                      <ion-col size="6" color="medium">{{dat.status_id === '0' ? 'Rejected By': 'Approve by'}}</ion-col>
+                      <ion-col size="6">{{dat.action_by}}</ion-col>
+                    </ion-row>
+                    <ion-row>
+                      <ion-col size="6" color="medium">Date Time</ion-col>
+                      <ion-col size="6">{{dat.date}}</ion-col>
+                    </ion-row>
+                    <ion-row>
+                      <ion-col size="6" color="medium">Remark</ion-col>
+                      <ion-col size="6">{{dat.remark}}</ion-col>
+                    </ion-row>
+                  </ion-card-content>
+                </ion-card>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal class="cancel" [isOpen]="isCloseAction" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismissClose()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Cancel</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isCloseAction = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <section class="inputbox" style="height:100%;">
+          <ion-text color="primary" >Enter Remark</ion-text>
+          <ion-item lines="none" style="border:2px solid rgba(42, 41, 92, 0.20);">
+            <ion-textarea rows="3" type="text" placeholder="Enter Remark here..." [(ngModel)]="closeRemark"> </ion-textarea>
+          </ion-item>
+        </section>
+      </ion-content>
+      <ion-footer>
+        <ion-toolbar style="padding-left: 16px; padding-right:16px">
+          <ion-button expand="block" color="primary" (click)="filterIds()">Submit</ion-button>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal class="details" [isOpen]="isDetailsAction" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismissDetails()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar >
+          <ion-title>Details</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isDetailsAction = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content> 
+        <ion-card class="cards ion-padding">
+          <ion-row>
+            <ion-col size="4">Block</ion-col>
+            <ion-col>{{selectedData.block_name}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Building</ion-col>
+            <ion-col>{{selectedData.building_name}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Floor</ion-col>
+            <ion-col>{{selectedData.floor_name}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Location</ion-col>
+            <ion-col>{{selectedData.location_desc}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Creation Date</ion-col>
+            <ion-col>{{selectedData.log_date}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Last PPM</ion-col>
+            <ion-col>{{selectedData.last_pms}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Overdue Days</ion-col>
+            <ion-col>{{selectedData.overdueDays}} </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Completion Date</ion-col>
+            <ion-col>{{selectedData.closed_date}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Team Leader</ion-col>
+            <ion-col>{{selectedData.team_leader}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="4">Created By</ion-col>
+            <ion-col>{{selectedData.creator}}</ion-col>
+          </ion-row>
+            <ion-row>
+            <ion-col size="4">Remark</ion-col>
+            <ion-col>{{selectedData.remark}}</ion-col>
+          </ion-row>
+        </ion-card>        
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
+

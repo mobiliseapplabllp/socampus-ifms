@@ -1,6 +1,6 @@
 import { Component,OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { AlertController, LoadingController, NavController, Platform } from '@ionic/angular';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AlertController, LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { environment } from 'src/environments/environment';
@@ -23,7 +23,11 @@ export class PmReportComponent  implements OnInit {
   rowIndex: any;
   colIndex: any;
   loop = false;
-
+  progress = 0;
+  isOpen = false;
+  questionList: any = [];
+  category: any = [];
+  selectedCategory = 0;
   constructor(
     private activeroute: ActivatedRoute,
     private alertController: AlertController,
@@ -34,6 +38,8 @@ export class PmReportComponent  implements OnInit {
     private common: CommonService,
     private httpDigital: DigitalChecklistService,
     private platform: Platform,
+    private modal: ModalController,
+    private router: Router,
     private camera: CameraService) {
 
   }
@@ -41,18 +47,74 @@ export class PmReportComponent  implements OnInit {
   ngOnInit() {
     this.activeroute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
-      this.getScheduleQuestion();
     });
 
-    if (this.platform.is('capacitor')) {
-      SpeechRecognition.checkPermissions().then(res => {
-        if (res.speechRecognition === 'granted') {
-          return
-        } else {
-          this.permission();
+    // if (this.platform.is('capacitor')) {
+    //   SpeechRecognition.checkPermissions().then(res => {
+    //     if (res.speechRecognition === 'granted') {
+    //       return
+    //     } else {
+    //       this.permission();
+    //     }
+    //   });
+    // }
+  }
+
+  ionViewDidEnter() {
+    this.getScheduleQuestion();
+  }
+
+  getCategory(wo_id: any) {
+    this.common.presentLoading().then(preLoad => {
+      this.httpPmCal.getCategory(wo_id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.myCategory = data.data.categories;
+            for (var i = 0 ; i < this.myCategory.length; i++) {
+              if (this.myCategory[i].is_applicable === 1) { // 3 means NA; 1 = yes
+                this.myCategory[i].is_applicable_temp = true;
+              } else {
+                this.myCategory[i].is_applicable_temp = false;
+              }
+            }
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.common.dismissloading();
         }
       });
+    })
+  }
+
+  openQusPage(data: any) {
+    if (!data.is_applicable_temp) {
+      this.common.presentToast('This category is not Applicable', 'warning');
+      return;
     }
+    data.wo_no = this.requestedData.wo_no;
+    data.wo_id = this.requestedData.wo_id
+    data.id = this.requestedData.id;
+    this.router.navigate(['/pm-calibration/fill-qus'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
+  }
+
+
+  openModal(question: any, category: any) {    
+    if (!category.is_applicable) {
+      return
+    }
+    this.isOpen = true;
+    this.questionList = question;
+    this.category = category
   }
 
   ionViewWillLeave() {
@@ -67,6 +129,10 @@ export class PmReportComponent  implements OnInit {
     SpeechRecognition.requestPermissions().then(res => {});
   }
 
+  cancel() {
+    this.modal.dismiss(null, 'cancel');
+  }
+
   scrollToDiv(id: string) {
     setTimeout(() => {
       const element = document.getElementById(id);
@@ -77,38 +143,39 @@ export class PmReportComponent  implements OnInit {
   }
 
   getScheduleQuestion() {
-    this.presentLoading('Please Wait').then(preLoad => {
-      this.httpPmCal.getScheduleQuestion(this.requestedData.wo_id).subscribe({
+    this.common.presentLoading('Please Wait').then(preLoad => {
+      this.httpPmCal.getScheduleQuestion(this.requestedData.id).subscribe({
         next:(data) => {
-          this.myCategory = data.data.categories;
+          this.myCategory = data.data.categories;          
           this.myCategory.forEach((element: any) => {
-            element.isResponseShow = false;
+            // element.is_applicable_temp = element.is_applicable === 1 ? true: false; // yeah dheeraj ne hatwai hai kyuki ab sare category bydefault enable hai
+            element.is_applicable_temp = true;
+            element.total_questions = element.qus.length;
+            let total_action = 0, count = 0;
+            element.responded_questions = total_action;
+            count = count + 1
+            if(element.is_applicable === 1) {
+
+            }
             element.qus.forEach((el: any) => {
-              if(el.response) {
+              if (el.response) {
+                total_action = total_action + 1;
+                el.rspns = el.response.optn_id;
                 el.remark = el.response.remark;
-                el.attachment = el.response.attachment1;
-                if(el.q_type == '226') {
-                  el.rspns = el.response.optn_id;
-                  if (el.rspns) {
-                    const obj = el.options.filter((val: any) => val.optn_id === el.rspns)[0];
-                    el.is_doc_mandatory = obj.is_doc_mandatory;
-                    el.is_rmrk_mandatory = obj.is_rmrk_mandatory;
-                  }
-                } else {
-                  el.rspns = el.response.rspns;
-                }
-              } else {
-                el.response = {}
+                el.attachment1 = el.response.attachment1;
+                element.responded_questions = total_action;
               }
             });
-          });
+            this.selectedCategory = count
+          });          
+          this.myCategory = this.myCategory.filter((val: any) => val.total_questions > 0);          
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     });
@@ -131,25 +198,28 @@ export class PmReportComponent  implements OnInit {
     await alert.present();
   }
 
+  changeToggle(data: any, ind: any) {    
+    if (data.is_applicable_temp === true && data.is_applicable === 1) {
+      return;
+    }
+    data.is_applicable_temp === false ? data.is_applicable = 3: data.is_applicable = 1;
+    this.submitCategoryAction(data)
+  }
+
   expand(data: any, ind: any) {
     this.rowIndex = ind;
     this.colIndex = 0;
-    if (data.qus.length > 0 && data.is_applicable !== 1) {
-      for (var i = 0 ; i < data.qus.length; i ++) {
-        data.qus[i].rspns = '';
-      }
-    }
-    this.submitCategoryAction(data, 1)
+    this.submitCategoryAction(data, data.is_applicable)
   }
 
-  submitCategoryAction(data: any, is_applicable: number) {
+  submitCategoryAction(data: any, is_applicable?: number) {
     const obj = {
       cat_id: data.cat_id,
-      is_applicable: is_applicable,
+      is_applicable: data.is_applicable,
       rspns_source: environment.source,
       wo_id: this.requestedData.wo_id,
     };
-    this.presentLoading('Please Wait..').then(preLoad => {
+    this.common.presentLoading('Please Wait..').then(preLoad => {
       this.httpPmCal.checkListCategoryStatus(obj).subscribe({
         next:(dat) => {
           if (dat.status) {
@@ -223,6 +293,15 @@ export class PmReportComponent  implements OnInit {
       q_max_score: data.q_max_score,
       rspns_source: environment.source
     }
+    let rspns_count = 0;
+    this.category.qus.forEach((element: any) => {
+      if (element.response?.optn_id) {
+        rspns_count = rspns_count + 1;
+        this.category.rspns_count = rspns_count;
+      }
+    });
+    this.category.progress = Math.round(this.category.rspns_count * 100 / this.category.qus.length);
+    this.category.progress1 = this.category.progress / 100
     this.submitResponseAction(obj, data)
   }
 
@@ -306,80 +385,140 @@ export class PmReportComponent  implements OnInit {
     });
   }
 
-  async presentActionSheet(val: any, ind: any) {
+  async presentActionSheet(data: any, ind: any) {
     let obj: any = [];
     if (ind === 1) {
       obj = ['camera', 'gallery'];
     } else {
-      obj = ['camera']
+      obj = ['camera'];
     }
-    this.camera.selectImage(obj, (blob: Blob) => {
-      this.readImg(blob, val)
-    });
-  }
-
-  async readImg(blob: any, data: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    let formData = new FormData();
-    formData.append('wo_id', this.requestedData.wo_id);
-    formData.append('q_id',  data.q_id);
-    formData.append('rspns_source', environment.source);
-    formData.append('attachment2', blob, random);
-    data.imagename = '';
-    this.presentLoading('Please Wait..').then(preLoad => {
-      this.httpPmCal.scheduleResponseActionDoc(formData).subscribe({
-        next:(dat) => {
-          if (dat.status) {
-            data.imagename = 'Uploaded';
-            data.isNotFill = false;
-            this.httpCommon.presentToast(dat.msg, 'success');
-            this.repeatLoop();
-          } else {
-            this.httpCommon.presentToast(dat.msg, 'warning');
+    this.camera.selectImage(obj, (blob) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+      let formData = new FormData();
+      formData.append('wo_id', this.requestedData.wo_id);
+      formData.append('q_id',  data.q_id);
+      formData.append('rspns_source', environment.source);
+      formData.append('attachment2', blob, random);
+      data.imagename = '';
+      this.presentLoading('Please Wait..').then(preLoad => {
+        this.httpPmCal.scheduleResponseActionDoc(formData).subscribe({
+          next:(dat) => {
+            if (dat.status) {
+              data.imagename = 'Uploaded';
+              data.isNotFill = false;
+              this.httpCommon.presentToast(dat.msg, 'success');
+              this.repeatLoop();
+            } else {
+              this.httpCommon.presentToast(dat.msg, 'warning');
+            }
+          },
+          error:() => {
+            this.dismissloading();
+            this.httpCommon.presentToast(environment.errMsg, 'danger');
+          },
+          complete:() => {
+            this.dismissloading();
           }
-        },
-        error:() => {
-          this.dismissloading();
-          this.httpCommon.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
+        });
       });
     });
+    // var obj: any = {}
+    // if (ind === 1) {
+    //   obj = {
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   }
+    // } else {
+    //   obj = {
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //     source: CameraSource.Camera,
+    //   }
+    // }
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto(obj);
+    //   this.readImg(image, val)
+    // };
+    // takePicture();
   }
 
+  // async readImg(photo: any, data: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   let formData = new FormData();
+  //   formData.append('wo_id', this.requestedData.wo_id);
+  //   formData.append('q_id',  data.q_id);
+  //   formData.append('rspns_source', environment.source);
+  //   formData.append('attachment2', blob, random);
+  //   data.imagename = '';
+  //   this.presentLoading('Please Wait..').then(preLoad => {
+  //     this.httpPmCal.scheduleResponseActionDoc(formData).subscribe({
+  //       next:(dat) => {
+  //         if (dat.status) {
+  //           data.imagename = 'Uploaded';
+  //           data.isNotFill = false;
+  //           this.httpCommon.presentToast(dat.msg, 'success');
+  //           this.repeatLoop();
+  //         } else {
+  //           this.httpCommon.presentToast(dat.msg, 'warning');
+  //         }
+  //       },
+  //       error:() => {
+  //         this.dismissloading();
+  //         this.httpCommon.presentToast(environment.errMsg, 'danger');
+  //       },
+  //       complete:() => {
+  //         this.dismissloading();
+  //       }
+  //     });
+  //   });
+  // }
+
   finalSubmit() {
-    const obj = {
-      status: 2,
-      wo_id: this.requestedData.wo_id,
-      source: environment.source
-    };
-    for (let i = 0; i < this.myCategory.length; i++) {
-      if (!this.myCategory[i].is_applicable) {
-        this.httpCommon.presentToastWithOk(`Please Add Response for Category ${i+1} ${this.myCategory[i].cat_desc}` , 'warning');
-        this.scrollToDiv(i.toString());
+    const NACat: any = [];
+    for (var i = 0 ; i < this.myCategory.length; i++) {
+      if (this.myCategory[i].responded_questions !== this.myCategory[i].total_questions) { // if (this.myCategory[i].is_applicable === 1 && (this.myCategory[i].responded_questions !== this.myCategory[i].total_questions)) {
+        this.myCategory[i].isError = true;
+        this.common.presentToast(`Please Response all Question for Category ${i+1}`, 'warning');
         return;
-      }
-      if (this.myCategory[i].is_applicable != 3) {
-        for (let j = 0; j < this.myCategory[i].qus.length; j++) {
-          if (!this.myCategory[i].qus[j].rspns) {
-            this.httpCommon.presentToastWithOk(`Please add Response for Question No ${ j + 1} from Category ${ this.myCategory[i].cat_desc }`, 'warning');
-            this.myCategory[i].qus[j].isNotFill = true;
-            this.myCategory[i].isResponseShow = true;
-            let temp = i+j.toString();;
-            setTimeout(() => {
-              this.scrollToDiv(temp);
-            }, 100);
-            return;
-          } else {
-            this.myCategory[i].isResponseShow = false;
-            this.myCategory[i].qus[j].isNotFill = false;
-          }
-        }
+      } else if (this.myCategory[i].is_applicable !== 1) {
+        NACat.push(this.myCategory[i].cat_id);
       }
     }
-
+    // for (let i = 0; i < this.myCategory.length; i++) {
+    //   if (!this.myCategory[i].is_applicable) {
+    //     this.httpCommon.presentToastWithOk(`Please Add Response for Category ${i+1} ${this.myCategory[i].cat_desc}` , 'warning');
+    //     this.scrollToDiv(i.toString());
+    //     return;
+    //   }
+    //   if (this.myCategory[i].is_applicable != 3) {
+    //     for (let j = 0; j < this.myCategory[i].qus.length; j++) {
+    //       if (!this.myCategory[i].qus[j].rspns) {
+    //         this.httpCommon.presentToastWithOk(`Please add Response for Question No ${ j + 1} from Category ${ this.myCategory[i].cat_desc }`, 'warning');
+    //         this.myCategory[i].qus[j].isNotFill = true;
+    //         this.myCategory[i].isError = true;
+    //         let temp = i+j.toString();;
+    //         setTimeout(() => {
+    //           this.scrollToDiv(temp);
+    //         }, 100);
+    //         return;
+    //       } else {
+    //         this.myCategory[i].isError = false;
+    //         this.myCategory[i].qus[j].isNotFill = false;
+    //       }
+    //     }
+    //   }
+    // }
+    const obj: any = {
+      status: 2,
+      // wo_id: this.requestedData.wo_id, //yeah hatwai hai backend k hisab se 
+      wo_id: this.requestedData.id,
+      source: environment.source,
+      na_cat: NACat
+    };    
     this.presentLoading('Saving Data..').then(preLoad => {
       this.httpPmCal.finalSubmitCheckList(obj).subscribe({
         next:(data) => {
@@ -409,10 +548,10 @@ export class PmReportComponent  implements OnInit {
     this.httpCommon.openDoc(url);
   }
 
-  async presentLoading(msg: string) {
+  async presentLoading(msg?: string) {
     this.loading = await this.loadingController.create({
       cssClass: 'my-custom-class',
-      message: msg,
+      message: msg ? msg: 'Please Wait...',
       duration: 8000
     });
     await this.loading.present();

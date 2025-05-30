@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
+import { CommonService } from 'src/app/provider/common/common.service';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 
 @Component({
@@ -14,8 +15,8 @@ export class AssetDevicenameComponent  implements OnInit {
   grp_id: any;
   constructor(
     private modalCtrl: ModalController,
-    private loadingController: LoadingController,
     private httpAsset: MyAssetGetService,
+    private common: CommonService
   ) { }
 
   ngOnInit() {
@@ -25,11 +26,11 @@ export class AssetDevicenameComponent  implements OnInit {
   ionViewDidLeave() {
     this.myDeviceName = [];
     this.myDeviceNameCopy = [];
-    this.dismissloading();
+    this.common.dismissloading();
   }
 
   getDeviceName() {
-    this.presentLoading().then(preLaod => {
+    this.common.presentLoading().then(preLaod => {
       this.httpAsset.getDeviceName(this.grp_id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -38,10 +39,10 @@ export class AssetDevicenameComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     });
@@ -49,20 +50,6 @@ export class AssetDevicenameComponent  implements OnInit {
 
   closeModal(val: any, status: any) {
     this.modalCtrl.dismiss(val, status);
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
   }
 
   search(ev: any) {

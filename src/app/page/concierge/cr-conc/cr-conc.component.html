@@ -1,0 +1,100 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Concierge Create</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card>
+    <form [formGroup]="forms">
+      <ion-item (click)="openRoName()">
+        <ion-label color="primary" position="floating">Select Site <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="email" formControlName="site_id_desc" readonly></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label color="primary" position="floating">Requestee  <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet"  mode="ios" formControlName="request_for" (ionChange)="changeRequest()">
+          <ion-select-option value="Self">Self</ion-select-option>
+          <ion-select-option value="On Behalf">On Behalf</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-label color="primary" position="floating">Name <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="email" formControlName="name" [readonly]="forms.value.request_for === 'Self' ? true: false "></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label color="primary" position="floating">Email <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="email" formControlName="email"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Mobile <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="number" formControlName="mobile"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Select Category  <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet"  mode="ios" formControlName="cat_id" (ionChange)="changeCategory()">
+          <ion-select-option *ngFor="let dat of categoryArr" [value]="dat.value">{{dat.label}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Select Sub Category  <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet"  mode="ios" formControlName="subcat_id" (ionChange)="changeSubCat()">
+          <ion-select-option *ngFor="let dat of subCatArr" [value]="dat.value">{{dat.label}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Response Time <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="text" formControlName="tckt_response" readonly></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Resolve Time <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="text" formControlName="tckt_resolve" readonly></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Billed To  <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet"  mode="ios" formControlName="billed_to">
+          <ion-select-option value="company">Company</ion-select-option>
+          <ion-select-option value="employee">Employee</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Select Urgency  <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet"  mode="ios" formControlName="priority">
+          <ion-select-option value="low">Low</ion-select-option>
+          <ion-select-option value="medium">Medium</ion-select-option>
+          <ion-select-option value="hard">Hard</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Remark  <ion-text color="danger">*</ion-text></ion-label>
+        <ion-textarea rows="4" type="text" formControlName="remark"></ion-textarea>
+      </ion-item>
+
+      <ion-button size="small" (click)="attachment()" class="ion-padding-start" [color]="isAttachment ? 'success' : 'primary' ">Attachment</ion-button>
+      <br>
+      <!-- <br>
+      <ion-row>
+        <ion-col>
+          <ion-button expand="block" class="ion-text-capitalize" (click)="submit()" [disabled]="forms.invalid">Create Ticket</ion-button>
+        </ion-col>
+      </ion-row> -->
+    </form>
+
+  </ion-card>
+
+</ion-content>
+<ion-footer>
+  <ion-toolbar style="padding-left: 8px;padding-right: 8px;">
+    <ion-button expand="block" class="ion-text-capitalize" (click)="submit()" [disabled]="forms.invalid">Create Ticket</ion-button>
+  </ion-toolbar>
+</ion-footer>

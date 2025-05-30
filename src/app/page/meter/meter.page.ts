@@ -61,7 +61,7 @@ export class MeterPage implements OnInit {
       return;
     }
     let fullUrl = environment.url + 'meter/ifms/meter-schedule-by-qrcode/' + lastEncryptedString
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpMeter.getPendingWoBarcode(fullUrl).subscribe({
         next:(data) => {
           if (data.status) {
@@ -72,11 +72,11 @@ export class MeterPage implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
@@ -84,7 +84,7 @@ export class MeterPage implements OnInit {
   }
 
   getPendingWo() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpMeter.getPendingWo().subscribe({
         next:(data) => {
           if (data.status) {
@@ -95,11 +95,11 @@ export class MeterPage implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     })
@@ -229,7 +229,7 @@ export class MeterPage implements OnInit {
       this.formData.delete(key);
       this.formData.append(key, obj[key]);
     }
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpMeter.updateReading(this.formData).subscribe({
         next:(data) => {
           if (data.status) {
@@ -246,20 +246,23 @@ export class MeterPage implements OnInit {
         },
         error:() => {
           this.common.presentToast(environment.errMsg, 'danger');
-          this.dismissloading();
+          this.common.dismissloading();
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     })
   }
 
   checkPhotoCondition(dat: any, type: any) {
+    let obj: any = [];
     if (dat.is_gllry_upld_allwd == 1) {
-      this.presentActionSheet(1, dat , type);
+      obj = ['camera', 'gallery'];
+      this.presentActionSheet(obj, dat, type);
     } else if (dat.is_gllry_upld_allwd == 0) {
-      this.presentActionSheet(0, dat , type);
+      obj = ['camera'];
+      this.presentActionSheet(obj, dat, type);
     } else {
       alert('Gallery is Undefined ' + dat.is_gllry_upld_allwd);
     }
@@ -307,12 +310,77 @@ export class MeterPage implements OnInit {
           }
         }
       }
-      this.presentLoading().then(preLoad => {
+      this.common.presentLoading().then(preLoad => {
         setTimeout(() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }, 500)
       })
-  }
+    }
+
+
+
+  // async presentActionSheet(val: any, data: any, type: any) {
+  //   const takePicture = async () => {
+  //     var obj: any = {};
+  //     if (val === 1) {
+  //       obj = {
+  //         quality: 80,
+  //         allowEditing: false,
+  //         resultType: CameraResultType.Uri,
+  //       }
+  //     } else {
+  //       obj = {
+  //         quality: 80,
+  //         allowEditing: false,
+  //         source: CameraSource.Camera,
+  //         resultType: CameraResultType.Uri,
+  //       }
+  //     }
+  //     const image = await Camera.getPhoto(obj);
+  //     this.readImg(image, data ,type)
+  //   };
+  //   takePicture();
+  // }
+
+  // async readImg(photo: any, data: any,type: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   if (type == 'consumption') {
+  //       this.formData.delete('img1');
+  //       this.formData.append('img1', blob, random);
+  //       data.isConsumptionImg = true;
+  //       for (var i = 0; i < this.meterInfo.length;i++) {
+  //         if (data.wo_id !== this.meterInfo[i].wo_id) {
+  //           this.meterInfo[i].isConsumptionImg = false;
+  //         }
+  //       }
+  //     } else if (type == 'generate_reading') {
+  //       this.formData.delete('img2');
+  //       this.formData.append('img2', blob, random);
+  //       data.isGenerationImg = true;
+  //       for (var i = 0; i < this.meterInfo.length;i++) {
+  //         if (data.wo_id !== this.meterInfo[i].wo_id) {
+  //           this.meterInfo[i].isGenerationImg = false;
+  //         }
+  //       }
+  //     } else if (type === 'other') {
+  //       this.formData.delete('img3');
+  //       this.formData.append('img3', blob, random);
+  //       data.isOtherImg = true;
+  //       for (var i = 0; i < this.meterInfo.length;i++) {
+  //         if (data.wo_id !== this.meterInfo[i].wo_id) {
+  //           this.meterInfo[i].isOtherImg = false;
+  //         }
+  //       }
+  //     }
+  //     this.presentLoading().then(preLoad => {
+  //       setTimeout(() => {
+  //         this.dismissloading();
+  //       }, 500)
+  //     })
+  // }
+
 
   async presentLoading() {
     this.loading = await this.loadingController.create({

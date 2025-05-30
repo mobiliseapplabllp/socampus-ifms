@@ -92,7 +92,7 @@ export class CommonService {
   openImg(url: string, blobType: string) {
     const formData = new FormData();
     formData.append('url', url);
-    formData.append('blob_name', blobType || 'PRIVATE');
+    formData.append('blob_name', blobType || ' ');
     this.presentLoading().then(preLoad => {
       this.http.post(environment.url + 'blob-url', formData).subscribe({
         next:(data: any) => {
@@ -150,9 +150,15 @@ export class CommonService {
     return await modal.present();
   }
 
-  async presentLoading() {
+  async presentLoading(msg?: string) {
+    let message;
+    if(msg) {
+      message = msg
+    } else {
+      message = 'Please Wait.';
+    }
     this.loading = await this.loadingController.create({
-      message: 'Please wait...',
+      message: message,
     });
     await this.loading.present();
   }

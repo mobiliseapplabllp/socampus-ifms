@@ -69,12 +69,12 @@ const routes: Routes = [
     loadChildren: () => import('./page/meter/meter.module').then( m => m.MeterPageModule)
   },
   {
-    path: 'digital-checklist-offline',
-    loadChildren: () => import('./page/digital-checklist-offline/digital-checklist-offline.module').then( m => m.DigitalChecklistOfflinePageModule)
-  },
-  {
     path: 'approvals',
     loadChildren: () => import('./page/approvals/approvals.module').then( m => m.ApprovalsPageModule)
+  },
+  {
+    path: 'concierge',
+    loadChildren: () => import('./page/concierge/concierge.module').then( m => m.ConciergePageModule)
   },
 ];
 

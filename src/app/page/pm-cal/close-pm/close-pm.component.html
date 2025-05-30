@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title id="open-modal" > {{requestedData.wo_no}} </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-row>
+    <ion-col class="ion-padding-start ion-padding-top"> Category({{myCategory.length}})</ion-col>
+  </ion-row>
+  <ion-card (click)="viewQuestion(dat)" *ngFor="let dat of allRes; let ind = index" style="border-left:5px solid rgb(143, 6, 249);box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;padding-bottom:10px">
+    <ion-item>
+      <ion-label class="ion-text-wrap">
+        <h2>{{dat.cat_desc}}</h2>
+      </ion-label>
+      <ion-buttons slot="end">
+        <ion-button slot="icon-only">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
+    <ion-row >
+      <ion-col size="9">Question</ion-col>
+      <ion-col size="3" class="ion-text-right ion-padding-right">{{dat.action_done}}/{{dat.total_length}}</ion-col>
+      <ion-col size="12">
+        <ion-progress-bar [color]="dat.action_done ===  dat.total_length ? 'primary': 'warning'" [value]="(dat.action_done * 100 / dat.total_length) / 100"></ion-progress-bar>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+</ion-content>

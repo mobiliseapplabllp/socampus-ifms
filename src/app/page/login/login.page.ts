@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LoadingController, MenuController, Platform } from '@ionic/angular';
+import { LoadingController, MenuController, ModalController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { environment } from 'src/environments/environment';
@@ -71,16 +71,13 @@ export class LoginPage implements OnInit {
         this.fcmToken = token.value;
       });
 
-      await PushNotifications.addListener('registrationError', err => {
-        console.error('Registration error: ', err.error);
+      await PushNotifications.addListener('registrationError', err => {        
       });
 
-      await PushNotifications.addListener('pushNotificationReceived', notification => {
-        console.log('Push notification received: ', notification);
+      await PushNotifications.addListener('pushNotificationReceived', notification => {        
       });
 
-      await PushNotifications.addListener('pushNotificationActionPerformed', notification => {
-        console.log('Push notification action performed', notification.actionId, notification.inputValue);
+      await PushNotifications.addListener('pushNotificationActionPerformed', notification => {        
       });
     }
 
@@ -99,8 +96,7 @@ export class LoginPage implements OnInit {
     }
 
     const getDeliveredNotifications = async () => {
-      const notificationList = await PushNotifications.getDeliveredNotifications();
-      console.log('delivered notifications', notificationList);
+      const notificationList = await PushNotifications.getDeliveredNotifications();      
     }
     addListeners();
     registerNotifications();
@@ -177,11 +173,7 @@ export class LoginPage implements OnInit {
 
     browser.on('loaderror').subscribe(error => {
       console.error('InAppBrowser error:', error);
-
-      // Display an error message to the user
       alert(JSON.stringify(error));
-
-      // Optionally, you can close the InAppBrowser here if necessary
       browser.close();
     });
   }
@@ -252,17 +244,14 @@ export class LoginPage implements OnInit {
     });
   }
 
-  getOtpValue(ev: any) {
-    console.log(ev);
-    console.log(ev.length);
+  getOtpValue(ev: any) {    
     this.otp = '';
     if (ev.length === 4) {
       this.otp = ev;
     }
   }
 
-  verifyOtp() {
-    console.log(this.loginForms.value);
+  verifyOtp() {    
     const formData = new FormData();
     formData.append('user_name', this.loginForms.value.userid);
     formData.append('otp', this.otp);

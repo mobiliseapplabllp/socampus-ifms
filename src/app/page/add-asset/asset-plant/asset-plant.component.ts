@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
+import { CommonService } from 'src/app/provider/common/common.service';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
-
 @Component({
   selector: 'app-asset-plant',
   templateUrl: './asset-plant.component.html',
@@ -16,7 +16,7 @@ export class AssetPlantComponent  implements OnInit {
   constructor(
     private modalCtrl: ModalController,
     private httpAsset: MyAssetGetService,
-    private loadingController: LoadingController,
+    private common: CommonService
   ) { }
 
   ngOnInit() {
@@ -30,13 +30,13 @@ export class AssetPlantComponent  implements OnInit {
   ionViewDidLeave() {
     this.plantName = [];
     this.plantNameCopy = [];
-    this.dismissloading();
+    this.common.dismissloading();
   }
 
   getValueFromPlant() {
-    this.presentLoading().then(preload => {
+    this.common.presentLoading().then(preload => {
       this.httpAsset.getPlantByCategory(this.faciity_type).subscribe(data => {
-        this.dismissloading();
+        this.common.dismissloading();
         if (data.status) {
           this.plantName = data.data;
           this.plantNameCopy = data.data
@@ -45,19 +45,6 @@ export class AssetPlantComponent  implements OnInit {
     });
   }
 
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
-  }
 
   search(ev: any) {
     this.plantName = this.plantNameCopy;

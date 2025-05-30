@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
 import { ApprovalService } from 'src/app/provider/approval/approval.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { environment } from 'src/environments/environment';
@@ -28,7 +27,6 @@ export class ApprovalsPage implements OnInit {
   pendingList: any = [];
   constructor(
     private router: Router,
-    private loadingController: LoadingController,
     private common: CommonService,
     private httpApproval: ApprovalService,
   ) { }
@@ -40,7 +38,7 @@ export class ApprovalsPage implements OnInit {
   }
 
   ionViewDidLeave() {
-    this.dismissloading();
+    this.common.dismissloading();
   }
 
   openPage(data: any) {
@@ -57,7 +55,7 @@ export class ApprovalsPage implements OnInit {
   }
 
   getPendingPTW() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpApproval.getPendingPTW().subscribe({
         next:(data) => {
           if (data.status) {
@@ -72,26 +70,12 @@ export class ApprovalsPage implements OnInit {
         },
         error:() => {
           this.common.presentToast(environment.errMsg, 'danger');
-          this.dismissloading();
+          this.common.dismissloading();
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please Wait...',
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
   }
 }

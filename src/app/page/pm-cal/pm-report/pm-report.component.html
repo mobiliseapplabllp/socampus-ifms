@@ -3,14 +3,67 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title> Fill Report ({{requestedData.short_code}}/{{requestedData.year}}/{{requestedData.wo_id}}) </ion-title>
+    <ion-title id="open-modal" >{{requestedData.wo_no}} </ion-title>
     <ion-buttons slot="end" *ngIf="loop">
       <ion-button (click)="stopSpeaker()" color="danger">Stop <ion-icon name="volume-high-outline" slot="end"></ion-icon></ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-card style="border-bottom:4px solid var(--ion-color-primary);border-radius: 5px;background-color:var(--ion-color-light)">
+  <ion-row>
+    <ion-col size="6" class="ion-padding-start ion-padding-top"> Category({{myCategory.length}})</ion-col>    
+  </ion-row>
+  <ion-card (click)="openQusPage(dat)" *ngFor="let dat of myCategory; let ind = index" [ngClass]="{fullborder: dat.isError === true}" style="border-left:5px solid #915FC8;box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;">
+    <ion-item>
+      <ion-label class="ion-text-wrap">{{ind+1}}. {{dat.cat_desc}}</ion-label>      
+    </ion-item>
+    <ion-row >
+      <ion-col size="9">Question</ion-col>
+      <ion-col size="3" class="ion-text-right ion-padding-right">{{dat.responded_questions}}/{{dat.total_questions}}</ion-col>
+      <ion-col size="12">
+        <ion-progress-bar [color]="dat.responded_questions === dat.total_questions ? 'success': 'warning' " [value]="(dat.responded_questions * 100 / dat.total_questions)/100 "></ion-progress-bar>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+</ion-content>
+<ion-footer class="ion-no-border">
+  <ion-toolbar color="light" style="padding: 0px 10px">
+    <ion-button expand="block" color="primary" (click)="finalSubmit()">Submit <ion-icon name="arrow-forward" slot="end"></ion-icon> </ion-button>
+  </ion-toolbar>
+</ion-footer>
+<!-- <ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title id="open-modal" > WO-{{requestedData.wo_no}} </ion-title>
+    <ion-buttons slot="end" *ngIf="loop">
+      <ion-button (click)="stopSpeaker()" color="danger">Stop <ion-icon name="volume-high-outline" slot="end"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <ion-row>
+    <ion-col>
+      Category({{myCategory.length}})
+    </ion-col>
+  </ion-row>
+  <ion-card *ngFor="let dat of myCategory; let ind = index" [ngClass]="{fullborder: dat.isError === true}" style="border-left:5px solid #915FC8;box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;">
+    <div id={{ind}}>
+      <ion-item>
+        <ion-label class="ion-text-wrap">{{ind+1}}. {{dat.cat_desc}}</ion-label>
+        <ion-toggle slot="end" [(ngModel)]="dat.is_applicable_temp" (ionChange)="changeToggle(dat, ind)"></ion-toggle>
+      </ion-item>
+      <ion-row  (click)="openModal(dat.qus, dat)" [ngClass]="{'disabled-card': !dat.is_applicable_temp}">
+        <ion-col size="9">Question</ion-col>
+        <ion-col size="3" class="ion-text-right ion-padding-right">{{dat.rspns_count}}/{{dat.qus.length}}</ion-col>
+        <ion-col size="12">
+          <ion-progress-bar [color]="dat.progress1 === 1 ? 'primary': 'warning' " [value]="dat.progress1"></ion-progress-bar>
+        </ion-col>
+      </ion-row>
+    </div>
+  </ion-card> -->
+  <!-- <ion-card style="border-bottom:4px solid var(--ion-color-primary);border-radius: 5px;background-color:var(--ion-color-light)">
     <ion-row>
       <ion-col size="6">
         <ion-text color="primary">Site Name</ion-text><br>
@@ -70,18 +123,15 @@
         <ion-row>
           <ion-col size="5" style="font-size:large;font-weight: 500;display: flex; align-items: center; padding-left: 10px">Applicable</ion-col>
           <ion-col class="ion-text-right">
-            <ion-button size="small" [fill]="dat.is_applicable === 3 ? 'solid': 'outline'" shape="round" (click)="notApplicable(dat)" [color]="dat.is_applicable === 3 ? 'success': 'medium'" [disabled]="dat.is_applicable === 3"> <!-- [disabled]="dat.is_applicable === 3"-->
+            <ion-button size="small" [fill]="dat.is_applicable === 3 ? 'solid': 'outline'" shape="round" (click)="notApplicable(dat)" [color]="dat.is_applicable === 3 ? 'success': 'medium'" [disabled]="dat.is_applicable === 3">
               NA <ion-icon *ngIf="dat.is_applicable === 3" name="checkmark-outline" slot="end"></ion-icon>
             </ion-button>
-            <ion-button size="small" [fill]="dat.is_applicable === 1 ? 'solid': 'outline'" shape="round" (click)="expand(dat, ind)" [color]="dat.is_applicable === 1 ? 'success': 'medium'" [disabled]="dat.is_applicable === 1"> <!-- [disabled]="dat.is_applicable === 1"-->
+            <ion-button size="small" [fill]="dat.is_applicable === 1 ? 'solid': 'outline'" shape="round" (click)="expand(dat, ind)" [color]="dat.is_applicable === 1 ? 'success': 'medium'" [disabled]="dat.is_applicable === 1">
               YES <ion-icon *ngIf="dat.is_applicable === 1" name="checkmark-outline" slot="end"></ion-icon>
             </ion-button>
             <ion-button size="small" shape="round" color="secondary" fill="outline" *ngIf="dat.is_applicable === 1" (click)="viewMore(dat, ind)">
               <ion-icon [name]="!dat.isResponseShow ? 'eye-outline' : 'eye-off-outline'"></ion-icon>
             </ion-button>
-            <!-- <ion-button size="small" shape="round" color="secondary" fill="outline" *ngIf="dat.is_applicable === 1" [hidden]="!dat.isResponseShow" (click)="viewMore(dat, ind)">
-              <ion-icon name="eye-off-outline"></ion-icon>
-            </ion-button> -->
           </ion-col>
         </ion-row>
       </section>
@@ -142,9 +192,86 @@
       </div>
     </div>
   </div>
-  <ion-row *ngIf="myCategory.length > 0">
+   -->
+   <!-- <ion-row *ngIf="myCategory.length > 0">
     <ion-col>
       <ion-button expand="full" (click)="finalSubmit()">Submit</ion-button>
     </ion-col>
   </ion-row>
-</ion-content>
+
+  <ion-modal [isOpen]="isOpen">
+    <ng-template>
+      <ion-header class="ion-no-border">
+        <ion-toolbar color="primary-dark">
+          <ion-button slot="start" (click)="isOpen = false" fill="clear" color="light" size="large">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+          <ion-title class="ion-text-left">WO-{{requestedData.wo_no}}</ion-title>
+        </ion-toolbar>
+        <ion-toolbar color="primary-dark">
+          <ion-item color="none" lines="none">
+            <ion-label color="light">{{category.cat_desc}}</ion-label>
+            <svg width="40" height="40" viewBox="0 0 36 36" class="circular-chart" slot="end">
+              <path class="circle-bg"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <path class="circle"
+                [attr.stroke-dasharray]="category.progress + ', 100'"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <text x="18" y="20.35" class="percentage">{{ category.rspns_count }}</text>
+            </svg>
+          </ion-item>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="modal-content">
+        <ion-card *ngFor="let dat of questionList;let i = index" style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;padding:10px;margin:20px;border-radius: 10px;">
+          <ion-row>
+            <ion-col size="6">
+              <ion-text color="primary-dark" style="font-size:22px">Q.{{i+1}}</ion-text>
+            </ion-col>
+            <ion-col size="6" class="ion-text-right ion-padding-right" style="display: flex; justify-content: end;">
+              <ion-text color="primary">Scope -</ion-text> <ion-text color="primary-dark">Sodexo</ion-text> </ion-col>
+            <ion-col size="12">
+              <ion-text color="primary-dark"> {{dat.q_desc}}</ion-text>
+            </ion-col>
+          </ion-row>
+
+          <ion-radio-group color="none" mode="md" [(ngModel)]="dat.rspns"  (ionChange)="changeOptionResponse(dat, $event)" >
+            <ion-item class="radioButton" *ngFor="let opt of dat.options" >
+              <ion-label>{{opt.optn_desc}}</ion-label>
+              <ion-radio slot="end" [value]="opt.optn_id"></ion-radio>
+            </ion-item>
+          </ion-radio-group>
+
+          <section class="inputbox" >
+            <ion-text color="primary" >Remarks</ion-text>
+            <ion-item lines="none" style="border:1px solid var(--ion-color-primary-dark)">
+              <ion-textarea rows="3" type="text" [(ngModel)]="dat.remark" placeholder="Enter your Remark" [disabled]="!dat.rspns" (change)="changeRemark(dat)"></ion-textarea>
+            </ion-item>
+          </section>
+          <ion-row>
+            <ion-col class="ion-text-left" size="6" >
+              <ion-button [disabled]="!dat.rspns" [ngClass]="{redBorder: dat.is_doc_mandatory === 1 && (!dat.imagename && !dat.attachment)}" size="small" [color]="!dat.imagename ? 'primary': 'success'" [fill]="!dat.imagename ? 'outline' : 'solid' " (click)="presentActionSheet(dat, 1)">
+                IMG
+                <ion-icon name="attach-outline" slot="end" *ngIf="!dat.imagename"></ion-icon>
+                <ion-icon name="checkmark-done-outline" slot="end" *ngIf="dat.imagename"></ion-icon>
+              </ion-button>
+            </ion-col>
+            <ion-col *ngIf="dat.attachment" class="ion-text-right">
+              <ion-button color="danger" (click)="viewDocs(dat.attachment)" fill="clear">
+                <ion-icon name="attach-outline"></ion-icon>
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-card>
+        <ion-button color="light" expand="block" class="ion-padding-start ion-padding-end" fill="outline" (click)="isOpen = false">Submit <ion-icon name="arrow-forward" slot="end"></ion-icon> </ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content> -->

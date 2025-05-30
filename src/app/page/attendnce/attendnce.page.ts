@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController, ModalController, NavController, Platform, ToastController } from '@ionic/angular';
+import { ModalController, NavController, Platform, ToastController } from '@ionic/angular';
 import * as moment from 'moment';
 import { AttendanceService } from 'src/app/provider/attendance/attendance.service';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -36,7 +36,6 @@ export class AttendncePage implements OnInit {
   att_id: any;
   checkLastAttendanceStatus!: boolean;
   constructor(
-    private loadingController: LoadingController,
     private modalController: ModalController,
     private common: CommonService,
     private navCtrl: NavController,
@@ -90,7 +89,7 @@ export class AttendncePage implements OnInit {
   }
 
   checkAttendance(pc_id: any) {
-    this.presentLoading().then(() => {
+    this.common.presentLoading().then(() => {
       this.httpAttendance.checkTodayAttendance(pc_id).subscribe({
         next:(data) => {
           this.checkLastAttendanceStatus = true;
@@ -107,11 +106,11 @@ export class AttendncePage implements OnInit {
         },
         error:() => {
           this.checkLastAttendanceStatus = true;
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     });
@@ -159,9 +158,9 @@ export class AttendncePage implements OnInit {
       if (val === 'OUT') {
         this.formData.append('id', this.att_id);
       }
-      this.presentLoading().then(preLoad => {
+      this.common.presentLoading().then(preLoad => {
         this.httpAttendance.punchInOutAction(this.formData).then((res: any) => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.result = res;
           if (this.result === false) {
             this.common.presentToast(environment.errMsg, 'danger');
@@ -180,21 +179,63 @@ export class AttendncePage implements OnInit {
           }
         });
       });
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
     }
-  }
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 70,
+    //     allowEditing: false,
+    //     source: CameraSource.Camera,
+    //     resultType: CameraResultType.Uri,
+    //   });
+    //   this.readImg(image, val)
+    // };
+    // takePicture();
+  
+
+  // async readImg(photo: any, val: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //     this.formData.delete('photo',);
+  //     this.formData.delete('emp_id');
+  //     this.formData.delete('att_date');
+  //     this.formData.delete('att_lattitude');
+  //     this.formData.delete('att_longitude');
+  //     this.formData.delete('att_time');
+  //     this.formData.delete('att_type');
+
+  //     this.formData.append('photo', blob, random);
+  //     this.formData.append('emp_id', this.userData.id);
+  //     this.formData.append('att_date', moment().format('yyyy-MM-DD'));
+  //     this.formData.append('att_lattitude', this.latitude);
+  //     this.formData.append('att_longitude', this.longitude);
+  //     this.formData.append('att_time', this.currentTime);
+  //     this.formData.append('att_type', val);
+  //     if (val === 'OUT') {
+  //       this.formData.append('id', this.att_id);
+  //     }
+  //     this.common.presentLoading().then(preLoad => {
+  //       this.httpAttendance.punchInOutAction(this.formData).then((res: any) => {
+  //         this.common.dismissloading();
+  //         this.result = res;
+  //         if (this.result === false) {
+  //           this.common.presentToast(environment.errMsg, 'danger');
+  //         } else {
+  //           if (this.result.status === true) {
+  //             this.common.presentToast(this.result.msg, 'success');
+  //             if (val === 'IN') {
+  //               this.attendanceStatus = true;
+  //             } else if (val === 'OUT') {
+  //               this.attendanceStatus = false;
+  //             }
+  //             this.navCtrl.pop();
+  //           } else if (this.result.status === false) {
+  //             this.common.presentToast(this.result.msg, 'warning');
+  //           }
+  //         }
+  //       });
+  //     });
+  // }
 
   async openRoName() {
     const modal = await this.modalController.create({

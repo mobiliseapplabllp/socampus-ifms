@@ -3,7 +3,7 @@ import { LoginService } from './provider/login/login.service';
 import { App } from '@capacitor/app';
 import { Router } from '@angular/router';
 import { ListMasterService } from './provider/list-master/list-master.service';
-import { AlertController, LoadingController, Platform } from '@ionic/angular';
+import { AlertController, Platform } from '@ionic/angular';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { UserIdleService } from 'angular-user-idle';
 import { CommonService } from './provider/common/common.service';
@@ -31,9 +31,7 @@ export class AppComponent {
     private userIdle: UserIdleService,
     private alertController: AlertController,
     private httpLogin: LoginService,
-    private loadingController: LoadingController,
-    private common: CommonService,
-    private zone: NgZone) {
+    private common: CommonService) {
       this.platform.ready().then(res => {
         this.initApp();
         this.getUserData();
@@ -100,24 +98,24 @@ export class AppComponent {
   }
 
   refreshTokenOnly() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpLogin.refreshToken().subscribe({
         next:(data) => {
           localStorage.setItem('token1', data.refresh);
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     });
   }
 
   refreshToken() {
-    this.presentLoading().then(res => {
+    this.common.presentLoading().then(res => {
       this.httpLogin.refreshToken().subscribe({
         next:(data) => {
           if (data.status) {
@@ -133,30 +131,17 @@ export class AppComponent {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
           this.presentAlertConfirmCache();
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
   }
 
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait..'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
-  }
 
   initIdle() {
     this.userIdle.startWatching();

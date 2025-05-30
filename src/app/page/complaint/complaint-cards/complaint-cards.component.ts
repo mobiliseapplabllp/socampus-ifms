@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, LoadingController, ModalController, NavController } from '@ionic/angular';
+import { AlertController, ModalController, NavController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
@@ -32,7 +32,6 @@ export class ComplaintCardsComponent  implements OnInit {
     private httpComplaint: ComplaintService,
     private common: CommonService,
     private router: Router,
-    private loadingController: LoadingController,
     private alertController: AlertController,
     private navCtrl: NavController
   ) {
@@ -68,7 +67,7 @@ export class ComplaintCardsComponent  implements OnInit {
   }
 
   async work_now() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpComplaint.getSpecificTicket(this.data.tkts_id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -87,29 +86,13 @@ export class ComplaintCardsComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissLoading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissLoading();
+          this.common.dismissloading();
         }
-      })
-      // this.httpComplaint.checkTicketConfirm(this.data.tkts_id).subscribe({
-      //   next:(data) => {
-      //     if (data.status) {
-      //       this.openTicketWork();
-      //     } else {
-      //       this.openTicketTypeModal(data.locations, data.data);
-      //     }
-      //   },
-      //   error:() => {
-      //     this.dismissLoading();
-      //     this.common.presentToast(environment.errMsg, 'danger');
-      //   },
-      //   complete:() => {
-      //     this.dismissLoading();
-      //   }
-      // });
+      });
     });
   }
 
@@ -119,16 +102,6 @@ export class ComplaintCardsComponent  implements OnInit {
         data: JSON.stringify(data),
       }
     });
-    // const modal = await this.modalCtrl.create({
-    //   component: TicketTypeComponent,
-    //   componentProps: { requestedData: data }
-    // });
-    // modal.onWillDismiss().then(disModal => {
-    //   if (disModal.role) {
-    //     this.greetEvent.emit(true);
-    //   }
-    // });
-    // modal.present();
   }
 
   openTicketWork(data: any) {
@@ -140,7 +113,7 @@ export class ComplaintCardsComponent  implements OnInit {
   }
 
   fsr(efsr: any) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpComplaint.getEfsr(efsr).subscribe({
         next:(data) => {
           if (data.status) {
@@ -149,21 +122,21 @@ export class ComplaintCardsComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissLoading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissLoading();
+          this.common.dismissloading();
         }
       });
     })
   }
 
   downLoadEfsr(data: any, spareCount: number) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpComplaint.downLoadEfsrPdf(data, spareCount).subscribe({
         next:(data) => {
-          this.dismissLoading();
+          this.common.dismissloading();
           if (data.status) {
             this.common.openImg(data.data.url, data.data.blob_type)
           } else {
@@ -171,11 +144,11 @@ export class ComplaintCardsComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissLoading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissLoading();
+          this.common.dismissloading();
         }
       })
     })
@@ -220,7 +193,7 @@ export class ComplaintCardsComponent  implements OnInit {
   }
 
   reOpenTicket(data: any) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpComplaint.reOpenTicket(data).subscribe({
         next:(data: any) => {
           if (data.status) {
@@ -231,29 +204,14 @@ export class ComplaintCardsComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissLoading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissLoading();
+          this.common.dismissloading();
         }
       });
     })
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...',
-
-    });
-    await this.loading.present();
-  }
-
-  dismissLoading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
   }
 
   indent() {

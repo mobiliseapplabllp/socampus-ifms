@@ -7,8 +7,8 @@ import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.comp
 import { environment } from 'src/environments/environment';
 import { PmAssignComponent } from './pm-assign/pm-assign.component';
 import { PtwUploadComponent } from './ptw-upload/ptw-upload.component';
-import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { CameraService } from 'src/app/provider/camera/camera.service';
+
 @Component({
   selector: 'app-pm-cal',
   templateUrl: './pm-cal.page.html',
@@ -17,16 +17,9 @@ import { CameraService } from 'src/app/provider/camera/camera.service';
 export class PmCalPage implements OnInit {
   status = 'open';
   pmCal: any = [];
-  // pmCalCopy: any = [];
-  // resolvedPm: any = [];
-  // resolvedPmCopy: any = [];
+  isSearch!:boolean;
   loading: any;
-  // userData: any = [];
-  // pmCalBoolean!: boolean;
-  // pmCalResBoolean!: boolean;
-  // counter = 0;
-  // userInfo: any = [];
-  // userName!: string;
+  selectedData: any = [];
   openPm: any = [];
   openPmCopy: any = [];
   actionPm: any = [];
@@ -37,21 +30,24 @@ export class PmCalPage implements OnInit {
   lastPage: any;
   currentPage = 1;
   myWorkOrder: any = [];
-   selectedPms: any = [];
-   searchBy: any;
-   searchValue: any;searchValueDesc: any;
-   selectedObj: any = {};
-   countObj: any = {};
+  selectedPms: any = [];
+  searchBy: any;
+  searchValue: any;searchValueDesc: any;
+  selectedObj: any = {};
+  countObj: any = {};
+  isPreOpen!: boolean;
+  isCloseAction!: boolean;
+  isDetailsAction!: boolean;
+  logs: any = [];
+  closeRemark!: string
   constructor(
     private loadingController: LoadingController,
     private httpPms: PmCalService,
     private common: CommonService,
     private modalCtrl: ModalController,
     private router: Router,
-    private httpDigital: DigitalChecklistService,
     private platform: Platform,
-    private camera: CameraService
-  ) { }
+    private camera: CameraService) { }
 
   ngOnInit() {
     this.common.setBarcode('');
@@ -169,6 +165,57 @@ export class PmCalPage implements OnInit {
     this.closePmCopy = [];
   }
 
+
+  singleCancel(data: any) {
+    this.isCloseAction = true;
+    data.isSelect = true;
+  }
+
+  multiCancel() {
+    this.isCloseAction = true;
+  }
+
+  filterIds() {
+    let submitObj: any, arr =this.openPm.filter((val: any) => val.isSelect == true).map((item: any) => item.id);
+    submitObj = {
+      id: arr,
+      data: {
+        cancel_remark: this.closeRemark
+      }
+    }
+    this.multiCancelAction(submitObj);
+  }
+
+  multiCancelAction(submitObj: any) {
+    if (!this.closeRemark) {
+      this.common.presentToast('Please Enter Remark', 'warning');
+      return;
+    }
+
+    this.presentLoading().then(preLoad => {
+      this.httpPms.closePms(submitObj).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            this.closeRemark = '';
+            this.isCloseAction = false;
+            this.openPm = this.openPm.filter((item: any) => !submitObj.id.includes(item.id));
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+
+  }
+
   multiAssign() {
     const obj =this.openPm.filter((val: any) => val.isSelect == true);
     this.pmAssign(obj);
@@ -183,7 +230,9 @@ export class PmCalPage implements OnInit {
   async pmAssign(dat: any) {
     const modal = await this.modalCtrl.create({
       component: PmAssignComponent,
-      cssClass: 'my-modal',
+      cssClass: 'my-modal-btm',
+      initialBreakpoint: 1,
+      breakpoints: [1],
       componentProps: { data: dat }
     });
     modal.onWillDismiss().then(disModal => {
@@ -205,12 +254,17 @@ export class PmCalPage implements OnInit {
   }
 
   openFillReport(data: any) {
-    if (data.ext_asset_id) {
-      this.selectedObj = data;
-      this.openBarcode(data)
+    if (this.platform.is('capacitor')) {
+      if (data.ext_asset_id) {
+        this.selectedObj = data;
+        this.openBarcode(data)
+      } else {
+        this.openPage(data);
+      }
     } else {
       this.openPage(data);
     }
+
   }
 
   openBarcode(data: any) {
@@ -240,10 +294,13 @@ export class PmCalPage implements OnInit {
     return await modal.present();
   }
 
-  async uploadPtw(dat: any, type: string) {    
+
+   async uploadPtw(dat: any, type: string) {    
     const modal = await this.modalCtrl.create({
       component: PtwUploadComponent,
-      cssClass: 'my-modal2',
+      cssClass: 'my-modal-ptw',
+      initialBreakpoint: 1, // Set to 50% of the screen height
+      breakpoints: [1],
       componentProps : {
         data: dat,
         req_for: type
@@ -254,12 +311,38 @@ export class PmCalPage implements OnInit {
         if (type === 'vendor') {
           this.openPm = this.openPm.filter((val: any) => val.id !== dat.id);
         } else {
-          dat.ptw_attach = disModal.data.ptw_attach
+          dat.ptw_attach = disModal.data.ptw_attach;
+          dat.is_for_ptw_upload_btn = false
         }        
       }
     });
     return await modal.present();
   }
+
+  // async uploadPtw(dat: any) {
+  //   const modal = await this.modalCtrl.create({
+  //     component: PtwUploadComponent,
+  //     cssClass: 'my-modal-ptw',
+  //     initialBreakpoint: 1, // Set to 50% of the screen height
+  //     breakpoints: [1],
+  //     componentProps : {
+  //       data: dat
+  //     }
+  //   });
+  //   modal.onWillDismiss().then(disModal => {
+  //     if (disModal.role) {
+  //       dat.ptw_attach = disModal.data.ptw_attach
+  //     }
+  //   });
+  //   return await modal.present();
+  // }
+
+  changeSearchBy(ev: any) {    
+    if (ev.target.value == 'all') {
+      this.getPm(1);
+    }
+  }
+
 
   searchWoFromServer(stage_id: any) {
     if (this.searchBy == 'all') {
@@ -287,6 +370,9 @@ export class PmCalPage implements OnInit {
         } else {
           this.pmCal = [];
         }
+      }, err => {
+        this.dismissloading();
+        this.common.presentToast(environment.errMsg, 'danger');
       });
 
     });
@@ -307,6 +393,7 @@ export class PmCalPage implements OnInit {
   }
 
   changeSeg(ev: any) {
+    this.selectedPms = [];
     if (ev.target.value == 'open') {
       this.lastSegment = 1;
       this.getPm(this.lastSegment);
@@ -316,18 +403,24 @@ export class PmCalPage implements OnInit {
     } else if (ev.target.value == 'closed') {
       this.lastSegment = 3;
       this.getPm(this.lastSegment);
-    } else if (ev.target.value == 'mywo') {}
+    } else if (ev.target.value == 'mywo') {
+
+    }
   }
 
   async presentActionSheet(data: any) {
-    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
-      this.readImg(blob, data)
-    });
-  }
-
-  async readImg(blob: any, data: any) {
-    let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    let formData = new FormData();
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 90,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   });
+    //   this.readImg(image, data)
+    // };
+    // takePicture();
+    this.camera.selectImage(['camera', 'gallery'], (blob) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+      let formData = new FormData();
       formData.append('attach', blob, random);
       formData.append('id', data.id)
       data.imgname_tmp = random;
@@ -348,6 +441,38 @@ export class PmCalPage implements OnInit {
           this.common.presentToast(environment.errMsg, 'danger');
         });
       })
+    });
+  }
+
+  // async readImg(photo: any, data: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   let formData = new FormData();
+  //     formData.append('attach', blob, random);
+  //     formData.append('id', data.id)
+  //     data.imgname_tmp = random;
+  //     data.docname_tmp = '';
+  //     this.presentLoading().then(preLoad => {
+  //       this.httpPms.uploadPtw(formData).subscribe(res => {
+  //         this.dismissloading();
+  //         if (res.status) {
+  //           this.common.presentToast(res.msg, 'success');
+  //           data.ptw_attach = res.ptw_attach
+  //           data.showPtw =  false
+  //         } else {
+  //           this.common.presentToast(res.msg, 'warning');
+  //         }
+  //       }, err => {
+  //         data.imgname_tmp = ''
+  //         this.dismissloading();
+  //         this.common.presentToast(environment.errMsg, 'danger');
+  //       });
+  //     })
+  // }
+
+  openDoc(url: string, blobType: string) {
+    this.common.openImg(url, blobType);
   }
 
 
@@ -471,4 +596,91 @@ export class PmCalPage implements OnInit {
     });
   }
 
+  openActionable(data: any) {
+    this.router.navigate(['/pm-calibration/actionable'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
+  }
+
+  openClose(data: any) {
+    this.router.navigate(['/pm-calibration/close-pm'], {
+      queryParams: {
+        data: JSON.stringify(data),
+      }
+    });
+  }
+
+  openModal(data: any) {
+    this.isPreOpen = true;
+    this.selectedData = data;
+    this.getPpmPending(this.selectedData.id);
+  }
+
+  onWillDismiss() {
+    this.isPreOpen = false;
+    this.selectedData = [];
+    this.logs = [];
+  }
+
+  onWillDismissClose() {
+    this.isCloseAction = false;
+  }
+
+  onWillDismissDetails() {
+    this.selectedData = [];
+    this.isDetailsAction = false;
+  }
+
+  openDetailsModal(data: any) {
+    this.selectedData = data;
+    this.isDetailsAction = true;    
+  }
+
+  getPpmPending(id: any) {
+    this.presentLoading().then(preLoad => {
+      this.httpPms.PpmPtwApproval(id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            const tmp = data.data;
+            for (var i = 0; i < tmp.length; i++) {
+              let status = tmp[i].status_id;
+
+              if(status !== ""){
+                this.logs.push({
+                  'status' :  (status == "0")?'Rejected':"Approved",
+                  'status_id':tmp[i].status_id,
+                  'date':tmp[i].appr_date,
+                  'action_by':tmp[i].ap_username+' '+tmp[i].approver,
+                  'remark':tmp[i].remark,
+                  'attach':'',
+                  // 'ind':i+2
+                });
+              }
+              this.logs.push({
+                'status' :  'Request Raised',
+                'status_id':"",
+                'date':tmp[i].created_at,
+                'action_by':tmp[i].username+' '+tmp[i].creater,
+                'remark':tmp[i].ptw_remark,
+                'attach':tmp[i].ptw_attach,
+                // 'ind':i+1
+              });
+            }
+
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    })
+  }
 }

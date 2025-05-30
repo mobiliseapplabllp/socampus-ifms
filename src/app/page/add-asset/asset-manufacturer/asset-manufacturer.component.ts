@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { environment } from 'src/environments/environment';
@@ -16,7 +16,6 @@ export class AssetManufacturerComponent  implements OnInit {
   constructor(
     private modalCtrl: ModalController,
     private httpAsset: MyAssetGetService,
-    private loadingController: LoadingController,
     private common: CommonService) { }
 
   ngOnInit() {
@@ -26,7 +25,7 @@ export class AssetManufacturerComponent  implements OnInit {
   ionViewDidLeave() {
     this.manufacturer = [];
     this.manufacturerCopy = [];
-    this.dismissloading();
+    this.common.dismissloading();
   }
 
   closeModal(val: any, status: any) {
@@ -34,7 +33,7 @@ export class AssetManufacturerComponent  implements OnInit {
   }
 
   getManufacturer() {
-    this.presentLoading().then(preLod => {
+    this.common.presentLoading().then(preLod => {
       this.httpAsset.getManufacturer().subscribe({
         next:(data) => {
           if (data.status) {
@@ -45,28 +44,14 @@ export class AssetManufacturerComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     });
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
   }
 
   search(ev: any) {

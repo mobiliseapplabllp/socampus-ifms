@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LoadingController, ModalController, NavController, NavParams } from '@ionic/angular';
+import { ModalController, NavController, NavParams } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
-// import { IonModal } from '@ionic/angular';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { HseAssignComponent } from '../hse-assign/hse-assign.component';
 import { ActivatedRoute } from '@angular/router';
@@ -50,7 +49,6 @@ export class TicketTypeComponent  implements OnInit {
     private httpComplaint: ComplaintService,
     private httpCommon: CommonService,
     private modalCtrl: ModalController,
-    private loadingController: LoadingController,
     private activeRoute: ActivatedRoute,
     private navCtrl: NavController) {
   }
@@ -65,11 +63,9 @@ export class TicketTypeComponent  implements OnInit {
        this.ticket = this.allData?.tkts_id;
        if (this.allData?.source !== 'QRCODE') {
          this.isShowBuilding = true;
-       }
-       console.log(this.allData);
+       }       
        this.getRequestType(this.allData.tkts_issue_id);
-    });
-    // this.httpCommon.setHomeLoadStatus(true);
+    });    
   }
 
 
@@ -157,25 +153,14 @@ export class TicketTypeComponent  implements OnInit {
 
 
   changeRadio() {
-    // this.ticketForm.get('bldg_id')?.setValue('');
-    // this.ticketForm.get('floor_id')?.setValue('');
-    // this.ticketForm.get('loc_code')?.setValue('');
     this.isShowBuilding = false
   }
 
 
 
   changeIsBarcode(ev: any) {
-    // this.ticketForm.get('barcode')?.setValue('');
-    // this.ticketForm.get('barcode_id')?.setValue('');
-    // this.barcodeList = [];
     if (ev.target.value == 0) {
       this.isShowBuilding = true;
-      // setTimeout(() => {
-      //   if (this.locations.length > 0) {
-      //     this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id)
-      //   }
-      // }, 100);
     }
   }
 
@@ -184,8 +169,6 @@ export class TicketTypeComponent  implements OnInit {
       next:(data) => {
         if (data.status) {
           this.buildingArr = data.data;
-          // if (this.locations.length > 0) {
-          // }
           setTimeout(() => {
             this.ticketForm.get('bldg_id')?.setValue(this.allData.building_id)
           }, 100);
@@ -206,18 +189,16 @@ export class TicketTypeComponent  implements OnInit {
     if(!id) {
       return;
     }
-    this.dismissloading();
+    this.httpCommon.dismissloading();
     this.getFloorList(id)
   }
 
   getFloorList(id: any) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.getFloorList(id).subscribe({
         next:(data) => {
           if (data.status) {
             this.floorArr = data.data;
-            // if (this.locations.length > 0) {
-            // }
             setTimeout(() => {
               this.ticketForm.get('floor_id')?.setValue(this.allData.floor_id);
             }, 100);
@@ -226,11 +207,11 @@ export class TicketTypeComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       })
     })
@@ -241,19 +222,17 @@ export class TicketTypeComponent  implements OnInit {
     if (!id) {
       return;
     }
-    this.dismissloading();
+    this.httpCommon.dismissloading();
     this.getLocation(id);
   }
 
   getLocation(id: any) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.getLocationList(id).subscribe({
         next:(data) => {
           if (data.status) {
             this.locationArr = data.data;
             setTimeout(() => {
-              // if (this.locations.length > 0) {
-              // }
               this.ticketForm.get('loc_code')?.setValue(this.allData.loc_id)
             }, 100)
           } else {
@@ -261,37 +240,23 @@ export class TicketTypeComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       })
     })
   }
 
   changeType() {
-    return;
-    this.ticketForm.get('is_barcode')?.setValue('');
-    this.ticketForm.get('barcode')?.setValue('');
-    this.ticketForm.get('category')?.setValue('');
-    this.ticketForm.get('subcat1_id')?.setValue('');
-    this.ticketForm.get('subcat2_id')?.setValue('');
-    this.barcodeList = [];
-    if (this.ticketForm.value.issue_type == 2) {
-      // this.getQueryCat();
-      // this.query = this.allData.cateList;
-      setTimeout(() => {
-        this.ticketForm.get('category')?.setValue(this.allData.cat_id);
-      }, 100)
-    }
   }
 
   getIssueType() {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.getIssueType().subscribe(data => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         if (data.status) {
           this.issueType = data.data;
           if (this.allData.issue_desc === 'Service') {
@@ -316,7 +281,7 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   // getQueryCat() {
-  //   this.presentLoading().then(preLoad => {
+  //   this.httpCommon.presentLoading().then(preLoad => {
   //     this.httpComplaint.getQueryCategory(this.ticketForm.value.issue_type).subscribe({
   //       next:(data) => {
   //         if (data.status) {
@@ -327,11 +292,11 @@ export class TicketTypeComponent  implements OnInit {
   //         }
   //       },
   //       error:() => {
-  //         this.dismissloading();
+  //         this.httpCommon.dismissloading();
   //         this.httpCommon.presentToast(environment.errMsg, 'danger');
   //       },
   //       complete:() => {
-  //         this.dismissloading();
+  //         this.httpCommon.dismissloading();
   //       }
   //     });
   //   })
@@ -364,7 +329,7 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   changeQuery(id: any) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.getQuerySubCat1(id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -372,11 +337,11 @@ export class TicketTypeComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     })
@@ -409,7 +374,7 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   changeSubCat(id: any) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.getQuerySubCat2(id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -417,10 +382,10 @@ export class TicketTypeComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     })
@@ -475,8 +440,7 @@ export class TicketTypeComponent  implements OnInit {
     return await modal.present();
   }
 
-  async openBuilding() {
-    console.log(this.ticketForm.value);
+  async openBuilding() {    
     if (!this.ticketForm.value.block_id) {
       this.httpCommon.presentToast('Block Id is Missing', 'warning');
       return;
@@ -549,7 +513,7 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   searchClientId() {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.getClientIdBarcode(this.ticketForm.value.barcode).subscribe({
         next:(data) => {
           if (data.status === false) {
@@ -567,11 +531,11 @@ export class TicketTypeComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     });
@@ -590,7 +554,7 @@ export class TicketTypeComponent  implements OnInit {
     } else if (this.ticketForm.value.buddy_req == '1' && !this.ticketForm.value.buddyName) {
       this.httpCommon.presentToast('Please Select Buddy Name', 'warning');
     } else {
-      this.presentLoading().then(preLoad => {
+      this.httpCommon.presentLoading().then(preLoad => {
         this.httpComplaint.complaintTypeConfirm(this.ticketForm.value).subscribe({
           next:(data) => {
             if (data.status) {
@@ -603,54 +567,22 @@ export class TicketTypeComponent  implements OnInit {
             }
           },
           error:() => {
-            this.dismissloading();
+            this.httpCommon.dismissloading();
             this.httpCommon.presentToast(environment.errMsg, 'danger');
           },
           complete:() => {
-            this.dismissloading();
+            this.httpCommon.dismissloading();
           }
         });
       })
     }
   }
 
-  // getPriority() {
-  //   this.httpComplaint.getTicketPriority(this.requestedData.data.tkts_id).subscribe({
-  //     next:(data) => {
-  //       if (data.status) {
-  //         // this.ticketPriority = data.data;
-  //       }
-  //     },
-  //     error:() => {
-  //       this.httpCommon.presentToast(environment.errMsg, 'danger');
-  //     },
-  //     complete:() => {
-
-  //     }
-  //   })
-  // }
-
   changePriority(ev: any) {
     this.selectPriorityObj = this.ticketPriority.filter((val: any) => val.id == ev.target.value)[0];
   }
 
   verify() { }
-
-  async presentLoading() {
-    this.dismissloading();
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...',
-      duration: 8000
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
-  }
 
   async assignTicket() {
     const modal = await this.modalCtrl.create({

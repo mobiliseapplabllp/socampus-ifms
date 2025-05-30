@@ -183,6 +183,10 @@ export class ListMasterPage implements OnInit {
     this.router.navigateByUrl('/list-master/offline-data');
   }
 
+  testRoute(url: string) {
+    this.router.navigateByUrl(url);
+  }
+
   async openSosModal() {
     const modal = await this.modalCtrl.create({
       component: SosComponent,

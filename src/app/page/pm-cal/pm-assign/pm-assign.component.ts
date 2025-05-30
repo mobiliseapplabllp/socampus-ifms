@@ -15,6 +15,7 @@ export class PmAssignComponent  implements OnInit {
   data: any;
   work_order: any = [];
   loading: any;
+  wo_no!: string;
   constructor(
     private httpPms: PmCalService,
     private loadingController: LoadingController,
@@ -25,10 +26,14 @@ export class PmAssignComponent  implements OnInit {
   ngOnInit() {    
     if (this.data) {
       if (this.data.length) {
+        if (this.data.length === 1) {
+          this.wo_no = this.data[0].wo_no
+        }
         for (var i = 0 ; i < this.data.length; i++) {
           this.work_order.push(this.data[i]);
         }
       } else {
+        this.wo_no = this.data.wo_no
         this.work_order.push(this.data);
       }
     }
@@ -37,8 +42,14 @@ export class PmAssignComponent  implements OnInit {
 
 
   getAllEmp() {
-    this.presentLoading().then(preLoad => {
-      this.httpPms.getAllEmployee(this.data.pc_id).subscribe({
+    let pc_id: any;
+    if (this.data.length > 0) {
+      pc_id = this.data[0].pc_id
+    } else {
+      pc_id = this.data.pc_id;
+    }
+    this.presentLoading().then(preLoad => {      
+      this.httpPms.getAllEmployee(pc_id).subscribe({
         next:(data) => {
           if (data.status) {
             this.allTeamMember = data.data;

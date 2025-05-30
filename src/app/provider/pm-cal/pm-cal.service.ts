@@ -38,9 +38,21 @@ export class PmCalService {
   searchTicketFromServer(key: any, value: any): Observable<any> {
     let url;
     url = 'limit=40&page=1&' + key + '=' + value + '&shource_from=app';
-    return this.https.get(environment.url + 'pmscal/get_work_order?' + url);
+    return this.https.get(environment.url + 'pmscal/get_ppm_work_area_work_order?' + url);
+    // return this.https.get(environment.url + 'pmscal/get_work_order?' + url);
   }
 
+  getCategory(cat_id: any): Observable<any> {
+    return this.https.get(environment.url + 'pmscal/schedule/get_wo_categories/' + cat_id);
+  }
+
+  getQuestionList(cat_id: any, wo_id: any): Observable<any> {
+    return this.https.get(environment.url + 'pmscal/schedule/get_questions?wo_id=' + wo_id + '&cat_id=' + cat_id)
+  }
+
+  getActionableQuestion(wo_id: any): Observable<any> {
+    return this.https.get(environment.url + 'pmscal/schedule/get_actionable_ques/' + wo_id);
+  }
 
   getScheduleQuestion(wo_id: any): Observable<any> {
     return this.https.get(environment.url + 'pmscal/schedule/get_schedule_questions/' + wo_id);
@@ -52,6 +64,10 @@ export class PmCalService {
 
   updateUserAction(formData: any): Observable<any> {
     return this.https.post(environment.url + 'pmscal/schedule/update_user_action', formData)
+  }
+
+  closePms(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'pmscal/cancel_wo_action', formData);
   }
 
   verifyBarcode(barcode: any, sid: any) {
@@ -90,6 +106,10 @@ export class PmCalService {
   myWo(): Observable<any> {
     return this.https.get(environment.url + 'pmscal/get_My_work_order?limit=10&page=1');
   }
+
+  // uploadPtw(formdata: any): Observable<any> {
+  //   return this.https.post(environment.url + 'pmscal/uploadPTW', formdata);
+  // }
 
   uploadPtw(formdata: any, req_for?: string): Observable<any> {
     let url: string;
