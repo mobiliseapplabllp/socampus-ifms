@@ -109,6 +109,7 @@ export class AddAssetPage implements OnInit {
       manufacturer_id_desc: [''],
       accessories:[''],
       ownership_id :['', Validators.required],
+      end_of_life: [''],
       ledger_ref:[''],
       pur_order_no:[''],
       pur_date:[''],
@@ -828,19 +829,34 @@ export class AddAssetPage implements OnInit {
   }
 
   submitAsset() {
-    let prefix_barcode, barcode, fullbarcode, pur_date, install_date, warranty_start_date, warranty_end_date;
-    pur_date = this.addAsset.value.pur_date;
-    install_date = this.addAsset.value.install_date,
-    warranty_start_date = this.addAsset.value.warranty_start_date,
-    warranty_end_date = this.addAsset.value.warranty_end_date,
-    prefix_barcode = this.addAsset.value.ext_asset_id_pre;
-    barcode = this.addAsset.value.input_asset_id;
-    fullbarcode = prefix_barcode + barcode;
-    this.addAsset.get('pur_date')?.setValue(moment(pur_date).format('YYYY-MM-DD'));
-    this.addAsset.get('install_date')?.setValue(moment(install_date).format('YYYY-MM-DD'));
-    this.addAsset.get('warranty_start_date')?.setValue(moment(warranty_start_date).format('YYYY-MM-DD'));
-    this.addAsset.get('warranty_end_date')?.setValue(moment(warranty_end_date).format('YYYY-MM-DD'));
-    this.addAsset.get('ext_asset_id')?.setValue(fullbarcode);
+    // let prefix_barcode, barcode, fullbarcode, pur_date, install_date, warranty_start_date, warranty_end_date, end_of_life;
+    // pur_date = this.addAsset.value.pur_date;
+    // install_date = this.addAsset.value.install_date,
+    // warranty_start_date = this.addAsset.value.warranty_start_date,
+    // warranty_end_date = this.addAsset.value.warranty_end_date,
+    // prefix_barcode = this.addAsset.value.ext_asset_id_pre;
+    // barcode = this.addAsset.value.input_asset_id;
+    // end_of_life = this.addAsset.value.end_of_life
+    // fullbarcode = prefix_barcode + barcode;
+    // this.addAsset.get('pur_date')?.setValue(moment(pur_date).format('YYYY-MM-DD'));
+    // this.addAsset.get('install_date')?.setValue(moment(install_date).format('YYYY-MM-DD'));
+    // this.addAsset.get('warranty_start_date')?.setValue(moment(warranty_start_date).format('YYYY-MM-DD'));
+    // this.addAsset.get('warranty_end_date')?.setValue(moment(warranty_end_date).format('YYYY-MM-DD'));
+    // this.addAsset.get('end_of_life')?.setValue(moment(end_of_life).format('YYYY-MM-DD'));
+    // this.addAsset.get('ext_asset_id')?.setValue(fullbarcode);
+    const { pur_date, install_date, warranty_start_date, warranty_end_date, ext_asset_id_pre, input_asset_id, end_of_life } = this.addAsset.value;
+    const fullBarcode = `${ext_asset_id_pre}${input_asset_id}`;
+
+    const formatDate = (date: any) => date ? moment(date).format('YYYY-MM-DD') : '';
+
+    this.addAsset.patchValue({
+      pur_date: formatDate(pur_date),
+      install_date: formatDate(install_date),
+      warranty_start_date: formatDate(warranty_start_date),
+      warranty_end_date: formatDate(warranty_end_date),
+      end_of_life: formatDate(end_of_life),
+      ext_asset_id: fullBarcode
+    });
     this.stopRequest();
     this.httpCommon.presentLoading().then(preLoad => {
       for(let key in this.addAsset.value) {
@@ -944,6 +960,7 @@ export class AddAssetPage implements OnInit {
     this.addAsset.get('is_child_asset')?.setValue('');
     this.addAsset.get('client_asset_id')?.setValue('');
     this.addAsset.get('serial_no')?.setValue('');
+    this.addAsset.get('end_of_life')?.setValue('');
     this.img1 = '';
     this.img2 = '';
     this.img3 = '';

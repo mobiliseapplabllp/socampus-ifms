@@ -171,8 +171,30 @@ export class PmCalPage implements OnInit {
     data.isSelect = true;
   }
 
-  multiCancel() {
-    this.isCloseAction = true;
+  multiAssign() {
+    const arr = this.openPm.filter((val: any) => val.isSelect == true && !val.can_assign_wo_btn);
+    if (arr.length > 0) {
+      arr.forEach((item: any) => {
+        item.isErr = true;
+      });
+      this.common.presentToastWithOk(`You are not authorized to ReAssign the highlighted Work Order`, 'warning');
+    } else {
+      let tmp = this.openPm.filter((val: any) => val.isSelect == true);      
+      this.pmAssign(tmp);
+    } 
+  }
+
+  multiCancel() {    
+    let arr = this.openPm.filter((val: any) => val.isSelect === true && !val.can_cancel_wo_btn);    
+    if (arr.length > 0) {      
+      arr.forEach((item: any) => {
+        item.isErr = true;
+      });
+      this.common.presentToastWithOk(`You are not authorized to cancel the highlighted Work Order`, 'warning');
+    } else {
+      this.isCloseAction = true;
+    }
+    
   }
 
   filterIds() {
@@ -216,15 +238,11 @@ export class PmCalPage implements OnInit {
 
   }
 
-  multiAssign() {
-    const obj =this.openPm.filter((val: any) => val.isSelect == true);
-    this.pmAssign(obj);
-  }
-
-  changeCheckbox(val: any) {
+  changeCheckbox(dat: any) {
+    dat.isErr = false;
     setTimeout(() => {
       this.selectedPms = this.openPm.filter((val: any) => val.isSelect == true);
-    }, 500);
+    }, 100);
   }
 
   async pmAssign(dat: any) {

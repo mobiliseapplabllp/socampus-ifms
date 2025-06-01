@@ -23,7 +23,7 @@ export class PmAssignComponent  implements OnInit {
     private modalCtrl: ModalController
   ) { }
 
-  ngOnInit() {    
+  ngOnInit() {        
     if (this.data) {
       if (this.data.length) {
         if (this.data.length === 1) {

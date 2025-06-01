@@ -227,6 +227,19 @@
             </ion-item>
           </ion-col>
         </ion-row>
+        <ion-row>
+          <ion-col>
+           <ion-item id="asset-end-of-life">
+              <ion-label color="primary" position="floating">End of Life</ion-label>
+              <ion-input type="email" [value]="addAsset.value.end_of_life | date"   placeholder="Select Date"  readonly></ion-input>
+            </ion-item>
+            <ion-popover trigger="asset-end-of-life" mode="md">
+              <ng-template>
+                <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" formControlName="end_of_life" [showDefaultButtons]="true"></ion-datetime>
+              </ng-template>
+            </ion-popover>
+          </ion-col>
+        </ion-row>
       </ion-card-content>
     </ion-card>
 
