@@ -104,7 +104,7 @@
         <ion-row>
           <ion-col>
             <ion-item>
-              <ion-label color="primary" position="floating">Has Parent ID</ion-label>
+              <ion-label color="primary" position="floating">Has Parent ID <ion-text color="danger">*</ion-text></ion-label>
               <ion-select interface="action-sheet" mode="ios" formControlName="is_child_asset" (click)="changeAssetChild()">
                 <ion-select-option value="1">YES</ion-select-option>
                 <ion-select-option value="0">NO</ion-select-option>
@@ -356,7 +356,7 @@
         <ion-row>
           <ion-col>
             <ion-item>
-              <ion-label color="primary" position="floating">Warranty</ion-label>
+              <ion-label color="primary" position="floating">Warranty <ion-text color="danger">*</ion-text></ion-label>
               <ion-select interface="action-sheet" mode="ios" formControlName="warranty_id" (ionChange)="changeWarranty()">
                 <ion-select-option *ngFor="let dat of myWarranty" [value]="dat.id">{{dat.warranty}}</ion-select-option>
               </ion-select>
@@ -366,7 +366,7 @@
         <ion-row *ngIf="addAsset.value.warranty_id === 1 || addAsset.value.warranty_id === 2 || addAsset.value.warranty_id === 3  ">
           <ion-col>
             <ion-item id="asset-warranty-start-date">
-              <ion-label color="primary" position="floating">Start Date</ion-label>
+              <ion-label color="primary" position="floating">Start Date <ion-text color="danger">*</ion-text></ion-label>
               <ion-input type="email" [value]="addAsset.value.warranty_start_date | date"   placeholder="Select Date"  readonly></ion-input>
             </ion-item>
             <ion-popover trigger="asset-warranty-start-date" mode="md">
@@ -377,7 +377,7 @@
           </ion-col>
           <ion-col>
             <ion-item id="asset-warranty-end-date">
-              <ion-label color="primary" position="floating">End Date</ion-label>
+              <ion-label color="primary" position="floating">End Date <ion-text color="danger">*</ion-text></ion-label>
               <ion-input type="email" [value]="addAsset.value.warranty_end_date | date"   placeholder="Select Date"  readonly></ion-input>
             </ion-item>
             <ion-popover trigger="asset-warranty-end-date" mode="md">
