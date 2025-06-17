@@ -59,7 +59,7 @@ export class TicketWorkComponent  implements OnInit {
   selectedFile: any;
 
   videoBlob: Blob | null = null;
-  compressedVideoUrl: string | null = null;
+  compressedVideoUrl: string | null = null;  
   constructor(
     private activeRoute: ActivatedRoute,
     private formbuilder: FormBuilder,
@@ -77,8 +77,9 @@ export class TicketWorkComponent  implements OnInit {
 
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
-      this.requestedData_TEMP = JSON.parse(res['data']);
-      this.requestedData = this.requestedData_TEMP.data;
+      this.requestedData_TEMP = JSON.parse(res['data']);      
+      
+      this.requestedData = this.requestedData_TEMP.data;      
       this.ticket_id = this.requestedData.tkts_id;
       this.mobile = this.requestedData.mobile
       this.initForm();
@@ -512,25 +513,6 @@ export class TicketWorkComponent  implements OnInit {
     })
   }
 
-  // async readImg(photo: any, val: string) {
-  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-  //   const response = await fetch(photo.webPath);
-  //   const blob = await response.blob();
-  //   if (val === 'image') {
-  //     this.formData.delete('img[]');
-  //     this.formData.append('img[]', blob, random);
-  //     this.fileName = random;
-  //   } else if (val === 'ppe') {
-  //     this.formData.delete('ppeKitAttach');
-  //     this.formData.append('ppeKitAttach', blob, random);
-  //     this.ppeFileName = random;
-  //   }
-
-  //   this.httpCommon.presentLoading().then(preLoad => {
-  //     this.httpCommon.dismissloading();
-  //   })
-  // }
-
   viewAttachment(img: string) {
     this.httpCommon.openDoc(img);
   }
@@ -667,6 +649,14 @@ export class TicketWorkComponent  implements OnInit {
   resetOtp() {
     this.isOtpSent = false;
     this.isVerifyOtp = false;
+  }
+
+  openRoute(url: string) {    
+    this.router.navigate([url], {
+      state: {
+        data: this.requestedData_TEMP
+      }
+    });
   }
 
 }

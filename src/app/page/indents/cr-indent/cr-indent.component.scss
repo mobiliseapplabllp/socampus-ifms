@@ -1,0 +1,17 @@
+.ticket_cards {   
+    ion-row:not(:last-child) {
+        border-bottom: 1px solid rgb(227, 227, 227);
+    }
+}
+
+.ticket_cards ion-row ion-col:nth-child(odd) {
+  color: #a19393;  
+}
+.ticket_cards ion-row ion-col:nth-child(even) {
+  color: black;
+  font-weight: bold;
+}
+
+ion-card {
+    box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+}

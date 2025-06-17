@@ -129,6 +129,11 @@ ion-segment-button {
   --border-radius: 20px 20px 0px 0px;
 }
 
+.vc {
+  display: flex;
+  align-items: center;
+}
+
 // .my-modal-btm .modal-wrapper {
 //   position: absolute;
 //   bottom: 0px !important;
@@ -187,6 +192,20 @@ ion-segment-button {
 body.scanner-active {
   --background: '#00000000';
   --ion-background-color: '#00000000';
+}
+
+.custom-disabled-input {
+  background-color: #f0f0f0;
+  color: #888;
+  border: 1px solid #ccc;
+  cursor: not-allowed;
+  opacity: 1; /* override browser default */
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+ion-card {
+    box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
 }
 
 

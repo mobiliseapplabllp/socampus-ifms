@@ -1,0 +1,138 @@
+<ion-header mode="md" class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Material {{index+1}} Details</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal(null, false)">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content mode="md">
+  <ion-card>
+    <ion-item>
+      <ion-label position="floating">Material</ion-label>
+      <ion-select interface="action-sheet" mode="ios" [(ngModel)]="arr.mtrl_id" (ionChange)="changeMaterial($event)">
+        <ion-select-option *ngFor="let dat of materialArr" [value]="dat.value">{{dat.label}}</ion-select-option>
+      </ion-select>
+    </ion-item>       
+    <ion-item >
+      <ion-label position="floating">SKU</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.sku" readonly></ion-input>
+    </ion-item>   
+    <ion-item>
+      <ion-label position="floating">Catelog Number</ion-label>
+      <ion-input type="text"  [(ngModel)]="arr.catlg_no" readonly></ion-input>
+    </ion-item>       
+    <ion-item>
+      <ion-label position="floating">Material Description</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.mtrl_desc" readonly></ion-input>
+    </ion-item>    
+    <ion-item>
+      <ion-label position="floating">Part Code</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.prt_code" readonly></ion-input>
+    </ion-item>       
+    <ion-item>
+      <ion-label position="floating">Manufacturer</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.mnfctrer_desc" readonly></ion-input>
+    </ion-item>       
+    <ion-item>
+      <ion-label position="floating">Model</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.model" readonly></ion-input>
+    </ion-item>       
+  </ion-card>  
+
+  <ion-card>
+    <ion-item>
+      <ion-label position="floating">Serial No</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.serial_no"></ion-input>
+    </ion-item>   
+    <ion-item>
+      <ion-label position="floating">Unit</ion-label>
+      <!-- <ion-input type="text" [(ngModel)]="arr.uom_id"></ion-input> -->
+      <ion-select interface="action-sheet" mode="ios" [(ngModel)]="arr.uom_id">
+        <ion-select-option *ngFor="let dat of uomArr" [value]="dat.value">{{dat.label}}</ion-select-option>
+      </ion-select>
+    </ion-item>   
+    <ion-item>
+      <ion-label position="floating">Qty</ion-label>
+      <ion-input type="number" [(ngModel)]="arr.qty" (ionChange)="changeCost()"></ion-input>
+    </ion-item>   
+     <ion-item>
+      <ion-label position="floating">MRP</ion-label>
+      <ion-input type="number" [(ngModel)]="arr.expt_price" (ionChange)="changeCost()"></ion-input>
+    </ion-item>   
+    <ion-item>
+      <ion-label position="floating">Discount</ion-label>
+      <ion-input type="number" [(ngModel)]="arr.discount" (ionChange)="changeCost()"></ion-input>
+    </ion-item>   
+    <ion-item>
+      <ion-label position="floating">Final Cost</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.actl_price" readonly></ion-input>
+    </ion-item>   
+    <!-- <ion-item>
+      <ion-label position="floating">Req By Date</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.reqd_by_date"></ion-input>
+    </ion-item>    -->
+    <ion-item id="mtrl-req-date">
+      <ion-label position="floating">Req By Date</ion-label>
+      <ion-input type="email" [value]="arr.reqd_by_date | date"   placeholder="Select Date"  readonly></ion-input>
+    </ion-item>
+    <ion-popover trigger="mtrl-req-date" mode="md">
+      <ng-template>
+        <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" [(ngModel)]="arr.reqd_by_date" [showDefaultButtons]="true"></ion-datetime>
+      </ng-template>
+    </ion-popover>
+    <ion-item>
+      <ion-label position="floating">Priority</ion-label>
+      <ion-select interface="action-sheet" mode="ios" [(ngModel)]="arr.priority">
+        <ion-select-option value="1">High </ion-select-option>
+        <ion-select-option value="1">Medium</ion-select-option>
+        <ion-select-option value="1">Low </ion-select-option>
+      </ion-select>
+    </ion-item>   
+    <ion-item>
+      <ion-label position="floating">Supplier Name</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.supl_name"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">PO No</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.pur_ordr_no"></ion-input>
+    </ion-item>  
+     <ion-item>
+      <ion-label position="floating">Requestee</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.user_id_label"></ion-input>
+      <ion-button slot="end" (click)="search()">Search</ion-button>
+    </ion-item>  
+    <ion-item>
+      <ion-label position="floating">Delivery Location</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.del_loc"></ion-input>
+    </ion-item>  
+    <ion-item id="mtrl-wrnty-exp-date">
+      <ion-label position="floating">Warranty Exp Date</ion-label>
+      <ion-input type="email" [value]="arr.wrnty_exp_date | date"   placeholder="Select Date"  readonly></ion-input>
+    </ion-item>
+    <ion-popover trigger="mtrl-wrnty-exp-date" mode="md">
+      <ng-template>
+        <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" [(ngModel)]="arr.wrnty_exp_date" [showDefaultButtons]="true"></ion-datetime>
+      </ng-template>
+    </ion-popover>
+     <ion-item>
+      <ion-label position="floating">Remark</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.remark"></ion-input>
+    </ion-item>  
+    <ion-row>
+      <ion-col class="ion-pading-start">
+        <ion-button (click)="presentActionSheet()" [color]="arr.mtrl_file ? 'success': 'primary' ">
+          Attachment 
+          <ion-icon [name]="arr.mtrl_file ? 'checkmark-circle-outline': 'attach-outline' " slot="end"></ion-icon>          
+        </ion-button>
+      </ion-col>
+    </ion-row>  
+  </ion-card>
+</ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <ion-button expand="block" (click)="submit()">Submit</ion-button>
+  </ion-toolbar>
+</ion-footer>

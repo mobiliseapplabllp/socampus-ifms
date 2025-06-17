@@ -1,0 +1,98 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+     <ion-label>Create Indent</ion-label>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card class="ion-padding ticket_cards">
+    <ion-row>
+      <ion-col size="4">Ticket ID</ion-col>
+      <ion-col>{{all_data.data?.tkts_id}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="4">Asset ID</ion-col>
+      <ion-col>{{all_data.data?.assets.ext_asset_id}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="4">Device Group </ion-col>
+      <ion-col>{{all_data.data?.grp_desc}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="4">Device Name </ion-col>
+      <ion-col>{{all_data.data?.subgrp_desc}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="4"> Log By </ion-col>
+      <ion-col>{{all_data.data?.user}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="4">Date </ion-col>
+      <ion-col>{{all_data.data?.log_date}}</ion-col>
+    </ion-row>
+  </ion-card>
+  <form [formGroup]="myForm">
+    <ion-card>    
+      <ion-item >
+        <ion-label position="floating">PC Code <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="email" formControlName="pc_id_desc" readonly></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">Warehouse <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet" mode="iod" formControlName="wh_id" mode="ios">
+          <ion-select-option *ngFor="let dat of warehouseArr" [value]="dat.wh_id">{{dat.wh_desc}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">Remark <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="email" formControlName="prop1"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">Billable Category <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet" mode="ios" formControlName="is_billable">
+          <ion-select-option value="1">Rebillable To Client</ion-select-option>
+          <ion-select-option value="0">Regular</ion-select-option>
+        </ion-select>
+      </ion-item>                
+    </ion-card>
+
+    <ion-card>
+      <ion-item>
+        <ion-label position="floating">Select Type <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet" mode="ios" formControlName="mtrl_type">
+          <ion-select-option *ngFor="let dat of typeArr" [value]="dat.value">{{dat.label}}</ion-select-option>    
+        </ion-select>
+      </ion-item>            
+    </ion-card>
+  </form>    
+
+  <ion-row>
+    <ion-col size="6" class="vc ion-padding-start">Material Details</ion-col>
+    <ion-col size="6" class="ion-text-right">
+      <ion-button shape="round" (click)="openMaterialDetails({})">
+        Add <ion-icon name="add-outline" slot="end"></ion-icon>
+      </ion-button>
+    </ion-col>
+  </ion-row>
+
+  <ion-card>
+    <ion-item *ngFor="let dat of materialArr; let i = index">
+      <ion-label class="ion-text-wrap" (click)="openMaterialDetails(dat, i)">Material {{i+1}} Details</ion-label>
+      <ion-buttons slot="end">
+        <ion-button (click)="deleteItems(i)" color="danger">
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-card>
+
+</ion-content>
+<ion-footer>
+  <ion-toolbar style="padding: 0px 10px">
+    <ion-button expand="block" (click)="finalSubmit()" [disabled]="myForm.invalid">Submit</ion-button>
+  </ion-toolbar>
+</ion-footer>

@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { env } from 'process';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 @Injectable({
@@ -15,7 +16,31 @@ export class IndentsService {
     return this.https.get(environment.url + 'setups/organisation/get_warehouse_by_pc?pc_id=' + pd_id);
   }
 
-  getMaterial(): Observable<any> {
+  getIndentType(): Observable<any> {
+    return this.https.get(environment.url + 'purchase/settings/select_type')
+  }
+
+  getMaterial(type: string): Observable<any> {
+    return this.https.get(environment.url + 'purchase/settings/select_material_on_type/' + type);
+  }
+
+  searchUser(username: string): Observable<any> {
+    return this.https.get(environment.url + 'search_emp_by_id/' + username);
+  }
+
+  getUom(): Observable<any> {
+    return this.https.get(environment.url + 'purchase/settings/select_uom')
+  }
+
+  submitIndent(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'purchase/mtrl_request/add_mtrl_request', formData);
+  }
+
+  // getMaterial(): Obs {
+
+  // }
+
+  getMaterialType(): Observable<any> {
     return this.https.get(environment.url + 'purchase/settings/select_material');
   }
 
@@ -32,9 +57,9 @@ export class IndentsService {
     });
   }
 
-  submitIndent(formData: any): Observable<any> {
-    return this.https.post(environment.url + 'purchase/mtrl_request/add_mtrl_request', formData);
-  }
+  // submitIndent(formData: any): Observable<any> {
+  //   return this.https.post(environment.url + 'purchase/mtrl_request/add_mtrl_request', formData);
+  // }
 
   getEmpSearch(emp_id: any): Observable<any> {
     const obj = {
