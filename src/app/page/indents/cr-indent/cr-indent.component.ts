@@ -110,8 +110,7 @@ export class CrIndentComponent  implements OnInit {
       ind = index
     } else {
       ind = this.materialArr.length;
-    }
-    console.log(ind);
+    }    
     if (!this.myForm.value.mtrl_type) {
       this.common.presentToast('Please Select Material Type', 'warning');
       return;
@@ -134,8 +133,7 @@ export class CrIndentComponent  implements OnInit {
           this.materialArr[ind] = disModal.data;
         } else {
           this.materialArr.push(disModal.data);
-        }      
-        console.log(this.materialArr);  
+        }              
       }
     });
     modal.present();
@@ -159,9 +157,14 @@ export class CrIndentComponent  implements OnInit {
       formData.append(`material[${i}][expt_price]`, item.expt_price);
       formData.append(`material[${i}][mnfctrer_desc]`, item.mnfctrer_desc);
       formData.append(`material[${i}][model]`, item.model);
-      formData.append(`material[${i}][mtrl_description]`, item.mtrl_description);
+      formData.append(`material[${i}][mtrl_desc]`, item.mtrl_desc);
       formData.append(`material[${i}][mtrl_id]`, item.mtrl_id);
       formData.append(`material[${i}][prt_code]`, item.prt_code);
+      formData.append(`material[${i}][supl_name]`, item.supl_name);
+      formData.append(`material[${i}][pur_ordr_no]`, item.pur_ordr_no);
+      formData.append(`material[${i}][remark]`, item.remark);
+      formData.append(`material[${i}][discount]`, item.discount);
+      formData.append(`material[${i}][actl_price]`, item.actl_price);            
       formData.append(`material[${i}][qty]`, item.qty);
       formData.append(`material[${i}][serial_no]`, item.serial_no);
       formData.append(`material[${i}][sku]`, item.sku);
@@ -170,7 +173,10 @@ export class CrIndentComponent  implements OnInit {
       formData.append(`material[${i}][reqd_by_date]`, item.reqd_by_date ? moment(item.reqd_by_date).format('YYYY-MM-DD'): '');
       formData.append(`material[${i}][user_id_label]`, item.user_id_label );
       formData.append(`material[${i}][wrnty_exp_date]`, item.wrnty_exp_date ? moment(item.wrnty_exp_date).format('YYYY-MM-DD'): '');      
-      formData.append(`material[${i}][mtrl_file]`, item.mtrl_file, random);
+      // formData.append(`material[${i}][mtrl_file]`, item.mtrl_file, random);
+      if (item.mtrl_file instanceof Blob) {        
+       formData.append(`material[${i}][mtrl_file]`, item.mtrl_file, random);
+      }
     }
     this.common.presentLoading().then(preLoad => {
       this.httpIndent.submitIndent(formData).subscribe({

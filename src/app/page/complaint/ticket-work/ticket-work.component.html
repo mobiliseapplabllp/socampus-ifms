@@ -78,7 +78,7 @@
                 <ion-icon name="attach-outline" slot="end"> </ion-icon>
               </ion-button>
               <ion-button size="small" shape="round" fill="outline" [color]="ppeFileName ? 'success': 'danger' " *ngIf="requestedData.ppekit_mandatory && !requestedData.ppekitFilled" (click)="presentActionSheet('ppe')">Upload PPE Kit</ion-button>
-              <ion-button size="small" shape="round" fill="outline" (click)="openRoute('/indents/spare-parts')">Create Indent</ion-button>
+              <ion-button size="small" shape="round" fill="outline" (click)="openRoute('/indents/spare-parts')">Create Indent <ion-icon name="create-outline" slot="end"></ion-icon></ion-button>
               <ion-row>
                 <ion-col size="4">
                   <ion-button expand="block" shape="round" (click)="checkHasWip()">Submit </ion-button>

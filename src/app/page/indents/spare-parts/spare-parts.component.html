@@ -15,8 +15,52 @@
     </ion-fab-button>
   </ion-fab>
 
-  <ion-card *ngFor="let dat of req_indent;let i = index" [ngClass]="{'cls1': i % 2 === 0, 'cls2': i % 2 !== 0}">
-    <ion-row>
+  <ion-card *ngFor="let dat of req_indent;let i = index" class="cards" [ngClass]="{'cls1': i % 2 === 0, 'cls2': i % 2 !== 0}">
+    <ion-grid style="margin-left:5px;margin-right:10px;margin-top:0px">
+      <ion-row>
+        <ion-col style="color: var(--ion-color-primary-dark); font-size:16px">SKU {{dat.sku}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="5">MR ID</ion-col>
+        <ion-col>{{dat.rqst_no}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="5">Qty</ion-col>
+        <ion-col>{{dat.qty}}</ion-col>
+      </ion-row>      
+      <ion-row>
+        <ion-col size="5">UOM</ion-col>
+        <ion-col>{{dat.uom_desc}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="5">Edit Remark</ion-col>
+        <ion-col>{{dat.edit_remark}}</ion-col>
+      </ion-row> 
+      <ion-row>
+        <ion-col size="5">Status</ion-col>
+        <ion-col>{{dat.status_desc}}</ion-col>
+      </ion-row>      
+      
+    </ion-grid>
+    <!-- <ion-row>
+      <ion-col size="6">
+        <ion-text>MR ID</ion-text><br>
+        <ion-text>{{dat.rqst_no}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text>SKU</ion-text><br>
+        <ion-text>{{dat.sku}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text>UOM</ion-text><br>
+        <ion-text>{{dat.uom_desc}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text>Edit Remark</ion-text><br>
+        <ion-text>{{dat.edit_remark}}</ion-text>
+      </ion-col>
+    </ion-row> -->
+    <!-- <ion-row>
       <ion-col size="6" >
         <div style="font-family: 'sansapro_normal' !important;">{{dat.wrnty_exp_date}}</div>
       </ion-col>
@@ -36,6 +80,70 @@
     </ion-row>
     <ion-row>
       <ion-col>{{dat.uom_desc}}</ion-col>
-    </ion-row>          
+    </ion-row>           -->
+    <ion-row>
+      <ion-col size="4">
+        <ion-button shape="round" fill="outline" expand="block" color="primary-dark" class="ion-text-capitalize" (click)="edit(dat)">
+          Edit <ion-icon name="create-outline" slot="end"></ion-icon>
+        </ion-button>
+      </ion-col>
+      <ion-col size="4">
+        <ion-button shape="round" fill="outline" expand="block" color="primary-dark" class="ion-text-capitalize" (click)="presentAlertConfirm(dat)"> 
+          Delete <ion-icon name="trash-sharp" slot="end"></ion-icon>
+        </ion-button>
+      </ion-col>
+      <ion-col size="4">
+        <ion-button shape="round" fill="outline" expand="block" color="primary-dark" class="ion-text-capitalize" (click)="viewIndent(dat)"> 
+          View <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+        </ion-button>
+      </ion-col>
+    </ion-row>
   </ion-card>
 </ion-content>
+
+<ion-modal class="myModal" [isOpen]="isModalOpen" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismiss()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>View Indent Logs</ion-title>
+        <ion-buttons slot="end"> 
+          <ion-button (click)="isModalOpen = false">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>          
+        </ion-buttons>
+      </ion-toolbar>      
+    </ion-header>
+    <ion-content>
+      <ion-card *ngFor="let dat of indentLogs" style="padding-bottom: 10px">
+        <ion-item lines="none">
+          <ion-label class="ion-text-wrap">
+            <p>{{dat.created_at}}</p>
+            <p>{{dat.status_desc}}</p>
+            <p>{{dat.updated_by}}</p>
+          </ion-label>
+        </ion-item>    
+        <div style="padding-left: 10px;padding-right:10px">
+          <ion-row style="background-color: #cecaca;color:black">
+            <ion-col size="4">Field</ion-col>
+            <ion-col size="4">Last Value</ion-col>
+            <ion-col size="4">Updated Value</ion-col>
+          </ion-row>
+          <ion-row *ngFor="let val of dat.changed_fields1" style="border-bottom: 1px solid #cecaca">
+            <ion-col size="4" style="border-right: 1px solid #cecaca">
+              <b>{{val.key}}</b>
+            </ion-col>
+            <ion-col style="border-right: 1px solid #cecaca">
+              <ion-button *ngIf="val.key === 'Attachment1'" size="small" (click)="viewImg(val.value.old_value, dat.attachment1_blob_type)">View</ion-button>
+              <ion-text *ngIf="val.key !== 'Attachment1' ">{{val.value.old_value}}</ion-text>
+            </ion-col>
+            <ion-col>
+              <ion-button *ngIf="val.key === 'Attachment1'" size="small" (click)="viewImg(val.value.new_value, dat.attachment1_blob_type)">View</ion-button>
+              <ion-text *ngIf="val.key !== 'Attachment1' ">{{val.value.new_value}}</ion-text>              
+            </ion-col>
+          </ion-row>    
+        </div>        
+      </ion-card>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+

@@ -103,15 +103,7 @@ export class CommonService {
               this.pdfView('data:application/pdf;base64,' + data.base64);
             } else {
               this.imageView('data:' + data.contentType + ';base64,' + data.base64, null);
-            }
-            // const base64 = 'data:' + data.contentType + ';base64,' + data.base64;
-            // this.imageView(base64, null);
-            // if (data.status) {
-            //   const base64 = 'data:' + data.contentType + ';base64,' + data.base64;
-            //   this.imageView(base64, null);
-            // } else {
-            //   this.presentToast(data.msg, 'warning');
-            // }
+            }           
           }
         },
         error:() => {

@@ -36,6 +36,17 @@ export class IndentsService {
     return this.https.post(environment.url + 'purchase/mtrl_request/add_mtrl_request', formData);
   }
 
+  editIndent(id: any): Observable<any> {
+    return this.https.get(environment.url + 'purchase/mtrl_request/get_edit_mtrl_request/' + id)
+  }
+
+  editAction(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'purchase/mtrl_request/edit_mtrl_request', formData);
+  }
+
+  getTktTran(id: any): Observable<any> {
+    return this.https.get(environment.url + 'complaints/get_tkt_trans/' + id);
+  }
   // getMaterial(): Obs {
 
   // }
@@ -76,5 +87,9 @@ export class IndentsService {
 
   cancelIndent(data: any): Observable<any> {
     return this.https.post(environment.url + 'purchase/mtrl_request/cancel_mtrl_request', data);
+  }
+
+  getIndentLogs(rqst_id: any): Observable<any> {
+    return this.https.get(environment.url + 'purchase/mtrl_request/cntr_indnt_data_logs?limit=20&page=1&rqst_id=' + rqst_id);
   }
 }
