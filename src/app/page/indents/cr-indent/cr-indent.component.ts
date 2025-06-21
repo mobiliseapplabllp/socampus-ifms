@@ -32,6 +32,7 @@ export class CrIndentComponent  implements OnInit {
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras?.state?.['data']) {
       this.all_data = navigation.extras.state['data'];            
+      console.log(this.all_data);
       this.getWarehouseByPC();      
     }    
     this.initForm();
@@ -124,7 +125,8 @@ export class CrIndentComponent  implements OnInit {
         data: data,
         index: ind,
         mtrl_type: this.myForm.value.mtrl_type,
-        arr: data
+        arr: data,
+        org_id: this.all_data.data.org_id
       }
     });
     modal.onWillDismiss().then(async disModal => {

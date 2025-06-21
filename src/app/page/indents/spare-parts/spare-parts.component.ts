@@ -28,7 +28,8 @@ export class SparePartsComponent  implements OnInit {
   ngOnInit() {    
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras?.state?.['data']) {
-      this.all_data = navigation.extras.state['data'];            
+      this.all_data = navigation.extras.state['data'];      
+
     } else {
       console.warn('No data found in router state.');    
     }
@@ -98,7 +99,8 @@ export class SparePartsComponent  implements OnInit {
       componentProps: {           
         index: -1,
         mtrl_type: data.mtrl_type,
-        arr: data
+        arr: data,
+        org_id: this.all_data.data.org_id,
       }
     });
     modal.onWillDismiss().then(async disModal => {

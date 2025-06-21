@@ -11,7 +11,7 @@ import { environment } from 'src/environments/environment';
   templateUrl: './material-details.component.html',
   styleUrls: ['./material-details.component.scss'],
 })
-export class MaterialDetailsComponent  implements OnInit {  
+export class MaterialDetailsComponent implements OnInit {
   index!: number;
   mtrl_type!: any;
   materialArr: any = [];
@@ -19,6 +19,7 @@ export class MaterialDetailsComponent  implements OnInit {
   uomArr: any = [];
   editRemark!: string;
   today = moment().format('YYYY-MM-DD');
+  org_id: any;
   constructor(
     private httpIndent: IndentsService,
     private common: CommonService,
@@ -27,20 +28,21 @@ export class MaterialDetailsComponent  implements OnInit {
     private alertController: AlertController
   ) { }
 
-  ngOnInit() {    
+  ngOnInit() {
+    console.log(this.org_id);
     this.getMaterial();
-    this.getUom();    
+    this.getUom();
     this.cleanDatesAndFields();
   }
 
   cleanDatesAndFields() {
-    const dateFields = ['reqd_by_date', 'wrnty_exp_date'];    
+    const dateFields = ['reqd_by_date', 'wrnty_exp_date'];
     dateFields.forEach(field => {
       if (!this.isValidDate(this.arr[field])) {
         this.arr[field] = '';
       }
     });
-  
+
     for (const key in this.arr) {
       if (this.arr[key] === undefined || this.arr[key] === 'undefined') {
         this.arr[key] = '';
@@ -53,32 +55,36 @@ export class MaterialDetailsComponent  implements OnInit {
     return dateStr && !isNaN(date.getTime());
   }
 
-  closeModal(data:any, status: any) {
+  closeModal(data: any, status: any) {
     this.modalCtrl.dismiss(data, status);
   }
 
-  getUom() {  
+  getUom() {
     this.httpIndent.getUom().subscribe({
-      next:(data: any) => {
+      next: (data: any) => {
         if (data.status) {
           this.uomArr = data.data;
         } else {
           this.common.presentToast(data.msg, 'warning');
-        }        
+        }
       },
-      error:() => {
+      error: () => {
 
       },
-      complete:() => {
+      complete: () => {
 
       }
     });
   }
 
-  getMaterial() {   
+  getMaterial() {
+    if (!this.org_id) {
+      this.common.presentToast('Org ID is Required', 'warning');
+      return;
+    }
     this.common.presentLoading().then(preLoad => {
-      this.httpIndent.getMaterial(this.mtrl_type).subscribe({
-        next:(data: any) => {
+      this.httpIndent.getMaterial(this.mtrl_type, this.org_id).subscribe({
+        next: (data: any) => {
           if (data.status) {
             this.materialArr = data.data;
             if (this.index === -1) {
@@ -88,25 +94,25 @@ export class MaterialDetailsComponent  implements OnInit {
             this.common.presentToast(data.msg, 'warning');
           }
         },
-        error:() => {
+        error: () => {
           this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
-        complete:() => {
+        complete: () => {
           this.common.dismissloading();
         }
       });
-    });    
+    });
   }
 
-  changeMaterial(ev: any, isUpdate?: any) {    
+  changeMaterial(ev: any, isUpdate?: any) {
     let val: any;
     if (isUpdate) {
       val = isUpdate
     } else {
       val = ev.target.value;
-    }    
-    let temp = this.materialArr.filter((value: any) => value.value === val)[0];    
+    }
+    let temp = this.materialArr.filter((value: any) => value.value === val)[0];
     this.arr.sku = temp.sku;
     this.arr.catlg_no = temp.catlg_no;
     this.arr.mtrl_desc = temp.mtrl_description;
@@ -118,7 +124,7 @@ export class MaterialDetailsComponent  implements OnInit {
   search() {
     this.common.presentLoading().then(preLoad => {
       this.httpIndent.searchUser(this.arr.user_id_label).subscribe({
-        next:(data: any) => {        
+        next: (data: any) => {
           if (data.status) {
             this.arr.user_id_label = data.data[0].name;
             this.arr.user_id = data.data[0].id;
@@ -126,15 +132,15 @@ export class MaterialDetailsComponent  implements OnInit {
             this.common.presentToast(data.msg, 'warning');
           }
         },
-        error:() => {
+        error: () => {
           this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
-        complete:() => {
+        complete: () => {
           this.common.dismissloading();
         }
       });
-    });    
+    });
   }
 
   async presentActionSheet() {
@@ -143,24 +149,27 @@ export class MaterialDetailsComponent  implements OnInit {
     });
   }
 
-  submit() {    
-    if (this.index === -1) {      
+  submit() {
+    const validations = [
+      { condition: !this.arr.mtrl_id, message: 'Please Select Material' },
+      { condition: !this.arr.uom_id, message: 'Please Select Unit' },
+      { condition: !this.arr.qty, message: 'Please Enter Qty' },
+      { condition: !this.arr.expt_price, message: 'Please Enter MRP' },
+      { condition: !this.arr.discount && this.arr.discount !== 0, message: 'Please Enter Discount' }
+    ];
+
+    for (const validation of validations) {
+      if (validation.condition) {
+        this.common.presentToast(validation.message, 'warning');
+        return;
+      }
+    }
+
+    if (this.index === -1) {
       this.presentAlertConfirm();
     } else {
-      if (!this.arr.mtrl_id) {
-        this.common.presentToast('Please Select Material', 'warning');
-      } else if (!this.arr.uom_id) {
-        this.common.presentToast('Please Select Unit', 'warning');
-      } else if (!this.arr.qty) {
-        this.common.presentToast('Please Entry Qty', 'warning');
-      } else if(!this.arr.expt_price) {
-        this.common.presentToast('Please Enter MRP', 'warning');        
-      } else if (!this.arr.discount) {
-        this.common.presentToast('Please Enter Discount', 'warning');
-      } else {
-        this.closeModal(this.arr, true);
-      }      
-    }    
+      this.closeModal(this.arr, true);
+    }
   }
 
   async presentAlertConfirm() {
@@ -170,36 +179,36 @@ export class MaterialDetailsComponent  implements OnInit {
       mode: 'ios',
       inputs: [{
         name: 'remark',
-        type:'textarea',
+        type: 'textarea',
         placeholder: 'Enter Remarks',
       }],
       buttons: [{
         text: 'Cancel',
-          handler: (data) => {
+        handler: (data) => {
+        }
+      }, {
+        text: 'Submit',
+        handler: (dat) => {
+          if (dat.remark) {
+            this.editRemark = dat.remark;
+            this.updateIndent();
+          } else {
+            this.common.presentToast('Please Enter Remarks', 'warning');
           }
-        },{
-          text: 'Submit',
-          handler: (dat) => {
-            if(dat.remark){
-              this.editRemark = dat.remark;
-              this.updateIndent();
-            } else {
-              this.common.presentToast('Please Enter Remarks', 'warning');
-            }
-          }
-        }]
+        }
+      }]
     });
     await alert.present();
   }
 
-  updateIndent() {    
+  updateIndent() {
     console.log(this.arr);
     let i = 0;
     const random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
-    const formData = new FormData();       
+    const formData = new FormData();
     formData.append('pc_id', this.arr.pc_id);
     formData.append('wh_id', this.arr.wh_id);
-    formData.append('is_ticket',  '1');
+    formData.append('is_ticket', '1');
     formData.append('ticket_id', this.arr.ticket_id);
     formData.append('asset_id', this.arr.asset_id);
     formData.append('source', environment.source);
@@ -220,25 +229,25 @@ export class MaterialDetailsComponent  implements OnInit {
     formData.append(`material[${i}][pur_ordr_no]`, this.arr.pur_ordr_no);
     formData.append(`material[${i}][remark]`, this.arr.remark);
     formData.append(`material[${i}][discount]`, this.arr.discount);
-    formData.append(`material[${i}][actl_price]`, this.arr.actl_price);            
+    formData.append(`material[${i}][actl_price]`, this.arr.actl_price);
     formData.append(`material[${i}][qty]`, this.arr.qty);
     formData.append(`material[${i}][serial_no]`, this.arr.serial_no);
     formData.append(`material[${i}][sku]`, this.arr.sku);
     // formData.append(`material[${i}][priority]`, this.arr.priority);
     formData.append(`material[${i}][del_loc]`, this.arr.del_loc);
-    formData.append(`material[${i}][uom_id]`, this.arr.uom_id);      
+    formData.append(`material[${i}][uom_id]`, this.arr.uom_id);
     formData.append(`material[${i}][user_id]`, this.arr.user_id);
-    formData.append(`material[${i}][reqd_by_date]`, this.arr.reqd_by_date ? moment(this.arr.reqd_by_date).format('YYYY-MM-DD'): '');
+    formData.append(`material[${i}][reqd_by_date]`, this.arr.reqd_by_date ? moment(this.arr.reqd_by_date).format('YYYY-MM-DD') : '');
     formData.append(`material[${i}][user_id_label]`, this.arr.user_id_label);
-    formData.append(`material[${i}][wrnty_exp_date]`, this.arr.wrnty_exp_date ? moment(this.arr.wrnty_exp_date).format('YYYY-MM-DD'): '');      
+    formData.append(`material[${i}][wrnty_exp_date]`, this.arr.wrnty_exp_date ? moment(this.arr.wrnty_exp_date).format('YYYY-MM-DD') : '');
     // formData.append(`material[${i}][mtrl_file]`, this.arr.mtrl_file, random);
-    if (this.arr.mtrl_file instanceof Blob) {        
-       formData.append(`material[${i}][mtrl_file]`, this.arr.mtrl_file, random);
+    if (this.arr.mtrl_file instanceof Blob) {
+      formData.append(`material[${i}][mtrl_file]`, this.arr.mtrl_file, random);
     }
-    
+
     this.common.presentLoading().then(preLoad => {
       this.httpIndent.editAction(formData).subscribe({
-        next:(data: any) => {
+        next: (data: any) => {
           if (data.status) {
             this.common.presentToast(data.msg, 'success');
             this.closeModal(null, true);
@@ -246,28 +255,33 @@ export class MaterialDetailsComponent  implements OnInit {
             this.common.presentToast(data.msg, 'warning');
           }
         },
-        error:() => {
+        error: () => {
           this.common.presentToast(environment.errMsg, 'danger');
           this.common.dismissloading();
         },
-        complete:() => {
+        complete: () => {
           this.common.dismissloading();
         }
       });
-    });    
+    });
   }
 
   changeCost() {
-    const { qty, expt_price, discount } = this.arr;    
+    const { qty, expt_price, discount } = this.arr;
+
     if (discount < 0 && discount !== null && discount !== undefined) {
       this.common.presentToast(`Discount can't be smaller than 0`, 'warning');
       this.arr.discount = 0;
       return;
-    }    
-    if (qty && expt_price && (discount !== null && discount !== undefined)) {
+    }
+
+    if (qty && expt_price) {
       const quantity = Number(qty);
       const expectedPrice = Number(expt_price);
-      const discountAmount = Number(discount);
+      const discountAmount = discount !== null && discount !== undefined && discount !== ''
+        ? Number(discount)
+        : 0;
+
       const total = quantity * expectedPrice;
 
       if (discountAmount > total) {
@@ -279,4 +293,28 @@ export class MaterialDetailsComponent  implements OnInit {
       }
     }
   }
+
+
+  // changeCost() {
+  //   const { qty, expt_price, discount } = this.arr;
+  //   if (discount < 0 && discount !== null && discount !== undefined) {
+  //     this.common.presentToast(`Discount can't be smaller than 0`, 'warning');
+  //     this.arr.discount = 0;
+  //     return;
+  //   }
+  //   if (qty && expt_price && (discount !== null && discount !== undefined)) {
+  //     const quantity = Number(qty);
+  //     const expectedPrice = Number(expt_price);
+  //     const discountAmount = Number(discount);
+  //     const total = quantity * expectedPrice;
+
+  //     if (discountAmount > total) {
+  //       this.common.presentToast(`Discount can't be greater than total amount`, 'warning');
+  //       this.arr.discount = null;
+  //       this.arr.actl_price = null;
+  //     } else {
+  //       this.arr.actl_price = total - discountAmount;
+  //     }
+  //   }
+  // }
 }

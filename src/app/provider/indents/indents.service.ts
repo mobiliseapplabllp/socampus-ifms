@@ -20,8 +20,8 @@ export class IndentsService {
     return this.https.get(environment.url + 'purchase/settings/select_type')
   }
 
-  getMaterial(type: string): Observable<any> {
-    return this.https.get(environment.url + 'purchase/settings/select_material_on_type/' + type);
+  getMaterial(type: string, org_id: any): Observable<any> {
+    return this.https.get(environment.url + 'purchase/settings/select_material_on_type?org_id=' + org_id + '&type=' + type);
   }
 
   searchUser(username: string): Observable<any> {
