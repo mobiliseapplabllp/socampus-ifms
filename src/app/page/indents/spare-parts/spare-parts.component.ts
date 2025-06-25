@@ -18,6 +18,8 @@ export class SparePartsComponent  implements OnInit {
   isModalOpen = false;  
   indentLogs: any = [];
   selectedIndent: any = {};
+  pi_action_permision: any = {};
+  test = true;
   constructor(    
     private router: Router,
     private httpIndent: IndentsService,
@@ -45,6 +47,8 @@ export class SparePartsComponent  implements OnInit {
         next:(data: any) => {
           if (data.status) {
             this.req_indent = data.reqIndent;
+            this.pi_action_permision = data.pi_action_permision;
+
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

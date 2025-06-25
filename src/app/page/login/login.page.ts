@@ -10,6 +10,7 @@ import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 import { env } from 'process';
 import { App } from '@capacitor/app';
 import { CameraService } from 'src/app/provider/camera/camera.service';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-login',
@@ -41,6 +42,7 @@ export class LoginPage implements OnInit {
   appUpdate: any = [];
   currentVersion: any = [];
   isProduction = environment.isProd;
+  appVersion!: string;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -62,6 +64,11 @@ export class LoginPage implements OnInit {
     this.common.setBarcode('');
     if (this.platform.is('capacitor')) {
       this.initFcm();
+      App.getInfo().then(res => {
+        this.appVersion = res.version
+      });
+    } else {
+      this.appVersion = '1.1';
     }
   }
 
@@ -211,7 +218,7 @@ export class LoginPage implements OnInit {
   getSsoEnc(token: string) {
     this.isHidden = !this.isHidden;
     this.presentLoading().then(preLoad => {
-      this.loginPro.ssoGatesLoginDetails(token, this.fcmToken).subscribe({
+      this.loginPro.ssoGatesLoginDetails(token, this.fcmToken, this.appVersion, this.isAndroid).subscribe({
         next:(data) => {
           this.isHidden = !this.isHidden;
           this.userValue = data;
@@ -228,6 +235,7 @@ export class LoginPage implements OnInit {
               localStorage.setItem('enc_id', this.userValue.enc_id);
               localStorage.setItem('user', JSON.stringify(this.userValue.user));
               localStorage.setItem('isAlreadyLogin', 'true');
+              localStorage.setItem('loginDate', moment().format('YYYY-MM-DD'));
               // this.multiFactorSubmit();
               this.checkAppUpdate();
             }
@@ -298,6 +306,7 @@ export class LoginPage implements OnInit {
           }
         });
       } else {
+        this.isAndroid = false
         this.multiFactorSubmit();
       }
     });
@@ -350,7 +359,7 @@ export class LoginPage implements OnInit {
     if (this.isProduction) {
       return;
     }
-    let token = 'mO3pEmclLk6HCNUt9n3-tllTMVNUVWZWVGVGVGRUbUFzRlh6VjVDOWQ0SmdsZ0tPaUNzSVQrUGNLbHpSRVBxR0lRWnBqemVnWm81YkgvWUxheXZaTXphVUluR09XZjl5ZDBqREFaMzg3WnhDaXo1cS8xTkZBUUFTVWZTY1BhVmpnVkU2Slg3dFR2TnRBZUdD';
+    let token = '-BWRpZWl6V034jESBoVQXHR6ZEpmQU1yekl5YzVVS0FhK2Y2STMxNSt6SnRWc2hiK2ZQTStoYU55dW9BR3lSTm1memdpOW92ZkVRUjY5RFFjcERxNmxCYjh6NkVyNE13b0JXUklSUnU5UnV6T2hBUDlLTXhOc3U3bVdoL3d0L3ZIZU9aMUZQRSsvNUo4MWZ2';
     this.getSsoEnc(token);
   }
 }

@@ -33,7 +33,7 @@ export class AppComponent {
     private httpLogin: LoginService,
     private common: CommonService) {
       this.platform.ready().then(res => {
-        // this.initApp();
+        this.initApp();
         this.getUserData();
       });
   }
@@ -79,7 +79,16 @@ export class AppComponent {
     this.httpLogin.getAppVersion(platform).subscribe({
       next:(data) => {
         if (data.status) {
+          let serverApp = data.data;
           this.common.setAppVersion(data.data);
+          if (this.platform.is('capacitor')) {
+            if (serverApp.is_view && serverApp.forceupdate && (serverApp.vesrion !== this.appVersion)) {
+              this.common.presentToast('Please Update your App', 'warning');
+              setTimeout(() => {
+                this.openPlayStore(serverApp.url);
+              }, 1500);
+            }
+          }
         }
       },
       error:() => {
@@ -89,6 +98,10 @@ export class AppComponent {
 
       }
     })
+  }
+
+  openPlayStore(url: string) {
+    window.open(url);
   }
 
   appUrl() {
@@ -223,6 +236,40 @@ export class AppComponent {
     this.listMaster.getData().subscribe((val: any) => {
       this.myMenu = val;
     });
+  }
+
+  // getIpAddress() {
+  //   this.httpLogin.getIPAddress().subscribe({
+  //     next:(data: any) => {
+  //       const ip = data.ip || '0.0.0.0';
+  //       this.saveIpAddress(ip);
+  //     },
+  //     error:() => {
+  //       this.saveIpAddress('0.0.0.0');
+  //     }
+  //   });
+  // }
+
+  logout() {
+    this.common.presentLoading().then(preLoad => {
+      this.httpLogin.logout('0.0.0.0').subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.reset();
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      });
+    })
+
   }
 
   async reset() {
