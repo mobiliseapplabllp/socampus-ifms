@@ -17,6 +17,7 @@ export class SparePartsComponent  implements OnInit {
   req_indent: any;
   isModalOpen = false;  
   indentLogs: any = [];
+  selectedIndent: any = {};
   constructor(    
     private router: Router,
     private httpIndent: IndentsService,
@@ -28,8 +29,7 @@ export class SparePartsComponent  implements OnInit {
   ngOnInit() {    
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras?.state?.['data']) {
-      this.all_data = navigation.extras.state['data'];      
-
+      this.all_data = navigation.extras.state['data'];            
     } else {
       console.warn('No data found in router state.');    
     }
@@ -135,8 +135,9 @@ export class SparePartsComponent  implements OnInit {
                 cancel_remark: dat.remark
               }
               this.deleteIndent(obj);
-            } else {
+            } else {              
               this.common.presentToast('Please Enter Remarks', 'warning');
+              this.presentAlertConfirm(data);
             }
           }
         }]
@@ -165,7 +166,8 @@ export class SparePartsComponent  implements OnInit {
     })   
   }
 
-  viewIndent(dat: any) {    
+  viewIndent(dat: any) {      
+    this.selectedIndent = dat;
     this.isModalOpen = true;
     this.getIndentLogs(dat.rqst_id);
   }
@@ -184,7 +186,7 @@ export class SparePartsComponent  implements OnInit {
                 }));                         
                 element.changed_fields1 = entries
               }            
-            });
+            });            
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

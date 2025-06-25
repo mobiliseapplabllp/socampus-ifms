@@ -15,11 +15,13 @@ export class MaterialDetailsComponent implements OnInit {
   index!: number;
   mtrl_type!: any;
   materialArr: any = [];
+  materialArrCopy: any = [];
   arr: any = {};
   uomArr: any = [];
   editRemark!: string;
   today = moment().format('YYYY-MM-DD');
   org_id: any;
+  isModalOpen = false;
   constructor(
     private httpIndent: IndentsService,
     private common: CommonService,
@@ -28,8 +30,8 @@ export class MaterialDetailsComponent implements OnInit {
     private alertController: AlertController
   ) { }
 
-  ngOnInit() {
-    console.log(this.org_id);
+  ngOnInit() {    
+    console.log(this.arr);
     this.getMaterial();
     this.getUom();
     this.cleanDatesAndFields();
@@ -87,6 +89,7 @@ export class MaterialDetailsComponent implements OnInit {
         next: (data: any) => {
           if (data.status) {
             this.materialArr = data.data;
+            this.materialArrCopy = data.data;
             if (this.index === -1) {
               this.changeMaterial(null, this.arr.mtrl_id);
             }
@@ -119,6 +122,9 @@ export class MaterialDetailsComponent implements OnInit {
     this.arr.prt_code = temp.part_code;
     this.arr.mnfctrer_desc = temp.mnfctrer_desc;
     this.arr.model = temp.model_desc;
+    this.arr.uom_id = parseInt(temp.uom_id, 10); 
+    this.arr.attachment = temp.attachment;
+    this.arr.attachment_blob_type = temp.attachment_blob_type
   }
 
   search() {
@@ -193,6 +199,7 @@ export class MaterialDetailsComponent implements OnInit {
             this.editRemark = dat.remark;
             this.updateIndent();
           } else {
+            this.presentAlertConfirm();
             this.common.presentToast('Please Enter Remarks', 'warning');
           }
         }
@@ -294,27 +301,34 @@ export class MaterialDetailsComponent implements OnInit {
     }
   }
 
+  openImg() {
+    this.common.openImg(this.arr.attachment, this.arr.attachment_blob_type);
+  }
 
-  // changeCost() {
-  //   const { qty, expt_price, discount } = this.arr;
-  //   if (discount < 0 && discount !== null && discount !== undefined) {
-  //     this.common.presentToast(`Discount can't be smaller than 0`, 'warning');
-  //     this.arr.discount = 0;
-  //     return;
-  //   }
-  //   if (qty && expt_price && (discount !== null && discount !== undefined)) {
-  //     const quantity = Number(qty);
-  //     const expectedPrice = Number(expt_price);
-  //     const discountAmount = Number(discount);
-  //     const total = quantity * expectedPrice;
+  onWillDismiss() {
+    this.materialArr = this.materialArrCopy;
+    this.isModalOpen = false;
+  }
 
-  //     if (discountAmount > total) {
-  //       this.common.presentToast(`Discount can't be greater than total amount`, 'warning');
-  //       this.arr.discount = null;
-  //       this.arr.actl_price = null;
-  //     } else {
-  //       this.arr.actl_price = total - discountAmount;
-  //     }
-  //   }
-  // }
+  searchItem(ev: any) {
+    let val: any;
+    val = ev.target.value;
+    this.materialArr = this.materialArrCopy;
+    if (val && val.trim() !== '') {
+      this.materialArr = this.materialArr.filter((dat: any) => {
+        if ((dat.label.toLowerCase().indexOf(val.toLowerCase()) > -1)) {
+          return (dat.label.toLowerCase().indexOf(val.toLowerCase()) > -1);
+        }
+        return
+      });
+    }
+  }
+
+  selectItem(data: any) {    
+    this.arr.mtrl_id = data.value;
+    this.arr.mtrl_id_desc = data.label;    
+    this.changeMaterial(null, this.arr.mtrl_id);
+    this.onWillDismiss();
+    // mtrl_id_desc
+  }
 }

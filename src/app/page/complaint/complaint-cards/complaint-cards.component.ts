@@ -66,11 +66,11 @@ export class ComplaintCardsComponent  implements OnInit {
     modal.present();
   }
 
-  async work_now() {
+  async work_now() {    
     this.common.presentLoading().then(preLoad => {
       this.httpComplaint.getSpecificTicket(this.data.tkts_id).subscribe({
         next:(data) => {
-          if (data.status) {
+          if (data.status) {            
             if (data.data.complaint_type_cfrm === 0 && data.data.canDoTktConfirmationWork) {
               this.openTicketTypeModal(data);
             } else if (data.data?.pc_hse_conf.travel_allow === 1 && !data.data?.pc_hse_conf.travel_data && data.data.canWork) {

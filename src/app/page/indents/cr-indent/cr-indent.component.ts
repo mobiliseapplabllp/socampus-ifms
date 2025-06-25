@@ -47,7 +47,7 @@ export class CrIndentComponent  implements OnInit {
       ticket_id: [this.all_data.data.tkts_id],
       asset_id: [this.all_data.data.tkts_asset_id],
       wh_id: ['', Validators.required],
-      prop1: ['', Validators.required],
+      prop1: [''],
       is_billable: ['', Validators.required],
       mtrl_type: ['', Validators.required],
       source: [environment.source]

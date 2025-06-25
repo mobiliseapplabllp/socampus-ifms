@@ -9,14 +9,14 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-card class="ion-padding ticket_cards">
+  <!-- <ion-card class="ion-padding ticket_cards">
     <ion-row>
       <ion-col size="4">Ticket ID</ion-col>
       <ion-col>{{all_data.data?.tkts_id}}</ion-col>
     </ion-row>
     <ion-row>
       <ion-col size="4">Asset ID</ion-col>
-      <ion-col>{{all_data.data?.assets.ext_asset_id}}</ion-col>
+      <ion-col>{{all_data.data?.assets?.ext_asset_id}}</ion-col>
     </ion-row>
     <ion-row>
       <ion-col size="4">Device Group </ion-col>
@@ -34,7 +34,7 @@
       <ion-col size="4">Date </ion-col>
       <ion-col>{{all_data.data?.log_date}}</ion-col>
     </ion-row>
-  </ion-card>
+  </ion-card> -->
   <form [formGroup]="myForm">
     <ion-card>    
       <ion-item >
@@ -48,7 +48,7 @@
         </ion-select>
       </ion-item>
       <ion-item>
-        <ion-label position="floating">Remark <ion-text color="danger">*</ion-text></ion-label>
+        <ion-label position="floating">Address Remark</ion-label>
         <ion-input type="email" formControlName="prop1"></ion-input>
       </ion-item>
       <ion-item>
