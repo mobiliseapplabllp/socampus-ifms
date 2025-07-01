@@ -138,7 +138,7 @@ export class SparePartsComponent  implements OnInit {
                 rqst_id: data.rqst_id,
                 cancel_remark: dat.remark
               }
-              this.deleteIndent(obj);
+              this.deleteIndent(obj, data);
             } else {              
               this.common.presentToast('Please Enter Remarks', 'warning');
               this.presentAlertConfirm(data);
@@ -149,11 +149,12 @@ export class SparePartsComponent  implements OnInit {
     await alert.present();
   }
 
-  deleteIndent(obj: Object) {
+  deleteIndent(obj: Object, fullObject: any) {
     this.common.presentLoading().then(preLoad => {
       this.httpIndent.cancelIndent(obj).subscribe({
         next:(data: any) => {
           if (data.status) {
+            fullObject.status_id = 4;            
             this.common.presentToast(data.msg, 'success');
           } else {
             this.common.presentToast(data.msg, 'warning');
