@@ -52,7 +52,7 @@ export class TokenInterceptor implements HttpInterceptor {
     } else {
       if (request.url == 'https://translate.googleapis.com/language/translate/v2?key=AIzaSyDJjHphpheVQM7CRYNqHHdJqMqAgt0IY70') {
         const userToken = localStorage.getItem('token1');
-        const modifiedReq = request.clone({headers: request.headers.set('Accept', 'application/json').set('Referer1', 'http://localhost:8100/')});
+        const modifiedReq = request.clone({headers: request.headers.set('Accept', 'application/json')});
         return next.handle(modifiedReq).pipe(tap(() => {},
           (err: any) => {
           if (err instanceof HttpErrorResponse) {

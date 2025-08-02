@@ -511,7 +511,7 @@ export class FillReportComponent  implements OnInit {
         },
         error:(err) => {
           this.common.dismissloading();
-          this.common.presentToastWithOk(JSON.stringify(err), 'warning');
+          this.common.presentToast(environment.errMsg, 'warning');
         },
         complete:() => {
           this.common.dismissloading();

@@ -60,7 +60,7 @@ export class LoginPage implements OnInit {
   }
 
 
-  ngOnInit() {
+  ngOnInit() {    
     this.common.setBarcode('');
     if (this.platform.is('capacitor')) {
       this.initFcm();
@@ -70,7 +70,7 @@ export class LoginPage implements OnInit {
     } else {
       this.appVersion = '1.1';
     }
-  }
+  }  
 
   initFcm() {
     const addListeners = async () => {
@@ -125,7 +125,7 @@ export class LoginPage implements OnInit {
       }
     }
   }
-  ionViewDidLeave() {
+  ionViewDidLeave() {    
     this.menu.enable(true);
   }
 
