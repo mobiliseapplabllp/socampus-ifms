@@ -51,14 +51,27 @@ export class LoginService {
     });
   }
 
-  ssoGatesLoginDetails(data: any, fcm_token: string): Observable<any> {
+  // ssoGatesLoginDetails(data: any, fcm_token: string): Observable<any> {
+  //   let param: any = new HttpParams();
+  //   param.append('data', data);
+  //   param.append('fcm_token', fcm_token);
+  //   return this.https.get(`${environment.url}/ssoGatesLoginDetails`,{
+  //     params: param,
+  //   });
+  // }
+
+   ssoGatesLoginDetails(data: any, fcm_token: string, appVersion: string, isAndroid: boolean): Observable<any> {
     let param: any = new HttpParams();
-    param.append('data', data);
-    param.append('fcm_token', fcm_token);
-    return this.https.get(`${environment.url}/ssoGatesLoginDetails`,{
+    param = param.append('data', data);
+    param = param.append('fcm_token', fcm_token);
+    param = param.append('source', environment.source);
+    param = param.append('app_version', appVersion);
+    param = param.append('is_android', isAndroid);
+    return this.https.get(`${environment.url}ssoGatesLoginDetails`,{
       params: param,
     });
   }
+
 
   verifyOtp(formData: any): Observable<any> {
     return this.https.post(environment.url + '/verify_login_otp', formData);

@@ -1,13 +1,15 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LoadingController, MenuController, Platform } from '@ionic/angular';
+import { LoadingController, MenuController, ModalController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { environment } from 'src/environments/environment';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 import { env } from 'process';
+import { App } from '@capacitor/app';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-login',
@@ -32,12 +34,14 @@ export class LoginPage implements OnInit {
     length: 4,
     allowNumbersOnly:true,
     inputClass: 'custom-otp-input',
-    containerClass: 'custom-otp-container',
-    autofocus: true,
+    containerClass: 'custom-otp-container'
   };
   otp: any;
   sendMobileMsg!: string;
-  USER_ID!: string;
+  appUpdate: any = [];
+  currentVersion: any = [];
+  isProduction = environment.isProd;
+  appVersion!: string;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -54,12 +58,17 @@ export class LoginPage implements OnInit {
   }
 
 
-  ngOnInit() {
+  ngOnInit() {    
     this.common.setBarcode('');
     if (this.platform.is('capacitor')) {
       this.initFcm();
+      App.getInfo().then(res => {
+        this.appVersion = res.version
+      });
+    } else {
+      this.appVersion = '1.1';
     }
-  }
+  }  
 
   initFcm() {
     const addListeners = async () => {
@@ -67,16 +76,13 @@ export class LoginPage implements OnInit {
         this.fcmToken = token.value;
       });
 
-      await PushNotifications.addListener('registrationError', err => {
-        console.error('Registration error: ', err.error);
+      await PushNotifications.addListener('registrationError', err => {        
       });
 
-      await PushNotifications.addListener('pushNotificationReceived', notification => {
-        console.log('Push notification received: ', notification);
+      await PushNotifications.addListener('pushNotificationReceived', notification => {        
       });
 
-      await PushNotifications.addListener('pushNotificationActionPerformed', notification => {
-        console.log('Push notification action performed', notification.actionId, notification.inputValue);
+      await PushNotifications.addListener('pushNotificationActionPerformed', notification => {        
       });
     }
 
@@ -95,8 +101,7 @@ export class LoginPage implements OnInit {
     }
 
     const getDeliveredNotifications = async () => {
-      const notificationList = await PushNotifications.getDeliveredNotifications();
-      console.log('delivered notifications', notificationList);
+      const notificationList = await PushNotifications.getDeliveredNotifications();      
     }
     addListeners();
     registerNotifications();
@@ -118,7 +123,7 @@ export class LoginPage implements OnInit {
       }
     }
   }
-  ionViewDidLeave() {
+  ionViewDidLeave() {    
     this.menu.enable(true);
   }
 
@@ -148,7 +153,6 @@ export class LoginPage implements OnInit {
         if (this.userValue.status === false ) {
           this.common.presentToast(this.userValue.msg, 'warning');
         } else  if (this.userValue.status === true) {
-          this.USER_ID = this.userValue.user
           this.sendMobileMsg = this.userValue.msg
           this.viewCondition = 'multi_factor';
         }
@@ -157,10 +161,10 @@ export class LoginPage implements OnInit {
   }
 
   openInAppBrowser() {
-    let browser = this.iab.create(environment.url2 + 'ssoGates/saml2/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let browser = this.iab.create(environment.ssoUrl + 'ssoGates/saml2/index.php?sso', '_blank', 'location=no,zoom=yes');
     let count = 0;
     browser.on('loadstart').subscribe((data: any) => {
-      if (data.url.match(environment.url2 + '#/auth/ssoGates/')) {
+      if (data.url.match(environment.ssoUrl + '#/auth/ssoGates/')) {
         let url, token
         url = data.url;
         token = url.split('ssoGates/')[1];
@@ -171,12 +175,44 @@ export class LoginPage implements OnInit {
         }
       }
     });
+
+    browser.on('loaderror').subscribe(error => {
+      console.error('InAppBrowser error:', error);
+      alert(JSON.stringify(error));
+      browser.close();
+    });
+  }
+
+  openKeyClock() {
+    let browser = this.iab.create(environment.ssoUrl + 'ssoGates/saml3/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let count = 0;
+    browser.on('loadstart').subscribe(data => {
+      if (data.url.match(environment.ssoUrl + '#/auth/ssoGates/')) {
+        count = count + 1;
+        let url, token
+        url = data.url;
+        token = url.split('ssoGates/')[1];
+        browser.close();
+        if (count <= 1) {
+          this.getSsoEnc(token);
+        }
+      }
+      if (data.url === environment.ssoUrl || data.url === environment.ssoUrl + 'be/apiloading') {
+        browser.close();
+      }
+    });
+
+    browser.on('loaderror').subscribe(error => {
+      console.error('InAppBrowser error:', error);
+      alert(JSON.stringify(error));
+      browser.close();
+    });
   }
 
   getSsoEnc(token: string) {
     this.isHidden = !this.isHidden;
     this.presentLoading().then(preLoad => {
-      this.loginPro.ssoGatesLoginDetails(token, this.fcmToken).subscribe({
+      this.loginPro.ssoGatesLoginDetails(token, this.fcmToken, this.appVersion, this.isAndroid).subscribe({
         next:(data) => {
           this.isHidden = !this.isHidden;
           this.userValue = data;
@@ -193,11 +229,14 @@ export class LoginPage implements OnInit {
               localStorage.setItem('enc_id', this.userValue.enc_id);
               localStorage.setItem('user', JSON.stringify(this.userValue.user));
               localStorage.setItem('isAlreadyLogin', 'true');
-              this.multiFactorSubmit();
+              localStorage.setItem('loginDate', moment().format('YYYY-MM-DD'));
+              // this.multiFactorSubmit();
+              this.checkAppUpdate();
             }
           }
         },
         error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
           this.dismissloading();
         },
         complete:() => {
@@ -207,17 +246,16 @@ export class LoginPage implements OnInit {
     });
   }
 
-  getOtpValue(ev: any) {
+  getOtpValue(ev: any) {    
     this.otp = '';
     if (ev.length === 4) {
       this.otp = ev;
     }
   }
 
-  verifyOtp() {
-    console.log(this.loginForms.value);
+  verifyOtp() {    
     const formData = new FormData();
-    formData.append('user_name', this.USER_ID);
+    formData.append('user_name', this.loginForms.value.userid);
     formData.append('otp', this.otp);
     formData.append('fcm_token', this.fcmToken);
     this.presentLoading().then(preLoad => {
@@ -229,7 +267,8 @@ export class LoginPage implements OnInit {
             localStorage.setItem('enc_id', data.enc_id);
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('isAlreadyLogin', 'true');
-            this.multiFactorSubmit();
+            this.checkAppUpdate();
+            // this.multiFactorSubmit();
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -243,9 +282,33 @@ export class LoginPage implements OnInit {
         }
       });
     })
-
   }
 
+  checkAppUpdate() {
+    this.common.getAppVersionObs().subscribe(data => {
+      this.appUpdate = data;
+      if (this.platform.is('android')) {
+        this.isAndroid = true;
+        App.getInfo().then(res => {
+          const curVersion = res.version.toString();
+          this.currentVersion = curVersion.toString();
+          if (this.appUpdate.is_view && this.appUpdate.forceupdate && (this.appUpdate.vesrion !== this.currentVersion)) {
+            this.openPlayStore(this.appUpdate.url);
+            this.common.presentToast('Please Update your App', 'warning');
+          } else {
+            this.multiFactorSubmit();
+          }
+        });
+      } else {
+        this.isAndroid = false
+        this.multiFactorSubmit();
+      }
+    });
+  }
+
+  openPlayStore(url: string) {
+    window.open(url);
+  }
 
   multiFactorSubmit() {
     this.router.navigateByUrl('/list-master', { replaceUrl: true });
@@ -267,5 +330,24 @@ export class LoginPage implements OnInit {
 
   openPage(url: any) {
     this.router.navigateByUrl(url);
+  }
+
+  changeAuth() {
+    if (!this.isProduction) {
+      this.viewCondition = 'login';
+    }
+  }
+
+  openBarcode() {
+    return;    
+  }
+
+  dummyLogin() {
+    if (this.isProduction) {
+      return;
+    }
+    // https://socampus.mobilisepro.com/#/auth/ssoGates/CM2j03r1kE0OSOSm3bZ60FlGaG54cFBMY0JmT2IyVTFLT2FwZU1JdVk4V3kya3NMdU5KUlQvZDNObU1MSy9mQzFMb1A2WGRQdjRlTEJGUWl1UTZ1MVIwQmhHbytoYjZmdGdWMlJFblFjQk9xYUJhMWt2bGtyUm0xK2lnZkoxazJCWVhESE9IblNPVGxVb3Ay
+    let token = 'CM2j03r1kE0OSOSm3bZ60FlGaG54cFBMY0JmT2IyVTFLT2FwZU1JdVk4V3kya3NMdU5KUlQvZDNObU1MSy9mQzFMb1A2WGRQdjRlTEJGUWl1UTZ1MVIwQmhHbytoYjZmdGdWMlJFblFjQk9xYUJhMWt2bGtyUm0xK2lnZkoxazJCWVhESE9IblNPVGxVb3Ay';
+    this.getSsoEnc(token);
   }
 }
