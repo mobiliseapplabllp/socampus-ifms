@@ -9,6 +9,7 @@ import { UserIdleService } from 'angular-user-idle';
 import { CommonService } from './provider/common/common.service';
 import { environment } from 'src/environments/environment';
 import { checklist, db } from './provider/local-db/local-db.service';
+import { CapacitorCookies } from '@capacitor/core';
 
 @Component({
   selector: 'app-root',
@@ -235,6 +236,7 @@ export class AppComponent {
 
   async reset() {
     localStorage.clear();
+    CapacitorCookies.clearAllCookies();
     await db.checklist.clear();
     if (this.platform.is('android')) {
       App.exitApp();
