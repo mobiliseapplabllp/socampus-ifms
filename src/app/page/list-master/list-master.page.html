@@ -5,7 +5,7 @@
     </ion-buttons>
     <ion-title> {{userName}} </ion-title>
     <ion-buttons slot="end" *ngIf="isInternet">
-      <!-- <ion-button (click)="testRoute('/concierge')">Concierge</ion-button> -->
+      <ion-button (click)="testRoute('/concierge')">Concierge</ion-button>
       <ion-button slot="icon-only"  (click)="openPageRoute()" style="position: relative;">
         <ion-icon name="cloud-upload-outline"></ion-icon>
         <ion-text color="danger" style="position: absolute;top:0px;right:0px">{{DGArr.length}}</ion-text>

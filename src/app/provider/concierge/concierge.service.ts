@@ -46,4 +46,8 @@ export class ConciergeService {
   createTicket(formData: any): Observable<any> {
     return this.https.post(environment.url + '/concierge/ticket/create', formData);
   }
+
+  reOpenAction(formData: any): Observable<any> {
+    return this.https.post(environment.url + '/concierge/ticket/ticket-status-change', formData);
+  }
 }

@@ -15,8 +15,10 @@ export class AssignUserComponent  implements OnInit {
   tab: any;
 
   assignUsers: any = [];
+  assignUsersCopy: any = [];
   tckt: any = [];
   isSelect: any;
+  userData: any = [];
   constructor(
     private common: CommonService,
     private httpConcierge: ConciergeService,
@@ -24,6 +26,8 @@ export class AssignUserComponent  implements OnInit {
   ) { }
 
   ngOnInit() {    
+    this.userData = JSON.parse(localStorage.getItem('user')!);
+    
     this.getSpecificTicket();
   }
 
@@ -37,6 +41,7 @@ export class AssignUserComponent  implements OnInit {
         next:(data: any) => {
           if (data.status) {
             this.assignUsers = data.data.assignUsers;
+            this.assignUsersCopy = data.data.assignUsers;
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -79,6 +84,16 @@ export class AssignUserComponent  implements OnInit {
           this.common.dismissloading();
         }
       });
+    });
+  }
+
+  search(ev: any) {
+    const searchTerm = (ev.target.value || '').toLowerCase();
+    this.assignUsers = this.assignUsersCopy;
+    this.assignUsers = this.assignUsers.filter((dat: any) => {
+      return (        
+        String(dat?.fname ?? '').toLowerCase().includes(searchTerm)        
+      );
     });
   }
 

@@ -3,11 +3,11 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>Concierge Work</ion-title>
+    <ion-title>Concierge Work (#{{requestData.id}})</ion-title>
   </ion-toolbar>
 </ion-header>
 <ion-content style="--background: var(--ion-color-light);">
-  <br>
+  <!-- <br>
   <div style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;font-size:8px;background-color: white;">
     <ion-row>
       <ion-col size="6">
@@ -19,8 +19,7 @@
             <p>
               <ion-text style="font-family: 'opensans_light' !important;">Date</ion-text>
             </p>
-
-            <ion-text>{{requestData.created_at}}</ion-text>
+            <ion-text>{{requestData.created_at_new | date:'dd-MM-yyyy'}}</ion-text>
           </ion-label>
         </ion-item>
       </ion-col>
@@ -96,10 +95,10 @@
       </ion-accordion>
     </ion-accordion-group>
   </div>
-  <br>
+  <br> -->
 
   <ion-segment  [(ngModel)]='segStatus'>
-    <ion-segment-button value="action">
+    <ion-segment-button value="action" *ngIf="!isSegDisable">
       <ion-label>Action </ion-label>
     </ion-segment-button>
     <ion-segment-button value="details">
@@ -133,21 +132,21 @@
         </div>
 
         <div *ngIf="status === 4 ">
-          <ion-item >
+          <!-- <ion-item >
             <ion-label color="primary" position="floating">Problem Reported <ion-text color="danger">*</ion-text></ion-label>
             <ion-textarea rows="2" [(ngModel)]="problem_reported"></ion-textarea>
-          </ion-item>
+          </ion-item> -->
           <ion-item >
             <ion-label color="primary" position="floating">Action Taken <ion-text color="danger">*</ion-text></ion-label>
             <ion-textarea rows="2" [(ngModel)]="action_taken"></ion-textarea>
           </ion-item>
 
-          <ion-item >
+          <!-- <ion-item >
             <ion-label color="primary" position="floating">Scope of Work <ion-text color="danger">*</ion-text></ion-label>
             <ion-select interface="action-sheet"  mode="ios" [(ngModel)]="scope_of_work">
               <ion-select-option *ngFor="let dat of scopeOfWorkArr" [value]="dat.value">{{dat.label}}</ion-select-option>
             </ion-select>
-          </ion-item>
+          </ion-item> -->
 
           <ion-button size="small" class="ion-padding-start" (click)="attachment('resolved')" [color]="resolveImage ? 'success' : 'primary' ">Attachment</ion-button>
           <ion-row>

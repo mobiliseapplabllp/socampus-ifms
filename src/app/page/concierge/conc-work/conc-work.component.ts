@@ -28,6 +28,8 @@ export class ConcWorkComponent  implements OnInit {
   assignUsers: any = [];
   action = ''
   segStatus = 'action';
+  isSegDisable!: boolean;
+
   constructor(
     private activeRoute: ActivatedRoute,
     private common: CommonService,
@@ -36,7 +38,15 @@ export class ConcWorkComponent  implements OnInit {
     private navCtrl: NavController,
     private modalCtrl: ModalController) {
     this.activeRoute.queryParams.subscribe((res) => {
-      this.requestData = JSON.parse(res['data']);
+      this.requestData = JSON.parse(res['data']);      
+      let segStatusType = res['type'];
+      this.segStatus = segStatusType;
+      if (segStatusType === 'details' ) {
+        this.isSegDisable = true;
+      }
+      this.requestData.created_at_new = new Date(
+        this.requestData.created_at.replace(/(\d{2})-(\d{2})-(\d{4})/, '$2/$1/$3')
+      );      
       this.tab = res['tab'];      
     });
   }
@@ -158,9 +168,11 @@ export class ConcWorkComponent  implements OnInit {
   actionResolve() {
     if (!this.status) {
       this.common.presentToast('Please select status', 'warning');
-    } else if (!this.problem_reported) {
-      this.common.presentToast('Please enter remark', 'warning');
-    } else if (!this.action_taken) {
+    } 
+    // else if (!this.problem_reported) {
+    //   this.common.presentToast('Please enter remark', 'warning');
+    // } 
+    else if (!this.action_taken) {
       this.common.presentToast('Please enter Action Taken', 'warning');
     } else if (!this.action_taken) {
       this.common.presentToast('Please enter Action Taken', 'warning');
@@ -169,17 +181,17 @@ export class ConcWorkComponent  implements OnInit {
     } else {
       this.formDataResolve.delete('status');
       this.formDataResolve.delete('document_type');
-      this.formDataResolve.delete('problem_reported');
+      // this.formDataResolve.delete('problem_reported');
       this.formDataResolve.delete('action_taken');
-      this.formDataResolve.delete('scope_of_work');
+      // this.formDataResolve.delete('scope_of_work');
       this.formDataResolve.delete('tckt');
       this.formDataResolve.delete('source');
 
       this.formDataResolve.append('status', this.status);
       this.formDataResolve.append('document_type', 'Attachment');
-      this.formDataResolve.append('problem_reported', this.problem_reported);
+      // this.formDataResolve.append('problem_reported', this.problem_reported);
       this.formDataResolve.append('action_taken', this.action_taken);
-      this.formDataResolve.append('scope_of_work', this.scope_of_work);
+      // this.formDataResolve.append('scope_of_work', this.scope_of_work);
       this.formDataResolve.append('tckt', this.requestData.id);
       this.formDataResolve.append('source', environment.source);
       this.actionTicket(this.formDataResolve);

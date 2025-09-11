@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { ConciergeService } from 'src/app/provider/concierge/concierge.service';
 import { SiteComponent } from './site/site.component';
 import { ConcHistoryComponent } from './conc-history/conc-history.component';
@@ -17,15 +17,18 @@ export class ConciergePage implements OnInit {
   status = 'assignto';
   dashboard: any = {};
   ticketData: any = [];
+  userData: any = [];
   constructor(
     private httpConcierge: ConciergeService,
     private modalCtrl: ModalController,
     private router: Router,
-    private common: CommonService
+    private common: CommonService,
+    private alertController: AlertController
   ) { }
 
   ngOnInit() {
-
+    this.userData = JSON.parse(localStorage.getItem('user')!);
+    console.log(this.userData);
   }
 
   ionViewDidEnter() {
@@ -33,19 +36,25 @@ export class ConciergePage implements OnInit {
   }
 
   getTicketList(ticketType?: string) {
-    const obj = {
+    const obj: any = {
       page: 1,
-      limit: 10,
+      limit: 50,
       export: 0,
       search: "",
-      ticketType: ticketType ? ticketType : 'assignto'
+      ticketType: ticketType ? ticketType : 'assignto',                 
+    }
+    if (this.status === 'assignto') {
+      obj.status = [1,2,3,5]
+    }
+    if (this.status === 'completed' ) {
+      obj.status = [4,6];
     }
     this.common.presentLoading().then(preLoad => {
       this.httpConcierge.getTicketList(obj).subscribe({
         next:(data: any) => {
           if (data.status) {
             this.dashboard = data.tcktCount;
-            this.ticketData = data.data.data
+            this.ticketData = data.data.data;                        
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -110,12 +119,13 @@ export class ConciergePage implements OnInit {
     modal.present();
   }
 
-  workNow(data: any) {
+  workNow(data: any, type: string) {
     // this.router.navigateByUrl('/concierge/conc-work');
     this.router.navigate(['/concierge/conc-work'], {
       queryParams: {
         data: JSON.stringify(data),
-        tab: this.status
+        tab: this.status,
+        type:type
       }
     });
   }
@@ -130,6 +140,68 @@ export class ConciergePage implements OnInit {
   createTicket() {
     this.router.navigateByUrl('/concierge/cr-ticket');
   }
+
+  async presentAlertConfirm(data: any) {
+    const alert = await this.alertController.create({
+      cssClass: 'my-custom-class',
+      header: 'RE-Open?',
+      message: 'Are you sure you want to RE-Open ' + data.id,
+      mode: 'ios',
+      inputs: [{
+        name: 'remark',
+        type:'textarea',
+        placeholder: 'Enter Remarks',
+      }],
+      buttons: [{
+        text: 'Cancel',
+          handler: (data) => {
+          }
+        },{
+          text: 'YES',
+          handler: (dat) => {
+            if(dat.remark){
+              const obj = {
+                source: environment.source,
+                remark: dat.remark,
+                tckt: data.id,
+                status: 5
+              }
+              this.actionReOpen(obj);
+            } else {
+              this.common.presentToast('Please Enter Remark', 'warning');
+            }
+          }
+        }]
+    });
+    await alert.present();
+  }
+
+  actionReOpen(obj: any) {
+    console.log(obj);
+    this.common.presentLoading().then(preLoad => {
+      this.httpConcierge.reOpenAction(obj).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.dashboard = {};
+            this.ticketData = [];
+            this.common.presentToast(data.msg, 'success');
+            this.getTicketList(this.status);
+          } else {            
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.common.dismissloading(); 
+        }
+      });
+    })
+  }
+
+  
 
 
 }

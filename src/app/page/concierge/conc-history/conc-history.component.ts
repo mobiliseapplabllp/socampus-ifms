@@ -56,4 +56,8 @@ export class ConcHistoryComponent  implements OnInit {
     this.common.openImg(url, type);
   }
 
+  openDoc(data: any) {
+    this.common.openImg(data.document, data.document_blob_type);
+  }
+
 }
