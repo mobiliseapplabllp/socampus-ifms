@@ -49,13 +49,11 @@ export class VideoComponent {
     //   //==========================================================
     //   // 4/ ADD EVENT LISTENER : WHEN NEW STREAM IS AVAILABLE IN CONVERSATION
     //   //==========================================================
-    //   conversation.on('streamListChanged', (streamInfo: any) => {
-    //     console.log("streamListChanged :", streamInfo);
+    //   conversation.on('streamListChanged', (streamInfo: any) => {    
     //     if (streamInfo.listEventType === 'added') {
     //       if (streamInfo.isRemote === true) {
     //         conversation.subscribeToMedia(streamInfo.streamId)
-    //           .then((stream: Stream) => {
-    //             console.log('subscribeToMedia success', stream);
+    //           .then((stream: Stream) => {    
     //           }).catch((err: any) => {
     //             console.error('subscribeToMedia error', err);
     //           });
@@ -84,8 +82,7 @@ export class VideoComponent {
     //         }
     //       },
     //     }
-    //   }).then((stream: Stream) => {
-    //       console.log('createStream :', stream);
+    //   }).then((stream: Stream) => {    
     //       // Save local stream
     //       localStream = stream;
     //       this.stream = stream;
@@ -99,8 +96,7 @@ export class VideoComponent {
     //           //==============================
     //           // 7/ PUBLISH LOCAL STREAM
     //           //==============================
-    //           conversation.publish(localStream).then((stream: Stream) => {
-    //             console.log('published', stream);
+    //           conversation.publish(localStream).then((stream: Stream) => {    
     //             this.isProcess = false;
     //             // setTimeout(() => {
     //             //   userAgent.unregister().then(res => {
@@ -116,9 +112,7 @@ export class VideoComponent {
     //     }).catch((err: any) => {
     //       console.error('create stream error', err);
     //     });
-    // }, (err: any) => {
-    //   console.log('Err User Register');
-    //   console.log(err);
+    // }, (err: any) => {     
     // });
   }
 

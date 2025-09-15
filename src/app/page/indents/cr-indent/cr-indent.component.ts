@@ -31,8 +31,7 @@ export class CrIndentComponent  implements OnInit {
   ngOnInit() {    
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras?.state?.['data']) {
-      this.all_data = navigation.extras.state['data'];            
-      console.log(this.all_data);
+      this.all_data = navigation.extras.state['data'];                  
       this.getWarehouseByPC();      
     }    
     this.initForm();

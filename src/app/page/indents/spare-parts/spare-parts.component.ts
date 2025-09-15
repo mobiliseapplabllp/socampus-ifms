@@ -75,8 +75,7 @@ export class SparePartsComponent  implements OnInit {
   edit(dat: any) {    
     this.common.presentLoading().then(preLoad => {
       this.httpIndent.editIndent(dat.rqst_id).subscribe({
-        next:(data: any) => {
-          console.log(data);
+        next:(data: any) => {          
           if (data.status) {
             this.openMaterialDetails(data.data[0]);
           } else {
@@ -108,8 +107,7 @@ export class SparePartsComponent  implements OnInit {
       }
     });
     modal.onWillDismiss().then(async disModal => {
-      if (disModal.role) {    
-        console.log('updated');        
+      if (disModal.role) {            
         this.getTktTran(this.all_data?.data?.tkts_id);                      
       }
     });

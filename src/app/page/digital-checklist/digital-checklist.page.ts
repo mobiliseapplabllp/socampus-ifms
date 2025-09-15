@@ -91,61 +91,116 @@ export class DigitalChecklistPage implements OnInit {
     this.common.dismissloading();
   }
 
-  ionViewDidEnter() {
-    let split, type, ecn_key, bar = this.common.getBarcode();
-    this.common.setBarcode('');
-    if (this.qrType === 'site') {
-      if (bar) {
-        this.scanBarcodeDetail.isScanBarcode = true;
-        split = bar.split('/');
-        if (split.length === 6) {
-          type = split[4];
-          ecn_key = split[5];
-          let val = this.common.decryptValue(ecn_key);
-          this.scanBarcodeDetail.QRType = type;
-          this.scanBarcodeDetail.QRValue = val;
-          if (val) {
-            this.getCheckListByBarcode(type, val);
-          } else {
-            this.common.presentToast('Invalid Encryption', 'warning');
-          }
-        } else {
-          this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-        }
-      } else if(this.scanBarcodeDetail.isScanBarcode) {
+  // ionViewDidEnter() {
+  //   let split, type, ecn_key, bar = this.common.getBarcode();
+  //   this.common.setBarcode('');
+  //   if (this.qrType === 'site') {
+  //     if (bar) {
+  //       this.scanBarcodeDetail.isScanBarcode = true;
+  //       split = bar.split('/');
+  //       if (split.length === 6) {
+  //         type = split[4];
+  //         ecn_key = split[5];
+  //         let val = this.common.decryptValue(ecn_key);
+  //         this.scanBarcodeDetail.QRType = type;
+  //         this.scanBarcodeDetail.QRValue = val;
+  //         if (val) {
+  //           this.getCheckListByBarcode(type, val);
+  //         } else {
+  //           this.common.presentToast('Invalid Encryption', 'warning');
+  //         }
+  //       } else {
+  //         this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+  //       }
+  //     } else if(this.scanBarcodeDetail.isScanBarcode) {
+  //       this.getCheckListByBarcode(this.scanBarcodeDetail.QRType, this.scanBarcodeDetail.QRValue);
+  //     } else {
+  //       this.checkCurrentDateDG(this.selectedDate);
+  //     }
+  //   } else if (this.qrType === 'verify') {
+  //     this.qrType = 'site';
+  //     split = bar.split('/');
+  //     if (split.length === 6) {
+  //       ecn_key = split[5];
+  //       let val = this.common.decryptValue(ecn_key);
+  //       this.qrType = 'site'
+  //       if (this.qrObject.barcode === val) {
+  //         this.openFillReport(this.qrObject);
+  //       } else {
+  //         this.common.presentToast('You are Scan Wrong QR Code ' + val, 'warning');
+  //       }
+  //     } else {
+  //       this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+  //     }
+  //   } else if (this.qrType === 'loc-verify') {
+  //     this.qrType = 'site';
+  //     split = bar.split('/');
+  //     if (split.length === 6) {
+  //       ecn_key = split[5];
+  //       let val = this.common.decryptValue(ecn_key);
+  //       if (this.qrObject.loc_id === parseInt(val, 10)) {
+  //         this.openFillReport(this.qrObject);
+  //       } else {
+  //         this.common.presentToast('You are Scan Wrong Location QR Code ' + val, 'warning');
+  //       }
+  //     } else {
+  //       this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+  //     }
+  //   }
+  // }
+
+  ionViewDidEnter() {    
+    const bar = this.common.getBarcode();
+    this.common.setBarcode('');    
+    if (!bar && this.qrType === 'site') {
+      if (this.scanBarcodeDetail.isScanBarcode) {
         this.getCheckListByBarcode(this.scanBarcodeDetail.QRType, this.scanBarcodeDetail.QRValue);
       } else {
         this.checkCurrentDateDG(this.selectedDate);
       }
-    } else if (this.qrType === 'verify') {
-      this.qrType = 'site';
-      split = bar.split('/');
-      if (split.length === 6) {
-        ecn_key = split[5];
-        let val = this.common.decryptValue(ecn_key);
-        this.qrType = 'site'
+      return;
+    }
+
+    const split = bar?.split('/') || [];
+    if (split.length !== 6) {
+      this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+      return;
+    }
+
+    const type = split[4];
+    const ecn_key = split[5];
+    const val = this.common.decryptValue(ecn_key);
+
+    switch (this.qrType) {
+      case 'site':
+      this.scanBarcodeDetail.isScanBarcode = true;
+      this.scanBarcodeDetail.QRType = type;
+      this.scanBarcodeDetail.QRValue = val;
+
+      if (val) {
+        this.getCheckListByBarcode(type, val);
+      } else {
+        this.common.presentToast('Invalid Encryption', 'warning');
+      }
+      break;
+
+      case 'verify':
+        this.qrType = 'site';
         if (this.qrObject.barcode === val) {
           this.openFillReport(this.qrObject);
         } else {
-          this.common.presentToast('You are Scan Wrong QR Code ' + val, 'warning');
+          this.common.presentToast(`You are Scan Wrong QR Code ${val}`, 'warning');
         }
-      } else {
-        this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-      }
-    } else if (this.qrType === 'loc-verify') {
-      this.qrType = 'site';
-      split = bar.split('/');
-      if (split.length === 6) {
-        ecn_key = split[5];
-        let val = this.common.decryptValue(ecn_key);
+      break;
+
+      case 'loc-verify':
+        this.qrType = 'site';
         if (this.qrObject.loc_id === parseInt(val, 10)) {
           this.openFillReport(this.qrObject);
         } else {
-          this.common.presentToast('You are Scan Wrong Location QR Code ' + val, 'warning');
+          this.common.presentToast(`You are Scan Wrong Location QR Code ${val}`, 'warning');
         }
-      } else {
-        this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-      }
+      break;
     }
   }
 
@@ -245,6 +300,9 @@ export class DigitalChecklistPage implements OnInit {
           setTimeout(() => {
             sub.unsubscribe();
           }, 1000);
+        }, error:() => {
+          this.common.presentToast('Please clean your phone Cache', 'warning');
+          this.common.dismissloading();
         }
       });
     })
@@ -308,8 +366,8 @@ export class DigitalChecklistPage implements OnInit {
     })
   }
 
-  async addBulkCheckList(checkListData: any) {
-    await db.checklist.bulkAdd(checkListData).then(res => {
+  async addBulkCheckList(checkListData: any) {    
+    await db.checklist.bulkPut(checkListData).then(res => {
       if (this.isLoop && this.TOTAL_CHECKLIST > 300) {
         this.offset = this.offset + 300;
         this.getOfflineCheckListFromServer(this.selectedDate, this.offset);
@@ -376,6 +434,15 @@ export class DigitalChecklistPage implements OnInit {
       }
     } else {
       this.openFillReport(data);
+      // if (data.barcode) {
+      //   this.qrType = 'verify';
+      //   this.qrObject = data;
+      //   this.router.navigateByUrl('/barcode');
+      // } else {
+      //   this.qrType = 'loc-verify';
+      //   this.qrObject = data;
+      //   this.router.navigateByUrl('/barcode');
+      // }
     }
 
   }
