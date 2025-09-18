@@ -701,4 +701,13 @@ export class PmCalPage implements OnInit {
       });
     })
   }
+
+  openRoute(data: any) {    
+    this.router.navigate(['/indents/spare-parts'], {
+      state: {
+        data: data,
+        type: 'ppm'
+      }
+    });
+  }
 }

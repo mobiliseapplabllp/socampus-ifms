@@ -62,7 +62,7 @@ export class LoginPage implements OnInit {
 
 
   ngOnInit() {    
-    if (moment().format('YYYY-MM-DD') === '2025-09-13') {
+    if (moment().format('YYYY-MM-DD') === '2025-09-16') {
       this.isDateValid = true;      
     }
     this.common.setBarcode('');
@@ -343,7 +343,7 @@ export class LoginPage implements OnInit {
   }
 
   changeAuth() {
-    if (this.isProduction || !this.isDateValid) {
+    if (this.isProduction) {
       return;
     }
     this.viewCondition = 'login';

@@ -654,7 +654,8 @@ export class TicketWorkComponent  implements OnInit {
   openRoute(url: string) {    
     this.router.navigate([url], {
       state: {
-        data: this.requestedData_TEMP
+        data: this.requestedData_TEMP,
+        type: 'ticket',
       }
     });
   }

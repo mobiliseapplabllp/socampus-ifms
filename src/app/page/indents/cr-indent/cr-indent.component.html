@@ -35,7 +35,7 @@
       <ion-col>{{all_data.data?.log_date}}</ion-col>
     </ion-row>
   </ion-card> -->
-  <form [formGroup]="myForm">
+  <form [formGroup]="myForm" *ngIf="req_type">
     <ion-card>    
       <ion-item >
         <ion-label position="floating">PC Code <ion-text color="danger">*</ion-text></ion-label>
@@ -91,7 +91,7 @@
   </ion-card>
 
 </ion-content>
-<ion-footer>
+<ion-footer *ngIf="req_type">
   <ion-toolbar style="padding: 0px 10px">
     <ion-button expand="block" (click)="finalSubmit()" [disabled]="myForm.invalid">Submit</ion-button>
   </ion-toolbar>

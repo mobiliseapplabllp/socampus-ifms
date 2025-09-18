@@ -15,10 +15,15 @@ import * as moment from 'moment';
 })
 export class CrIndentComponent  implements OnInit {
   all_data: any;
+  ppm_req_data: any;
   warehouseArr: any = [];
   public myForm!: FormGroup;
   typeArr: any = [];
   materialArr: any = [];
+  req_type!: string;
+  pc_id: any;
+  pc_desc!: string;
+  org_id: any;
   constructor(
     private router: Router,
     private httpIndent: IndentsService,
@@ -29,12 +34,24 @@ export class CrIndentComponent  implements OnInit {
   ) { }
 
   ngOnInit() {    
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras?.state?.['data']) {
-      this.all_data = navigation.extras.state['data'];                  
+    const navigation = this.router.getCurrentNavigation();    
+    if (navigation?.extras?.state?.['data']) {      
+      this.req_type = navigation.extras.state['req_type'];
+      if (this.req_type === 'ticket') {        
+        this.all_data = navigation.extras.state['data'];    
+        this.pc_id = this.all_data.data.pc_id;
+        this.pc_desc = this.all_data.data.pc_desc;
+        this.org_id = this.all_data.data.org_id;        
+        this.initForm();              
+      } else {
+        this.ppm_req_data = navigation.extras.state['data'];                  
+        this.pc_id = this.ppm_req_data.pc_id;
+        this.pc_desc = this.ppm_req_data.pc_desc;
+        this.org_id = this.ppm_req_data.org_id;        
+        this.initFormPPM();
+      }
       this.getWarehouseByPC();      
-    }    
-    this.initForm();
+    }        
     this.getSelectType();
   }
 
@@ -51,12 +68,26 @@ export class CrIndentComponent  implements OnInit {
       mtrl_type: ['', Validators.required],
       source: [environment.source]
     });
+  }
 
+  initFormPPM() {
+    this.myForm = this.formbuilder.group({
+      pc_id_desc: [this.ppm_req_data.pc_desc, Validators.required],
+      pc_id: [this.ppm_req_data.pc_id, Validators.required],
+      is_ppm: ['1'],
+      ppm_wo_id: [this.ppm_req_data.id],
+      asset_id: [this.ppm_req_data.asset_id],
+      wh_id: ['', Validators.required],
+      prop1: [''],
+      is_billable: ['', Validators.required],
+      mtrl_type: ['', Validators.required],
+      source: [environment.source]
+    });
   }
 
   getWarehouseByPC() {
     this.common.presentLoading().then(preLoad => {
-      this.httpIndent.getWarehousePc(this.all_data.data.pc_id).subscribe({
+      this.httpIndent.getWarehousePc(this.pc_id).subscribe({
         next:(data: any) => {          
           if (data.status) {
             this.warehouseArr = data.data; 
@@ -125,7 +156,7 @@ export class CrIndentComponent  implements OnInit {
         index: ind,
         mtrl_type: this.myForm.value.mtrl_type,
         arr: data,
-        org_id: this.all_data.data.org_id
+        org_id: this.org_id
       }
     });
     modal.onWillDismiss().then(async disModal => {

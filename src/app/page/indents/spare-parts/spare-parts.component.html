@@ -4,7 +4,8 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>
-      <ion-label>Material Requested (#{{all_data?.data?.tkts_id}})</ion-label>
+      <ion-label *ngIf="req_type === 'ticket' ">MR   (#{{all_data?.data?.tkts_id}})</ion-label>
+      <ion-label *ngIf="req_type === 'ppm' ">MR (#{{pms_req_data?.wo_id}})</ion-label>
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -40,55 +41,12 @@
       <ion-row>
         <ion-col size="5">Qty</ion-col>
         <ion-col>{{dat.qty}}</ion-col>
-      </ion-row>
-      <!-- <ion-row>
-        <ion-col size="5">Status</ion-col>
-        <ion-col>{{dat.status_desc}}</ion-col>
-      </ion-row> -->
+      </ion-row>      
       <ion-row>
         <ion-col size="5">Edit Remark</ion-col>
         <ion-col>{{dat.edit_remark}}</ion-col>
       </ion-row>
-    </ion-grid>
-    <!-- <ion-row>
-      <ion-col size="6">
-        <ion-text>MR ID</ion-text><br>
-        <ion-text>{{dat.rqst_no}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text>SKU</ion-text><br>
-        <ion-text>{{dat.sku}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text>UOM</ion-text><br>
-        <ion-text>{{dat.uom_desc}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text>Edit Remark</ion-text><br>
-        <ion-text>{{dat.edit_remark}}</ion-text>
-      </ion-col>
-    </ion-row> -->
-    <!-- <ion-row>
-      <ion-col size="6" >
-        <div style="font-family: 'sansapro_normal' !important;">{{dat.wrnty_exp_date}}</div>
-      </ion-col>
-      <ion-col size="6" class="ion-text-right">
-        <span [ngClass]="{'cls11': i % 2 === 0, 'cls21': i % 2 !== 0}">Quantity - {{dat.qty}}</span> 
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="6" class="vc">
-        <div style="font-family: 'opensans_bold' !important;color:black">SKU : {{dat.sku}}</div>
-      </ion-col>
-      <ion-col size="6" class="ion-text-right">
-        <ion-button size="small" fill="clear">
-          <ion-icon name="chevron-forward-outline"></ion-icon>
-        </ion-button>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>{{dat.uom_desc}}</ion-col>
-    </ion-row>           -->
+    </ion-grid>    
     <ion-row>
       <ion-col size="4">
         <ion-button shape="round" fill="outline" expand="block" color="primary-dark" class="ion-text-capitalize" *ngIf="dat.status_id !== 4 " [disabled]="!pi_action_permision.can_edit_indent_pi"
@@ -167,41 +125,7 @@
             </ion-col>
           </ion-row>
         </div>
-      </ion-grid>
-
-
-      <!-- <div *ngFor="let dat of indentLogs">
-        <ion-card  *ngIf="dat.changed_fields" style="padding-bottom: 10px">
-          <ion-row class="ion-padding">
-            <ion-col size="6">
-              <ion-text color="dark">{{dat.updated_by}}</ion-text>
-            </ion-col>
-            <ion-col size="6" class="ion-text-right">{{dat.updated_at}}</ion-col>
-          </ion-row>
-          <div style="padding-left: 10px;padding-right:10px">
-            <ion-row style="background-color: var(--ion-color-primary);color:white">
-              <ion-col size="4">Field</ion-col>
-              <ion-col size="4">Last Value</ion-col>
-              <ion-col size="4">Updated Value</ion-col>
-            </ion-row>
-            <ion-row *ngFor="let val of dat.changed_fields1" style="border-bottom: 1px solid #cecaca">
-              <ion-col size="4" style="border-right: 1px solid #cecaca">
-                <b>{{val.value.label}}</b>
-              </ion-col>
-              <ion-col style="border-right: 1px solid #cecaca">
-                <ion-button *ngIf="val.key === 'Attachment1'" size="small"
-                  (click)="viewImg(val.value.old_value, dat.attachment1_blob_type)">View</ion-button>
-                <ion-text *ngIf="val.key !== 'Attachment1' ">{{val.value.old_value}}</ion-text>
-              </ion-col>
-              <ion-col>
-                <ion-button *ngIf="val.key === 'Attachment1'" size="small"
-                  (click)="viewImg(val.value.new_value, dat.attachment1_blob_type)">View</ion-button>
-                <ion-text *ngIf="val.key !== 'Attachment1' ">{{val.value.new_value}}</ion-text>
-              </ion-col>
-            </ion-row>
-          </div>
-        </ion-card>
-      </div> -->
+      </ion-grid>    
     </ion-content>
   </ng-template>
 </ion-modal>
