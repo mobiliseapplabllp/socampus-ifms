@@ -22,6 +22,12 @@ export class MaterialDetailsComponent implements OnInit {
   today = moment().format('YYYY-MM-DD');
   org_id: any;
   isModalOpen = false;
+  isChanged = false;
+  originalArr: any = {};
+  requesteeArr: any = [];
+  requesteeArrCopy: any = [];
+  isRequesteeModalOpen = false;
+  pc_id: any;
   constructor(
     private httpIndent: IndentsService,
     private common: CommonService,
@@ -30,10 +36,30 @@ export class MaterialDetailsComponent implements OnInit {
     private alertController: AlertController
   ) { }
 
-  ngOnInit() {        
+  ngOnInit() {
     this.getMaterial();
     this.getUom();
     this.cleanDatesAndFields();
+    console.log(this.arr);    
+    if (this.pc_id) {
+      this.arr.pc_id = this.pc_id;
+    }    
+    // console.log(this.index);
+
+    // if (this.index === -1 && this.arr.user_id_label) {
+    //   this.arr.user_id_label = '';
+    //   this.arr.user_id = '';
+    // }
+    
+    // this.arr.user_id = data.id;
+    // this.arr.user_id_label = data.label;
+
+    this.arr.user_id_label = this.arr.username    
+    this.isChanged = this.index !== -1;
+    setTimeout(() => {
+      this.originalArr = JSON.parse(JSON.stringify(this.arr));
+    }, 100);
+
   }
 
   cleanDatesAndFields() {
@@ -48,6 +74,10 @@ export class MaterialDetailsComponent implements OnInit {
       if (this.arr[key] === undefined || this.arr[key] === 'undefined') {
         this.arr[key] = '';
       }
+    }
+    if (this.index === -1) {
+      this.arr.user_id_label = '';
+      this.arr.user_id = '';
     }
   }
 
@@ -115,13 +145,15 @@ export class MaterialDetailsComponent implements OnInit {
       val = ev.target.value;
     }
     let temp = this.materialArr.filter((value: any) => value.value === val)[0];
+    console.log(temp);
     this.arr.sku = temp.sku;
     this.arr.catlg_no = temp.catlg_no;
-    this.arr.mtrl_desc = temp.mtrl_description;
+    this.arr.mtrl_desc = temp.mtrl_desc;
+    this.arr.mtrl_description = temp.mtrl_description;
     this.arr.prt_code = temp.part_code;
     this.arr.mnfctrer_desc = temp.mnfctrer_desc;
     this.arr.model = temp.model_desc;
-    this.arr.uom_id = parseInt(temp.uom_id, 10); 
+    this.arr.uom_id = parseInt(temp.uom_id, 10);
     this.arr.attachment = temp.attachment;
     this.arr.attachment_blob_type = temp.attachment_blob_type
   }
@@ -147,14 +179,19 @@ export class MaterialDetailsComponent implements OnInit {
       });
     });
   }
-
   async presentActionSheet() {
     this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
       this.arr.mtrl_file = blob;
+      this.onFieldChange(); // Add this line
     });
   }
 
   submit() {
+    if (this.index !== -1 && !this.isChanged) {
+      this.common.presentToast('No changes detected. Please modify something before updating.', 'warning');
+      return;
+    }
+
     const validations = [
       { condition: !this.arr.mtrl_id, message: 'Please Select Material' },
       { condition: !this.arr.uom_id, message: 'Please Select Unit' },
@@ -207,7 +244,7 @@ export class MaterialDetailsComponent implements OnInit {
     await alert.present();
   }
 
-  updateIndent() {    
+  updateIndent() {
     let i = 0;
     const random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
     const formData = new FormData();
@@ -322,11 +359,97 @@ export class MaterialDetailsComponent implements OnInit {
     }
   }
 
-  selectItem(data: any) {    
+  selectItem(data: any) {
     this.arr.mtrl_id = data.value;
-    this.arr.mtrl_id_desc = data.label;    
+    this.arr.mtrl_id_desc = data.label;
     this.changeMaterial(null, this.arr.mtrl_id);
     this.onWillDismiss();
     // mtrl_id_desc
   }
+  onFieldChange() {
+    setTimeout(() => {
+      this.isChanged = this.hasChanges();
+    }, 0);
+  }
+
+  hasChanges(): boolean {
+    if (this.index !== -1) return true;  
+
+    const fieldsToCheck = [
+      'serial_no', 'qty', 'expt_price', 'discount', 'reqd_by_date',
+      'supl_name', 'pur_ordr_no', 'user_id_label', 'del_loc',
+      'wrnty_exp_date', 'remark'
+    ];
+
+    for (let field of fieldsToCheck) {
+      if (this.arr[field] != this.originalArr[field]) {
+        return true;
+      }
+    }
+    if (this.arr.mtrl_file) {
+      return true;
+    }
+
+    return false;
+  }
+  //  get Requestee
+  getRequesteeList() {
+    if (!this.arr.pc_id) {
+      this.common.presentToast('PC ID is Required', 'warning');
+      return;
+    }
+    this.common.presentLoading().then(preLoad => {
+      this.httpIndent.getRequesteeList(this.arr.pc_id).subscribe({
+        next: (data: any) => {
+          if (data.status) {
+            this.requesteeArr = data.data;
+            this.requesteeArrCopy = data.data;
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error: () => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete: () => {
+          this.common.dismissloading();
+        }
+      });
+    });
+  }
+
+  onRequesteeWillDismiss() {
+    this.requesteeArr = this.requesteeArrCopy;
+    this.isRequesteeModalOpen = false;
+  }
+
+  searchRequesteeItem(ev: any) {
+    let val: any;
+    val = ev.target.value;
+    this.requesteeArr = this.requesteeArrCopy;
+    if (val && val.trim() !== '') {
+      this.requesteeArr = this.requesteeArr.filter((dat: any) => {
+        if ((dat.label.toLowerCase().indexOf(val.toLowerCase()) > -1)) {
+          return (dat.label.toLowerCase().indexOf(val.toLowerCase()) > -1);
+        }
+        return
+      });
+    }
+  }
+
+  selectRequestee(data: any) {
+    this.arr.user_id = data.id;
+    this.arr.user_id_label = data.label;
+    this.onRequesteeWillDismiss();
+    this.onFieldChange();
+  }
+
+  openRequesteeModal() {
+    this.isRequesteeModalOpen = true;
+    if (this.requesteeArr.length === 0) {
+      this.getRequesteeList();
+    }
+  }
+
 }

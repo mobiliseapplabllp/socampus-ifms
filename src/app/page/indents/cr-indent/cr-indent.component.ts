@@ -156,7 +156,8 @@ export class CrIndentComponent  implements OnInit {
         index: ind,
         mtrl_type: this.myForm.value.mtrl_type,
         arr: data,
-        org_id: this.org_id
+        org_id: this.org_id,
+        pc_id: this.myForm.value.pc_id
       }
     });
     modal.onWillDismiss().then(async disModal => {

@@ -4,17 +4,19 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>
-      <ion-label *ngIf="req_type === 'ticket' ">MR   (#{{all_data?.data?.tkts_id}})</ion-label>
-      <ion-label *ngIf="req_type === 'ppm' ">MR (#{{pms_req_data?.wo_id}})</ion-label>
+      <ion-label *ngIf="req_type === 'ticket' ">MR (#{{all_data?.data?.tkts_id}})</ion-label>
+      <ion-label *ngIf="req_type === 'ppm' ">MR (#{{pms_req_data?.wo_id}})</ion-label>        
     </ion-title>
+    <ion-text slot="end" *ngIf="req_type === 'ppm' " class="ion-padding-end" style="font-size: 12px"> Total Cost: {{ totalPrice}} </ion-text>
   </ion-toolbar>
 </ion-header>
 <ion-content>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button fill="clear" color="primary" (click)="crIndent()">
+    <ion-fab-button fill="clear" color="primary" (click)="crIndent()" [disabled]="!canCreateIndent">
       <ion-icon name="add-outline"></ion-icon>
     </ion-fab-button>
   </ion-fab>
+
 
   <ion-card *ngFor="let dat of req_indent;let i = index" class="cards"
     [ngClass]="{'cls1': dat.status_id === 2, 'cls2': dat.status_id !== 2}">
@@ -41,28 +43,34 @@
       <ion-row>
         <ion-col size="5">Qty</ion-col>
         <ion-col>{{dat.qty}}</ion-col>
-      </ion-row>      
+      </ion-row>
+      <ion-row>
+        <ion-col size="5">Final Cost</ion-col>
+        <ion-col>{{dat.actl_price}}</ion-col>
+      </ion-row>
       <ion-row>
         <ion-col size="5">Edit Remark</ion-col>
         <ion-col>{{dat.edit_remark}}</ion-col>
       </ion-row>
-    </ion-grid>    
+    </ion-grid>
     <ion-row>
-      <ion-col size="4">
-        <ion-button shape="round" fill="outline" expand="block" color="primary-dark" class="ion-text-capitalize" *ngIf="dat.status_id !== 4 " [disabled]="!pi_action_permision.can_edit_indent_pi"
-          (click)="edit(dat)">
-          Edit <ion-icon name="create-outline" slot="end"></ion-icon>
-        </ion-button>
-      </ion-col>
       <ion-col size="4">
         <ion-button shape="round" fill="outline" expand="block" color="primary-dark" class="ion-text-capitalize"
           (click)="viewIndent(dat)">
           Logs <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
         </ion-button>
       </ion-col>
+      <ion-col size="4">
+        <ion-button shape="round" fill="outline" expand="block" color="primary-dark" class="ion-text-capitalize"
+          *ngIf="dat.status_id !== 4 " [disabled]="!pi_action_permision.can_edit_indent_pi" (click)="edit(dat)"
+          [disabled]="!canCreateIndent">
+          Edit <ion-icon name="create-outline" slot="end"></ion-icon>
+        </ion-button>
+      </ion-col>
       <ion-col size="4" class="ion-text-center">
-        <ion-button shape="round" fill="outline" expand="block" color="danger" class="ion-text-capitalize" *ngIf="dat.status_id !== 4 " [disabled]="!pi_action_permision.can_delete_indent_pi"
-          (click)="presentAlertConfirm(dat)">
+        <ion-button shape="round" fill="outline" expand="block" color="danger" class="ion-text-capitalize"
+          *ngIf="dat.status_id !== 4 " [disabled]="!pi_action_permision.can_delete_indent_pi"
+          (click)="presentAlertConfirm(dat)" [disabled]="!canCreateIndent">
           <ion-icon name="trash-sharp" slot="end"></ion-icon>
         </ion-button>
       </ion-col>
@@ -83,16 +91,65 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content>
-      <ion-grid>        
-        <div *ngFor="let dat of indentLogs;let i = index" class="ion-padding-start ion-padding-end">
+    <ion-content>      
+      <!-- <ion-grid *ngIf="isDataLoadLogs">
+        <div class="empty-message">
+          <img src="../../../../assets/img/empty-state-logs.svg" alt="No Data" />
+          <h2>No transactions created yet</h2>
+        </div>
+      </ion-grid> -->
+      <ion-row>
+        <ion-col class="ion-text-center" *ngIf="isDataLoadLogs" style="margin-top: 40%;">
+          <img src="assets/img/empty-state-logs.svg" alt="No Data" class=""/>
+          <h2 >No transactions created yet</h2>
+        </ion-col>
+      </ion-row>
+            
+      <ion-grid>
+        <div *ngFor="let dat of indentLogs;let i = index" class="ion-padding-start ion-padding-end">          
           <ion-row class="row" *ngIf="dat.changed_fields">
             <ion-col size="1" class="ion-padding-start">
               <div class="images"> <img src="assets/img/dot.jpeg"></div>
               <div class="line" *ngIf="i < indentLogs.length - 2 "></div>
             </ion-col>
             <ion-col size="11">
-              <ion-card *ngIf="dat.changed_fields" style="padding-bottom: 10px">
+              <ion-card *ngIf="dat.changed_fields" class="log-card">
+                <ion-row class="ion-padding-horizontal ion-padding-top">
+                  <ion-col size="6">
+                    <ion-text color="dark">{{dat.updated_by}}</ion-text>
+                  </ion-col>
+                  <ion-col size="6" class="ion-text-right">{{dat.updated_at}}</ion-col>
+                </ion-row>
+
+                <div class="table-container">
+                  <div class="table-header">
+                    <div class="header-cell">Field</div>
+                    <div class="header-cell">Last Value</div>
+                    <div class="header-cell">Update Value</div>
+                  </div>
+
+                  <div *ngFor="let val of dat.changed_fields1" class="table-row">
+                    <div class="table-cell field-name">
+                      {{val.value.label}}
+                    </div>
+                    <div class="table-cell">
+                      <ion-button *ngIf="val.key === 'Attachment1'" size="small"
+                        (click)="viewImg(val.value.old_value, dat.attachment1_blob_type)">
+                        <ion-icon name="eye-outline"></ion-icon>
+                      </ion-button>
+                      <span *ngIf="val.key !== 'Attachment1'">{{val.value.old_value}}</span>
+                    </div>
+                    <div class="table-cell">
+                      <ion-button *ngIf="val.key === 'Attachment1'" size="small"
+                        (click)="viewImg(val.value.new_value, dat.attachment1_blob_type)">
+                        <ion-icon name="eye-outline"></ion-icon>
+                      </ion-button>
+                      <span *ngIf="val.key !== 'Attachment1'">{{val.value.new_value}}</span>
+                    </div>
+                  </div>
+                </div>
+              </ion-card>
+              <!-- <ion-card *ngIf="dat.changed_fields" style="padding-bottom: 10px">
                 <ion-row class="ion-padding">
                   <ion-col size="6">
                     <ion-text color="dark">{{dat.updated_by}}</ion-text>
@@ -111,21 +168,21 @@
                     </ion-col>
                     <ion-col style="border-right: 1px solid #cecaca">
                       <ion-button *ngIf="val.key === 'Attachment1'" size="small"
-                        (click)="viewImg(val.value.old_value, dat.attachment1_blob_type)">View</ion-button>
+                        (click)="viewImg(val.value.old_value, dat.attachment1_blob_type)"><ion-icon name="eye-outline"></ion-icon></ion-button>
                       <ion-text *ngIf="val.key !== 'Attachment1' ">{{val.value.old_value}}</ion-text>
                     </ion-col>
                     <ion-col>
                       <ion-button *ngIf="val.key === 'Attachment1'" size="small"
-                        (click)="viewImg(val.value.new_value, dat.attachment1_blob_type)">View</ion-button>
+                        (click)="viewImg(val.value.new_value, dat.attachment1_blob_type)"><ion-icon name="eye-outline"></ion-icon></ion-button>
                       <ion-text *ngIf="val.key !== 'Attachment1' ">{{val.value.new_value}}</ion-text>
                     </ion-col>
                   </ion-row>
                 </div>
-              </ion-card>
+              </ion-card> -->
             </ion-col>
           </ion-row>
         </div>
-      </ion-grid>    
+      </ion-grid>
     </ion-content>
   </ng-template>
 </ion-modal>

@@ -93,4 +93,7 @@ export class IndentsService {
   getIndentLogs(rqst_id: any): Observable<any> {
     return this.https.get(environment.url + 'purchase/mtrl_request/cntr_indnt_data_logs?limit=20&page=1&rqst_id=' + rqst_id);
   }
+  getRequesteeList(pc_id: any): Observable<any> {
+    return this.https.get(environment.url + 'shared/get-users-list-pc-wise?pc_id=' + pc_id);
+  }
 }
