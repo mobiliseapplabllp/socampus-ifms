@@ -18,17 +18,44 @@
     <ion-card-header color="primary"> User Detail </ion-card-header>
     <ion-card-content>
       <ion-item>
-        <ion-label position="floating">Name <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="email" formControlName="usr_name"></ion-input>
+        <ion-label position="floating">Requestee <ion-text color="danger">*</ion-text> </ion-label>
+        <ion-select interface="action-sheet" formControlName="requestee"  mode="ios"><!-- -->
+          <ion-select-option value="self">Self</ion-select-option>
+          <ion-select-option value="behalf">On Behalf</ion-select-option>
+        </ion-select>
       </ion-item>
-      <ion-item>
-        <ion-label position="floating">Mobile No  </ion-label>
-        <ion-input type="number" formControlName="mobile"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-label position="floating">Email  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="email" formControlName="email"></ion-input>
-      </ion-item>
+      <div *ngIf="createForm.value.requestee === 'self' ">
+        <ion-item class="disable" color="none" lines="none">
+          <ion-label position="floating">Name <ion-text color="danger">*</ion-text> </ion-label>
+          <ion-input type="email" formControlName="usr_name" readonly ></ion-input>
+        </ion-item>
+        <br>
+        <ion-item class="disable" color="none" lines="none">
+          <ion-label position="floating">Mobile No  </ion-label>
+          <ion-input type="number" formControlName="mobile" readonly></ion-input>
+        </ion-item>
+        <br>
+        <ion-item class="disable" color="none" lines="none">
+          <ion-label position="floating">Email  <ion-text color="danger">*</ion-text> </ion-label>
+          <ion-input type="email" formControlName="email" readonly></ion-input>
+        </ion-item>
+      </div>
+
+       <div *ngIf="createForm.value.requestee === 'behalf' ">
+        <ion-item>
+          <ion-label position="floating">Name <ion-text color="danger">*</ion-text> </ion-label>
+          <ion-input type="email" formControlName="behalf_name"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Mobile No  </ion-label>
+          <ion-input type="number" formControlName="behalf_mobile" ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Email  <ion-text color="danger">*</ion-text> </ion-label>
+          <ion-input type="email" formControlName="behalf_email"></ion-input>
+        </ion-item>
+      </div>
+      
     </ion-card-content>
   </ion-card>
 
@@ -147,20 +174,20 @@
           <!-- <ion-select interface="action-sheet" mode="ios" formControlName="loc_code">
             <ion-select-option *ngFor="let dat of locationArr" [value]="dat.value">{{dat.label}}</ion-select-option>
           </ion-select> -->
-        </ion-item>
-        <ion-item (click)="openCategory()">
-          <ion-label position="floating">Query Category  <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="email" formControlName="category_desc" readonly></ion-input>
-        </ion-item>
-        <ion-item (click)="openCategorySubCat()" *ngIf="allSubCat1.length > 0">
-          <ion-label position="floating">Query Sub Category One  <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="email" formControlName="subcat1_id_desc" readonly></ion-input>
-        </ion-item>
-        <ion-item (click)="openCategorySubCat2()" *ngIf="allSubCat2.length > 0">
-          <ion-label position="floating">Query Sub Category Two <ion-text color="danger">*</ion-text> </ion-label>
-          <ion-input type="email" formControlName="subcat2_id_desc" readonly></ion-input>
-        </ion-item>
+        </ion-item>        
       </div>
+      <ion-item (click)="openCategory()">
+        <ion-label position="floating">Query Category  <ion-text color="danger">*</ion-text> </ion-label>
+        <ion-input type="email" formControlName="category_desc" readonly></ion-input>
+      </ion-item>
+      <ion-item (click)="openCategorySubCat()" *ngIf="allSubCat1.length > 0">
+        <ion-label position="floating">Query Sub Category One  <ion-text color="danger">*</ion-text> </ion-label>
+        <ion-input type="email" formControlName="subcat1_id_desc" readonly></ion-input>
+      </ion-item>
+      <ion-item (click)="openCategorySubCat2()" *ngIf="allSubCat2.length > 0">
+        <ion-label position="floating">Query Sub Category Two <ion-text color="danger">*</ion-text> </ion-label>
+        <ion-input type="email" formControlName="subcat2_id_desc" readonly></ion-input>
+      </ion-item>
     </ion-card-content>
   </ion-card>
 

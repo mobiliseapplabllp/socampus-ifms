@@ -109,8 +109,14 @@ export class ComplaintService {
     return this.https.get(environment.url + 'complaints/select_tkt_req_type?issue_id=' + id)
   }
 
-  getQueryCategoryTicket(cat_id: any, pc_id: any): Observable<any> {
-    return this.https.get(environment.url + 'complaints/select_category/' + cat_id + '?pc_id=' + pc_id);
+  getQueryCategoryTicket(cat_id: any, pc_id: any, barcode?: string): Observable<any> {
+    let type;
+    if (barcode) {
+      type = 'barcode=' + barcode;
+    } else {
+      type = 'pc_id=' + pc_id;
+    }
+    return this.https.get(environment.url + 'complaints/select_category/' + cat_id + '?' + type);
   }
 
   getQueryCategory(cat_id: any): Observable<any> {

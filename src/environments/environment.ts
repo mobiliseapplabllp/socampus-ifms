@@ -20,7 +20,7 @@ export const environment = {
   // url1: 'https://apac-ad81b25ce966.herokuapp.com/https://socampusdev.mobilisepro.com/',
   // url2: 'https://socampusdev.mobilisepro.com/',
   // ssoUrl: 'https://socampusdev.mobilisepro.com/',
-  // referUrl: 'https://socampus.mobilisepro.com/',
+  // referUrl: 'https://socampusdev.mobilisepro.com/',
   // isProd: false,
   db: 'socampuseng.db',
   db_location: 'default',

@@ -34,9 +34,13 @@
   </div>
   <div>
     <ion-row>
-      <ion-col>
+      <ion-col size="6">
         <ion-text  class="medium">Site</ion-text><br>
         <ion-text color="dark">{{data.pc_ext_id}} {{data.pc_desc}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text  class="medium">Requestee</ion-text><br>
+        <ion-text color="dark">{{data.is_behalf}}</ion-text>
       </ion-col>
     </ion-row>
     <section *ngIf="data.issue_desc === 'Service'">
@@ -93,6 +97,21 @@
         </ion-col>
       </ion-row>
     </section>
+    <ion-row *ngIf="data.is_behalf === 'On Behalf' ">
+      <ion-col size="6">
+        <ion-text class="medium">Behalf Name</ion-text><br>
+        <ion-text color="dark">{{data.behalf_name}} </ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text class="medium">Behalf Mobile</ion-text><br>
+        <ion-text color="dark">{{data.behalf_mobile}} </ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text class="medium">Behalf Email</ion-text><br>
+        <ion-text color="dark">{{data.behalf_email}} </ion-text>
+      </ion-col>
+    </ion-row>
+
     <ion-row>
       <ion-col>
         <ion-text class="medium">Remark</ion-text><br>

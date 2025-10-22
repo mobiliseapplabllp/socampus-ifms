@@ -11,7 +11,7 @@ export const environment = {
   url2: 'https://socampus.mobilisepro.com/',
   ssoUrl: 'https://socampus.mobilisepro.com/',
   referUrl: 'https://socampus.mobilisepro.com/',
-  isProd: true,  
+  isProd: false,  
   // url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampusdev.mobilisepro.com/adani/be/api/',
   // url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampusdev.mobilisepro.com/',
   // url2: 'https://socampusdev.mobilisepro.com/',
