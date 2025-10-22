@@ -13,6 +13,7 @@ import { LoginService } from 'src/app/provider/login/login.service';
   styleUrls: ['./list-master.page.scss'],
 })
 export class ListMasterPage implements OnInit {
+  alerts: string='137367763476437643';
   userData: any = [];
   userName!: string;
   eventChange = false;
@@ -55,6 +56,7 @@ export class ListMasterPage implements OnInit {
           }
         });
       }
+      // this.getnoti();
     });
   }
 
@@ -83,8 +85,6 @@ export class ListMasterPage implements OnInit {
       }
     })
   }
-
-
 
   openPlayStore(url: string) {
     window.open(url);
@@ -171,7 +171,6 @@ export class ListMasterPage implements OnInit {
     }, 1500);
   }
 
-
   handleRefresh(event: any) {
     event.target.complete();
     this.isLoading = true;
@@ -194,5 +193,19 @@ export class ListMasterPage implements OnInit {
     });
     modal.present();
   }
+  notification(url: string) {
+    this.router.navigateByUrl(url);
+  }
+  // getnoti(){
+  //   const today = new Date();
+  //   const formattedDate = today.toISOString().split('T')[0];
+  //   this.httpLogin.getNotification(formattedDate).subscribe({
+  //     next:(data) => {
+  //       console.log(data);
+  //       this.alerts = data.data;
+  //       console.log(this.alerts);
+  //     }
+  //   });
+  // }
 
 }

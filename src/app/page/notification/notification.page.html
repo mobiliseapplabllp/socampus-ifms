@@ -1,0 +1,43 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title +>Alert</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-list lines="full" mode="ios">
+    <ion-item *ngFor="let alert of alerts" [ngClass]="alert.isRead ? 'read' : 'unread'" class="ion-no-padding">
+      <ion-grid>
+        <ion-row>
+          <ion-col size="1">
+            <ion-icon name="ellipse" class="dot" *ngIf="alert.action"></ion-icon>
+          </ion-col>
+          <ion-col size="3" class="ion-text-start">
+            <ion-text class="color">{{alert.action}}</ion-text>
+          </ion-col>
+          <ion-col size="6"></ion-col>
+          <ion-col size="2" class="ion-text-end">
+            <ion-text class="color">{{ getHoursAgo(alert.datetime) }}</ion-text>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="1"></ion-col>
+          <ion-col size="11"><ion-text>{{alert.body}}</ion-text></ion-col>
+        </ion-row>
+        <!-- <ion-row *ngIf="alert.action === 'Create' || alert.action === 'Assigned'">
+          <ion-col size="1"></ion-col>
+          <ion-col size="11">
+            <ion-button fill="outline" size="small" shape="round">
+              {{ getButtonText(alert.action) }}
+            </ion-button>
+          </ion-col>
+        </ion-row> -->
+      </ion-grid>
+    </ion-item>
+  </ion-list>
+  <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
+    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

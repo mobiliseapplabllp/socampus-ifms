@@ -139,4 +139,8 @@ export class LoginService {
       });
     });
   }
+
+  getNotification(date : any): Observable<any> {
+    return this.https.post(environment.url + 'complaints/app/get-fcm-push-notification-list',date);
+  }
 }

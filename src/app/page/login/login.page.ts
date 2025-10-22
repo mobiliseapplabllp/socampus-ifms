@@ -18,7 +18,7 @@ import * as moment from 'moment';
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage implements OnInit {
-  login = { userid: '', password: ''};
+  login = { userid: 'Admin', password: '' };
   submitted = false;
   userValue: any = [];
   isHidden = true;
@@ -341,9 +341,10 @@ export class LoginPage implements OnInit {
   openPage(url: any) {
     this.router.navigateByUrl(url);
   }
-
+  
+ //|| !this.isDateValid
   changeAuth() {
-    if (this.isProduction || !this.isDateValid) {
+    if (this.isProduction ) {
       return;
     }
     this.viewCondition = 'login';

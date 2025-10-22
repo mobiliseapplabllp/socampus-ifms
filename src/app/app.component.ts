@@ -33,39 +33,39 @@ export class AppComponent {
     private httpLogin: LoginService,
     private common: CommonService) {
       this.platform.ready().then(res => {
-        this.initApp();
+        // this.initApp();
         this.getUserData();
       });
   }
 
-  initApp() {
-    this.getAppVersion();
-    if (this.platform.is('capacitor')) {
-      StatusBar.setOverlaysWebView({overlay: false});
-      StatusBar.setBackgroundColor({'color': '#040E51'})
-      App.getInfo().then(res => {
-        this.appVersion = res.version
-      });
+  // initApp() {
+  //   this.getAppVersion();
+  //   if (this.platform.is('capacitor')) {
+  //     StatusBar.setOverlaysWebView({overlay: false});
+  //     StatusBar.setBackgroundColor({'color': '#040E51'})
+  //     App.getInfo().then(res => {
+  //       this.appVersion = res.version
+  //     });
       
-    }
-    this.router.navigateByUrl('/login/splash');
-    this.initIdle();
-    return;
-    const isLogin = localStorage.getItem('isAlreadyLogin');
-    if (!isLogin) {
-      this.router.navigateByUrl('/login', { replaceUrl: true });
-    } else {
-      this.common.checkInternet().then(res => {
-        if (res) {
-          // this.refreshToken();
-          this.router.navigateByUrl('/login', { replaceUrl: true });
-        } else {
-          this.common.presentToast('You are in Offline Mode', 'warning')
-          this.router.navigateByUrl('/list-master', { replaceUrl: true });
-        }
-      });
-    }
-  }
+  //   }
+  //   this.router.navigateByUrl('/login/splash');
+  //   this.initIdle();
+  //   return;
+  //   const isLogin = localStorage.getItem('isAlreadyLogin');
+  //   if (!isLogin) {
+  //     this.router.navigateByUrl('/login', { replaceUrl: true });
+  //   } else {
+  //     this.common.checkInternet().then(res => {
+  //       if (res) {
+  //         // this.refreshToken();
+  //         this.router.navigateByUrl('/login', { replaceUrl: true });
+  //       } else {
+  //         this.common.presentToast('You are in Offline Mode', 'warning')
+  //         this.router.navigateByUrl('/list-master', { replaceUrl: true });
+  //       }
+  //     });
+  //   }
+  // }
 
   getAppVersion() {
     let platform;

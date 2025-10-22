@@ -3,11 +3,11 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { BarcodeComponent } from './shared/barcode/barcode.component';
 
 const routes: Routes = [
-  // {
-  //   path: '',
-  //   redirectTo: '/login',
-  //   pathMatch: 'full'
-  // },
+  {
+    path: '',
+    redirectTo: '/login',
+    pathMatch: 'full'
+  },
   {
     path: 'login',
     loadChildren: () => import('./page/login/login.module').then(m => m.LoginPageModule)
@@ -75,6 +75,14 @@ const routes: Routes = [
   {
     path: 'concierge',
     loadChildren: () => import('./page/concierge/concierge.module').then( m => m.ConciergePageModule)
+  },
+  {
+    path: 'notification',
+    loadChildren: () => import('./page/notification/notification.module').then( m => m.NotificationPageModule)
+  },
+  {
+    path: 'notification',
+    loadChildren: () => import('./page/notification/notification.module').then( m => m.NotificationPageModule)
   },
 ];
 
