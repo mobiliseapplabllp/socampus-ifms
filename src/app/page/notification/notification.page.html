@@ -14,10 +14,10 @@
           <ion-col size="1">
             <ion-icon name="ellipse" class="dot" *ngIf="alert.action"></ion-icon>
           </ion-col>
-          <ion-col size="3" class="ion-text-start">
-            <ion-text class="color" style="font-size:16px">{{alert.action}}</ion-text>
+          <ion-col size="7" class="ion-text-start">
+            <ion-text class="color" style="font-size:16px">{{alert.title}}</ion-text>
           </ion-col>          
-          <ion-col size="8" class="ion-text-end">
+          <ion-col size="4" class="ion-text-end">
             <ion-text class="color" style="font-size:13px">{{ getTimeAgo(alert.datetime) }}</ion-text>
           </ion-col>
         </ion-row>
