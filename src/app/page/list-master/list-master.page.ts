@@ -13,7 +13,7 @@ import { LoginService } from 'src/app/provider/login/login.service';
   styleUrls: ['./list-master.page.scss'],
 })
 export class ListMasterPage implements OnInit {
-  alerts: string='137367763476437643';
+  notiticationCount = 0;
   userData: any = [];
   userName!: string;
   eventChange = false;
@@ -55,9 +55,8 @@ export class ListMasterPage implements OnInit {
             this.getAppVersion();
           }
         });
-      }
-      // this.getnoti();
-    });
+      }      
+    });       
   }
 
   getAppVersion() {
@@ -111,6 +110,7 @@ export class ListMasterPage implements OnInit {
       this.didEnter = false;
     }, 1500);
     this.getHomeLoad();
+    this.getNotification();
   }
 
   getHomeLoad() {
@@ -176,6 +176,7 @@ export class ListMasterPage implements OnInit {
     this.isLoading = true;
     this.getHomeLoad();
     this.changeEvent();
+    this.getNotification();
   }
 
   openPageRoute() {
@@ -196,16 +197,19 @@ export class ListMasterPage implements OnInit {
   notification(url: string) {
     this.router.navigateByUrl(url);
   }
-  // getnoti(){
-  //   const today = new Date();
-  //   const formattedDate = today.toISOString().split('T')[0];
-  //   this.httpLogin.getNotification(formattedDate).subscribe({
-  //     next:(data) => {
-  //       console.log(data);
-  //       this.alerts = data.data;
-  //       console.log(this.alerts);
-  //     }
-  //   });
-  // }
 
+  getNotification() {
+    const obj = {
+      status: 'unread'
+    }
+    this.httpLogin.getNotification(obj).subscribe({
+      next:(data) => {        
+        if (data.status) {
+          this.notiticationCount = data.count;
+        } else {
+          this.notiticationCount = 0;
+        }
+      }
+    });
+  }
 }

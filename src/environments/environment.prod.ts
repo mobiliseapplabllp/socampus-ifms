@@ -12,7 +12,7 @@ export const environment = {
   // ssoUrl: 'https://socampus.mobilisepro.com/',
   // referUrl: 'https://socampus.mobilisepro.com/',
   // isProd: true,  
-  url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampusdev.mobilisepro.com/adani/be/api/',
+  url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampusdev.mobilisepro.com/be/api/',
   url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampusdev.mobilisepro.com/',
   url2: 'https://socampusdev.mobilisepro.com/',
   ssoUrl: 'https://socampusdev.mobilisepro.com/',
