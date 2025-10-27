@@ -62,7 +62,7 @@ export class LoginPage implements OnInit {
 
 
   ngOnInit() {    
-    if (moment().format('YYYY-MM-DD') === '2025-09-13') {
+    if (moment().format('YYYY-MM-DD') === '2025-09-26') {
       this.isDateValid = true;      
     }
     this.common.setBarcode('');
@@ -344,7 +344,7 @@ export class LoginPage implements OnInit {
   
  //|| !this.isDateValid
   changeAuth() {
-    if (this.isProduction ) {
+    if (this.isProduction) {
       return;
     }
     this.viewCondition = 'login';
@@ -362,11 +362,11 @@ export class LoginPage implements OnInit {
   }
 
   dummyLogin() {
-    if (this.isProduction || !this.isDateValid) {
+    if (this.isProduction) {
       return;
     }
-    // https://socampusstaging.mobilisepro.com/#/auth/ssoGates/TskoEAY8LkgP3JDlxiKygDV5RW5DUDd4VmJ0N0owLzVSOVgyYUVRYkdsNWpxWEVJVERNZlpYOGZYQlB6dzRPNXRETU4wRDRhT3QyQk5leEZ1ZE91TS9GYjQ3ZmlQNkVEcHFJMzJRMFBONldyOTE5bFVBZk9pSUlGNU44ZXAvd01PZnc3eTlrRmtBaysrZ1pP
-    let token = 'TskoEAY8LkgP3JDlxiKygDV5RW5DUDd4VmJ0N0owLzVSOVgyYUVRYkdsNWpxWEVJVERNZlpYOGZYQlB6dzRPNXRETU4wRDRhT3QyQk5leEZ1ZE91TS9GYjQ3ZmlQNkVEcHFJMzJRMFBONldyOTE5bFVBZk9pSUlGNU44ZXAvd01PZnc3eTlrRmtBaysrZ1pP';
+    // https://socampus.mobilisepro.com/#/auth/ssoGates/8sTLjsrH8Q1CqPemtxumLHlwR0dLWmtqZjljMWkvNnlBdy90ZVFRVU1BQ2JFYjQ1MW1OaHUvWEE4TXNuTktaRkt1TFRJbjlJL0d3SGVKWnhzTUxpN2lZbW43bGZiTE04anRxUGl4bktCa2NhbS9HSnlBWlNDUVZKNk9XVFVmSS94NWVpRlh5d2N1NTlXY3RY
+    let token = '8sTLjsrH8Q1CqPemtxumLHlwR0dLWmtqZjljMWkvNnlBdy90ZVFRVU1BQ2JFYjQ1MW1OaHUvWEE4TXNuTktaRkt1TFRJbjlJL0d3SGVKWnhzTUxpN2lZbW43bGZiTE04anRxUGl4bktCa2NhbS9HSnlBWlNDUVZKNk9XVFVmSS94NWVpRlh5d2N1NTlXY3RY';
     this.getSsoEnc(token);
   }
 }
