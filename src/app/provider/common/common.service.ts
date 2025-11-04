@@ -3,7 +3,7 @@ import { LoadingController, ModalController, ToastController } from '@ionic/angu
 import { Network } from '@capacitor/network';
 import * as CryptoJS from 'crypto-js';
 import { environment } from 'src/environments/environment';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ImageViewComponent } from 'src/app/shared/image-view/image-view.component';
 import { PdfViewComponent } from 'src/app/shared/pdf-view/pdf-view.component';
@@ -166,6 +166,34 @@ export class CommonService {
       const status = await Network.getStatus();
       resolve(status.connected);
     });
+  }
+
+  async checkNetworkSpeed(): Promise<'Fast' | 'Moderate' | 'Slow' | 'No Internet'> {
+    const { connected } = await Network.getStatus();
+    console.log('Connected:', connected);
+    if (!connected) {
+      return 'No Internet';
+    }
+    
+    const testUrl = environment.url1 + 'img/px.gif';
+    const startTime = Date.now();
+
+    try {
+      await firstValueFrom(this.http.get(testUrl, { responseType: 'blob' }));
+
+      const duration = Date.now() - startTime;
+      console.log('Response time (ms):', duration);
+
+      let speed: 'Fast' | 'Moderate' | 'Slow';
+      if (duration < 500) speed = 'Fast';
+      else if (duration < 1500) speed = 'Moderate';
+      else speed = 'Slow';
+
+      return speed;
+    } catch (error) {
+      console.error('Speed check error:', error);
+      return 'No Internet';
+    }
   }
 
   decryptValue(encryptedValue: string) {

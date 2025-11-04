@@ -32,8 +32,7 @@ export class AppComponent {
     private alertController: AlertController,
     private httpLogin: LoginService,
     private common: CommonService) {
-      this.platform.ready().then(res => {
-        console.log(this.isEnglish('Hello °'));
+      this.platform.ready().then(res => {        
         this.initApp();
         this.getUserData();        
       });
