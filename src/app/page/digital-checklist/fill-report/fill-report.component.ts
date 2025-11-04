@@ -80,7 +80,7 @@ export class FillReportComponent  implements OnInit {
     }
 
     this.temp = this.scheduleArr1$.subscribe({
-      next:(data) => {
+      next:(data) => {        
         this.scheduleArr = [...data];        
         this.schedule_status = this.scheduleArr[0].schedule_status
         this.remark =this.scheduleArr[0].final_remark;
@@ -488,35 +488,73 @@ export class FillReportComponent  implements OnInit {
     this.translate(question, lang);
   }
 
+  // translate(data: any, lang: string) {
+  //   this.common.presentLoading().then(preLoad => {
+  //     this.httpDigital.googleTranslate(data, lang).subscribe({
+  //       next:(translateText) => {
+  //         const optionArr = translateText.data.translations.slice(-3);
+  //         for (var i = 0 ; i < this.scheduleArr.length;i++) {
+  //           for (var j = 0 ; j < this.scheduleArr[i].qus.length; j++) {
+  //             this.scheduleArr[i].qus[j].q_desc = translateText.data.translations[j].translatedText
+  //             if (lang == 'en') {
+  //               this.scheduleArr[i].qus[j].options[0].optn_desc = 'Yes';
+  //               this.scheduleArr[i].qus[j].options[1].optn_desc = 'No';
+  //               this.scheduleArr[i].qus[j].options[2].optn_desc = 'NA';
+  //             } else {
+  //               this.scheduleArr[i].qus[j].options[0].optn_desc = optionArr[0].translatedText;
+  //               this.scheduleArr[i].qus[j].options[1].optn_desc = optionArr[1].translatedText;
+  //               this.scheduleArr[i].qus[j].options[2].optn_desc = optionArr[2].translatedText;
+  //             }
+  //           }
+  //         }
+  //         this.selectedLanguage = lang;
+  //       },
+  //       error:(err) => {
+  //         this.common.dismissloading();
+  //         this.common.presentToast(environment.errMsg, 'warning');
+  //       },
+  //       complete:() => {
+  //         this.common.dismissloading();
+  //       }
+  //     })
+  //   });
+  // }
+
   translate(data: any, lang: string) {
     this.common.presentLoading().then(preLoad => {
       this.httpDigital.googleTranslate(data, lang).subscribe({
-        next:(translateText) => {
-          const optionArr = translateText.data.translations.slice(-3);
-          for (var i = 0 ; i < this.scheduleArr.length;i++) {
-            for (var j = 0 ; j < this.scheduleArr[i].qus.length; j++) {
-              this.scheduleArr[i].qus[j].q_desc = translateText.data.translations[j].translatedText
-              if (lang == 'en') {
-                this.scheduleArr[i].qus[j].options[0].optn_desc = 'Yes';
-                this.scheduleArr[i].qus[j].options[1].optn_desc = 'No';
-                this.scheduleArr[i].qus[j].options[2].optn_desc = 'NA';
-              } else {
-                this.scheduleArr[i].qus[j].options[0].optn_desc = optionArr[0].translatedText;
-                this.scheduleArr[i].qus[j].options[1].optn_desc = optionArr[1].translatedText;
-                this.scheduleArr[i].qus[j].options[2].optn_desc = optionArr[2].translatedText;
+        next: (translateText) => {
+          const optionArr = translateText.data.translations.slice(-3); // Last 3 translations = Yes, No, NA
+          for (let i = 0; i < this.scheduleArr.length; i++) {
+            for (let j = 0; j < this.scheduleArr[i].qus.length; j++) {
+              this.scheduleArr[i].qus[j].q_desc = translateText.data.translations[j].translatedText;
+
+              if (this.scheduleArr[i].qus[j].options?.length) {
+                this.scheduleArr[i].qus[j].options.forEach((opt: any) => {
+                  // Check the original value (case-insensitive) and set translation
+                  if (lang === 'en') {
+                    if (opt.optn_value.toLowerCase() === 'yes') opt.optn_desc = 'Yes';
+                    if (opt.optn_value.toLowerCase() === 'no') opt.optn_desc = 'No';
+                    if (opt.optn_value.toLowerCase() === 'na') opt.optn_desc = 'NA';
+                  } else {
+                    if (opt.optn_value.toLowerCase() === 'yes') opt.optn_desc = optionArr[0].translatedText;
+                    if (opt.optn_value.toLowerCase() === 'no') opt.optn_desc = optionArr[1].translatedText;
+                    if (opt.optn_value.toLowerCase() === 'na') opt.optn_desc = optionArr[2].translatedText;
+                  }
+                });
               }
             }
           }
           this.selectedLanguage = lang;
         },
-        error:(err) => {
+        error: () => {
           this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'warning');
         },
-        complete:() => {
+        complete: () => {
           this.common.dismissloading();
         }
-      })
+      });
     });
   }
 

@@ -32,7 +32,7 @@ export class AppComponent {
     private alertController: AlertController,
     private httpLogin: LoginService,
     private common: CommonService) {
-      this.platform.ready().then(res => {
+      this.platform.ready().then(res => {        
         this.initApp();
         this.getUserData();
       });
@@ -65,6 +65,12 @@ export class AppComponent {
         }
       });
     }
+  }
+
+  isEnglish(text: string): boolean {
+  // Allow A-Z, a-z, 0-9, spaces, and all common keyboard symbols
+    const englishRegex = /^[\x20-\x7E°]*$/;
+    return englishRegex.test(text);
   }
 
   getAppVersion() {

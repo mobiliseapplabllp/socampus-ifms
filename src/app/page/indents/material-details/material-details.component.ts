@@ -30,8 +30,7 @@ export class MaterialDetailsComponent implements OnInit {
     private alertController: AlertController
   ) { }
 
-  ngOnInit() {    
-    console.log(this.arr);
+  ngOnInit() {        
     this.getMaterial();
     this.getUom();
     this.cleanDatesAndFields();
@@ -208,8 +207,7 @@ export class MaterialDetailsComponent implements OnInit {
     await alert.present();
   }
 
-  updateIndent() {
-    console.log(this.arr);
+  updateIndent() {    
     let i = 0;
     const random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
     const formData = new FormData();

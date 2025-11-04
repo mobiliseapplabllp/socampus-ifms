@@ -43,6 +43,7 @@ export class LoginPage implements OnInit {
   currentVersion: any = [];
   isProduction = environment.isProd;
   appVersion!: string;
+  isDateValid!: boolean;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -61,6 +62,9 @@ export class LoginPage implements OnInit {
 
 
   ngOnInit() {    
+    if (moment().format('YYYY-MM-DD') === '2025-09-26') {
+      this.isDateValid = true;      
+    }
     this.common.setBarcode('');
     if (this.platform.is('capacitor')) {
       this.initFcm();
@@ -339,9 +343,10 @@ export class LoginPage implements OnInit {
   }
 
   changeAuth() {
-    if (!this.isProduction) {
-      this.viewCondition = 'login';
+    if (this.isProduction) {
+      return;
     }
+    this.viewCondition = 'login';
   }
 
   openBarcode() {
@@ -359,7 +364,8 @@ export class LoginPage implements OnInit {
     if (this.isProduction) {
       return;
     }
-    let token = '-BWRpZWl6V034jESBoVQXHR6ZEpmQU1yekl5YzVVS0FhK2Y2STMxNSt6SnRWc2hiK2ZQTStoYU55dW9BR3lSTm1memdpOW92ZkVRUjY5RFFjcERxNmxCYjh6NkVyNE13b0JXUklSUnU5UnV6T2hBUDlLTXhOc3U3bVdoL3d0L3ZIZU9aMUZQRSsvNUo4MWZ2';
+    // https://socampus.mobilisepro.com/#/auth/ssoGates/8sTLjsrH8Q1CqPemtxumLHlwR0dLWmtqZjljMWkvNnlBdy90ZVFRVU1BQ2JFYjQ1MW1OaHUvWEE4TXNuTktaRkt1TFRJbjlJL0d3SGVKWnhzTUxpN2lZbW43bGZiTE04anRxUGl4bktCa2NhbS9HSnlBWlNDUVZKNk9XVFVmSS94NWVpRlh5d2N1NTlXY3RY
+    let token = '8sTLjsrH8Q1CqPemtxumLHlwR0dLWmtqZjljMWkvNnlBdy90ZVFRVU1BQ2JFYjQ1MW1OaHUvWEE4TXNuTktaRkt1TFRJbjlJL0d3SGVKWnhzTUxpN2lZbW43bGZiTE04anRxUGl4bktCa2NhbS9HSnlBWlNDUVZKNk9XVFVmSS94NWVpRlh5d2N1NTlXY3RY';
     this.getSsoEnc(token);
   }
 }

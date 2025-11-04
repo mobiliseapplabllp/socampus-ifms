@@ -67,8 +67,7 @@ export class SplashComponent  implements OnInit {
             this.common.presentToast(data.msg, 'warning');
           }
         },
-        error: (err: any) => {
-          console.log(err);
+        error: (err: any) => {          
           if (err.status !== 401) {
             this.clearSessionAndShowError();
             this.router.navigateByUrl('/login', { replaceUrl: true });
