@@ -1,0 +1,21 @@
+
+.dot {
+  font-size: 12px;
+  color: #283897;
+  font-weight: 400;
+}
+
+ion-item.read {
+  --background: var(--ion-color-light);
+}
+
+ion-item.unread {
+  --background: #E7E9F7;
+  color: #2a295cE6;
+  font-weight: 200 !important;
+}
+
+.color {
+  color: #2a295cE6 !important;
+  font-weight: 400;
+}

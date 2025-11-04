@@ -16,7 +16,7 @@ export const environment = {
   // url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampusdev.mobilisepro.com/',
   // url2: 'https://socampusdev.mobilisepro.com/',
   // ssoUrl: 'https://socampusdev.mobilisepro.com/',
-  // referUrl: 'https://socampusdev.mobilisepro.com/adani/',
+  // referUrl: 'https://socampusdev.mobilisepro.com/',
   // isProd: false,  
   db: 'socampuseng.db',
   db_location: 'default',

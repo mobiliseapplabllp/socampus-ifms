@@ -34,7 +34,7 @@ export class AppComponent {
     private common: CommonService) {
       this.platform.ready().then(res => {        
         this.initApp();
-        this.getUserData();
+        this.getUserData();        
       });
   }
 

@@ -13,6 +13,7 @@ import { LoginService } from 'src/app/provider/login/login.service';
   styleUrls: ['./list-master.page.scss'],
 })
 export class ListMasterPage implements OnInit {
+  notiticationCount = 0;
   userData: any = [];
   userName!: string;
   eventChange = false;
@@ -54,8 +55,8 @@ export class ListMasterPage implements OnInit {
             this.getAppVersion();
           }
         });
-      }
-    });
+      }      
+    });       
   }
 
   getAppVersion() {
@@ -84,8 +85,6 @@ export class ListMasterPage implements OnInit {
     })
   }
 
-
-
   openPlayStore(url: string) {
     window.open(url);
   }
@@ -111,6 +110,7 @@ export class ListMasterPage implements OnInit {
       this.didEnter = false;
     }, 1500);
     this.getHomeLoad();
+    this.getNotification();
   }
 
   getHomeLoad() {
@@ -171,12 +171,12 @@ export class ListMasterPage implements OnInit {
     }, 1500);
   }
 
-
   handleRefresh(event: any) {
     event.target.complete();
     this.isLoading = true;
     this.getHomeLoad();
     this.changeEvent();
+    this.getNotification();
   }
 
   openPageRoute() {
@@ -194,5 +194,22 @@ export class ListMasterPage implements OnInit {
     });
     modal.present();
   }
+  notification(url: string) {
+    this.router.navigateByUrl(url);
+  }
 
+  getNotification() {
+    const obj = {
+      status: 'unread'
+    }
+    this.httpLogin.getNotification(obj).subscribe({
+      next:(data) => {        
+        if (data.status) {
+          this.notiticationCount = data.count;
+        } else {
+          this.notiticationCount = 0;
+        }
+      }
+    });
+  }
 }

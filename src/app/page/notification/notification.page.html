@@ -1,0 +1,34 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Notifications</ion-title>    
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-list lines="full" mode="ios">
+    <ion-item *ngFor="let alert of alerts" [ngClass]="alert.status === 'read'  ? 'read' : 'unread'" class="ion-no-padding">
+      <ion-grid>
+        <ion-row>
+          <ion-col size="1">
+            <ion-icon name="ellipse" class="dot" *ngIf="alert.action"></ion-icon>
+          </ion-col>
+          <ion-col size="7" class="ion-text-start">
+            <ion-text class="color" style="font-size:16px">{{alert.title}}</ion-text>
+          </ion-col>          
+          <ion-col size="4" class="ion-text-end">
+            <ion-text class="color" style="font-size:13px">{{ getTimeAgo(alert.datetime) }}</ion-text>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="1"></ion-col>
+          <ion-col size="11"><ion-text style="font-size:14px;">{{alert.body}}</ion-text></ion-col>
+        </ion-row>      
+      </ion-grid>
+    </ion-item>
+  </ion-list>
+  <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)" *ngIf="canLoadData">
+    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>
