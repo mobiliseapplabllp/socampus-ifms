@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { CameraService } from 'src/app/provider/camera/camera.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
@@ -16,17 +16,18 @@ export class TicketHoldComponent  implements OnInit {
   tkts_id: any;
   formData = new FormData();
   isModalOpen = false;    
-  viewArr: any = [];  
-  externalArr: any = [];
-  sodexoArr: any = [];  
+  allArr: any = [];
+  allArrCopy: any = [];
+  // viewArr: any = [];  
+  // externalArr: any = [];
+  // sodexoArr: any = [];  
   currentModal!: string;
   hold_validation: any
   constructor(
     private modalCtrl: ModalController,
     private camera: CameraService,
     private httpComp: ComplaintService,
-    private common: CommonService,    
-    private alertController: AlertController
+    private common: CommonService,        
   ) { }
 
   ngOnInit() {    
@@ -38,9 +39,11 @@ export class TicketHoldComponent  implements OnInit {
     this.common.presentLoading().then(preLoad => {
       this.httpComp.getInternalUser(this.pc_id).subscribe({
         next:(data: any) => {          
-          if (data.status) {                                    
-            this.sodexoArr = structuredClone(data.data);
-            this.externalArr = structuredClone(data.data);
+          if (data.status) {   
+            this.allArr = data.data;   
+            this.allArrCopy = data.data;
+            // this.sodexoArr = structuredClone(data.data);
+            // this.externalArr = structuredClone(data.data);
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -71,59 +74,109 @@ export class TicketHoldComponent  implements OnInit {
   }
 
   openModal(type: string) {    
-    if (type === 'sodexo_user') {
-      this.viewArr = [...this.sodexoArr];      
-    } else if (type === 'external_user') {        
-      let internalArr = this.formObj.onHoldInternalUsers || [];      
-      if (internalArr.length === 0) {
-        this.common.presentToast('Please Select Sodexo Users', 'warning');
-        return;
-      }
-      this.viewArr = this.externalArr.filter((val: any) => !internalArr.includes(val.value));      
-    }
+    // if (type === 'sodexo_user') {
+    //   this.viewArr = [...this.sodexoArr];      
+    // } else if (type === 'external_user') {        
+    //   let internalArr = this.formObj.onHoldInternalUsers || [];      
+    //   if (internalArr.length === 0) {
+    //     this.common.presentToast('Please Select Sodexo Users', 'warning');
+    //     return;
+    //   }
+    //   this.viewArr = this.externalArr.filter((val: any) => !internalArr.includes(val.value));      
+    // }
     this.currentModal = type;
     this.isModalOpen = true;    
   }
 
+  changeSearch(ev: any) {    
+    const searchTerm = (ev.target.value || '').toLowerCase();
+    this.allArr = this.allArrCopy;
+    this.allArr = this.allArr.filter((dat: any) => {
+      return (        
+        String(dat?.label ?? '').toLowerCase().includes(searchTerm)        
+      );
+    });
+  }
 
-  done() {
+  done() {    
     this.isModalOpen = false;
+    let internalArr = this.allArr.filter((val: any) => val.select_by === 'sodexo_user').map((item: any) => item.value) || [];
+    let externalArr = this.allArr.filter((val: any) => val.select_by === 'external_user').map((item: any) => item.value) || [];    
+    if (this.currentModal === 'sodexo_user') {
+      this.formObj.onHoldInternalUsers = internalArr;
+      this.formObj.onHoldInternalUsers_desc = internalArr.length + ' User Selected';      
+    }
+    if (this.currentModal === 'external_user') {
+      this.formObj.onHoldExternalUsers = externalArr;
+      this.formObj.onHoldExternalUsers_desc = externalArr.length + ' User Selected';          
+    }    
   }
 
-  changeCheckBox(dat: any) {    
-    let arr = this.viewArr.filter((val: any) => val.isSelect === true).map((item: any) => item.value);        
-    if (this.currentModal === 'sodexo_user') {      
-      this.formObj.onHoldInternalUsers = arr;
-      this.formObj.onHoldInternalUsers_desc = arr.length + ' Users Selected';      
-      for (var i = 0; i < this.externalArr.length;i++) {
-        if (arr.includes(this.externalArr[i].value)) {
-          this.externalArr[i].isSelect = false
-        }
-      }     
-      if (this.formObj.onHoldExternalUsers && this.formObj.onHoldExternalUsers.length > 0) {
-        this.formObj.onHoldExternalUsers = this.formObj?.onHoldExternalUsers?.filter((val: any) => !this.formObj.onHoldInternalUsers.includes(val)) || 0;
-        this.formObj.onHoldExternalUsers_desc = this.formObj?.onHoldExternalUsers.length  + ' Users Selected';      
-      }
-      
-    } else if (this.currentModal === 'external_user') {      
-      this.formObj.onHoldExternalUsers = arr;
-      this.formObj.onHoldExternalUsers_desc = arr.length + ' Users Selected';
-      for (var i = 0; i < this.sodexoArr.length;i++) {
-        if (arr.includes(this.sodexoArr[i].value)) {
-          this.sodexoArr[i].isSelect = false
-        }
-      }      
-      this.formObj.onHoldInternalUsers = this.formObj?.onHoldInternalUsers?.filter((val: any) => !this.formObj.onHoldExternalUsers.includes(val)) || 0;
-      this.formObj.onHoldInternalUsers_desc = this.formObj?.onHoldInternalUsers.length  + ' Users Selected';      
-    }    
-    
+  changeCheckBox(dat: any, ev: any) {    
+    if (ev.detail.checked) {
+      dat.select_by = this.currentModal;
+    } else {
+      dat.select_by = ''
+    }
   }
+
+  // changeCheckBox(dat: any) {    
+  //   let arr = this.viewArr.filter((val: any) => val.isSelect === true).map((item: any) => item.value);        
+  //   if (this.currentModal === 'sodexo_user') {      
+  //     this.formObj.onHoldInternalUsers = arr;
+  //     this.formObj.onHoldInternalUsers_desc = arr.length + ' Users Selected';      
+  //     for (var i = 0; i < this.externalArr.length;i++) {
+  //       if (arr.includes(this.externalArr[i].value)) {
+  //         this.externalArr[i].isSelect = false
+  //       }
+  //     }     
+  //     if (this.formObj.onHoldExternalUsers && this.formObj.onHoldExternalUsers.length > 0) {
+  //       this.formObj.onHoldExternalUsers = this.formObj?.onHoldExternalUsers?.filter((val: any) => !this.formObj.onHoldInternalUsers.includes(val)) || 0;
+  //       this.formObj.onHoldExternalUsers_desc = this.formObj?.onHoldExternalUsers.length  + ' Users Selected';      
+  //     }
+      
+  //   } else if (this.currentModal === 'external_user') {      
+  //     this.formObj.onHoldExternalUsers = arr;
+  //     this.formObj.onHoldExternalUsers_desc = arr.length + ' Users Selected';
+  //     for (var i = 0; i < this.sodexoArr.length;i++) {
+  //       if (arr.includes(this.sodexoArr[i].value)) {
+  //         this.sodexoArr[i].isSelect = false
+  //       }
+  //     }      
+  //     this.formObj.onHoldInternalUsers = this.formObj?.onHoldInternalUsers?.filter((val: any) => !this.formObj.onHoldExternalUsers.includes(val)) || 0;
+  //     this.formObj.onHoldInternalUsers_desc = this.formObj?.onHoldInternalUsers.length  + ' Users Selected';      
+  //   }    
+    
+  // }
 
   onWillDismiss() {
     this.isModalOpen = false;
+    this.allArr = this.allArrCopy;    
+    this.done();
   } 
 
   submit() {    
+    console.log(this.formObj);
+    if (!this.formObj.onHoldRemark) {
+      this.common.presentToast('Please Enter Remark', 'warning');
+      return;
+    }
+
+    if (!this.formObj.isImgUpload) {
+      this.common.presentToast('Please Add Attachment', 'warning');
+      return;
+    }  
+
+    if (this.hold_validation.is_sodexo_email_required === 1 && (!Array.isArray(this.formObj?.onHoldInternalUsers) || this.formObj?.onHoldInternalUsers.length === 0))  {
+      this.common.presentToast('Please Select Sodexo Users', 'warning');
+      return;
+    }
+
+    if (this.hold_validation.is_external_email_required === 1 && (!Array.isArray(this.formObj?.onHoldExternalUsers) || this.formObj?.onHoldExternalUsers.length === 0))  {
+      this.common.presentToast('Please Select External Users', 'warning');
+      return;
+    }
+
     for (var key in this.formObj) {
       this.formData.delete(key);      
       if (Array.isArray(this.formObj[key])) {

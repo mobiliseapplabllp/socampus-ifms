@@ -14,17 +14,19 @@
       <ion-label position="floating">Remark <ion-text color="danger">*</ion-text></ion-label>
       <ion-textarea type="text" rows="2" [(ngModel)]="formObj.onHoldRemark"></ion-textarea>
     </ion-item>
-    <ion-item (click)="openModal('sodexo_user')">
+    <ion-item (click)="openModal('sodexo_user')" *ngIf="hold_validation.is_sodexo_email_required === 1">
       <ion-label color="primary" position="floating">Sodexo User<ion-text color="danger">*</ion-text></ion-label>
       <ion-input type="text" [(ngModel)]="formObj.onHoldInternalUsers_desc" readonly></ion-input>
     </ion-item>
-    <ion-item (click)="openModal('external_user')">
+    <ion-item (click)="openModal('external_user')" *ngIf="hold_validation.is_external_email_required === 1">
       <ion-label color="primary" position="floating">External User<ion-text color="danger">*</ion-text></ion-label>
       <ion-input type="text" [(ngModel)]="formObj.onHoldExternalUsers_desc" readonly></ion-input>
     </ion-item>
     <ion-row>
       <ion-col>
-        <ion-button class="ion-text-capitalize" size="small" (click)="presentActionSheet()" [color]="formObj.isImgUpload ? 'success' : 'primary'">Attachment</ion-button>
+        <ion-button class="ion-text-capitalize" size="small" (click)="presentActionSheet()" [color]="formObj.isImgUpload ? 'success' : 'primary'">
+          Attachment <ion-icon name="formObj.isImgUpload ? 'checkmark-done-outline': 'attach-outline' "></ion-icon>
+        </ion-button>
       </ion-col>
     </ion-row>
     <ion-row>
@@ -36,10 +38,23 @@
 </ion-content>
 
 <ion-modal class="myModal" [isOpen]="isModalOpen" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismiss()" [backdropDismiss]="false">
-  <ng-template>    
-    <ion-content>
-      <ion-item *ngFor="let dat of viewArr"> 
-        <ion-checkbox  slot="start" [(ngModel)]="dat.isSelect" (ionChange)="changeCheckBox(dat)"></ion-checkbox>
+  <ng-template>  
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{currentModal === 'sodexo_user' ? 'Sodexo User': 'External User' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="onWillDismiss()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar (ionChange)="changeSearch($event)"></ion-searchbar>
+      </ion-toolbar>
+    </ion-header>      
+    <ion-content>      
+      <ion-item *ngFor="let dat of allArr"> 
+        <ion-checkbox  slot="start" [checked]="dat.select_by === 'sodexo_user' || dat.select_by === 'external_user'" [disabled]="(dat.select_by == 'sodexo_user' && currentModal == 'external_user') || (dat.select_by == 'external_user' && currentModal === 'sodexo_user')" (ionChange)="changeCheckBox(dat, $event)"></ion-checkbox>
         <ion-label>
           <h3>{{dat.label}}</h3>
         </ion-label>
