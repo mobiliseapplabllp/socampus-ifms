@@ -44,6 +44,14 @@ export class ComplaintService {
     return this.https.get(environment.url + 'complaints/get_ticket_stages');
   }
 
+  getInternalUser(pc_id: any): Observable<any> {
+    return this.https.get(environment.url + 'search_internal_users?pc_id=' + pc_id);
+  }
+
+  ticketHoldAction(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'complaints/helpdesk_ticket_on_hold', formData);
+  }
+
 
   getTicketMaster(status: any, page: any): Observable<any> {
     let url;

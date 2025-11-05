@@ -70,19 +70,25 @@
                 <ion-label position="floating">Remark <ion-text color="danger">*</ion-text></ion-label>
                 <ion-textarea rows="4" formControlName="remark"></ion-textarea>
               </ion-item>
-              <ion-button  size="small" shape="round" fill="outline" color="danger" [color]="fileName ? 'success': 'danger'"  class="ion-padding-start" (click)="presentActionSheet('image')">
+              <ion-button  size="small" shape="round" fill="outline" color="danger" [color]="fileName ? 'success': 'danger'"  class="ion-padding-start" (click)="presentActionSheet('image')" [disabled]="workSpace.disabled">
                 <ion-text *ngIf="arr.hasWIP === 0 && arr.ptw_mandatory && arr.ptwApproved === 0; else image">Upload PTW</ion-text>
                 <ng-template #image>
                   <ion-text>Upload Image</ion-text>
                 </ng-template>
                 <ion-icon name="attach-outline" slot="end"> </ion-icon>
               </ion-button>
-              <ion-button size="small" shape="round" fill="outline" [color]="ppeFileName ? 'success': 'danger' " *ngIf="requestedData.ppekit_mandatory && !requestedData.ppekitFilled" (click)="presentActionSheet('ppe')">Upload PPE Kit</ion-button>
-              <ion-button size="small" shape="round" fill="outline" (click)="openRoute('/indents/spare-parts')">Create Indent <ion-icon name="create-outline" slot="end"></ion-icon></ion-button>
+              <ion-button size="small" shape="round" fill="outline" [color]="ppeFileName ? 'success': 'danger' " *ngIf="requestedData.ppekit_mandatory && !requestedData.ppekitFilled" (click)="presentActionSheet('ppe')" [disabled]="workSpace.disabled">Upload PPE Kit</ion-button>
+              <ion-button size="small" shape="round" fill="outline" (click)="openRoute('/indents/spare-parts')" [disabled]="workSpace.disabled">Create Indent <ion-icon name="create-outline" slot="end"></ion-icon></ion-button>
               <ion-row>
                 <ion-col size="4">
-                  <ion-button expand="block" shape="round" (click)="checkHasWip()">Submit </ion-button>
+                  <ion-button expand="block" shape="round" (click)="checkHasWip()" [disabled]="workSpace.disabled">Submit </ion-button>
                 </ion-col>
+                <ion-col size="8">                  
+                  <!-- <ion-button expand="block" shape="round" color="tertiary" class="ion-text-capitalize" *ngIf="requestedData_TEMP?.pi_action_permision?.can_hold_ticket" (click)="openTicketHold()">Place on Hold</ion-button>
+                  <ion-button expand="block" shape="round" color="success" class="ion-text-capitalize" *ngIf="requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold" (click)="presentAlertConfirm()">Remove on Hold</ion-button> -->
+                  <ion-button expand="block" shape="round" color="tertiary" class="ion-text-capitalize" *ngIf="canHoldTicket" (click)="openTicketHold()">Place on Hold</ion-button>
+                  <ion-button expand="block" shape="round" color="success" class="ion-text-capitalize" *ngIf="canUnHoldticket" (click)="presentAlertConfirm()">Remove on Hold</ion-button>
+                </ion-col>                
                 <!-- <ion-col size="4">
                   <ion-button expand="block" shape="round" [color]="isVidUpl ? 'success': 'secondary'" (click)="captureAndUploadVideo()">Video </ion-button>
                 </ion-col> -->

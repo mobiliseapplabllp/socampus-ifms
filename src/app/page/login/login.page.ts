@@ -343,7 +343,7 @@ export class LoginPage implements OnInit {
   }
 
   changeAuth() {
-    if (this.isProduction || !this.isDateValid) {
+    if (this.isProduction) {
       return;
     }
     this.viewCondition = 'login';
@@ -361,7 +361,7 @@ export class LoginPage implements OnInit {
   }
 
   dummyLogin() {
-    if (this.isProduction || !this.isDateValid) {
+    if (this.isProduction ) {
       return;
     }
     // https://socampusstaging.mobilisepro.com/#/auth/ssoGates/TskoEAY8LkgP3JDlxiKygDV5RW5DUDd4VmJ0N0owLzVSOVgyYUVRYkdsNWpxWEVJVERNZlpYOGZYQlB6dzRPNXRETU4wRDRhT3QyQk5leEZ1ZE91TS9GYjQ3ZmlQNkVEcHFJMzJRMFBONldyOTE5bFVBZk9pSUlGNU44ZXAvd01PZnc3eTlrRmtBaysrZ1pP

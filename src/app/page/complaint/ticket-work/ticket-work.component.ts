@@ -12,6 +12,7 @@ import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/medi
 import { Filesystem } from '@capacitor/filesystem';
 import { CaptureComponent } from 'src/app/shared/capture/capture.component';
 import { CameraService } from 'src/app/provider/camera/camera.service';
+import { TicketHoldComponent } from '../ticket-hold/ticket-hold.component';
 
 @Component({
   selector: 'app-ticket-work',
@@ -60,6 +61,8 @@ export class TicketWorkComponent  implements OnInit {
 
   videoBlob: Blob | null = null;
   compressedVideoUrl: string | null = null;  
+  canHoldTicket!: boolean;
+  canUnHoldticket!: boolean;
   constructor(
     private activeRoute: ActivatedRoute,
     private formbuilder: FormBuilder,
@@ -78,7 +81,14 @@ export class TicketWorkComponent  implements OnInit {
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
       this.requestedData_TEMP = JSON.parse(res['data']);      
-      
+      console.log(this.requestedData_TEMP);
+
+      // <ion-button expand="block" shape="round" color="tertiary" class="ion-text-capitalize" *ngIf="requestedData_TEMP?.pi_action_permision?.can_hold_ticket" (click)="openTicketHold()">Place on Hold</ion-button>
+      // <ion-button expand="block" shape="round" color="success" class="ion-text-capitalize" *ngIf="requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold" (click)="presentAlertConfirm()">Remove on Hold</ion-button>
+
+      this.canHoldTicket = this.requestedData_TEMP?.pi_action_permision?.can_hold_ticket;
+      this.canUnHoldticket = this.requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold;
+
       this.requestedData = this.requestedData_TEMP.data;      
       this.ticket_id = this.requestedData.tkts_id;
       this.mobile = this.requestedData.mobile
@@ -294,6 +304,9 @@ export class TicketWorkComponent  implements OnInit {
 
           setTimeout(() => {
             this.workSpace.get('status')?.setValue(3);
+            if (this.requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold) {
+              this.workSpace.disable();
+            }      
           }, 1000);
         }
       });
@@ -309,6 +322,28 @@ export class TicketWorkComponent  implements OnInit {
     } else {
       this.submitTicket();
     }
+  }
+
+  async openTicketHold() {
+    const modal = await this.modalCtrl.create({
+      component: TicketHoldComponent,
+      cssClass: 'my-modal_',
+      backdropDismiss:false,
+      componentProps: { 
+        pc_id: this.requestedData_TEMP.data.pc_id,
+        tkts_id: this.requestedData_TEMP.data.tkts_id,
+        hold_validation: this.requestedData_TEMP.pi_action_permision?.hold_validation
+      }
+    });    
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role == 'true') {
+        this.workSpace.disable();         
+        // this.requestedData_TEMP.pi_action_permision.can_hold_ticket = false;
+        this.canHoldTicket = !this.canHoldTicket;
+        this.canUnHoldticket = !this.canUnHoldticket;
+      }
+    });
+    modal.present();
   }
 
   async openInstructionModal() {
@@ -658,5 +693,67 @@ export class TicketWorkComponent  implements OnInit {
       }
     });
   }
+
+  async presentAlertConfirm() {
+    const alert = await this.alertCtrl.create({
+      cssClass: 'my-custom-class',
+      header: 'Unhold Ticket?',
+      message: 'Are you sure you want to unhold ticket?',
+      mode: 'ios',
+      inputs: [{
+        name: 'remark',
+        type:'textarea',
+        placeholder: 'Enter Remarks',
+      }],
+      buttons: [{
+        text: 'Cancel',
+          handler: (data) => {
+          }
+        },{
+          text: 'YES',
+          handler: (dat) => {
+            if(dat.remark){
+              const obj = {
+                unHoldRemark: dat.remark,
+                tkts_id: this.ticket_id,
+                pc_id: this.requestedData.pc_id,
+                source: environment.source,
+                action_type: 'UNHOLD'
+              }              
+              console.log(obj);
+              this.unholdAction(obj);
+            } else {
+              this.httpCommon.presentToast('Please Enter Remark', 'warning');
+            }
+          }
+        }]
+    });
+    await alert.present();
+  }
+
+  unholdAction(obj: any) {
+    this.httpCommon.presentLoading().then(preLoad => {
+      this.httpComplaint.ticketHoldAction(obj).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.canHoldTicket = !this.canHoldTicket;
+            this.canUnHoldticket = !this.canUnHoldticket;
+            this.httpCommon.presentToast(data.msg, 'success');
+            this.workSpace.enable();
+          } else {
+            this.httpCommon.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.httpCommon.dismissloading();
+          this.httpCommon.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.httpCommon.dismissloading();
+        }
+      });
+    });    
+  }
+
 
 }
