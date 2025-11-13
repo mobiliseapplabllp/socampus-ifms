@@ -162,10 +162,10 @@ export class TicketHoldComponent  implements OnInit {
       return;
     }
 
-    if (!this.formObj.isImgUpload) {
-      this.common.presentToast('Please Add Attachment', 'warning');
-      return;
-    }  
+    // if (!this.formObj.isImgUpload) {
+    //   this.common.presentToast('Please Add Attachment', 'warning');
+    //   return;
+    // }  
 
     if (this.hold_validation.is_sodexo_email_required === 1 && (!Array.isArray(this.formObj?.onHoldInternalUsers) || this.formObj?.onHoldInternalUsers.length === 0))  {
       this.common.presentToast('Please Select Sodexo Users', 'warning');

@@ -63,6 +63,7 @@ export class TicketWorkComponent  implements OnInit {
   compressedVideoUrl: string | null = null;  
   canHoldTicket!: boolean;
   canUnHoldticket!: boolean;
+  canCreateIndent!: boolean;
   constructor(
     private activeRoute: ActivatedRoute,
     private formbuilder: FormBuilder,
@@ -88,7 +89,9 @@ export class TicketWorkComponent  implements OnInit {
 
       this.canHoldTicket = this.requestedData_TEMP?.pi_action_permision?.can_hold_ticket;
       this.canUnHoldticket = this.requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold;
-
+      // tktStatus == 3 && this.ticketData.tkts_asset_id != null && this.ticketData.tkts_asset_id != 0 && action_permission.can_perform_pi_action
+      this.canCreateIndent = this.requestedData_TEMP?.data?.tkts_asset_id !== null && this.requestedData_TEMP?.data?.tkts_asset_id !== 0 && this.requestedData_TEMP?.pi_action_permision.can_perform_pi_action;
+      console.log(this.canCreateIndent);
       this.requestedData = this.requestedData_TEMP.data;      
       this.ticket_id = this.requestedData.tkts_id;
       this.mobile = this.requestedData.mobile
@@ -697,8 +700,8 @@ export class TicketWorkComponent  implements OnInit {
   async presentAlertConfirm() {
     const alert = await this.alertCtrl.create({
       cssClass: 'my-custom-class',
-      header: 'Unhold Ticket?',
-      message: 'Are you sure you want to unhold ticket?',
+      header: 'Warning',
+      message: 'Once the Status is changed, it can not be undone.',
       mode: 'ios',
       inputs: [{
         name: 'remark',
@@ -706,27 +709,26 @@ export class TicketWorkComponent  implements OnInit {
         placeholder: 'Enter Remarks',
       }],
       buttons: [{
+        text:'In Progress',
+        handler: (dat) => {
+          if(dat.remark){
+            const obj = {
+              unHoldRemark: dat.remark,
+              tkts_id: this.ticket_id,
+              pc_id: this.requestedData.pc_id,
+              source: environment.source,
+              action_type: 'UNHOLD'
+            }                          
+            this.unholdAction(obj);
+          } else {
+            this.httpCommon.presentToast('Please Enter Remark', 'warning');
+          }
+        }
+      }, {
         text: 'Cancel',
           handler: (data) => {
-          }
-        },{
-          text: 'YES',
-          handler: (dat) => {
-            if(dat.remark){
-              const obj = {
-                unHoldRemark: dat.remark,
-                tkts_id: this.ticket_id,
-                pc_id: this.requestedData.pc_id,
-                source: environment.source,
-                action_type: 'UNHOLD'
-              }              
-              console.log(obj);
-              this.unholdAction(obj);
-            } else {
-              this.httpCommon.presentToast('Please Enter Remark', 'warning');
-            }
-          }
-        }]
+        }
+      }]
     });
     await alert.present();
   }
