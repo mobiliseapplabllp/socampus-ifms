@@ -26,4 +26,14 @@ export class ApprovalService {
   actionPpmPtw(obj: Object): Observable<any> {
     return this.http.post(environment.url + 'pmscal/pms_ptw_approval_action', obj);
   }
+  getHelpdeskOnHoldTickets(): Observable<any> {
+    return this.http.get(environment.url + 'complaints/get_helpdesk_on_hold_tickets_list');
+  }
+  actionHoldTicket(obj: Object): Observable<any> {
+    return this.http.post(environment.url + 'complaints/helpdesk_on_hold_approval_action', obj);
+  }
 }
+
+
+// get_helpdesk_on_hold_tickets_list
+
