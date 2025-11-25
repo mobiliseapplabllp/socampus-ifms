@@ -362,7 +362,7 @@ export class LoginPage implements OnInit {
   }
 
   dummyLogin() {
-    if (this.isProduction) {
+    if (this.isProduction ) {
       return;
     }
     // https://socampus.mobilisepro.com/#/auth/ssoGates/8sTLjsrH8Q1CqPemtxumLHlwR0dLWmtqZjljMWkvNnlBdy90ZVFRVU1BQ2JFYjQ1MW1OaHUvWEE4TXNuTktaRkt1TFRJbjlJL0d3SGVKWnhzTUxpN2lZbW43bGZiTE04anRxUGl4bktCa2NhbS9HSnlBWlNDUVZKNk9XVFVmSS94NWVpRlh5d2N1NTlXY3RY

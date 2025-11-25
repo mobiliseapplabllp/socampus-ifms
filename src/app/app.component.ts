@@ -33,9 +33,8 @@ export class AppComponent {
     private httpLogin: LoginService,
     private common: CommonService) {
       this.platform.ready().then(res => {
-        console.log(this.isEnglish('Hello °'));
         this.initApp();
-        this.getUserData();        
+        this.getUserData();
       });
   }
 
