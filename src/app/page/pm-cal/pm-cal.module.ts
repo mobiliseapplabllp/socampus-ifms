@@ -17,6 +17,7 @@ import { LogsComponent } from './logs/logs.component';
 import { ActionableComponent } from './actionable/actionable.component';
 import { FillQusComponent } from './fill-qus/fill-qus.component';
 import { ClosePmComponent } from './close-pm/close-pm.component';
+import { HoldPpmComponent } from './hold-ppm/hold-ppm.component';
 
 @NgModule({
   imports: [
@@ -37,7 +38,8 @@ import { ClosePmComponent } from './close-pm/close-pm.component';
     LogsComponent,
     ActionableComponent,
     FillQusComponent,
-    ClosePmComponent
+    ClosePmComponent,
+    HoldPpmComponent
   ]
 })
 export class PmCalPageModule {}

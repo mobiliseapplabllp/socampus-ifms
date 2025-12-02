@@ -10,6 +10,7 @@ import { ApprovalsPage } from './approvals.page';
 import { PtwApprovalComponent } from './ptw-approval/ptw-approval.component';
 import { PpmPtwComponent } from './ppm-ptw/ppm-ptw.component';
 import { TicketHoldComponent } from './ticket-hold/ticket-hold.component';
+import { PpmHoldComponent } from './ppm-hold/ppm-hold.component';
 
 @NgModule({
   imports: [
@@ -22,7 +23,8 @@ import { TicketHoldComponent } from './ticket-hold/ticket-hold.component';
     ApprovalsPage,
     PtwApprovalComponent,
     PpmPtwComponent,
-    TicketHoldComponent
+    TicketHoldComponent,
+    PpmHoldComponent    
   ]
 })
 export class ApprovalsPageModule {}

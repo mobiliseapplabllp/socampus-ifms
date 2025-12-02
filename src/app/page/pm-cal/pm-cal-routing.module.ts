@@ -10,6 +10,7 @@ import { LogsComponent } from './logs/logs.component';
 import { ActionableComponent } from './actionable/actionable.component';
 import { FillQusComponent } from './fill-qus/fill-qus.component';
 import { ClosePmComponent } from './close-pm/close-pm.component';
+import { HoldPpmComponent } from './hold-ppm/hold-ppm.component';
 
 const routes: Routes = [
   {
@@ -51,6 +52,10 @@ const routes: Routes = [
   {
     path: 'close-pm',
     component: ClosePmComponent
+  },
+  {
+    path: 'hold-ppm',
+    component: HoldPpmComponent
   }
 ];
 
