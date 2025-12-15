@@ -11,6 +11,7 @@ import { environment } from 'src/environments/environment';
 })
 export class NotificationPage implements OnInit {
   selectedSegment: string = 'all';
+  notiticationCount : any = 0;
   allCount: number = 8;
   unreadCount: number = 8;
   alerts: any = [];
@@ -25,6 +26,7 @@ export class NotificationPage implements OnInit {
 
   ngOnInit() {    
     this.getNotificationList(false);
+    this.getNotification();
   }
 
   getNotificationList(isFromInfinite: boolean = false, event?: any) {
@@ -113,6 +115,44 @@ export class NotificationPage implements OnInit {
         ? `${diffYears} year${diffYears > 1 ? 's' : ''} ${remainingMonths} month${remainingMonths > 1 ? 's' : ''} ago`
         : `${diffYears} year${diffYears > 1 ? 's' : ''} ago`;
     }
+  }
+
+  markAllRead() {
+
+    this.alerts.forEach((a: any) => a.status = 'read');
+
+    const payload = {
+      read_all: 'yes',
+    };
+
+    this.httpLogin.getNotification(payload).subscribe({
+      next: (data) => {
+        if (data.status) {
+          this.notiticationCount = 0;
+          this.common.presentToast(data.msg, 'success');
+        }else {
+          this.common.presentToast(data.msg, 'warning');
+        }
+      },
+      error: (err) => {
+        this.common.presentToast(environment.errMsg, 'danger');
+      },
+    })
+  }
+
+  getNotification() {
+    const obj = {
+      status: 'unread'
+    }
+    this.httpLogin.getNotification(obj).subscribe({
+      next:(data) => {        
+        if (data.status) {
+          this.notiticationCount = data.count;
+        } else {
+          this.notiticationCount = 0;
+        }
+      }
+    });
   }
 
 
