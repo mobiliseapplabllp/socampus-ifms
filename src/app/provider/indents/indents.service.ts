@@ -47,9 +47,10 @@ export class IndentsService {
   getTktTran(id: any): Observable<any> {
     return this.https.get(environment.url + 'complaints/get_tkt_trans/' + id);
   }
-  // getMaterial(): Obs {
-
-  // }
+  
+  getPmsTnx(wo_id: string): Observable<any> {
+    return this.https.get(environment.url + 'purchase/mtrl_request/get_mtrl_request_master?limit=30&&page=1&is_excel=0&for=forPpm&wo_id=' + wo_id);
+  }
 
   getMaterialType(): Observable<any> {
     return this.https.get(environment.url + 'purchase/settings/select_material');

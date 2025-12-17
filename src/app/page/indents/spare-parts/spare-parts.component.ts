@@ -14,12 +14,14 @@ import { env } from 'process';
 })
 export class SparePartsComponent  implements OnInit {
   all_data: any;
+  pms_req_data: any;
   req_indent: any;
   isModalOpen = false;  
   indentLogs: any = [];
   selectedIndent: any = {};
   pi_action_permision: any = {};
   test = true;
+  req_type!: string;
   constructor(    
     private router: Router,
     private httpIndent: IndentsService,
@@ -29,16 +31,25 @@ export class SparePartsComponent  implements OnInit {
   ) { }
 
   ngOnInit() {    
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras?.state?.['data']) {
-      this.all_data = navigation.extras.state['data'];            
+    const navigation = this.router.getCurrentNavigation();    
+    if (navigation?.extras?.state?.['data']) {      
+      this.req_type = navigation.extras.state['type']; // ticket, ppm      
+      if (this.req_type === 'ticket') {
+        this.all_data = navigation.extras.state['data'];                 
+      } else {
+        this.pms_req_data = navigation.extras.state['data'];                    
+      }        
     } else {
       console.warn('No data found in router state.');    
     }
   }
 
   ionViewDidEnter() {    
-    this.getTktTran(this.all_data?.data?.tkts_id);
+    if (this.req_type === 'ticket') {
+      this.getTktTran(this.all_data?.data?.tkts_id);
+    } else {
+      this.getPmsTnx()
+    }    
   }
 
   getTktTran(id: any) {
@@ -64,10 +75,33 @@ export class SparePartsComponent  implements OnInit {
     }); 
   }
 
+  getPmsTnx() {
+    this.common.presentLoading().then(preLoad => {
+      this.httpIndent.getPmsTnx(this.pms_req_data.enc_id).subscribe({
+        next:(data: any) => {          
+          if (data.status) {
+            this.req_indent = data.data.data;
+            this.pi_action_permision = data.permission
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      });  
+    });    
+  }
+
   crIndent() {
     this.router.navigate(['/indents/cr-indent'], {
       state: {
-        data: this.all_data
+        data: this.req_type === 'ticket' ? this.all_data : this.pms_req_data,        
+        req_type: this.req_type
       }
     });
   }
@@ -103,12 +137,17 @@ export class SparePartsComponent  implements OnInit {
         index: -1,
         mtrl_type: data.mtrl_type,
         arr: data,
-        org_id: this.all_data.data.org_id,
+        org_id: this.req_type === 'ticket' ? this.all_data.data.org_id : this.pms_req_data.org_id,
       }
     });
     modal.onWillDismiss().then(async disModal => {
       if (disModal.role) {            
-        this.getTktTran(this.all_data?.data?.tkts_id);                      
+        // this.getTktTran(this.all_data?.data?.tkts_id);                      
+        if (this.req_type === 'ticket') {
+          this.getTktTran(this.all_data?.data?.tkts_id);
+        } else {
+          this.getPmsTnx()
+        }
       }
     });
     modal.present();

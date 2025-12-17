@@ -68,7 +68,15 @@
             <ion-col size="1" class="center">
               <ion-checkbox [(ngModel)]="dat.isSelect" color="primary-dark" (click)="changeCheckbox(dat)"></ion-checkbox>
             </ion-col>
-            <ion-col style="color: var(--ion-color-primary-dark); font-size:16px">WO {{dat.wo_no}}</ion-col>
+            <ion-col size="5" style="color: var(--ion-color-primary-dark); font-size:16px" class="vc">WO {{dat.wo_no}}</ion-col>
+            <ion-col size="6" class="ion-text-right ion-padding-right">
+              <!-- <span (click)="openRoute(dat)" *ngIf="(dat.stage_id === 1  || dat.stage_id === 2 ) && status === 'open' ">
+                <ion-text color="primary">Add Indent</ion-text>
+              </span> -->
+              <ion-button (click)="openRoute(dat)" size="small" shape="round" *ngIf="(dat.stage_id === 1  || dat.stage_id === 2 ) && status === 'open' " class="ion-text-capitalize" fill="outline">
+                Add Indent
+              </ion-button>
+            </ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="5">Site Name</ion-col>
