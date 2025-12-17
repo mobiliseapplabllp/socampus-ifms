@@ -6,6 +6,14 @@
     <ion-title> {{userName}} </ion-title>
     <ion-buttons slot="end" *ngIf="isInternet">
       <!-- <ion-button (click)="testRoute('/concierge')">Concierge</ion-button> -->
+       <!-- <ion-button (click)="notification('/notification')">
+        <ion-icon name="notifications-outline"></ion-icon>
+        <ion-text color="danger" style="position: absolute;top:0px;right:0px">{{alerts.length}}</ion-text>
+      </ion-button> -->
+      <!-- <ion-button slot="icon-only" (click)="notification('/notification')" style="position: relative;">        
+        <ion-icon name="notifications-outline"></ion-icon>
+        <ion-text color="danger" style="position: absolute;top:0px;right:0px">{{notiticationCount}}</ion-text>
+      </ion-button> -->
       <ion-button slot="icon-only"  (click)="openPageRoute()" style="position: relative;">
         <ion-icon name="cloud-upload-outline"></ion-icon>
         <ion-text color="danger" style="position: absolute;top:0px;right:0px">{{DGArr.length}}</ion-text>

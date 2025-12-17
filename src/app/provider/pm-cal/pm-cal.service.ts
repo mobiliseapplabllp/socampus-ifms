@@ -121,6 +121,14 @@ export class PmCalService {
     return this.https.post(url, formdata);
   }
 
+  getInternalUser(pc_id: any): Observable<any> {
+    return this.https.get(environment.url + 'ppm_search_internal_users?pc_id=' + pc_id);
+  }
+
+  pmsHoldAction(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'pmscal/ppm/ppm_work_order_on_hold', formData);
+  }
+
   resolvePmCal(remarks: any, ticketInfo: any, empID: any, img: any, completionDate: any) {
     return new Promise(resolve => {
       const url = environment.url + 'update_pm_callibration_status.php';

@@ -4,6 +4,8 @@ import { Routes, RouterModule } from '@angular/router';
 import { ApprovalsPage } from './approvals.page';
 import { PtwApprovalComponent } from './ptw-approval/ptw-approval.component';
 import { PpmPtwComponent } from './ppm-ptw/ppm-ptw.component';
+import { TicketHoldComponent } from './ticket-hold/ticket-hold.component';
+import { PpmHoldComponent } from './ppm-hold/ppm-hold.component';
 
 const routes: Routes = [
   {
@@ -15,6 +17,12 @@ const routes: Routes = [
   }, {
     path: 'ppm-ptw',
     component: PpmPtwComponent
+  },{
+    path: 'ticket-hold',
+    component:TicketHoldComponent
+  },{
+    path: 'ppm-hold',
+    component: PpmHoldComponent
   }
 ];
 

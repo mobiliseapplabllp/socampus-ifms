@@ -81,9 +81,7 @@ export class TicketWorkComponent  implements OnInit {
 
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
-      this.requestedData_TEMP = JSON.parse(res['data']);      
-      console.log(this.requestedData_TEMP);
-
+      this.requestedData_TEMP = JSON.parse(res['data']);                  
       // <ion-button expand="block" shape="round" color="tertiary" class="ion-text-capitalize" *ngIf="requestedData_TEMP?.pi_action_permision?.can_hold_ticket" (click)="openTicketHold()">Place on Hold</ion-button>
       // <ion-button expand="block" shape="round" color="success" class="ion-text-capitalize" *ngIf="requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold" (click)="presentAlertConfirm()">Remove on Hold</ion-button>
 
@@ -307,7 +305,7 @@ export class TicketWorkComponent  implements OnInit {
 
           setTimeout(() => {
             this.workSpace.get('status')?.setValue(3);
-            if (this.requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold) {
+            if (this.requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold || this.requestedData_TEMP?.pi_action_permision?.ticket_is_on_hold_process) {
               this.workSpace.disable();
             }      
           }, 1000);
@@ -711,6 +709,7 @@ export class TicketWorkComponent  implements OnInit {
       }],
       buttons: [{
         text:'In Progress',
+        cssClass: 'alert-bold-btn',
         handler: (dat) => {
           if(dat.remark){
             const obj = {
@@ -727,7 +726,8 @@ export class TicketWorkComponent  implements OnInit {
         }
       }, {
         text: 'Cancel',
-          handler: (data) => {
+        cssClass: 'alert-light-btn',
+        handler: (data) => {
         }
       }]
     });

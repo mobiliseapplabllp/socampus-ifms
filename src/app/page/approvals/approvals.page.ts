@@ -22,6 +22,18 @@ export class ApprovalsPage implements OnInit {
     url: '/approvals/ppm-ptw',
     id: 2,
     count: 0
+  },{
+    label :'Ticket On Hold',
+    icon :  'assets/imgs/images-removebg-preview.png',
+    url: '/approvals/ticket-hold',
+    id : 3,
+    count : 0
+  },{
+    label :'PPM On Hold',
+    icon :  'assets/imgs/images-removebg-preview.png',
+    url: '/approvals/ppm-hold',
+    id : 4,
+    count : 0
   }];
   loading: any;
   pendingList: any = [];
@@ -48,10 +60,9 @@ export class ApprovalsPage implements OnInit {
           data: JSON.stringify(data.data),
         }
       });
-    } else if (data.id === 2) {
+    } else {
       this.router.navigateByUrl(data.url);
     }
-
   }
 
   getPendingPTW() {

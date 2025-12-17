@@ -3,32 +3,49 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title id="open-modal" >{{requestedData.wo_no}} </ion-title>
-    <ion-buttons slot="end" *ngIf="loop">
-      <ion-button (click)="stopSpeaker()" color="danger">Stop <ion-icon name="volume-high-outline" slot="end"></ion-icon></ion-button>
+    <ion-title id="open-modal">{{requestedData.wo_no}} </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openTicketHold()" *ngIf="actionPermission.can_hold_ticket" class="ion-text-capitalize" fill="outline" shape="round">Place on Hold</ion-button>
+      <ion-button (click)="presentAlertConfirm()" *ngIf="actionPermission.is_ppm_wo_on_hold" class="ion-text-capitalize" fill="outline" shape="round">  Remove on Hold</ion-button>
+      <ion-button *ngIf="loop" (click)="stopSpeaker()" color="danger">Stop <ion-icon name="volume-high-outline"
+          slot="end"></ion-icon></ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-row>
-    <ion-col size="6" class="ion-padding-start ion-padding-top"> Category({{myCategory.length}})</ion-col>    
-  </ion-row>
-  <ion-card (click)="openQusPage(dat)" *ngFor="let dat of myCategory; let ind = index" [ngClass]="{fullborder: dat.isError === true}" style="border-left:5px solid #915FC8;box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;">
-    <ion-item>
-      <ion-label class="ion-text-wrap">{{ind+1}}. {{dat.cat_desc}}</ion-label>      
-    </ion-item>
-    <ion-row >
-      <ion-col size="9">Question</ion-col>
-      <ion-col size="3" class="ion-text-right ion-padding-right">{{dat.responded_questions}}/{{dat.total_questions}}</ion-col>
-      <ion-col size="12">
-        <ion-progress-bar [color]="dat.responded_questions === dat.total_questions ? 'success': 'warning' " [value]="(dat.responded_questions * 100 / dat.total_questions)/100 "></ion-progress-bar>
+  <div *ngIf="actionPermission.wo_is_on_hold" >
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <ion-text>{{actionPermission.wo_is_on_hold_msg}}</ion-text>
       </ion-col>
     </ion-row>
-  </ion-card>
+  </div>
+  <div *ngIf="!actionPermission.wo_is_on_hold">
+    <ion-row>
+      <ion-col size="6" class="ion-padding-start ion-padding-top"> Category({{myCategory.length}})</ion-col>
+    </ion-row>
+    <ion-card (click)="openQusPage(dat)" *ngFor="let dat of myCategory; let ind = index"
+      [ngClass]="{fullborder: dat.isError === true}"
+      style="border-left:5px solid #915FC8;box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;">
+      <ion-item>
+        <ion-label class="ion-text-wrap">{{ind+1}}. {{dat.cat_desc}}</ion-label>
+      </ion-item>
+      <ion-row>
+        <ion-col size="9">Question</ion-col>
+        <ion-col size="3"
+          class="ion-text-right ion-padding-right">{{dat.responded_questions}}/{{dat.total_questions}}</ion-col>
+        <ion-col size="12">
+          <ion-progress-bar [color]="dat.responded_questions === dat.total_questions ? 'success': 'warning' "
+            [value]="(dat.responded_questions * 100 / dat.total_questions)/100 "></ion-progress-bar>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+  </div>
 </ion-content>
-<ion-footer class="ion-no-border">
+<ion-footer class="ion-no-border" *ngIf="!actionPermission.wo_is_on_hold">
   <ion-toolbar color="light" style="padding: 0px 10px">
-    <ion-button expand="block" color="primary" (click)="finalSubmit()">Submit <ion-icon name="arrow-forward" slot="end"></ion-icon> </ion-button>
+    <ion-button expand="block" color="primary" (click)="finalSubmit()">Submit <ion-icon name="arrow-forward"
+        slot="end"></ion-icon> </ion-button>
   </ion-toolbar>
 </ion-footer>
 <!-- <ion-header>
@@ -63,7 +80,7 @@
       </ion-row>
     </div>
   </ion-card> -->
-  <!-- <ion-card style="border-bottom:4px solid var(--ion-color-primary);border-radius: 5px;background-color:var(--ion-color-light)">
+<!-- <ion-card style="border-bottom:4px solid var(--ion-color-primary);border-radius: 5px;background-color:var(--ion-color-light)">
     <ion-row>
       <ion-col size="6">
         <ion-text color="primary">Site Name</ion-text><br>
@@ -193,7 +210,7 @@
     </div>
   </div>
    -->
-   <!-- <ion-row *ngIf="myCategory.length > 0">
+<!-- <ion-row *ngIf="myCategory.length > 0">
     <ion-col>
       <ion-button expand="full" (click)="finalSubmit()">Submit</ion-button>
     </ion-col>

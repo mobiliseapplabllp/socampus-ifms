@@ -355,9 +355,16 @@ export class DigitalChecklistPage implements OnInit {
             });
           }
         },
-        error:() => {
+        error:(err: any) => {                    
           this.common.dismissloading();
-          this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
+          if (err.message === 'TIMEOUT') {
+            const retry = confirm('Timeout error. Do you want to retry the request?');
+            if (retry) {          
+              this.getOfflineCheckListFromServer(date, offset);
+            }
+          } else {
+            this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
+          }          
         },
         complete:() => {
           this.common.dismissloading();

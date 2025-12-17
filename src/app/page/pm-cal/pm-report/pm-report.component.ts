@@ -8,6 +8,7 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { CameraService } from 'src/app/provider/camera/camera.service';
+import { HoldPpmComponent } from '../hold-ppm/hold-ppm.component';
 @Component({
   selector: 'app-pm-report',
   templateUrl: './pm-report.component.html',
@@ -28,6 +29,9 @@ export class PmReportComponent  implements OnInit {
   questionList: any = [];
   category: any = [];
   selectedCategory = 0;
+  canHoldPpm!: boolean;
+  canUnHoldPpm!: boolean;
+  actionPermission: any = [];
   constructor(
     private activeroute: ActivatedRoute,
     private alertController: AlertController,
@@ -38,15 +42,18 @@ export class PmReportComponent  implements OnInit {
     private common: CommonService,
     private httpDigital: DigitalChecklistService,
     private platform: Platform,
-    private modal: ModalController,
+    // private modal: ModalController,
     private router: Router,
-    private camera: CameraService) {
+    private camera: CameraService,
+    private modalCtrl: ModalController,    
+    ) {
 
   }
 
   ngOnInit() {
     this.activeroute.queryParams.subscribe((res) => {
       this.requestedData = JSON.parse(res['data']);
+      console.log(this.requestedData);
     });
 
     // if (this.platform.is('capacitor')) {
@@ -70,6 +77,7 @@ export class PmReportComponent  implements OnInit {
         next:(data) => {
           if (data.status) {
             this.myCategory = data.data.categories;
+
             for (var i = 0 ; i < this.myCategory.length; i++) {
               if (this.myCategory[i].is_applicable === 1) { // 3 means NA; 1 = yes
                 this.myCategory[i].is_applicable_temp = true;
@@ -130,7 +138,7 @@ export class PmReportComponent  implements OnInit {
   }
 
   cancel() {
-    this.modal.dismiss(null, 'cancel');
+    this.modalCtrl.dismiss(null, 'cancel');
   }
 
   scrollToDiv(id: string) {
@@ -147,6 +155,8 @@ export class PmReportComponent  implements OnInit {
       this.httpPmCal.getScheduleQuestion(this.requestedData.id).subscribe({
         next:(data) => {
           this.myCategory = data.data.categories;          
+          this.actionPermission = data.action_permissions;
+          console.log(this.actionPermission);
           this.myCategory.forEach((element: any) => {
             // element.is_applicable_temp = element.is_applicable === 1 ? true: false; // yeah dheeraj ne hatwai hai kyuki ab sare category bydefault enable hai
             element.is_applicable_temp = true;
@@ -749,4 +759,113 @@ export class PmReportComponent  implements OnInit {
     stop();
     this.myCategory[this.rowIndex].qus[this.colIndex].bgcolor = false;
   }
+
+  async openTicketHold() {
+    const modal = await this.modalCtrl.create({
+      component: HoldPpmComponent,
+      cssClass: 'my-modal_',
+      backdropDismiss:false,
+      componentProps: { 
+        pc_id: this.requestedData.pc_id,
+        tkts_id: this.requestedData.id,
+        hold_validation: this.actionPermission.hold_validation
+      }
+    });    
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role == 'true') {      
+        this.actionPermission.can_hold_ticket = !this.actionPermission.can_hold_ticket;
+        this.actionPermission.is_ppm_wo_on_hold = !this.actionPermission.is_ppm_wo_on_hold;
+        this.actionPermission.wo_is_on_hold = !this.actionPermission.wo_is_on_hold;
+        this.actionPermission.wo_is_on_hold_msg = 'Work Order is on hold process. Please contact your Team Leader.'
+      }
+    });
+    modal.present();
+  }  
+
+  // buttons: [{
+  //       text:'In Progress',
+  //       cssClass: 'alert-bold-btn',
+  //       handler: (dat) => {
+  //         if(dat.remark){
+  //           const obj = {
+  //             unHoldRemark: dat.remark,
+  //             tkts_id: this.ticket_id,
+  //             pc_id: this.requestedData.pc_id,
+  //             source: environment.source,
+  //             action_type: 'UNHOLD'
+  //           }                          
+  //           this.unholdAction(obj);
+  //         } else {
+  //           this.httpCommon.presentToast('Please Enter Remark', 'warning');
+  //         }
+  //       }
+  //     }, {
+  //       text: 'Cancel',
+  //       cssClass: 'alert-light-btn',
+  //       handler: (data) => {
+  //       }
+  //     }]
+
+  async presentAlertConfirm() {
+    const alert = await this.alertController.create({
+      cssClass: 'my-custom-class',
+      header: 'Warning',
+      message: 'Once the Status is changed, it can not be undone.',
+      mode: 'ios',
+      inputs: [{
+        name: 'remark',
+        type:'textarea',
+        placeholder: 'Enter Remarks',
+      }],
+      buttons: [{
+        text:'In Progress',
+        cssClass: 'alert-bold-btn',
+        handler: (dat) => {
+          if(dat.remark){
+            const obj = {
+              unHoldRemark: dat.remark,
+              wo_id: this.requestedData.id,
+              pc_id: this.requestedData.pc_id,
+              source: environment.source,
+              action_type: 'UNHOLD'
+            }                          
+            this.unholdAction(obj);
+          } else {
+            this.httpCommon.presentToast('Please Enter Remark', 'warning');
+          }
+        }
+      }, {
+        text: 'Cancel',
+        cssClass: 'alert-light-btn',
+        handler: (data) => {
+        }
+      }]
+    });
+    await alert.present();
+  }
+
+  unholdAction(obj: any) {
+    this.httpCommon.presentLoading().then(preLoad => {
+      this.httpPmCal.pmsHoldAction(obj).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.actionPermission.can_hold_ticket = !this.actionPermission.can_hold_ticket
+            this.actionPermission.is_ppm_wo_on_hold = !this.actionPermission.is_ppm_wo_on_hold
+            this.actionPermission.wo_is_on_hold = !this.actionPermission.wo_is_on_hold
+            this.httpCommon.presentToast(data.msg, 'success');            
+          } else {
+            this.httpCommon.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.httpCommon.dismissloading();
+          this.httpCommon.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.httpCommon.dismissloading();
+        }
+      });
+    });    
+  }
+
 }

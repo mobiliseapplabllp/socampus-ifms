@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { delay, forkJoin, mergeMap, Observable, of } from 'rxjs';
+import { delay, forkJoin, mergeMap, Observable, of, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { timeout, catchError } from 'rxjs/operators';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -11,9 +13,27 @@ export class DigitalChecklistService {
     private http: HttpClient
   ) { }
 
-  getOfflineCheckListFromServer(date: string, offset?: number): Observable<any> {
-    // return this.http.get('assets/data/offline_checklist' + date + '.json');
-    return this.http.get(this.baseurl + 'digicheck/offlineapp/getAllPendingChecklist?date=' + date + '&paginate=1&limit=300&offset=' + offset);
+  // getOfflineCheckListFromServer(date: string, offset?: number): Observable<any> {    
+  //   return this.http.get(this.baseurl + 'digicheck/offlineapp/getAllPendingChecklist?date=' + date + '&paginate=1&limit=300&offset=' + offset);
+  // }
+
+  getOfflineCheckListFromServer(date: string, offset: number = 0): Observable<any> {    
+    const apiCall$ = this.http.get(
+      `${this.baseurl}digicheck/offlineapp/getAllPendingChecklist?date=${date}&paginate=1&limit=300&offset=${offset}`
+    );
+    if (offset === 0) {
+      return apiCall$.pipe(
+        timeout(70000), 
+        catchError(err => {
+          if (err.name === 'TimeoutError') {
+            return throwError(() => new Error('TIMEOUT'));
+          }
+          return throwError(() => err);
+        })
+      );
+    } else {
+      return apiCall$;
+    }
   }
 
   getSchedule(): Observable<any> {

@@ -54,18 +54,18 @@ export class TicketTypeComponent  implements OnInit {
   }
 
   ngOnInit() {
-    this.initForm();
     this.activeRoute.queryParams.subscribe((res) => {
-       this.requestedData = JSON.parse(res['data']);;
-       this.ticketPriority = this.requestedData?.priority_list || [];
-       this.allData = this.requestedData?.data || [];
-       this.pc_hse_conf = this.requestedData.data?.pc_hse_conf || [];
-       this.ticket = this.allData?.tkts_id;
-       if (this.allData?.source !== 'QRCODE') {
-         this.isShowBuilding = true;
-       }       
-       this.getRequestType(this.allData.tkts_issue_id);
+      this.requestedData = JSON.parse(res['data']);        
+      this.ticketPriority = this.requestedData?.priority_list || [];
+      this.allData = this.requestedData?.data || [];
+      this.pc_hse_conf = this.requestedData.data?.pc_hse_conf || [];
+      this.ticket = this.allData?.tkts_id;
+      if (this.allData?.source !== 'QRCODE') {
+        this.isShowBuilding = true;
+      }       
+      this.getRequestType(this.allData.tkts_issue_id);
     });    
+    this.initForm();
   }
 
 
@@ -99,7 +99,8 @@ export class TicketTypeComponent  implements OnInit {
       assignTo: [''],
       buddy_req: [''],
       buddyId: [''],
-      buddyName: ['']
+      buddyName: [''],
+      pc_id: [this.requestedData?.data?.pc_id]
     });
     setTimeout(() => {
       let tkt_tag = this.allData?.tkt_tag;

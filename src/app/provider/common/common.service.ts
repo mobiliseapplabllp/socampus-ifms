@@ -142,20 +142,14 @@ export class CommonService {
     return await modal.present();
   }
 
-  async presentLoading(msg?: string) {
-    let message;
-    if(msg) {
-      message = msg
-    } else {
-      message = 'Please Wait.';
-    }
+  async presentLoading(msg?: string) {    
     this.loading = await this.loadingController.create({
-      message: message,
+      message: msg ? msg : 'Please Wait...',
     });
     await this.loading.present();
   }
 
-  dismissloading() {
+  dismissloading() {    
     if (this.loading) {
       this.loading.dismiss();
     }

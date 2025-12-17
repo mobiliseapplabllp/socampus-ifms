@@ -10,19 +10,16 @@ import { environment } from 'src/environments/environment';
   templateUrl: './ticket-hold.component.html',
   styleUrls: ['./ticket-hold.component.scss'],
 })
-export class TicketHoldComponent  implements OnInit {
+export class TicketHoldComponent  implements OnInit {  
   formObj: any = {};
   pc_id: any;
   tkts_id: any;
   formData = new FormData();
   isModalOpen = false;    
   allArr: any = [];
-  allArrCopy: any = [];
-  // viewArr: any = [];  
-  // externalArr: any = [];
-  // sodexoArr: any = [];  
+  allArrCopy: any = [];  
   currentModal!: string;
-  hold_validation: any
+  hold_validation: any  
   constructor(
     private modalCtrl: ModalController,
     private camera: CameraService,
@@ -30,8 +27,7 @@ export class TicketHoldComponent  implements OnInit {
     private common: CommonService,        
   ) { }
 
-  ngOnInit() {    
-    console.log(this.hold_validation);
+  ngOnInit() {            
     this.formObj.pc_id = this.pc_id;
     this.formObj.tkts_id = this.tkts_id;
     this.formObj.source = environment.source,
@@ -41,9 +37,7 @@ export class TicketHoldComponent  implements OnInit {
         next:(data: any) => {          
           if (data.status) {   
             this.allArr = data.data;   
-            this.allArrCopy = data.data;
-            // this.sodexoArr = structuredClone(data.data);
-            // this.externalArr = structuredClone(data.data);
+            this.allArrCopy = data.data;            
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -73,17 +67,7 @@ export class TicketHoldComponent  implements OnInit {
     });
   }
 
-  openModal(type: string) {    
-    // if (type === 'sodexo_user') {
-    //   this.viewArr = [...this.sodexoArr];      
-    // } else if (type === 'external_user') {        
-    //   let internalArr = this.formObj.onHoldInternalUsers || [];      
-    //   if (internalArr.length === 0) {
-    //     this.common.presentToast('Please Select Sodexo Users', 'warning');
-    //     return;
-    //   }
-    //   this.viewArr = this.externalArr.filter((val: any) => !internalArr.includes(val.value));      
-    // }
+  openModal(type: string) {       
     this.currentModal = type;
     this.isModalOpen = true;    
   }
@@ -120,35 +104,6 @@ export class TicketHoldComponent  implements OnInit {
     }
   }
 
-  // changeCheckBox(dat: any) {    
-  //   let arr = this.viewArr.filter((val: any) => val.isSelect === true).map((item: any) => item.value);        
-  //   if (this.currentModal === 'sodexo_user') {      
-  //     this.formObj.onHoldInternalUsers = arr;
-  //     this.formObj.onHoldInternalUsers_desc = arr.length + ' Users Selected';      
-  //     for (var i = 0; i < this.externalArr.length;i++) {
-  //       if (arr.includes(this.externalArr[i].value)) {
-  //         this.externalArr[i].isSelect = false
-  //       }
-  //     }     
-  //     if (this.formObj.onHoldExternalUsers && this.formObj.onHoldExternalUsers.length > 0) {
-  //       this.formObj.onHoldExternalUsers = this.formObj?.onHoldExternalUsers?.filter((val: any) => !this.formObj.onHoldInternalUsers.includes(val)) || 0;
-  //       this.formObj.onHoldExternalUsers_desc = this.formObj?.onHoldExternalUsers.length  + ' Users Selected';      
-  //     }
-      
-  //   } else if (this.currentModal === 'external_user') {      
-  //     this.formObj.onHoldExternalUsers = arr;
-  //     this.formObj.onHoldExternalUsers_desc = arr.length + ' Users Selected';
-  //     for (var i = 0; i < this.sodexoArr.length;i++) {
-  //       if (arr.includes(this.sodexoArr[i].value)) {
-  //         this.sodexoArr[i].isSelect = false
-  //       }
-  //     }      
-  //     this.formObj.onHoldInternalUsers = this.formObj?.onHoldInternalUsers?.filter((val: any) => !this.formObj.onHoldExternalUsers.includes(val)) || 0;
-  //     this.formObj.onHoldInternalUsers_desc = this.formObj?.onHoldInternalUsers.length  + ' Users Selected';      
-  //   }    
-    
-  // }
-
   onWillDismiss() {
     this.isModalOpen = false;
     this.allArr = this.allArrCopy;    
@@ -161,11 +116,6 @@ export class TicketHoldComponent  implements OnInit {
       this.common.presentToast('Please Enter Remark', 'warning');
       return;
     }
-
-    // if (!this.formObj.isImgUpload) {
-    //   this.common.presentToast('Please Add Attachment', 'warning');
-    //   return;
-    // }  
 
     if (this.hold_validation.is_sodexo_email_required === 1 && (!Array.isArray(this.formObj?.onHoldInternalUsers) || this.formObj?.onHoldInternalUsers.length === 0))  {
       this.common.presentToast('Please Select Sodexo Users', 'warning');

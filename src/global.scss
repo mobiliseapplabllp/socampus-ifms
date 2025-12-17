@@ -87,6 +87,15 @@
   filter: blur(10px);
 }
 
+.alert-bold-btn {
+  font-weight: bold !important;
+  color: #000;   // optional
+}
+
+.alert-light-btn {
+  font-weight: 400 !important;
+  opacity: 0.9;  // light effect
+}
 
 ion-content {
   font-family: 'opensans_semibold' !important;
