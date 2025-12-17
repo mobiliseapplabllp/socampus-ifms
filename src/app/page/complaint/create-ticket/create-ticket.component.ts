@@ -74,6 +74,10 @@ export class CreateTicketComponent  implements OnInit {
 
   initializeForm() {
     this.createForm = this.formbuilder.group({
+      requestee: ['self'],
+      behalf_name: [''],
+      behalf_mobile: [''],
+      behalf_email: [''],
       usr_name: ['', Validators.required],
       mobile: [''],
       email: ['', Validators.required],
@@ -255,16 +259,34 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   async openCategory() {
-    if (!this.createForm.value.pc_id) {
-      alert('Please Select Site');
+    // if (!this.createForm.value.pc_id) {
+    //   alert('Please Select Site');
+    //   return;
+    // }
+    // if (!this.createForm.value.pc_id ) { //&& !this.createForm.value.is_barcode
+    //   alert('Please Select PC or Is Barcode');
+    //   return;
+    // }
+    
+
+
+    if (this.createForm.value.is_barcode === '1' && !this.createForm.value.barcode) {
+      alert('Please Enter Barcode No');
       return;
     }
+
+    if (this.createForm.value.is_barcode === '0' && !this.createForm.value.pc_id) {
+      alert('Please Select PC');
+      return;
+    }
+
     const modal = await this.modalController.create({
       component: QueryCatComponent,
       cssClass: 'my-modal',
       componentProps : {
         issue_id: this.createForm.value.issue_id,
-        pc_id: this.createForm.value.pc_id
+        pc_id: this.createForm.value.pc_id,
+        barcode: this.createForm.value.barcode
       }
     });
     modal.onWillDismiss().then(disModal => {
@@ -307,17 +329,17 @@ export class CreateTicketComponent  implements OnInit {
   }
 
   changeIssue(ev: any) {
-    // this.createForm.get('pc_id')?.setValue('');
-    // this.createForm.get('pc_id_desc')?.setValue('');
-    // this.createForm.get('bldg_id')?.setValue('');
-    // this.createForm.get('floor_id')?.setValue('');
-    // this.createForm.get('loc_code')?.setValue('');
-    // this.createForm.get('pc_id_desc')?.setValue('');
-    // this.createForm.get('bldg_id')?.setValue('');
-    // this.createForm.get('floor_id')?.setValue('');
-    // this.createForm.get('category_desc')?.setValue('');
-    // this.createForm.get('subcat1_id_desc')?.setValue('');
-    // this.createForm.get('subcat2_id_desc')?.setValue('');
+    this.createForm.get('pc_id')?.setValue('');
+    this.createForm.get('pc_id_desc')?.setValue('');
+    this.createForm.get('bldg_id')?.setValue('');
+    this.createForm.get('floor_id')?.setValue('');
+    this.createForm.get('loc_code')?.setValue('');
+    this.createForm.get('pc_id_desc')?.setValue('');
+    this.createForm.get('bldg_id')?.setValue('');
+    this.createForm.get('floor_id')?.setValue('');
+    this.createForm.get('category_desc')?.setValue('');
+    this.createForm.get('subcat1_id_desc')?.setValue('');
+    this.createForm.get('subcat2_id_desc')?.setValue('');
     this.getRequestType(ev.target.value);
   }
 
@@ -797,6 +819,25 @@ export class CreateTicketComponent  implements OnInit {
 
   changeHasBarcode() {
     this.barcodeList = [];
+    this.createForm.get('barcode')?.setValue('');
+    this.createForm.get('pc_id_desc')?.setValue('');
+    this.createForm.get('pc_id')?.setValue('');
+    this.createForm.get('block_id')?.setValue('');
+    this.createForm.get('bldg_id_desc')?.setValue('');
+    this.createForm.get('bldg_id')?.setValue('');
+    this.createForm.get('floor_id_desc')?.setValue('');
+    this.createForm.get('floor_id')?.setValue('');
+    this.createForm.get('loc_code_desc')?.setValue('');
+    this.createForm.get('loc_code')?.setValue('');
+  
+    this.createForm.get('category_desc')?.setValue('');
+    this.createForm.get('subcat1_id_desc')?.setValue('');
+    this.createForm.get('subcat2_id_desc')?.setValue('');
+
+    this.createForm.get('category')?.setValue('');
+    this.createForm.get('subcat1_id')?.setValue('');
+    this.createForm.get('subcat2_id')?.setValue('');
+
   }
 
 }
