@@ -11,6 +11,7 @@ import { environment } from 'src/environments/environment';
 })
 export class NotificationPage implements OnInit {
   selectedSegment: string = 'all';
+  notiticationCount : any = 0;
   allCount: number = 8;
   unreadCount: number = 8;
   alerts: any = [];
@@ -25,6 +26,7 @@ export class NotificationPage implements OnInit {
 
   ngOnInit() {    
     this.getNotificationList(false);
+    this.getNotification();
   }
 
   getNotificationList(isFromInfinite: boolean = false, event?: any) {
@@ -72,11 +74,11 @@ export class NotificationPage implements OnInit {
     this.getNotificationList(true, event);
   }
 
-  getButtonText(action: string): string {
-    if (action === 'Create') return 'View Ticket';
-    if (action === 'Assigned') return 'View Content';
-    return '';
-  }
+  // getButtonText(action: string): string {
+  //   if (action === 'Create') return 'View Ticket';
+  //   if (action === 'Assigned') return 'View Content';
+  //   return '';
+  // }
 
   getTimeAgo(dateString: string): string {    
     const [datePart, timePart] = dateString.split(' ');
@@ -113,6 +115,47 @@ export class NotificationPage implements OnInit {
         ? `${diffYears} year${diffYears > 1 ? 's' : ''} ${remainingMonths} month${remainingMonths > 1 ? 's' : ''} ago`
         : `${diffYears} year${diffYears > 1 ? 's' : ''} ago`;
     }
+  }
+
+  markAllRead() {
+    const payload = {
+      read_all: 'yes',
+    };
+    this.common.presentLoading().then(preLoad => {
+      this.httpLogin.getNotification(payload).subscribe({
+        next: (data) => {
+          if (data.status) {
+            this.notiticationCount = 0;
+            this.alerts.forEach((a: any) => a.status = 'read');
+            this.common.presentToast(data.msg, 'success');
+          }else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error: (err) => {
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.common.dismissloading();
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      });  
+    });    
+  }
+
+  getNotification() {
+    const obj = {
+      status: 'unread'
+    }
+    this.httpLogin.getNotification(obj).subscribe({
+      next:(data) => {        
+        if (data.status) {
+          this.notiticationCount = data.count;
+        } else {
+          this.notiticationCount = 0;
+        }
+      }
+    });
   }
 
 
