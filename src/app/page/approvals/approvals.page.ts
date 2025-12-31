@@ -11,7 +11,7 @@ import { environment } from 'src/environments/environment';
 })
 export class ApprovalsPage implements OnInit {
   approvalsList: any = [{
-    label:'PTW Approval',
+    label:'Helpdesk PTW',
     icon: 'assets/imgs/helpdesk.png',
     url: '/approvals/ptw-approval',
     id: 1,
@@ -46,7 +46,37 @@ export class ApprovalsPage implements OnInit {
   ngOnInit() {}
 
   ionViewDidEnter() {
-    this.getPendingPTW();
+    // this.getPendingPTW();
+    this.getMatrix();
+  }
+
+  handleRefresh(ev: any) {
+    setTimeout(() => {
+      ev.target.complete();
+    }, 1000);
+    this.getMatrix();
+  }
+
+  getMatrix() {
+    this.common.presentLoading().then(preLoad => {
+      this.httpApproval.getApprvalMatrix().subscribe({
+        next:(data: any) => {
+          if(data.status) {
+            this.approvalsList[0].count = data?.data?.getComplaintPTWApprovals || 0;
+            this.approvalsList[1].count = data?.data?.getPmsPtwApprovals || 0;
+            this.approvalsList[2].count = data?.data?.getHelpdeskOnHoldTicketsList || 0;
+            this.approvalsList[3].count = data?.data?.getPpmOnHoldWorkOrderList || 0;
+          }
+        },
+        error:() => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      });
+    });    
   }
 
   ionViewDidLeave() {
@@ -71,10 +101,9 @@ export class ApprovalsPage implements OnInit {
         next:(data) => {
           if (data.status) {
             this.pendingList = data.data;
-            const index = this.approvalsList.findIndex((item: any) => item.id === 1);
-            this.approvalsList[index].count = this.pendingList.length;
-            this.approvalsList[index].data = this.pendingList;
-
+            // const index = this.approvalsList.findIndex((item: any) => item.id === 1);
+            // this.approvalsList[index].count = this.pendingList.length;
+            // this.approvalsList[index].data = this.pendingList;
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

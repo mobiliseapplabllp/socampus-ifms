@@ -24,10 +24,11 @@ export class PtwApprovalComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.activeRoute.queryParams.subscribe((res) => {
-      this.requestData = JSON.parse(res['data']);
-      this.pendingList = this.requestData;
-    });
+    this.getPendingPTW();
+    // this.activeRoute.queryParams.subscribe((res) => {
+    //   this.requestData = JSON.parse(res['data']);
+    //   this.pendingList = this.requestData;
+    // });
   }
 
   getPendingPTW() {

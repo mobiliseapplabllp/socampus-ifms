@@ -80,7 +80,7 @@ export class CreateTicketComponent  implements OnInit {
       behalf_email: [''],
       usr_name: ['', Validators.required],
       mobile: [''],
-      email: ['', Validators.required],
+      email: [''],
       issue_id: ['', Validators.required],
       req_type_id: ['', Validators.required],
       is_barcode: [''],

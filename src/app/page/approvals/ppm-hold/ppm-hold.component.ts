@@ -18,17 +18,8 @@ export class PpmHoldComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.getPpmHold();
-    // this.testfun();
-  }
-
-  testfun() {
-    this.common.presentLoading().then(preLoad => {
-      setTimeout(() => {
-        this.common.dismissloading();
-      }, 4000);      
-    })
-  }
+    this.getPpmHold();    
+  }  
 
   getPpmHold() {
     this.common.presentLoading().then(preLoad => {
@@ -46,7 +37,6 @@ export class PpmHoldComponent  implements OnInit {
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          console.log('a');
           this.common.dismissloading();
         }
       });

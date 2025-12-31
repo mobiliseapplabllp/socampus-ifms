@@ -42,6 +42,10 @@ export class ApprovalService {
   actionHoldPPM(obj: Object): Observable<any> {
     return this.http.post(environment.url + 'pmscal/ppm/ppm_on_hold_approval_action', obj);
   }
+
+  getApprvalMatrix(): Observable<any> {
+    return this.http.get(environment.url + 'get_approval_matrix_count') 
+  }
 }
 
 
