@@ -17,7 +17,7 @@ export class ApprovalsPage implements OnInit {
     id: 1,
     count: 0
   },{
-    label:'PPM Ptw',
+    label:'PPM PTW',
     icon: 'assets/imgs/pms.png',
     url: '/approvals/ppm-ptw',
     id: 2,
