@@ -81,7 +81,7 @@
 
   <ion-card>
     <ion-item *ngFor="let dat of materialArr; let i = index">
-      <ion-label class="ion-text-wrap" (click)="openMaterialDetails(dat, i)">{{i+1}} Material ({{dat.sku ? dat.sku : ''}})</ion-label>
+      <ion-label class="ion-text-wrap" (click)="openMaterialDetails(dat, i)">{{i+1}} Material ({{dat.sku ? dat.sku : ''}}) </ion-label>
       <ion-buttons slot="end">
         <ion-button (click)="deleteItems(i)" color="danger">
           <ion-icon name="trash-outline"></ion-icon>

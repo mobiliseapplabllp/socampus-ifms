@@ -4,8 +4,8 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>
-      <ion-label *ngIf="req_type === 'ticket' ">MR (#{{all_data?.data?.tkts_id}})</ion-label>
-      <ion-label *ngIf="req_type === 'ppm' ">MR (#{{pms_req_data?.wo_id}})</ion-label>        
+      <ion-label *ngIf="req_type === 'ticket' ">Indents on Ticket MR (#{{all_data?.data?.tkts_id}})</ion-label>
+      <ion-label *ngIf="req_type === 'ppm' ">Indents on PPM MR (#{{pms_req_data?.wo_id}})</ion-label>        
     </ion-title>
     <ion-text slot="end" *ngIf="req_type === 'ppm' " class="ion-padding-end" style="font-size: 12px"> Total Cost: {{ totalPrice}} </ion-text>
   </ion-toolbar>
@@ -44,10 +44,10 @@
         <ion-col size="5">Qty</ion-col>
         <ion-col>{{dat.qty}}</ion-col>
       </ion-row>
-      <ion-row>
+      <!-- <ion-row>
         <ion-col size="5">Final Cost</ion-col>
         <ion-col>{{dat.actl_price}}</ion-col>
-      </ion-row>
+      </ion-row> -->
       <ion-row>
         <ion-col size="5">Edit Remark</ion-col>
         <ion-col>{{dat.edit_remark}}</ion-col>
@@ -62,7 +62,7 @@
       </ion-col>
       <ion-col size="4">
         <ion-button shape="round" fill="outline" expand="block" color="primary-dark" class="ion-text-capitalize"
-          *ngIf="dat.status_id !== 4 " [disabled]="!pi_action_permision.can_edit_indent_pi" (click)="edit(dat)"
+          *ngIf="dat.status_id !== 4 && dat.is_edit === 'Yes'" [disabled]="!pi_action_permision.can_edit_indent_pi" (click)="edit(dat)"
           [disabled]="!canCreateIndent">
           Edit <ion-icon name="create-outline" slot="end"></ion-icon>
         </ion-button>

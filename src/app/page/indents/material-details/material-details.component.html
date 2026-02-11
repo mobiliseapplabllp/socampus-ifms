@@ -1,6 +1,7 @@
 <ion-header mode="md" class="ion-no-border">
   <ion-toolbar color="primary">
-    <ion-title>{{ index === -1 ? 'Edit Material Requested (' + arr.rqst_no + ')' : 'Material ' + (index + 1) + ' Details'
+    <ion-title>{{ index === -1 ? 'Edit Material Requested (' + arr.rqst_no + ')' : 'Material ' + (index + 1) + '
+      Details'
       }}</ion-title><!--Material {{index+1}} Details-->
     <ion-buttons slot="end">
       <ion-button (click)="closeModal(null, false)">
@@ -52,12 +53,12 @@
 
   <ion-card>
     <ion-row>
-      <ion-col size="6">
+      <!-- <ion-col size="6">
         <ion-item>
           <ion-label position="floating">Serial No</ion-label>
           <ion-input type="text" [(ngModel)]="arr.serial_no"  (ionInput)="onFieldChange()"></ion-input>
         </ion-item>
-      </ion-col>
+      </ion-col> -->
       <!-- <ion-col size="6">
         <ion-item style="--background: #f0f0f0"  >
           <ion-label position="floating">Uom <ion-text color="danger">*</ion-text></ion-label>
@@ -75,20 +76,19 @@
       <ion-col size="6">
         <ion-item>
           <ion-label position="floating">Qty <ion-text color="danger">*</ion-text></ion-label>
-          <ion-input type="number" [(ngModel)]="arr.qty" (ionInput)="onFieldChange()" (ionChange)="changeCost()"></ion-input>
+          <ion-input type="number" [(ngModel)]="arr.qty" (ionInput)="onFieldChange()"
+            (ionChange)="changeCost()"></ion-input>
         </ion-item>
       </ion-col>
-      <ion-col size="6">
+      <!-- <ion-col size="6">
         <ion-item>
-          <ion-label position="floating">MRP <ion-text color="danger">*</ion-text></ion-label>
-          <!-- <ion-input type="number" [(ngModel)]="arr.expt_price"  (ionInput)="onFieldChange()"(ionChange)="changeCost()"></ion-input> -->
+          <ion-label position="floating">MRP <ion-text color="danger">*</ion-text></ion-label>          
           <ion-input type="number" [(ngModel)]="arr.expt_price" (ionInput)="onFieldChange()" (ionChange)="changeCost()"></ion-input>
         </ion-item>
       </ion-col>
       <ion-col size="6">
         <ion-item>
-          <ion-label position="floating">Discount <ion-text color="danger">*</ion-text></ion-label>
-          <!-- <ion-input type="number" [(ngModel)]="arr.discount"  (ionInput)="onFieldChange()"(ionChange)="changeCost()"></ion-input> -->
+          <ion-label position="floating">Discount <ion-text color="danger">*</ion-text></ion-label>        
           <ion-input type="number" [(ngModel)]="arr.discount" (ionInput)="onFieldChange()" (ionChange)="changeCost()"></ion-input>
         </ion-item>
       </ion-col>
@@ -97,52 +97,50 @@
           <ion-label position="floating">Final Cost</ion-label>
           <ion-input type="text" [(ngModel)]="arr.actl_price" (ionInput)="onFieldChange()" readonly></ion-input>
         </ion-item>
-      </ion-col>
-      <ion-col size="6">
-        <ion-item id="mtrl-req-date">
-          <ion-label position="floating">Req By Date</ion-label>
-          <ion-input type="email" [value]="arr.reqd_by_date | date" placeholder="Select Date"  (ionInput)="onFieldChange()"readonly></ion-input>
-        </ion-item>
-        <ion-popover trigger="mtrl-req-date" mode="md">
-          <ng-template>
-            <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" [min]="today"
-              [(ngModel)]="arr.reqd_by_date" [showDefaultButtons]="true" (ionInput)="onFieldChange()"></ion-datetime>
-          </ng-template>
-        </ion-popover>
-      </ion-col>
-      <ion-col size="6">
+      </ion-col> -->
+      <!-- <ion-col size="6">
+        
+      </ion-col> -->
+      <!-- <ion-col size="6">
         <ion-item>
           <ion-label position="floating">Supplier Name</ion-label>
           <ion-input type="text" [(ngModel)]="arr.supl_name" (ionInput)="onFieldChange()"></ion-input>
         </ion-item>
-      </ion-col>
-      <ion-col size="12">
+      </ion-col> -->
+    </ion-row>
+    <ion-item id="mtrl-req-date">
+      <ion-label position="floating">Req By Date</ion-label>
+      <ion-input type="email" [value]="arr.reqd_by_date | date" placeholder="Select Date" (ionInput)="onFieldChange()"
+        readonly></ion-input>
+    </ion-item>
+    <ion-popover trigger="mtrl-req-date" mode="md">
+      <ng-template>
+        <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" [min]="today"
+          [(ngModel)]="arr.reqd_by_date" [showDefaultButtons]="true" (ionInput)="onFieldChange()"></ion-datetime>
+      </ng-template>
+    </ion-popover>
+    <!-- <ion-col size="12">
         <ion-item>
           <ion-label position="floating">PO No</ion-label>
           <ion-input type="text" [(ngModel)]="arr.pur_ordr_no" (ionInput)="onFieldChange()"></ion-input>
         </ion-item>
-      </ion-col>
-      <!-- <ion-col size="12">
+      </ion-col> -->
+    <!-- <ion-col size="12">
         <ion-item>
           <ion-label position="floating">Requestee</ion-label>
           <ion-input type="text" [(ngModel)]="arr.user_id_label" (ionInput)="onFieldChange()"></ion-input>
           <ion-button slot="end" (click)="search()">Search</ion-button>
         </ion-item>
       </ion-col> -->
-      <ion-col size="12">
-        <ion-item (click)="openRequesteeModal()">
-          <ion-label position="floating">Requestee</ion-label>
-          <ion-input type="text" [(ngModel)]="arr.user_id_label" readonly></ion-input>
-        </ion-item>
-      </ion-col>
-      <ion-col size="6">
-
-        <ion-item>
-          <ion-label position="floating">Delivery Location</ion-label>
-          <ion-input type="text" [(ngModel)]="arr.del_loc" (ionInput)="onFieldChange()"></ion-input>
-        </ion-item>
-      </ion-col>
-      <ion-col size="6">
+    <ion-item (click)="openRequesteeModal()">
+      <ion-label position="floating">Requestee</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.user_id_label" readonly></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Delivery Location</ion-label>
+      <ion-input type="text" [(ngModel)]="arr.del_loc" (ionInput)="onFieldChange()"></ion-input>
+    </ion-item>
+    <!-- <ion-col size="6">
         <ion-item id="mtrl-wrnty-exp-date">
           <ion-label position="floating">Warranty Exp Date</ion-label>
           <ion-input type="email" [value]="arr.wrnty_exp_date | date" placeholder="Select Date"  (ionInput)="onFieldChange()"readonly></ion-input>
@@ -153,15 +151,16 @@
               [showDefaultButtons]="true"></ion-datetime>
           </ng-template>
         </ion-popover>
-      </ion-col>      
-    </ion-row>    
+      </ion-col>       -->
+
     <ion-item>
       <ion-label position="floating">Remark</ion-label>
       <ion-input type="text" [(ngModel)]="arr.remark" (ionInput)="onFieldChange()"></ion-input>
     </ion-item>
     <ion-row>
       <ion-col class="ion-pading-start">
-        <ion-button (click)="presentActionSheet()" [color]="arr.mtrl_file ? 'success': 'primary' " (ionInput)="onFieldChange()">
+        <ion-button (click)="presentActionSheet()" [color]="arr.mtrl_file ? 'success': 'primary' "
+          (ionInput)="onFieldChange()">
           Attachment
           <ion-icon [name]="arr.mtrl_file ? 'checkmark-circle-outline': 'attach-outline' " slot="end"></ion-icon>
         </ion-button>
@@ -178,7 +177,8 @@
   </ion-toolbar>
 </ion-footer>
 
-<ion-modal class="myModal" [isOpen]="isModalOpen" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismiss()">
+<ion-modal class="myModal" [isOpen]="isModalOpen" [initialBreakpoint]="1" [breakpoints]="[1]"
+  (willDismiss)="onWillDismiss()">
   <ng-template>
     <ion-header>
       <ion-searchbar (ionChange)="searchItem($event)"></ion-searchbar>
@@ -186,7 +186,7 @@
     <ion-content>
       <ion-item *ngFor="let dat of materialArr" (click)="selectItem(dat)">
         <ion-label>{{dat.label}}</ion-label>
-        <ion-button fill="clear" slot="end"> 
+        <ion-button fill="clear" slot="end">
           <ion-icon name="arrow-forward-outline"></ion-icon>
         </ion-button>
       </ion-item>
@@ -195,7 +195,8 @@
 </ion-modal>
 
 <!-- New Requestee modal -->
-<ion-modal  class="myModal"  [isOpen]="isRequesteeModalOpen"  [initialBreakpoint]="1" [breakpoints]="[1]"(willDismiss)="onRequesteeWillDismiss()">
+<ion-modal class="myModal" [isOpen]="isRequesteeModalOpen" [initialBreakpoint]="1" [breakpoints]="[1]"
+  (willDismiss)="onRequesteeWillDismiss()">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -212,7 +213,7 @@
       <ion-list>
         <ion-item button *ngFor="let requestee of requesteeArr" (click)="selectRequestee(requestee)">
           <ion-label>
-            <h2>{{requestee.label}}</h2>          
+            <h2>{{requestee.label}}</h2>
           </ion-label>
         </ion-item>
       </ion-list>
