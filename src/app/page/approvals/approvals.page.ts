@@ -34,6 +34,19 @@ export class ApprovalsPage implements OnInit {
     url: '/approvals/ppm-hold',
     id : 4,
     count : 0
+  },
+  {
+    label :'Stock Approval',
+    icon: 'assets/imgs/helpdesk.png',
+    url: '/approvals/stock-adjust',
+    id : 5,
+    count : 0
+  },{
+    label :'Indent Approval',
+    icon: 'assets/imgs/helpdesk.png',
+    url: '/approvals/indent-approval',
+    id : 6,
+    count : 0
   }];
   loading: any;
   pendingList: any = [];

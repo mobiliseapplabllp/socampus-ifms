@@ -11,6 +11,8 @@ import { PtwApprovalComponent } from './ptw-approval/ptw-approval.component';
 import { PpmPtwComponent } from './ppm-ptw/ppm-ptw.component';
 import { TicketHoldComponent } from './ticket-hold/ticket-hold.component';
 import { PpmHoldComponent } from './ppm-hold/ppm-hold.component';
+import { IndentApprovalComponent } from './indent-approval/indent-approval.component';
+import { StockAdjustComponent } from './stock-adjust/stock-adjust.component';
 
 @NgModule({
   imports: [
@@ -24,7 +26,9 @@ import { PpmHoldComponent } from './ppm-hold/ppm-hold.component';
     PtwApprovalComponent,
     PpmPtwComponent,
     TicketHoldComponent,
-    PpmHoldComponent    
+    PpmHoldComponent,
+    IndentApprovalComponent,
+    StockAdjustComponent   
   ]
 })
 export class ApprovalsPageModule {}

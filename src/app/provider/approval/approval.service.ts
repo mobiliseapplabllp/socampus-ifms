@@ -46,8 +46,26 @@ export class ApprovalService {
   getApprvalMatrix(): Observable<any> {
     return this.http.get(environment.url + 'get_approval_matrix_count') 
   }
+
+  getStockAdujApp(): Observable<any> {
+    return this.http.get(environment.url + 'purchase/inventory/get_stock_adjust_approval');
+  }
+
+  getIndentApp(): Observable<any> {
+    return this.http.get(environment.url + 'dashboard/get_approvals');
+  }
+
+  stockAdjustApproveReject(payload:any) {
+    return this.http.post( environment.url + 'purchase/inventory/stock_adjust_approval_Action', payload );
+  }
+
+  getStockMaterialDetails(payload:any) {
+    return this.http.get(environment.url + 'purchase/inventory/get_stock_adjust_mtrl?order_no='+payload );
+  }
+
+  indentAdjustApproveReject(payload:any) {
+    return this.http.post( environment.url + 'dashboard/mr_approve_action', payload );
+  }
+  
+  
 }
-
-
-// get_helpdesk_on_hold_tickets_list
-
