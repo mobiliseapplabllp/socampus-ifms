@@ -22,6 +22,11 @@ export class SparePartsComponent  implements OnInit {
   pi_action_permision: any = {};
   test = true;
   req_type!: string;
+  currentUser: any;
+  canCreateIndent = false;
+  isLoading = false; 
+  isDataLoadLogs = false;
+  totalPrice = 0;
   constructor(    
     private router: Router,
     private httpIndent: IndentsService,
@@ -30,19 +35,43 @@ export class SparePartsComponent  implements OnInit {
     private alertController: AlertController
   ) { }
 
-  ngOnInit() {    
-    const navigation = this.router.getCurrentNavigation();    
-    if (navigation?.extras?.state?.['data']) {      
-      this.req_type = navigation.extras.state['type']; // ticket, ppm      
-      if (this.req_type === 'ticket') {
-        this.all_data = navigation.extras.state['data'];                 
+  // ngOnInit() {    
+  //   const userStr = localStorage.getItem('user'); 
+  //   console.log(userStr);
+  //   const navigation = this.router.getCurrentNavigation();    
+  //   if (navigation?.extras?.state?.['data']) {      
+  //     this.req_type = navigation.extras.state['type']; // ticket, ppm      
+  //     if (this.req_type === 'ticket') {
+  //       this.all_data = navigation.extras.state['data'];   
+  //       console.log(this.all_data);              
+  //     } else {
+  //       this.pms_req_data = navigation.extras.state['data'];                    
+  //     }        
+  //   } else {
+  //     console.warn('No data found in router state.');    
+  //   }
+  // }
+  ngOnInit() {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      this.currentUser = JSON.parse(userStr);
+      console.log(this.currentUser);
+    }
+    const navigation = this.router.getCurrentNavigation();
+    if (navigation?.extras?.state?.['data']) {
+      this.req_type = navigation.extras.state['type'];
+  
+      if (this.req_type?.toLowerCase() === 'ticket') {
+        this.all_data = navigation.extras.state['data'];
+        this.canCreateIndent = true; 
       } else {
-        this.pms_req_data = navigation.extras.state['data'];                    
-      }        
-    } else {
-      console.warn('No data found in router state.');    
+        this.pms_req_data = navigation.extras.state['data'];
+        this.canCreateIndent =
+          this.currentUser?.username === this.pms_req_data?.username;
+      }
     }
   }
+  
 
   ionViewDidEnter() {    
     if (this.req_type === 'ticket') {
@@ -58,7 +87,7 @@ export class SparePartsComponent  implements OnInit {
         next:(data: any) => {
           if (data.status) {
             this.req_indent = data.reqIndent;
-            this.pi_action_permision = data.pi_action_permision;
+            this.pi_action_permision = data.pi_action_permision;            
 
           } else {
             this.common.presentToast(data.msg, 'warning');
@@ -75,13 +104,15 @@ export class SparePartsComponent  implements OnInit {
     }); 
   }
 
-  getPmsTnx() {
+  getPmsTnx() {    
     this.common.presentLoading().then(preLoad => {
       this.httpIndent.getPmsTnx(this.pms_req_data.enc_id).subscribe({
         next:(data: any) => {          
           if (data.status) {
             this.req_indent = data.data.data;
-            this.pi_action_permision = data.permission
+            this.pi_action_permision = data.permission;
+            this.totalPrice = this.req_indent.reduce((acc: number, item: any) => acc + (item.actl_price || 0), 0);
+            
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -215,29 +246,36 @@ export class SparePartsComponent  implements OnInit {
   }
 
   getIndentLogs(rqst_id: number) {
+    this.isDataLoadLogs = false
     this.common.presentLoading().then(preLoad => {
       this.httpIndent.getIndentLogs(rqst_id).subscribe({
         next:(data: any) => {
           if (data.status) {
-            this.indentLogs = data.data.data;
-            this.indentLogs.forEach((element: any) => {            
+            let count = 0
+            this.indentLogs = data.data.data;            
+            this.indentLogs.forEach((element: any) => {
               if (element.changed_fields) {
+                count = count + 1;
                 const entries = Object.entries(element.changed_fields).map(([key, value]) => ({
                   key: this.formatKey(key),
                   value
                 }));                         
-                element.changed_fields1 = entries
+                element.changed_fields1 = entries;                
               }            
             });            
+            if (count === 0) {
+              console.log('No changed fields found in any log entry.');
+              this.isDataLoadLogs = true;
+            }
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
         },
-        error:() => {
+        error:() => {          
           this.common.presentToast(environment.errMsg, 'danger');
           this.common.dismissloading();
         },
-        complete:() => {
+        complete:() => {          
           this.common.dismissloading();
         }
       });
@@ -257,4 +295,14 @@ export class SparePartsComponent  implements OnInit {
   viewImg(url: string, blobType: string) {
     this.common.openImg(url, blobType);
   }
+  getCurrentUser() {
+    this.currentUser = localStorage.getItem('user') || sessionStorage.getItem('user_id');
+    console.log(this.currentUser);
+    // this.currentUserName = localStorage.getItem('user_name') || sessionStorage.getItem('user_name');
+  }
+
+  // get totalPrice(): number {
+  //   if (!Array.isArray(this.req_indent)) return 0;
+  //   return this.req_indent.reduce( (sum, item) => sum + (Number(item.actl_price) || 0), 0 );
+  // }
 }

@@ -54,8 +54,8 @@
       <ion-item>
         <ion-label position="floating">Billable Category <ion-text color="danger">*</ion-text></ion-label>
         <ion-select interface="action-sheet" mode="ios" formControlName="is_billable">
-          <ion-select-option value="1">Rebillable To Client</ion-select-option>
-          <ion-select-option value="0">Regular</ion-select-option>
+          <ion-select-option value="1">Rebillable to client</ion-select-option>
+          <ion-select-option value="0">Non rebillable to client</ion-select-option>
         </ion-select>
       </ion-item>                
     </ion-card>
@@ -81,7 +81,7 @@
 
   <ion-card>
     <ion-item *ngFor="let dat of materialArr; let i = index">
-      <ion-label class="ion-text-wrap" (click)="openMaterialDetails(dat, i)">{{i+1}} Material ({{dat.sku ? dat.sku : ''}})</ion-label>
+      <ion-label class="ion-text-wrap" (click)="openMaterialDetails(dat, i)">{{i+1}} Material ({{dat.sku ? dat.sku : ''}}) </ion-label>
       <ion-buttons slot="end">
         <ion-button (click)="deleteItems(i)" color="danger">
           <ion-icon name="trash-outline"></ion-icon>

@@ -135,7 +135,7 @@ export class CrIndentComponent  implements OnInit {
     this.materialArr.splice(ind, 1);
   }
 
-  async openMaterialDetails(data: any, index?: number) {    
+  async openMaterialDetails(data: any, index?: number) {
     let ind: any
     if (index === 0 || index) {
       ind = index
@@ -152,26 +152,29 @@ export class CrIndentComponent  implements OnInit {
       breakpoints: [1],    
       mode: 'ios',  
       componentProps: { 
-        data: data,
+        // data: data,
         index: ind,
         mtrl_type: this.myForm.value.mtrl_type,
-        arr: data,
-        org_id: this.org_id
+        arr: {...data},
+        org_id: this.org_id,
+        pc_id: this.myForm.value.pc_id
       }
     });
     modal.onWillDismiss().then(async disModal => {
+      console.log(disModal.data);
       if (disModal.role) {                 
         if (ind < this.materialArr.length) {
           this.materialArr[ind] = disModal.data;
         } else {
           this.materialArr.push(disModal.data);
-        }              
+        }
       }
     });
     modal.present();
   } 
 
   finalSubmit() {
+    console.log(this.materialArr);
     if (this.materialArr.length === 0) {
       this.common.presentToast('At least one Material Detail is Required', 'warning');
       return;
@@ -185,31 +188,33 @@ export class CrIndentComponent  implements OnInit {
     for (let i = 0; i < this.materialArr.length; i++) {
       const item = this.materialArr[i];
       const random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
-      formData.append(`material[${i}][catlg_no]`, item.catlg_no);
-      formData.append(`material[${i}][expt_price]`, item.expt_price);
-      formData.append(`material[${i}][mnfctrer_desc]`, item.mnfctrer_desc);
-      formData.append(`material[${i}][model]`, item.model);
-      formData.append(`material[${i}][mtrl_desc]`, item.mtrl_desc);
-      formData.append(`material[${i}][mtrl_id]`, item.mtrl_id);
-      formData.append(`material[${i}][prt_code]`, item.prt_code);
-      formData.append(`material[${i}][supl_name]`, item.supl_name);
-      formData.append(`material[${i}][pur_ordr_no]`, item.pur_ordr_no);
-      formData.append(`material[${i}][remark]`, item.remark);
-      formData.append(`material[${i}][discount]`, item.discount);
-      formData.append(`material[${i}][actl_price]`, item.actl_price);            
-      formData.append(`material[${i}][qty]`, item.qty);
-      formData.append(`material[${i}][serial_no]`, item.serial_no);
-      formData.append(`material[${i}][sku]`, item.sku);
-      formData.append(`material[${i}][uom_id]`, item.uom_id);      
-      formData.append(`material[${i}][user_id]`, item.user_id);
+      formData.append(`material[${i}][del_loc]`, item.del_loc || '');
+      formData.append(`material[${i}][catlg_no]`, item.catlg_no || '');
+      formData.append(`material[${i}][expt_price]`, item.expt_price || '');
+      formData.append(`material[${i}][mnfctrer_desc]`, item.mnfctrer_desc || '');
+      formData.append(`material[${i}][model]`, item.model || '');
+      formData.append(`material[${i}][mtrl_desc]`, item.mtrl_desc || '');
+      formData.append(`material[${i}][mtrl_id]`, item.mtrl_id || '');
+      formData.append(`material[${i}][prt_code]`, item.prt_code || '');
+      formData.append(`material[${i}][supl_name]`, item.supl_name || '');
+      formData.append(`material[${i}][pur_ordr_no]`, item.pur_ordr_no || '');
+      formData.append(`material[${i}][remark]`, item.remark || '');
+      formData.append(`material[${i}][discount]`, item.discount || '');
+      formData.append(`material[${i}][actl_price]`, item.actl_price || '');            
+      formData.append(`material[${i}][qty]`, item.qty || '');
+      formData.append(`material[${i}][serial_no]`, item.serial_no || '');
+      formData.append(`material[${i}][sku]`, item.sku || '');
+      formData.append(`material[${i}][uom_id]`, item.uom_id || '');
+      formData.append(`material[${i}][user_id]`, item.user_id || '');
       formData.append(`material[${i}][reqd_by_date]`, item.reqd_by_date ? moment(item.reqd_by_date).format('YYYY-MM-DD'): '');
-      formData.append(`material[${i}][user_id_label]`, item.user_id_label );
+      formData.append(`material[${i}][user_id_label]`, item.user_id_label || '');
       formData.append(`material[${i}][wrnty_exp_date]`, item.wrnty_exp_date ? moment(item.wrnty_exp_date).format('YYYY-MM-DD'): '');      
       // formData.append(`material[${i}][mtrl_file]`, item.mtrl_file, random);
       if (item.mtrl_file instanceof Blob) {        
        formData.append(`material[${i}][mtrl_file]`, item.mtrl_file, random);
       }
     }
+    
     this.common.presentLoading().then(preLoad => {
       this.httpIndent.submitIndent(formData).subscribe({
         next:(data: any) => {

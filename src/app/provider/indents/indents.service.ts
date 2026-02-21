@@ -93,4 +93,10 @@ export class IndentsService {
   getIndentLogs(rqst_id: any): Observable<any> {
     return this.https.get(environment.url + 'purchase/mtrl_request/cntr_indnt_data_logs?limit=20&page=1&rqst_id=' + rqst_id);
   }
+  
+  getRequesteeList(arr: any): Observable<any> {
+    return this.https.get(environment.url + 'shared/get-users-list-pc-wise?pc_id=' + arr.pc_id);
+    // https://socampusdev.mobilisepro.com/be/api/purchase/settings/get_indent_material_by_pc?org_id=1&type=6&pc_id=13
+    // return this.https.get(environment.url + 'purchase/settings/get_indent_material_by_pc?pc_id=' + arr.pc_id + '&org_id=' + arr.org_id + '&type=' + arr.mtrl_type);
+  }
 }
