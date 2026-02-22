@@ -82,13 +82,15 @@ export class TicketWorkComponent  implements OnInit {
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
       this.requestedData_TEMP = JSON.parse(res['data']);                  
+      console.log(this.requestedData_TEMP);
       // <ion-button expand="block" shape="round" color="tertiary" class="ion-text-capitalize" *ngIf="requestedData_TEMP?.pi_action_permision?.can_hold_ticket" (click)="openTicketHold()">Place on Hold</ion-button>
       // <ion-button expand="block" shape="round" color="success" class="ion-text-capitalize" *ngIf="requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold" (click)="presentAlertConfirm()">Remove on Hold</ion-button>
 
       this.canHoldTicket = this.requestedData_TEMP?.pi_action_permision?.can_hold_ticket;
       this.canUnHoldticket = this.requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold;
-      // tktStatus == 3 && this.ticketData.tkts_asset_id != null && this.ticketData.tkts_asset_id != 0 && action_permission.can_perform_pi_action
-      this.canCreateIndent = this.requestedData_TEMP?.data?.tkts_asset_id !== null && this.requestedData_TEMP?.data?.tkts_asset_id !== 0 && this.requestedData_TEMP?.pi_action_permision.can_perform_pi_action;
+      
+      // this.canCreateIndent = this.requestedData_TEMP?.data?.tkts_asset_id !== null && this.requestedData_TEMP?.data?.tkts_asset_id !== 0 && this.requestedData_TEMP?.pi_action_permision.can_perform_pi_action;
+      this.canCreateIndent = this.requestedData_TEMP?.pi_action_permision.can_perform_pi_action;
       console.log(this.canCreateIndent);
       this.requestedData = this.requestedData_TEMP.data;      
       this.ticket_id = this.requestedData.tkts_id;

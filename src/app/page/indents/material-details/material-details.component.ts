@@ -119,7 +119,7 @@ export class MaterialDetailsComponent implements OnInit {
       return;
     }
     this.common.presentLoading().then(preLoad => {
-      this.httpIndent.getMaterial(this.mtrl_type, this.org_id).subscribe({
+      this.httpIndent.getMaterial(this.mtrl_type, this.org_id, this.pc_id).subscribe({
         next: (data: any) => {
           if (data.status) {
             this.materialArr = data.data;

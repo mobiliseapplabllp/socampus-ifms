@@ -20,8 +20,10 @@ export class IndentsService {
     return this.https.get(environment.url + 'purchase/settings/select_type')
   }
 
-  getMaterial(type: string, org_id: any): Observable<any> {
-    return this.https.get(environment.url + 'purchase/settings/select_material_on_type?org_id=' + org_id + '&type=' + type);
+  getMaterial(type: string, org_id: any, pc_id: any): Observable<any> {
+    // api/purchase/settings/get_indent_material_by_pc?org_id=1&type=7&pc_id=13
+    // return this.https.get(environment.url + 'purchase/settings/select_material_on_type?org_id=' + org_id + '&type=' + type);
+    return this.https.get(environment.url + 'purchase/settings/get_indent_material_by_pc?org_id=' + org_id + '&type=' + type + '&pc_id=' + pc_id);
   }
 
   searchUser(username: string): Observable<any> {
