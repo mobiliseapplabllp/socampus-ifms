@@ -7,6 +7,8 @@ import { Router } from '@angular/router';
 import { SosComponent } from './sos/sos.component';
 import { App } from '@capacitor/app';
 import { LoginService } from 'src/app/provider/login/login.service';
+import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
+import { take } from 'rxjs';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -32,7 +34,8 @@ export class ListMasterPage implements OnInit {
     private router: Router,
     private modalCtrl: ModalController,
     private platform: Platform,
-    private httpLogin: LoginService) {
+    private httpLogin: LoginService,
+    private iab: InAppBrowser,) {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
@@ -41,7 +44,7 @@ export class ListMasterPage implements OnInit {
   }
 
   ngOnInit(): void {
-    this.common.getAppVersionObs().subscribe(data => {
+    this.common.getAppVersionObs().pipe(take(1)).subscribe(data => {
       this.appUpdate = data;
       if (this.platform.is('android')) {
         this.isAndroid = true;
@@ -56,7 +59,7 @@ export class ListMasterPage implements OnInit {
           }
         });
       }      
-    });       
+    });           
   }
 
   getAppVersion() {
@@ -85,8 +88,8 @@ export class ListMasterPage implements OnInit {
     })
   }
 
-  openPlayStore(url: string) {
-    window.open(url);
+  openPlayStore(url: string) {    
+    this.iab.create(url, '_system', 'location=no,zoom=yes');
   }
 
   downloadApp(url: string) {

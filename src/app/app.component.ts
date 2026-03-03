@@ -10,6 +10,7 @@ import { CommonService } from './provider/common/common.service';
 import { environment } from 'src/environments/environment';
 import { checklist, db } from './provider/local-db/local-db.service';
 import { CapacitorCookies } from '@capacitor/core';
+import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 
 
 @Component({
@@ -31,7 +32,8 @@ export class AppComponent {
     private userIdle: UserIdleService,
     private alertController: AlertController,
     private httpLogin: LoginService,
-    private common: CommonService) {
+    private common: CommonService,
+    private iab: InAppBrowser) {
       this.platform.ready().then(res => {        
         this.initApp();
         this.getUserData();
@@ -67,8 +69,7 @@ export class AppComponent {
     }
   }
 
-  isEnglish(text: string): boolean {
-  // Allow A-Z, a-z, 0-9, spaces, and all common keyboard symbols
+  isEnglish(text: string): boolean {  
     const englishRegex = /^[\x20-\x7E°]*$/;
     return englishRegex.test(text);
   }
@@ -103,11 +104,11 @@ export class AppComponent {
       complete:() => {
 
       }
-    })
+    });
   }
 
-  openPlayStore(url: string) {
-    window.open(url);
+  openPlayStore(url: string) {    
+    this.iab.create(url, '_system', 'location=no,zoom=yes');
   }
 
   appUrl() {

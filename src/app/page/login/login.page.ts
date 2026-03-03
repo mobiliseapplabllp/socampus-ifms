@@ -11,6 +11,7 @@ import { env } from 'process';
 import { App } from '@capacitor/app';
 import { CameraService } from 'src/app/provider/camera/camera.service';
 import * as moment from 'moment';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -208,13 +209,8 @@ export class LoginPage implements OnInit {
       }
     });
 
-    browser.on('loaderror').subscribe(error => {
-      console.error('InAppBrowser error:', error);
-
-      // Display an error message to the user
+    browser.on('loaderror').subscribe(error => {            
       alert(JSON.stringify(error));
-
-      // Optionally, you can close the InAppBrowser here if necessary
       browser.close();
     });
   }
@@ -295,16 +291,18 @@ export class LoginPage implements OnInit {
   }
 
   checkAppUpdate() {
-    this.common.getAppVersionObs().subscribe(data => {
+    this.common.getAppVersionObs().pipe(take(1)).subscribe(data => {
       this.appUpdate = data;
-      if (this.platform.is('android')) {
+      if (this.platform.is('capacitor')) {
         this.isAndroid = true;
         App.getInfo().then(res => {
           const curVersion = res.version.toString();
           this.currentVersion = curVersion.toString();
           if (this.appUpdate.is_view && this.appUpdate.forceupdate && (this.appUpdate.vesrion !== this.currentVersion)) {
-            this.openPlayStore(this.appUpdate.url);
             this.common.presentToast('Please Update your App', 'warning');
+            setTimeout(() => {
+              this.openPlayStore(this.appUpdate.url);            
+            });            
           } else {
             this.multiFactorSubmit();
           }
@@ -316,8 +314,8 @@ export class LoginPage implements OnInit {
     });
   }
 
-  openPlayStore(url: string) {
-    window.open(url);
+  openPlayStore(url: string) {    
+    this.iab.create(url, '_system', 'location=no,zoom=yes');
   }
 
   multiFactorSubmit() {
