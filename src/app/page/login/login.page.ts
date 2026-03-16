@@ -276,6 +276,7 @@ export class LoginPage implements OnInit {
             localStorage.setItem('token1', data.token);
             localStorage.setItem('enc_id', data.enc_id);
             localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('punchStatus',JSON.stringify(data.current_punch_status));
             localStorage.setItem('isAlreadyLogin', 'true');
             this.checkAppUpdate();
             // this.multiFactorSubmit();

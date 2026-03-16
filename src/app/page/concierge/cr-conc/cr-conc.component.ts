@@ -19,6 +19,7 @@ export class CrConcComponent  implements OnInit {
   categoryArr: any = [];
   subCatArr: any = [];
   userData: any = [];
+  showDate = false;
   constructor(
     private cameraService: CameraService,
     private formbuilder: FormBuilder,
@@ -48,6 +49,7 @@ export class CrConcComponent  implements OnInit {
       billed_to: ['', Validators.required],
       priority: ['', Validators.required],
       remark: ['', Validators.required],
+      date_urgency: [''], 
       document_type: ['Attachment'],
       source: [environment.source],
     });
@@ -197,5 +199,20 @@ export class CrConcComponent  implements OnInit {
       });
     });
   }
+
+  onPriorityChange(event:any){
+
+    const value = event.detail.value;
+  
+    if(value === 'low' || value === 'medium' || value === 'hard'){
+      this.showDate = true;
+    }else{
+      this.showDate = false;
+    }
+  
+  }
+
+
+
 }
 

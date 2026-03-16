@@ -73,4 +73,11 @@ export class ListMasterService {
   }
 
 
+  punchIn(formData : any): Observable<any> {
+    return this.https.post(environment.url + 'concierge/users/save_user_punch' , formData);
+  }
+  punchOut(formData : any): Observable<any> {
+    return this.https.post(environment.url + 'concierge/users/save_user_punch',formData);
+  }
+
 }

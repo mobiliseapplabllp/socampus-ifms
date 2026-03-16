@@ -4,6 +4,11 @@
       <ion-toolbar color="primary" style="padding:2%">
         <h4>{{userInfo.user_name}}</h4>
         <p>{{userInfo.username}} {{userInfo.user_type}}</p>
+        <div class="punch-wrapper">
+          <span  class="label punch-out-text">Punch Out</span>
+          <ion-toggle color="success" [checked]="isPunchIn" (ionChange)="togglePunch($event)" [class.punch-in]="isPunchIn" [class.punch-out]="!isPunchIn"> </ion-toggle>
+          <span class="label punch-in-text">Punch In</span>
+        </div>
       </ion-toolbar>
     </ion-header>
     <ion-content>

@@ -117,5 +117,35 @@ ion-note {
 ion-item.selected {
   --color: var(--ion-color-primary);
 }
+.punch-wrapper{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:15px;
+  margin-top:40px;
+}
+
+.label{
+  font-weight:600;
+  font-size:16px;
+}
+
+.punch-in-text{
+  color:#2ecc71;
+}
+
+.punch-out-text{
+  color:#ff1900;
+}
+
+ion-toggle.punch-in{
+  --background:#2ecc71;
+  --handle-background:white;
+}
+
+ion-toggle.punch-out{
+  --background:#ff1900;
+  --handle-background:rgb(255, 0, 0);
+}
 
 
