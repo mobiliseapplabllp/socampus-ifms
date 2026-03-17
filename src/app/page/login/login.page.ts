@@ -240,6 +240,7 @@ export class LoginPage implements OnInit {
               localStorage.setItem('user', JSON.stringify(this.userValue.user));
               localStorage.setItem('isAlreadyLogin', 'true');
               localStorage.setItem('loginDate', moment().format('YYYY-MM-DD'));
+              this.loginPro.username.next(this.userValue.user);
               // this.multiFactorSubmit();
               this.checkAppUpdate();
             }
@@ -366,8 +367,8 @@ export class LoginPage implements OnInit {
     if (this.isProduction) {
       return;
     }
-    // https://socampus.mobilisepro.com/#/auth/ssoGates/8sTLjsrH8Q1CqPemtxumLHlwR0dLWmtqZjljMWkvNnlBdy90ZVFRVU1BQ2JFYjQ1MW1OaHUvWEE4TXNuTktaRkt1TFRJbjlJL0d3SGVKWnhzTUxpN2lZbW43bGZiTE04anRxUGl4bktCa2NhbS9HSnlBWlNDUVZKNk9XVFVmSS94NWVpRlh5d2N1NTlXY3RY
-    let token = '8sTLjsrH8Q1CqPemtxumLHlwR0dLWmtqZjljMWkvNnlBdy90ZVFRVU1BQ2JFYjQ1MW1OaHUvWEE4TXNuTktaRkt1TFRJbjlJL0d3SGVKWnhzTUxpN2lZbW43bGZiTE04anRxUGl4bktCa2NhbS9HSnlBWlNDUVZKNk9XVFVmSS94NWVpRlh5d2N1NTlXY3RY';
+    // https://socampusdev.mobilisepro.com/#/auth/ssoGates/zee9gMYL_YtCk8EgMrViymhkWDF0SzZ4NmFCand0bDB0R0ZOMmhxZ1hodEF1cFB1Y0RnZjhkeDVJalRNTlc4NTc4cEVEUG1DZENlWUxtY2xSOU1CL2UxUE9KZkF5QzFmS0Jkc1NUUmh1NlNBOUd0OHpSYk5nTC9RQXFPZUswYmw2UmVJV3V2MXlrNXl2T0lB
+    let token = 'zee9gMYL_YtCk8EgMrViymhkWDF0SzZ4NmFCand0bDB0R0ZOMmhxZ1hodEF1cFB1Y0RnZjhkeDVJalRNTlc4NTc4cEVEUG1DZENlWUxtY2xSOU1CL2UxUE9KZkF5QzFmS0Jkc1NUUmh1NlNBOUd0OHpSYk5nTC9RQXFPZUswYmw2UmVJV3V2MXlrNXl2T0lB';
     this.getSsoEnc(token);
   }
 }

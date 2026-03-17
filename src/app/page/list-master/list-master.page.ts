@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { SosComponent } from './sos/sos.component';
 import { App } from '@capacitor/app';
 import { LoginService } from 'src/app/provider/login/login.service';
+import { stat } from 'fs';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -38,15 +39,12 @@ export class ListMasterPage implements OnInit {
     if (user) {
       this.userData = JSON.parse(user);
       this.userName = this.userData.user_name
-
-      const punchStatus = this.userData.current_punch_status;
-
-      if (punchStatus === 'IN' || punchStatus === 'FORCE_PUNCH_IN') {
-        this.isPunchIn = true;
-      } else if (punchStatus === 'OUT' || punchStatus === 'FORCE_PUNCH_OUT') {
-        this.isPunchIn = false;
-      }
-
+      // const punchStatus = this.userData.current_punch_status;
+      // if (punchStatus === 'IN' || punchStatus === 'FORCE_PUNCH_IN') {
+      //   this.isPunchIn = true;
+      // } else if (punchStatus === 'OUT' || punchStatus === 'FORCE_PUNCH_OUT') {
+      //   this.isPunchIn = false;
+      // }
     }
   }
 
@@ -225,20 +223,9 @@ export class ListMasterPage implements OnInit {
   }
 
   getPunchStatus() {
-
     this.httpLogin.getPunchStatus().subscribe((status: any) => {
-
       console.log("Punch Status From Service", status);
-
-      if (status === 'IN') {
-        this.isPunchIn = true;
-      }
-
-      if (status === 'OUT') {
-        this.isPunchIn = false;
-      }
-
+      this.isPunchIn = status;      
     });
-
   }
 }

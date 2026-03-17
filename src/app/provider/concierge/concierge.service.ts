@@ -12,42 +12,50 @@ export class ConciergeService {
     private https: HttpClient) { }
 
   getTicketList(formData: any): Observable<any> {
-    return this.https.post(environment.url + '/concierge/ticket/list', formData)
+    return this.https.post(environment.url + 'concierge/ticket/list', formData)
   }
 
   getSpecificTicket(data: any): Observable<any> {
-    return this.https.post(environment.url + '/concierge/ticket/get-specific-ticket', data);
+    return this.https.post(environment.url + 'concierge/ticket/get-specific-ticket', data);
   }
 
   actionInProgress(data: any): Observable<any> {
-    return this.https.post(environment.url + '/concierge/ticket/ticket-status-change', data);
+    return this.https.post(environment.url + 'concierge/ticket/ticket-status-change', data);
   }
 
   getScopeOfWork(): Observable<any> {
-    return this.https.get(environment.url + '/concierge/ticket/get-ticket-scope-of-work');
+    return this.https.get(environment.url + 'concierge/ticket/get-ticket-scope-of-work');
   }
 
   ticketAssign(formData: any): Observable<any> {
-    return this.https.post(environment.url + '/concierge/ticket/ticket-reassign', formData);
+    return this.https.post(environment.url + 'concierge/ticket/ticket-reassign', formData);
   }
 
   getCategory(formData: any): Observable<any> {
-    return this.https.post(environment.url + '/concierge/ticket/site-wise-category', formData);
+    return this.https.post(environment.url + 'concierge/ticket/site-wise-category', formData);
   }
 
   getSubCategory(formData: any): Observable<any> {
-    return this.https.post(environment.url + '/concierge/ticket/category-wise-subcategory', formData);
+    return this.https.post(environment.url + 'concierge/ticket/category-wise-subcategory', formData);
   }
 
   getResponseTime(formData: any): Observable<any> {
-    return this.https.post(environment.url + '/concierge/ticket/site-cate-wise-resolve-response-time', formData);
+    return this.https.post(environment.url + 'concierge/ticket/site-cate-wise-resolve-response-time', formData);
   }
 
   createTicket(formData: any): Observable<any> {
-    return this.https.post(environment.url + '/concierge/ticket/create', formData);
+    return this.https.post(environment.url + 'concierge/ticket/create', formData);
   }
 
   reOpenAction(formData: any): Observable<any> {
-    return this.https.post(environment.url + '/concierge/ticket/ticket-status-change', formData);
+    return this.https.post(environment.url + 'concierge/ticket/ticket-status-change', formData);
+  }
+
+  startOrEndTrip(formData: any): Observable<any> {
+    // https://socampusdev.mobilisepro.com/be/api/concierge/ticket/save_concierge_trip
+    for (let [key, value] of (formData as any).entries()) {
+      console.log(key, value);
+    }
+    return this.https.post(environment.url + 'concierge/ticket/save_concierge_trip', formData);
   }
 }

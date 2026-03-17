@@ -36,18 +36,9 @@ export class AppComponent {
     private common: CommonService) {
     this.platform.ready().then(res => {
       // this.initApp();
-      this.getUserData();
-      this.loginPro.getPunchStatus().subscribe((status: any) => {
-
-        console.log(status)
-
-        if (status === 'IN' || status === 'FORCE_PUNCH_IN') {
-          this.setPunchIn(true); 
-        }
-
-        if (status === 'OUT' || status === 'FORCE_PUNCH_OUT') {
-          this.setPunchIn(false); 
-        }
+      this.getUserData();      
+      this.loginPro.getPunchStatus().subscribe((status: any) => {        
+        this.setPunchIn(status);         
       });
     });
   }
@@ -254,7 +245,13 @@ export class AppComponent {
   getUserData() {
     this.loginPro.getUserDataObs().subscribe((dat: any) => {
       this.userInfo = dat;
-      console.log(this.userInfo);
+      // if (this.userInfo.current_punch_status === 'IN') {        
+      //   this.setPunchIn(true);
+      //   this.loginPro.setPunchStatus(true);
+      // } else if (this.userInfo.current_punch_status === 'OUT') {        
+      //   this.setPunchIn(false);
+      //   this.loginPro.setPunchStatus(false);
+      // }      
     });
 
     this.listMaster.getData().subscribe((val: any) => {
@@ -311,93 +308,89 @@ export class AppComponent {
     this.router.navigateByUrl(data.link);
   }
 
-  private setPunchIn(value: boolean) {
+  private setPunchIn(value: boolean) {    
     this.isProgrammaticChange = true;
     this.isPunchIn = value;
     setTimeout(() => this.isProgrammaticChange = false, 100);
   }
 
-  togglePunch(event: any) {
+  togglePunch(event: any) {    
     if (this.isProgrammaticChange) return;
-
     this.isPunchIn = event.detail.checked;
-
     if (this.isPunchIn) {
-      this.punchInApi();
+      this.punchInOutApi('IN');
     } else {
-      this.punchOutApi();
+      this.punchInOutApi('OUT');
     }
-
   }
-
-
-  punchInApi() {
-
+  
+  punchInOutApi(type: string) {
+    console.log(type);
     const payload = {
-      type: "IN",
+      type: type,
       latitude: 28.443433897705546,
       longitude: 77.31187477565328,
       source: "MOBILE",
       actionType: "REGULAR",
       userId: this.userInfo.id
     };
-
-    this.listMaster.punchIn(payload).subscribe({
-      next: (res: any) => {
-
-        console.log("Punch In API Response", res);
-
-        if (res.status) {
-          const punchStatus = res.data.current_punch_status;
-
-          if (punchStatus === 'IN') {
-            this.loginPro.setPunchStatus('IN');
-            this.setPunchIn(true);
+    this.common.presentLoading().then(preLoad => {
+      this.listMaster.punchIn(payload).subscribe({
+        next: (res: any) => {
+          console.log("Punch In API Response", res);
+          if (res.status) {
+            let val = type === 'IN' ? true : false;
+            this.loginPro.setPunchStatus(val);
+            // const punchStatus = res.data.current_punch_status;
+            // if (punchStatus === 'IN') {
+            //   this.loginPro.setPunchStatus('IN');
+            //   this.setPunchIn(true);
+            // }
           }
+        },
+        error: () => {          
+          this.setPunchIn(false);
+        },
+        complete:() => {
+          this.common.dismissloading();
         }
-
-      },
-      error: () => {
-        console.log("Punch In API Error");
-        this.setPunchIn(false);
-      }
-    });
-
+      });  
+    });    
   }
 
 
-  punchOutApi() {
+  // punchOutApi() {
 
-    const payload = {
-      type: "OUT",
-      latitude: 28.443433897705546,
-      longitude: 77.31187477565328,
-      source: "MOBILE",
-      actionType: "REGULAR",
-      userId: this.userInfo.id
-    };
+  //   const payload = {
+  //     type: "OUT",
+  //     latitude: 28.443433897705546,
+  //     longitude: 77.31187477565328,
+  //     source: "MOBILE",
+  //     actionType: "REGULAR",
+  //     userId: this.userInfo.id
+  //   };
 
-    this.listMaster.punchOut(payload).subscribe({
-      next: (res: any) => {
+  //   this.listMaster.punchOut(payload).subscribe({
+  //     next: (res: any) => {
 
-        console.log("Punch Out API Response", res);
+  //       console.log("Punch Out API Response", res);
 
-        if (res.status) {
-          const punchStatus = res.data.current_punch_status;
+  //       if (res.status) {
+  //         const punchStatus = res.data.current_punch_status;
 
-          if (punchStatus === 'OUT') {
-            this.loginPro.setPunchStatus('OUT');
-            this.setPunchIn(false);
-          }
-        }
+  //         if (punchStatus === 'OUT') {
+  //           this.loginPro.setPunchStatus('OUT');
+  //           this.setPunchIn(false);
+  //         }
+  //       }
 
-      },
-      error: () => {
-        console.log("Punch Out API Error");
-        this.setPunchIn(true); 
-      }
-    });
+  //     },
+  //     error: () => {
+  //       console.log("Punch Out API Error");
+  //       this.setPunchIn(true); 
+  //     }
+  //   });
 
-  }
+  // }
 
 }

@@ -9,7 +9,7 @@ import { CommonService } from '../common/common.service';
 export class LoginService {
   userDataTemp: any = [];
   username = new BehaviorSubject([]);
-  punchStatus = new BehaviorSubject<string | null>(null);
+  punchStatus = new BehaviorSubject(false);
   userData: any = [];
   constructor(
     private https: HttpClient,
@@ -34,7 +34,7 @@ export class LoginService {
           if (this.userDataTemp.status) {
             this.userData = this.userDataTemp.user;
             this.username.next(this.userData);
-            this.setPunchStatus(this.userDataTemp.current_punch_status);
+            // this.setPunchStatus(this.userDataTemp.current_punch_status);
           }
           resolve(data);
         },
@@ -54,7 +54,7 @@ export class LoginService {
   }
 
 
-  setPunchStatus(status: string) {
+  setPunchStatus(status: boolean) {
     this.punchStatus.next(status);
   }
 

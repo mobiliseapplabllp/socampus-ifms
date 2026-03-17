@@ -27,8 +27,7 @@ export class ConciergePage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.userData = JSON.parse(localStorage.getItem('user')!);
-    console.log(this.userData);
+    this.userData = JSON.parse(localStorage.getItem('user')!);   
   }
 
   ionViewDidEnter() {
@@ -119,8 +118,7 @@ export class ConciergePage implements OnInit {
     modal.present();
   }
 
-  workNow(data: any, type: string) {
-    // this.router.navigateByUrl('/concierge/conc-work');
+  workNow(data: any, type: string) {    
     this.router.navigate(['/concierge/conc-work'], {
       queryParams: {
         data: JSON.stringify(data),
