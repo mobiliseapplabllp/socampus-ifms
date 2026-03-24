@@ -4,6 +4,12 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>Concierge</ion-title>
+    <!-- <ion-buttons slot="end">
+      <ion-button (click)="startTracking()">S</ion-button>
+      <ion-button (click)="stopTracking()">E</ion-button>
+      <ion-button (click)="getLocations()">G</ion-button>
+      <ion-button (click)="clearLocations()">C</ion-button>
+    </ion-buttons> -->
   </ion-toolbar>
   <ion-toolbar class="medium ion-no-padding">
     <ion-segment  [(ngModel)]='status' (ionChange)="changeSegment($event)">

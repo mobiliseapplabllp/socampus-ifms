@@ -8,6 +8,7 @@ import { environment } from 'src/environments/environment';
 import { AssignUserComponent } from '../assign-user/assign-user.component';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Geolocation } from '@capacitor/geolocation';
+import { LocationTracker } from 'capacitor-location-tracker-sqlite';
 declare var google: any;
 @Component({
   selector: 'app-conc-work',
@@ -373,7 +374,7 @@ export class ConcWorkComponent implements OnInit {
       formData.append('trip_start_odometer_img', this.captureImage.start_trip, random);
       formData.append('ticket_id', this.requestData.id);
       formData.append('action', this.specificTicketObj.tckt_trip);
-      this.startOrEndTrip(formData, 'start');
+      this.startOrEndTrip(formData, 'start', 'manual');
     } else if (tripType === 'gps') {
       const formData = new FormData();
       formData.append('trip_type', 'gps');
@@ -381,12 +382,15 @@ export class ConcWorkComponent implements OnInit {
       formData.append('action', this.specificTicketObj.tckt_trip);
       formData.append('trip_start_lat', this.lat);
       formData.append('trip_start_lng', this.lng);
-      this.startOrEndTrip(formData, 'start');
+      this.startOrEndTrip(formData, 'start', 'gps');
     }
   }
 
-  startOrEndTrip(formData: any, tripType: string) {
-    this.common.presentLoading().then(preLoad => {
+  startOrEndTrip(formData: any, tripType: 'start' | 'stop', source: 'manual' | 'gps') {
+    for (let [key, value] of (formData as any).entries()) {
+      console.log(key, value);
+    }
+    this.common.presentLoading().then(preLoad => {      
       this.httpConcierge.startOrEndTrip(formData).subscribe({
         next: async (data: any) => {
           console.log(data);
@@ -394,6 +398,13 @@ export class ConcWorkComponent implements OnInit {
             let msg = tripType === 'start' ? data.msg + ' ' + 'Trip ID : ' + data.trip_id : data.msg;
             this.common.presentToast(msg, 'success');
             tripType === 'start' ? this.isTripModalOpen = false : this.isEndTripModalOpen = false;
+            if (source === 'gps' && tripType === 'start') {
+              this.startTracking();
+            }
+            if (source === 'gps' && tripType === 'stop') {  
+              this.stopTracking();            
+              this.clearLocations();
+            }
             setTimeout(() => {
               this.navCtrl.pop();
             }, 1000);
@@ -450,7 +461,7 @@ export class ConcWorkComponent implements OnInit {
     formData.append('trip_id', this.specificTicketObj.trip_id);
     formData.append('ticket_id', this.requestData.id);
     formData.append('action', this.specificTicketObj.tckt_trip);
-    this.startOrEndTrip(formData, 'end')
+    this.startOrEndTrip(formData, 'stop', 'manual');
   }
 
   // async tripAttachment() {  
@@ -489,8 +500,11 @@ export class ConcWorkComponent implements OnInit {
       return;
     }
 
+    let trekPath = this.getLocations();
+
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
     const formData = new FormData();
+    formData.append('trek_path', JSON.stringify(trekPath));
     formData.append('trip_type', 'gps');
     formData.append('ticket_id', this.requestData.id);
     formData.append('action', this.specificTicketObj.tckt_trip);
@@ -503,7 +517,7 @@ export class ConcWorkComponent implements OnInit {
       formData.append('toll_img', this.captureImage.toll_img, random);
     }    
     formData.append('trip_id', this.specificTicketObj.trip_id);
-    this.startOrEndTrip(formData, 'end')
+    this.startOrEndTrip(formData, 'stop', 'gps');
   }
 
   private calcDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -512,6 +526,48 @@ export class ConcWorkComponent implements OnInit {
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  async startTracking() {    
+    // 1. Background permission check
+    const { allowed: bgAllowed } = await LocationTracker.requestBackgroundPermissionsCheck();
+    if (!bgAllowed) {
+      await LocationTracker.requestBackgroundPermissions(); // Opens app settings
+      return;
+    }
+
+    // 2. Battery optimization check (IMPORTANT - tracking band ho sakti hai otherwise)
+    const { allowed: batteryAllowed } = await LocationTracker.requestIgnoreBatteryOptimizationsCheck();
+    if (!batteryAllowed) {
+      await LocationTracker.requestIgnoreBatteryOptimizations(); // Opens battery settings
+      return;
+    }
+
+    // 3. Start tracking
+    const { success } = await LocationTracker.start();
+    if (success) {
+      console.log('Tracking started');
+    } else {
+      console.error('Failed to start');
+    }
+  }
+
+  async stopTracking() {
+    const { success } = await LocationTracker.stop();
+    if (success) {
+      console.log('Tracking stopped');
+    }
+  }
+
+  async getLocations() {
+    const { locations } = await LocationTracker.getLocations();
+    console.log('Locations:', locations);
+    return locations;
+  }
+
+  async clearLocations() {
+    await LocationTracker.clearLocations();
+    console.log('Locations cleared');
   }
 
 }

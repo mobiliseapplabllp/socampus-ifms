@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { environment } from 'src/environments/environment';
 import { AssignUserComponent } from './assign-user/assign-user.component';
+import { LocationTracker } from 'capacitor-location-tracker-sqlite';
 
 @Component({
   selector: 'app-concierge',
@@ -28,6 +29,48 @@ export class ConciergePage implements OnInit {
 
   ngOnInit() {
     this.userData = JSON.parse(localStorage.getItem('user')!);   
+  }
+
+  async startTracking() {    
+    // 1. Background permission check
+    const { allowed: bgAllowed } = await LocationTracker.requestBackgroundPermissionsCheck();
+    if (!bgAllowed) {
+      await LocationTracker.requestBackgroundPermissions(); // Opens app settings
+      return;
+    }
+
+    // 2. Battery optimization check (IMPORTANT - tracking band ho sakti hai otherwise)
+    const { allowed: batteryAllowed } = await LocationTracker.requestIgnoreBatteryOptimizationsCheck();
+    if (!batteryAllowed) {
+      await LocationTracker.requestIgnoreBatteryOptimizations(); // Opens battery settings
+      return;
+    }
+
+    // 3. Start tracking
+    const { success } = await LocationTracker.start();
+    if (success) {
+      console.log('Tracking started');
+    } else {
+      console.error('Failed to start');
+    }
+  }
+
+  async stopTracking() {
+    const { success } = await LocationTracker.stop();
+    if (success) {
+      console.log('Tracking stopped');
+    }
+  }
+
+  async getLocations() {
+    const { locations } = await LocationTracker.getLocations();
+    console.log('Locations:', locations);
+    return locations;
+  }
+
+  async clearLocations() {
+    await LocationTracker.clearLocations();
+    console.log('Locations cleared');
   }
 
   ionViewDidEnter() {
