@@ -63,7 +63,8 @@ export class SplashComponent  implements OnInit {
         next: (data) => {
           console.log(data);
           if (data.status) { 
-            // this.httpLogin.setPunchStatus(false);           
+            let val = data.data.current_punch_status === 'IN' || data.data.current_punch_status == 'FORCE_PUNCH_IN' ? true : false;
+            this.httpLogin.setPunchStatus(val);           
             this.router.navigateByUrl('/list-master', { replaceUrl: true });
           } else {
             this.common.presentToast(data.msg, 'warning');

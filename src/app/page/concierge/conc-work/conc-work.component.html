@@ -34,7 +34,7 @@
             [color]="captureImage.inProgressImage ? 'success' : 'primary' ">Attachment</ion-button>
           <br>
           <ion-row>
-            <ion-col size="6">              
+            <ion-col size="6" *ngIf="specificTicketObj.tckt_status == 3 ">              
               <ion-button expand="block" *ngIf="specificTicketObj.tckt_trip == '1'" color="success" (click)="openTripModal()">{{specificTicketObj.tckt_trip_btnName}}</ion-button>
               <ion-button expand="block" *ngIf="specificTicketObj.tckt_trip == '2'" color="danger" (click)="openEndTripModal()">{{specificTicketObj.tckt_trip_btnName}}</ion-button>
             </ion-col> 
@@ -143,7 +143,7 @@
     </div>
   </div>
 
-  <ion-modal [isOpen]="isTripModalOpen" cssClass="center-modal">
+  <ion-modal [isOpen]="isTripModalOpen" (willDismiss)="closeTripModal()" cssClass="center-modal">
     <ng-template>
       <ion-header>
         <ion-toolbar color="primary">
@@ -187,7 +187,7 @@
               <ion-input type="number" formControlName="trip_start_odometer_reading"></ion-input>
             </ion-item>
             <br>
-            <ion-button color="primary" shape="round" fill="outline" (click)="openCamera('start_trip')" [color]="captureImage.start_trip ? 'success' : 'primary'" class="ion-text-capitalize"> 
+            <ion-button color="primary" shape="round" fill="outline" (click)="openCamera('start_trip' , false)" [color]="captureImage.start_trip ? 'success' : 'primary'" class="ion-text-capitalize"> 
               Capture OD Reading <ion-icon slot="end"  [name]="!captureImage.start_trip ? 'camera-outline' : 'checkmark-done-outline'"></ion-icon>
             </ion-button>
           </section>
@@ -212,7 +212,7 @@
     </ng-template>
   </ion-modal>
 
-  <ion-modal [isOpen]="isEndTripModalOpen" cssClass="center-modal">
+  <ion-modal [isOpen]="isEndTripModalOpen" (willDismiss)="closeEndTripModal()" cssClass="center-modal">
     <ng-template>
       <ion-header>
         <ion-toolbar color="primary">
@@ -255,7 +255,7 @@
               <ion-item>
                 <ion-label color="primary" position="floating">Toll Amount</ion-label>
                 <ion-input type="number" [(ngModel)]="tollAmount" placeholder="Enter amount"></ion-input>
-                <ion-button slot="end" [color]="captureImage.toll_img ? 'success' : 'primary'"  (click)="openCamera('toll_img')">Image</ion-button>
+                <ion-button slot="end" [color]="captureImage.toll_img ? 'success' : 'primary'"  (click)="openCamera('toll_img', true)">Image</ion-button>
               </ion-item>
             </ion-list>
             <section style="height:100px;width:100%; padding:5px;">
@@ -286,7 +286,7 @@
               <ion-item>
                 <ion-label color="primary" position="floating">Trip End Reading <ion-text color="danger">*</ion-text></ion-label>
                 <ion-input type="number" [(ngModel)]="endReading" placeholder="Enter reading"></ion-input>
-                <ion-button slot="end" [color]="captureImage.trip_end ? 'success' : 'primary'" (click)="openCamera('end_trip')">Image</ion-button>
+                <ion-button slot="end" [color]="captureImage.trip_end ? 'success' : 'primary'" (click)="openCamera('end_trip', false)">Image</ion-button>
               </ion-item>
               <ion-item *ngIf="endReading && specificTicketObj.trip_start_odometer_reading">
                 <ion-label>
@@ -297,7 +297,7 @@
               <ion-item>
                 <ion-label color="primary" position="floating">Toll Amount</ion-label>
                 <ion-input type="number" [(ngModel)]="tollAmount" placeholder="Enter amount"></ion-input>
-                <ion-button slot="end" [color]="captureImage.toll_img ? 'success' : 'primary'"  (click)="openCamera('toll_img')">Image</ion-button>
+                <ion-button slot="end" [color]="captureImage.toll_img ? 'success' : 'primary'"  (click)="openCamera('toll_img', true)">Image</ion-button>
               </ion-item>
             </ion-list>            
             <ion-grid>

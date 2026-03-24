@@ -8,6 +8,7 @@ import { SosComponent } from './sos/sos.component';
 import { App } from '@capacitor/app';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { stat } from 'fs';
+import { cordovaInstance } from '@awesome-cordova-plugins/core';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -38,13 +39,7 @@ export class ListMasterPage implements OnInit {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
-      this.userName = this.userData.user_name
-      // const punchStatus = this.userData.current_punch_status;
-      // if (punchStatus === 'IN' || punchStatus === 'FORCE_PUNCH_IN') {
-      //   this.isPunchIn = true;
-      // } else if (punchStatus === 'OUT' || punchStatus === 'FORCE_PUNCH_OUT') {
-      //   this.isPunchIn = false;
-      // }
+      this.userName = this.userData.user_name;      
     }
   }
 
@@ -120,6 +115,7 @@ export class ListMasterPage implements OnInit {
     }, 1500);
     this.getHomeLoad();
     this.getNotification();
+    this.loginPingApi();
   }
 
   getHomeLoad() {
@@ -171,6 +167,7 @@ export class ListMasterPage implements OnInit {
   }
 
   changeEvent() {
+    this.loginPingApi();
     this.eventChange = true;
     this.isLoading = true;
     setTimeout(() => {
@@ -186,6 +183,26 @@ export class ListMasterPage implements OnInit {
     this.getHomeLoad();
     this.changeEvent();
     this.getNotification();
+    this.loginPingApi();
+
+  }
+
+  loginPingApi() {
+    this.httpLogin.loginPingApi().subscribe({
+      next:(data: any) => {
+        console.log(data);
+        if (data.status) {
+          let val = data.data.current_punch_status === 'IN' || data.data.current_punch_status === 'FORCE_PUNCH_IN' ? true: false;
+          this.httpLogin.setPunchStatus(val);
+        }
+      },
+      error:() => {
+
+      },
+      complete:() => {
+
+      }
+    });
   }
 
   openPageRoute() {
@@ -223,8 +240,7 @@ export class ListMasterPage implements OnInit {
   }
 
   getPunchStatus() {
-    this.httpLogin.getPunchStatus().subscribe((status: any) => {
-      console.log("Punch Status From Service", status);
+    this.httpLogin.getPunchStatus().subscribe((status: any) => {      
       this.isPunchIn = status;      
     });
   }

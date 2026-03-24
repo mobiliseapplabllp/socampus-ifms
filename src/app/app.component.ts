@@ -325,7 +325,6 @@ export class AppComponent {
   }
   
   punchInOutApi(type: string) {
-    console.log(type);
     const payload = {
       type: type,
       latitude: 28.443433897705546,
@@ -340,16 +339,12 @@ export class AppComponent {
           console.log("Punch In API Response", res);
           if (res.status) {
             let val = type === 'IN' ? true : false;
-            this.loginPro.setPunchStatus(val);
-            // const punchStatus = res.data.current_punch_status;
-            // if (punchStatus === 'IN') {
-            //   this.loginPro.setPunchStatus('IN');
-            //   this.setPunchIn(true);
-            // }
+            this.loginPro.setPunchStatus(val);           
           }
         },
         error: () => {          
           this.setPunchIn(false);
+          this.common.dismissloading();
         },
         complete:() => {
           this.common.dismissloading();
@@ -357,40 +352,4 @@ export class AppComponent {
       });  
     });    
   }
-
-
-  // punchOutApi() {
-
-  //   const payload = {
-  //     type: "OUT",
-  //     latitude: 28.443433897705546,
-  //     longitude: 77.31187477565328,
-  //     source: "MOBILE",
-  //     actionType: "REGULAR",
-  //     userId: this.userInfo.id
-  //   };
-
-  //   this.listMaster.punchOut(payload).subscribe({
-  //     next: (res: any) => {
-
-  //       console.log("Punch Out API Response", res);
-
-  //       if (res.status) {
-  //         const punchStatus = res.data.current_punch_status;
-
-  //         if (punchStatus === 'OUT') {
-  //           this.loginPro.setPunchStatus('OUT');
-  //           this.setPunchIn(false);
-  //         }
-  //       }
-
-  //     },
-  //     error: () => {
-  //       console.log("Punch Out API Error");
-  //       this.setPunchIn(true); 
-  //     }
-  //   });
-
-  // }
-
 }

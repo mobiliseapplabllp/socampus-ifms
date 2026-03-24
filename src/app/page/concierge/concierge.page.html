@@ -77,7 +77,7 @@
               <ion-button size="small" shape="round" fill="outline" (click)="openHistory(dat)">History</ion-button>
             </ion-col>
             <ion-col size="4" class="ion-text-center" *ngIf="status === 'assignto' || status === 'created' ">
-              <ion-button size="small" shape="round" fill="outline" (click)="assignUser(dat)">Assign</ion-button>
+              <ion-button size="small" shape="round" fill="outline" *ngIf="dat.show_asn_btn" [disabled]="dat.tckt_trip === '2' " (click)="assignUser(dat)">Assign</ion-button>
             </ion-col>
             <ion-col size="4" class="ion-text-center" *ngIf="(status === 'assignto' || status === 'created') && userData.id === dat.assign_to ">
               <ion-button size="small" shape="round" fill="outline" (click)="workNow(dat ,'action')">Work Now</ion-button>

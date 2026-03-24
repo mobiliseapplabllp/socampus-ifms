@@ -60,6 +60,8 @@ export class ConcWorkComponent implements OnInit {
   // private DUMMY_END_LAT = 28.7041;
   // private DUMMY_END_LONG = 77.1025;
 
+  mapStatus: any;
+
   constructor(
     private activeRoute: ActivatedRoute,
     private common: CommonService,
@@ -263,29 +265,50 @@ export class ConcWorkComponent implements OnInit {
       await Geolocation.getCurrentPosition({ enableHighAccuracy: true }).then((res: any) => {
         this.lat = res.coords.latitude;
         this.lng = res.coords.longitude;
-        this.initMap(this.lat, this.lng);
+        this.initMap(this.lat, this.lng, 'start');
       }, (err: any) => {
         alert(JSON.stringify(err) + ' Err');
       });
     } else {
       this.lat = 28.445831445524963;
       this.lng = 77.30814421380869;
-      this.initMap(this.lat, this.lng);
+      this.initMap(this.lat, this.lng, 'start');
     }
   }
 
-  async initMap(lat: any, lng: any) {
-    console.log(lat, lng);
+  async initMap(lat: any, lng: any, status: string) {    
     await new Promise(resolve => setTimeout(resolve, 500));
     this.gpsStatus = true;
     this.map = new google.maps.Map(document.getElementById('map'), {
       center: { lat: lat, lng: lng },
       zoom: 15,
     });
-    this.addMarker(lat, lng);
+    this.map.addListener('click', (event: any) => this.changeMarker(event.latLng, status));
+    this.currentMarker(lat, lng);
   }
 
-  addMarker(lat: any, long: any) {
+  changeMarker(latLng: any, status: string) {
+    if (this.mapStatus) {this.mapStatus.setMap(null)}    
+    this.mapStatus = new google.maps.Marker({
+      position: latLng,
+      map: this.map,
+      label: 'S',
+      icon: 'assets/img/green-dot.png'  
+    });    
+    this.lat = latLng.toJSON().lat;
+    this.lng = latLng.toJSON().lng;       
+    if (status === 'end') {
+      this.specificTicketObj.trip_end_lat = this.lat;
+      this.specificTicketObj.trip_end_lng = this.lng;    
+      let val = this.calcDistance(this.lat!, this.lng!, this.specificTicketObj.trip_start_lat, this.specificTicketObj.trip_start_lng).toFixed(2);
+      this.specificTicketObj.distance = val;
+      this.common.presentLoading().then(preLoad => {
+        this.common.dismissloading();
+      });
+    }     
+  }
+
+  currentMarker(lat: any, long: any) {
     const position = new google.maps.LatLng(lat, long);
     const marker = new google.maps.Marker({ position, title: 'Mobilise' });
     marker.setMap(this.map);
@@ -308,20 +331,19 @@ export class ConcWorkComponent implements OnInit {
         await Geolocation.getCurrentPosition({ enableHighAccuracy: true }).then((res: any) => {
           lat = res.coords.latitude;
           lng = res.coords.longitude;
-          this.initMap(lat, lng);
+          this.initMap(lat, lng, 'end');
         }, (err: any) => {
           alert(JSON.stringify(err) + ' Err');
         });
       } else {
         lat = 28.519282852735152;
         lng = 77.31089846797633;
-        this.initMap(lat, lng);
+        this.initMap(lat, lng, 'end');
       }
       this.specificTicketObj.trip_end_lat = lat;
       this.specificTicketObj.trip_end_lng = lng;
       let val = this.calcDistance(lat!, lng!, this.specificTicketObj.trip_start_lat, this.specificTicketObj.trip_start_lng).toFixed(2);
-      this.specificTicketObj.distance = lat;
-      console.log(this.specificTicketObj);
+      this.specificTicketObj.distance = val;      
     }
   }
 
@@ -406,11 +428,12 @@ export class ConcWorkComponent implements OnInit {
     }
 
     if (this.tollAmount && !this.captureImage.toll_img) {
-      this.common.presentToast('Toll is Mandatory', 'warning');
+      this.common.presentToast('Toll Attachment is Mandatory', 'warning');
       return;
     } 
     if (this.captureImage.toll_img && !this.tollAmount) {
       this.common.presentToast('Please Enter Toll Amount', 'warning');
+      return;
     }
 
     let distance = parseInt(this.endReading, 10) - parseInt(this.specificTicketObj.trip_start_odometer_reading, 10);
@@ -437,8 +460,14 @@ export class ConcWorkComponent implements OnInit {
   //   });
   // }
 
-  async openCamera(type: string) {
-    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
+  async openCamera(type: string, status: boolean) {
+    let obj = [];
+    if (status === true) {
+      obj = ['camera', 'gallery'];
+    } else {
+      obj = ['camera']
+    }
+    this.camera.selectImage(obj, (blob: Blob) => {
       if (type === 'start_trip') {
         this.captureImage.start_trip = blob;
       } else if (type === 'end_trip') {
