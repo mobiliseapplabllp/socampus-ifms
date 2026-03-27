@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController, Platform } from '@ionic/angular';
 import { ConciergeService } from 'src/app/provider/concierge/concierge.service';
 import { SiteComponent } from './site/site.component';
 import { ConcHistoryComponent } from './conc-history/conc-history.component';
@@ -24,63 +24,25 @@ export class ConciergePage implements OnInit {
     private modalCtrl: ModalController,
     private router: Router,
     private common: CommonService,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private platform: Platform
   ) { }
 
   ngOnInit() {
     this.userData = JSON.parse(localStorage.getItem('user')!);   
   }
 
-  async startTracking() {    
-    // 1. Background permission check
-    const { allowed: bgAllowed } = await LocationTracker.requestBackgroundPermissionsCheck();
-    if (!bgAllowed) {
-      await LocationTracker.requestBackgroundPermissions(); // Opens app settings
-      return;
-    }
-
-    // 2. Battery optimization check (IMPORTANT - tracking band ho sakti hai otherwise)
-    const { allowed: batteryAllowed } = await LocationTracker.requestIgnoreBatteryOptimizationsCheck();
-    if (!batteryAllowed) {
-      await LocationTracker.requestIgnoreBatteryOptimizations(); // Opens battery settings
-      return;
-    }
-
-    // 3. Start tracking
-    const { success } = await LocationTracker.start();
-    if (success) {
-      console.log('Tracking started');
-    } else {
-      console.error('Failed to start');
-    }
-  }
-
-  async stopTracking() {
-    const { success } = await LocationTracker.stop();
-    if (success) {
-      console.log('Tracking stopped');
-    }
-  }
-
-  async getLocations() {
-    const { locations } = await LocationTracker.getLocations();
-    console.log('Locations:', locations);
-    return locations;
-  }
-
-  async clearLocations() {
-    await LocationTracker.clearLocations();
-    console.log('Locations cleared');
-  }
-
   ionViewDidEnter() {
+    if (this.platform.is('capacitor')) {
+      this.ensureLocationTrackingReadinessOnEntry();
+    }    
     this.getTicketList();
   }
 
   getTicketList(ticketType?: string) {
     const obj: any = {
       page: 1,
-      limit: 50,
+      limit: 10,
       export: 0,
       search: "",
       ticketType: ticketType ? ticketType : 'assignto',                 
@@ -240,6 +202,65 @@ export class ConciergePage implements OnInit {
         }
       });
     })
+  }
+
+  private async ensureLocationTrackingReadinessOnEntry() {
+    const hasBackgroundPermission = await this.checkBackgroundPermission();
+    if (!hasBackgroundPermission) {
+      const shouldOpenSettings = await this.showSettingsPrompt(
+        'Location Permission Required',
+        'Please allow location access all the time for accurate background tracking.'
+      );
+
+      if (shouldOpenSettings) {
+        await LocationTracker.requestBackgroundPermissions();
+      }
+      return;
+    }
+
+    const batteryOptimizationIgnored = await this.checkBatteryOptimization();
+    if (!batteryOptimizationIgnored) {
+      const shouldOpenBatterySettings = await this.showSettingsPrompt(
+        'Battery Optimization',
+        'Please disable battery optimization for this app to keep background tracking active.'
+      );
+
+      if (shouldOpenBatterySettings) {
+        await LocationTracker.requestIgnoreBatteryOptimizations();
+      }
+    }
+  }
+
+  private async checkBackgroundPermission() {
+    const { allowed } = await LocationTracker.requestBackgroundPermissionsCheck();
+    return allowed;
+  }
+
+  private async checkBatteryOptimization() {
+    const { allowed } = await LocationTracker.requestIgnoreBatteryOptimizationsCheck();
+    return allowed;
+  }
+
+  private async showSettingsPrompt(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      mode: 'ios',
+      buttons: [
+        {
+          text: 'Not now',
+          role: 'cancel'
+        },
+        {
+          text: 'Open Settings',
+          role: 'confirm'
+        }
+      ]
+    });
+
+    await alert.present();
+    const { role } = await alert.onDidDismiss();
+    return role === 'confirm';
   }
 
   

@@ -35,7 +35,7 @@
           <br>
           <ion-row>
             <ion-col size="6" *ngIf="specificTicketObj.tckt_status == 3 ">              
-              <ion-button expand="block" *ngIf="specificTicketObj.tckt_trip == '1'" color="success" (click)="openTripModal()">{{specificTicketObj.tckt_trip_btnName}}</ion-button>
+              <ion-button expand="block" *ngIf="specificTicketObj.tckt_trip == '1'" color="success" (click)="openStartTripModal()">{{specificTicketObj.tckt_trip_btnName}}</ion-button>
               <ion-button expand="block" *ngIf="specificTicketObj.tckt_trip == '2'" color="danger" (click)="openEndTripModal()">{{specificTicketObj.tckt_trip_btnName}}</ion-button>
             </ion-col> 
             <ion-col [size]="status === 3 ? '6' : '12'">
@@ -143,13 +143,13 @@
     </div>
   </div>
 
-  <ion-modal [isOpen]="isTripModalOpen" (willDismiss)="closeTripModal()" cssClass="center-modal">
+  <ion-modal [isOpen]="isTripModalOpen" (willDismiss)="closeStartTripModal()" cssClass="center-modal">
     <ng-template>
       <ion-header>
         <ion-toolbar color="primary">
           <ion-title>Start Trip</ion-title>
           <ion-buttons slot="end">
-            <ion-button (click)="closeTripModal()">Close</ion-button>
+            <ion-button (click)="closeStartTripModal()">Close</ion-button>
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
@@ -193,18 +193,39 @@
           </section>
 
           <section *ngIf="tripForm.value.tripType === 'gps'">
-            <ion-row >
-              <ion-col size="6">
-                <ion-button expand="block" [color]="lat ? 'success': 'primary'" (click)="getLocation()"> Select Location </ion-button>
-              </ion-col>             
+            <ion-card class="ion-no-margin ion-margin-bottom">
+              <ion-card-content>
+                <ion-text color="medium">
+                  <p class="ion-no-margin">
+                    Click on "Use Current Location".                    
+                  </p>
+                </ion-text>
+              </ion-card-content>
+            </ion-card>
+            <ion-row>
+              <ion-col size="12">
+                <ion-button expand="block" [color]="lat ? 'success': 'primary'" (click)="selectStartGpsLocation()">
+                  <ion-icon slot="start" name="locate-outline"></ion-icon>
+                  Use Current Location
+                </ion-button>
+              </ion-col>
             </ion-row>
-            <section style="height:100px;width:100%; padding:5px;">
+            <ion-item lines="none" *ngIf="lat && lng">
+              <ion-label>
+                <p>Selected Start Location</p>
+                <h3>Lat: {{lat}} | Long: {{lng}}</h3>
+              </ion-label>
+            </ion-item>
+            <section style="height:180px;width:100%; padding:5px;">
               <div id="map" style="height:100%;width:100%"></div>
             </section>
+            <ion-note color="medium">
+              You can change the marker by tapping on the map.
+            </ion-note>
           </section>
           <ion-row class="ion-margin-top">
             <ion-col>
-              <ion-button expand="block" color="primary" (click)="startTrip()"> Submit </ion-button>
+              <ion-button expand="block" color="primary" (click)="submitStartTrip()"> Submit </ion-button>
             </ion-col>
           </ion-row>
         </form>
@@ -238,7 +259,7 @@
               </ion-item>
               <ion-item>
                 <ion-label>
-                  <p>End Location (dummy)</p>
+                  <p>End Location</p>
                   <h3>Lat: {{specificTicketObj.trip_end_lat}} | Long: {{specificTicketObj.trip_end_lng}}</h3>
                 </ion-label>
               </ion-item>
@@ -258,13 +279,25 @@
                 <ion-button slot="end" [color]="captureImage.toll_img ? 'success' : 'primary'"  (click)="openCamera('toll_img', true)">Image</ion-button>
               </ion-item>
             </ion-list>
-            <section style="height:100px;width:100%; padding:5px;">
+            <ion-card class="ion-no-margin ion-margin-top ion-margin-bottom">
+              <ion-card-content>
+                <ion-text color="medium">
+                  <p class="ion-no-margin">
+                    Current location is auto-loaded for End Trip. If you need to adjust the location, tap on the map.
+                  </p>
+                </ion-text>
+              </ion-card-content>
+            </ion-card>
+            <section style="height:180px;width:100%; padding:5px;">
               <div id="map" style="height:100%;width:100%"></div>
             </section>
+            <ion-note color="medium">
+              Changing the map marker will update the end location and distance.
+            </ion-note>
             <ion-grid>
               <ion-row>
                 <ion-col size="12">
-                  <ion-button expand="block" color="primary" (click)="endTripGps()">Submit</ion-button>
+                  <ion-button expand="block" color="primary" (click)="submitGpsTripEnd()">Submit</ion-button>
                 </ion-col>                
               </ion-row>
             </ion-grid>
@@ -303,7 +336,7 @@
             <ion-grid>
               <ion-row>
                 <ion-col size="12">
-                  <ion-button expand="block" color="primary" (click)="endTripManual()">Submit</ion-button>
+                  <ion-button expand="block" color="primary" (click)="submitManualTripEnd()">Submit</ion-button>
                 </ion-col>                
               </ion-row>
             </ion-grid>

@@ -62,6 +62,7 @@ export class ConcWorkComponent implements OnInit {
   // private DUMMY_END_LONG = 77.1025;
 
   mapStatus: any;
+  private readonly gpsTrackerStateKey = 'gps_tracker_running';
 
   constructor(
     private activeRoute: ActivatedRoute,
@@ -261,19 +262,35 @@ export class ConcWorkComponent implements OnInit {
   }
   //------------===================--------------------======================--------------------======================---------------------==================----------------=============---->
 
-  async getLocation() {
-    if (this.platform.is('android')) {
-      await Geolocation.getCurrentPosition({ enableHighAccuracy: true }).then((res: any) => {
-        this.lat = res.coords.latitude;
-        this.lng = res.coords.longitude;
-        this.initMap(this.lat, this.lng, 'start');
-      }, (err: any) => {
-        alert(JSON.stringify(err) + ' Err');
-      });
-    } else {
-      this.lat = 28.445831445524963;
-      this.lng = 77.30814421380869;
+  private async getCurrentForegroundLocation() {
+    if (this.platform.is('capacitor')) {
+      const res = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+      return {
+        lat: res.coords.latitude,
+        lng: res.coords.longitude
+      };
+    }
+
+    return {
+      lat: 28.445831445524963,
+      lng: 77.30814421380869
+    };
+  }
+
+  async selectStartGpsLocation() {
+    try {
+      const current = await this.getCurrentForegroundLocation();
+      this.lat = current.lat;
+      this.lng = current.lng;
       this.initMap(this.lat, this.lng, 'start');
+
+      const trackingStarted = await this.startTracking();
+      if (!trackingStarted) {
+        this.common.presentToast('Location selected, but background tracking is not active yet', 'warning');
+      }
+    } catch (error) {
+      console.error(error);
+      this.common.presentToast('Unable to fetch current location', 'warning');
     }
   }
 
@@ -315,32 +332,21 @@ export class ConcWorkComponent implements OnInit {
     marker.setMap(this.map);
   }
 
-  openTripModal() {
+  openStartTripModal() {
     this.isTripModalOpen = true;
   }
 
-  closeTripModal() {
+  closeStartTripModal() {
     this.isTripModalOpen = false;
   }
 
   async openEndTripModal() {
     this.isEndTripModalOpen = true;
     if (this.specificTicketObj.trip_type === 'gps') {
-      let lat: number | undefined;
-      let lng: number | undefined;
-      if (this.platform.is('android')) {
-        await Geolocation.getCurrentPosition({ enableHighAccuracy: true }).then((res: any) => {
-          lat = res.coords.latitude;
-          lng = res.coords.longitude;
-          this.initMap(lat, lng, 'end');
-        }, (err: any) => {
-          alert(JSON.stringify(err) + ' Err');
-        });
-      } else {
-        lat = 28.519282852735152;
-        lng = 77.31089846797633;
-        this.initMap(lat, lng, 'end');
-      }
+      const current = await this.getCurrentForegroundLocation();
+      const lat = current.lat;
+      const lng = current.lng;
+      this.initMap(lat, lng, 'end');
       this.specificTicketObj.trip_end_lat = lat;
       this.specificTicketObj.trip_end_lng = lng;
       let val = this.calcDistance(lat!, lng!, this.specificTicketObj.trip_start_lat, this.specificTicketObj.trip_start_lng).toFixed(2);
@@ -352,7 +358,7 @@ export class ConcWorkComponent implements OnInit {
     this.isEndTripModalOpen = false;
   }
 
-  startTrip() {
+  submitStartTrip() {
     const tripType = this.tripForm.value.tripType;
     if (tripType === 'gps' && (!this.lat || !this.lng)) {
       this.common.presentToast('Please get current location first', 'warning');
@@ -374,7 +380,7 @@ export class ConcWorkComponent implements OnInit {
       formData.append('trip_start_odometer_img', this.captureImage.start_trip, random);
       formData.append('ticket_id', this.requestData.id);
       formData.append('action', this.specificTicketObj.tckt_trip);
-      this.startOrEndTrip(formData, 'start', 'manual');
+      this.submitTripAction(formData, 'start', 'manual');
     } else if (tripType === 'gps') {
       const formData = new FormData();
       formData.append('trip_type', 'gps');
@@ -382,11 +388,11 @@ export class ConcWorkComponent implements OnInit {
       formData.append('action', this.specificTicketObj.tckt_trip);
       formData.append('trip_start_lat', this.lat);
       formData.append('trip_start_lng', this.lng);
-      this.startOrEndTrip(formData, 'start', 'gps');
+      this.submitTripAction(formData, 'start', 'gps');
     }
   }
 
-  startOrEndTrip(formData: any, tripType: 'start' | 'stop', source: 'manual' | 'gps') {
+  submitTripAction(formData: any, tripType: 'start' | 'stop', source: 'manual' | 'gps') {
     for (let [key, value] of (formData as any).entries()) {
       console.log(key, value);
     }
@@ -398,11 +404,7 @@ export class ConcWorkComponent implements OnInit {
             let msg = tripType === 'start' ? data.msg + ' ' + 'Trip ID : ' + data.trip_id : data.msg;
             this.common.presentToast(msg, 'success');
             tripType === 'start' ? this.isTripModalOpen = false : this.isEndTripModalOpen = false;
-            if (source === 'gps' && tripType === 'start') {
-              this.startTracking();
-            }
             if (source === 'gps' && tripType === 'stop') {  
-              this.stopTracking();            
               this.clearLocations();
             }
             setTimeout(() => {
@@ -424,7 +426,7 @@ export class ConcWorkComponent implements OnInit {
     });
   }
 
-  endTripManual() {
+  submitManualTripEnd() {
     if (!this.endReading) {
       this.common.presentToast('Please enter end reading', 'warning');
       return;
@@ -461,15 +463,8 @@ export class ConcWorkComponent implements OnInit {
     formData.append('trip_id', this.specificTicketObj.trip_id);
     formData.append('ticket_id', this.requestData.id);
     formData.append('action', this.specificTicketObj.tckt_trip);
-    this.startOrEndTrip(formData, 'stop', 'manual');
-  }
-
-  // async tripAttachment() {  
-  //   this.camera.selectImage(['camera'], (blob: Blob) => {
-  //     // this.selectedImage = blob;
-  //     // this.fileName = Date.now() + '.jpg';
-  //   });
-  // }
+    this.submitTripAction(formData, 'stop', 'manual');
+  }  
 
   async openCamera(type: string, status: boolean) {
     let obj = [];
@@ -489,7 +484,7 @@ export class ConcWorkComponent implements OnInit {
     });
   }
 
-  endTripGps() {
+  async submitGpsTripEnd() {
     if (this.tollAmount && !this.captureImage.toll_img) {
       this.common.presentToast('Toll Image is Mandatory', 'warning');
       return;
@@ -500,7 +495,22 @@ export class ConcWorkComponent implements OnInit {
       return;
     }
 
-    let trekPath = this.getLocations();
+    const current = await this.getCurrentForegroundLocation();
+    this.specificTicketObj.trip_end_lat = current.lat;
+    this.specificTicketObj.trip_end_lng = current.lng;
+    this.initMap(current.lat, current.lng, 'end');
+    this.specificTicketObj.distance = this.calcDistance(
+      current.lat,
+      current.lng,
+      this.specificTicketObj.trip_start_lat,
+      this.specificTicketObj.trip_start_lng
+    ).toFixed(2);
+
+    if (this.getGpsTrackerRunningState()) {
+      await this.stopTracking();
+    }
+
+    const trekPath = await this.getLocations();
 
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
     const formData = new FormData();
@@ -517,7 +527,7 @@ export class ConcWorkComponent implements OnInit {
       formData.append('toll_img', this.captureImage.toll_img, random);
     }    
     formData.append('trip_id', this.specificTicketObj.trip_id);
-    this.startOrEndTrip(formData, 'stop', 'gps');
+    this.submitTripAction(formData, 'stop', 'gps');
   }
 
   private calcDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -529,34 +539,50 @@ export class ConcWorkComponent implements OnInit {
   }
 
   async startTracking() {    
+    if (this.getGpsTrackerRunningState()) {
+      return true;
+    }
+
     // 1. Background permission check
     const { allowed: bgAllowed } = await LocationTracker.requestBackgroundPermissionsCheck();
     if (!bgAllowed) {
       await LocationTracker.requestBackgroundPermissions(); // Opens app settings
-      return;
+      return false;
     }
 
     // 2. Battery optimization check (IMPORTANT - tracking band ho sakti hai otherwise)
     const { allowed: batteryAllowed } = await LocationTracker.requestIgnoreBatteryOptimizationsCheck();
     if (!batteryAllowed) {
       await LocationTracker.requestIgnoreBatteryOptimizations(); // Opens battery settings
-      return;
+      return false;
     }
 
     // 3. Start tracking
     const { success } = await LocationTracker.start();
     if (success) {
+      this.setGpsTrackerRunningState(true);
       console.log('Tracking started');
+      return true;
     } else {
       console.error('Failed to start');
+      return false;
     }
   }
 
   async stopTracking() {
     const { success } = await LocationTracker.stop();
     if (success) {
+      this.setGpsTrackerRunningState(false);
       console.log('Tracking stopped');
     }
+  }
+
+  private setGpsTrackerRunningState(status: boolean) {
+    localStorage.setItem(this.gpsTrackerStateKey, status ? '1' : '0');
+  }
+
+  private getGpsTrackerRunningState() {
+    return localStorage.getItem(this.gpsTrackerStateKey) === '1';
   }
 
   async getLocations() {
