@@ -1,18 +1,19 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, IonDatetime, IonSlides, Platform } from '@ionic/angular';
+import { AlertController, IonDatetime, IonSlides, ModalController, Platform } from '@ionic/angular';
 import * as moment from 'moment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { environment } from 'src/environments/environment';
 import { db } from '../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
+import { JustificationComponent } from './justification/justification.component';
 @Component({
   selector: 'app-digital-checklist',
   templateUrl: './digital-checklist.page.html',
   styleUrls: ['./digital-checklist.page.scss'],
 })
-export class DigitalChecklistPage implements OnInit {
+export class DigitalChecklistPage implements OnInit {  
   @ViewChild(IonSlides) slides!: IonSlides;
   @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
   temp: any = [];
@@ -65,7 +66,9 @@ export class DigitalChecklistPage implements OnInit {
     private router: Router,
     private httpDigital: DigitalChecklistService,
     private platform: Platform,
-    private alertController: AlertController) {
+    private alertController: AlertController,
+    private modalCtrl: ModalController
+    ) {
   }
 
   ngOnInit() {
@@ -78,7 +81,7 @@ export class DigitalChecklistPage implements OnInit {
     });
     const user = localStorage.getItem('user');
     if (user) {
-      this.userData = JSON.parse(user);
+      this.userData = JSON.parse(user);      
     }
     let date = moment().format('YYYY-MM-DD');
     this.common.setBarcode('');
@@ -289,11 +292,21 @@ export class DigitalChecklistPage implements OnInit {
     this.common.presentLoading().then(preLoad => {
       const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
       const sub = friendsObservable.subscribe({
-        next:(data) => {
+        next:(data) => {          
           this.common.dismissloading();
-          this.allChecklist = data;
-          this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-          this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+          this.allChecklist = data;          
+          // this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned' && val.assign_to == this.userData.id);
+          // this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status != 'assigned' && val.assign_to == this.userData.id);
+          this.assignCheckList = this.allChecklist.filter((val: any) => {
+            const assignIds = val.assign_to.split(',').map((id: string) => id.trim());
+            return val.schedule_status == 'assigned' && assignIds.includes(String(this.userData.id));
+          });
+          
+          this.attendedCheckList = this.allChecklist.filter((val: any) => {
+            const assignIds = val.assign_to.split(',').map((id: string) => id.trim());
+            return val.schedule_status != 'assigned' && assignIds.includes(String(this.userData.id));
+          });
+          console.log(this.assignCheckList);
           if (this.allChecklist.length === 0 && this.isInternet) {
             this.getOfflineCheckListFromServer(date, 0);
           }
@@ -396,6 +409,17 @@ export class DigitalChecklistPage implements OnInit {
     return await db.checklist.clear();
   }
 
+  shouldShowJustification(item: any): boolean {
+    const today = moment().format('YYYY-MM-DD');  
+    if (item.schedule_date !== today) {
+      return true;
+    }
+
+    const currentTime = moment();
+    const endTime = moment(item.sch_endDateTime);
+    return currentTime.isAfter(endTime);
+  }
+
   openPage(url: string) {
     this.router.navigateByUrl(url);
   }
@@ -429,7 +453,8 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   verifyQr(data: any) {
-    if (this.platform.is('capacitor')) {
+    // console.log(this.scanBarcodeDetail.isScanBarcode);
+    if (this.platform.is('capacitor') && !this.scanBarcodeDetail.isScanBarcode) {
       if (data.barcode) {
         this.qrType = 'verify';
         this.qrObject = data;
@@ -454,26 +479,61 @@ export class DigitalChecklistPage implements OnInit {
 
   }
 
-  openFillReport(data: any) {
-    if (this.platform.is('capacitor')) {
+  // openFillReport(data: any) {          
+  //   if (this.platform.is('capacitor')) {
+  //     if (data.schedule_status !== 'assigned') {
+  //       this.openPageUrl(data);
+  //     } else {
+  //       const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
+  //       const currentDate = moment(moment().format('YYYY-MM-DD'));
+  //       if (!currentDate.isSame(pastDate)) {
+  //         this.common.presentToast('You can fill only Current Date Checklist', 'warning');
+  //         return;
+  //       }
+  //       const pastDateTime = moment(data.sch_dateTime);        
+  //       const currentDateTime = moment();        
+  //       const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);        
+  //       if (!isCurrentDatetimeBigger) {
+  //         this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
+  //         return;
+  //       }
+  //       this.openPageUrl(data);
+  //     }
+  //   } else {
+  //     this.openPageUrl(data);
+  //   }
+  // }
+
+  openFillReport(data: any) {          
+    if (this.platform.is('capacitor')) {  
       if (data.schedule_status !== 'assigned') {
         this.openPageUrl(data);
-      } else {
-        const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
-        const currentDate = moment(moment().format('YYYY-MM-DD'));
-        if (!currentDate.isSame(pastDate)) {
-          this.common.presentToast('You can fill only Current Date Checklist', 'warning');
-          return;
-        }
-        const pastDateTime = moment(data.sch_dateTime);
-        const currentDateTime = moment();
-        const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
-        if (!isCurrentDatetimeBigger) {
-          this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
-          return;
-        }
-        this.openPageUrl(data);
+        return;
       }
+      const scheduleDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
+      const todayDate = moment().format('YYYY-MM-DD');      
+      if (todayDate !== scheduleDate) {
+        this.common.presentToast('You can fill only Current Date Checklist', 'warning');
+        return;
+      }  
+      const scheduleStartTime = moment(data.sch_dateTime);
+      const scheduleEndTime = moment(data.sch_endDateTime);
+      const currentTime = moment();      
+      if (currentTime.isBefore(scheduleStartTime)) {
+        this.common.presentToast(
+          'You cant fill Checklist before Time, this Checklist time is ' + scheduleStartTime.format('h:mm:ss A'),
+          'warning'
+        );
+        return;
+      }      
+      if (currentTime.isAfter(scheduleEndTime)) {
+        this.common.presentToast(
+          'Checklist time is over. You can not fill after ' + scheduleEndTime.format('h:mm:ss A'),
+          'warning'
+        );
+        return;
+      }      
+      this.openPageUrl(data);  
     } else {
       this.openPageUrl(data);
     }
@@ -546,5 +606,16 @@ export class DigitalChecklistPage implements OnInit {
     setTimeout(() => {
       this.slides.slideTo(index - 3);
     }, 50);
+  }
+
+  async openJustification(data: any) {
+    const modal = await this.modalCtrl.create({
+      component: JustificationComponent,
+      cssClass: 'my-modal',
+      componentProps: {
+        data: data
+       }
+    });
+    modal.present();
   }
 }

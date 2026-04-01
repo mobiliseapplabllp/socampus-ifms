@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { delay, forkJoin, mergeMap, Observable, of, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { timeout, catchError } from 'rxjs/operators';
+import { stat } from 'fs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,10 +13,6 @@ export class DigitalChecklistService {
   constructor(
     private http: HttpClient
   ) { }
-
-  // getOfflineCheckListFromServer(date: string, offset?: number): Observable<any> {    
-  //   return this.http.get(this.baseurl + 'digicheck/offlineapp/getAllPendingChecklist?date=' + date + '&paginate=1&limit=300&offset=' + offset);
-  // }
 
   getOfflineCheckListFromServer(date: string, offset: number = 0): Observable<any> {    
     const apiCall$ = this.http.get(
@@ -122,32 +119,23 @@ export class DigitalChecklistService {
     return this.http.get('https://aovsshdashboard.com/Webservices/test_image.php' , {params: data})
   }
 
-  // postDynamicData(apiRequests: any[]): Observable<any[]> {
-  //   const observables = apiRequests.map(request => {
-  //     const { method, url, data, delayTime, id } = request;
+  getJustification(schedule_id: string): Observable<any> {
+    let obj = {
+      schedule_id: schedule_id
+    }
+    return this.http.post(this.baseurl + 'digicheck/missed_justification/status', obj);
+  }
 
-  //     // Check if a delayTime is provided and if it's for the specific id
-  //     const delayObservable = url === 'https://socampus-8db369a81c0c.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/dash/mobile_app_engineer_dashboard'
-  //       ? of(null).pipe(delay(10000))
-  //       : of(null);
+  submitJusti(formData: any): Observable<any> {
+    return this.http.post(this.baseurl + 'digicheck/missed_justification/add', formData);
+  }
 
-  //     const apiRequestObservable = this.makeApiRequest(method, url, data);
+  updateJusti(formData: any): Observable<any> {
+    return this.http.post(this.baseurl + 'digicheck/missed_justification/update', formData);
+  }
 
-  //     // Use mergeMap to merge the delay and the actual API request
-  //     return delayObservable.pipe(
-  //       mergeMap(() => apiRequestObservable)
-  //     );
-  //   });
-
-  //   return forkJoin(observables);
-  // }
-
-  // private makeApiRequest(method: string, url: string, data: any): Observable<any> {
-  //   if (method.toLowerCase() === 'post') {
-  //     return this.http.post(url, data);
-  //   } else {
-  //     return this.http.get(url);
-  //   }
-  // }
+  deleteJust(id: any): Observable<any> {
+    return this.http.delete(this.baseurl + 'digicheck/missed_justification/delete?id=' + id);
+  }
 
 }

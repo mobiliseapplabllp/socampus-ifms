@@ -9,6 +9,7 @@ import { DigitalChecklistPageRoutingModule } from './digital-checklist-routing.m
 import { DigitalChecklistPage } from './digital-checklist.page';
 import { FillReportComponent } from './fill-report/fill-report.component';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { JustificationComponent } from './justification/justification.component';
 
 @NgModule({
   imports: [
@@ -20,6 +21,8 @@ import { SharedModule } from 'src/app/shared/shared.module';
   ],
   declarations: [
     DigitalChecklistPage,
-    FillReportComponent]
+    FillReportComponent,
+    JustificationComponent
+  ]
 })
 export class DigitalChecklistPageModule {}
