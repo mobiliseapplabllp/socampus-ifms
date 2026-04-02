@@ -54,6 +54,9 @@ export class ConcWorkComponent implements OnInit {
   // previewUrl: any = '';
   specificTicketObj: any = {};
   captureImage: any = {};
+  /** Last attachment blobs for preview on re-open (FormData does not expose them back) */
+  private attachmentBlobInProgress: Blob | null = null;
+  private attachmentBlobResolved: Blob | null = null;
 
   map: any;
   // private DUMMY_START_LAT = 28.6139;
@@ -204,18 +207,30 @@ export class ConcWorkComponent implements OnInit {
   }
 
   attachment(type: string) {
-    this.camera.selectImage(['camera', 'gallery'], (blob: any) => {
-      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-      if (type == 'in_progress') {
-        this.formDataInProgress.delete('document');
-        this.formDataInProgress.append('document', blob, random);
-        this.captureImage.inProgressImage = true;
-      } else if (type == 'resolved') {
-        this.formDataResolve.delete('document');
-        this.formDataResolve.append('document', blob, random);
-        this.captureImage.resolveImage = true;
-      }
-    });
+    const existingBlob =
+      type === 'in_progress'
+        ? this.attachmentBlobInProgress
+        : type === 'resolved'
+          ? this.attachmentBlobResolved
+          : null;
+    this.camera.selectImage(
+      ['camera', 'gallery'],
+      (blob: any) => {
+        let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+        if (type == 'in_progress') {
+          this.formDataInProgress.delete('document');
+          this.formDataInProgress.append('document', blob, random);
+          this.captureImage.inProgressImage = true;
+          this.attachmentBlobInProgress = blob;
+        } else if (type == 'resolved') {
+          this.formDataResolve.delete('document');
+          this.formDataResolve.append('document', blob, random);
+          this.captureImage.resolveImage = true;
+          this.attachmentBlobResolved = blob;
+        }
+      },
+      existingBlob ?? undefined
+    );
   }
 
   actionResolve() {
@@ -472,17 +487,31 @@ export class ConcWorkComponent implements OnInit {
     if (status === true) {
       obj = ['camera', 'gallery'];
     } else {
-      obj = ['camera']
+      obj = ['camera'];
     }
-    this.camera.selectImage(obj, (blob: Blob) => {
-      if (type === 'start_trip') {
-        this.captureImage.start_trip = blob;
-      } else if (type === 'end_trip') {
-        this.captureImage.trip_end = blob;
-      } else if (type === 'toll_img') {
-        this.captureImage.toll_img = blob;
-      }
-    });
+    const existingBlob =
+      type === 'start_trip'
+        ? this.captureImage.start_trip
+        : type === 'end_trip'
+          ? this.captureImage.trip_end
+          : type === 'toll_img'
+            ? this.captureImage.toll_img
+            : null;
+    const existing =
+      existingBlob instanceof Blob ? existingBlob : undefined;
+    this.camera.selectImage(
+      obj,
+      (blob: Blob) => {
+        if (type === 'start_trip') {
+          this.captureImage.start_trip = blob;
+        } else if (type === 'end_trip') {
+          this.captureImage.trip_end = blob;
+        } else if (type === 'toll_img') {
+          this.captureImage.toll_img = blob;
+        }
+      },
+      existing
+    );
   }
 
   async submitGpsTripEnd() {

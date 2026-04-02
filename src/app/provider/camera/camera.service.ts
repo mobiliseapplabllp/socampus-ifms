@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActionSheetController, ModalController, Platform } from '@ionic/angular';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { CameraComponent } from 'src/app/shared/camera/camera.component';
+import { PhotoViewComponent } from 'src/app/shared/photo-view/photo-view.component';
 
 @Injectable({
   providedIn: 'root'
@@ -13,13 +14,14 @@ export class CameraService {
     private actionSheetCtrl: ActionSheetController,
     private platform: Platform) { }
 
-  async selectImage(options: string[], callback: (blob: Blob) => void) {
+  async selectImage(options: string[], callback: (blob: Blob) => void, existingBlob?: Blob | null) {
     if (this.platform.is('android')) {
       options = options.map(item => (item === 'camera' ? 'outer' : item));
     } else {
       options = options.filter(item => item !== 'outer');
     }
-    if (options.length === 1) {
+
+    if (options.length === 1 && !existingBlob) {
       const option = options[0];
       if (option === 'camera') {
         return this.openCamera(CameraSource.Camera, callback);
@@ -31,32 +33,52 @@ export class CameraService {
     }
 
     const actionButtons = [];
-    if (options.includes('camera')) {
+    
+    actionButtons.push(...this.buildSourceActionButtons(options, callback));
+    if (existingBlob) {
       actionButtons.push({
-        text: 'Camera',
-        handler: () => this.openCamera(CameraSource.Camera, callback)
+        text: 'View image',
+        handler: () => this.openPhotoViewModal(existingBlob)
       });
     }
-    if (options.includes('outer')) {
-      actionButtons.push({
-        text: 'Camera',
-        handler: () => this.openOuterCamera(callback)
-      });
-    }
-    if (options.includes('gallery')) {
-      actionButtons.push({
-        text: 'Gallery',
-        handler: () => this.openCamera(CameraSource.Photos, callback)
-      });
-    }
-
-
     const actionSheet = await this.actionSheetCtrl.create({
       header: 'Select Image Source',
       buttons: actionButtons
     });
 
     await actionSheet.present();
+  }
+
+  private buildSourceActionButtons(options: string[], callback: (blob: Blob) => void) {
+    const buttons: { text: string; handler: () => void | Promise<void> }[] = [];
+    if (options.includes('camera')) {
+      buttons.push({
+        text: 'Camera',
+        handler: () => this.openCamera(CameraSource.Camera, callback)
+      });
+    }
+    if (options.includes('outer')) {
+      buttons.push({
+        text: 'Camera',
+        handler: () => this.openOuterCamera(callback)
+      });
+    }
+    if (options.includes('gallery')) {
+      buttons.push({
+        text: 'Gallery',
+        handler: () => this.openCamera(CameraSource.Photos, callback)
+      });
+    }
+    return buttons;
+  }
+
+  private async openPhotoViewModal(blob: Blob) {
+    const modal = await this.modalCtrl.create({
+      component: PhotoViewComponent,
+      cssClass: 'my-modal_',
+      componentProps: { blobFile: blob }
+    });
+    await modal.present();
   }
 
   private async openCamera(source: CameraSource, callback: (blob: Blob) => void) {
