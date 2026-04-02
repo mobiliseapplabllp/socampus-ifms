@@ -221,6 +221,7 @@ export class PendingTaskComponent  implements OnInit {
       const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
       const sub = friendsObservable.subscribe({
         next:(data) => {
+          console.log(data);
           this.common.dismissloading();
           this.allChecklist = data;
           this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
