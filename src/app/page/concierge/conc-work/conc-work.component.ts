@@ -311,7 +311,8 @@ export class ConcWorkComponent implements OnInit {
       position: latLng,
       map: this.map,
       label: 'S',
-      icon: 'assets/img/green-dot.png'  
+      icon: 'assets/img/green-dot.png',
+      animation: google.maps.Animation.BOUNCE
     });    
     this.lat = latLng.toJSON().lat;
     this.lng = latLng.toJSON().lng;       
