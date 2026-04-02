@@ -15,7 +15,7 @@ export class SplashComponent  implements OnInit {
   constructor(
     private router: Router,
     private common: CommonService,
-    private httpLogin: LoginService
+    private httpLogin: LoginService,
   ) { }
 
   ngOnInit() {
@@ -61,7 +61,10 @@ export class SplashComponent  implements OnInit {
     this.common.presentLoading().then(() => {
       this.httpLogin.loginPingApi().subscribe({
         next: (data) => {
-          if (data.status) {
+          console.log(data);
+          if (data.status) { 
+            let val = data.data.current_punch_status === 'IN' || data.data.current_punch_status == 'FORCE_PUNCH_IN' ? true : false;
+            this.httpLogin.setPunchStatus(val);           
             this.router.navigateByUrl('/list-master', { replaceUrl: true });
           } else {
             this.common.presentToast(data.msg, 'warning');

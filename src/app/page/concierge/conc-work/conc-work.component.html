@@ -3,103 +3,13 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>Concierge Work</ion-title>
+    <ion-title>Concierge Work (#{{requestData.id}})</ion-title>
   </ion-toolbar>
 </ion-header>
 <ion-content style="--background: var(--ion-color-light);">
-  <br>
-  <div style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;font-size:8px;background-color: white;">
-    <ion-row>
-      <ion-col size="6">
-        <ion-item lines="none">
-          <ion-thumbnail slot="start">
-            <img src="assets/conc/dash1.png">
-          </ion-thumbnail>
-          <ion-label>
-            <p>
-              <ion-text style="font-family: 'opensans_light' !important;">Date</ion-text>
-            </p>
 
-            <ion-text>{{requestData.created_at}}</ion-text>
-          </ion-label>
-        </ion-item>
-      </ion-col>
-      <ion-col size="6">
-        <ion-item lines="none">
-          <ion-thumbnail slot="start">
-            <img src="assets/conc/dash2.png">
-          </ion-thumbnail>
-          <ion-label>
-            <ion-text style="font-family: 'opensans_light' !important;">Requested By</ion-text><br>
-            <ion-text>{{requestData.req_name}}</ion-text>
-          </ion-label>
-        </ion-item>
-      </ion-col>
-      <ion-col size="6">
-        <ion-item lines="none">
-          <ion-thumbnail slot="start">
-            <img src="assets/conc/dash3.png">
-          </ion-thumbnail>
-          <ion-label>
-            <ion-text style="font-family: 'opensans_light' !important;">Assigned To</ion-text><br>
-            <ion-text>{{requestData.lg_name}} {{requestData.lg_username}}</ion-text>
-          </ion-label>
-        </ion-item>
-      </ion-col>
-      <ion-col size="6">
-        <ion-item lines="none">
-          <ion-thumbnail slot="start">
-            <img src="assets/conc/dash4.png">
-          </ion-thumbnail>
-          <ion-label>
-            <ion-text style="font-family: 'opensans_light' !important;">Priority</ion-text><br>
-            <ion-text>{{requestData.priority}}</ion-text>
-          </ion-label>
-        </ion-item>
-      </ion-col>
-      <ion-col size="6">
-        <ion-item lines="none">
-          <ion-thumbnail slot="start">
-            <img src="assets/conc/dash5.png">
-          </ion-thumbnail>
-          <ion-label>
-            <ion-text style="font-family: 'opensans_light' !important;">Status</ion-text><br>
-            <ion-text>{{requestData.stage_desc}}</ion-text>
-          </ion-label>
-        </ion-item>
-      </ion-col>
-      <ion-col size="6">
-        <ion-item lines="none">
-          <ion-thumbnail slot="start">
-            <img src="assets/conc/dash6.png">
-          </ion-thumbnail>
-          <ion-label>
-            <ion-text style="font-family: 'opensans_light' !important;">Case Age</ion-text><br>
-            <ion-text>{{requestData.request_age}}</ion-text>
-          </ion-label>
-        </ion-item>
-      </ion-col>
-    </ion-row>
-  </div>
-  <br>
-  <div style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px">
-    <ion-accordion-group>
-      <ion-accordion value="first">
-        <ion-item slot="header">
-          <ion-label>
-            <ion-text color="primary">Case Description</ion-text>
-          </ion-label>
-        </ion-item>
-        <div class="ion-padding" slot="content">
-          <ion-text color="primary">{{requestData.remark}}</ion-text>
-        </div>
-      </ion-accordion>
-    </ion-accordion-group>
-  </div>
-  <br>
-
-  <ion-segment  [(ngModel)]='segStatus'>
-    <ion-segment-button value="action">
+  <ion-segment [(ngModel)]='segStatus'>
+    <ion-segment-button value="action" *ngIf="!isSegDisable">
       <ion-label>Action </ion-label>
     </ion-segment-button>
     <ion-segment-button value="details">
@@ -107,23 +17,28 @@
     </ion-segment-button>
   </ion-segment>
   <div [ngSwitch]='segStatus'>
-    <div *ngSwitchCase= "'action'">
+    <div *ngSwitchCase="'action'">
       <ion-card>
-        <ion-item >
+        <ion-item>
           <ion-label color="primary" position="floating">Status <ion-text color="danger">*</ion-text></ion-label>
-          <ion-select interface="action-sheet"  mode="ios" [(ngModel)]="status" (ionChange)="changeStatus($event)">
+          <ion-select interface="action-sheet" mode="ios" [(ngModel)]="status" (ionChange)="changeStatus($event)">
             <ion-select-option *ngFor="let dat of statusData" [value]="dat.value">{{dat.label}}</ion-select-option>
           </ion-select>
         </ion-item>
         <div *ngIf="status === 3 ">
-          <ion-item >
+          <ion-item>
             <ion-label color="primary" position="floating">Remark <ion-text color="danger">*</ion-text></ion-label>
-            <ion-textarea rows="4" [(ngModel)]="remark" ></ion-textarea>
+            <ion-textarea rows="4" [(ngModel)]="remark"></ion-textarea>
           </ion-item>
-          <ion-button size="small" class="ion-padding-start" (click)="attachment('in_progress')" [color]="inProgressImage ? 'success' : 'primary' ">Attachment</ion-button>
+          <ion-button size="small" class="ion-padding-start" (click)="attachment('in_progress')"
+            [color]="captureImage.inProgressImage ? 'success' : 'primary' ">Attachment</ion-button>
           <br>
           <ion-row>
-            <ion-col size="12">
+            <ion-col size="6" *ngIf="specificTicketObj.tckt_status == 3 ">              
+              <ion-button expand="block" *ngIf="specificTicketObj.tckt_trip == '1'" color="success" (click)="openStartTripModal()">{{specificTicketObj.tckt_trip_btnName}}</ion-button>
+              <ion-button expand="block" *ngIf="specificTicketObj.tckt_trip == '2'" color="danger" (click)="openEndTripModal()">{{specificTicketObj.tckt_trip_btnName}}</ion-button>
+            </ion-col> 
+            <ion-col [size]="status === 3 ? '6' : '12'">
               <ion-button color="primary" expand="block" (click)="actionInProgress()">Submit</ion-button>
             </ion-col>
             <!-- <ion-col size="6">
@@ -133,23 +48,24 @@
         </div>
 
         <div *ngIf="status === 4 ">
-          <ion-item >
+          <!-- <ion-item >
             <ion-label color="primary" position="floating">Problem Reported <ion-text color="danger">*</ion-text></ion-label>
             <ion-textarea rows="2" [(ngModel)]="problem_reported"></ion-textarea>
-          </ion-item>
-          <ion-item >
+          </ion-item> -->
+          <ion-item>
             <ion-label color="primary" position="floating">Action Taken <ion-text color="danger">*</ion-text></ion-label>
             <ion-textarea rows="2" [(ngModel)]="action_taken"></ion-textarea>
           </ion-item>
 
-          <ion-item >
+          <!-- <ion-item >
             <ion-label color="primary" position="floating">Scope of Work <ion-text color="danger">*</ion-text></ion-label>
             <ion-select interface="action-sheet"  mode="ios" [(ngModel)]="scope_of_work">
               <ion-select-option *ngFor="let dat of scopeOfWorkArr" [value]="dat.value">{{dat.label}}</ion-select-option>
             </ion-select>
-          </ion-item>
+          </ion-item> -->
 
-          <ion-button size="small" class="ion-padding-start" (click)="attachment('resolved')" [color]="resolveImage ? 'success' : 'primary' ">Attachment</ion-button>
+          <ion-button size="small" class="ion-padding-start" (click)="attachment('resolved')"
+            [color]="captureImage.resolveImage ? 'success' : 'primary' ">Attachment</ion-button>
           <ion-row>
             <ion-col size="12">
               <ion-button color="primary" expand="block" (click)="actionResolve()">Submit</ion-button>
@@ -227,4 +143,206 @@
     </div>
   </div>
 
+  <ion-modal [isOpen]="isTripModalOpen" (willDismiss)="closeStartTripModal()" cssClass="center-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Start Trip</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeStartTripModal()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding trip-content">
+        <h2 class="trip-title">Start Trip</h2>
+        <form [formGroup]="tripForm">
+          <ion-radio-group formControlName="tripType">
+            <ion-grid>
+              <ion-row>
+                <ion-col size="6">
+                  <ion-item lines="none">
+                    <ion-label>
+                      <ion-text>Manual</ion-text>
+                    </ion-label>
+                    <ion-radio slot="start" value="manual"></ion-radio>
+                  </ion-item>
+                </ion-col>
+
+                <ion-col size="6">
+                  <ion-item lines="none">
+                    <ion-label>
+                      <ion-text>GPS</ion-text>
+                    </ion-label>
+                    <ion-radio slot="start" value="gps"></ion-radio>
+                  </ion-item>
+                </ion-col>              
+              </ion-row>
+            </ion-grid>
+          </ion-radio-group> <br>
+    
+          <section *ngIf="tripForm.value.tripType === 'manual'" lines="none">           
+            <ion-item>
+              <ion-label color="primary" position="floating">Trip Start Reading  <ion-text color="danger">*</ion-text></ion-label>
+              <ion-input type="number" formControlName="trip_start_odometer_reading"></ion-input>
+            </ion-item>
+            <br>
+            <ion-button color="primary" shape="round" fill="outline" (click)="openCamera('start_trip' , false)" [color]="captureImage.start_trip ? 'success' : 'primary'" class="ion-text-capitalize"> 
+              Capture OD Reading <ion-icon slot="end"  [name]="!captureImage.start_trip ? 'camera-outline' : 'checkmark-done-outline'"></ion-icon>
+            </ion-button>
+          </section>
+
+          <section *ngIf="tripForm.value.tripType === 'gps'">
+            <ion-card class="ion-no-margin ion-margin-bottom">
+              <ion-card-content>
+                <ion-text color="medium">
+                  <p class="ion-no-margin">
+                    Click on "Use Current Location".                    
+                  </p>
+                </ion-text>
+              </ion-card-content>
+            </ion-card>
+            <ion-row>
+              <ion-col size="12">
+                <ion-button expand="block" [color]="lat ? 'success': 'primary'" (click)="selectStartGpsLocation()">
+                  <ion-icon slot="start" name="locate-outline"></ion-icon>
+                  Use Current Location
+                </ion-button>
+              </ion-col>
+            </ion-row>
+            <ion-item lines="none" *ngIf="lat && lng">
+              <ion-label>
+                <p>Selected Start Location</p>
+                <h3>Lat: {{lat}} | Long: {{lng}}</h3>
+              </ion-label>
+            </ion-item>
+            <section style="height:180px;width:100%; padding:5px;">
+              <div id="map" style="height:100%;width:100%"></div>
+            </section>
+            <ion-note color="medium">
+              You can change the marker by tapping on the map.
+            </ion-note>
+          </section>
+          <ion-row class="ion-margin-top">
+            <ion-col>
+              <ion-button expand="block" color="primary" (click)="submitStartTrip()"> Submit </ion-button>
+            </ion-col>
+          </ion-row>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="isEndTripModalOpen" (willDismiss)="closeEndTripModal()" cssClass="center-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>End Trip</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeEndTripModal()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-card *ngIf="specificTicketObj.trip_type === 'gps'"><!--*ngIf="specificTicketObj.trip_type === 'gps'"-->
+          <ion-card-header>
+            <ion-card-title class="ion-text-start">GPS Based</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <ion-list lines="full">
+              <ion-item>
+                <ion-label>
+                  <p>Start Location</p>
+                  <h3>Lat: {{specificTicketObj.trip_start_lat}} | Long: {{specificTicketObj.trip_start_lng}}</h3>
+                </ion-label>
+              </ion-item>
+              <ion-item>
+                <ion-label>
+                  <p>End Location</p>
+                  <h3>Lat: {{specificTicketObj.trip_end_lat}} | Long: {{specificTicketObj.trip_end_lng}}</h3>
+                </ion-label>
+              </ion-item>
+              <ion-item>
+                <ion-label>
+                  <p>Total Distance (km)</p>
+                  <h3>{{specificTicketObj.distance}}</h3>
+                </ion-label>
+              </ion-item>
+              <ion-item>
+                <ion-label color="primary" position="floating">Total Distance Adjust</ion-label>
+                <ion-input type="number" [(ngModel)]="distanceAdjust" placeholder="Enter adjustment."></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label color="primary" position="floating">Toll Amount</ion-label>
+                <ion-input type="number" [(ngModel)]="tollAmount" placeholder="Enter amount"></ion-input>
+                <ion-button slot="end" [color]="captureImage.toll_img ? 'success' : 'primary'"  (click)="openCamera('toll_img', true)">Image</ion-button>
+              </ion-item>
+            </ion-list>
+            <ion-card class="ion-no-margin ion-margin-top ion-margin-bottom">
+              <ion-card-content>
+                <ion-text color="medium">
+                  <p class="ion-no-margin">
+                    Current location is auto-loaded for End Trip. If you need to adjust the location, tap on the map.
+                  </p>
+                </ion-text>
+              </ion-card-content>
+            </ion-card>
+            <section style="height:180px;width:100%; padding:5px;">
+              <div id="map" style="height:100%;width:100%"></div>
+            </section>
+            <ion-note color="medium">
+              Changing the map marker will update the end location and distance.
+            </ion-note>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12">
+                  <ion-button expand="block" color="primary" (click)="submitGpsTripEnd()">Submit</ion-button>
+                </ion-col>                
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card *ngIf="specificTicketObj.trip_type === 'manual'">
+          <ion-card-header>
+            <ion-card-title class="ion-text-center">Manual</ion-card-title>
+          </ion-card-header>          
+          <ion-card-content>
+            <ion-list lines="full">
+              <ion-item>
+                <ion-label>
+                  <p>Start Reading</p>
+                  <h3>{{specificTicketObj.trip_start_odometer_reading || '—'}}</h3>
+                </ion-label>
+              </ion-item>
+              <ion-item>
+                <ion-label color="primary" position="floating">Trip End Reading <ion-text color="danger">*</ion-text></ion-label>
+                <ion-input type="number" [(ngModel)]="endReading" placeholder="Enter reading"></ion-input>
+                <ion-button slot="end" [color]="captureImage.trip_end ? 'success' : 'primary'" (click)="openCamera('end_trip', false)">Image</ion-button>
+              </ion-item>
+              <ion-item *ngIf="endReading && specificTicketObj.trip_start_odometer_reading">
+                <ion-label>
+                  <p>Total Distance Travelled</p>
+                  <h3>{{endReading - specificTicketObj.trip_start_odometer_reading}} km</h3>
+                </ion-label>
+              </ion-item>
+              <ion-item>
+                <ion-label color="primary" position="floating">Toll Amount</ion-label>
+                <ion-input type="number" [(ngModel)]="tollAmount" placeholder="Enter amount"></ion-input>
+                <ion-button slot="end" [color]="captureImage.toll_img ? 'success' : 'primary'"  (click)="openCamera('toll_img', true)">Image</ion-button>
+              </ion-item>
+            </ion-list>            
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12">
+                  <ion-button expand="block" color="primary" (click)="submitManualTripEnd()">Submit</ion-button>
+                </ion-col>                
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

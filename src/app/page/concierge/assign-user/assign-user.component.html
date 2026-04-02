@@ -9,10 +9,15 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
+  <ion-searchbar (ionInput)="search($event)"></ion-searchbar>
+
   <ion-item *ngFor="let dat of assignUsers;let i = index" lines="none">
     <ion-avatar slot="start" class="center">{{i+1}}</ion-avatar>
-    <ion-label>{{dat.fname}}</ion-label>
-    <ion-button slot="end" size="small" fill="outline" (click)="assign(dat)">Assign</ion-button>
+    <ion-label>
+      <h3>{{dat.fname}}</h3>
+      <p>Workload : <ion-text color="danger">{{dat.workload}}</ion-text> </p>
+    </ion-label>
+    <ion-button slot="end" size="small" fill="outline" (click)="assign(dat)" [disabled]="dat.id === userData.id ">Assign</ion-button>
   </ion-item>
   <!-- <ion-radio-group [(ngModel)]="isSelect">
     <ion-item *ngFor="let dat of assignUsers">

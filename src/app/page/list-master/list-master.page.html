@@ -3,8 +3,9 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title> {{userName}} </ion-title>
+    <ion-title> <ion-icon name="ellipse"  [color]="isPunchIn ? 'success' : 'danger'" style="padding-top: 2%;"></ion-icon> {{userName}} </ion-title>
     <ion-buttons slot="end" *ngIf="isInternet">
+      <ion-button (click)="testRoute('/concierge')">C</ion-button>
       <!-- <ion-button (click)="testRoute('/concierge')">Concierge</ion-button> -->
        <!-- <ion-button (click)="notification('/notification')">
         <ion-icon name="notifications-outline"></ion-icon>

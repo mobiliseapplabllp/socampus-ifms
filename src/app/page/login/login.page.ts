@@ -236,7 +236,9 @@ export class LoginPage implements OnInit {
               localStorage.setItem('user', JSON.stringify(this.userValue.user));
               localStorage.setItem('isAlreadyLogin', 'true');
               localStorage.setItem('loginDate', moment().format('YYYY-MM-DD'));
-              // this.multiFactorSubmit();
+              this.loginPro.username.next(this.userValue.user);
+              let val = this.userValue.user.current_punch_status === 'IN' || this.userValue.user.current_punch_status === 'FORCE_PUNCH_IN'  ? true: false;
+              this.loginPro.setPunchStatus(val);              
               this.checkAppUpdate();
             }
           }
@@ -272,6 +274,7 @@ export class LoginPage implements OnInit {
             localStorage.setItem('token1', data.token);
             localStorage.setItem('enc_id', data.enc_id);
             localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('punchStatus',JSON.stringify(data.current_punch_status));
             localStorage.setItem('isAlreadyLogin', 'true');
             this.checkAppUpdate();
             // this.multiFactorSubmit();
@@ -363,8 +366,8 @@ export class LoginPage implements OnInit {
     if (this.isProduction) {
       return;
     }
-    // https://socampus.mobilisepro.com/#/auth/ssoGates/IKgzdUcx_YOzDMQpvyS3bmN6elpRaDYzSncyei9haHd1ZFJETTZpWVo3dW5SeUVzMnQyWUhLbTlsMnRYeklIZ29DN2dFM3puRTJ2ak92WTFCTHExY1RoMTc3VHY4QjlPdC83SVFRait3a0RuWWlVWTBVTlVsWlZXbjVtQU4yVVlvUit3aStVSVovUVBsZ1pJ
-    let token = 'IKgzdUcx_YOzDMQpvyS3bmN6elpRaDYzSncyei9haHd1ZFJETTZpWVo3dW5SeUVzMnQyWUhLbTlsMnRYeklIZ29DN2dFM3puRTJ2ak92WTFCTHExY1RoMTc3VHY4QjlPdC83SVFRait3a0RuWWlVWTBVTlVsWlZXbjVtQU4yVVlvUit3aStVSVovUVBsZ1pJ';
+    // https://socampusdev.mobilisepro.com/#/auth/ssoGates/XQCx8ekhELpXkHYvv5JTyzNmci9MaVVkM0ZHS1BGZ05ZZWpCRWtGRmcvNDdsYjQvdUVrODlCYWVWcWhMb2MyRlFsSG4xZThOVHZXTDVNZ2s3ZHV6ZlBvbTdMTzYyV29KL1EwRHFKaXRoN3pKWjBWQ3BWblN3VVBUREtmRVd2dVJsYkQyZFFrdWw5QW9uc3Jn
+    let token = 'XQCx8ekhELpXkHYvv5JTyzNmci9MaVVkM0ZHS1BGZ05ZZWpCRWtGRmcvNDdsYjQvdUVrODlCYWVWcWhMb2MyRlFsSG4xZThOVHZXTDVNZ2s3ZHV6ZlBvbTdMTzYyV29KL1EwRHFKaXRoN3pKWjBWQ3BWblN3VVBUREtmRVd2dVJsYkQyZFFrdWw5QW9uc3Jn';
     this.getSsoEnc(token);
   }
 }

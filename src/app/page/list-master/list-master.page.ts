@@ -2,13 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { db } from '../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
-import { AlertController, ModalController, Platform,  } from '@ionic/angular';
+import { AlertController, ModalController, Platform, } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { SosComponent } from './sos/sos.component';
 import { App } from '@capacitor/app';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 import { take } from 'rxjs';
+import { stat } from 'fs';
+import { cordovaInstance } from '@awesome-cordova-plugins/core';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -28,6 +30,7 @@ export class ListMasterPage implements OnInit {
   appUpdate: any = {};
   currentVersion!: string;
   isAndroid!: boolean;
+  isPunchIn = false;
   constructor(
     private common: CommonService,
     private alertController: AlertController,
@@ -39,7 +42,7 @@ export class ListMasterPage implements OnInit {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
-      this.userName = this.userData.user_name
+      this.userName = this.userData.user_name;      
     }
   }
 
@@ -58,8 +61,9 @@ export class ListMasterPage implements OnInit {
             this.getAppVersion();
           }
         });
-      }      
-    });           
+      }
+    });
+    this.getPunchStatus();
   }
 
   getAppVersion() {
@@ -72,17 +76,17 @@ export class ListMasterPage implements OnInit {
       platform = 'android'
     }
     this.httpLogin.getAppVersion(platform).subscribe({
-      next:(data) => {
+      next: (data) => {
         this.appUpdate = data;
         if (this.appUpdate.is_view && this.appUpdate.forceupdate && (this.appUpdate.vesrion !== this.currentVersion)) {
           this.openPlayStore(this.appUpdate.url);
           this.common.presentToast('Please Update your App', 'warning');
         }
       },
-      error:() => {
+      error: () => {
 
       },
-      complete:() => {
+      complete: () => {
 
       }
     })
@@ -93,7 +97,7 @@ export class ListMasterPage implements OnInit {
   }
 
   downloadApp(url: string) {
-    if (url){
+    if (url) {
       this.common.presentToast('Please install latest application', 'secondary');
       this.common.openDoc(url);
     } else {
@@ -114,6 +118,7 @@ export class ListMasterPage implements OnInit {
     }, 1500);
     this.getHomeLoad();
     this.getNotification();
+    this.loginPingApi();
   }
 
   getHomeLoad() {
@@ -128,9 +133,9 @@ export class ListMasterPage implements OnInit {
   }
 
   async getOffLineCheckList() {
-    const friendsObservable = liveQuery (() => db.checklist.where({offline_save: "true"}).toArray());
+    const friendsObservable = liveQuery(() => db.checklist.where({ offline_save: "true" }).toArray());
     const sub = friendsObservable.subscribe({
-      next:(data) => {
+      next: (data) => {
         this.DGArr = data;
         if (this.DGArr.length > 0 && this.count == 0) {
           this.count = 1;
@@ -151,20 +156,21 @@ export class ListMasterPage implements OnInit {
       mode: 'ios',
       buttons: [{
         text: 'Cancel',
-          handler: (data) => {
+        handler: (data) => {
 
-          }
-        },{
-          text: 'YES',
-          handler: (data) => {
-            this.openPageRoute();
-          }
-        }]
+        }
+      }, {
+        text: 'YES',
+        handler: (data) => {
+          this.openPageRoute();
+        }
+      }]
     });
     await alert.present();
   }
 
   changeEvent() {
+    this.loginPingApi();
     this.eventChange = true;
     this.isLoading = true;
     setTimeout(() => {
@@ -180,6 +186,26 @@ export class ListMasterPage implements OnInit {
     this.getHomeLoad();
     this.changeEvent();
     this.getNotification();
+    this.loginPingApi();
+
+  }
+
+  loginPingApi() {
+    this.httpLogin.loginPingApi().subscribe({
+      next:(data: any) => {
+        console.log(data);
+        if (data.status) {
+          let val = data.data.current_punch_status === 'IN' || data.data.current_punch_status === 'FORCE_PUNCH_IN' ? true: false;
+          this.httpLogin.setPunchStatus(val);
+        }
+      },
+      error:() => {
+
+      },
+      complete:() => {
+
+      }
+    });
   }
 
   openPageRoute() {
@@ -193,7 +219,7 @@ export class ListMasterPage implements OnInit {
   async openSosModal() {
     const modal = await this.modalCtrl.create({
       component: SosComponent,
-      componentProps: { }
+      componentProps: {}
     });
     modal.present();
   }
@@ -206,13 +232,19 @@ export class ListMasterPage implements OnInit {
       status: 'unread'
     }
     this.httpLogin.getNotification(obj).subscribe({
-      next:(data) => {        
+      next: (data) => {
         if (data.status) {
           this.notiticationCount = data.count;
         } else {
           this.notiticationCount = 0;
         }
       }
+    });
+  }
+
+  getPunchStatus() {
+    this.httpLogin.getPunchStatus().subscribe((status: any) => {      
+      this.isPunchIn = status;      
     });
   }
 }

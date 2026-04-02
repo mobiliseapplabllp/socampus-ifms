@@ -24,6 +24,8 @@ export class AppComponent {
   loading: any;
   appVersion!: string;
   isAndroid!: boolean;
+  isPunchIn = false;
+  private isProgrammaticChange = false;
   constructor(
     private loginPro: LoginService,
     private router: Router,
@@ -34,21 +36,24 @@ export class AppComponent {
     private httpLogin: LoginService,
     private common: CommonService,
     private iab: InAppBrowser) {
-      this.platform.ready().then(res => {        
-        this.initApp();
-        this.getUserData();
+    this.platform.ready().then(res => {
+      this.initApp();
+      this.getUserData();      
+      this.loginPro.getPunchStatus().subscribe((status: any) => {        
+        this.setPunchIn(status);         
       });
+    });
   }
 
   initApp() {
     this.getAppVersion();
     if (this.platform.is('capacitor')) {
-      StatusBar.setOverlaysWebView({overlay: false});
-      StatusBar.setBackgroundColor({'color': '#040E51'})
+      StatusBar.setOverlaysWebView({ overlay: false });
+      StatusBar.setBackgroundColor({ 'color': '#040E51' })
       App.getInfo().then(res => {
         this.appVersion = res.version
       });
-      
+
     }
     this.router.navigateByUrl('/login/splash');
     this.initIdle();
@@ -69,7 +74,8 @@ export class AppComponent {
     }
   }
 
-  isEnglish(text: string): boolean {  
+  isEnglish(text: string): boolean {
+    // Allow A-Z, a-z, 0-9, spaces, and all common keyboard symbols
     const englishRegex = /^[\x20-\x7E°]*$/;
     return englishRegex.test(text);
   }
@@ -84,7 +90,7 @@ export class AppComponent {
       platform = 'android'
     }
     this.httpLogin.getAppVersion(platform).subscribe({
-      next:(data) => {
+      next: (data) => {
         if (data.status) {
           let serverApp = data.data;
           this.common.setAppVersion(data.data);
@@ -98,10 +104,10 @@ export class AppComponent {
           }
         }
       },
-      error:() => {
+      error: () => {
 
       },
-      complete:() => {
+      complete: () => {
 
       }
     });
@@ -118,14 +124,14 @@ export class AppComponent {
   refreshTokenOnly() {
     this.common.presentLoading().then(preLoad => {
       this.httpLogin.refreshToken().subscribe({
-        next:(data) => {
+        next: (data) => {
           localStorage.setItem('token1', data.refresh);
         },
-        error:() => {
+        error: () => {
           this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
-        complete:() => {
+        complete: () => {
           this.common.dismissloading();
         }
       })
@@ -135,12 +141,13 @@ export class AppComponent {
   refreshToken() {
     this.common.presentLoading().then(res => {
       this.httpLogin.refreshToken().subscribe({
-        next:(data) => {
+        next: (data) => {
           if (data.status) {
             localStorage.setItem('token1', data.refresh);
             const userTemp = localStorage.getItem('user');
             if (userTemp) {
               this.httpLogin.username.next(JSON.parse(userTemp));
+              console.log(this.userInfo);
             }
             this.router.navigateByUrl('/list-master', { replaceUrl: true });
           } else {
@@ -148,12 +155,12 @@ export class AppComponent {
             this.presentAlertConfirmCache();
           }
         },
-        error:() => {
+        error: () => {
           this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
           this.presentAlertConfirmCache();
         },
-        complete:() => {
+        complete: () => {
           this.common.dismissloading();
         }
       })
@@ -179,15 +186,15 @@ export class AppComponent {
       mode: 'ios',
       buttons: [{
         text: 'RESET',
-          handler: (data) => {
-            this.cleanDb();
-          }
-        },{
-          text: 'RETRY',
-          handler: (data) => {
-            this.refreshToken();
-          }
-        }]
+        handler: (data) => {
+          this.cleanDb();
+        }
+      }, {
+        text: 'RETRY',
+        handler: (data) => {
+          this.refreshToken();
+        }
+      }]
     });
     await alert.present();
   }
@@ -195,7 +202,7 @@ export class AppComponent {
   async cleanDb() {
     await db.checklist.clear();
     localStorage.clear();
-    this.router.navigateByUrl('/login', {replaceUrl: true});
+    this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 
   async presentAlertConfirm() {
@@ -206,15 +213,15 @@ export class AppComponent {
       mode: 'ios',
       buttons: [{
         text: 'Cancel',
-          handler: (data) => { }
-        },{
-          text: 'YES',
-          handler: (data) => {
-            this.startWatching()
-            this.restart();
-            this.refreshTokenOnly();
-          }
-        }]
+        handler: (data) => { }
+      }, {
+        text: 'YES',
+        handler: (data) => {
+          this.startWatching()
+          this.restart();
+          this.refreshTokenOnly();
+        }
+      }]
     });
     await alert.present();
   }
@@ -238,6 +245,13 @@ export class AppComponent {
   getUserData() {
     this.loginPro.getUserDataObs().subscribe((dat: any) => {
       this.userInfo = dat;
+      // if (this.userInfo.current_punch_status === 'IN') {        
+      //   this.setPunchIn(true);
+      //   this.loginPro.setPunchStatus(true);
+      // } else if (this.userInfo.current_punch_status === 'OUT') {        
+      //   this.setPunchIn(false);
+      //   this.loginPro.setPunchStatus(false);
+      // }      
     });
 
     this.listMaster.getData().subscribe((val: any) => {
@@ -260,18 +274,18 @@ export class AppComponent {
   logout() {
     this.common.presentLoading().then(preLoad => {
       this.httpLogin.logout('0.0.0.0').subscribe({
-        next:(data: any) => {
+        next: (data: any) => {
           if (data.status) {
             this.reset();
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
         },
-        error:() => {
+        error: () => {
           this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
-        complete:() => {
+        complete: () => {
           this.common.dismissloading();
         }
       });
@@ -292,5 +306,50 @@ export class AppComponent {
 
   openPage(data: any) {
     this.router.navigateByUrl(data.link);
+  }
+
+  private setPunchIn(value: boolean) {    
+    this.isProgrammaticChange = true;
+    this.isPunchIn = value;
+    setTimeout(() => this.isProgrammaticChange = false, 100);
+  }
+
+  togglePunch(event: any) {    
+    if (this.isProgrammaticChange) return;
+    this.isPunchIn = event.detail.checked;
+    if (this.isPunchIn) {
+      this.punchInOutApi('IN');
+    } else {
+      this.punchInOutApi('OUT');
+    }
+  }
+  
+  punchInOutApi(type: string) {
+    const payload = {
+      type: type,
+      latitude: 28.443433897705546,
+      longitude: 77.31187477565328,
+      source: "MOBILE",
+      actionType: "REGULAR",
+      userId: this.userInfo.id
+    };
+    this.common.presentLoading().then(preLoad => {
+      this.listMaster.punchIn(payload).subscribe({
+        next: (res: any) => {
+          console.log("Punch In API Response", res);
+          if (res.status) {
+            let val = type === 'IN' ? true : false;
+            this.loginPro.setPunchStatus(val);           
+          }
+        },
+        error: () => {          
+          this.setPunchIn(false);
+          this.common.dismissloading();
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      });  
+    });    
   }
 }

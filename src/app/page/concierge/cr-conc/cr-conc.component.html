@@ -68,12 +68,25 @@
 
       <ion-item>
         <ion-label color="primary" position="floating">Select Urgency  <ion-text color="danger">*</ion-text></ion-label>
-        <ion-select interface="action-sheet"  mode="ios" formControlName="priority">
+        <ion-select interface="action-sheet"  mode="ios" formControlName="priority" (ionChange)="onPriorityChange($event)">
           <ion-select-option value="low">Low</ion-select-option>
           <ion-select-option value="medium">Medium</ion-select-option>
           <ion-select-option value="hard">Hard</ion-select-option>
         </ion-select>
       </ion-item>
+
+      <div *ngIf="showDate">
+        <ion-item id="menu-roaster">
+          <ion-label color="primary" position="floating">Date <ion-text color="danger">*</ion-text></ion-label>
+          <ion-input [value]="forms.value.date_urgency | date:'medium'" placeholder="Select Date" readonly> </ion-input>
+          <ion-icon name="calendar-outline" slot="end"></ion-icon>
+        </ion-item>
+        <ion-popover trigger="menu-roaster">
+          <ng-template>
+            <ion-datetime max="2099" presentation="date-time" size="cover" formControlName="date_urgency"> </ion-datetime>
+          </ng-template>
+        </ion-popover>
+      </div>
 
       <ion-item>
         <ion-label color="primary" position="floating">Remark  <ion-text color="danger">*</ion-text></ion-label>
