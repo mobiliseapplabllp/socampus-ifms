@@ -66,7 +66,7 @@ export class DigitalChecklistService {
   }
 
   finalSubmitCheckList(formData: any): Observable<any> {
-    return this.http.post(this.baseurl + 'digicheck/offlineapp/saveAllPendingChecklist', formData);
+    return this.http.post(this.baseurl + 'digicheck/offlineapp/saveAllPendingChecklist_AM', formData);
   }
 
   updateTktToSchedule(formData: any): Observable<any> {
