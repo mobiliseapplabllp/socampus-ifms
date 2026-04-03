@@ -344,7 +344,7 @@ export class ConcWorkComponent implements OnInit {
 
   currentMarker(lat: any, long: any) {
     const position = new google.maps.LatLng(lat, long);
-    const marker = new google.maps.Marker({ position, title: 'Mobilise' });
+    const marker = new google.maps.Marker({ position, title: 'Mobilise', animation: google.maps.Animation.BOUNCE });
     marker.setMap(this.map);
   }
 
