@@ -35,7 +35,7 @@ export class AppComponent {
     private common: CommonService,
     private iab: InAppBrowser) {
       this.platform.ready().then(res => {        
-        this.initApp();
+        // this.initApp();
         this.getUserData();
       });
   }

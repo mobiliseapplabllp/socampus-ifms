@@ -289,12 +289,14 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   checkCurrentDateDG(date: string) {
-    this.common.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {      
+      console.log(date);
       const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
       const sub = friendsObservable.subscribe({
         next:(data) => {          
           this.common.dismissloading();
-          this.allChecklist = data;          
+          this.allChecklist = data;      
+          console.log(this.allChecklist);    
           // this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status == 'assigned' && val.assign_to == this.userData.id);
           // this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status != 'assigned' && val.assign_to == this.userData.id);
           this.assignCheckList = this.allChecklist.filter((val: any) => {
@@ -308,7 +310,7 @@ export class DigitalChecklistPage implements OnInit {
           });
           console.log(this.assignCheckList);
           if (this.allChecklist.length === 0 && this.isInternet) {
-            this.getOfflineCheckListFromServer(date, 0);
+            this.getOfflineCheckListFromServer(date, this.offset);
           }
           setTimeout(() => {
             sub.unsubscribe();
@@ -337,6 +339,7 @@ export class DigitalChecklistPage implements OnInit {
       msg = 'Please Wait, Application is Fetching your Data ';
     }
     this.common.presentLoading(msg).then(preLoad => {
+      console.log(date, offset);
       this.httpDigital.getOfflineCheckListFromServer(date, offset).subscribe({
         next:(data: any) => {
           if (data.status) {
@@ -388,6 +391,8 @@ export class DigitalChecklistPage implements OnInit {
 
   async addBulkCheckList(checkListData: any) {    
     await db.checklist.bulkPut(checkListData).then(res => {
+      console.log(this.isLoop);
+      console.log(this.TOTAL_CHECKLIST);
       if (this.isLoop && this.TOTAL_CHECKLIST > 300) {
         this.offset = this.offset + 300;
         this.getOfflineCheckListFromServer(this.selectedDate, this.offset);

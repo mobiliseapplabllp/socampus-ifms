@@ -84,8 +84,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
       });
     }
   }
-
-  /** One-shot hydrate from Dexie when entering the page — no liveQuery (avoids scroll jump / re-patch on every save). */
+  
   async ionViewWillEnter() {
     const qp = this.activeRoute.snapshot.queryParamMap;
     this.on_behalf = qp.get('isOnBehalf') ?? this.on_behalf;
