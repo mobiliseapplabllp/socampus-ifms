@@ -55,6 +55,7 @@ export class LoginService {
 
 
   setPunchStatus(status: boolean) {
+    console.log('status', status);
     this.punchStatus.next(status);
   }
 

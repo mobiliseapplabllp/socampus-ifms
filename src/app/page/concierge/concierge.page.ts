@@ -34,8 +34,8 @@ export class ConciergePage implements OnInit {
 
   ionViewDidEnter() {
     if (this.platform.is('capacitor')) {
-      this.ensureLocationTrackingReadinessOnEntry();
-    }    
+      void this.ensureLocationTrackingReadinessOnEntry();
+    }
     this.getTicketList();
   }
 
@@ -205,29 +205,60 @@ export class ConciergePage implements OnInit {
   }
 
   private async ensureLocationTrackingReadinessOnEntry() {
-    const hasBackgroundPermission = await this.checkBackgroundPermission();
-    if (!hasBackgroundPermission) {
-      const shouldOpenSettings = await this.showSettingsPrompt(
-        'Location Permission Required',
-        'Please allow location access all the time for accurate background tracking.'
-      );
+    try {
+      // abc
+      let hasBackgroundPermission = await this.checkBackgroundPermission();
 
-      if (shouldOpenSettings) {
+      // Must call native permission APIs first — iOS/Android system dialogs live inside
+      // requestBackgroundPermissions(), not in our alert. Old flow only ran that after
+      // "Open Settings", so users who tapped "Not now" never saw any system prompt.
+      if (!hasBackgroundPermission) {
         await LocationTracker.requestBackgroundPermissions();
+        // iOS: authorization updates arrive asynchronously on the native delegate;
+        // an immediate re-check often reads stale state and skips the Settings path.
+        if (this.platform.is('ios')) {
+          await new Promise<void>(resolve => setTimeout(resolve, 600));
+        }
+        hasBackgroundPermission = await this.checkBackgroundPermission();
       }
-      return;
-    }
 
-    const batteryOptimizationIgnored = await this.checkBatteryOptimization();
-    if (!batteryOptimizationIgnored) {
-      const shouldOpenBatterySettings = await this.showSettingsPrompt(
-        'Battery Optimization',
-        'Please disable battery optimization for this app to keep background tracking active.'
-      );
+      if (!hasBackgroundPermission) {
+        const shouldOpenSettings = await this.showSettingsPrompt(
+          'Location Permission Required',
+          this.platform.is('ios')
+            ? 'Turn on Location and set it to "Always" for background GPS trips. You can open Settings to change this.'
+            : 'Please allow location access all the time for accurate background tracking.'
+        );
 
-      if (shouldOpenBatterySettings) {
-        await LocationTracker.requestIgnoreBatteryOptimizations();
+        if (shouldOpenSettings) {
+          await LocationTracker.requestBackgroundPermissions();
+          if (this.platform.is('ios')) {
+            await new Promise<void>(resolve => setTimeout(resolve, 600));
+          }
+          hasBackgroundPermission = await this.checkBackgroundPermission();
+        }
+        if (!hasBackgroundPermission) {
+          return;
+        }
       }
+
+      // Android only: iOS has no battery optimization API; plugin stubs return allowed=true.
+      if (this.platform.is('android')) {
+        const batteryOptimizationIgnored = await this.checkBatteryOptimization();
+        if (!batteryOptimizationIgnored) {
+          const shouldOpenBatterySettings = await this.showSettingsPrompt(
+            'Battery Optimization',
+            'Please disable battery optimization for this app to keep background tracking active.'
+          );
+
+          if (shouldOpenBatterySettings) {
+            await LocationTracker.requestIgnoreBatteryOptimizations();
+          }
+        }
+      }
+    } catch (e) {
+      console.error('ensureLocationTrackingReadinessOnEntry', e);
+      this.common.presentToast('Could not complete location permission setup.', 'warning');
     }
   }
 
@@ -245,7 +276,7 @@ export class ConciergePage implements OnInit {
     const alert = await this.alertController.create({
       header,
       message,
-      mode: 'ios',
+      mode: this.platform.is('ios') ? 'ios' : 'md',
       buttons: [
         {
           text: 'Not now',
@@ -262,8 +293,5 @@ export class ConciergePage implements OnInit {
     const { role } = await alert.onDidDismiss();
     return role === 'confirm';
   }
-
-  
-
 
 }

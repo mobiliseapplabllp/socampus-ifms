@@ -11,6 +11,7 @@ import { environment } from 'src/environments/environment';
 import { checklist, db } from './provider/local-db/local-db.service';
 import { CapacitorCookies } from '@capacitor/core';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
+import { Geolocation } from '@capacitor/geolocation';
 
 
 @Component({
@@ -19,7 +20,7 @@ import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-  userInfo: any = [];
+  userInfo: any = []
   myMenu: any = [];
   loading: any;
   appVersion!: string;
@@ -318,38 +319,72 @@ export class AppComponent {
     if (this.isProgrammaticChange) return;
     this.isPunchIn = event.detail.checked;
     if (this.isPunchIn) {
-      this.punchInOutApi('IN');
+      void this.punchInOutApi('IN');
     } else {
-      this.punchInOutApi('OUT');
+      void this.punchInOutApi('OUT');
     }
   }
-  
-  punchInOutApi(type: string) {
+
+  private revertPunchToggleAfterFailure(type: string) {
+    this.setPunchIn(type === 'IN' ? false : true);
+  }
+
+  async punchInOutApi(type: string) {
+    let latitude: number;
+    let longitude: number;
+
+    if (this.platform.is('capacitor')) {
+      try {
+        const perm = await Geolocation.requestPermissions();
+        if (perm.location === 'denied') {
+          this.common.presentToast('Please enable your location', 'warning');
+          this.revertPunchToggleAfterFailure(type);
+          return;
+        }
+        const res = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 20000,
+        });
+        latitude = res.coords.latitude;
+        longitude = res.coords.longitude;
+      } catch {
+        this.common.presentToast('Please enable your location', 'warning');
+        this.revertPunchToggleAfterFailure(type);
+        return;
+      }
+    } else {
+      latitude = 28.443433897705546;
+      longitude = 77.31187477565328;
+    }
+
     const payload = {
-      type: type,
-      latitude: 28.443433897705546,
-      longitude: 77.31187477565328,
-      source: "MOBILE",
-      actionType: "REGULAR",
-      userId: this.userInfo.id
+      type,
+      latitude,
+      longitude,
+      source: 'MOBILE',
+      actionType: 'REGULAR',
+      userId: this.userInfo.id,
     };
-    this.common.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(() => {
       this.listMaster.punchIn(payload).subscribe({
         next: (res: any) => {
-          console.log("Punch In API Response", res);
           if (res.status) {
-            let val = type === 'IN' ? true : false;
-            this.loginPro.setPunchStatus(val);           
+            const val = type === 'IN';
+            this.loginPro.setPunchStatus(val);
+          } else {
+            this.common.presentToast(res.msg || 'Punch failed', 'warning');
+            this.revertPunchToggleAfterFailure(type);
           }
         },
-        error: () => {          
-          this.setPunchIn(false);
+        error: () => {
+          this.revertPunchToggleAfterFailure(type);
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete: () => {
           this.common.dismissloading();
         },
-        complete:() => {
-          this.common.dismissloading();
-        }
-      });  
-    });    
+      });
+    });
   }
 }

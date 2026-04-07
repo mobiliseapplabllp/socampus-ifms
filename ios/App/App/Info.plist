@@ -20,44 +20,21 @@
 	<string>4.1.7</string>
 	<key>CFBundleVersion</key>
 	<string>417</string>
-
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app requires photo library access to function properly.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>This app requires camera access to function properly.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app requires access to your location when the screen is on and the app is displayed.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app requires microphone access to function properly.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>This app uses speech recognition to convert spoken words into text for quick and easy note-taking.</string>
-
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>socampusstaging.mobilisepro.com</key>
-			<dict>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-				<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
-				<false/>
-				<key>NSTemporaryExceptionMinimumTLSVersion</key>
-				<string>TLSv1.2</string>
-			</dict>
-		</dict>
-	</dict>
-
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict/>
 	<key>NSCameraUsageDescription</key>
-	<string>This app requires camera access to function properly.</string>
+	<string>This app requires camera access to function properly.</string>	
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs your location even when the app is in the background or the screen is locked, for continuous location tracking.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app requires access to your location when the screen is on and the app is displayed.</string>
+
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+  		<string>com.socampuseng.mbl.location</string>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app requires microphone access to function properly.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
@@ -71,6 +48,9 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
+		<string>location</string>
+		<string>fetch</string>
+		<string>processing</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

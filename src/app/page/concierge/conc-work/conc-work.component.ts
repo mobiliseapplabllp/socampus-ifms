@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ModalController, NavController, Platform } from '@ionic/angular';
+import { AlertController, ModalController, NavController, Platform } from '@ionic/angular';
 import { CameraService } from 'src/app/provider/camera/camera.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ConciergeService } from 'src/app/provider/concierge/concierge.service';
@@ -75,7 +75,8 @@ export class ConcWorkComponent implements OnInit {
     private fb: FormBuilder,
     private navCtrl: NavController,
     private modalCtrl: ModalController,
-    private platform: Platform) {
+    private platform: Platform,
+    private alertController: AlertController) {
     this.activeRoute.queryParams.subscribe((res) => {
       this.requestData = JSON.parse(res['data']);
       let segStatusType = res['type'];
@@ -279,6 +280,7 @@ export class ConcWorkComponent implements OnInit {
 
   private async getCurrentForegroundLocation() {
     if (this.platform.is('capacitor')) {
+      await Geolocation.requestPermissions();
       const res = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
       return {
         lat: res.coords.latitude,
@@ -573,28 +575,56 @@ export class ConcWorkComponent implements OnInit {
       return true;
     }
 
-    // 1. Background permission check
-    const { allowed: bgAllowed } = await LocationTracker.requestBackgroundPermissionsCheck();
-    if (!bgAllowed) {
-      await LocationTracker.requestBackgroundPermissions(); // Opens app settings
-      return false;
-    }
+    try {
+      // 1. Background = Always (iOS) / all-the-time (Android) — same flow as concierge.page
+      let { allowed: bgAllowed } = await LocationTracker.requestBackgroundPermissionsCheck();
+      if (!bgAllowed) {
+        await LocationTracker.requestBackgroundPermissions();
+        if (this.platform.is('ios')) {
+          await new Promise<void>(resolve => setTimeout(resolve, 600));
+        }
+        bgAllowed = (await LocationTracker.requestBackgroundPermissionsCheck()).allowed;
+      }
+      if (!bgAllowed) {
+        const shouldOpenSettings = await this.showLocationPermissionSettingsPrompt();
+        if (shouldOpenSettings) {
+          await LocationTracker.requestBackgroundPermissions();
+          if (this.platform.is('ios')) {
+            await new Promise<void>(resolve => setTimeout(resolve, 600));
+          }
+          bgAllowed = (await LocationTracker.requestBackgroundPermissionsCheck()).allowed;
+        }
+      }
+      if (!bgAllowed) {
+        this.common.presentToast(
+          'Background location (Always) is required for GPS trip tracking.',
+          'warning'
+        );
+        return false;
+      }
 
-    // 2. Battery optimization check (IMPORTANT - tracking band ho sakti hai otherwise)
-    const { allowed: batteryAllowed } = await LocationTracker.requestIgnoreBatteryOptimizationsCheck();
-    if (!batteryAllowed) {
-      await LocationTracker.requestIgnoreBatteryOptimizations(); // Opens battery settings
-      return false;
-    }
+      // 2. Battery optimization (Android only; iOS plugin stubs return allowed)
+      if (this.platform.is('android')) {
+        const { allowed: batteryAllowed } = await LocationTracker.requestIgnoreBatteryOptimizationsCheck();
+        if (!batteryAllowed) {
+          await LocationTracker.requestIgnoreBatteryOptimizations();
+          const { allowed: batAgain } = await LocationTracker.requestIgnoreBatteryOptimizationsCheck();
+          if (!batAgain) {
+            return false;
+          }
+        }
+      }
 
-    // 3. Start tracking
-    const { success } = await LocationTracker.start();
-    if (success) {
-      this.setGpsTrackerRunningState(true);
-      console.log('Tracking started');
-      return true;
-    } else {
-      console.error('Failed to start');
+      // 3. Start native background tracker (separate from Geolocation current position)
+      const { success } = await LocationTracker.start();
+      if (success) {
+        this.setGpsTrackerRunningState(true);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error('startTracking', e);
+      this.common.presentToast('Could not start background location tracking.', 'warning');
       return false;
     }
   }
@@ -624,6 +654,23 @@ export class ConcWorkComponent implements OnInit {
   async clearLocations() {
     await LocationTracker.clearLocations();
     console.log('Locations cleared');
+  }
+
+  private async showLocationPermissionSettingsPrompt(): Promise<boolean> {
+    const alert = await this.alertController.create({
+      header: 'Location Permission Required',
+      message: this.platform.is('ios')
+        ? 'Turn on Location and set it to "Always" for background GPS trips. You can open Settings to change this.'
+        : 'Please allow location access all the time for accurate background tracking.',
+      mode: this.platform.is('ios') ? 'ios' : 'md',
+      buttons: [
+        { text: 'Not now', role: 'cancel' },
+        { text: 'Open Settings', role: 'confirm' }
+      ]
+    });
+    await alert.present();
+    const { role } = await alert.onDidDismiss();
+    return role === 'confirm';
   }
 
 }

@@ -1,35 +1,83 @@
 <ion-app>
-  <ion-menu contentId="main-content">
-    <ion-header>
-      <ion-toolbar color="primary" style="padding:2%">
-        <h4>{{userInfo.user_name}}</h4>
-        <p>{{userInfo.username}} {{userInfo.user_type}}</p>
-        <div class="punch-wrapper">
-          <span  class="label punch-out-text">Punch Out</span>
-          <ion-toggle color="success" [checked]="isPunchIn" (ionChange)="togglePunch($event)" [class.punch-in]="isPunchIn" [class.punch-out]="!isPunchIn"> </ion-toggle>
-          <span class="label punch-in-text">Punch In</span>
+  <ion-menu contentId="main-content" side="start" menuId="app-menu">
+    <ion-header class="menu-header ion-no-border">
+      <ion-toolbar color="primary" class="menu-toolbar">
+        <div class="menu-toolbar-inner">
+          <div class="menu-profile">
+            <div class="menu-avatar" aria-hidden="true">
+              <ion-icon name="person"></ion-icon>
+            </div>
+            <div class="menu-profile-text">
+              <h2 class="menu-user-name">{{ userInfo?.user_name || 'User' }}</h2>
+              <p class="menu-user-meta">
+                <span *ngIf="userInfo?.username" class="menu-user-id">{{ userInfo.username }}</span>
+                <span *ngIf="userInfo?.user_type" class="menu-user-type">{{ userInfo.user_type }}</span>
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="punch-card"
+            [class.punch-card--in]="isPunchIn"
+            [class.punch-card--out]="!isPunchIn"
+          >
+            <p class="punch-card-title">Attendance</p>
+            <div class="punch-row">
+              <span class="punch-side-label punch-out-text">Out</span>
+              <ion-toggle
+                color="success"
+                [checked]="isPunchIn"
+                (ionChange)="togglePunch($event)"
+                [class.toggle--in]="isPunchIn"
+                [class.toggle--out]="!isPunchIn"
+                aria-label="Punch in or punch out"
+              ></ion-toggle>
+              <span class="punch-side-label punch-in-text">In</span>
+            </div>
+            <p class="punch-hint">{{ isPunchIn ? 'Currently punched in' : 'Currently punched out' }}</p>
+          </div>
         </div>
       </ion-toolbar>
     </ion-header>
-    <ion-content>
-      <ion-list >
-        <ion-menu-toggle *ngFor="let dat of myMenu let i = index" (click)="openPage(dat)">
-          <ion-item lines="none" >
-            <img [src]="dat.icon_path" slot="start" style="width:30px; height:30px">
-            <ion-label>{{dat.smnu_desc}}</ion-label>
+
+    <ion-content class="menu-content" scroll-y="true">
+      <ion-list class="menu-list" lines="none">
+        <ion-menu-toggle
+          [autoHide]="false"
+          *ngFor="let dat of myMenu; let i = index"
+        >
+          <ion-item
+            class="menu-item"
+            button
+            detail="false"
+            (click)="openPage(dat)"
+          >
+            <div class="menu-item-icon-wrap" slot="start">
+              <img [src]="dat.icon_path" alt="" class="menu-item-icon" />
+            </div>
+            <ion-label class="menu-item-label">{{ dat.smnu_desc }}</ion-label>
+            <ion-icon name="chevron-forward-outline" slot="end" class="menu-item-chevron"></ion-icon>
           </ion-item>
         </ion-menu-toggle>
-        <ion-item lines="none" (click)="logout()">
-          <ion-icon name="log-out-outline" style="width:30px; height:30px" slot="start" color="dark"></ion-icon>
-          <ion-label>Logout</ion-label>
+
+        <div class="menu-divider" role="separator"></div>
+
+        <ion-item class="menu-item menu-item--logout" button detail="false" (click)="logout()">
+          <ion-icon name="log-out-outline" slot="start" class="menu-item-ion-icon"></ion-icon>
+          <ion-label class="menu-item-label">Logout</ion-label>
         </ion-item>
       </ion-list>
     </ion-content>
-    <ion-footer>
-      <ion-toolbar color="light">
-        <ion-title class="ion-text-center" size="small" (click)="appUrl()"> V {{appVersion}} </ion-title>
+
+    <ion-footer class="menu-footer ion-no-border">
+      <ion-toolbar class="menu-footer-toolbar">
+        <button type="button" class="version-chip" (click)="appUrl()">
+          <ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon>
+          <span>Version {{ appVersion || '—' }}</span>
+        </button>
       </ion-toolbar>
     </ion-footer>
   </ion-menu>
+
   <ion-router-outlet id="main-content"></ion-router-outlet>
 </ion-app>
