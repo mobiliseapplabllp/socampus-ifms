@@ -29,3 +29,29 @@ ion-text {
   opacity: 0;
   pointer-events: none;
 }
+
+.fill-report-q-card {
+  margin: 10px;
+  padding: 5px 0;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+.fill-report-q-type {
+  font-size: 12px;
+}
+
+.fill-report-radio-gap {
+  margin-right: 3px;
+}
+
+.fill-report-sign-thumb {
+  height: 30px;
+  width: 30px;
+  border: 1px solid black;
+}
+
+.fill-report-video-preview {
+  width: 100%;
+  max-height: 70vh;
+}

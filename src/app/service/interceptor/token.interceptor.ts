@@ -50,7 +50,7 @@ export class TokenInterceptor implements HttpInterceptor {
       })
       return next.handle(mod);
     } else {
-      if (request.url == 'https://translate.googleapis.com/language/translate/v2?key=AIzaSyDJjHphpheVQM7CRYNqHHdJqMqAgt0IY70') {
+      if (request.url == 'https://translate.googleapis.com/language/translate/v2?key=AIzaSyDJjHphpheVQM7CRYNqHHdJqMqAgt0IY70' || request.url == 'https://aov.mhbemp.in/test_script/RFID.php') {
         const userToken = localStorage.getItem('token1');
         const modifiedReq = request.clone({headers: request.headers.set('Accept', 'application/json')});
         return next.handle(modifiedReq).pipe(tap(() => {},

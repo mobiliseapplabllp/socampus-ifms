@@ -3,8 +3,8 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title >Fill Reports</ion-title>
-    <ion-buttons slot="end" [hidden]="!isInternet || schedule_status !== 'assigned' || offline_save === 'true' " >
+    <ion-title>Fill Reports</ion-title>
+    <ion-buttons slot="end" [hidden]="!isInternet || !isEditable()">
       <ion-button id="click-trigger" slot="icon-only">
         <ion-icon name="language-outline"></ion-icon>
       </ion-button>
@@ -12,241 +12,208 @@
     <ion-popover trigger="click-trigger" triggerAction="click" [dismissOnSelect]="true">
       <ng-template>
         <ion-content>
-          <ion-item (click)="changeLan('en')" >
-            <ion-label>English</ion-label>
+          <ion-item *ngFor="let l of uiLangs" (click)="changeLan(l.code)">
+            <ion-label>{{ l.label }}</ion-label>
           </ion-item>
-          <ion-item (click)="changeLan('hi')" >
-            <ion-label>Hindi</ion-label>
-          </ion-item>
-          <ion-item (click)="changeLan('te')" >
-            <ion-label>Telugu</ion-label>
-          </ion-item>
-          <ion-item (click)="changeLan('ta')" >
-            <ion-label>Tamil</ion-label>
-          </ion-item>
-          <ion-item (click)="changeLan('kn')" >
-            <ion-label>Kannada</ion-label>
-          </ion-item>
-          <ion-item (click)="changeLan('ml')" >
-            <ion-label>Malayalam</ion-label>
-          </ion-item>
-          <ion-item (click)="changeLan('mr')" >
-            <ion-label>Marathi</ion-label>
-          </ion-item>
-          <ion-item (click)="changeLan('gu')" >
-            <ion-label>Gujarati</ion-label>
-          </ion-item>    
-          <ion-item (click)="changeLan('bn')" >
-            <ion-label>Bengali</ion-label>
-          </ion-item>
-          <ion-item (click)="changeLan('ory')" >
-            <ion-label>Odia</ion-label>
-          </ion-item>          
         </ion-content>
       </ng-template>
     </ion-popover>
   </ion-toolbar>
 </ion-header>
+
 <ion-content>
   <input #videoFileInput type="file" accept="video/*" class="fill-report-hidden-file" (change)="onVideoFileSelected($event)">
+
+  <ng-template #numericScalar let-val="val" let-dat="dat">
+    <ion-item [ngClass]="{ redBorder: val.isNotFill && !isScalarAnswerValid(val) }">
+      <ion-label position="floating">{{ numericScalarLabel(val) }}</ion-label>
+      <ion-input type="number" inputmode="decimal" step="any" [(ngModel)]="val.q_value" (ionChange)="onScalarAnswerChange(val)" [disabled]="!isEditable(dat)"></ion-input>
+    </ion-item>
+    <ion-text color="medium" class="ion-padding-horizontal" *ngIf="getNumericHint(val)">
+      <p class="ion-no-margin ion-padding-bottom">{{ getNumericHint(val) }}</p>
+    </ion-text>
+  </ng-template>
+
+  <!-- Photo / video / IMG picker row (reused) -->
+  <ng-template #docPickRow let-val="val" let-dat="dat" let-mode="mode">
+    <ion-row>
+      <ion-col size="6" class="ion-padding-start">
+        <div [hidden]="!isEditable(dat)">
+          <ion-button
+            size="small"
+            [color]="!val.imagename ? 'primary' : 'success'"
+            [fill]="!val.imagename ? 'outline' : 'solid'"
+            (click)="onDocPick(val, mode)"
+            [ngClass]="{ redBorder: docPickRedBorder(val, mode) }">
+            {{ docPickLabel(mode) }}
+            <ion-icon [name]="val.imagename ? 'checkmark-done-outline' : docPickIconPending(mode)" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-col>
+      <ion-col size="6" class="ion-text-end" *ngIf="val.imagename">
+        <ion-button color="danger" (click)="viewAttachment(val)" fill="clear">
+          <ion-icon [name]="viewIconForDocMode(mode)"></ion-icon>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ng-template>
 
   <div *ngFor="let dat of scheduleArr">
     <ion-card>
       <ion-row>
         <ion-col size="6">
           <ion-text color="primary"> PC Name</ion-text><br>
-          <ion-text>{{dat.pc_desc}}</ion-text>
+          <ion-text>{{ dat.pc_desc }}</ion-text>
         </ion-col>
         <ion-col size="6">
           <ion-text color="primary"> Location</ion-text><br>
-          <ion-text>{{dat.location_desc}}</ion-text>
+          <ion-text>{{ dat.location_desc }}</ion-text>
         </ion-col>
         <ion-col size="6">
           <ion-text color="primary"> CheckList ID</ion-text><br>
-          <ion-text>{{dat.schedule_unique_id}}</ion-text>
+          <ion-text>{{ dat.schedule_unique_id }}</ion-text>
         </ion-col>
         <ion-col size="6">
           <ion-text color="primary"> CheckList</ion-text><br>
-          <ion-text>{{dat.chk_cat_name}}</ion-text>
+          <ion-text>{{ dat.chk_cat_name }}</ion-text>
         </ion-col>
         <ion-col size="6">
           <ion-text color="primary"> Schedule Date</ion-text><br>
-          <ion-text>{{dat.schedule_date}}</ion-text>
+          <ion-text>{{ dat.schedule_date }}</ion-text>
         </ion-col>
-        <ion-col size="6" *ngIf="dat.schedule_status !== 'assigned'" >
+        <ion-col size="6" *ngIf="dat.schedule_status !== 'assigned'">
           <ion-text color="primary"> Attended Date</ion-text><br>
-          <ion-text>{{dat.submitted_date}}</ion-text>
+          <ion-text>{{ dat.submitted_date }}</ion-text>
         </ion-col>
         <ion-col size="6" *ngIf="(dat.raised_cust === 'Yes' || dat.ticket_id > 0) && isInternet">
           <ion-button size="small" shape="round" (click)="presentAlertConfirm()" *ngIf="dat.raised_cust === 'Yes' && dat.ticket_id === 0" mode="ios">Raise a Ticket</ion-button>
-          <ion-button size="small" shape="round" color="success" *ngIf="dat.ticket_id > 0">Ticket ID: {{dat.ticket_id}}</ion-button>
+          <ion-button size="small" shape="round" color="success" *ngIf="dat.ticket_id > 0">Ticket ID: {{ dat.ticket_id }}</ion-button>
         </ion-col>
       </ion-row>
-      <ion-row *ngIf="dat.schedule_status !== 'assigned'" >
+      <ion-row *ngIf="dat.schedule_status !== 'assigned'">
         <ion-col size="6" *ngIf="dat.review_date">
           <ion-text color="primary"> Review Date</ion-text><br>
-          <ion-text>{{dat.review_date}}</ion-text>
+          <ion-text>{{ dat.review_date }}</ion-text>
         </ion-col>
-        <ion-col size="6" >
+        <ion-col size="6">
           <ion-text color="primary"> Submit By</ion-text><br>
-          <ion-text>{{dat.user}}</ion-text>
+          <ion-text>{{ dat.user }}</ion-text>
         </ion-col>
       </ion-row>
     </ion-card>
+
     <div *ngIf="!dat.isResponseShow" class="ion-no-padding">
-      <div style="margin:10px;padding:5px 0px ;border:1px solid black;border-radius: 10px;" *ngFor="let val of dat.qus; let i = index" [ngClass]="{critical: val.critical_desc === 'Critical', noncritical: val.critical_desc === 'Non Critical', fullborder: val.isNotFill === true, bgcolor: val.bgcolor === true}" #a>
+      <div
+        class="fill-report-q-card"
+        *ngFor="let val of dat.qus; let i = index"
+        [ngClass]="{
+          critical: val.critical_desc === 'Critical',
+          noncritical: val.critical_desc === 'Non Critical',
+          fullborder: val.isNotFill === true,
+          bgcolor: val.bgcolor === true
+        }"
+        #a>
         <ion-item color="none">
           <ion-avatar class="center">
-            <b>{{i+1}}</b>
+            <b>{{ i + 1 }}</b>
           </ion-avatar>
           <ion-label class="ion-text-wrap">
             <div [innerHTML]="val.q_desc"></div>
             <p class="ion-no-margin ion-margin-top" *ngIf="val.question_type">
-              <ion-text color="medium" style="font-size: 12px;">{{ val.question_type }}</ion-text>
+              <ion-text color="medium" class="fill-report-q-type">{{ val.question_type }}</ion-text>
             </p>
           </ion-label>
-          <ion-buttons slot="end" (click)="speakCondition(val, i)" [hidden]="dat.schedule_status !== 'assigned' || offline_save === 'true' ">
+          <ion-buttons slot="end" (click)="speakCondition(val, i)" [hidden]="!isEditable(dat)">
             <ion-button slot="icon-only">
               <ion-icon name="volume-high-outline"></ion-icon>
             </ion-button>
           </ion-buttons>
         </ion-item>
 
-        <!-- Option (Yes / No / NA) -->
-        <ion-row *ngIf="questionKind(val) === 'option'">
-          <ion-col size="12" class="ion-no-padding" >
-            <ion-radio-group  [(ngModel)]="val.rspns" (ionChange)="changeResponseAction(val)" color="none" mode="md" >
-              <ion-row>
-                <ion-col size="4" *ngFor="let opt of val.options">
-                  <ion-item lines="none" [disabled]="dat.schedule_status !== 'assigned' || offline_save === 'true'" >
-                    <ion-label>{{opt.optn_desc}}</ion-label>
-                    <ion-radio slot="start" [value]="opt.optn_id" style="margin-right:3px"></ion-radio>
-                  </ion-item>
-                </ion-col>
-              </ion-row>
-            </ion-radio-group>
-          </ion-col>
-        </ion-row>
+        <ng-container [ngSwitch]="questionKind(val)">
+          <!-- Option -->
+          <ng-container *ngSwitchCase="'option'">
+            <ion-row>
+              <ion-col size="12" class="ion-no-padding">
+                <ion-radio-group [(ngModel)]="val.rspns" (ionChange)="changeResponseAction(val)" color="none" mode="md">
+                  <ion-row>
+                    <ion-col size="4" *ngFor="let opt of val.options">
+                      <ion-item lines="none" [disabled]="!isEditable(dat)">
+                        <ion-label>{{ opt.optn_desc }}</ion-label>
+                        <ion-radio slot="start" [value]="opt.optn_id" class="fill-report-radio-gap"></ion-radio>
+                      </ion-item>
+                    </ion-col>
+                  </ion-row>
+                </ion-radio-group>
+              </ion-col>
+            </ion-row>
+            <ng-container *ngTemplateOutlet="docPickRow; context: { val: val, dat: dat, mode: 'img' }"></ng-container>
+          </ng-container>
 
-        <!-- Date (popover + datetime — same pattern as add-asset) -->
-        <ng-container *ngIf="questionKind(val) === 'date'">
-          <ion-item lines="none" class="ion-padding-vertical" [attr.id]="'fill-q-date-' + val.q_id" [disabled]="dat.schedule_status !== 'assigned' || offline_save === 'true'">
-            <ion-label color="primary" position="floating">{{ val.options?.[0]?.optn_desc || 'Date' }}</ion-label>
-            <ion-input type="text" [value]="displayIsoAsDate(val.q_value)" placeholder="Select Date" readonly></ion-input>
-          </ion-item>
-          <ion-popover [trigger]="'fill-q-date-' + val.q_id" mode="md">
-            <ng-template>
-              <ion-datetime max="2099" presentation="date" size="cover" [(ngModel)]="val.q_value" [showDefaultButtons]="true" (ionChange)="onScalarAnswerChange(val, $event)"></ion-datetime>
-            </ng-template>
-          </ion-popover>
+          <!-- Date -->
+          <ng-container *ngSwitchCase="'date'">
+            <ion-item lines="none" class="ion-padding-vertical" [attr.id]="'fill-q-date-' + val.q_id" [disabled]="!isEditable(dat)">
+              <ion-label color="primary" position="floating">{{ val.options?.[0]?.optn_desc || 'Date' }}</ion-label>
+              <ion-input type="text" [value]="displayIsoAsDate(val.q_value)" placeholder="Select Date" readonly></ion-input>
+            </ion-item>
+            <ion-popover [trigger]="'fill-q-date-' + val.q_id" mode="md">
+              <ng-template>
+                <ion-datetime max="2099" presentation="date" size="cover" [(ngModel)]="val.q_value" [showDefaultButtons]="true" (ionChange)="onScalarAnswerChange(val, $event)"></ion-datetime>
+              </ng-template>
+            </ion-popover>
+          </ng-container>
+
+          <!-- Date & time -->
+          <ng-container *ngSwitchCase="'datetime'">
+            <ion-item lines="none" class="ion-padding-vertical" [attr.id]="'fill-q-dt-' + val.q_id" [disabled]="!isEditable(dat)">
+              <ion-label color="primary" position="floating">{{ val.options?.[0]?.optn_desc || 'Date & time' }}</ion-label>
+              <ion-input type="text" [value]="displayIsoAsDateTime(val.q_value)" placeholder="Select date & time" readonly></ion-input>
+            </ion-item>
+            <ion-popover [trigger]="'fill-q-dt-' + val.q_id" mode="md">
+              <ng-template>
+                <ion-datetime max="2099" presentation="date-time" size="cover" [(ngModel)]="val.q_value" [showDefaultButtons]="true" (ionChange)="onScalarAnswerChange(val, $event)"></ion-datetime>
+              </ng-template>
+            </ion-popover>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'number'">
+            <ng-container *ngTemplateOutlet="numericScalar; context: { val: val, dat: dat }"></ng-container>
+          </ng-container>
+          <ng-container *ngSwitchCase="'temperature'">
+            <ng-container *ngTemplateOutlet="numericScalar; context: { val: val, dat: dat }"></ng-container>
+          </ng-container>
+
+          <!-- Short text -->
+          <ng-container *ngSwitchCase="'shorttext'">
+            <ion-item [ngClass]="{ redBorder: val.isNotFill && !isScalarAnswerValid(val) }">
+              <ion-label position="floating">Your answer</ion-label>
+              <ion-input type="text" [(ngModel)]="val.q_value" (ionChange)="onScalarAnswerChange(val)" [disabled]="!isEditable(dat)"></ion-input>
+            </ion-item>
+          </ng-container>
+
+          <!-- Attachment -->
+          <ng-container *ngSwitchCase="'attachment'">
+            <ng-container *ngTemplateOutlet="docPickRow; context: { val: val, dat: dat, mode: 'photo' }"></ng-container>
+          </ng-container>
+
+          <!-- Video -->
+          <ng-container *ngSwitchCase="'video'">
+            <ng-container *ngTemplateOutlet="docPickRow; context: { val: val, dat: dat, mode: 'video' }"></ng-container>
+          </ng-container>
         </ng-container>
 
-        <!-- Date Time -->
-        <ng-container *ngIf="questionKind(val) === 'datetime'">
-          <ion-item lines="none" class="ion-padding-vertical" [attr.id]="'fill-q-dt-' + val.q_id" [disabled]="dat.schedule_status !== 'assigned' || offline_save === 'true'">
-            <ion-label color="primary" position="floating">{{ val.options?.[0]?.optn_desc || 'Date & time' }}</ion-label>
-            <ion-input type="text" [value]="displayIsoAsDateTime(val.q_value)" placeholder="Select date & time" readonly></ion-input>
-          </ion-item>
-          <ion-popover [trigger]="'fill-q-dt-' + val.q_id" mode="md">
-            <ng-template>
-              <ion-datetime max="2099" presentation="date-time" size="cover" [(ngModel)]="val.q_value" [showDefaultButtons]="true" (ionChange)="onScalarAnswerChange(val, $event)"></ion-datetime>
-            </ng-template>
-          </ion-popover>
+        <ng-container *ngIf="showExtraDocRow(val)">
+          <ng-container *ngTemplateOutlet="docPickRow; context: { val: val, dat: dat, mode: 'img' }"></ng-container>
         </ng-container>
 
-        <!-- Number (decimal) -->
-        <ion-item *ngIf="questionKind(val) === 'number'" [ngClass]="{redBorder: val.isNotFill && !isScalarAnswerValid(val)}">
-          <ion-label position="floating">Enter value</ion-label>
-          <ion-input type="number" inputmode="decimal" step="any" [(ngModel)]="val.q_value" (ionChange)="onScalarAnswerChange(val)" [disabled]="dat.schedule_status !== 'assigned' || offline_save === 'true'"></ion-input>
-        </ion-item>
-        <ion-text color="medium" class="ion-padding-horizontal" *ngIf="questionKind(val) === 'number' && getNumericHint(val)">
-          <p class="ion-no-margin ion-padding-bottom">{{ getNumericHint(val) }}</p>
-        </ion-text>
-
-        <!-- Temperature -->
-        <ion-item *ngIf="questionKind(val) === 'temperature'" [ngClass]="{redBorder: val.isNotFill && !isScalarAnswerValid(val)}">
-          <ion-label position="floating">Temperature</ion-label>
-          <ion-input type="number" inputmode="decimal" step="any" [(ngModel)]="val.q_value" (ionChange)="onScalarAnswerChange(val)" [disabled]="dat.schedule_status !== 'assigned' || offline_save === 'true'"></ion-input>
-        </ion-item>
-        <ion-text color="medium" class="ion-padding-horizontal" *ngIf="questionKind(val) === 'temperature' && getNumericHint(val)">
-          <p class="ion-no-margin ion-padding-bottom">{{ getNumericHint(val) }}</p>
-        </ion-text>
-
-        <!-- Attachment (photo) primary -->
-        <ion-row *ngIf="questionKind(val) === 'attachment'">
-          <ion-col size="6" class="ion-padding-start">
-            <div [hidden]="dat.schedule_status !== 'assigned' || offline_save === 'true'">
-              <ion-button size="small" [color]="!val.imagename ? 'primary': 'success'" [fill]="!val.imagename ? 'outline' : 'solid' " (click)="presentActionSheet(val, 1)" [ngClass]="{redBorder: val.isDocMandatory === 1 && val.isNotFill && !val.imagename}">
-                Photo
-                <ion-icon name="camera-outline" slot="end" *ngIf="!val.imagename"></ion-icon>
-                <ion-icon name="checkmark-done-outline" slot="end" *ngIf="val.imagename"></ion-icon>
-              </ion-button>
-            </div>
-          </ion-col>
-          <ion-col size="6" class="ion-text-end" *ngIf="val.imagename">
-            <ion-button color="danger" (click)="viewAttachment(val)" fill="clear">
-              <ion-icon name="eye-outline"></ion-icon>
-            </ion-button>
-          </ion-col>
-        </ion-row>
-
-        <!-- Video primary -->
-        <ion-row *ngIf="questionKind(val) === 'video'">
-          <ion-col size="6" class="ion-padding-start">
-            <div [hidden]="dat.schedule_status !== 'assigned' || offline_save === 'true'">
-              <ion-button size="small" [color]="!val.imagename ? 'primary': 'success'" [fill]="!val.imagename ? 'outline' : 'solid' " (click)="pickVideo(val)" [ngClass]="{redBorder: val.isDocMandatory === 1 && val.isNotFill && !val.imagename}">
-                Video
-                <ion-icon name="videocam-outline" slot="end" *ngIf="!val.imagename"></ion-icon>
-                <ion-icon name="checkmark-done-outline" slot="end" *ngIf="val.imagename"></ion-icon>
-              </ion-button>
-            </div>
-          </ion-col>
-          <ion-col size="6" class="ion-text-end" *ngIf="val.imagename">
-            <ion-button color="danger" (click)="viewAttachment(val)" fill="clear">
-              <ion-icon name="eye-outline"></ion-icon>
-            </ion-button>
-          </ion-col>
-        </ion-row>
-
-        <!-- Option: document (IMG when selected option requires) -->
-        <ion-row *ngIf="questionKind(val) === 'option'">
-          <ion-col size="6" class="ion-padding-start" >
-            <div [hidden]="dat.schedule_status !== 'assigned' || offline_save === 'true' " >
-              <ion-button size="small" [color]="!val.imagename ? 'primary': 'success'" [fill]="!val.imagename ? 'outline' : 'solid' " (click)="presentActionSheet(val, 1)" [ngClass]="{redBorder: val.isDocMandatory === 1 && !val.imagename}">
-                IMG
-                <ion-icon name="attach-outline" slot="end" *ngIf="!val.imagename"></ion-icon>
-                <ion-icon name="checkmark-done-outline" slot="end" *ngIf="val.imagename"></ion-icon>
-              </ion-button>
-            </div>
-          </ion-col>
-          <ion-col size="6" class="ion-text-right" *ngIf="val.imagename">
-            <ion-button color="danger" (click)="viewAttachment(val)" fill="clear">
-              <ion-icon name="attach-outline"></ion-icon>
-            </ion-button>
-          </ion-col>
-        </ion-row>
-
-        <!-- Extra photo when schema marks doc mandatory on scalar types -->
-        <ion-row *ngIf="showExtraDocRow(val)">
-          <ion-col size="6" class="ion-padding-start">
-            <div [hidden]="dat.schedule_status !== 'assigned' || offline_save === 'true'">
-              <ion-button size="small" [color]="!val.imagename ? 'primary': 'success'" [fill]="!val.imagename ? 'outline' : 'solid' " (click)="presentActionSheet(val, 1)" [ngClass]="{redBorder: val.isDocMandatory === 1 && !val.imagename}">
-                IMG
-                <ion-icon name="attach-outline" slot="end" *ngIf="!val.imagename"></ion-icon>
-                <ion-icon name="checkmark-done-outline" slot="end" *ngIf="val.imagename"></ion-icon>
-              </ion-button>
-            </div>
-          </ion-col>
-          <ion-col size="6" class="ion-text-right" *ngIf="val.imagename">
-            <ion-button color="danger" (click)="viewAttachment(val)" fill="clear">
-              <ion-icon name="attach-outline"></ion-icon>
-            </ion-button>
-          </ion-col>
-        </ion-row>
-
-        <ion-item [ngClass]="{redBorder: val.isRemarkMandatory === 1 && !val.remark }">
-          <ion-input type="text" [(ngModel)]="val.remark" placeholder="Enter Remark" (change)="changeRemark(val)" [disabled]="dat.schedule_status !== 'assigned' || offline_save === 'true' || !isRemarkInputEnabled(val)"></ion-input>
-          <ion-buttons slot="end" [hidden]="dat.schedule_status !== 'assigned' || offline_save === 'true' " *ngIf="isInternet">
+        <ion-item [ngClass]="{ redBorder: val.isRemarkMandatory === 1 && !val.remark }">
+          <ion-input
+            type="text"
+            [(ngModel)]="val.remark"
+            placeholder="Enter Remark"
+            (change)="changeRemark(val)"
+            [disabled]="!isEditable(dat)"></ion-input>
+          <ion-buttons slot="end" [hidden]="!isEditable(dat)" *ngIf="isInternet">
             <ion-button slot="icon-only" (click)="listenCondition(val)" [disabled]="questionKind(val) !== 'option'">
               <ion-icon name="mic-outline"></ion-icon>
             </ion-button>
@@ -255,14 +222,18 @@
       </div>
     </div>
   </div>
-  <ion-item [ngClass]="{fullborder: remarkErr && !remark}">
+
+  <ion-item [ngClass]="{ fullborder: remarkErr && !remark }">
     <ion-label position="floating">Remark</ion-label>
-    <ion-input type="email" [(ngModel)]="remark" [disabled]="schedule_status !== 'assigned' || offline_save === 'true' "></ion-input>
+    <ion-input type="email" [(ngModel)]="remark" [disabled]="!isEditable()"></ion-input>
   </ion-item>
-  <ion-button color="success" size="small" (click)="viewSign()" *ngIf="(isInternet && signatureBase64) && schedule_status !== 'assigned' || offline_save === 'true' ">View Signature</ion-button>
-  <ion-item lines="none" [hidden]="schedule_status !== 'assigned' || offline_save === 'true'">
-    <ion-button (click)="openSign()" [fill]="signatureBase64 ? 'solid':'outline'">Signature <ion-icon name="checkmark-done-outline" slot="end" *ngIf="signatureBase64"></ion-icon></ion-button>
-    <img [src]="signatureBase64" style="height:30px;width:30px;border:1px solid black" slot="end" *ngIf="signatureBase64">
+  <ion-button color="success" size="small" (click)="viewSign()" *ngIf="(isInternet && signatureBase64) && schedule_status !== 'assigned' || offline_save === 'true'">View Signature</ion-button>
+  <ion-item lines="none" [hidden]="!isEditable()">
+    <ion-button (click)="openSign()" [fill]="signatureBase64 ? 'solid' : 'outline'">
+      Signature
+      <ion-icon name="checkmark-done-outline" slot="end" *ngIf="signatureBase64"></ion-icon>
+    </ion-button>
+    <img [src]="signatureBase64" class="fill-report-sign-thumb" slot="end" *ngIf="signatureBase64" />
   </ion-item>
 </ion-content>
 
@@ -276,12 +247,15 @@
     </ion-toolbar>
   </ion-header>
   <ion-content class="ion-padding">
-    <video *ngIf="videoObjectUrl" [src]="videoObjectUrl" controls playsinline style="width:100%;max-height:70vh"></video>
+    <video *ngIf="videoObjectUrl" [src]="videoObjectUrl" controls playsinline class="fill-report-video-preview"></video>
   </ion-content>
 </ion-modal>
 
 <ion-footer *ngIf="scheduleArr.length > 0" [hidden]="schedule_status !== 'assigned'">
   <ion-toolbar>
-    <ion-button expand="block" (click)="finalSubmit()" color="primary" [disabled]="offline_save === 'true'" tappable>Submit <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
+    <ion-button expand="block" (click)="finalSubmit()" color="primary" [disabled]="offline_save === 'true'" tappable>
+      Submit
+      <ion-icon name="save-outline" slot="end"></ion-icon>
+    </ion-button>
   </ion-toolbar>
 </ion-footer>

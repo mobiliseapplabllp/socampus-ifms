@@ -15,6 +15,28 @@ import * as moment from 'moment';
 import { PhotoViewComponent } from 'src/app/shared/photo-view/photo-view.component';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { CameraService } from 'src/app/provider/camera/camera.service';
+
+export type QuestionKind =
+  | 'option'
+  | 'video'
+  | 'attachment'
+  | 'date'
+  | 'datetime'
+  | 'number'
+  | 'temperature'
+  | 'shorttext';
+
+const Q_TYPE_TO_KIND: Record<string, QuestionKind> = {
+  '315': 'video',
+  '225': 'attachment',
+  '229': 'date',
+  '313': 'datetime',
+  '316': 'number',
+  '314': 'temperature',
+  '308': 'shorttext',
+  '226': 'option',
+};
+
 @Component({
   selector: 'app-fill-report',
   templateUrl: './fill-report.component.html',
@@ -23,6 +45,24 @@ import { CameraService } from 'src/app/provider/camera/camera.service';
 export class FillReportComponent implements OnInit, ViewWillEnter {
   @ViewChildren('a') private itemlist!: QueryList<ElementRef>;
   @ViewChild('videoFileInput') videoFileInput!: ElementRef<HTMLInputElement>;
+
+  /** Language picker — keeps template a single *ngFor */
+  readonly uiLangs: { code: string; label: string }[] = [
+    { code: 'en', label: 'English' },
+    { code: 'hi', label: 'Hindi' },
+    { code: 'te', label: 'Telugu' },
+    { code: 'ta', label: 'Tamil' },
+    { code: 'kn', label: 'Kannada' },
+    { code: 'ml', label: 'Malayalam' },
+    { code: 'mr', label: 'Marathi' },
+    { code: 'gu', label: 'Gujarati' },
+    { code: 'bn', label: 'Bengali' },
+    { code: 'ory', label: 'Odia' },
+  ];
+
+  private readonly ttsEngineHint =
+    'Please Select Google Preferred engine. go to Setting and Search "Text-to-speech output" then select "Preferred engine" and select "Speech Recognition and Synthesis"';
+
   /** Blocks Dexie writes while UI applies a Dexie snapshot (avoids ionChange → update loops during hydrate). */
   private applyingDbSnapshot = false;
   scheduleArr: any = [];
@@ -61,12 +101,8 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   ) { }
 
   ngOnInit() {
-    this.common.checkInternet().then(res => {
-      if (res) {
-        this.isInternet = true;
-      } else {
-        this.isInternet = false;
-      }
+    this.common.checkInternet().then((res) => {
+      this.isInternet = !!res;
     });
     const user = localStorage.getItem('user');
     if (user) {
@@ -195,8 +231,14 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     })
   }
 
+  /** Assigned checklist + not offline-locked */
+  isEditable(dat?: any): boolean {
+    const status = dat?.schedule_status ?? this.schedule_status;
+    return status === 'assigned' && this.offline_save !== 'true';
+  }
+
   /** UI + validation: map API question_type / q_type */
-  questionKind(val: any): 'option' | 'video' | 'attachment' | 'date' | 'datetime' | 'number' | 'temperature' {
+  questionKind(val: any): QuestionKind {
     const t = (val?.question_type || '').toString().trim().toLowerCase();
     if (t.includes('date time') || t.includes('datetime')) {
       return 'datetime';
@@ -213,6 +255,9 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     if (t.includes('temperature')) {
       return 'temperature';
     }
+    if (t.includes('short text')) {
+      return 'shorttext';
+    }
     if (t.includes('decimal') || (t.includes('number') && !t.includes('phone'))) {
       return 'number';
     }
@@ -220,16 +265,38 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
       return 'option';
     }
     const qt = String(val?.q_type ?? '');
-    switch (qt) {
-      case '315': return 'video';
-      case '225': return 'attachment';
-      case '229': return 'date';
-      case '313': return 'datetime';
-      case '316': return 'number';
-      case '314': return 'temperature';
-      case '226':
-      default: return 'option';
+    return Q_TYPE_TO_KIND[qt] ?? 'option';
+  }
+
+  numericScalarLabel(val: any): string {
+    return this.questionKind(val) === 'temperature' ? 'Temperature' : 'Enter value';
+  }
+
+  onDocPick(val: any, mode: 'photo' | 'video' | 'img'): void {
+    if (mode === 'video') {
+      this.pickVideo(val);
+    } else {
+      this.presentActionSheet(val, 1);
     }
+  }
+
+  docPickLabel(mode: 'photo' | 'video' | 'img'): string {
+    return mode === 'photo' ? 'Photo' : mode === 'video' ? 'Video' : 'IMG';
+  }
+
+  docPickIconPending(mode: 'photo' | 'video' | 'img'): string {
+    return mode === 'photo' ? 'camera-outline' : mode === 'video' ? 'videocam-outline' : 'attach-outline';
+  }
+
+  docPickRedBorder(val: any, mode: 'photo' | 'video' | 'img'): boolean {
+    if (!val.imagename && val.isDocMandatory === 1) {
+      return mode === 'img' ? true : !!val.isNotFill;
+    }
+    return false;
+  }
+
+  viewIconForDocMode(mode: 'photo' | 'video' | 'img'): string {
+    return mode === 'img' ? 'attach-outline' : 'eye-outline';
   }
 
   /** Extra IMG row for scalar types: always show; mandatory flag only affects validation */
@@ -297,11 +364,6 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     if (typeof v === 'string') {
       return v.trim().length > 0;
     }
-    return true;
-  }
-
-  /** Remark field always visible/editable when schedule allows; mandatory only from server on submit */
-  isRemarkInputEnabled(_val: any): boolean {
     return true;
   }
 
@@ -381,7 +443,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
       if (this.platform.is('capacitor')) {
         TextToSpeech.isLanguageSupported({ lang: this.selectedLanguage }).then((isSupported) => {
           if (isSupported.supported === false) {
-            this.common.presentToastWithOk('Please Select Google Preferred engine. go to Setting and Search "Text-to-speech output" then select "Preferred engine" and select "Speech Recognition and Synthesis"', 'warning');
+            this.common.presentToastWithOk(this.ttsEngineHint, 'warning');
           }
           runSpeak();
         });
@@ -398,7 +460,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     const isLanguageSupported = async (lang: string) => {
       const isSupported = await TextToSpeech.isLanguageSupported({ lang });
       if (isSupported.supported === false) {
-        this.common.presentToastWithOk('Please Select Google Preferred engine. go to Setting and Search "Text-to-speech output" then select "Preferred engine" and select "Speech Recognition and Synthesis"', 'warning');
+        this.common.presentToastWithOk(this.ttsEngineHint, 'warning');
       } else {
         this.speak(val);
       }
@@ -493,25 +555,32 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   }
 
   listenAction(val: any, voiceResponseTemp: any) {
-    let respns, option: any, voiceResponse;
-    voiceResponse = voiceResponseTemp.toLocaleLowerCase();
+    let respns: any;
+    let option: any;
+    const voiceResponse = String(voiceResponseTemp).toLowerCase();
     if (!val.tempoutput || val.tempoutput === 'response') {
       if (this.questionKind(val) !== 'option') {
         return;
       }
-      if (voiceResponse === 'yes' || voiceResponse === 'yess' || voiceResponse === 'yeees' || voiceResponse === 'yaaa' || voiceResponse === 'ha') {
-        option = val.options.filter((ops: any) => ops.optn_value === 'Yes')[0];
-        respns = option.optn_id;
-      } else if (voiceResponse === 'no' || voiceResponse === 'nooo') {
-        option = val.options.filter((ops: any) => ops.optn_value === 'No')[0];
-        respns = option.optn_id;
-      } else if (voiceResponse === 'n a' || voiceResponse === 'na' || voiceResponse === 'not applicable' || voiceResponse === 'not app') {
-        option = val.options.filter((ops: any) => ops.optn_value === 'NA')[0];
-        respns = option.optn_id;
+      const yes = /^(yes|yess|yeees|yaaa|ha)$/;
+      const no = /^(no|nooo)$/;
+      const na = /^(n a|na|not applicable|not app)$/;
+      if (yes.test(voiceResponse)) {
+        option = val.options.find((ops: any) => ops.optn_value === 'Yes');
+        respns = option?.optn_id;
+      } else if (no.test(voiceResponse)) {
+        option = val.options.find((ops: any) => ops.optn_value === 'No');
+        respns = option?.optn_id;
+      } else if (na.test(voiceResponse)) {
+        option = val.options.find((ops: any) => ops.optn_value === 'NA');
+        respns = option?.optn_id;
       } else {
         val.tempoutput = 'response';
         val.q_desc_temp = 'We Accept Only yes, no and Not Applicable';
         this.speak(val);
+        return;
+      }
+      if (!option) {
         return;
       }
       val.isRemarkMandatory = option.is_rmrk_mandatory;
@@ -736,7 +805,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     if (k === 'option') {
       return q;
     }
-    if (k === 'date' || k === 'datetime' || k === 'number' || k === 'temperature') {
+    if (k === 'date' || k === 'datetime' || k === 'number' || k === 'temperature' || k === 'shorttext') {
       if (q.q_value != null && q.q_value !== '') {
         q.rspns = q.q_value;
       }
@@ -785,10 +854,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     const payload = this.buildPayloadForFinalSubmit(this.scheduleArr[0]);
     const formData = this.convertToFormData(payload);
     formData.forEach((value, key) => {
-      const display =
-        value instanceof Blob
-          ? `[Blob type=${(value as Blob).type || 'n/a'} size=${value.size}]`
-          : value;
+      const display = value instanceof Blob ? `[Blob type=${(value as Blob).type || 'n/a'} size=${value.size}]` : value;
       console.log('[finalSubmit FormData]', key, display);
     });
     this.common.presentLoading().then(preLoad => {
@@ -947,48 +1013,11 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   }
 
   changeLan(lang: string) {
-    var question: any = [], temp: any, options;
-    temp = this.scheduleArr[0].qus;
-    for (var i = 0 ; i < temp.length; i++) {
-      question.push(temp[i].q_desc);
-    }
-    question.push('yes');
-    question.push('no');
-    question.push('not applicable');
+    const temp = this.scheduleArr[0]?.qus ?? [];
+    const question = temp.map((q: any) => q.q_desc);
+    question.push('yes', 'no', 'not applicable');
     this.translate(question, lang);
   }
-
-  // translate(data: any, lang: string) {
-  //   this.common.presentLoading().then(preLoad => {
-  //     this.httpDigital.googleTranslate(data, lang).subscribe({
-  //       next:(translateText) => {
-  //         const optionArr = translateText.data.translations.slice(-3);
-  //         for (var i = 0 ; i < this.scheduleArr.length;i++) {
-  //           for (var j = 0 ; j < this.scheduleArr[i].qus.length; j++) {
-  //             this.scheduleArr[i].qus[j].q_desc = translateText.data.translations[j].translatedText
-  //             if (lang == 'en') {
-  //               this.scheduleArr[i].qus[j].options[0].optn_desc = 'Yes';
-  //               this.scheduleArr[i].qus[j].options[1].optn_desc = 'No';
-  //               this.scheduleArr[i].qus[j].options[2].optn_desc = 'NA';
-  //             } else {
-  //               this.scheduleArr[i].qus[j].options[0].optn_desc = optionArr[0].translatedText;
-  //               this.scheduleArr[i].qus[j].options[1].optn_desc = optionArr[1].translatedText;
-  //               this.scheduleArr[i].qus[j].options[2].optn_desc = optionArr[2].translatedText;
-  //             }
-  //           }
-  //         }
-  //         this.selectedLanguage = lang;
-  //       },
-  //       error:(err) => {
-  //         this.common.dismissloading();
-  //         this.common.presentToast(environment.errMsg, 'warning');
-  //       },
-  //       complete:() => {
-  //         this.common.dismissloading();
-  //       }
-  //     })
-  //   });
-  // }
 
   translate(data: any, lang: string) {
     this.common.presentLoading().then(preLoad => {

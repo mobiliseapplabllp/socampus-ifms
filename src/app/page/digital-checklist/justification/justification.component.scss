@@ -1,0 +1,130 @@
+.justification-content {
+  --background: var(--ion-color-light, #f4f5f8);
+}
+
+.justification-card {
+  margin: 0;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
+  ion-card-header {
+    padding-bottom: 8px;
+  }
+
+  ion-card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  ion-card-subtitle {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+}
+
+.justification-textarea-wrap {
+  --background: var(--ion-color-light, #f4f5f8);
+  --border-radius: 12px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --inner-padding-end: 0;
+  margin-bottom: 16px;
+}
+
+.justification-textarea {
+  margin-top: 8px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.attachment-block {
+  margin-bottom: 20px;
+}
+
+.attachment-label {
+  margin: 0 0 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ion-color-dark, #222428);
+}
+
+.attachment-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  padding-left: 4px;
+}
+
+.submit-btn {
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* View mode */
+.justification-view-card {
+  .detail-list {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 8px;
+  }
+
+  .detail-row {
+    --background: transparent;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --min-height: 56px;
+    margin-bottom: 4px;
+
+    ion-icon[slot='start'] {
+      margin-inline-end: 12px;
+      font-size: 22px;
+    }
+  }
+
+  .detail-row--remark {
+    align-items: flex-start;
+
+    ion-icon {
+      margin-top: 4px;
+    }
+  }
+
+  .detail-key {
+    margin: 0 0 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ion-color-medium, #92949c);
+  }
+
+  .detail-value {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ion-text-color, #000);
+  }
+
+  .detail-remark {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--ion-color-dark, #222428);
+    white-space: pre-wrap;
+  }
+}
+
+.action-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ion-color-step-150, #d7d8da);
+}
