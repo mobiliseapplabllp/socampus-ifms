@@ -278,6 +278,8 @@ export class ConcWorkComponent implements OnInit {
   }
   //------------===================--------------------======================--------------------======================---------------------==================----------------=============---->
 
+  private readonly webGpsFallback = { lat: 28.445831445524963, lng: 77.30814421380869 };
+
   private async getCurrentForegroundLocation() {
     if (this.platform.is('capacitor')) {
       await Geolocation.requestPermissions();
@@ -288,38 +290,63 @@ export class ConcWorkComponent implements OnInit {
       };
     }
 
-    return {
-      lat: 28.445831445524963,
-      lng: 77.30814421380869
-    };
+    return { ...this.webGpsFallback };
   }
 
-  async selectStartGpsLocation() {
+  /** Native app only: background LocationTracker (map shows on browser too) */
+  isCapacitorGps(): boolean {
+    return this.platform.is('capacitor');
+  }
+
+  async setStartLocationFromGps() {
     try {
       const current = await this.getCurrentForegroundLocation();
       this.lat = current.lat;
       this.lng = current.lng;
-      this.initMap(this.lat, this.lng, 'start');
 
-      const trackingStarted = await this.startTracking();
-      if (!trackingStarted) {
-        this.common.presentToast('Location selected, but background tracking is not active yet', 'warning');
-      }
+      await this.initMap(this.lat, this.lng, 'start');
+      this.gpsStatus = true;
     } catch (error) {
       console.error(error);
       this.common.presentToast('Unable to fetch current location', 'warning');
     }
   }
 
-  async initMap(lat: any, lng: any, status: string) {    
-    await new Promise(resolve => setTimeout(resolve, 500));
+  /** Wait for modal/layout paint so #map has real dimensions (replaces fixed 500ms delay). */
+  private waitForMapLayout(): Promise<void> {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      });
+    });
+  }
+
+  async initMap(lat: any, lng: any, status: string) {
+    await this.waitForMapLayout();
+    const el = document.getElementById('map');
+    if (!el) {
+      await new Promise((r) => setTimeout(r, 32));
+    }
+    const mapEl = document.getElementById('map');
+    if (!mapEl || typeof google === 'undefined' || !google.maps) {
+      console.warn('Map container or Google Maps API not ready');
+      return;
+    }
+
     this.gpsStatus = true;
-    this.map = new google.maps.Map(document.getElementById('map'), {
-      center: { lat: lat, lng: lng },
+    const center = { lat: Number(lat), lng: Number(lng) };
+    this.map = new google.maps.Map(mapEl, {
+      center,
       zoom: 15,
     });
     this.map.addListener('click', (event: any) => this.changeMarker(event.latLng, status));
     this.currentMarker(lat, lng);
+
+    // Ionic modal: first paint often grey until resize + center refresh
+    google.maps.event.addListenerOnce(this.map, 'idle', () => {
+      google.maps.event.trigger(this.map, 'resize');
+      this.map.setCenter(center);
+    });
   }
 
   changeMarker(latLng: any, status: string) {
@@ -336,8 +363,8 @@ export class ConcWorkComponent implements OnInit {
     if (status === 'end') {
       this.specificTicketObj.trip_end_lat = this.lat;
       this.specificTicketObj.trip_end_lng = this.lng;    
-      let val = this.calcDistance(this.lat!, this.lng!, this.specificTicketObj.trip_start_lat, this.specificTicketObj.trip_start_lng).toFixed(2);
-      this.specificTicketObj.distance = val;
+      // let val = this.calcDistance(this.lat!, this.lng!, this.specificTicketObj.trip_start_lat, this.specificTicketObj.trip_start_lng).toFixed(2);
+      // this.specificTicketObj.distance = val;
       this.common.presentLoading().then(preLoad => {
         this.common.dismissloading();
       });
@@ -350,67 +377,97 @@ export class ConcWorkComponent implements OnInit {
     marker.setMap(this.map);
   }
 
-  openStartTripModal() {
+  openTripStartModal() {
     this.isTripModalOpen = true;
   }
 
-  closeStartTripModal() {
+  closeTripStartModal() {
     this.isTripModalOpen = false;
   }
 
-  async openEndTripModal() {
+  async openTripEndModal() {
     this.isEndTripModalOpen = true;
     if (this.specificTicketObj.trip_type === 'gps') {
       const current = await this.getCurrentForegroundLocation();
-      const lat = current.lat;
-      const lng = current.lng;
-      this.initMap(lat, lng, 'end');
-      this.specificTicketObj.trip_end_lat = lat;
-      this.specificTicketObj.trip_end_lng = lng;
-      let val = this.calcDistance(lat!, lng!, this.specificTicketObj.trip_start_lat, this.specificTicketObj.trip_start_lng).toFixed(2);
-      this.specificTicketObj.distance = val;      
+      const endLat = current.lat;
+      const endLng = current.lng;
+      this.initMap(endLat, endLng, 'end');
+      this.specificTicketObj.trip_end_lat = endLat;
+      this.specificTicketObj.trip_end_lng = endLng;
+      // const computedDistanceKm = this.calcDistance(
+      //   endLat!,
+      //   endLng!,
+      //   this.specificTicketObj.trip_start_lat,
+      //   this.specificTicketObj.trip_start_lng
+      // ).toFixed(2);
+      // this.specificTicketObj.distance = computedDistanceKm;
+      const trekPath = this.isCapacitorGps() ? await this.getLocations() : [];    
+      const pathDistanceKm = this.getPathDistanceKm(trekPath);    
+      this.specificTicketObj.distance = pathDistanceKm.toFixed(2);      
     }
   }
 
-  closeEndTripModal() {
+  closeTripEndModal() {
     this.isEndTripModalOpen = false;
   }
 
-  submitStartTrip() {
+  submitTripStart() {
     const tripType = this.tripForm.value.tripType;
     if (tripType === 'gps' && (!this.lat || !this.lng)) {
       this.common.presentToast('Please get current location first', 'warning');
       return;
     }
     if (tripType === 'manual') {
-      if (!this.tripForm.value.trip_start_odometer_reading) {
-        this.common.presentToast('Please enter start reading', 'warning');
-        return;
-      }
-      if (!this.captureImage.start_trip) {
-        this.common.presentToast('Please capture OD reading image', 'warning');
-        return;
-      }
-      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
-      const formData = new FormData();
-      formData.append('trip_type', 'manual');
-      formData.append('trip_start_odometer_reading', this.tripForm.value.trip_start_odometer_reading);
-      formData.append('trip_start_odometer_img', this.captureImage.start_trip, random);
-      formData.append('ticket_id', this.requestData.id);
-      formData.append('action', this.specificTicketObj.tckt_trip);
-      this.submitTripAction(formData, 'start', 'manual');
+      this.submitManualTripStart();
     } else if (tripType === 'gps') {
-      const formData = new FormData();
-      formData.append('trip_type', 'gps');
-      formData.append('ticket_id', this.requestData.id);
-      formData.append('action', this.specificTicketObj.tckt_trip);
-      formData.append('trip_start_lat', this.lat);
-      formData.append('trip_start_lng', this.lng);
-      this.submitTripAction(formData, 'start', 'gps');
+      this.submitGpsTripStart();
     }
   }
 
-  submitTripAction(formData: any, tripType: 'start' | 'stop', source: 'manual' | 'gps') {
+  private submitManualTripStart() {
+    if (!this.tripForm.value.trip_start_odometer_reading) {
+      this.common.presentToast('Please enter start reading', 'warning');
+      return;
+    }
+    if (!this.captureImage.start_trip) {
+      this.common.presentToast('Please capture OD reading image', 'warning');
+      return;
+    }
+    const random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+    const formData = this.buildBaseTripFormData('manual');
+    formData.append('trip_start_odometer_reading', this.tripForm.value.trip_start_odometer_reading);
+    formData.append('trip_start_odometer_img', this.captureImage.start_trip, random);
+    this.submitTripApi(formData, 'start', 'manual');
+  }
+
+  private submitGpsTripStart() {
+    const formData = this.buildBaseTripFormData('gps');
+    formData.append('trip_start_lat', this.lat);
+    formData.append('trip_start_lng', this.lng);
+    this.submitTripApi(formData, 'start', 'gps');
+  }
+
+  private buildBaseTripFormData(tripType: 'manual' | 'gps'): FormData {
+    const formData = new FormData();
+    formData.append('trip_type', tripType);
+    formData.append('ticket_id', this.requestData.id);
+    formData.append('action', this.specificTicketObj.tckt_trip);
+    return formData;
+  }
+
+  private validateTollInputPair(imageWarning: string): boolean {
+    if (this.tollAmount && !this.captureImage.toll_img) {
+      this.common.presentToast(imageWarning, 'warning');
+      return false;
+    }
+    if (!this.tollAmount && this.captureImage.toll_img) {
+      this.common.presentToast('Please Enter Toll Amount', 'warning');
+      return false;
+    }
+    return true;
+  }
+
+  submitTripApi(formData: any, tripType: 'start' | 'stop', source: 'manual' | 'gps') {
     for (let [key, value] of (formData as any).entries()) {
       console.log(key, value);
     }
@@ -419,6 +476,12 @@ export class ConcWorkComponent implements OnInit {
         next: async (data: any) => {
           console.log(data);
           if (data.status) {
+            if (this.isCapacitorGps() && source === 'gps' && tripType === 'start') {
+              const trackingStarted = await this.startTracking();
+              if (!trackingStarted) {
+                this.common.presentToast('Trip started, but background tracking is not active yet', 'warning');
+              }
+            }
             let msg = tripType === 'start' ? data.msg + ' ' + 'Trip ID : ' + data.trip_id : data.msg;
             this.common.presentToast(msg, 'success');
             tripType === 'start' ? this.isTripModalOpen = false : this.isEndTripModalOpen = false;
@@ -444,7 +507,7 @@ export class ConcWorkComponent implements OnInit {
     });
   }
 
-  submitManualTripEnd() {
+  submitTripEndManual() {
     if (!this.endReading) {
       this.common.presentToast('Please enter end reading', 'warning');
       return;
@@ -458,14 +521,11 @@ export class ConcWorkComponent implements OnInit {
       return;
     }
 
-    if (this.tollAmount && !this.captureImage.toll_img) {
-      this.common.presentToast('Toll Attachment is Mandatory', 'warning');
-      return;
-    } 
-    if (this.captureImage.toll_img && !this.tollAmount) {
-      this.common.presentToast('Please Enter Toll Amount', 'warning');
+    if (!this.validateTollInputPair('Toll Attachment is Mandatory')) {
       return;
     }
+
+    this.onTollAmountBlur();
 
     let distance = parseInt(this.endReading, 10) - parseInt(this.specificTicketObj.trip_start_odometer_reading, 10);
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
@@ -481,7 +541,7 @@ export class ConcWorkComponent implements OnInit {
     formData.append('trip_id', this.specificTicketObj.trip_id);
     formData.append('ticket_id', this.requestData.id);
     formData.append('action', this.specificTicketObj.tckt_trip);
-    this.submitTripAction(formData, 'stop', 'manual');
+    this.submitTripApi(formData, 'stop', 'manual');
   }  
 
   async openCamera(type: string, status: boolean) {
@@ -516,14 +576,8 @@ export class ConcWorkComponent implements OnInit {
     );
   }
 
-  async submitGpsTripEnd() {
-    if (this.tollAmount && !this.captureImage.toll_img) {
-      this.common.presentToast('Toll Image is Mandatory', 'warning');
-      return;
-    }
-
-    if (!this.tollAmount && this.captureImage.toll_img) {
-      this.common.presentToast('Toll Amount is Mandatory', 'warning');
+  async submitTripEndGps() {
+    if (!this.validateTollInputPair('Toll Image is Mandatory')) {
       return;
     }
 
@@ -531,18 +585,22 @@ export class ConcWorkComponent implements OnInit {
     this.specificTicketObj.trip_end_lat = current.lat;
     this.specificTicketObj.trip_end_lng = current.lng;
     this.initMap(current.lat, current.lng, 'end');
-    this.specificTicketObj.distance = this.calcDistance(
+
+    if (this.isCapacitorGps() && this.getGpsTrackerRunningState()) {
+      await this.stopTracking();
+    }
+
+    const trekPath = this.isCapacitorGps() ? await this.getLocations() : [];    
+    const pathDistanceKm = this.getPathDistanceKm(trekPath);    
+    // Prefer real tracked path sum; fallback to straight-line start/end.
+    this.specificTicketObj.distance = (pathDistanceKm > 0 ? pathDistanceKm : this.calcDistance(
       current.lat,
       current.lng,
       this.specificTicketObj.trip_start_lat,
       this.specificTicketObj.trip_start_lng
-    ).toFixed(2);
-
-    if (this.getGpsTrackerRunningState()) {
-      await this.stopTracking();
-    }
-
-    const trekPath = await this.getLocations();
+    )).toFixed(2);
+    this.onDistanceAdjustBlur();
+    this.onTollAmountBlur();
 
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
     const formData = new FormData();
@@ -559,7 +617,7 @@ export class ConcWorkComponent implements OnInit {
       formData.append('toll_img', this.captureImage.toll_img, random);
     }    
     formData.append('trip_id', this.specificTicketObj.trip_id);
-    this.submitTripAction(formData, 'stop', 'gps');
+    this.submitTripApi(formData, 'stop', 'gps');
   }
 
   private calcDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -570,7 +628,83 @@ export class ConcWorkComponent implements OnInit {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  async startTracking() {    
+  private toLatLngPoint(p: any): { lat: number; lng: number } | null {
+    const latRaw = p?.lat ?? p?.latitude ?? p?.coords?.latitude;
+    const lngRaw = p?.lng ?? p?.lon ?? p?.long ?? p?.longitude ?? p?.coords?.longitude;
+    const lat = Number(latRaw);
+    const lng = Number(lngRaw);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return null;
+    }
+    return { lat, lng };
+  }
+
+  private getPathDistanceKm(points: any[]): number {
+    if (!Array.isArray(points) || points.length < 2) {
+      return 0;
+    }
+    let total = 0;
+    let prev = this.toLatLngPoint(points[0]);
+    for (let i = 1; i < points.length; i++) {
+      const curr = this.toLatLngPoint(points[i]);
+      if (!prev || !curr) {
+        prev = curr;
+        continue;
+      }
+      total += this.calcDistance(prev.lat, prev.lng, curr.lat, curr.lng);
+      prev = curr;
+    }
+    return total;
+  }
+
+  private clampModelToTwoDecimals(ev: any, key: 'distanceAdjust' | 'tollAmount'): void {
+    const cur = (this as any)[key];
+    const raw = String(ev?.detail?.value ?? cur ?? '').replace(',', '.');
+    if (!raw.includes('.')) {
+      return;
+    }
+    const dot = raw.indexOf('.');
+    const intPart = raw.slice(0, dot);
+    const frac = raw.slice(dot + 1).replace(/[^\d]/g, '');
+    if (frac.length <= 2) {
+      return;
+    }
+    (this as any)[key] = `${intPart}.${frac.slice(0, 2)}`;
+  }
+
+  private normalizeModelTwoDecimalsBlur(key: 'distanceAdjust' | 'tollAmount'): void {
+    const v = (this as any)[key];
+    if (v === '' || v == null) {
+      return;
+    }
+    const n = parseFloat(String(v).replace(',', '.'));
+    if (!Number.isFinite(n)) {
+      return;
+    }
+    (this as any)[key] = Number(n.toFixed(2));
+  }
+
+  /** Max 2 digits after decimal while typing (e.g. 19.22) */
+  clampDistanceAdjustDecimals(ev: any): void {
+    this.clampModelToTwoDecimals(ev, 'distanceAdjust');
+  }
+
+  onDistanceAdjustBlur(): void {
+    this.normalizeModelTwoDecimalsBlur('distanceAdjust');
+  }
+
+  clampTollAmountDecimals(ev: any): void {
+    this.clampModelToTwoDecimals(ev, 'tollAmount');
+  }
+
+  onTollAmountBlur(): void {
+    this.normalizeModelTwoDecimalsBlur('tollAmount');
+  }
+
+  async startTracking() {
+    if (!this.isCapacitorGps()) {
+      return false;
+    }
     if (this.getGpsTrackerRunningState()) {
       return true;
     }
@@ -630,6 +764,9 @@ export class ConcWorkComponent implements OnInit {
   }
 
   async stopTracking() {
+    if (!this.isCapacitorGps()) {
+      return;
+    }
     const { success } = await LocationTracker.stop();
     if (success) {
       this.setGpsTrackerRunningState(false);
@@ -646,12 +783,18 @@ export class ConcWorkComponent implements OnInit {
   }
 
   async getLocations() {
+    if (!this.isCapacitorGps()) {
+      return [];
+    }
     const { locations } = await LocationTracker.getLocations();
     console.log('Locations:', locations);
     return locations;
   }
 
   async clearLocations() {
+    if (!this.isCapacitorGps()) {
+      return;
+    }
     await LocationTracker.clearLocations();
     console.log('Locations cleared');
   }

@@ -35,8 +35,8 @@
           <br>
           <ion-row>
             <ion-col size="6" *ngIf="specificTicketObj.tckt_status == 3 ">              
-              <ion-button expand="block" *ngIf="specificTicketObj.tckt_trip == '1'" color="success" (click)="openStartTripModal()">{{specificTicketObj.tckt_trip_btnName}}</ion-button>
-              <ion-button expand="block" *ngIf="specificTicketObj.tckt_trip == '2'" color="danger" (click)="openEndTripModal()">{{specificTicketObj.tckt_trip_btnName}}</ion-button>
+              <ion-button expand="block" *ngIf="specificTicketObj.tckt_trip == '1'" color="success" (click)="openTripStartModal()">{{specificTicketObj.tckt_trip_btnName}}</ion-button>
+              <ion-button expand="block" *ngIf="specificTicketObj.tckt_trip == '2'" color="danger" (click)="openTripEndModal()">{{specificTicketObj.tckt_trip_btnName}}</ion-button>
             </ion-col> 
             <ion-col [size]="status === 3 ? '6' : '12'">
               <ion-button color="primary" expand="block" (click)="actionInProgress()">Submit</ion-button>
@@ -143,13 +143,13 @@
     </div>
   </div>
 
-  <ion-modal [isOpen]="isTripModalOpen" (willDismiss)="closeStartTripModal()" cssClass="center-modal">
+  <ion-modal [isOpen]="isTripModalOpen" (willDismiss)="closeTripStartModal()" cssClass="center-modal">
     <ng-template>
       <ion-header>
         <ion-toolbar color="primary">
           <ion-title>Start Trip</ion-title>
           <ion-buttons slot="end">
-            <ion-button (click)="closeStartTripModal()">Close</ion-button>
+            <ion-button (click)="closeTripStartModal()">Close</ion-button>
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
@@ -193,18 +193,9 @@
           </section>
 
           <section *ngIf="tripForm.value.tripType === 'gps'">
-            <ion-card class="ion-no-margin ion-margin-bottom">
-              <ion-card-content>
-                <ion-text color="medium">
-                  <p class="ion-no-margin">
-                    Click on "Use Current Location".                    
-                  </p>
-                </ion-text>
-              </ion-card-content>
-            </ion-card>
             <ion-row>
               <ion-col size="12">
-                <ion-button expand="block" [color]="lat ? 'success': 'primary'" (click)="selectStartGpsLocation()">
+                <ion-button expand="block" [color]="lat ? 'success': 'primary'" (click)="setStartLocationFromGps()">
                   <ion-icon slot="start" name="locate-outline"></ion-icon>
                   Use Current Location
                 </ion-button>
@@ -216,6 +207,9 @@
                 <h3>Lat: {{lat}} | Long: {{lng}}</h3>
               </ion-label>
             </ion-item>
+            <p *ngIf="!isCapacitorGps() && lat && lng" class="ion-padding-horizontal ion-no-margin ion-text-wrap">
+              <ion-text color="medium">Browser uses sample coordinates; live GPS and background path tracking run in the app.</ion-text>
+            </p>
             <section style="height:180px;width:100%; padding:5px;">
               <div id="map" style="height:100%;width:100%"></div>
             </section>
@@ -225,7 +219,7 @@
           </section>
           <ion-row class="ion-margin-top">
             <ion-col>
-              <ion-button expand="block" color="primary" (click)="submitStartTrip()"> Submit </ion-button>
+              <ion-button expand="block" color="primary" (click)="submitTripStart()"> Submit </ion-button>
             </ion-col>
           </ion-row>
         </form>
@@ -233,13 +227,13 @@
     </ng-template>
   </ion-modal>
 
-  <ion-modal [isOpen]="isEndTripModalOpen" (willDismiss)="closeEndTripModal()" cssClass="center-modal">
+  <ion-modal [isOpen]="isEndTripModalOpen" (willDismiss)="closeTripEndModal()" cssClass="center-modal">
     <ng-template>
       <ion-header>
         <ion-toolbar color="primary">
           <ion-title>End Trip</ion-title>
           <ion-buttons slot="end">
-            <ion-button (click)="closeEndTripModal()">Close</ion-button>
+            <ion-button (click)="closeTripEndModal()">Close</ion-button>
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
@@ -271,11 +265,25 @@
               </ion-item>
               <ion-item>
                 <ion-label color="primary" position="floating">Total Distance Adjust</ion-label>
-                <ion-input type="number" [(ngModel)]="distanceAdjust" placeholder="Enter adjustment."></ion-input>
+                <ion-input
+                  type="number"
+                  inputmode="decimal"
+                  step="0.01"
+                  [(ngModel)]="distanceAdjust"
+                  placeholder="e.g. 19.22"
+                  (ionInput)="clampDistanceAdjustDecimals($event)"
+                  (ionBlur)="onDistanceAdjustBlur()"></ion-input>
               </ion-item>
               <ion-item>
                 <ion-label color="primary" position="floating">Toll Amount</ion-label>
-                <ion-input type="number" [(ngModel)]="tollAmount" placeholder="Enter amount"></ion-input>
+                <ion-input
+                  type="number"
+                  inputmode="decimal"
+                  step="0.01"
+                  [(ngModel)]="tollAmount"
+                  placeholder="e.g. 19.22"
+                  (ionInput)="clampTollAmountDecimals($event)"
+                  (ionBlur)="onTollAmountBlur()"></ion-input>
                 <ion-button slot="end" [color]="captureImage.toll_img ? 'success' : 'primary'"  (click)="openCamera('toll_img', true)">Image</ion-button>
               </ion-item>
             </ion-list>
@@ -288,6 +296,9 @@
                 </ion-text>
               </ion-card-content>
             </ion-card>
+            <p *ngIf="!isCapacitorGps()" class="ion-margin-top ion-no-margin ion-text-wrap">
+              <ion-text color="medium">Recorded trek path is saved only in the app; the map still works here for preview.</ion-text>
+            </p>
             <section style="height:180px;width:100%; padding:5px;">
               <div id="map" style="height:100%;width:100%"></div>
             </section>
@@ -297,7 +308,7 @@
             <ion-grid>
               <ion-row>
                 <ion-col size="12">
-                  <ion-button expand="block" color="primary" (click)="submitGpsTripEnd()">Submit</ion-button>
+                  <ion-button expand="block" color="primary" (click)="submitTripEndGps()">Submit</ion-button>
                 </ion-col>                
               </ion-row>
             </ion-grid>
@@ -329,14 +340,21 @@
               </ion-item>
               <ion-item>
                 <ion-label color="primary" position="floating">Toll Amount</ion-label>
-                <ion-input type="number" [(ngModel)]="tollAmount" placeholder="Enter amount"></ion-input>
+                <ion-input
+                  type="number"
+                  inputmode="decimal"
+                  step="0.01"
+                  [(ngModel)]="tollAmount"
+                  placeholder="e.g. 19.22"
+                  (ionInput)="clampTollAmountDecimals($event)"
+                  (ionBlur)="onTollAmountBlur()"></ion-input>
                 <ion-button slot="end" [color]="captureImage.toll_img ? 'success' : 'primary'"  (click)="openCamera('toll_img', true)">Image</ion-button>
               </ion-item>
             </ion-list>            
             <ion-grid>
               <ion-row>
                 <ion-col size="12">
-                  <ion-button expand="block" color="primary" (click)="submitManualTripEnd()">Submit</ion-button>
+                  <ion-button expand="block" color="primary" (click)="submitTripEndManual()">Submit</ion-button>
                 </ion-col>                
               </ion-row>
             </ion-grid>

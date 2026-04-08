@@ -206,55 +206,29 @@ export class ConciergePage implements OnInit {
 
   private async ensureLocationTrackingReadinessOnEntry() {
     try {
-      // abc
       let hasBackgroundPermission = await this.checkBackgroundPermission();
 
-      // Must call native permission APIs first — iOS/Android system dialogs live inside
-      // requestBackgroundPermissions(), not in our alert. Old flow only ran that after
-      // "Open Settings", so users who tapped "Not now" never saw any system prompt.
       if (!hasBackgroundPermission) {
+        const goToSettings = await this.showLocationAlwaysInstructionModal();
+        if (!goToSettings) {
+          return;
+        }
         await LocationTracker.requestBackgroundPermissions();
-        // iOS: authorization updates arrive asynchronously on the native delegate;
-        // an immediate re-check often reads stale state and skips the Settings path.
         if (this.platform.is('ios')) {
           await new Promise<void>(resolve => setTimeout(resolve, 600));
         }
         hasBackgroundPermission = await this.checkBackgroundPermission();
-      }
-
-      if (!hasBackgroundPermission) {
-        const shouldOpenSettings = await this.showSettingsPrompt(
-          'Location Permission Required',
-          this.platform.is('ios')
-            ? 'Turn on Location and set it to "Always" for background GPS trips. You can open Settings to change this.'
-            : 'Please allow location access all the time for accurate background tracking.'
-        );
-
-        if (shouldOpenSettings) {
-          await LocationTracker.requestBackgroundPermissions();
-          if (this.platform.is('ios')) {
-            await new Promise<void>(resolve => setTimeout(resolve, 600));
-          }
-          hasBackgroundPermission = await this.checkBackgroundPermission();
-        }
         if (!hasBackgroundPermission) {
+          this.common.presentToast(
+            'Background location (Always / All the time) is still required for GPS trips.',
+            'warning'
+          );
           return;
         }
       }
 
-      // Android only: iOS has no battery optimization API; plugin stubs return allowed=true.
       if (this.platform.is('android')) {
-        const batteryOptimizationIgnored = await this.checkBatteryOptimization();
-        if (!batteryOptimizationIgnored) {
-          const shouldOpenBatterySettings = await this.showSettingsPrompt(
-            'Battery Optimization',
-            'Please disable battery optimization for this app to keep background tracking active.'
-          );
-
-          if (shouldOpenBatterySettings) {
-            await LocationTracker.requestIgnoreBatteryOptimizations();
-          }
-        }
+        await this.ensureBatteryOptimizationIgnored();
       }
     } catch (e) {
       console.error('ensureLocationTrackingReadinessOnEntry', e);
@@ -262,36 +236,35 @@ export class ConciergePage implements OnInit {
     }
   }
 
-  private async checkBackgroundPermission() {
-    const { allowed } = await LocationTracker.requestBackgroundPermissionsCheck();
-    return allowed;
-  }
-
-  private async checkBatteryOptimization() {
-    const { allowed } = await LocationTracker.requestIgnoreBatteryOptimizationsCheck();
-    return allowed;
-  }
-
-  private async showSettingsPrompt(header: string, message: string) {
+  private async showLocationAlwaysInstructionModal(): Promise<boolean> {
+    const msg = this.platform.is('ios')
+      ? 'For concierge GPS trips, Location must be set to "Always".\n\nTap "Go to Settings", then choose Always for this app.'
+      : 'For background GPS tracking, you must allow location "All the time" (not only while using the app).\n\nTap "Go to Settings" and select Allow all the time.';
     const alert = await this.alertController.create({
-      header,
-      message,
+      header: 'Location access',
+      message: msg,
       mode: this.platform.is('ios') ? 'ios' : 'md',
       buttons: [
-        {
-          text: 'Not now',
-          role: 'cancel'
-        },
-        {
-          text: 'Open Settings',
-          role: 'confirm'
-        }
-      ]
+        { text: 'Not now', role: 'cancel' },
+        { text: 'Go to Settings', role: 'confirm' },
+      ],
     });
-
     await alert.present();
     const { role } = await alert.onDidDismiss();
     return role === 'confirm';
+  }
+
+  private async ensureBatteryOptimizationIgnored(): Promise<void> {
+    const { allowed } = await LocationTracker.requestIgnoreBatteryOptimizationsCheck();
+    if (allowed) {
+      return;
+    }
+    await LocationTracker.requestIgnoreBatteryOptimizations();
+  }
+
+  private async checkBackgroundPermission() {
+    const { allowed } = await LocationTracker.requestBackgroundPermissionsCheck();
+    return allowed;
   }
 
 }
