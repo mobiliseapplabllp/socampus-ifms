@@ -59,6 +59,8 @@ export class ConcWorkComponent implements OnInit {
   private attachmentBlobResolved: Blob | null = null;
 
   map: any;
+  mapRoute: any;
+  trekPath: any = [];
   // private DUMMY_START_LAT = 28.6139;
   // private DUMMY_START_LONG = 77.2090;
   // private DUMMY_END_LAT = 28.7041;
@@ -401,10 +403,90 @@ export class ConcWorkComponent implements OnInit {
       //   this.specificTicketObj.trip_start_lng
       // ).toFixed(2);
       // this.specificTicketObj.distance = computedDistanceKm;
-      const trekPath = this.isCapacitorGps() ? await this.getLocations() : [];    
-      const pathDistanceKm = this.getPathDistanceKm(trekPath);    
+      this.trekPath = this.isCapacitorGps() ? await this.getLocations() : [{
+        latitude: 28.43891332576039, longitude: 77.32364796665696
+      }, {
+        latitude: 28.444880675184887, longitude: 77.30811020300669
+      }, {
+        latitude: 28.44781728716837, longitude: 77.30776470085033
+      }, {
+        latitude: 28.45235421762417, longitude: 77.30744390462624
+      }, {
+        latitude: 28.459815924491107, longitude: 77.30687201571149
+      }];    
+      setTimeout(() => {
+        if (this.trekPath.length > 0) {
+          this.initMapRoute(this.trekPath);
+        }
+      }, 1000)
+      
+      const pathDistanceKm = this.getPathDistanceKm(this.trekPath);    
       this.specificTicketObj.distance = pathDistanceKm.toFixed(2);      
     }
+  }
+
+  async initMapRoute(location: any) {    
+  
+    // Map center: pehle point par
+    const center = { lat: location[0].latitude, lng: location[0].longitude };
+  
+    this.mapRoute = new google.maps.Map(document.getElementById('mapRoute'), {
+      center: center,
+      zoom: 12,
+    });
+  
+    // Saare markers add karo
+    location.forEach((point: any, index: any) => {
+      let color: string;
+  
+      if (index === 0) {
+        color = 'green';                        // Pehla point → green
+      } else if (index === location.length - 1) {
+        color = 'red';                          // Aakhri point → red
+      } else {
+        color = 'blue';                         // Beech ke point → blue
+      }
+  
+      this.addColoredMarker(point.latitude, point.longitude, color, index);
+    });
+  
+    // Route path draw karo (polyline)
+    this.drawRoutePath(location);
+  }
+  
+  addColoredMarker(lat: number, lng: number, color: string, index: number) {
+    const position = new google.maps.LatLng(lat, lng);
+  
+    const marker = new google.maps.Marker({
+      position,
+      map: this.mapRoute,
+      title: `Point ${index + 1}`,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 10,
+        fillColor: color,
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2,
+      }
+    });
+  }
+  
+  drawRoutePath(location: any[]) {
+    const pathCoordinates = location.map(point => ({
+      lat: point.latitude,
+      lng: point.longitude
+    }));
+  
+    const routePath = new google.maps.Polyline({
+      path: pathCoordinates,
+      geodesic: true,
+      strokeColor: '#4A90E2',   // Route line ka color (blue-ish)
+      strokeOpacity: 0.8,
+      strokeWeight: 4,
+    });
+  
+    routePath.setMap(this.mapRoute);
   }
 
   closeTripEndModal() {
