@@ -287,7 +287,7 @@
                   placeholder="e.g. 19.22"
                   (ionInput)="clampTollAmountDecimals($event)"
                   (ionBlur)="onTollAmountBlur()"></ion-input>
-                <ion-button slot="end" [color]="captureImage.toll_img ? 'success' : 'primary'"  (click)="openCamera('toll_img', true)">Image</ion-button>
+                <ion-button slot="end" [color]="captureImage.toll_img ? 'success' : 'primary'"  (click)="openCamera('toll_img', true)">Attachment</ion-button>
               </ion-item>
             </ion-list>
             <ion-card class="ion-no-margin ion-margin-top ion-margin-bottom">
@@ -307,13 +307,15 @@
             </section>
             <ion-note color="medium">
               Changing the map marker will update the end location and distance.
-            </ion-note>          
-            <section style="height:180px;width:100%; padding:5px;">
-              <div id="mapRoute" style="height:100%;width:100%"></div>
+            </ion-note>
+            <section *ngIf="trekPath?.length" class="ion-margin-top">
+              <ion-text color="medium">
+                <p class="ion-no-margin ion-margin-bottom">Recorded trek path</p>
+              </ion-text>
+              <div class="end-trip-route-map-wrap">
+                <div id="mapRoute"></div>
+              </div>
             </section>
-            <!-- <ion-text *ngFor="let dat of trekPath">
-              {{dat.latitude}} | {{dat.longitude}}
-            </ion-text> -->
 
             <ion-grid>
               <ion-row>

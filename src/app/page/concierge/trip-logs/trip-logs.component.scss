@@ -3,7 +3,7 @@
 }
 
 .trip-log-card {
-  background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+  background: linear-gradient(180deg, #fff 0%, #fcfcfd 100%);
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   margin-bottom: 16px;
@@ -17,7 +17,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%);
+  background: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -25,13 +25,11 @@
   font-weight: 700;
   font-size: 1rem;
   color: var(--ion-text-color);
-  letter-spacing: 0.02em;
 }
 
 .trip-log-card__body {
   display: flex;
   align-items: stretch;
-  gap: 0;
   padding: 14px 14px 16px 12px;
 }
 
@@ -50,7 +48,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, #ffffff 0%, #f3f4f6 100%);
+  background: linear-gradient(145deg, #fff 0%, #f3f4f6 100%);
   --border-radius: 50%;
   border: 1px solid rgba(0, 0, 0, 0.04);
 
@@ -64,9 +62,7 @@
   flex: 1 1 auto;
   align-self: stretch;
   width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 8px;
+  margin: 8px auto 0;
   border-left: 2px dashed rgba(0, 0, 0, 0.1);
   min-height: 48px;
 }
@@ -89,7 +85,6 @@
   margin: 0 0 8px;
   font-size: 0.9375rem;
   font-weight: 700;
-  letter-spacing: 0.01em;
 }
 
 .trip-section__title--start {
@@ -102,48 +97,22 @@
   font-weight: 600;
 }
 
-/* Key–value block: very light linear washes (theme-aware via color-mix) */
 .trip-fields {
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Fallback gradients (no color-mix) — still very light */
 .trip-section--start .trip-fields {
-  background: linear-gradient(165deg, #ffffff 0%, #f5f8ff 45%, #fafcff 100%);
-  border-color: rgba(0, 0, 0, 0.05);
+  background: linear-gradient(165deg, #fff 0%, #f5f8ff 45%, #fafcff 100%);
 }
 
 .trip-section--end .trip-fields {
-  background: linear-gradient(165deg, #ffffff 0%, #f4fbf7 45%, #f9fcfa 100%);
-  border-color: rgba(0, 0, 0, 0.05);
-}
-
-@supports (color: color-mix(in srgb, red, white)) {
-  .trip-section--start .trip-fields {
-    background: linear-gradient(
-      165deg,
-      #ffffff 0%,
-      color-mix(in srgb, var(--ion-color-primary) 4%, #ffffff) 55%,
-      color-mix(in srgb, var(--ion-color-primary) 2%, #ffffff) 100%
-    );
-    border-color: color-mix(in srgb, var(--ion-color-primary) 10%, #ffffff);
-  }
-
-  .trip-section--end .trip-fields {
-    background: linear-gradient(
-      165deg,
-      #ffffff 0%,
-      color-mix(in srgb, var(--ion-color-success) 4%, #ffffff) 55%,
-      color-mix(in srgb, var(--ion-color-success) 2%, #ffffff) 100%
-    );
-    border-color: color-mix(in srgb, var(--ion-color-success) 10%, #ffffff);
-  }
+  background: linear-gradient(165deg, #fff 0%, #f4fbf7 45%, #f9fcfa 100%);
 }
 
 .trip-fields--plain {
-  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+  background: linear-gradient(180deg, #fff 0%, #fafbfc 100%);
   border-color: rgba(0, 0, 0, 0.05);
   margin-top: 8px;
 
@@ -154,15 +123,10 @@
 
 .trip-kv {
   display: flex;
-  flex-direction: row;
   align-items: flex-start;
   gap: 12px;
   padding: 10px 12px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-.trip-fields--plain .trip-kv {
-  border-bottom-color: rgba(0, 0, 0, 0.04);
 }
 
 .trip-kv--last {
@@ -184,7 +148,6 @@
   min-width: 0;
   font-size: 0.875rem;
   line-height: 1.45;
-  font-weight: 400;
   color: var(--ion-text-color);
   word-break: break-word;
   overflow-wrap: anywhere;
@@ -201,7 +164,6 @@
   align-items: center;
 }
 
-/* Narrow screens: stack label above value */
 @media (max-width: 380px) {
   .trip-kv {
     flex-direction: column;
@@ -218,7 +180,6 @@
 
   .trip-kv__val {
     width: 100%;
-    padding-left: 0;
   }
 }
 
@@ -254,19 +215,7 @@
 
 .trip-track-map {
   width: 100%;
-  min-height: 60vh;
-  height: 60vh;
-}
-
-::ng-deep .trip-track-map-modal {
-  --width: 100%;
-  --height: 100%;
-  --max-width: 520px;
-  --max-height: 85vh;
-  --border-radius: 12px;
-}
-
-::ng-deep .trip-track-map-modal ion-content {
-  --padding-top: 0;
-  --padding-bottom: 0;
+  height: 100%;
+  // min-height: 60vh;
+  // height: 60vh;
 }

@@ -27,3 +27,17 @@ ion-item {
   align-items: center;
   justify-content: center;
 }
+
+.end-trip-route-map-wrap {
+  height: 180px;
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+
+  #mapRoute {
+    height: 100%;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}

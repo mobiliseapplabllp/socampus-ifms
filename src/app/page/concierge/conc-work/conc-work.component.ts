@@ -62,6 +62,8 @@ export class ConcWorkComponent implements OnInit {
   map: any;
   mapRoute: any;
   trekPath: any = [];
+  private mapRoutePolyline: any = null;
+  private mapRouteMarkers: any[] = [];
   // private DUMMY_START_LAT = 28.6139;
   // private DUMMY_START_LONG = 77.2090;
   // private DUMMY_END_LAT = 28.7041;
@@ -390,109 +392,134 @@ export class ConcWorkComponent implements OnInit {
   }
 
   async openTripEndModal() {
+    this.trekPath = [];
     this.isEndTripModalOpen = true;
     if (this.specificTicketObj.trip_type === 'gps') {
+      const trekPathRaw = this.isCapacitorGps() ? await this.getLocations() : [{
+        latitude: 28.430856265720674, longitude: 77.30961464926419
+      }, {
+        latitude: 28.446630168500157, longitude: 77.30781220482622
+      }, {
+        latitude: 28.466270706276184, longitude: 77.30566643763815
+      }];
+      this.trekPath = trekPathRaw;
+      const pathDistanceKm = this.getPathDistanceKm(trekPathRaw);
+      this.specificTicketObj.distance = pathDistanceKm.toFixed(2);
+
       const current = await this.getCurrentForegroundLocation();
       const endLat = current.lat;
       const endLng = current.lng;
-      this.initMap(endLat, endLng, 'end');
       this.specificTicketObj.trip_end_lat = endLat;
       this.specificTicketObj.trip_end_lng = endLng;
-      // const computedDistanceKm = this.calcDistance(
-      //   endLat!,
-      //   endLng!,
-      //   this.specificTicketObj.trip_start_lat,
-      //   this.specificTicketObj.trip_start_lng
-      // ).toFixed(2);
-      // this.specificTicketObj.distance = computedDistanceKm;
-      this.trekPath = this.isCapacitorGps() ? await this.getLocations() : [{
-        latitude: 28.43891332576039, longitude: 77.32364796665696
-      }, {
-        latitude: 28.444880675184887, longitude: 77.30811020300669
-      }, {
-        latitude: 28.44781728716837, longitude: 77.30776470085033
-      }, {
-        latitude: 28.45235421762417, longitude: 77.30744390462624
-      }, {
-        latitude: 28.459815924491107, longitude: 77.30687201571149
-      }];    
-      setTimeout(() => {
-        if (this.trekPath.length > 0) {
-          this.initMapRoute(this.trekPath);
-        }
-      }, 1000)
-      
-      const pathDistanceKm = this.getPathDistanceKm(this.trekPath);    
-      this.specificTicketObj.distance = pathDistanceKm.toFixed(2);      
+      await this.initMap(endLat, endLng, 'end');
+
+      if (trekPathRaw.length > 0) {
+        await this.waitForMapLayout();
+        await new Promise((r) => setTimeout(r, 80));
+        this.renderTrekRouteMap(trekPathRaw);
+      } else {
+        this.clearMapRouteOverlays();
+        this.mapRoute = null;
+      }
     }
   }
 
-  async initMapRoute(location: any) {    
-  
-    // Map center: pehle point par
-    const center = { lat: location[0].latitude, lng: location[0].longitude };
-  
-    this.mapRoute = new google.maps.Map(document.getElementById('mapRoute'), {
-      center: center,
-      zoom: 12,
-    });
-  
-    // Saare markers add karo
-    location.forEach((point: any, index: any) => {
-      let color: string;
-  
-      if (index === 0) {
-        color = 'green';                        // Pehla point → green
-      } else if (index === location.length - 1) {
-        color = 'red';                          // Aakhri point → red
-      } else {
-        color = 'blue';                         // Beech ke point → blue
-      }
-  
-      this.addColoredMarker(point.latitude, point.longitude, color, index);
-    });
-  
-    // Route path draw karo (polyline)
-    this.drawRoutePath(location);
+  /** Same style as trip-logs View Track: polyline + start/end markers only. */
+  private clearMapRouteOverlays() {
+    if (this.mapRoutePolyline) {
+      this.mapRoutePolyline.setMap(null);
+      this.mapRoutePolyline = null;
+    }
+    for (const m of this.mapRouteMarkers) {
+      m.setMap(null);
+    }
+    this.mapRouteMarkers = [];
   }
-  
-  addColoredMarker(lat: number, lng: number, color: string, index: number) {
-    const position = new google.maps.LatLng(lat, lng);
-  
-    const marker = new google.maps.Marker({
-      position,
-      map: this.mapRoute,
-      title: `Point ${index + 1}`,
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 10,
-        fillColor: color,
-        fillOpacity: 1,
-        strokeColor: '#ffffff',
-        strokeWeight: 2,
+
+  private normalizeTrekPointsForRoute(raw: any[]): { lat: number; lng: number }[] {
+    const out: { lat: number; lng: number }[] = [];
+    for (const p of raw || []) {
+      const pt = this.toLatLngPoint(p);
+      if (pt) {
+        out.push(pt);
       }
-    });
+    }
+    return out;
   }
-  
-  drawRoutePath(location: any[]) {
-    const pathCoordinates = location.map(point => ({
-      lat: point.latitude,
-      lng: point.longitude
-    }));
-  
-    const routePath = new google.maps.Polyline({
-      path: pathCoordinates,
-      geodesic: true,
-      strokeColor: '#4A90E2',   // Route line ka color (blue-ish)
-      strokeOpacity: 0.8,
-      strokeWeight: 4,
+
+  private renderTrekRouteMap(raw: any[]) {
+    const pts = this.normalizeTrekPointsForRoute(raw);
+    if (pts.length === 0) {
+      this.clearMapRouteOverlays();
+      this.mapRoute = null;
+      return;
+    }
+    const el = document.getElementById('mapRoute');
+    if (!el || typeof google === 'undefined' || !google.maps) {
+      console.warn('mapRoute container or Google Maps API not ready');
+      return;
+    }
+
+    this.clearMapRouteOverlays();
+
+    const center = pts[0];
+    this.mapRoute = new google.maps.Map(el, {
+      center,
+      zoom: 13,
     });
-  
-    routePath.setMap(this.mapRoute);
+
+    if (pts.length >= 2) {
+      this.mapRoutePolyline = new google.maps.Polyline({
+        path: pts,
+        geodesic: true,
+        strokeColor: '#1a73e8',
+        strokeOpacity: 0.9,
+        strokeWeight: 4,
+        map: this.mapRoute,
+      });
+    }
+
+    const addMarker = (p: { lat: number; lng: number }, color: string, title: string) => {
+      const marker = new google.maps.Marker({
+        position: p,
+        map: this.mapRoute,
+        title,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 9,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+        },
+      });
+      this.mapRouteMarkers.push(marker);
+    };
+
+    addMarker(pts[0], '#2dd36f', 'Start');
+    if (pts.length > 1) {
+      addMarker(pts[pts.length - 1], '#eb445a', 'End');
+    }
+
+    if (pts.length === 1) {
+      this.mapRoute.setCenter(pts[0]);
+      this.mapRoute.setZoom(14);
+    } else {
+      const bounds = new google.maps.LatLngBounds();
+      pts.forEach((p) => bounds.extend(p));
+      this.mapRoute.fitBounds(bounds, 48);
+    }
+
+    google.maps.event.addListenerOnce(this.mapRoute, 'idle', () => {
+      google.maps.event.trigger(this.mapRoute, 'resize');
+    });
   }
 
   closeTripEndModal() {
     this.isEndTripModalOpen = false;
+    this.clearMapRouteOverlays();
+    this.mapRoute = null;
+    this.trekPath = [];
   }
 
   submitTripStart() {
