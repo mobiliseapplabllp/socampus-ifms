@@ -388,6 +388,8 @@ export class ConcWorkComponent implements OnInit {
   }
 
   closeTripStartModal() {
+    this.lat = '';
+    this.lng = '';
     this.isTripModalOpen = false;
   }
 
