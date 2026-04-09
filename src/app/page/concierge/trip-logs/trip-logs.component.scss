@@ -1,0 +1,272 @@
+.trip-logs-content {
+  --background: var(--ion-color-light);
+}
+
+.trip-log-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+  padding: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.trip-log-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.trip-log-card__trip-no {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ion-text-color);
+  letter-spacing: 0.02em;
+}
+
+.trip-log-card__body {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 14px 14px 16px 12px;
+}
+
+.trip-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40px;
+  flex-shrink: 0;
+  padding-right: 4px;
+}
+
+.trip-rail__avatar {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #ffffff 0%, #f3f4f6 100%);
+  --border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+
+  ion-icon {
+    font-size: 20px;
+    color: var(--ion-color-medium);
+  }
+}
+
+.trip-rail__line {
+  flex: 1 1 auto;
+  align-self: stretch;
+  width: 0;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 8px;
+  border-left: 2px dashed rgba(0, 0, 0, 0.1);
+  min-height: 48px;
+}
+
+.trip-main {
+  flex: 1;
+  min-width: 0;
+  padding-left: 4px;
+}
+
+.trip-section {
+  margin-bottom: 16px;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.trip-section__title {
+  margin: 0 0 8px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.trip-section__title--start {
+  color: var(--ion-color-primary);
+  font-weight: 600;
+}
+
+.trip-section__title--end {
+  color: var(--ion-color-success);
+  font-weight: 600;
+}
+
+/* Key–value block: very light linear washes (theme-aware via color-mix) */
+.trip-fields {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Fallback gradients (no color-mix) — still very light */
+.trip-section--start .trip-fields {
+  background: linear-gradient(165deg, #ffffff 0%, #f5f8ff 45%, #fafcff 100%);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+.trip-section--end .trip-fields {
+  background: linear-gradient(165deg, #ffffff 0%, #f4fbf7 45%, #f9fcfa 100%);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+@supports (color: color-mix(in srgb, red, white)) {
+  .trip-section--start .trip-fields {
+    background: linear-gradient(
+      165deg,
+      #ffffff 0%,
+      color-mix(in srgb, var(--ion-color-primary) 4%, #ffffff) 55%,
+      color-mix(in srgb, var(--ion-color-primary) 2%, #ffffff) 100%
+    );
+    border-color: color-mix(in srgb, var(--ion-color-primary) 10%, #ffffff);
+  }
+
+  .trip-section--end .trip-fields {
+    background: linear-gradient(
+      165deg,
+      #ffffff 0%,
+      color-mix(in srgb, var(--ion-color-success) 4%, #ffffff) 55%,
+      color-mix(in srgb, var(--ion-color-success) 2%, #ffffff) 100%
+    );
+    border-color: color-mix(in srgb, var(--ion-color-success) 10%, #ffffff);
+  }
+}
+
+.trip-fields--plain {
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+  border-color: rgba(0, 0, 0, 0.05);
+  margin-top: 8px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.trip-kv {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.trip-fields--plain .trip-kv {
+  border-bottom-color: rgba(0, 0, 0, 0.04);
+}
+
+.trip-kv--last {
+  border-bottom: none;
+}
+
+.trip-kv__key {
+  flex: 0 0 38%;
+  max-width: 148px;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ion-color-medium-shade);
+  padding-top: 1px;
+}
+
+.trip-kv__val {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--ion-text-color);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.trip-kv__val--actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.trip-kv--attachments {
+  align-items: center;
+}
+
+/* Narrow screens: stack label above value */
+@media (max-width: 380px) {
+  .trip-kv {
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .trip-kv__key {
+    flex: none;
+    max-width: none;
+    width: 100%;
+  }
+
+  .trip-kv__val {
+    width: 100%;
+    padding-left: 0;
+  }
+}
+
+.trip-view-track {
+  margin-top: 12px;
+  margin-bottom: 4px;
+  --border-width: 2px;
+  font-weight: 600;
+}
+
+.trip-toll {
+  margin-top: 12px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.trip-toll__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+
+.trip-toll__view-btn {
+  --padding-start: 4px;
+  --padding-end: 8px;
+  height: 36px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: none;
+  margin: 0;
+}
+
+.trip-track-map {
+  width: 100%;
+  min-height: 60vh;
+  height: 60vh;
+}
+
+::ng-deep .trip-track-map-modal {
+  --width: 100%;
+  --height: 100%;
+  --max-width: 520px;
+  --max-height: 85vh;
+  --border-radius: 12px;
+}
+
+::ng-deep .trip-track-map-modal ion-content {
+  --padding-top: 0;
+  --padding-bottom: 0;
+}

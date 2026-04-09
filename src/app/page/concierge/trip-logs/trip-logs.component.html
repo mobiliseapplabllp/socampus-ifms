@@ -1,0 +1,152 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Trip Logs</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding trip-logs-content">
+  <div *ngIf="loading" class="ion-text-center ion-padding-vertical">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <div *ngIf="!loading && tripLogs.length === 0" class="ion-text-center ion-padding-vertical">
+    <ion-text color="medium">No trip logs found.</ion-text>
+  </div>
+
+  <article
+    *ngFor="let trip of tripLogs; let i = index; trackBy: trackByTripId"
+    class="trip-log-card">
+    <div class="trip-log-card__header">
+      <span class="trip-log-card__trip-no">Trip #{{ i + 1 }}</span>
+      <ion-badge [color]="statusColor(trip)">{{ disp(trip.trip_status_label) }}</ion-badge>
+    </div>
+
+    <div class="trip-log-card__body">
+      <div class="trip-rail" aria-hidden="true">
+        <ion-avatar class="trip-rail__avatar">
+          <ion-icon name="person-outline"></ion-icon>
+        </ion-avatar>
+        <div class="trip-rail__line"></div>
+      </div>
+
+      <div class="trip-main">
+        <section class="trip-section trip-section--start" *ngIf="trip.start_logs">
+          <h3 class="trip-section__title trip-section__title--start">Start Trip</h3>
+          <div class="trip-fields">
+            <div class="trip-kv">
+              <div class="trip-kv__key">Start Date &amp; Time</div>
+              <div class="trip-kv__val">{{ disp(trip.start_logs.trip_start_time) }}</div>
+            </div>
+            <div class="trip-kv">
+              <div class="trip-kv__key">Started By</div>
+              <div class="trip-kv__val">{{ disp(trip.start_logs.started_by_remark) }}</div>
+            </div>
+            <div class="trip-kv">
+              <div class="trip-kv__key">Start Latitude</div>
+              <div class="trip-kv__val">{{ disp(trip.start_logs.start_lat) }}</div>
+            </div>
+            <div class="trip-kv trip-kv--last">
+              <div class="trip-kv__key">Start Longitude</div>
+              <div class="trip-kv__val">{{ disp(trip.start_logs.start_lng) }}</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="trip-section trip-section--end" *ngIf="trip.end_logs">
+          <h3 class="trip-section__title trip-section__title--end">End Trip</h3>
+          <div class="trip-fields">
+            <div class="trip-kv">
+              <div class="trip-kv__key">End Date &amp; Time</div>
+              <div class="trip-kv__val">{{ disp(trip.end_logs.trip_end_time) }}</div>
+            </div>
+            <div class="trip-kv">
+              <div class="trip-kv__key">Ended By</div>
+              <div class="trip-kv__val">{{ disp(trip.end_logs.ended_by_remark) }}</div>
+            </div>
+            <div class="trip-kv">
+              <div class="trip-kv__key">End Latitude</div>
+              <div class="trip-kv__val">{{ disp(trip.end_logs.end_lat) }}</div>
+            </div>
+            <div class="trip-kv">
+              <div class="trip-kv__key">End Longitude</div>
+              <div class="trip-kv__val">{{ disp(trip.end_logs.end_lng) }}</div>
+            </div>
+            <div class="trip-kv">
+              <div class="trip-kv__key">Total Distance (Km)</div>
+              <div class="trip-kv__val">{{ disp(trip.end_logs.trip_total_distance) }}</div>
+            </div>
+            <div class="trip-kv trip-kv--last">
+              <div class="trip-kv__key">Adjusted Distance (Km)</div>
+              <div class="trip-kv__val">{{ disp(trip.end_logs.trip_total_distance_adjusted) }}</div>
+            </div>
+          </div>
+        </section>
+
+        <ion-button
+          *ngIf="canViewTrack(trip)"
+          class="trip-view-track"
+          fill="outline"
+          color="success"
+          expand="block"
+          (click)="openViewTrack(trip)">
+          <ion-icon slot="start" name="location-outline"></ion-icon>
+          View Track
+        </ion-button>
+
+        <div class="trip-toll" *ngIf="trip.end_logs">
+          <div class="trip-fields trip-fields--plain">
+            <div class="trip-kv trip-kv--last">
+              <div class="trip-kv__key">Toll Amount (Rs)</div>
+              <div class="trip-kv__val">{{ disp(trip.end_logs.trip_toll) }}</div>
+            </div>
+          </div>
+          <div class="trip-fields trip-fields--plain" *ngIf="trip.end_logs.toll_images?.length">
+            <div class="trip-kv trip-kv--last trip-kv--attachments">
+              <div class="trip-kv__key">Toll Attachments</div>
+              <div class="trip-kv__val trip-kv__val--actions">
+                <span class="trip-toll__links">
+                  <ion-button
+                    *ngFor="let img of trip.end_logs.toll_images; let ti = index"
+                    fill="clear"
+                    size="small"
+                    class="trip-toll__view-btn"
+                    (click)="viewTollImage(img)">
+                    <ion-icon slot="start" name="image-outline"></ion-icon>
+                    View<span *ngIf="trip.end_logs.toll_images.length > 1">&nbsp;{{ ti + 1 }}</span>
+                  </ion-button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+</ion-content>
+
+<ion-modal
+  [isOpen]="isTrackMapOpen"
+  [backdropDismiss]="true"
+  (didDismiss)="onTrackMapDismissed()"
+  cssClass="trip-track-map-modal">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Trip track</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeTrackModal()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <div id="trip-logs-track-map" class="trip-track-map"></div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { tick } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -57,5 +58,10 @@ export class ConciergeService {
       console.log(key, value);
     }
     return this.https.post(environment.url + 'concierge/ticket/save_concierge_trip', formData);
+  }
+
+  getTripLogs(ticket_id: any): Observable<any> {
+    // concierge/ticket/get_trip_logs?ticket_id=57&source=mobile
+    return this.https.get(environment.url + 'concierge/ticket/get_trip_logs?ticket_id=' + ticket_id + '&source=mobile');
   }
 }

@@ -9,6 +9,7 @@ import { AssignUserComponent } from '../assign-user/assign-user.component';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Geolocation } from '@capacitor/geolocation';
 import { LocationTracker } from 'capacitor-location-tracker-sqlite';
+import { TripLogsComponent } from '../trip-logs/trip-logs.component';
 declare var google: any;
 @Component({
   selector: 'app-conc-work',
@@ -81,6 +82,7 @@ export class ConcWorkComponent implements OnInit {
     private alertController: AlertController) {
     this.activeRoute.queryParams.subscribe((res) => {
       this.requestData = JSON.parse(res['data']);
+      console.log(this.requestData);
       let segStatusType = res['type'];
       this.segStatus = segStatusType;
       if (segStatusType === 'details') {
@@ -896,6 +898,17 @@ export class ConcWorkComponent implements OnInit {
     await alert.present();
     const { role } = await alert.onDidDismiss();
     return role === 'confirm';
+  }
+
+  async openTripLogs() {
+    const modal = await this.modalCtrl.create({
+      component: TripLogsComponent,
+      cssClass: 'my-modal_',
+      componentProps: {
+        data: this.requestData.id
+      }
+    });
+    modal.present();
   }
 
 }

@@ -13,6 +13,7 @@ import { ConcWorkComponent } from './conc-work/conc-work.component';
 import { AssignUserComponent } from './assign-user/assign-user.component';
 import { CrConcComponent } from './cr-conc/cr-conc.component';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { TripLogsComponent } from './trip-logs/trip-logs.component';
 
 @NgModule({
   imports: [
@@ -21,7 +22,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
     IonicModule,
     ReactiveFormsModule,
     ConciergePageRoutingModule,
-    SharedModule,
+    SharedModule,    
   ],
   declarations: [
     ConciergePage,
@@ -29,7 +30,8 @@ import { SharedModule } from 'src/app/shared/shared.module';
     ConcHistoryComponent,
     ConcWorkComponent,
     AssignUserComponent,
-    CrConcComponent
+    CrConcComponent,
+    TripLogsComponent
   ]
 })
 export class ConciergePageModule {}
