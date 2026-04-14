@@ -5,21 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>ifms-sodexo</string>
+        <string>SoCampus Service</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
-  <key>NSCameraUsageDescription</key>
-	<string>Need Camera Access to Resolve Ticket, Upload Attandance and Scan QR Code</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Need Location Permission to Submit User Attandance</string>
-  <key>NSPhotoLibraryUsageDescription</key>
-	<string>Need Library Access Permission</string>
-  <key>NSPhotoLibraryAddUsageDescription</key>
-  <string>Need Photo Library Access Permission</string>
-  <key>NSSpeechRecognitionUsageDescription</key>
-  <string>Need allow Speaker to speak checklist question or PMS question</string>
-  <key>NSMicrophoneUsageDescription</key>
-  <string>Need allow Mic to Listen checklist question or PMS question</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -29,9 +17,25 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
+	<string>4.1.7</string>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>417</string>
+
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to function properly.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app requires access to your location when the screen is on and the app is displayed.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires microphone access to function properly.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app requires photo library access to function properly.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires photo library access to function properly.</string>
+	<key>NSPhotoLibraryUsageDescriptionentry</key>
+	<string>This app requires Photo Library access to function properly.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app required Speech functionlity to listen digital checklist etc</string>
+	
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
