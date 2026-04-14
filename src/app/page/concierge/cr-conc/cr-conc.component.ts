@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalController, NavController } from '@ionic/angular';
+import * as moment from 'moment';
 import { CameraService } from 'src/app/provider/camera/camera.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ConciergeService } from 'src/app/provider/concierge/concierge.service';
@@ -175,10 +176,16 @@ export class CrConcComponent  implements OnInit {
   }
 
   submit() {
+    let dte = moment(this.forms.value.date_urgency).format('YYYY-MM-DD');
+    let tme = moment(this.forms.value.date_urgency).format('HH:mm');
     for (const key in this.forms.value) {
       this.formData.delete(key);
       this.formData.append(key, this.forms.get(key)?.value);
     }
+    this.formData.delete('tckt_date');
+    this.formData.delete('tckt_time');
+    this.formData.append('tckt_date', dte);
+    this.formData.append('tckt_time', tme);
     this.common.presentLoading().then(preLoad => {
       this.httpConcierge.createTicket(this.formData).subscribe({
         next:(data: any) => {

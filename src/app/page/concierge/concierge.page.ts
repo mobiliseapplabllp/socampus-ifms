@@ -8,6 +8,7 @@ import { CommonService } from 'src/app/provider/common/common.service';
 import { environment } from 'src/environments/environment';
 import { AssignUserComponent } from './assign-user/assign-user.component';
 import { LocationTracker } from 'capacitor-location-tracker-sqlite';
+import { TripLogsComponent } from './trip-logs/trip-logs.component';
 
 @Component({
   selector: 'app-concierge',
@@ -265,6 +266,17 @@ export class ConciergePage implements OnInit {
   private async checkBackgroundPermission() {
     const { allowed } = await LocationTracker.requestBackgroundPermissionsCheck();
     return allowed;
+  }
+
+  async openTripLogs(dat: any) {
+    const modal = await this.modalCtrl.create({
+      component: TripLogsComponent,
+      cssClass: 'my-modal_',
+      componentProps: {
+        data: dat.id
+      }
+    });
+    modal.present();
   }
 
 }

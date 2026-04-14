@@ -42,7 +42,7 @@
       </ion-item>
 
       <ion-item>
-        <ion-label color="primary" position="floating">Select Sub Category  <ion-text color="danger">*</ion-text></ion-label>
+        <ion-label color="primary" position="floating">Select Subcategory  <ion-text color="danger">*</ion-text></ion-label>
         <ion-select interface="action-sheet"  mode="ios" formControlName="subcat_id" (ionChange)="changeSubCat()">
           <ion-select-option *ngFor="let dat of subCatArr" [value]="dat.value">{{dat.label}}</ion-select-option>
         </ion-select>
