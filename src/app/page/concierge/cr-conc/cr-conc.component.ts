@@ -31,7 +31,7 @@ export class CrConcComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.userData = JSON.parse(localStorage.getItem('user')!);   
+    this.userData = JSON.parse(localStorage.getItem('user')!);       
     this.initForm();
   }
 
@@ -42,7 +42,7 @@ export class CrConcComponent  implements OnInit {
       request_for: ['', Validators.required],
       name: ['', Validators.required],
       email: ['', Validators.required],
-      mobile: ['', Validators.required],
+      mobile: [''],
       cat_id: ['', Validators.required],
       subcat_id: ['', Validators.required],
       tckt_response: ['', Validators.required],

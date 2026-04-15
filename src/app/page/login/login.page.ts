@@ -366,8 +366,8 @@ export class LoginPage implements OnInit {
     if (this.isProduction) {
       return;
     }
-    // https://socampusdev.mobilisepro.com/#/auth/ssoGates/XQCx8ekhELpXkHYvv5JTyzNmci9MaVVkM0ZHS1BGZ05ZZWpCRWtGRmcvNDdsYjQvdUVrODlCYWVWcWhMb2MyRlFsSG4xZThOVHZXTDVNZ2s3ZHV6ZlBvbTdMTzYyV29KL1EwRHFKaXRoN3pKWjBWQ3BWblN3VVBUREtmRVd2dVJsYkQyZFFrdWw5QW9uc3Jn
-    let token = 'XQCx8ekhELpXkHYvv5JTyzNmci9MaVVkM0ZHS1BGZ05ZZWpCRWtGRmcvNDdsYjQvdUVrODlCYWVWcWhMb2MyRlFsSG4xZThOVHZXTDVNZ2s3ZHV6ZlBvbTdMTzYyV29KL1EwRHFKaXRoN3pKWjBWQ3BWblN3VVBUREtmRVd2dVJsYkQyZFFrdWw5QW9uc3Jn';
+    // https://socampusstaging.mobilisepro.com/#/auth/ssoGates/oMin5mlOvLH1tCaoBEbdN21nUmVDa0Rza2l5V2g2TUlhTm52OVFTbVBWY2lCRTJuelhoODVMVkdwT1NkN0VqQ1plQVRUZm5DTmJzOW9kRjU5Z2E1endaZ2huUi9IYU9uenZnUS8rNExoa1ZFb0NKNk1XZGdqOWlRRkVWK25SODE0U0FGd3NEQnFKYStyTWpC
+    let token = 'oMin5mlOvLH1tCaoBEbdN21nUmVDa0Rza2l5V2g2TUlhTm52OVFTbVBWY2lCRTJuelhoODVMVkdwT1NkN0VqQ1plQVRUZm5DTmJzOW9kRjU5Z2E1endaZ2huUi9IYU9uenZnUS8rNExoa1ZFb0NKNk1XZGdqOWlRRkVWK25SODE0U0FGd3NEQnFKYStyTWpC';
     this.getSsoEnc(token);
   }
 }

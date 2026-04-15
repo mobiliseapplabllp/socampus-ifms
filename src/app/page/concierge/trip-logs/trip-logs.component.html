@@ -46,14 +46,27 @@
               <div class="trip-kv__key">Started By</div>
               <div class="trip-kv__val">{{ disp(trip.start_logs.started_by_remark) }}</div>
             </div>
-            <div class="trip-kv">
-              <div class="trip-kv__key">Start Latitude</div>
-              <div class="trip-kv__val">{{ disp(trip.start_logs.start_lat) }}</div>
-            </div>
-            <div class="trip-kv trip-kv--last">
-              <div class="trip-kv__key">Start Longitude</div>
-              <div class="trip-kv__val">{{ disp(trip.start_logs.start_lng) }}</div>
-            </div>
+            <section *ngIf="trip.trip_type_label === 'GPS' ">
+              <div class="trip-kv" >
+                <div class="trip-kv__key">Start Latitude</div>
+                <div class="trip-kv__val">{{ disp(trip.start_logs.start_lat) }}</div>
+              </div>
+              <div class="trip-kv trip-kv--last">
+                <div class="trip-kv__key">Start Longitude</div>
+                <div class="trip-kv__val">{{ disp(trip.start_logs.start_lng) }}</div>
+              </div>
+            </section>
+            <section *ngIf="trip.trip_type_label === 'Manual'">
+              <div class="trip-kv" >
+                <div class="trip-kv__key">ODO Meter</div>
+                <div class="trip-kv__val">{{ disp(trip.start_logs.start_odometer_reading) }}</div>
+              </div>
+              <div class="trip-kv trip-kv--last">
+                <div class="trip-kv__key">Start Longitude</div>
+                <div class="trip-kv__val">{{ disp(trip.start_logs.start_lng) }}</div>
+              </div>
+            </section>
+            
           </div>
         </section>
 
