@@ -142,6 +142,7 @@ export class TripLogsComponent implements OnInit {
     this.clearTrackMapOverlays();
     this.trackGoogleMap = null;
     this.trackPoints = [];
+    this.isTrackMapOpen = false;
   }
 
   private clearTrackMapOverlays() {

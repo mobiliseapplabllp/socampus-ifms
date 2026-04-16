@@ -39,9 +39,9 @@ export class CrConcComponent  implements OnInit {
     this.forms = this.formbuilder.group({
       site_id: ['', Validators.required],
       site_id_desc: ['', Validators.required],
-      request_for: ['', Validators.required],
+      request_for: ['On Behalf', Validators.required],
       name: ['', Validators.required],
-      email: ['', Validators.required],
+      email: [''],
       mobile: [''],
       cat_id: ['', Validators.required],
       subcat_id: ['', Validators.required],
@@ -186,6 +186,10 @@ export class CrConcComponent  implements OnInit {
     this.formData.delete('tckt_time');
     this.formData.append('tckt_date', dte);
     this.formData.append('tckt_time', tme);
+    if (!this.isAttachment) {
+      this.formData.delete('document');
+      this.formData.append('document', 'null');      
+    }
     this.common.presentLoading().then(preLoad => {
       this.httpConcierge.createTicket(this.formData).subscribe({
         next:(data: any) => {

@@ -1,6 +1,6 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar >
-    <ion-title>Assign</ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Assign User</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="close(null, false)">
         <ion-icon name="close-outline"></ion-icon>
@@ -8,30 +8,57 @@
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
-<ion-content>
-  <ion-searchbar (ionInput)="search($event)"></ion-searchbar>
 
-  <ion-item *ngFor="let dat of assignUsers;let i = index" lines="none">
-    <ion-avatar slot="start" class="center">{{i+1}}</ion-avatar>
-    <ion-label>
-      <h3>{{dat.fname}}</h3>
-      <p>Workload : <ion-text color="danger">{{dat.workload}}</ion-text> </p>
-    </ion-label>
-    <ion-button slot="end" size="small" fill="outline" (click)="assign(dat)">Assign</ion-button>
-  </ion-item>
-  <!-- <ion-radio-group [(ngModel)]="isSelect">
-    <ion-item *ngFor="let dat of assignUsers">
-      <ion-label>
-        <h3>{{dat.fname}}</h3>
-        <p>Work Load {{dat.workload}}</p>
-      </ion-label>
-      <ion-radio slot="start" [value]="dat.id"></ion-radio>
-    </ion-item>
-  </ion-radio-group>
-  <ion-row>
-    <ion-col size="12" class="ion-text-center">
-      <ion-button color="primary" (click)="assign()">Assign</ion-button>
-    </ion-col>
-  </ion-row> -->
+<ion-content class="assign-content">
+
+  <div class="search-wrap">
+    <ion-searchbar
+      mode="ios"
+      placeholder="Search by name..."
+      (ionInput)="search($event)"
+      class="assign-search">
+    </ion-searchbar>
+  </div>
+
+  <div *ngIf="assignUsers.length === 0" class="empty-state">
+    <ion-icon name="people-outline" class="empty-state__icon"></ion-icon>
+    <ion-text color="medium">No users found.</ion-text>
+  </div>
+
+  <div class="user-list">
+    <div class="user-card" *ngFor="let dat of assignUsers; let i = index">
+      <div class="user-card__avatar">
+        <span class="user-card__initials">{{ dat.fname?.charAt(0)?.toUpperCase() || '#' }}</span>
+      </div>
+
+      <div class="user-card__info">
+        <span class="user-card__name">{{ dat.fname }}</span>
+        <span class="user-card__workload">
+          <ion-icon name="briefcase-outline" class="user-card__workload-icon"></ion-icon>
+          Workload:
+          <span class="user-card__workload-val"
+            [ngClass]="{
+              'user-card__workload-val--high': dat.workload >= 5,
+              'user-card__workload-val--medium': dat.workload >= 2 && dat.workload < 5,
+              'user-card__workload-val--low': dat.workload < 2
+            }">
+            {{ dat.workload }}
+          </span>
+        </span>
+      </div>
+
+      <ion-button
+        slot="end"
+        size="small"
+        fill="outline"
+        color="primary"
+        shape="round"
+        class="user-card__btn"
+        (click)="assign(dat)">
+        <ion-icon slot="start" name="person-add-outline"></ion-icon>
+        Assign
+      </ion-button>
+    </div>
+  </div>
 
 </ion-content>

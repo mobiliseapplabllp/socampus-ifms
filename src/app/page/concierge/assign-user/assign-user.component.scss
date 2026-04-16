@@ -1,0 +1,121 @@
+.assign-content {
+  --background: #f2f4f8;
+}
+
+.search-wrap {
+  padding: 10px 12px 4px;
+}
+
+.assign-search {
+  --border-radius: 12px;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --background: #fff;
+  font-size: 14px;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  gap: 12px;
+
+  &__icon {
+    font-size: 48px;
+    color: #ccc;
+  }
+}
+
+/* ── User list ── */
+.user-list {
+  padding: 8px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.04);
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__initials {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__workload {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #999;
+  }
+
+  &__workload-icon {
+    font-size: 13px;
+  }
+
+  &__workload-val {
+    font-weight: 700;
+
+    &--high {
+      color: #d10015;
+    }
+
+    &--medium {
+      color: #e67e00;
+    }
+
+    &--low {
+      color: #2e7d32;
+    }
+  }
+
+  &__btn {
+    --border-radius: 18px;
+    --padding-start: 10px;
+    --padding-end: 12px;
+    height: 34px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: none;
+    flex-shrink: 0;
+  }
+}

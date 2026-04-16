@@ -14,130 +14,198 @@
     <ion-spinner name="crescent"></ion-spinner>
   </div>
 
-  <div *ngIf="!loading && tripLogs.length === 0" class="ion-text-center ion-padding-vertical">
+  <div *ngIf="!loading && tripLogs.length === 0" class="empty-state">
+    <ion-icon name="car-outline" class="empty-state__icon"></ion-icon>
     <ion-text color="medium">No trip logs found.</ion-text>
   </div>
 
   <article
     *ngFor="let trip of tripLogs; let i = index; trackBy: trackByTripId"
-    class="trip-log-card">
-    <div class="trip-log-card__header">
-      <span class="trip-log-card__trip-no">Trip #{{ i + 1 }}</span>
+    class="tl-card">
+
+    <!-- Card Header -->
+    <div class="tl-card__header">
+      <div class="tl-card__header-left">
+        <span class="tl-card__trip-no">Trip #{{ i + 1 }}</span>
+        <span class="tl-type-badge" [ngClass]="{'tl-type-badge--gps': trip.trip_type_label === 'GPS', 'tl-type-badge--manual': trip.trip_type_label === 'Manual'}">
+          <ion-icon [name]="trip.trip_type_label === 'GPS' ? 'navigate-outline' : 'create-outline'"></ion-icon>
+          {{ trip.trip_type_label }}
+        </span>
+      </div>
       <ion-badge [color]="statusColor(trip)">{{ disp(trip.trip_status_label) }}</ion-badge>
     </div>
 
-    <div class="trip-log-card__body">
-      <div class="trip-rail" aria-hidden="true">
-        <ion-avatar class="trip-rail__avatar">
-          <ion-icon name="person-outline"></ion-icon>
-        </ion-avatar>
-        <div class="trip-rail__line"></div>
+    <!-- Card Body -->
+    <div class="tl-card__body">
+
+      <!-- Start Trip Section -->
+      <section class="tl-section" *ngIf="trip.start_logs">
+        <div class="tl-section__header tl-section__header--start">
+          <div class="tl-section__dot tl-section__dot--start"></div>
+          <span class="tl-section__title">Start Trip</span>
+        </div>
+        <div class="tl-fields">
+          <div class="tl-row">
+            <ion-icon name="calendar-outline" class="tl-row__icon"></ion-icon>
+            <span class="tl-row__label">Date &amp; Time</span>
+            <span class="tl-row__value">{{ disp(trip.start_logs.trip_start_time) }}</span>
+          </div>
+          <div class="tl-row">
+            <ion-icon name="person-outline" class="tl-row__icon"></ion-icon>
+            <span class="tl-row__label">Started By</span>
+            <span class="tl-row__value">{{ disp(trip.start_logs.started_by_remark) }}</span>
+          </div>
+
+          <!-- GPS fields -->
+          <ng-container *ngIf="trip.trip_type_label === 'GPS'">
+            <div class="tl-row">
+              <ion-icon name="location-outline" class="tl-row__icon"></ion-icon>
+              <span class="tl-row__label">Latitude</span>
+              <span class="tl-row__value">{{ disp(trip.start_logs.start_lat) }}</span>
+            </div>
+            <div class="tl-row tl-row--last">
+              <ion-icon name="location-outline" class="tl-row__icon"></ion-icon>
+              <span class="tl-row__label">Longitude</span>
+              <span class="tl-row__value">{{ disp(trip.start_logs.start_lng) }}</span>
+            </div>
+          </ng-container>
+
+          <!-- Manual fields -->
+          <ng-container *ngIf="trip.trip_type_label === 'Manual'">
+            <div class="tl-row" [class.tl-row--last]="!trip.start_logs.start_odometer_img">
+              <ion-icon name="speedometer-outline" class="tl-row__icon"></ion-icon>
+              <span class="tl-row__label">ODO Meter</span>
+              <span class="tl-row__value">{{ disp(trip.start_logs.start_odometer_reading) }}</span>
+            </div>
+            <div class="tl-row tl-row--last tl-row--action" *ngIf="trip.start_logs.start_odometer_img">
+              <ion-icon name="image-outline" class="tl-row__icon"></ion-icon>
+              <span class="tl-row__label">ODO Image</span>
+              <span class="tl-row__value">
+                <ion-button fill="outline" size="small" color="tertiary" class="tl-img-btn" (click)="viewTollImage(trip.start_logs.start_odometer_img)">
+                  <ion-icon slot="start" name="eye-outline"></ion-icon> View
+                </ion-button>
+              </span>
+            </div>
+          </ng-container>
+        </div>
+      </section>
+
+      <!-- Connector line -->
+      <div class="tl-connector" *ngIf="trip.start_logs && trip.end_logs">
+        <div class="tl-connector__line"></div>
       </div>
 
-      <div class="trip-main">
-        <section class="trip-section trip-section--start" *ngIf="trip.start_logs">
-          <h3 class="trip-section__title trip-section__title--start">Start Trip</h3>
-          <div class="trip-fields">
-            <div class="trip-kv">
-              <div class="trip-kv__key">Start Date &amp; Time</div>
-              <div class="trip-kv__val">{{ disp(trip.start_logs.trip_start_time) }}</div>
-            </div>
-            <div class="trip-kv">
-              <div class="trip-kv__key">Started By</div>
-              <div class="trip-kv__val">{{ disp(trip.start_logs.started_by_remark) }}</div>
-            </div>
-            <section *ngIf="trip.trip_type_label === 'GPS' ">
-              <div class="trip-kv" >
-                <div class="trip-kv__key">Start Latitude</div>
-                <div class="trip-kv__val">{{ disp(trip.start_logs.start_lat) }}</div>
-              </div>
-              <div class="trip-kv trip-kv--last">
-                <div class="trip-kv__key">Start Longitude</div>
-                <div class="trip-kv__val">{{ disp(trip.start_logs.start_lng) }}</div>
-              </div>
-            </section>
-            <section *ngIf="trip.trip_type_label === 'Manual'">
-              <div class="trip-kv" >
-                <div class="trip-kv__key">ODO Meter</div>
-                <div class="trip-kv__val">{{ disp(trip.start_logs.start_odometer_reading) }}</div>
-              </div>
-              <div class="trip-kv trip-kv--last">
-                <div class="trip-kv__key">Start Longitude</div>
-                <div class="trip-kv__val">{{ disp(trip.start_logs.start_lng) }}</div>
-              </div>
-            </section>
-            
+      <!-- End Trip Section -->
+      <section class="tl-section" *ngIf="trip.end_logs">
+        <div class="tl-section__header tl-section__header--end">
+          <div class="tl-section__dot tl-section__dot--end"></div>
+          <span class="tl-section__title">End Trip</span>
+        </div>
+        <div class="tl-fields">
+          <div class="tl-row">
+            <ion-icon name="calendar-outline" class="tl-row__icon"></ion-icon>
+            <span class="tl-row__label">Date &amp; Time</span>
+            <span class="tl-row__value">{{ disp(trip.end_logs.trip_end_time) }}</span>
           </div>
-        </section>
-
-        <section class="trip-section trip-section--end" *ngIf="trip.end_logs">
-          <h3 class="trip-section__title trip-section__title--end">End Trip</h3>
-          <div class="trip-fields">
-            <div class="trip-kv">
-              <div class="trip-kv__key">End Date &amp; Time</div>
-              <div class="trip-kv__val">{{ disp(trip.end_logs.trip_end_time) }}</div>
-            </div>
-            <div class="trip-kv">
-              <div class="trip-kv__key">Ended By</div>
-              <div class="trip-kv__val">{{ disp(trip.end_logs.ended_by_remark) }}</div>
-            </div>
-            <div class="trip-kv">
-              <div class="trip-kv__key">End Latitude</div>
-              <div class="trip-kv__val">{{ disp(trip.end_logs.end_lat) }}</div>
-            </div>
-            <div class="trip-kv">
-              <div class="trip-kv__key">End Longitude</div>
-              <div class="trip-kv__val">{{ disp(trip.end_logs.end_lng) }}</div>
-            </div>
-            <div class="trip-kv">
-              <div class="trip-kv__key">Total Distance (Km)</div>
-              <div class="trip-kv__val">{{ disp(trip.end_logs.trip_total_distance) }}</div>
-            </div>
-            <div class="trip-kv trip-kv--last">
-              <div class="trip-kv__key">Adjusted Distance (Km)</div>
-              <div class="trip-kv__val">{{ disp(trip.end_logs.trip_total_distance_adjusted) }}</div>
-            </div>
+          <div class="tl-row">
+            <ion-icon name="person-outline" class="tl-row__icon"></ion-icon>
+            <span class="tl-row__label">Ended By</span>
+            <span class="tl-row__value">{{ disp(trip.end_logs.ended_by_remark) }}</span>
           </div>
-        </section>
 
-        <ion-button
-          *ngIf="canViewTrack(trip)"
-          class="trip-view-track"
-          fill="outline"
-          color="success"
-          expand="block"
-          (click)="openViewTrack(trip)">
-          <ion-icon slot="start" name="location-outline"></ion-icon>
-          View Track
-        </ion-button>
-
-        <div class="trip-toll" *ngIf="trip.end_logs">
-          <div class="trip-fields trip-fields--plain">
-            <div class="trip-kv trip-kv--last">
-              <div class="trip-kv__key">Toll Amount (Rs)</div>
-              <div class="trip-kv__val">{{ disp(trip.end_logs.trip_toll) }}</div>
+          <!-- GPS fields -->
+          <ng-container *ngIf="trip.trip_type_label === 'GPS'">
+            <div class="tl-row">
+              <ion-icon name="location-outline" class="tl-row__icon"></ion-icon>
+              <span class="tl-row__label">Latitude</span>
+              <span class="tl-row__value">{{ disp(trip.end_logs.end_lat) }}</span>
             </div>
+            <div class="tl-row">
+              <ion-icon name="location-outline" class="tl-row__icon"></ion-icon>
+              <span class="tl-row__label">Longitude</span>
+              <span class="tl-row__value">{{ disp(trip.end_logs.end_lng) }}</span>
+            </div>
+            <div class="tl-row">
+              <ion-icon name="analytics-outline" class="tl-row__icon"></ion-icon>
+              <span class="tl-row__label">Distance</span>
+              <span class="tl-row__value tl-row__value--highlight">{{ disp(trip.end_logs.trip_total_distance) }} Km</span>
+            </div>
+            <div class="tl-row tl-row--last">
+              <ion-icon name="swap-horizontal-outline" class="tl-row__icon"></ion-icon>
+              <span class="tl-row__label">Adjusted</span>
+              <span class="tl-row__value">{{ disp(trip.end_logs.trip_total_distance_adjusted) }} Km</span>
+            </div>
+          </ng-container>
+
+          <!-- Manual fields -->
+          <ng-container *ngIf="trip.trip_type_label === 'Manual'">
+            <div class="tl-row">
+              <ion-icon name="speedometer-outline" class="tl-row__icon"></ion-icon>
+              <span class="tl-row__label">ODO Meter</span>
+              <span class="tl-row__value">{{ disp(trip.end_logs.end_odometer_reading) }}</span>
+            </div>
+            <div class="tl-row" *ngIf="trip.end_logs.end_odometer_img">
+              <ion-icon name="image-outline" class="tl-row__icon"></ion-icon>
+              <span class="tl-row__label">ODO Image</span>
+              <span class="tl-row__value">
+                <ion-button fill="outline" size="small" color="tertiary" class="tl-img-btn" (click)="viewTollImage(trip.end_logs.end_odometer_img)">
+                  <ion-icon slot="start" name="eye-outline"></ion-icon> View
+                </ion-button>
+              </span>
+            </div>
+            <div class="tl-row tl-row--last">
+              <ion-icon name="analytics-outline" class="tl-row__icon"></ion-icon>
+              <span class="tl-row__label">Distance</span>
+              <span class="tl-row__value tl-row__value--highlight">{{ disp(trip.end_logs.trip_total_distance) }} Km</span>
+            </div>
+          </ng-container>
+        </div>
+      </section>
+
+      <!-- View Track Button -->
+      <ion-button
+        *ngIf="canViewTrack(trip)"
+        class="tl-track-btn"
+        fill="outline"
+        color="success"
+        shape="round"
+        expand="block"
+        (click)="openViewTrack(trip)">
+        <ion-icon slot="start" name="map-outline"></ion-icon>
+        View Track
+      </ion-button>
+
+      <!-- Toll Section -->
+      <div class="tl-toll" *ngIf="trip.end_logs">
+        <div class="tl-toll__header">
+          <ion-icon name="cash-outline" class="tl-toll__icon"></ion-icon>
+          <span class="tl-toll__title">Toll Details</span>
+        </div>
+        <div class="tl-fields tl-fields--toll">
+          <div class="tl-row" [class.tl-row--last]="!trip.end_logs.toll_images?.length">
+            <ion-icon name="wallet-outline" class="tl-row__icon"></ion-icon>
+            <span class="tl-row__label">Amount</span>
+            <span class="tl-row__value tl-row__value--highlight">Rs {{ disp(trip.end_logs.trip_toll) }}</span>
           </div>
-          <div class="trip-fields trip-fields--plain" *ngIf="trip.end_logs.toll_images?.length">
-            <div class="trip-kv trip-kv--last trip-kv--attachments">
-              <div class="trip-kv__key">Toll Attachments</div>
-              <div class="trip-kv__val trip-kv__val--actions">
-                <span class="trip-toll__links">
-                  <ion-button
-                    *ngFor="let img of trip.end_logs.toll_images; let ti = index"
-                    fill="clear"
-                    size="small"
-                    class="trip-toll__view-btn"
-                    (click)="viewTollImage(img)">
-                    <ion-icon slot="start" name="image-outline"></ion-icon>
-                    View<span *ngIf="trip.end_logs.toll_images.length > 1">&nbsp;{{ ti + 1 }}</span>
-                  </ion-button>
-                </span>
-              </div>
-            </div>
+          <div class="tl-row tl-row--last tl-row--action" *ngIf="trip.end_logs.toll_images?.length">
+            <ion-icon name="images-outline" class="tl-row__icon"></ion-icon>
+            <span class="tl-row__label">Receipts</span>
+            <span class="tl-row__value tl-row__value--actions">
+              <ion-button
+                *ngFor="let img of trip.end_logs.toll_images; let ti = index"
+                fill="outline"
+                size="small"
+                color="tertiary"
+                class="tl-img-btn"
+                (click)="viewTollImage(img)">
+                <ion-icon slot="start" name="eye-outline"></ion-icon>
+                View<span *ngIf="trip.end_logs.toll_images.length > 1">&nbsp;{{ ti + 1 }}</span>
+              </ion-button>
+            </span>
           </div>
         </div>
       </div>
+
     </div>
   </article>
 </ion-content>

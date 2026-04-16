@@ -30,7 +30,7 @@
     <div *ngFor="let dat of ticketData" class="ticket-card" [style.border-left-color]="getStatusBorderColor(dat.stage_desc)">
 
       <div class="ticket-header" (click)="workNow(dat, 'details')">
-        <div class="ticket-id">{{dat.ext_id}}</div>
+        <div class="ticket-id">{{dat.id}}</div>
         <span class="status-badge" [ngClass]="getStatusClass(dat.stage_desc)">{{dat.stage_desc}}</span>
       </div>
 
@@ -38,7 +38,11 @@
         <div class="ticket-row">
           <ion-icon name="flag-outline" class="row-icon"></ion-icon>
           <span class="row-label">Urgency</span>
-          <span class="priority-badge" [ngClass]="{'high': dat.priority === 'High', 'medium': dat.priority === 'Medium', 'low': dat.priority === 'Low'}">{{dat.priority}}</span>
+          <span class="priority-badge" [ngClass]="{
+            'high': dat.priority?.toLowerCase() === 'high',
+            'medium': dat.priority?.toLowerCase() === 'medium',
+            'low': dat.priority?.toLowerCase() === 'low'
+          }">{{dat.priority}}</span>
         </div>
 
         <div class="ticket-row">
@@ -65,19 +69,19 @@
       </div>
 
       <div class="ticket-actions">
-        <ion-button size="small" fill="clear" color="medium" (click)="openHistory(dat)">
-          <ion-icon name="time-outline" slot="start"></ion-icon> History
+        <ion-button size="small" fill="outline" color="medium" (click)="openHistory(dat)">
+          <ion-icon name="time-outline" slot="start"></ion-icon> Logs
         </ion-button>
-        <ion-button size="small" fill="clear" color="tertiary" (click)="openTripLogs(dat)">
+        <ion-button size="small" fill="outline" color="tertiary" (click)="openTripLogs(dat)">
           <ion-icon name="navigate-outline" slot="start"></ion-icon> Trip Log
         </ion-button>
-        <ion-button *ngIf="(status === 'assignto' || status === 'created') && dat.show_asn_btn" size="small" fill="clear" color="primary" [disabled]="dat.tckt_trip === '2'" (click)="assignUser(dat)">
+        <ion-button *ngIf="(status === 'assignto' || status === 'created') && dat.show_asn_btn" size="small" fill="outline" color="primary" [disabled]="dat.tckt_trip === '2'" (click)="assignUser(dat)">
           <ion-icon name="people-outline" slot="start"></ion-icon> Assign
         </ion-button>
-        <ion-button *ngIf="(status === 'assignto' || status === 'created') && userData.id === dat.assign_to" size="small" fill="clear" color="success" (click)="workNow(dat, 'action')">
+        <ion-button *ngIf="(status === 'assignto' || status === 'created') && userData.id === dat.assign_to" size="small" fill="outline" color="success" (click)="workNow(dat, 'action')">
           <ion-icon name="hammer-outline" slot="start"></ion-icon> Work Now
         </ion-button>
-        <ion-button *ngIf="status === 'completed' && dat.tckt_status === 4" size="small" fill="clear" color="danger" (click)="presentAlertConfirm(dat)">
+        <ion-button *ngIf="status === 'completed' && dat.tckt_status === 4" size="small" fill="outline" color="danger" (click)="presentAlertConfirm(dat)">
           <ion-icon name="refresh-outline" slot="start"></ion-icon> RE-Open
         </ion-button>
       </div>
