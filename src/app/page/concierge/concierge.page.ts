@@ -214,18 +214,11 @@ export class ConciergePage implements OnInit {
         if (!goToSettings) {
           return;
         }
+        // Settings app kholega — user wapis aane par ionViewDidEnter dobara fire hoga
+        // aur tab permission re-check hogi. Yahan immediate re-check karna galat hai
+        // kyunki 600ms mein user permission grant karke wapis nahi aa sakta.
         await LocationTracker.requestBackgroundPermissions();
-        if (this.platform.is('ios')) {
-          await new Promise<void>(resolve => setTimeout(resolve, 600));
-        }
-        hasBackgroundPermission = await this.checkBackgroundPermission();
-        if (!hasBackgroundPermission) {
-          this.common.presentToast(
-            'Background location (Always / All the time) is still required for GPS trips.',
-            'warning'
-          );
-          return;
-        }
+        return;
       }
 
       if (this.platform.is('android')) {
@@ -260,7 +253,20 @@ export class ConciergePage implements OnInit {
     if (allowed) {
       return;
     }
-    await LocationTracker.requestIgnoreBatteryOptimizations();
+    const alert = await this.alertController.create({
+      header: 'Battery Optimization',
+      message: 'To ensure GPS tracking works continuously in the background, please disable battery optimization for this app.\n\nTap "Go to Settings" and select "Don\'t optimize".',
+      mode: 'md',
+      buttons: [
+        { text: 'Not now', role: 'cancel' },
+        { text: 'Go to Settings', role: 'confirm' },
+      ],
+    });
+    await alert.present();
+    const { role } = await alert.onDidDismiss();
+    if (role === 'confirm') {
+      await LocationTracker.requestIgnoreBatteryOptimizations();
+    }
   }
 
   private async checkBackgroundPermission() {
