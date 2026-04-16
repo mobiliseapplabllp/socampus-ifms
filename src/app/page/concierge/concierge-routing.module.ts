@@ -7,6 +7,7 @@ import { ConcHistoryComponent } from './conc-history/conc-history.component';
 import { ConcWorkComponent } from './conc-work/conc-work.component';
 import { AssignUserComponent } from './assign-user/assign-user.component';
 import { CrConcComponent } from './cr-conc/cr-conc.component';
+import { ConcMenuComponent } from './conc-menu/conc-menu.component';
 
 const routes: Routes = [
   {
@@ -32,6 +33,10 @@ const routes: Routes = [
   {
     path: 'cr-ticket',
     component: CrConcComponent
+  },
+  {
+    path: 'conc-menu',
+    component: ConcMenuComponent
   }
 ];
 

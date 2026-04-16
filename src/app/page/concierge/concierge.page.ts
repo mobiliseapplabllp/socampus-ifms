@@ -3,7 +3,7 @@ import { AlertController, ModalController, Platform } from '@ionic/angular';
 import { ConciergeService } from 'src/app/provider/concierge/concierge.service';
 import { SiteComponent } from './site/site.component';
 import { ConcHistoryComponent } from './conc-history/conc-history.component';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { environment } from 'src/environments/environment';
 import { AssignUserComponent } from './assign-user/assign-user.component';
@@ -16,33 +16,47 @@ import { TripLogsComponent } from './trip-logs/trip-logs.component';
   styleUrls: ['./concierge.page.scss'],
 })
 export class ConciergePage implements OnInit {
-  status = 'assignto';
-  dashboard: any = {};
+  status = 'assignto';  
   ticketData: any = [];
   userData: any = [];
+  labelName: {[key: string]: string} = {
+    created: 'Created By',
+    assignto: 'Assigned To',
+    all_active_req: 'All Request',
+    completed: 'Completed'
+  };
+  page = 1;
+  canLoadMore = false;
   constructor(
     private httpConcierge: ConciergeService,
     private modalCtrl: ModalController,
     private router: Router,
+    private route: ActivatedRoute,
     private common: CommonService,
     private alertController: AlertController,
     private platform: Platform
   ) { }
 
   ngOnInit() {
-    this.userData = JSON.parse(localStorage.getItem('user')!);   
+    this.userData = JSON.parse(localStorage.getItem('user')!);
+    this.route.queryParams.subscribe(params => {
+      if (params['status']) {
+        this.status = params['status'];        
+        this.getTicketList(this.status, this.page);
+      }
+    });
   }
 
   ionViewDidEnter() {
     if (this.platform.is('capacitor')) {
       void this.ensureLocationTrackingReadinessOnEntry();
     }
-    this.getTicketList();
+    // this.getTicketList();
   }
 
-  getTicketList(ticketType?: string) {
+  getTicketList(ticketType: string, page: number, event?: any) {
     const obj: any = {
-      page: 1,
+      page: page,
       limit: 10,
       export: 0,
       search: "",
@@ -57,19 +71,26 @@ export class ConciergePage implements OnInit {
     this.common.presentLoading().then(preLoad => {
       this.httpConcierge.getTicketList(obj).subscribe({
         next:(data: any) => {
-          if (data.status) {
-            this.dashboard = data.tcktCount;
-            this.ticketData = data.data.data;                        
+          if (data.status) {            
+            this.ticketData = [...this.ticketData ,...data.data.data];  
+            if (this.page < data.data.last_page) {
+              this.page = this.page + 1;
+              this.canLoadMore = true;
+            } else {
+              this.canLoadMore = false;
+            }
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
-
         },
         error:() => {
           this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
+          if (event) {
+            event.target.complete();
+          }
           this.common.dismissloading();
         }
       });
@@ -118,7 +139,7 @@ export class ConciergePage implements OnInit {
 
     modal.onWillDismiss().then(async disModal => {
       if (disModal.role) {
-        this.getTicketList(this.status);
+        // this.getTicketList(this.status);
       }
     });
     modal.present();
@@ -135,14 +156,34 @@ export class ConciergePage implements OnInit {
   }
 
   changeSegment(event: any) {
-    this.dashboard = {};
+    // this.dashboard = {};
     this.ticketData = [];
     this.status = event.detail.value;
-    this.getTicketList(this.status);
+    // this.getTicketList(this.status);
   }
 
   createTicket() {
     this.router.navigateByUrl('/concierge/cr-ticket');
+  }
+
+  getStatusClass(stageDesc: string): string {
+    const s = (stageDesc || '').toLowerCase();
+    if (s === 'open') return 'status-open';
+    if (s === 'assigned') return 'status-assigned';
+    if (s === 'in progress') return 'status-in-progress';
+    if (s === 'resolved') return 'status-resolved';
+    if (s === 'closed') return 'status-closed';
+    if (s === 'reopened' || s === 're-opened') return 'status-reopened';
+    return 'status-open';
+  }
+
+  getStatusBorderColor(stageDesc: string): string {
+    const s = (stageDesc || '').toLowerCase();
+    if (s === 'open' || s === 'assigned') return '#e67e00';
+    if (s === 'in progress') return '#43a047';
+    if (s === 'resolved' || s === 'closed') return '#2e7d32';
+    if (s === 'reopened' || s === 're-opened') return '#d32f2f';
+    return '#e67e00';
   }
 
   async presentAlertConfirm(data: any) {
@@ -186,10 +227,10 @@ export class ConciergePage implements OnInit {
       this.httpConcierge.reOpenAction(obj).subscribe({
         next:(data: any) => {
           if (data.status) {
-            this.dashboard = {};
+            // this.dashboard = {};
             this.ticketData = [];
             this.common.presentToast(data.msg, 'success');
-            this.getTicketList(this.status);
+            // this.getTicketList(this.status);
           } else {            
             this.common.presentToast(data.msg, 'warning');
           }
@@ -213,10 +254,7 @@ export class ConciergePage implements OnInit {
         const goToSettings = await this.showLocationAlwaysInstructionModal();
         if (!goToSettings) {
           return;
-        }
-        // Settings app kholega — user wapis aane par ionViewDidEnter dobara fire hoga
-        // aur tab permission re-check hogi. Yahan immediate re-check karna galat hai
-        // kyunki 600ms mein user permission grant karke wapis nahi aa sakta.
+        }        
         await LocationTracker.requestBackgroundPermissions();
         return;
       }
@@ -283,6 +321,11 @@ export class ConciergePage implements OnInit {
       }
     });
     modal.present();
+  }
+
+  loadData(event: any) {
+    // event.target.complete();
+    this.getTicketList(this.status, this.page, event);
   }
 
 }

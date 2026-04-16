@@ -1,28 +1,128 @@
+.ticket-list {
+  padding: 12px 16px;
+}
+
+.ticket-card {
+  background: #fff;
+  border-radius: 12px;
+  border-left: 5px solid;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.ticket-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 8px;
+  cursor: pointer;
+}
+
+.ticket-id {
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+}
+
+.status-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.ticket-body {
+  padding: 0 14px 10px;
+}
+
+.ticket-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.row-icon {
+  font-size: 15px;
+  color: #aaa;
+  margin-right: 10px;
+  min-width: 15px;
+}
+
+.row-label {
+  font-size: 12px;
+  color: #999;
+  min-width: 90px;
+}
+
+.row-value {
+  font-size: 12.5px;
+  color: #333;
+  font-weight: 500;
+}
+
+.priority-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ticket-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 4px 6px;
+  border-top: 1px solid #f0f0f0;
+  gap: 2px;
+
+  ion-button {
+    font-size: 11px;
+    font-weight: 500;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    text-transform: none;
+  }
+}
+
+// Status colors
+.status-open,
+.status-assigned {
+  background-color: #fff3cd;
+  color: #e67e00;
+}
+
+.status-in-progress {
+  background-color: #e8f5e9;
+  color: #43a047;
+}
+
+.status-resolved,
+.status-closed {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.status-reopened {
+  background-color: #fde0dc;
+  color: #d32f2f;
+}
+
+// Priority colors
 .high {
-  background-color: #f8d7da;color: #d10015;padding: 5px 10px;border-radius: 5px;
+  background-color: #f8d7da;
+  color: #d10015;
 }
 
 .medium {
-  background-color: #fff3cd;color: #856404;padding: 5px 10px;border-radius: 5px;
+  background-color: #fff3cd;
+  color: #856404;
 }
 
 .low {
-  background-color: #d1ecf1;color: #0c5460;padding: 5px 10px;border-radius: 5px;
+  background-color: #d1ecf1;
+  color: #0c5460;
 }
-
-.assigned{
-  background-color: #d4edda;color: #155724;padding: 5px 10px;border-radius: 5px;
-}
-
-.in_progress {
-  background-color: #cce5ff;color: #004085;padding: 5px 10px;border-radius: 5px;
-}
-.card {
-  ion-col:nth-child(odd) {
-    color: rgb(82, 81, 81);
-  }
-  ion-col:nth-child(even) {
-    color: var(--ion-color-dark);
-  }
-}
-

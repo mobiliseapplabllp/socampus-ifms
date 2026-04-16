@@ -14,6 +14,7 @@ import { AssignUserComponent } from './assign-user/assign-user.component';
 import { CrConcComponent } from './cr-conc/cr-conc.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { TripLogsComponent } from './trip-logs/trip-logs.component';
+import { ConcMenuComponent } from './conc-menu/conc-menu.component';
 
 @NgModule({
   imports: [
@@ -31,7 +32,8 @@ import { TripLogsComponent } from './trip-logs/trip-logs.component';
     ConcWorkComponent,
     AssignUserComponent,
     CrConcComponent,
-    TripLogsComponent
+    TripLogsComponent,
+    ConcMenuComponent
   ]
 })
 export class ConciergePageModule {}
