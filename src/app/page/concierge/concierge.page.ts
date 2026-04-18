@@ -30,6 +30,30 @@ export class ConciergePage implements OnInit {
   showFilter = false;
   fromDate = '';
   toDate = '';
+  statusFilter: number | '' = '';
+  statusOptionsMap: { [key: string]: { value: number; label: string }[] } = {
+    request_raise_byme: [
+      { value: 2, label: 'Assigned' },
+      { value: 3, label: 'In Progress' },
+      { value: 4, label: 'Resolved' },
+      { value: 6, label: 'Closed' },
+      { value: 5, label: 'Reopen' },
+    ],
+    assignto: [
+      { value: 2, label: 'Assigned' },
+      { value: 3, label: 'In Progress' },
+      { value: 5, label: 'Reopen' },
+    ],
+    all_active_req: [
+      { value: 2, label: 'Assigned' },
+      { value: 3, label: 'In Progress' },
+      { value: 5, label: 'Reopen' },
+    ],
+    completed: [
+      { value: 4, label: 'Resolved' },
+      { value: 6, label: 'Closed' },
+    ],
+  };
   constructor(
     private httpConcierge: ConciergeService,
     private modalCtrl: ModalController,
@@ -66,7 +90,9 @@ export class ConciergePage implements OnInit {
       ticketType: ticketType,
       source: environment.source
     }
-    if (this.status === 'request_raise_byme') {
+    if (this.statusFilter !== '' && this.statusFilter !== null && this.statusFilter !== undefined) {
+      obj.status = [this.statusFilter];
+    } else if (this.status === 'request_raise_byme') {
       obj.status = [1,2,3,4,5,6]
     } else if (this.status === 'assignto') {
       obj.status = [1,2,3,5]
@@ -198,6 +224,10 @@ export class ConciergePage implements OnInit {
     this.showFilter = !this.showFilter;
   }
 
+  getStatusOptions(): { value: number; label: string }[] {
+    return this.statusOptionsMap[this.status] || [];
+  }
+
   applyFilter() {
     if (this.fromDate && this.toDate && this.fromDate > this.toDate) {
       this.common.presentToast('From Date cannot be after To Date', 'warning');
@@ -210,11 +240,12 @@ export class ConciergePage implements OnInit {
   }
 
   clearFilter() {
-    if (!this.fromDate && !this.toDate) {
+    if (!this.fromDate && !this.toDate && this.statusFilter === '') {
       return;
     }
     this.fromDate = '';
     this.toDate = '';
+    this.statusFilter = '';
     this.page = 1;
     this.ticketData = [];
     this.getTicketList(this.status, this.page);

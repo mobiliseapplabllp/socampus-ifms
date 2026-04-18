@@ -7,7 +7,7 @@
     <ion-buttons slot="end">
       <ion-button (click)="toggleFilter()" class="filter-btn">
         <ion-icon slot="icon-only" name="funnel-outline"></ion-icon>
-        <span class="filter-btn__dot" *ngIf="fromDate || toDate"></span>
+        <span class="filter-btn__dot" *ngIf="fromDate || toDate || statusFilter"></span>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -44,6 +44,17 @@
         <label class="filter-panel__label">To Date</label>
         <ion-item lines="none" class="filter-panel__item">
           <ion-input type="date" [(ngModel)]="toDate"></ion-input>
+        </ion-item>
+      </div>
+    </div>
+    <div class="filter-panel__row">
+      <div class="filter-panel__col filter-panel__col--full">
+        <label class="filter-panel__label">Status</label>
+        <ion-item lines="none" class="filter-panel__item">
+          <ion-select interface="action-sheet" mode="ios" placeholder="All" [(ngModel)]="statusFilter">
+            <ion-select-option [value]="''">All</ion-select-option>
+            <ion-select-option *ngFor="let opt of getStatusOptions()" [value]="opt.value">{{opt.label}}</ion-select-option>
+          </ion-select>
         </ion-item>
       </div>
     </div>
