@@ -17,29 +17,29 @@
   <ion-grid style="padding: 16px;">
     <ion-row>
       <ion-col size="6">
-        <div class="menu-card" (click)="openMenu('created')" style="--card-color: var(--ion-color-primary);">
-          <div class="count-badge">0</div>
+        <div class="menu-card" (click)="openMenu('request_raise_byme')" style="--card-color: var(--ion-color-primary);">
+          <div class="count-badge">{{dash.request_raise_byme}}</div>
           <ion-icon name="document-text-outline"></ion-icon>
           <span>Request Raise by me</span>
         </div>
       </ion-col>
       <ion-col size="6">
         <div class="menu-card" (click)="openMenu('assignto')" style="--card-color: var(--ion-color-tertiary);">
-          <div class="count-badge">0</div>
+          <div class="count-badge">{{dash.assignto}}</div>
           <ion-icon name="person-outline"></ion-icon>
           <span>Assigned To Me</span>
         </div>
       </ion-col>
       <ion-col size="6">
         <div class="menu-card" (click)="openMenu('all_active_req')" style="--card-color: var(--ion-color-warning);">
-          <div class="count-badge">0</div>
+          <div class="count-badge">{{dash.all_active_req}}</div>
           <ion-icon name="create-outline"></ion-icon>
           <span>All Active Request</span>
         </div>
       </ion-col>
       <ion-col size="6">
         <div class="menu-card" (click)="openMenu('completed')" style="--card-color: var(--ion-color-success);">
-          <div class="count-badge">0</div>
+          <div class="count-badge">{{dash.completed}}</div>
           <ion-icon name="checkmark-circle-outline"></ion-icon>
           <span>Resolved / Closed</span>
         </div>

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AlertController, Platform } from '@ionic/angular';
 import { LocationTracker } from 'capacitor-location-tracker-sqlite';
 import { CommonService } from 'src/app/provider/common/common.service';
+import { ConciergeService } from 'src/app/provider/concierge/concierge.service';
 
 @Component({
   selector: 'app-conc-menu',
@@ -10,21 +11,40 @@ import { CommonService } from 'src/app/provider/common/common.service';
   styleUrls: ['./conc-menu.component.scss'],
 })
 export class ConcMenuComponent implements OnInit {
-
+  dash: any = {};
   constructor(
     private router: Router,
     private platform: Platform,
     private common: CommonService,
     private alertController: AlertController,
+    private httpConcierge: ConciergeService,
   ) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.getDashCount();
+  }
+
+  getDashCount() {
+    this.httpConcierge.getDashCount().subscribe({
+      next:(data: any) => {
+        console.log(data);
+        if (data.status) {
+          this.dash = data.data;
+        }
+      },
+      error:() => {
+
+      },
+      complete:() => {
+
+      }
+    });
+  }
 
   ionViewDidEnter() {
     if (this.platform.is('capacitor')) {
       void this.ensureLocationTrackingReadinessOnEntry();
-    }
-    // this.getTicketList();
+    }    
   }
 
   openMenu(status: string) {

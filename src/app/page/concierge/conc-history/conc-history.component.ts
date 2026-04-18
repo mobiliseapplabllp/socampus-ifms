@@ -11,6 +11,7 @@ import { environment } from 'src/environments/environment';
 })
 export class ConcHistoryComponent  implements OnInit {
   id: any;
+  ext_id: any;
   tab: any;
   txnData: any = [];
   constructor(

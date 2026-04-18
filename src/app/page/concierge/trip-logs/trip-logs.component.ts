@@ -13,7 +13,7 @@ declare var google: any;
 })
 export class TripLogsComponent implements OnInit {
   @Input() data!: any;
-
+  ext_id: any;
   tripLogs: any[] = [];
   loading = false;
   isTrackMapOpen = false;

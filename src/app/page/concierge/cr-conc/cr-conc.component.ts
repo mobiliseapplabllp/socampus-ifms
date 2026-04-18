@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalController, NavController } from '@ionic/angular';
-import * as moment from 'moment';
 import { CameraService } from 'src/app/provider/camera/camera.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ConciergeService } from 'src/app/provider/concierge/concierge.service';
@@ -36,6 +35,15 @@ export class CrConcComponent  implements OnInit {
   }
 
   initForm() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mi = String(now.getMinutes()).padStart(2, '0');
+    const currentDate = `${yyyy}-${mm}-${dd}`;
+    const currentTime = `${hh}:${mi}`;
+
     this.forms = this.formbuilder.group({
       site_id: ['', Validators.required],
       site_id_desc: ['', Validators.required],
@@ -50,7 +58,9 @@ export class CrConcComponent  implements OnInit {
       billed_to: ['', Validators.required],
       priority: ['', Validators.required],
       remark: ['', Validators.required],
-      date_urgency: [''], 
+      date_urgency: [''],
+      date_urgency_date: [currentDate],
+      date_urgency_time: [currentTime],
       document_type: ['Attachment'],
       source: [environment.source],
     });
@@ -176,8 +186,8 @@ export class CrConcComponent  implements OnInit {
   }
 
   submit() {
-    let dte = moment(this.forms.value.date_urgency).format('YYYY-MM-DD');
-    let tme = moment(this.forms.value.date_urgency).format('HH:mm');
+    let dte = this.forms.value.date_urgency_date || '';
+    let tme = this.forms.value.date_urgency_time || '';
     for (const key in this.forms.value) {
       this.formData.delete(key);
       this.formData.append(key, this.forms.get(key)?.value);
@@ -215,7 +225,7 @@ export class CrConcComponent  implements OnInit {
 
     const value = event.detail.value;
   
-    if(value === 'low' || value === 'medium' || value === 'hard'){
+    if(value === 'Low' || value === 'Medium' || value === 'High'){
       this.showDate = true;
     }else{
       this.showDate = false;

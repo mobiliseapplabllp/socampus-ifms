@@ -13,7 +13,8 @@ import { environment } from 'src/environments/environment';
 export class AssignUserComponent  implements OnInit {
   id: any;
   tab: any;
-
+  assign_to: any;
+  ext_id: any;
   assignUsers: any = [];
   assignUsersCopy: any = [];
   tckt: any = [];

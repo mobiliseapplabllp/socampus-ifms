@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Assign User</ion-title>
+    <ion-title>Assign User ({{ext_id}})</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="close(null, false)">
         <ion-icon name="close-outline"></ion-icon>
@@ -12,11 +12,7 @@
 <ion-content class="assign-content">
 
   <div class="search-wrap">
-    <ion-searchbar
-      mode="ios"
-      placeholder="Search by name..."
-      (ionInput)="search($event)"
-      class="assign-search">
+    <ion-searchbar mode="ios" placeholder="Search by name..." (ionInput)="search($event)" class="assign-search">
     </ion-searchbar>
   </div>
 
@@ -36,8 +32,7 @@
         <span class="user-card__workload">
           <ion-icon name="briefcase-outline" class="user-card__workload-icon"></ion-icon>
           Workload:
-          <span class="user-card__workload-val"
-            [ngClass]="{
+          <span class="user-card__workload-val" [ngClass]="{
               'user-card__workload-val--high': dat.workload >= 5,
               'user-card__workload-val--medium': dat.workload >= 2 && dat.workload < 5,
               'user-card__workload-val--low': dat.workload < 2
@@ -47,14 +42,7 @@
         </span>
       </div>
 
-      <ion-button
-        slot="end"
-        size="small"
-        fill="outline"
-        color="primary"
-        shape="round"
-        class="user-card__btn"
-        (click)="assign(dat)">
+      <ion-button slot="end" size="small" fill="outline" color="primary" shape="round" class="user-card__btn" (click)="assign(dat)" [disabled]="assign_to == dat.id ">
         <ion-icon slot="start" name="person-add-outline"></ion-icon>
         Assign
       </ion-button>

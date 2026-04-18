@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>{{labelName[status]}}</ion-title>    
+    <ion-title>{{labelName[status]}}</ion-title>
   </ion-toolbar>
   <!-- <ion-toolbar class="medium ion-no-padding">
     <ion-segment  [(ngModel)]='status' (ionChange)="changeSegment($event)">
@@ -25,13 +25,21 @@
       <ion-icon name="add-outline"></ion-icon>
     </ion-fab-button>
   </ion-fab> -->
-
   <div class="ticket-list">
-    <div *ngFor="let dat of ticketData" class="ticket-card" [style.border-left-color]="getStatusBorderColor(dat.stage_desc)">
+    <div *ngFor="let dat of ticketData" class="ticket-card"
+      [style.border-left-color]="getStatusBorderColor(dat.stage_desc)">
 
-      <div class="ticket-header" (click)="workNow(dat, 'details')">
-        <div class="ticket-id">{{dat.id}}</div>
-        <span class="status-badge" [ngClass]="getStatusClass(dat.stage_desc)">{{dat.stage_desc}}</span>
+      <div class="ticket-header" (click)="workNow(dat, 'details')" role="button" tabindex="0">
+        <div class="ticket-id">
+          {{dat.ext_id}}
+        </div>
+        <div class="ticket-header__right">
+          <span class="status-badge" [ngClass]="getStatusClass(dat.stage_desc)">{{dat.stage_desc}}</span>
+          <span class="view-details-hint">
+            View
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </span>
+        </div>
       </div>
 
       <div class="ticket-body">
@@ -58,14 +66,29 @@
         <div class="ticket-row">
           <ion-icon name="calendar-outline" class="row-icon"></ion-icon>
           <span class="row-label">Request Date</span>
-          <span class="row-value">{{dat.created_at}}</span>
+          <span class="row-value">{{dat.created_at | slice:0:16}}</span>
         </div>
         <div class="ticket-row">
           <ion-icon name="person-outline" class="row-icon"></ion-icon>
           <span class="row-label">Assigned To</span>
           <span class="row-value">{{dat.username}} {{dat.name}} {{dat.lname}}</span>
         </div>
-       
+        <div class="ticket-row" *ngIf="dat.tat_resp_date">
+          <ion-icon name="arrow-forward-outline" class="row-icon"></ion-icon>
+          <span class="row-label">Response Time</span>
+          <span class="row-value"
+            [style.color]="isPastDate(dat.tat_resp_date) ? 'var(--ion-color-success)' : 'var(--ion-color-danger)'">
+            {{dat.tat_resp_date | date:'dd-MM-yyyy HH:mm'}}
+          </span>
+        </div>
+        <div class="ticket-row" *ngIf="dat.tat_res_date">
+          <ion-icon name="checkmark-done-outline" class="row-icon"></ion-icon>
+          <span class="row-label">Resolution Time</span>
+          <span class="row-value"
+            [style.color]="isPastDate(dat.tat_res_date) ? 'var(--ion-color-success)' : 'var(--ion-color-danger)'">
+            {{dat.tat_res_date | date:'dd-MM-yyyy HH:mm'}}
+          </span>
+        </div>
       </div>
 
       <div class="ticket-actions">
@@ -75,21 +98,22 @@
         <ion-button size="small" fill="outline" color="tertiary" (click)="openTripLogs(dat)">
           <ion-icon name="navigate-outline" slot="start"></ion-icon> Trip Log
         </ion-button>
-        <ion-button *ngIf="(status === 'assignto' || status === 'created') && dat.show_asn_btn" size="small" fill="outline" color="primary" [disabled]="dat.tckt_trip === '2'" (click)="assignUser(dat)">
+        <ion-button *ngIf="(status === 'assignto' || status === 'request_raise_byme' || status === 'all_active_req') && dat.show_asn_btn" size="small" fill="outline" color="primary" [disabled]="dat.tckt_trip === '2'" (click)="assignUser(dat)">
           <ion-icon name="people-outline" slot="start"></ion-icon> Assign
         </ion-button>
-        <ion-button *ngIf="(status === 'assignto' || status === 'created') && userData.id === dat.assign_to" size="small" fill="outline" color="success" (click)="workNow(dat, 'action')">
+        <ion-button *ngIf="(status === 'assignto') && userData.id === dat.assign_to" size="small" fill="outline"
+          color="success" (click)="workNow(dat, 'action')">
           <ion-icon name="hammer-outline" slot="start"></ion-icon> Work Now
         </ion-button>
-        <ion-button *ngIf="status === 'completed' && dat.tckt_status === 4" size="small" fill="outline" color="danger" (click)="presentAlertConfirm(dat)">
+        <ion-button *ngIf="status === 'completed' && dat.tckt_status === 4" size="small" fill="outline" color="danger"
+          (click)="presentAlertConfirm(dat)">
           <ion-icon name="refresh-outline" slot="start"></ion-icon> RE-Open
         </ion-button>
       </div>
     </div>
-
     <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)" *ngIf="canLoadMore">
-      <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
+      <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data...">
+      </ion-infinite-scroll-content>
     </ion-infinite-scroll>
-
   </div>
 </ion-content>

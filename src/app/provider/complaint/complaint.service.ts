@@ -156,8 +156,7 @@ export class ComplaintService {
   }
 
   getBuildingList(id: any): Observable<any> {
-    return this.https.get(environment.url + 'shared/get_building_list/' + id);
-    // return this.https.get(environment.url + 'shared/get-buildings-list/' + id);
+    return this.https.get(environment.url + 'shared/get_building_list/' + id);    
   }
 
   getFloorList(id: any): Observable<any> {

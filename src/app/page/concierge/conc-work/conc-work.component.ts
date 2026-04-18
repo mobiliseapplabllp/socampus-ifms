@@ -304,6 +304,14 @@ export class ConcWorkComponent implements OnInit {
     return this.platform.is('capacitor');
   }
 
+  isPastDate(value: any): boolean {
+    if (!value) {
+      return false;
+    }
+    const t = new Date(String(value).replace(' ', 'T')).getTime();
+    return Number.isFinite(t) && t < Date.now();
+  }
+
   async setStartLocationFromGps() {
     try {
       const current = await this.getCurrentForegroundLocation();
@@ -770,7 +778,7 @@ export class ConcWorkComponent implements OnInit {
     return total;
   }
 
-  private clampModelToTwoDecimals(ev: any, key: 'distanceAdjust' | 'tollAmount'): void {
+  private clampModelToTwoDecimals(ev: any, key: 'distanceAdjust' | 'tollAmount' | 'endReading'): void {
     const cur = (this as any)[key];
     const raw = String(ev?.detail?.value ?? cur ?? '').replace(',', '.');
     if (!raw.includes('.')) {
@@ -785,7 +793,7 @@ export class ConcWorkComponent implements OnInit {
     (this as any)[key] = `${intPart}.${frac.slice(0, 2)}`;
   }
 
-  private normalizeModelTwoDecimalsBlur(key: 'distanceAdjust' | 'tollAmount'): void {
+  private normalizeModelTwoDecimalsBlur(key: 'distanceAdjust' | 'tollAmount' | 'endReading'): void {
     const v = (this as any)[key];
     if (v === '' || v == null) {
       return;
@@ -812,6 +820,48 @@ export class ConcWorkComponent implements OnInit {
 
   onTollAmountBlur(): void {
     this.normalizeModelTwoDecimalsBlur('tollAmount');
+  }
+
+  clampEndReadingDecimals(ev: any): void {
+    this.clampModelToTwoDecimals(ev, 'endReading');
+  }
+
+  onEndReadingBlur(): void {
+    this.normalizeModelTwoDecimalsBlur('endReading');
+  }
+
+  clampTripStartOdometerDecimals(ev: any): void {
+    const ctrl = this.tripForm?.get('trip_start_odometer_reading');
+    if (!ctrl) {
+      return;
+    }
+    const raw = String(ev?.detail?.value ?? ctrl.value ?? '').replace(',', '.');
+    if (!raw.includes('.')) {
+      return;
+    }
+    const dot = raw.indexOf('.');
+    const intPart = raw.slice(0, dot);
+    const frac = raw.slice(dot + 1).replace(/[^\d]/g, '');
+    if (frac.length <= 2) {
+      return;
+    }
+    ctrl.setValue(`${intPart}.${frac.slice(0, 2)}`);
+  }
+
+  onTripStartOdometerBlur(): void {
+    const ctrl = this.tripForm?.get('trip_start_odometer_reading');
+    if (!ctrl) {
+      return;
+    }
+    const v = ctrl.value;
+    if (v === '' || v == null) {
+      return;
+    }
+    const n = parseFloat(String(v).replace(',', '.'));
+    if (!Number.isFinite(n)) {
+      return;
+    }
+    ctrl.setValue(Number(n.toFixed(2)));
   }
 
   async startTracking() {

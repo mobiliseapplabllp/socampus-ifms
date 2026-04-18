@@ -20,7 +20,7 @@ export class ConciergePage implements OnInit {
   ticketData: any = [];
   userData: any = [];
   labelName: {[key: string]: string} = {
-    created: 'Created By',
+    request_raise_byme: 'Created By',
     assignto: 'Assigned To',
     all_active_req: 'All Request',
     completed: 'Completed'
@@ -60,13 +60,17 @@ export class ConciergePage implements OnInit {
       limit: 10,
       export: 0,
       search: "",
-      ticketType: ticketType ? ticketType : 'assignto',                 
+      ticketType: ticketType,
+      source: environment.source
     }
-    if (this.status === 'assignto') {
+    if (this.status === 'request_raise_byme') {
+      obj.status = [1,2,3,4,5,6]
+    } else if (this.status === 'assignto') {
       obj.status = [1,2,3,5]
-    }
-    if (this.status === 'completed' ) {
+    } else if (this.status === 'completed' ) {
       obj.status = [4,6];
+    } else if (this.status === 'all_active_req') {
+      obj.status = [1,2,3,5]
     }
     this.common.presentLoading().then(preLoad => {
       this.httpConcierge.getTicketList(obj).subscribe({
@@ -116,8 +120,10 @@ export class ConciergePage implements OnInit {
       cssClass: 'my-modal-btm',
       initialBreakpoint: 1,
       breakpoints: [1],
+      backdropDismiss: false,
       componentProps: {
         id: data.id,
+        ext_id: data.ext_id,
         tab: this.status
       }
     });
@@ -132,7 +138,9 @@ export class ConciergePage implements OnInit {
       initialBreakpoint: 1,
       breakpoints: [1],
       componentProps: {
-        id: data.id,
+        id: data.id,        
+        ext_id: data.ext_id,
+        assign_to: data.assign_to,
         tab: this.status
       }
     });
@@ -175,6 +183,14 @@ export class ConciergePage implements OnInit {
     if (s === 'closed') return 'status-closed';
     if (s === 'reopened' || s === 're-opened') return 'status-reopened';
     return 'status-open';
+  }
+
+  isPastDate(value: any): boolean {
+    if (!value) {
+      return false;
+    }
+    const t = new Date(String(value).replace(' ', 'T')).getTime();
+    return Number.isFinite(t) && t < Date.now();
   }
 
   getStatusBorderColor(stageDesc: string): string {
@@ -317,7 +333,8 @@ export class ConciergePage implements OnInit {
       component: TripLogsComponent,
       cssClass: 'my-modal_',
       componentProps: {
-        data: dat.id
+        data: dat.id,
+        ext_id: dat.ext_id
       }
     });
     modal.present();

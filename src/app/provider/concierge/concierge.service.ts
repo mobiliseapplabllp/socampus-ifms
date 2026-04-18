@@ -12,6 +12,10 @@ export class ConciergeService {
   constructor(
     private https: HttpClient) { }
 
+  getDashCount(): Observable<any> {
+    return this.https.get(environment.url + 'concierge/ticket/concierge_dash_count');
+  }
+
   getTicketList(formData: any): Observable<any> {
     return this.https.post(environment.url + 'concierge/ticket/list', formData)
   }

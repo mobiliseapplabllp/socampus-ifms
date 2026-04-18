@@ -17,6 +17,34 @@
   justify-content: space-between;
   padding: 14px 14px 8px;
   cursor: pointer;
+  background: linear-gradient(180deg, rgba(var(--ion-color-primary-rgb), 0.04) 0%, rgba(var(--ion-color-primary-rgb), 0) 100%);
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+  transition: background-color 0.15s ease;
+
+  &:active {
+    background-color: rgba(var(--ion-color-primary-rgb), 0.10);
+  }
+}
+
+.ticket-header__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-details-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+  ion-icon {
+    font-size: 14px;
+  }
 }
 
 .ticket-id {
