@@ -215,7 +215,7 @@
             </div>
             <div class="detail-row__value">
               <span *ngIf="requestData.tat_resp_date; else respDash"
-                [style.color]="isPastDate(requestData.tat_resp_date) ? 'var(--ion-color-success)' : 'var(--ion-color-danger)'">
+                [style.color]="isPastDate(requestData.tat_resp_date) ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
                 {{requestData.tat_resp_date | date:'dd-MM-yyyy HH:mm'}}
               </span>
               <ng-template #respDash>—</ng-template>
@@ -228,7 +228,7 @@
             </div>
             <div class="detail-row__value">
               <span *ngIf="requestData.tat_res_date; else resDash"
-                [style.color]="isPastDate(requestData.tat_res_date) ? 'var(--ion-color-success)' : 'var(--ion-color-danger)'">
+                [style.color]="isPastDate(requestData.tat_res_date) ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
                 {{requestData.tat_res_date | date:'dd-MM-yyyy HH:mm'}}
               </span>
               <ng-template #resDash>—</ng-template>

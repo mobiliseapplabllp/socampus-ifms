@@ -4,6 +4,12 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>{{labelName[status]}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleFilter()" class="filter-btn">
+        <ion-icon slot="icon-only" name="funnel-outline"></ion-icon>
+        <span class="filter-btn__dot" *ngIf="fromDate || toDate"></span>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
   <!-- <ion-toolbar class="medium ion-no-padding">
     <ion-segment  [(ngModel)]='status' (ionChange)="changeSegment($event)">
@@ -25,6 +31,32 @@
       <ion-icon name="add-outline"></ion-icon>
     </ion-fab-button>
   </ion-fab> -->
+
+  <div class="filter-panel" *ngIf="showFilter">
+    <div class="filter-panel__row">
+      <div class="filter-panel__col">
+        <label class="filter-panel__label">From Date</label>
+        <ion-item lines="none" class="filter-panel__item">
+          <ion-input type="date" [(ngModel)]="fromDate"></ion-input>
+        </ion-item>
+      </div>
+      <div class="filter-panel__col">
+        <label class="filter-panel__label">To Date</label>
+        <ion-item lines="none" class="filter-panel__item">
+          <ion-input type="date" [(ngModel)]="toDate"></ion-input>
+        </ion-item>
+      </div>
+    </div>
+    <div class="filter-panel__actions">
+      <ion-button size="small" fill="outline" color="medium" (click)="clearFilter()">
+        <ion-icon name="close-outline" slot="start"></ion-icon> Clear
+      </ion-button>
+      <ion-button size="small" color="primary" (click)="applyFilter()">
+        <ion-icon name="checkmark-outline" slot="start"></ion-icon> Apply
+      </ion-button>
+    </div>
+  </div>
+
   <div class="ticket-list">
     <div *ngFor="let dat of ticketData" class="ticket-card"
       [style.border-left-color]="getStatusBorderColor(dat.stage_desc)">
@@ -77,7 +109,7 @@
           <ion-icon name="arrow-forward-outline" class="row-icon"></ion-icon>
           <span class="row-label">Response Time</span>
           <span class="row-value"
-            [style.color]="isPastDate(dat.tat_resp_date) ? 'var(--ion-color-success)' : 'var(--ion-color-danger)'">
+            [style.color]="isPastDate(dat.tat_resp_date) ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
             {{dat.tat_resp_date | date:'dd-MM-yyyy HH:mm'}}
           </span>
         </div>
@@ -85,7 +117,7 @@
           <ion-icon name="checkmark-done-outline" class="row-icon"></ion-icon>
           <span class="row-label">Resolution Time</span>
           <span class="row-value"
-            [style.color]="isPastDate(dat.tat_res_date) ? 'var(--ion-color-success)' : 'var(--ion-color-danger)'">
+            [style.color]="isPastDate(dat.tat_res_date) ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
             {{dat.tat_res_date | date:'dd-MM-yyyy HH:mm'}}
           </span>
         </div>

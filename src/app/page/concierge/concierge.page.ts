@@ -27,6 +27,9 @@ export class ConciergePage implements OnInit {
   };
   page = 1;
   canLoadMore = false;
+  showFilter = false;
+  fromDate = '';
+  toDate = '';
   constructor(
     private httpConcierge: ConciergeService,
     private modalCtrl: ModalController,
@@ -71,6 +74,12 @@ export class ConciergePage implements OnInit {
       obj.status = [4,6];
     } else if (this.status === 'all_active_req') {
       obj.status = [1,2,3,5]
+    }
+    if (this.fromDate) {
+      obj.from_date = this.fromDate;
+    }
+    if (this.toDate) {
+      obj.to_date = this.toDate;
     }
     this.common.presentLoading().then(preLoad => {
       this.httpConcierge.getTicketList(obj).subscribe({
@@ -183,6 +192,32 @@ export class ConciergePage implements OnInit {
     if (s === 'closed') return 'status-closed';
     if (s === 'reopened' || s === 're-opened') return 'status-reopened';
     return 'status-open';
+  }
+
+  toggleFilter() {
+    this.showFilter = !this.showFilter;
+  }
+
+  applyFilter() {
+    if (this.fromDate && this.toDate && this.fromDate > this.toDate) {
+      this.common.presentToast('From Date cannot be after To Date', 'warning');
+      return;
+    }
+    this.page = 1;
+    this.ticketData = [];
+    this.showFilter = false;
+    this.getTicketList(this.status, this.page);
+  }
+
+  clearFilter() {
+    if (!this.fromDate && !this.toDate) {
+      return;
+    }
+    this.fromDate = '';
+    this.toDate = '';
+    this.page = 1;
+    this.ticketData = [];
+    this.getTicketList(this.status, this.page);
   }
 
   isPastDate(value: any): boolean {

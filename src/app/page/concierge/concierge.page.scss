@@ -2,6 +2,65 @@
   padding: 12px 16px;
 }
 
+.filter-btn {
+  position: relative;
+
+  &__dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ion-color-warning, #ffc107);
+    box-shadow: 0 0 0 2px var(--ion-color-primary);
+  }
+}
+
+.filter-panel {
+  background: #fff;
+  margin: 12px 16px 0;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+
+  &__row {
+    display: flex;
+    gap: 10px;
+  }
+
+  &__col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    margin: 0 0 4px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  &__item {
+    --background: #f6f8fb;
+    --border-radius: 8px;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    --min-height: 38px;
+    border-radius: 8px;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+  }
+}
+
 .ticket-card {
   background: #fff;
   border-radius: 12px;
