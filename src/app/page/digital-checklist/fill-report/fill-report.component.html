@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>Fill Reports</ion-title>
+    <ion-title>{{ i18nLabels.fillReports }}</ion-title>
     <ion-buttons slot="end" [hidden]="!isInternet || !isEditable()">
       <ion-button id="click-trigger" slot="icon-only">
         <ion-icon name="language-outline"></ion-icon>
@@ -25,81 +25,108 @@
   <input #videoFileInput type="file" accept="video/*" class="fill-report-hidden-file" (change)="onVideoFileSelected($event)">
 
   <ng-template #numericScalar let-val="val" let-dat="dat">
-    <ion-item [ngClass]="{ redBorder: val.isNotFill && !isScalarAnswerValid(val) }">
+    <ion-item class="fill-report-input-item" [ngClass]="{ redBorder: val.isNotFill && !isScalarAnswerValid(val) }">
       <ion-label position="floating">{{ numericScalarLabel(val) }}</ion-label>
       <ion-input type="number" inputmode="decimal" step="any" [(ngModel)]="val.q_value" (ionChange)="onScalarAnswerChange(val)" [disabled]="!isEditable(dat)"></ion-input>
     </ion-item>
-    <ion-text color="medium" class="ion-padding-horizontal" *ngIf="getNumericHint(val)">
-      <p class="ion-no-margin ion-padding-bottom">{{ getNumericHint(val) }}</p>
-    </ion-text>
+    <div class="fill-report-hint" *ngIf="getNumericHint(val)">
+      <ion-icon name="information-circle-outline"></ion-icon>
+      <span>{{ getNumericHint(val) }}</span>
+    </div>
   </ng-template>
 
   <!-- Photo / video / IMG picker row (reused) -->
   <ng-template #docPickRow let-val="val" let-dat="dat" let-mode="mode">
-    <ion-row>
-      <ion-col size="6" class="ion-padding-start">
-        <div [hidden]="!isEditable(dat)">
-          <ion-button
-            size="small"
-            [color]="!val.imagename ? 'primary' : 'success'"
-            [fill]="!val.imagename ? 'outline' : 'solid'"
-            (click)="onDocPick(val, mode)"
-            [ngClass]="{ redBorder: docPickRedBorder(val, mode) }">
-            {{ docPickLabel(mode) }}
-            <ion-icon [name]="val.imagename ? 'checkmark-done-outline' : docPickIconPending(mode)" slot="end"></ion-icon>
-          </ion-button>
-        </div>
-      </ion-col>
-      <ion-col size="6" class="ion-text-end" *ngIf="val.imagename">
-        <ion-button color="danger" (click)="viewAttachment(val)" fill="clear">
-          <ion-icon [name]="viewIconForDocMode(mode)"></ion-icon>
+    <div class="fill-report-doc-row">
+      <div [hidden]="!isEditable(dat)" class="fill-report-doc-row__pick">
+        <ion-button
+          size="small"
+          [color]="!val.imagename ? 'primary' : 'success'"
+          [fill]="!val.imagename ? 'outline' : 'solid'"
+          (click)="onDocPick(val, mode)"
+          [ngClass]="{ redBorder: docPickRedBorder(val, mode) }">
+          {{ docPickLabel(mode) }}
+          <ion-icon [name]="val.imagename ? 'checkmark-done-outline' : docPickIconPending(mode)" slot="end"></ion-icon>
         </ion-button>
-      </ion-col>
-    </ion-row>
+      </div>
+      <div *ngIf="val.imagename" class="fill-report-doc-row__view">
+        <ion-button color="danger" (click)="viewAttachment(val)" fill="clear" size="small">
+          <ion-icon [name]="viewIconForDocMode(mode)" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
   </ng-template>
 
   <div *ngFor="let dat of scheduleArr">
-    <ion-card>
-      <ion-row>
-        <ion-col size="6">
-          <ion-text color="primary"> PC Name</ion-text><br>
-          <ion-text>{{ dat.pc_desc }}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary"> Location</ion-text><br>
-          <ion-text>{{ dat.location_desc }}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary"> CheckList ID</ion-text><br>
-          <ion-text>{{ dat.schedule_unique_id }}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary"> CheckList</ion-text><br>
-          <ion-text>{{ dat.chk_cat_name }}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary"> Schedule Date</ion-text><br>
-          <ion-text>{{ dat.schedule_date }}</ion-text>
-        </ion-col>
-        <ion-col size="6" *ngIf="dat.schedule_status !== 'assigned'">
-          <ion-text color="primary"> Attended Date</ion-text><br>
-          <ion-text>{{ dat.submitted_date }}</ion-text>
-        </ion-col>
-        <ion-col size="6" *ngIf="(dat.raised_cust === 'Yes' || dat.ticket_id > 0) && isInternet">
-          <ion-button size="small" shape="round" (click)="presentAlertConfirm()" *ngIf="dat.raised_cust === 'Yes' && dat.ticket_id === 0" mode="ios">Raise a Ticket</ion-button>
-          <ion-button size="small" shape="round" color="success" *ngIf="dat.ticket_id > 0">Ticket ID: {{ dat.ticket_id }}</ion-button>
-        </ion-col>
-      </ion-row>
-      <ion-row *ngIf="dat.schedule_status !== 'assigned'">
-        <ion-col size="6" *ngIf="dat.review_date">
-          <ion-text color="primary"> Review Date</ion-text><br>
-          <ion-text>{{ dat.review_date }}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary"> Submit By</ion-text><br>
-          <ion-text>{{ dat.user }}</ion-text>
-        </ion-col>
-      </ion-row>
+    <ion-card class="fill-report-info-card">
+      <div class="fill-report-info-grid">
+        <div class="fill-report-info-cell">
+          <div class="fill-report-info-label">
+            <ion-icon name="desktop-outline"></ion-icon>
+            {{ i18nLabels.pcName }}
+          </div>
+          <div class="fill-report-info-value">{{ dat.pc_desc }}</div>
+        </div>
+        <div class="fill-report-info-cell">
+          <div class="fill-report-info-label">
+            <ion-icon name="location-outline"></ion-icon>
+            {{ i18nLabels.location }}
+          </div>
+          <div class="fill-report-info-value">{{ dat.location_desc }}</div>
+        </div>
+        <div class="fill-report-info-cell">
+          <div class="fill-report-info-label">
+            <ion-icon name="barcode-outline"></ion-icon>
+            {{ i18nLabels.checklistId }}
+          </div>
+          <div class="fill-report-info-value">{{ dat.schedule_unique_id }}</div>
+        </div>
+        <div class="fill-report-info-cell">
+          <div class="fill-report-info-label">
+            <ion-icon name="list-outline"></ion-icon>
+            {{ i18nLabels.checklist }}
+          </div>
+          <div class="fill-report-info-value">{{ dat.chk_cat_name }}</div>
+        </div>
+        <div class="fill-report-info-cell">
+          <div class="fill-report-info-label">
+            <ion-icon name="calendar-outline"></ion-icon>
+            {{ i18nLabels.scheduleDate }}
+          </div>
+          <div class="fill-report-info-value">{{ dat.schedule_date }}</div>
+        </div>
+        <div class="fill-report-info-cell" *ngIf="dat.schedule_status !== 'assigned'">
+          <div class="fill-report-info-label">
+            <ion-icon name="checkmark-done-outline"></ion-icon>
+            {{ i18nLabels.attendedDate }}
+          </div>
+          <div class="fill-report-info-value">{{ dat.submitted_date }}</div>
+        </div>
+        <div class="fill-report-info-cell" *ngIf="dat.review_date && dat.schedule_status !== 'assigned'">
+          <div class="fill-report-info-label">
+            <ion-icon name="eye-outline"></ion-icon>
+            {{ i18nLabels.reviewDate }}
+          </div>
+          <div class="fill-report-info-value">{{ dat.review_date }}</div>
+        </div>
+        <div class="fill-report-info-cell" *ngIf="dat.schedule_status !== 'assigned'">
+          <div class="fill-report-info-label">
+            <ion-icon name="person-outline"></ion-icon>
+            {{ i18nLabels.submitBy }}
+          </div>
+          <div class="fill-report-info-value">{{ dat.user }}</div>
+        </div>
+      </div>
+      <div class="fill-report-ticket-row" *ngIf="(dat.raised_cust === 'Yes' || dat.ticket_id > 0) && isInternet">
+        <ion-button size="small" shape="round" (click)="presentAlertConfirm()" *ngIf="dat.raised_cust === 'Yes' && dat.ticket_id === 0" mode="ios">
+          <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+          {{ i18nLabels.raiseTicket }}
+        </ion-button>
+        <ion-button size="small" shape="round" color="success" *ngIf="dat.ticket_id > 0">
+          <ion-icon name="ticket-outline" slot="start"></ion-icon>
+          {{ i18nLabels.ticketId }}: {{ dat.ticket_id }}
+        </ion-button>
+      </div>
     </ion-card>
 
     <div *ngIf="!dat.isResponseShow" class="ion-no-padding">
@@ -113,48 +140,44 @@
           bgcolor: val.bgcolor === true
         }"
         #a>
-        <ion-item color="none">
-          <ion-avatar class="center">
+        <ion-item color="none" class="fill-report-q-header" lines="none">
+          <ion-avatar class="center fill-report-q-avatar">
             <b>{{ i + 1 }}</b>
           </ion-avatar>
           <ion-label class="ion-text-wrap">
-            <div [innerHTML]="val.q_desc"></div>
-            <p class="ion-no-margin ion-margin-top" *ngIf="val.question_type">
-              <ion-text color="medium" class="fill-report-q-type">{{ val.question_type }}</ion-text>
+            <div class="fill-report-q-desc" [innerHTML]="val.q_desc"></div>
+            <p class="ion-no-margin" *ngIf="val.question_type">
+              <span class="fill-report-q-type">{{ val.question_type }}</span>
             </p>
           </ion-label>
           <ion-buttons slot="end" (click)="speakCondition(val, i)" [hidden]="!isEditable(dat)">
-            <ion-button slot="icon-only">
+            <ion-button slot="icon-only" color="primary">
               <ion-icon name="volume-high-outline"></ion-icon>
             </ion-button>
           </ion-buttons>
         </ion-item>
 
+        <div class="fill-report-q-body">
         <ng-container [ngSwitch]="questionKind(val)">
           <!-- Option -->
           <ng-container *ngSwitchCase="'option'">
-            <ion-row>
-              <ion-col size="12" class="ion-no-padding">
-                <ion-radio-group [(ngModel)]="val.rspns" (ionChange)="changeResponseAction(val)" color="none" mode="md">
-                  <ion-row>
-                    <ion-col size="4" *ngFor="let opt of val.options">
-                      <ion-item lines="none" [disabled]="!isEditable(dat)">
-                        <ion-label>{{ opt.optn_desc }}</ion-label>
-                        <ion-radio slot="start" [value]="opt.optn_id" class="fill-report-radio-gap"></ion-radio>
-                      </ion-item>
-                    </ion-col>
-                  </ion-row>
-                </ion-radio-group>
-              </ion-col>
-            </ion-row>
+            <ion-radio-group [(ngModel)]="val.rspns" (ionChange)="changeResponseAction(val)" color="none" mode="md" class="fill-report-options">
+              <div class="fill-report-options-grid">
+                <ion-item lines="none" class="fill-report-option-item" *ngFor="let opt of val.options" [disabled]="!isEditable(dat)">
+                  <ion-radio slot="start" [value]="opt.optn_id" class="fill-report-radio-gap"></ion-radio>
+                  <ion-label>{{ opt.optn_desc }}</ion-label>
+                </ion-item>
+              </div>
+            </ion-radio-group>
             <ng-container *ngTemplateOutlet="docPickRow; context: { val: val, dat: dat, mode: 'img' }"></ng-container>
           </ng-container>
 
           <!-- Date -->
           <ng-container *ngSwitchCase="'date'">
-            <ion-item lines="none" class="ion-padding-vertical" [attr.id]="'fill-q-date-' + val.q_id" [disabled]="!isEditable(dat)">
-              <ion-label color="primary" position="floating">{{ val.options?.[0]?.optn_desc || 'Date' }}</ion-label>
-              <ion-input type="text" [value]="displayIsoAsDate(val.q_value)" placeholder="Select Date" readonly></ion-input>
+            <ion-item lines="none" class="fill-report-input-item fill-report-date-item" [attr.id]="'fill-q-date-' + val.q_id" [disabled]="!isEditable(dat)">
+              <ion-icon name="calendar-outline" slot="start" color="primary"></ion-icon>
+              <ion-label color="primary" position="floating">{{ val.options?.[0]?.optn_desc || i18nLabels.date }}</ion-label>
+              <ion-input type="text" [value]="displayIsoAsDate(val.q_value)" [placeholder]="i18nLabels.selectDate" readonly></ion-input>
             </ion-item>
             <ion-popover [trigger]="'fill-q-date-' + val.q_id" mode="md">
               <ng-template>
@@ -165,9 +188,10 @@
 
           <!-- Date & time -->
           <ng-container *ngSwitchCase="'datetime'">
-            <ion-item lines="none" class="ion-padding-vertical" [attr.id]="'fill-q-dt-' + val.q_id" [disabled]="!isEditable(dat)">
-              <ion-label color="primary" position="floating">{{ val.options?.[0]?.optn_desc || 'Date & time' }}</ion-label>
-              <ion-input type="text" [value]="displayIsoAsDateTime(val.q_value)" placeholder="Select date & time" readonly></ion-input>
+            <ion-item lines="none" class="fill-report-input-item fill-report-date-item" [attr.id]="'fill-q-dt-' + val.q_id" [disabled]="!isEditable(dat)">
+              <ion-icon name="time-outline" slot="start" color="primary"></ion-icon>
+              <ion-label color="primary" position="floating">{{ val.options?.[0]?.optn_desc || i18nLabels.dateTime }}</ion-label>
+              <ion-input type="text" [value]="displayIsoAsDateTime(val.q_value)" [placeholder]="i18nLabels.selectDateTime" readonly></ion-input>
             </ion-item>
             <ion-popover [trigger]="'fill-q-dt-' + val.q_id" mode="md">
               <ng-template>
@@ -185,8 +209,8 @@
 
           <!-- Short text -->
           <ng-container *ngSwitchCase="'shorttext'">
-            <ion-item [ngClass]="{ redBorder: val.isNotFill && !isScalarAnswerValid(val) }">
-              <ion-label position="floating">Your answer</ion-label>
+            <ion-item class="fill-report-input-item" [ngClass]="{ redBorder: val.isNotFill && !isScalarAnswerValid(val) }">
+              <ion-label position="floating">{{ i18nLabels.yourAnswer }}</ion-label>
               <ion-input type="text" [(ngModel)]="val.q_value" (ionChange)="onScalarAnswerChange(val)" [disabled]="!isEditable(dat)"></ion-input>
             </ion-item>
           </ng-container>
@@ -206,43 +230,56 @@
           <ng-container *ngTemplateOutlet="docPickRow; context: { val: val, dat: dat, mode: 'img' }"></ng-container>
         </ng-container>
 
-        <ion-item [ngClass]="{ redBorder: val.isRemarkMandatory === 1 && !val.remark }">
+        <ion-item class="fill-report-input-item fill-report-remark-item" [ngClass]="{ redBorder: val.isRemarkMandatory === 1 && !val.remark }">
+          <ion-icon name="chatbubble-ellipses-outline" slot="start" color="medium"></ion-icon>
           <ion-input
             type="text"
             [(ngModel)]="val.remark"
-            placeholder="Enter Remark"
+            [placeholder]="i18nLabels.enterRemark"
             (change)="changeRemark(val)"
             [disabled]="!isEditable(dat)"></ion-input>
           <ion-buttons slot="end" [hidden]="!isEditable(dat)" *ngIf="isInternet">
-            <ion-button slot="icon-only" (click)="listenCondition(val)" [disabled]="questionKind(val) !== 'option'">
+            <ion-button slot="icon-only" (click)="listenCondition(val)" [disabled]="questionKind(val) !== 'option'" color="primary">
               <ion-icon name="mic-outline"></ion-icon>
             </ion-button>
           </ion-buttons>
         </ion-item>
+        </div>
       </div>
     </div>
   </div>
 
-  <ion-item [ngClass]="{ fullborder: remarkErr && !remark }">
-    <ion-label position="floating">Remark</ion-label>
-    <ion-input type="email" [(ngModel)]="remark" [disabled]="!isEditable()"></ion-input>
-  </ion-item>
-  <ion-button color="success" size="small" (click)="viewSign()" *ngIf="(isInternet && signatureBase64) && schedule_status !== 'assigned' || offline_save === 'true'">View Signature</ion-button>
-  <ion-item lines="none" [hidden]="!isEditable()">
-    <ion-button (click)="openSign()" [fill]="signatureBase64 ? 'solid' : 'outline'">
-      Signature
-      <ion-icon name="checkmark-done-outline" slot="end" *ngIf="signatureBase64"></ion-icon>
+  <ion-card class="fill-report-final-card" *ngIf="scheduleArr.length > 0">
+    <div class="fill-report-final-title">
+      <ion-icon name="create-outline"></ion-icon>
+      <span>{{ i18nLabels.remark }}</span>
+    </div>
+    <ion-item class="fill-report-input-item" [ngClass]="{ fullborder: remarkErr && !remark }" lines="none">
+      <ion-input type="email" [(ngModel)]="remark" [disabled]="!isEditable()" [placeholder]="i18nLabels.enterRemark"></ion-input>
+    </ion-item>
+
+    <div class="fill-report-sign-row" [hidden]="!isEditable()">
+      <ion-button (click)="openSign()" [fill]="signatureBase64 ? 'solid' : 'outline'" [color]="signatureBase64 ? 'success' : 'primary'" shape="round">
+        <ion-icon name="create-outline" slot="start"></ion-icon>
+        {{ i18nLabels.signature }}
+        <ion-icon name="checkmark-done-outline" slot="end" *ngIf="signatureBase64"></ion-icon>
+      </ion-button>
+      <!-- <img [src]="signatureBase64" class="fill-report-sign-thumb" *ngIf="signatureBase64" /> -->
+    </div>
+
+    <ion-button color="success" size="small" shape="round" (click)="viewSign()" *ngIf="(isInternet && signatureBase64) && schedule_status !== 'assigned' || offline_save === 'true'">
+      <ion-icon name="eye-outline" slot="start"></ion-icon>
+      {{ i18nLabels.viewSignature }}
     </ion-button>
-    <img [src]="signatureBase64" class="fill-report-sign-thumb" slot="end" *ngIf="signatureBase64" />
-  </ion-item>
+  </ion-card>
 </ion-content>
 
 <ion-modal [isOpen]="videoPreviewOpen" (didDismiss)="closeVideoPreview()">
   <ion-header>
     <ion-toolbar color="primary">
-      <ion-title>Video</ion-title>
+      <ion-title>{{ i18nLabels.video }}</ion-title>
       <ion-buttons slot="end">
-        <ion-button (click)="closeVideoPreview()">Close</ion-button>
+        <ion-button (click)="closeVideoPreview()">{{ i18nLabels.close }}</ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
@@ -251,11 +288,11 @@
   </ion-content>
 </ion-modal>
 
-<ion-footer *ngIf="scheduleArr.length > 0" [hidden]="schedule_status !== 'assigned'">
+<ion-footer *ngIf="scheduleArr.length > 0" [hidden]="schedule_status !== 'assigned'" class="fill-report-footer">
   <ion-toolbar>
-    <ion-button expand="block" (click)="finalSubmit()" color="primary" [disabled]="offline_save === 'true'" tappable>
-      Submit
-      <ion-icon name="save-outline" slot="end"></ion-icon>
+    <ion-button expand="block" shape="round" (click)="finalSubmit()" color="primary" [disabled]="offline_save === 'true'" tappable class="fill-report-submit-btn">
+      <ion-icon name="save-outline" slot="start"></ion-icon>
+      {{ i18nLabels.submit }}
     </ion-button>
   </ion-toolbar>
 </ion-footer>

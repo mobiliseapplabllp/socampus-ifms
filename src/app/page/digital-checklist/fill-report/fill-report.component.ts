@@ -37,6 +37,373 @@ const Q_TYPE_TO_KIND: Record<string, QuestionKind> = {
   '226': 'option',
 };
 
+export interface I18nLabels {
+  fillReports: string;
+  pcName: string;
+  location: string;
+  checklistId: string;
+  checklist: string;
+  scheduleDate: string;
+  attendedDate: string;
+  reviewDate: string;
+  submitBy: string;
+  raiseTicket: string;
+  ticketId: string;
+  enterValue: string;
+  temperature: string;
+  allowedRange: string;
+  date: string;
+  dateTime: string;
+  selectDate: string;
+  selectDateTime: string;
+  yourAnswer: string;
+  enterRemark: string;
+  remark: string;
+  photo: string;
+  video: string;
+  img: string;
+  signature: string;
+  viewSignature: string;
+  submit: string;
+  close: string;
+  yes: string;
+  no: string;
+  na: string;
+}
+
+const I18N_LABELS: Record<string, I18nLabels> = {
+  en: {
+    fillReports: 'Fill Reports',
+    pcName: 'PC Name',
+    location: 'Location',
+    checklistId: 'CheckList ID',
+    checklist: 'CheckList',
+    scheduleDate: 'Schedule Date',
+    attendedDate: 'Attended Date',
+    reviewDate: 'Review Date',
+    submitBy: 'Submit By',
+    raiseTicket: 'Raise a Ticket',
+    ticketId: 'Ticket ID',
+    enterValue: 'Enter value',
+    temperature: 'Temperature',
+    allowedRange: 'Allowed range',
+    date: 'Date',
+    dateTime: 'Date & time',
+    selectDate: 'Select Date',
+    selectDateTime: 'Select date & time',
+    yourAnswer: 'Your answer',
+    enterRemark: 'Enter Remark',
+    remark: 'Remark',
+    photo: 'Photo',
+    video: 'Video',
+    img: 'IMG',
+    signature: 'Signature',
+    viewSignature: 'View Signature',
+    submit: 'Submit',
+    close: 'Close',
+    yes: 'Yes',
+    no: 'No',
+    na: 'NA',
+  },
+  hi: {
+    fillReports: 'रिपोर्ट भरें',
+    pcName: 'पीसी नाम',
+    location: 'स्थान',
+    checklistId: 'चेकलिस्ट आईडी',
+    checklist: 'चेकलिस्ट',
+    scheduleDate: 'निर्धारित तिथि',
+    attendedDate: 'उपस्थित तिथि',
+    reviewDate: 'समीक्षा तिथि',
+    submitBy: 'द्वारा प्रस्तुत',
+    raiseTicket: 'टिकट बनाएं',
+    ticketId: 'टिकट आईडी',
+    enterValue: 'मान दर्ज करें',
+    temperature: 'तापमान',
+    allowedRange: 'अनुमत सीमा',
+    date: 'तिथि',
+    dateTime: 'तिथि और समय',
+    selectDate: 'तिथि चुनें',
+    selectDateTime: 'तिथि और समय चुनें',
+    yourAnswer: 'आपका उत्तर',
+    enterRemark: 'टिप्पणी दर्ज करें',
+    remark: 'टिप्पणी',
+    photo: 'फोटो',
+    video: 'वीडियो',
+    img: 'चित्र',
+    signature: 'हस्ताक्षर',
+    viewSignature: 'हस्ताक्षर देखें',
+    submit: 'जमा करें',
+    close: 'बंद करें',
+    yes: 'हाँ',
+    no: 'नहीं',
+    na: 'लागू नहीं',
+  },
+  te: {
+    fillReports: 'నివేదికలు నింపండి',
+    pcName: 'పీసీ పేరు',
+    location: 'స్థానం',
+    checklistId: 'చెక్‌లిస్ట్ ID',
+    checklist: 'చెక్‌లిస్ట్',
+    scheduleDate: 'షెడ్యూల్ తేదీ',
+    attendedDate: 'హాజరైన తేదీ',
+    reviewDate: 'సమీక్ష తేదీ',
+    submitBy: 'సమర్పించినవారు',
+    raiseTicket: 'టికెట్ సృష్టించండి',
+    ticketId: 'టికెట్ ID',
+    enterValue: 'విలువ నమోదు చేయండి',
+    temperature: 'ఉష్ణోగ్రత',
+    allowedRange: 'అనుమతించిన పరిధి',
+    date: 'తేదీ',
+    dateTime: 'తేదీ & సమయం',
+    selectDate: 'తేదీని ఎంచుకోండి',
+    selectDateTime: 'తేదీ & సమయాన్ని ఎంచుకోండి',
+    yourAnswer: 'మీ సమాధానం',
+    enterRemark: 'వ్యాఖ్య నమోదు చేయండి',
+    remark: 'వ్యాఖ్య',
+    photo: 'ఫోటో',
+    video: 'వీడియో',
+    img: 'చిత్రం',
+    signature: 'సంతకం',
+    viewSignature: 'సంతకం చూడండి',
+    submit: 'సమర్పించండి',
+    close: 'మూసివేయండి',
+    yes: 'అవును',
+    no: 'కాదు',
+    na: 'వర్తించదు',
+  },
+  ta: {
+    fillReports: 'அறிக்கைகளை நிரப்பவும்',
+    pcName: 'பிசி பெயர்',
+    location: 'இடம்',
+    checklistId: 'சரிபார்ப்புப் பட்டியல் ID',
+    checklist: 'சரிபார்ப்புப் பட்டியல்',
+    scheduleDate: 'திட்டமிடப்பட்ட தேதி',
+    attendedDate: 'கலந்துகொண்ட தேதி',
+    reviewDate: 'மதிப்பாய்வு தேதி',
+    submitBy: 'சமர்ப்பித்தவர்',
+    raiseTicket: 'டிக்கெட் உருவாக்கு',
+    ticketId: 'டிக்கெட் ID',
+    enterValue: 'மதிப்பை உள்ளிடவும்',
+    temperature: 'வெப்பநிலை',
+    allowedRange: 'அனுமதிக்கப்பட்ட வரம்பு',
+    date: 'தேதி',
+    dateTime: 'தேதி & நேரம்',
+    selectDate: 'தேதியைத் தேர்ந்தெடுக்கவும்',
+    selectDateTime: 'தேதி & நேரத்தைத் தேர்ந்தெடுக்கவும்',
+    yourAnswer: 'உங்கள் பதில்',
+    enterRemark: 'குறிப்பை உள்ளிடவும்',
+    remark: 'குறிப்பு',
+    photo: 'புகைப்படம்',
+    video: 'வீடியோ',
+    img: 'படம்',
+    signature: 'கையொப்பம்',
+    viewSignature: 'கையொப்பத்தைப் பார்க்கவும்',
+    submit: 'சமர்ப்பி',
+    close: 'மூடு',
+    yes: 'ஆம்',
+    no: 'இல்லை',
+    na: 'பொருந்தாது',
+  },
+  kn: {
+    fillReports: 'ವರದಿಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ',
+    pcName: 'ಪಿಸಿ ಹೆಸರು',
+    location: 'ಸ್ಥಳ',
+    checklistId: 'ಪರಿಶೀಲನಾ ಪಟ್ಟಿ ID',
+    checklist: 'ಪರಿಶೀಲನಾ ಪಟ್ಟಿ',
+    scheduleDate: 'ನಿಗದಿತ ದಿನಾಂಕ',
+    attendedDate: 'ಹಾಜರಾದ ದಿನಾಂಕ',
+    reviewDate: 'ವಿಮರ್ಶೆ ದಿನಾಂಕ',
+    submitBy: 'ಸಲ್ಲಿಸಿದವರು',
+    raiseTicket: 'ಟಿಕೆಟ್ ರಚಿಸಿ',
+    ticketId: 'ಟಿಕೆಟ್ ID',
+    enterValue: 'ಮೌಲ್ಯವನ್ನು ನಮೂದಿಸಿ',
+    temperature: 'ತಾಪಮಾನ',
+    allowedRange: 'ಅನುಮತಿಸಲಾದ ವ್ಯಾಪ್ತಿ',
+    date: 'ದಿನಾಂಕ',
+    dateTime: 'ದಿನಾಂಕ & ಸಮಯ',
+    selectDate: 'ದಿನಾಂಕ ಆಯ್ಕೆಮಾಡಿ',
+    selectDateTime: 'ದಿನಾಂಕ & ಸಮಯ ಆಯ್ಕೆಮಾಡಿ',
+    yourAnswer: 'ನಿಮ್ಮ ಉತ್ತರ',
+    enterRemark: 'ಟಿಪ್ಪಣಿ ನಮೂದಿಸಿ',
+    remark: 'ಟಿಪ್ಪಣಿ',
+    photo: 'ಫೋಟೋ',
+    video: 'ವೀಡಿಯೊ',
+    img: 'ಚಿತ್ರ',
+    signature: 'ಸಹಿ',
+    viewSignature: 'ಸಹಿಯನ್ನು ನೋಡಿ',
+    submit: 'ಸಲ್ಲಿಸಿ',
+    close: 'ಮುಚ್ಚಿ',
+    yes: 'ಹೌದು',
+    no: 'ಇಲ್ಲ',
+    na: 'ಅನ್ವಯಿಸುವುದಿಲ್ಲ',
+  },
+  ml: {
+    fillReports: 'റിപ്പോർട്ടുകൾ പൂരിപ്പിക്കുക',
+    pcName: 'പിസി പേര്',
+    location: 'സ്ഥലം',
+    checklistId: 'ചെക്ക്‌ലിസ്റ്റ് ID',
+    checklist: 'ചെക്ക്‌ലിസ്റ്റ്',
+    scheduleDate: 'ഷെഡ്യൂൾ തീയതി',
+    attendedDate: 'ഹാജരായ തീയതി',
+    reviewDate: 'അവലോകന തീയതി',
+    submitBy: 'സമർപ്പിച്ചത്',
+    raiseTicket: 'ടിക്കറ്റ് സൃഷ്ടിക്കുക',
+    ticketId: 'ടിക്കറ്റ് ID',
+    enterValue: 'മൂല്യം നൽകുക',
+    temperature: 'താപനില',
+    allowedRange: 'അനുവദനീയ പരിധി',
+    date: 'തീയതി',
+    dateTime: 'തീയതി & സമയം',
+    selectDate: 'തീയതി തിരഞ്ഞെടുക്കുക',
+    selectDateTime: 'തീയതി & സമയം തിരഞ്ഞെടുക്കുക',
+    yourAnswer: 'നിങ്ങളുടെ ഉത്തരം',
+    enterRemark: 'അഭിപ്രായം നൽകുക',
+    remark: 'അഭിപ്രായം',
+    photo: 'ഫോട്ടോ',
+    video: 'വീഡിയോ',
+    img: 'ചിത്രം',
+    signature: 'ഒപ്പ്',
+    viewSignature: 'ഒപ്പ് കാണുക',
+    submit: 'സമർപ്പിക്കുക',
+    close: 'അടയ്ക്കുക',
+    yes: 'അതെ',
+    no: 'അല്ല',
+    na: 'ബാധകമല്ല',
+  },
+  mr: {
+    fillReports: 'अहवाल भरा',
+    pcName: 'पीसी नाव',
+    location: 'स्थान',
+    checklistId: 'चेकलिस्ट आयडी',
+    checklist: 'चेकलिस्ट',
+    scheduleDate: 'नियोजित तारीख',
+    attendedDate: 'उपस्थित तारीख',
+    reviewDate: 'पुनरावलोकन तारीख',
+    submitBy: 'द्वारा सादर',
+    raiseTicket: 'तिकीट तयार करा',
+    ticketId: 'तिकीट आयडी',
+    enterValue: 'मूल्य प्रविष्ट करा',
+    temperature: 'तापमान',
+    allowedRange: 'अनुमत श्रेणी',
+    date: 'तारीख',
+    dateTime: 'तारीख आणि वेळ',
+    selectDate: 'तारीख निवडा',
+    selectDateTime: 'तारीख आणि वेळ निवडा',
+    yourAnswer: 'तुमचे उत्तर',
+    enterRemark: 'टिप्पणी प्रविष्ट करा',
+    remark: 'टिप्पणी',
+    photo: 'फोटो',
+    video: 'व्हिडिओ',
+    img: 'प्रतिमा',
+    signature: 'स्वाक्षरी',
+    viewSignature: 'स्वाक्षरी पहा',
+    submit: 'सबमिट करा',
+    close: 'बंद करा',
+    yes: 'होय',
+    no: 'नाही',
+    na: 'लागू नाही',
+  },
+  gu: {
+    fillReports: 'અહેવાલો ભરો',
+    pcName: 'પીસી નામ',
+    location: 'સ્થાન',
+    checklistId: 'ચેકલિસ્ટ ID',
+    checklist: 'ચેકલિસ્ટ',
+    scheduleDate: 'નિર્ધારિત તારીખ',
+    attendedDate: 'હાજર રહેલી તારીખ',
+    reviewDate: 'સમીક્ષા તારીખ',
+    submitBy: 'દ્વારા સબમિટ',
+    raiseTicket: 'ટિકિટ બનાવો',
+    ticketId: 'ટિકિટ ID',
+    enterValue: 'મૂલ્ય દાખલ કરો',
+    temperature: 'તાપમાન',
+    allowedRange: 'મંજૂર શ્રેણી',
+    date: 'તારીખ',
+    dateTime: 'તારીખ અને સમય',
+    selectDate: 'તારીખ પસંદ કરો',
+    selectDateTime: 'તારીખ અને સમય પસંદ કરો',
+    yourAnswer: 'તમારો જવાબ',
+    enterRemark: 'ટિપ્પણી દાખલ કરો',
+    remark: 'ટિપ્પણી',
+    photo: 'ફોટો',
+    video: 'વિડિઓ',
+    img: 'છબી',
+    signature: 'સહી',
+    viewSignature: 'સહી જુઓ',
+    submit: 'સબમિટ કરો',
+    close: 'બંધ કરો',
+    yes: 'હા',
+    no: 'ના',
+    na: 'લાગુ નથી',
+  },
+  bn: {
+    fillReports: 'রিপোর্ট পূরণ করুন',
+    pcName: 'পিসি নাম',
+    location: 'অবস্থান',
+    checklistId: 'চেকলিস্ট ID',
+    checklist: 'চেকলিস্ট',
+    scheduleDate: 'নির্ধারিত তারিখ',
+    attendedDate: 'উপস্থিত তারিখ',
+    reviewDate: 'পর্যালোচনা তারিখ',
+    submitBy: 'জমাদানকারী',
+    raiseTicket: 'টিকিট তৈরি করুন',
+    ticketId: 'টিকিট ID',
+    enterValue: 'মান লিখুন',
+    temperature: 'তাপমাত্রা',
+    allowedRange: 'অনুমোদিত পরিসীমা',
+    date: 'তারিখ',
+    dateTime: 'তারিখ ও সময়',
+    selectDate: 'তারিখ নির্বাচন করুন',
+    selectDateTime: 'তারিখ ও সময় নির্বাচন করুন',
+    yourAnswer: 'আপনার উত্তর',
+    enterRemark: 'মন্তব্য লিখুন',
+    remark: 'মন্তব্য',
+    photo: 'ছবি',
+    video: 'ভিডিও',
+    img: 'চিত্র',
+    signature: 'স্বাক্ষর',
+    viewSignature: 'স্বাক্ষর দেখুন',
+    submit: 'জমা দিন',
+    close: 'বন্ধ করুন',
+    yes: 'হ্যাঁ',
+    no: 'না',
+    na: 'প্রযোজ্য নয়',
+  },
+  ory: {
+    fillReports: 'ରିପୋର୍ଟ ପୂରଣ କରନ୍ତୁ',
+    pcName: 'ପିସି ନାମ',
+    location: 'ସ୍ଥାନ',
+    checklistId: 'ଚେକଲିଷ୍ଟ ID',
+    checklist: 'ଚେକଲିଷ୍ଟ',
+    scheduleDate: 'ନିର୍ଧାରିତ ତାରିଖ',
+    attendedDate: 'ଉପସ୍ଥିତ ତାରିଖ',
+    reviewDate: 'ସମୀକ୍ଷା ତାରିଖ',
+    submitBy: 'ଦ୍ୱାରା ଦାଖଲ',
+    raiseTicket: 'ଟିକେଟ୍ ସୃଷ୍ଟି କରନ୍ତୁ',
+    ticketId: 'ଟିକେଟ୍ ID',
+    enterValue: 'ମୂଲ୍ୟ ପ୍ରବେଶ କରନ୍ତୁ',
+    temperature: 'ତାପମାତ୍ରା',
+    allowedRange: 'ଅନୁମତିପ୍ରାପ୍ତ ପରିସର',
+    date: 'ତାରିଖ',
+    dateTime: 'ତାରିଖ ଏବଂ ସମୟ',
+    selectDate: 'ତାରିଖ ବାଛନ୍ତୁ',
+    selectDateTime: 'ତାରିଖ ଏବଂ ସମୟ ବାଛନ୍ତୁ',
+    yourAnswer: 'ଆପଣଙ୍କ ଉତ୍ତର',
+    enterRemark: 'ଟିପ୍ପଣୀ ପ୍ରବେଶ କରନ୍ତୁ',
+    remark: 'ଟିପ୍ପଣୀ',
+    photo: 'ଫଟୋ',
+    video: 'ଭିଡିଓ',
+    img: 'ଚିତ୍ର',
+    signature: 'ଦସ୍ତଖତ',
+    viewSignature: 'ଦସ୍ତଖତ ଦେଖନ୍ତୁ',
+    submit: 'ଦାଖଲ କରନ୍ତୁ',
+    close: 'ବନ୍ଦ କରନ୍ତୁ',
+    yes: 'ହଁ',
+    no: 'ନା',
+    na: 'ପ୍ରଯୁଜ୍ୟ ନୁହେଁ',
+  },
+};
+
 @Component({
   selector: 'app-fill-report',
   templateUrl: './fill-report.component.html',
@@ -76,6 +443,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   remarkErr = false;
   arr: any = [];
   selectedLanguage =  'en';
+  i18nLabels: I18nLabels = I18N_LABELS['en'];
   index: any;
   loop = false;
   isInternet!:boolean;
@@ -269,7 +637,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   }
 
   numericScalarLabel(val: any): string {
-    return this.questionKind(val) === 'temperature' ? 'Temperature' : 'Enter value';
+    return this.questionKind(val) === 'temperature' ? this.i18nLabels.temperature : this.i18nLabels.enterValue;
   }
 
   onDocPick(val: any, mode: 'photo' | 'video' | 'img'): void {
@@ -281,7 +649,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   }
 
   docPickLabel(mode: 'photo' | 'video' | 'img'): string {
-    return mode === 'photo' ? 'Photo' : mode === 'video' ? 'Video' : 'IMG';
+    return mode === 'photo' ? this.i18nLabels.photo : mode === 'video' ? this.i18nLabels.video : this.i18nLabels.img;
   }
 
   docPickIconPending(mode: 'photo' | 'video' | 'img'): string {
@@ -387,7 +755,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     if (!r) {
       return '';
     }
-    return `Allowed range: ${r.min} – ${r.max}`;
+    return `${this.i18nLabels.allowedRange}: ${r.min} – ${r.max}`;
   }
 
   isNumberInRange(val: any): boolean {
@@ -805,23 +1173,30 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
 
   private mapQuestionForSubmitPayload(q: any): any {
     const k = this.questionKind(q);
-    if (k === 'option') {
-      return q;
-    }
     if (k === 'date' || k === 'datetime' || k === 'number' || k === 'temperature' || k === 'shorttext') {
       if (q.q_value != null && q.q_value !== '') {
         q.rspns = q.q_value;
       }
-      delete q.q_value;
-      return q;
-    }
-    if (k === 'attachment' || k === 'video') {
+    } else if (k === 'attachment' || k === 'video') {
       if (q.options?.[0]?.optn_id != null) {
         q.rspns = q.options[0].optn_id;
       }
-      return q;
     }
-    return q;
+    const trimmed: any = {
+      q_desc: q.q_desc,
+      q_id: q.q_id,
+      q_type: q.q_type,
+      question_type: q.question_type,
+      cat_id: q.cat_id,
+      q_max_score: q.q_max_score,
+      imagename: q.imagename,
+      remark: q.remark,
+      rspns: q.rspns,
+    };
+    if (q.attach_ext != null) {
+      trimmed.attach_ext = q.attach_ext;
+    }
+    return trimmed;
   }
 
   convertToFormData(data: any, formData?: FormData, parentKey?: string): FormData {
@@ -1027,35 +1402,37 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   }
 
   changeLan(lang: string) {
+    this.i18nLabels = I18N_LABELS[lang] ?? I18N_LABELS['en'];
+    this.applyYesNoNaFromLabels();
     const temp = this.scheduleArr[0]?.qus ?? [];
     const question = temp.map((q: any) => q.q_desc);
-    question.push('yes', 'no', 'not applicable');
     this.translate(question, lang);
+  }
+
+  private applyYesNoNaFromLabels() {
+    for (let i = 0; i < this.scheduleArr.length; i++) {
+      for (let j = 0; j < this.scheduleArr[i].qus.length; j++) {
+        const q = this.scheduleArr[i].qus[j];
+        if (!q.options?.length) {
+          continue;
+        }
+        q.options.forEach((opt: any) => {
+          const ov = String(opt?.optn_value ?? '').toLowerCase();
+          if (ov === 'yes') opt.optn_desc = this.i18nLabels.yes;
+          else if (ov === 'no') opt.optn_desc = this.i18nLabels.no;
+          else if (ov === 'na') opt.optn_desc = this.i18nLabels.na;
+        });
+      }
+    }
   }
 
   translate(data: any, lang: string) {
     this.common.presentLoading().then(preLoad => {
       this.httpDigital.googleTranslate(data, lang).subscribe({
         next: (translateText) => {
-          const optionArr = translateText.data.translations.slice(-3); // Last 3 translations = Yes, No, NA
           for (let i = 0; i < this.scheduleArr.length; i++) {
             for (let j = 0; j < this.scheduleArr[i].qus.length; j++) {
               this.scheduleArr[i].qus[j].q_desc = translateText.data.translations[j].translatedText;
-
-              if (this.scheduleArr[i].qus[j].options?.length) {
-                this.scheduleArr[i].qus[j].options.forEach((opt: any) => {
-                  // Check the original value (case-insensitive) and set translation
-                  if (lang === 'en') {
-                    if (opt.optn_value.toLowerCase() === 'yes') opt.optn_desc = 'Yes';
-                    if (opt.optn_value.toLowerCase() === 'no') opt.optn_desc = 'No';
-                    if (opt.optn_value.toLowerCase() === 'na') opt.optn_desc = 'NA';
-                  } else {
-                    if (opt.optn_value.toLowerCase() === 'yes') opt.optn_desc = optionArr[0].translatedText;
-                    if (opt.optn_value.toLowerCase() === 'no') opt.optn_desc = optionArr[1].translatedText;
-                    if (opt.optn_value.toLowerCase() === 'na') opt.optn_desc = optionArr[2].translatedText;
-                  }
-                });
-              }
             }
           }
           this.selectedLanguage = lang;

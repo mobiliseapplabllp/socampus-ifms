@@ -73,28 +73,51 @@
 
 .menu-service-card {
   margin: 0;
-  min-height: 80px;
+  height: 100px;
   width: 100%;
   box-shadow: 1px 1px 8px #26589c;
   border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .menu-service-card__icon {
   height: 60px;
   width: 100%;
+  flex: 0 0 60px;
 
   ion-img {
     height: 35px;
     width: 35px;
+    object-fit: contain;
+
+    &::part(image) {
+      object-fit: contain;
+      height: 35px;
+      width: 35px;
+    }
   }
 }
 
 .menu-service-card__label {
-  min-height: 20px;
+  height: 40px;
+  flex: 0 0 40px;
   width: 100%;
+  padding: 0 4px;
+  overflow: hidden;
 
   ion-text {
     font-weight: 500;
+    font-size: 12px;
+    line-height: 1.15;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
   }
 }
 

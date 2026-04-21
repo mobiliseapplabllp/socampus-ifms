@@ -415,7 +415,7 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   shouldShowJustification(item: any): boolean {
-    const today = moment().format('YYYY-MM-DD');  
+    const today = moment().format('YYYY-MM-DD');
     if (item.schedule_date !== today) {
       return true;
     }
@@ -423,6 +423,10 @@ export class DigitalChecklistPage implements OnInit {
     const currentTime = moment();
     const endTime = moment(item.sch_endDateTime);
     return currentTime.isAfter(endTime);
+  }
+
+  trackByScheduleId(_index: number, item: any): any {
+    return item?.schedule_id ?? item?.schedule_unique_id ?? _index;
   }
 
   openPage(url: string) {

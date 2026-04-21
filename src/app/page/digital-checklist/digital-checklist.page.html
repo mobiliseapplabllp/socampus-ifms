@@ -57,46 +57,76 @@
     </ion-fab-button>
   </ion-fab>
   <div [ngSwitch]='segmentStatus'>
-    <div *ngSwitchCase= "'assigned'" style="height:100%;margin-bottom:5px">
-      <ion-virtual-scroll [items]="assignCheckList" >
-        <ion-card *virtualItem="let dat; let itemBounds = bounds;" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
-          <ion-item lines="none" color="none">
-            <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
-            <ion-label class="ion-text-wrap">
-              <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
-              <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
-              <p><b>({{dat.scheduler_id}}) {{dat.location_desc}}</b></p>
-              <p><b>{{dat.barcode}}</b></p>
-            </ion-label>
-            
-          </ion-item>
-          <ion-row>
-            <ion-col size="6" *ngIf="shouldShowJustification(dat)">
-              <ion-button expand="block" fill="outline" shape="round" class="ion-text-capitalize" (click)="openJustification(dat)">Justification</ion-button>
-            </ion-col>
-            <ion-col size="6">
-              <ion-button expand="block" (click)="verifyQr(dat)" fill="outline" shape="round" class="ion-text-capitalize">Fill</ion-button>
-            </ion-col>
-          </ion-row>
+    <div *ngSwitchCase= "'assigned'" style="margin-bottom:5px">
+      <ng-container *ngFor="let dat of assignCheckList; trackBy: trackByScheduleId">
+        <ion-card class="checklist-card" [ngClass]="{'bg-color': dat.offline_save, 'checklist-card--overdue': shouldShowJustification(dat)}" [ngStyle]="{'border-left-color': dat.backgroundColor }">
+          <div class="checklist-card__body">
+            <div class="checklist-card__thumb checklist-card__thumb--assigned" [class.checklist-card__thumb--overdue]="shouldShowJustification(dat)">
+              <ion-icon name="checkbox-outline"></ion-icon>
+            </div>
+            <div class="checklist-card__info">
+              <h2 class="checklist-card__title">{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</h2>              
+              <p class="checklist-card__meta">
+                <ion-icon name="time-outline"></ion-icon>
+                {{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm'}}
+              </p>
+              <p class="checklist-card__meta">
+                <ion-icon name="location-outline"></ion-icon>
+                ({{dat.scheduler_id}}) {{dat.location_desc}}
+              </p>
+              <p class="checklist-card__meta" *ngIf="dat.barcode">
+                <ion-icon name="barcode-outline"></ion-icon>
+                {{dat.barcode}}
+              </p>
+              <ion-badge class="checklist-card__badge" *ngIf="shouldShowJustification(dat)" color="danger">Overdue</ion-badge>
+              <ion-badge class="checklist-card__badge" *ngIf="!shouldShowJustification(dat)" color="success">Active</ion-badge>
+            </div>
+          </div>
+          <div class="checklist-card__actions">
+            <ion-button *ngIf="shouldShowJustification(dat); else fillBtn" expand="block" fill="solid" shape="round" color="warning" class="ion-text-capitalize checklist-card__btn" (click)="openJustification(dat)">
+              <ion-icon name="document-text-outline" slot="start"></ion-icon>
+              Justification
+            </ion-button>
+            <ng-template #fillBtn>
+              <ion-button expand="block" (click)="verifyQr(dat)" fill="solid" shape="round" color="primary" class="ion-text-capitalize checklist-card__btn">
+                <ion-icon name="create-outline" slot="start"></ion-icon>
+                Fill
+              </ion-button>
+            </ng-template>
+          </div>
         </ion-card>
-      </ion-virtual-scroll>
+      </ng-container>
 
     </div>
-    <div *ngSwitchCase= "'attended'" style="height:100%;margin-bottom:5px">
-      <ion-virtual-scroll [items]="attendedCheckList" style="padding:5px;height:100%">
-        <ion-card *virtualItem="let dat; let itemBounds = bounds;" style="padding: 5px; margin: 10px">
-          <ion-item lines="none" color="none"  (click)="openFillReport(dat)">
-            <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
-            <ion-label class="ion-text-wrap">
-              <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
-              <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
-              <p><b>({{dat.scheduler_id}}) {{dat.location_desc}}</b></p>
-              <p><b>{{dat.barcode}}</b></p>
-            </ion-label>
-            <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize">View</ion-button>
-          </ion-item>
+    <div *ngSwitchCase= "'attended'" style="margin-bottom:5px">
+      <ng-container *ngFor="let dat of attendedCheckList; trackBy: trackByScheduleId">
+        <ion-card class="checklist-card checklist-card--attended" (click)="openFillReport(dat)">
+          <div class="checklist-card__body">
+            <div class="checklist-card__thumb checklist-card__thumb--attended">
+              <ion-icon name="checkmark-done-circle-outline"></ion-icon>
+            </div>
+            <div class="checklist-card__info">
+              <h2 class="checklist-card__title">{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</h2>
+              <p class="checklist-card__meta">
+                <ion-icon name="time-outline"></ion-icon>
+                {{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm'}}
+              </p>
+              <p class="checklist-card__meta">
+                <ion-icon name="location-outline"></ion-icon>
+                ({{dat.scheduler_id}}) {{dat.location_desc}}
+              </p>
+              <p class="checklist-card__meta" *ngIf="dat.barcode">
+                <ion-icon name="barcode-outline"></ion-icon>
+                {{dat.barcode}}
+              </p>
+            </div>
+            <ion-button shape="round" color="primary" fill="solid" class="ion-text-capitalize checklist-card__view-btn">
+              View
+              <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+            </ion-button>
+          </div>
         </ion-card>
-      </ion-virtual-scroll>
+      </ng-container>
     </div>
   </div>
 </ion-content>
