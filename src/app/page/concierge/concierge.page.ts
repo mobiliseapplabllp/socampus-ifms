@@ -31,6 +31,12 @@ export class ConciergePage implements OnInit {
   fromDate = '';
   toDate = '';
   statusFilter: number | '' = '';
+  tatBreachFilter: string = '';
+  tatBreachOptions = [
+    { value: 'overall', label: 'Overall' },
+    { value: 'response', label: 'Response' },
+    { value: 'resolve', label: 'Resolve' },
+  ];
   statusOptionsMap: { [key: string]: { value: number; label: string }[] } = {
     request_raise_byme: [
       { value: 2, label: 'Assigned' },
@@ -106,6 +112,9 @@ export class ConciergePage implements OnInit {
     }
     if (this.toDate) {
       obj.to_date = this.toDate;
+    }
+    if (this.tatBreachFilter && (this.status === 'assignto' || this.status === 'all_active_req')) {
+      obj.tat_breached = this.tatBreachFilter;
     }
     this.common.presentLoading().then(preLoad => {
       this.httpConcierge.getTicketList(obj).subscribe({
@@ -240,12 +249,13 @@ export class ConciergePage implements OnInit {
   }
 
   clearFilter() {
-    if (!this.fromDate && !this.toDate && this.statusFilter === '') {
+    if (!this.fromDate && !this.toDate && this.statusFilter === '' && !this.tatBreachFilter) {
       return;
     }
     this.fromDate = '';
     this.toDate = '';
     this.statusFilter = '';
+    this.tatBreachFilter = '';
     this.page = 1;
     this.ticketData = [];
     this.getTicketList(this.status, this.page);
