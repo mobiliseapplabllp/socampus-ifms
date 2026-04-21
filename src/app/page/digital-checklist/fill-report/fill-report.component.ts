@@ -380,6 +380,9 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   }
 
   getNumericHint(val: any): string {
+    if (this.questionKind(val) === 'temperature') {
+      return '';
+    }
     const r = this.parseNumericRange(val);
     if (!r) {
       return '';
@@ -404,7 +407,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     if (!this.hasScalarAnswer(val)) {
       return false;
     }
-    if (k === 'number' || k === 'temperature') {
+    if (k === 'number') {
       return this.isNumberInRange(val);
     }
     return true;
@@ -853,10 +856,10 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     this.scheduleArr[0].offline_save = 'false'
     const payload = this.buildPayloadForFinalSubmit(this.scheduleArr[0]);
     const formData = this.convertToFormData(payload);
-    formData.forEach((value, key) => {
-      const display = value instanceof Blob ? `[Blob type=${(value as Blob).type || 'n/a'} size=${value.size}]` : value;
-      console.log('[finalSubmit FormData]', key, display);
-    });
+    // formData.forEach((value, key) => {
+    //   const display = value instanceof Blob ? `[Blob type=${(value as Blob).type || 'n/a'} size=${value.size}]` : value;
+    //   console.log('[finalSubmit FormData]', key, display);
+    // });
     this.common.presentLoading().then(preLoad => {
       this.httpDigital.finalSubmitCheckList(formData).subscribe({
         next:(data) => {
@@ -927,7 +930,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     if (!this.hasScalarAnswer(q)) {
       return fail(`Please fill answer for Question No ${index + 1}`, true);
     }
-    if ((k === 'number' || k === 'temperature') && !this.isNumberInRange(q)) {
+    if (k === 'number' && !this.isNumberInRange(q)) {
       return fail(`Enter a valid value in allowed range for Question No ${index + 1}`);
     }
     if (q.options?.[0]) {
@@ -1005,11 +1008,22 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     });
     modal.onWillDismiss().then(async disModal => {
       if (disModal.role) {
-        let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
-        this.signatureBase64 = disModal.data;
+        this.signatureBase64 = this.dataUrlToBlob(disModal.data);
       }
     });
     modal.present();
+  }
+
+  private dataUrlToBlob(dataUrl: string): Blob {
+    const [meta, b64] = String(dataUrl).split(',');
+    const mime = /data:(.*?);base64/.exec(meta)?.[1] || 'image/png';
+    const bin = atob(b64);
+    const len = bin.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = bin.charCodeAt(i);
+    }
+    return new Blob([bytes], { type: mime });
   }
 
   changeLan(lang: string) {

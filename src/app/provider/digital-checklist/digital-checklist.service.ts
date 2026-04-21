@@ -67,8 +67,8 @@ export class DigitalChecklistService {
 
   finalSubmitCheckList(formData: any): Observable<any> {
     // https://aov.mhbemp.in/test_script/RFID.php?djdkmnkmsnd
-    // return this.http.post(this.baseurl + 'digicheck/offlineapp/saveAllPendingChecklist_AM', formData);
-    return this.http.post('https://aov.mhbemp.in/test_script/RFID.php', formData);
+    return this.http.post(this.baseurl + 'digicheck/offlineapp/saveAllPendingChecklistV2', formData);
+    // return this.http.post('https://aov.mhbemp.in/test_script/RFID.php', formData);
   }
 
   updateTktToSchedule(formData: any): Observable<any> {
