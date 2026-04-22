@@ -31,6 +31,7 @@ const Q_TYPE_TO_KIND: Record<string, QuestionKind> = {
   '225': 'attachment',
   '229': 'date',
   '313': 'datetime',
+  '227': 'number',
   '316': 'number',
   '314': 'temperature',
   '308': 'shorttext',
@@ -495,6 +496,72 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     const rawSid = qp.get('schedule_id');
     this.schedule_id = rawSid != null && rawSid !== '' ? parseInt(rawSid, 10) : NaN;
     await this.hydrateChecklistFromDexieOnce();
+    this.tryAutoFillFromPreviousChecklist();
+  }
+
+  /** Text-only auto-fill from earlier checklist of same category. Skips attachment/video. */
+  private tryAutoFillFromPreviousChecklist() {
+    if (!this.scheduleArr?.length) {
+      return;
+    }
+    if (!this.isEditable()) {
+      return;
+    }
+    const root = this.scheduleArr[0];
+    const payload = {
+      scheduler_id: root.scheduler_id ?? '',
+      schedule_id: root.schedule_id ?? '',
+      checklist_cat_id: root.checklist_cat_id ?? root.cat_id ?? '',
+    };
+    this.httpDigital.getAutoFillData(payload).subscribe({
+      next: (res: any) => {
+        if (res?.status && Array.isArray(res.data) && res.data.length) {
+          this.applyAutoFillResponse(res.data);
+        }
+      },
+      error: () => { /* silent — leave checklist blank */ }
+    });
+  }
+
+  private applyAutoFillResponse(data: Array<{ q_id: any; q_type: any; rspns: any; remark: any }>) {
+    if (!this.scheduleArr?.[0]?.qus) {
+      return;
+    }
+    const map = new Map(data.map(d => [String(d.q_id), d]));
+    this.scheduleArr[0].qus.forEach((q: any) => {
+      const prev = map.get(String(q.q_id));
+      if (!prev) {
+        return;
+      }
+      const k = this.questionKind(q);
+      if (k === 'attachment' || k === 'video') {
+        return;
+      }
+      if (k === 'date' || k === 'datetime' || k === 'number' || k === 'temperature' || k === 'shorttext') {
+        q.q_value = prev.rspns ?? '';
+        if (q.options?.[0] && q.q_value !== '') {
+          q.rspns = q.options[0].optn_id;
+        }
+      } else if (k === 'option') {
+        const needle = String(prev.rspns ?? '').trim().toLowerCase();
+        const opt = q.options?.find((o: any) =>
+          String(o.optn_desc ?? '').trim().toLowerCase() === needle ||
+          String(o.optn_value ?? '').trim().toLowerCase() === needle
+        );
+        if (opt) {
+          q.rspns = opt.optn_id;
+          q.rspns_temp = opt.optn_id;
+          q.isRemarkMandatory = opt.is_rmrk_mandatory;
+          q.isDocMandatory = opt.is_doc_mandatory;
+        }
+      }
+      if (prev.remark) {
+        q.remark = prev.remark;
+      }
+      q.isNotFill = false;
+    });
+    this.applyingDbSnapshot = false;
+    this.actionUpdateChecklist();
   }
 
   private async hydrateChecklistFromDexieOnce() {
@@ -518,6 +585,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     }
     this.applyingDbSnapshot = true;
     this.scheduleArr = [...data];
+    console.log(this.scheduleArr);
     this.scheduleArr[0].qus?.forEach((q: any) => {
       this.syncNonOptionMandatory(q);
       this.syncOptionResponseTempAfterLoad(q);
