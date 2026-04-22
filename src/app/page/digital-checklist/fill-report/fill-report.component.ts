@@ -1,20 +1,21 @@
-import { Component, ElementRef, NgZone, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
 import { Filesystem } from '@capacitor/filesystem';
 import { ActivatedRoute } from '@angular/router';
 import { AlertController, ModalController, NavController, Platform, ViewWillEnter } from '@ionic/angular';
-import { CommonService } from 'src/app/provider/common/common.service';
-import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
-import { SignatureComponent } from 'src/app/shared/signature/signature.component';
-import { environment } from 'src/environments/environment';
-import { TextToSpeech } from '@capacitor-community/text-to-speech';
-import { SpeechRecognition } from "@capacitor-community/speech-recognition";
-import { checklist, db } from '../../../provider/local-db/local-db.service';
+import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import * as moment from 'moment';
-import { PhotoViewComponent } from 'src/app/shared/photo-view/photo-view.component';
+import { CommonService } from 'src/app/provider/common/common.service';
+import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { CameraService } from 'src/app/provider/camera/camera.service';
+import { SignatureComponent } from 'src/app/shared/signature/signature.component';
+import { PhotoViewComponent } from 'src/app/shared/photo-view/photo-view.component';
+import { environment } from 'src/environments/environment';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { SpeechRecognition } from '@capacitor-community/speech-recognition';
+import { checklist, db } from '../../../provider/local-db/local-db.service';
 
 export type QuestionKind =
   | 'option'
@@ -410,9 +411,14 @@ const I18N_LABELS: Record<string, I18nLabels> = {
   templateUrl: './fill-report.component.html',
   styleUrls: ['./fill-report.component.scss'],
 })
-export class FillReportComponent implements OnInit, ViewWillEnter {
+export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
   @ViewChildren('a') private itemlist!: QueryList<ElementRef>;
   @ViewChild('videoFileInput') videoFileInput!: ElementRef<HTMLInputElement>;
+
+  /** All HTTP / rxjs subscriptions created during this page's life. Disposed on leave/destroy. */
+  private readonly activeSubs: Subscription[] = [];
+  /** All setTimeout handles so we can cancel them on leave/destroy. */
+  private readonly pendingTimers: any[] = [];
 
   /** Language picker — keeps template a single *ngFor */
   readonly uiLangs: { code: string; label: string }[] = [
@@ -435,21 +441,18 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   private applyingDbSnapshot = false;
   scheduleArr: any = [];
   schedule_id: any;
-  loading: any;
   remark: any;
   signatureBase64!: any;
   schedule_status: any;
-  sign_attachment: any;
   on_behalf: any;
   remarkErr = false;
-  arr: any = [];
-  selectedLanguage =  'en';
+  selectedLanguage = 'en';
   i18nLabels: I18nLabels = I18N_LABELS['en'];
   index: any;
   loop = false;
-  isInternet!:boolean;
+  isInternet = false;
   offline_save!: string;
-  userData: any = [];
+  userData: any = {};
   ticketMsg!: string;
   videoPreviewOpen = false;
   videoObjectUrl = '';
@@ -470,20 +473,16 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   ) { }
 
   ngOnInit() {
-    this.common.checkInternet().then((res) => {
-      this.isInternet = !!res;
+    this.common.checkInternet().then(online => {
+      this.isInternet = !!online;
     });
-    const user = localStorage.getItem('user');
-    if (user) {
-      this.userData = JSON.parse(user);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      this.userData = JSON.parse(storedUser);
     }
-    this.selectedLanguage = 'en';
-
     if (this.platform.is('capacitor')) {
       SpeechRecognition.checkPermissions().then(res => {
-        if (res.speechRecognition === 'granted') {
-          return
-        } else {
+        if (res.speechRecognition !== 'granted') {
           this.permission();
         }
       });
@@ -513,14 +512,16 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
       schedule_id: root.schedule_id ?? '',
       checklist_cat_id: root.checklist_cat_id ?? root.cat_id ?? '',
     };
-    this.httpDigital.getAutoFillData(payload).subscribe({
-      next: (res: any) => {
-        if (res?.status && Array.isArray(res.data) && res.data.length) {
-          this.applyAutoFillResponse(res.data);
-        }
-      },
-      error: () => { /* silent — leave checklist blank */ }
-    });
+    this.trackSub(
+      this.httpDigital.getAutoFillData(payload).subscribe({
+        next: (res: any) => {
+          if (res?.status && Array.isArray(res.data) && res.data.length) {
+            this.applyAutoFillResponse(res.data);
+          }
+        },
+        error: () => { /* silent — leave checklist blank */ }
+      })
+    );
   }
 
   private applyAutoFillResponse(data: Array<{ q_id: any; q_type: any; rspns: any; remark: any }>) {
@@ -570,7 +571,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
       this.applyingDbSnapshot = false;
       return;
     }
-    const data = await this.getScheuleFromLocal();
+    const data = await this.getScheduleFromLocal();
     this.applyChecklistSnapshotFromDexie(data);
   }
 
@@ -594,11 +595,13 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     this.remark = this.scheduleArr[0].final_remark;
     this.signatureBase64 = this.scheduleArr[0].base64_sign;
     this.offline_save = this.scheduleArr[0].offline_save;
-    this.ngZone.onStable.pipe(take(1)).subscribe(() => {
-      queueMicrotask(() => {
-        this.applyingDbSnapshot = false;
-      });
-    });
+    this.trackSub(
+      this.ngZone.onStable.pipe(take(1)).subscribe(() => {
+        queueMicrotask(() => {
+          this.applyingDbSnapshot = false;
+        });
+      })
+    );
   }
 
   /** After Dexie/liveQuery hydrate, match ion-radio temp so changeResponseAction does not treat it as a user change. */
@@ -644,18 +647,49 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     });
   }
 
-  async getScheuleFromLocal() {
-    return await db.checklist.where({schedule_id: this.schedule_id}).toArray();
+  async getScheduleFromLocal() {
+    return await db.checklist.where({ schedule_id: this.schedule_id }).toArray();
   }
 
   ionViewDidLeave() {
     this.loop = false;
     this.removeListen();
     this.closeVideoPreview();
-    const stop = async () => {
-      await TextToSpeech.stop();
-    };
-    stop();
+    this.disposeAll();
+    TextToSpeech.stop().catch(() => { /* safe noop */ });
+  }
+
+  ngOnDestroy() {
+    this.disposeAll();
+    this.closeVideoPreview();
+  }
+
+  /** Track an RxJS subscription so it gets torn down on leave/destroy. */
+  private trackSub(sub: Subscription): Subscription {
+    this.activeSubs.push(sub);
+    return sub;
+  }
+
+  /** Wrap setTimeout so the handle is cancelled automatically on leave/destroy. */
+  private scheduleTimer(fn: () => void, delayMs: number): any {
+    const id = setTimeout(() => {
+      this.pendingTimers.splice(this.pendingTimers.indexOf(id), 1);
+      fn();
+    }, delayMs);
+    this.pendingTimers.push(id);
+    return id;
+  }
+
+  private disposeAll() {
+    this.activeSubs.forEach(sub => {
+      if (sub && !sub.closed) {
+        sub.unsubscribe();
+      }
+    });
+    this.activeSubs.length = 0;
+
+    this.pendingTimers.forEach(id => clearTimeout(id));
+    this.pendingTimers.length = 0;
   }
 
   removeListen() {
@@ -663,8 +697,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   }
 
   permission() {
-    SpeechRecognition.requestPermissions().then(res => {
-    })
+    SpeechRecognition.requestPermissions().catch(() => { /* user denied */ });
   }
 
   /** Assigned checklist + not offline-locked */
@@ -785,11 +818,9 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   }
 
   clearQuestionHighlight() {
-    for (let i = 0; i < this.scheduleArr.length; i++) {
-      for (let j = 0; j < this.scheduleArr[i].qus.length; j++) {
-        this.scheduleArr[i].qus[j].bgcolor = false;
-      }
-    }
+    this.scheduleArr.forEach((row: any) => {
+      (row.qus || []).forEach((q: any) => { q.bgcolor = false; });
+    });
   }
 
   hasScalarAnswer(val: any): boolean {
@@ -975,19 +1006,21 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
         this.listenAction(val, voiceResponse);
       } else {
         this.common.presentLoading('Translate String to  English Language').then(preLoad => {
-          this.httpDigital.googleTranslate([voiceResponseTemp], 'en').subscribe({
-            next:(translateText) => {
-              voiceResponse = translateText.data.translations[0].translatedText;
-              this.listenAction(val, voiceResponse);
-            },
-            error:() => {
-              this.common.presentToast(environment.errMsg, 'danger');
-              this.common.dismissloading();
-            },
-            complete:() => {
-              this.common.dismissloading();
-            }
-          });
+          this.trackSub(
+            this.httpDigital.googleTranslate([voiceResponseTemp], 'en').subscribe({
+              next:(translateText) => {
+                voiceResponse = translateText.data.translations[0].translatedText;
+                this.listenAction(val, voiceResponse);
+              },
+              error:() => {
+                this.common.presentToast(environment.errMsg, 'danger');
+                this.common.dismissloading();
+              },
+              complete:() => {
+                this.common.dismissloading();
+              }
+            })
+          );
         });
       }
     });
@@ -1083,7 +1116,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     this.actionUpdateChecklist();
   }
 
-  actionUpdateChecklist(obj?: any) {
+  actionUpdateChecklist() {
     if (this.applyingDbSnapshot) {
       return;
     }
@@ -1152,7 +1185,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
       this.captureVideoForQuestion(val);
     } else {
       this.videoPickTarget = val;
-      setTimeout(() => this.videoFileInput?.nativeElement?.click(), 0);
+      this.scheduleTimer(() => this.videoFileInput?.nativeElement?.click(), 0);
     }
   }
 
@@ -1218,22 +1251,24 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
       formData.append('video', blob, fileName);
 
       val.video_uploading = true;
-      this.httpDigital.saveVideoResponse(formData).subscribe({
-        next: (data: any) => {
-          val.video_uploading = false;
-          if (data?.status) {
-            val.imagename = 'already_upload';
-            this.actionUpdateChecklist();
-            this.common.presentToast(data?.msg || 'Video uploaded successfully', 'success');
-          } else {
-            this.common.presentToast(data?.msg || 'Video upload failed, kept offline', 'warning');
+      this.trackSub(
+        this.httpDigital.saveVideoResponse(formData).subscribe({
+          next: (data: any) => {
+            val.video_uploading = false;
+            if (data?.status) {
+              val.imagename = 'already_upload';
+              this.actionUpdateChecklist();
+              this.common.presentToast(data?.msg || 'Video uploaded successfully', 'success');
+            } else {
+              this.common.presentToast(data?.msg || 'Video upload failed, kept offline', 'warning');
+            }
+          },
+          error: () => {
+            val.video_uploading = false;
+            this.common.presentToast('Video upload failed, will retry on submit', 'warning');
           }
-        },
-        error: () => {
-          val.video_uploading = false;
-          this.common.presentToast('Video upload failed, will retry on submit', 'warning');
-        }
-      });
+        })
+      );
     });
   }
 
@@ -1283,9 +1318,9 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
         q.rspns = q.q_value;
       }
     } else if (k === 'attachment' || k === 'video') {
-      if (q.options?.[0]?.optn_id != null) {
-        q.rspns = q.options[0].optn_id;
-      }
+      // Attachment/Video questions: the file itself is the answer, so send it under `rspns`
+      // and do NOT carry `imagename` (which is reserved for the optional extra IMG row on other types).
+      q.rspns = q.imagename;
     }
     const trimmed: any = {
       q_desc: q.q_desc,
@@ -1294,10 +1329,13 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
       question_type: q.question_type,
       cat_id: q.cat_id,
       q_max_score: q.q_max_score,
-      imagename: q.imagename,
       remark: q.remark,
       rspns: q.rspns,
     };
+    // Non file-type questions may still carry an optional extra attachment in `imagename`.
+    if (k !== 'attachment' && k !== 'video') {
+      trimmed.imagename = q.imagename;
+    }
     if (q.attach_ext != null) {
       trimmed.attach_ext = q.attach_ext;
     }
@@ -1315,7 +1353,8 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
         const currentKey = parentKey ? `${parentKey}[${key}]` : key;
         const randomBase = Date.now() + Math.floor(Math.random() * 90000) + 10000;
         if (value instanceof File || (value instanceof Blob && typeof value !== 'string')) {
-          const ext = key === 'imagename' && (data as any).attach_ext ? (data as any).attach_ext : '.jpg';
+          const isQuestionFileField = key === 'rspns' || key === 'imagename';
+          const ext = isQuestionFileField && (data as any).attach_ext ? (data as any).attach_ext : '.jpg';
           formData.append(currentKey, value, randomBase + ext);
         } else if (Array.isArray(value)) {
           value.forEach((arrayItem, index) => {
@@ -1333,34 +1372,32 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   }
 
   submitAction() {
-    this.scheduleArr[0].offline_save = 'false'
+    this.scheduleArr[0].offline_save = 'false';
     const payload = this.buildPayloadForFinalSubmit(this.scheduleArr[0]);
     const formData = this.convertToFormData(payload);
-    // formData.forEach((value, key) => {
-    //   const display = value instanceof Blob ? `[Blob type=${(value as Blob).type || 'n/a'} size=${value.size}]` : value;
-    //   console.log('[finalSubmit FormData]', key, display);
-    // });
     this.common.presentLoading().then(preLoad => {
-      this.httpDigital.finalSubmitCheckList(formData).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.common.presentToast(data.msg, 'success');
-            this.common.setHomeLoadStatus(true);
-            this.scheduleArr[0].schedule_status = 'attended'
-            this.actionUpdateChecklist();
-            this.navCtrl.pop();
-          } else {
-            this.common.presentToast(data.msg, 'warning');
+      this.trackSub(
+        this.httpDigital.finalSubmitCheckList(formData).subscribe({
+          next:(data) => {
+            if (data.status) {
+              this.common.presentToast(data.msg, 'success');
+              this.common.setHomeLoadStatus(true);
+              this.scheduleArr[0].schedule_status = 'attended'
+              this.actionUpdateChecklist();
+              this.navCtrl.pop();
+            } else {
+              this.common.presentToast(data.msg, 'warning');
+            }
+          },
+          error:() => {
+            this.common.dismissloading();
+            this.common.presentToast(environment.errMsg, 'danger');
+          },
+          complete:() => {
+            this.common.dismissloading();
           }
-        },
-        error:() => {
-          this.common.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.common.dismissloading();
-        }
-      });
+        })
+      );
     })
   }
 
@@ -1409,9 +1446,6 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
 
     if (!this.hasScalarAnswer(q)) {
       return fail(`Please fill answer for Question No ${index + 1}`, true);
-    }
-    if (k === 'number' && !this.isNumberInRange(q)) {
-      return fail(`Enter a valid value in allowed range for Question No ${index + 1}`);
     }
     if (q.options?.[0]) {
       q.rspns = q.options[0].optn_id;
@@ -1463,12 +1497,9 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   }
 
   scroll(indexFound: any) {
-    setTimeout(() => {
+    this.scheduleTimer(() => {
       const userToScrollOn: any = this.itemlist.toArray();
-      userToScrollOn[indexFound].nativeElement.scrollIntoView({
-        behavior: 'smooth'
-      }, (err: any) => {
-      });
+      userToScrollOn?.[indexFound]?.nativeElement?.scrollIntoView({ behavior: 'smooth' });
     }, 500);
   }
 
@@ -1515,41 +1546,46 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
   }
 
   private applyYesNoNaFromLabels() {
-    for (let i = 0; i < this.scheduleArr.length; i++) {
-      for (let j = 0; j < this.scheduleArr[i].qus.length; j++) {
-        const q = this.scheduleArr[i].qus[j];
+    this.scheduleArr.forEach((row: any) => {
+      (row.qus || []).forEach((q: any) => {
         if (!q.options?.length) {
-          continue;
+          return;
         }
         q.options.forEach((opt: any) => {
-          const ov = String(opt?.optn_value ?? '').toLowerCase();
-          if (ov === 'yes') opt.optn_desc = this.i18nLabels.yes;
-          else if (ov === 'no') opt.optn_desc = this.i18nLabels.no;
-          else if (ov === 'na') opt.optn_desc = this.i18nLabels.na;
+          const optionValue = String(opt?.optn_value ?? '').toLowerCase();
+          if (optionValue === 'yes') {
+            opt.optn_desc = this.i18nLabels.yes;
+          } else if (optionValue === 'no') {
+            opt.optn_desc = this.i18nLabels.no;
+          } else if (optionValue === 'na') {
+            opt.optn_desc = this.i18nLabels.na;
+          }
         });
-      }
-    }
+      });
+    });
   }
 
   translate(data: any, lang: string) {
     this.common.presentLoading().then(preLoad => {
-      this.httpDigital.googleTranslate(data, lang).subscribe({
-        next: (translateText) => {
-          for (let i = 0; i < this.scheduleArr.length; i++) {
-            for (let j = 0; j < this.scheduleArr[i].qus.length; j++) {
-              this.scheduleArr[i].qus[j].q_desc = translateText.data.translations[j].translatedText;
-            }
+      this.trackSub(
+        this.httpDigital.googleTranslate(data, lang).subscribe({
+          next: (translateText) => {
+            this.scheduleArr.forEach((row: any) => {
+              (row.qus || []).forEach((q: any, j: number) => {
+                q.q_desc = translateText.data.translations[j].translatedText;
+              });
+            });
+            this.selectedLanguage = lang;
+          },
+          error: () => {
+            this.common.dismissloading();
+            this.common.presentToast(environment.errMsg, 'warning');
+          },
+          complete: () => {
+            this.common.dismissloading();
           }
-          this.selectedLanguage = lang;
-        },
-        error: () => {
-          this.common.dismissloading();
-          this.common.presentToast(environment.errMsg, 'warning');
-        },
-        complete: () => {
-          this.common.dismissloading();
-        }
-      });
+        })
+      );
     });
   }
 
@@ -1570,29 +1606,16 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     const modal = await this.modalCtrl.create({
       component: PhotoViewComponent,
       cssClass: 'my-modal',
-      componentProps: {
-        blobFile: blob
-      }
-    });
-    modal.onWillDismiss().then(async disModal => {
-      if (disModal.role) {
-
-      }
+      componentProps: { blobFile: blob }
     });
     modal.present();
   }
 
 
   changeBackground(ind: any) {
-    for (var i = 0; i < this.scheduleArr.length;i++) {
-      for (var j = 0 ; j < this.scheduleArr[i].qus.length;j++) {
-        if (ind == j) {
-          this.scheduleArr[i].qus[j].bgcolor = true;
-        } else {
-          this.scheduleArr[i].qus[j].bgcolor = false;
-        }
-      }
-    }
+    this.scheduleArr.forEach((row: any) => {
+      (row.qus || []).forEach((q: any, j: number) => { q.bgcolor = j === ind; });
+    });
   }
 
   async presentAlertConfirm() {
@@ -1605,26 +1628,23 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
         type:'textarea',
         placeholder: 'Enter Remarks',
       }],
-      buttons: [{
-        text: 'Cancel',
-          handler: (data) => {
-          }
-        },{
+      buttons: [
+        { text: 'Cancel', handler: () => {} },
+        {
           text: 'Submit',
           handler: (dat) => {
-            if(dat.remark){
-              const obj = {
+            if (dat.remark) {
+              this.actionTicket({
                 source: environment.source,
                 remark: dat.remark,
-                schedule_id: this.schedule_id
-
-              }
-              this.actionTicket(obj);
+                schedule_id: this.schedule_id,
+              });
             } else {
               this.common.presentToast('Please Enter Remarks', 'warning');
             }
           }
-        }]
+        }
+      ]
     });
     await alert.present();
   }
@@ -1653,50 +1673,54 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
 
   actionComplaint(formData: any) {
     this.common.presentLoading().then(preLoad => {
-      this.httpComplaint.createTicketAction(formData).subscribe({
-        next:(data) => {
-          if (data.status) {
-            const fData = {
-              wo_id: this.scheduleArr[0].schedule_id,
-              ticketid: data.ticket_id
+      this.trackSub(
+        this.httpComplaint.createTicketAction(formData).subscribe({
+          next:(data) => {
+            if (data.status) {
+              const fData = {
+                wo_id: this.scheduleArr[0].schedule_id,
+                ticketid: data.ticket_id
+              }
+              this.ticketMsg = data.msg;
+              this.updateTicket(fData);
+            } else {
+              this.common.presentToast(data.msg, 'warning');
             }
-            this.ticketMsg = data.msg;
-            this.updateTicket(fData);
-          } else {
-            this.common.presentToast(data.msg, 'warning');
+          },
+          error:() => {
+            this.common.dismissloading();
+            this.common.presentToast(environment.errMsg, 'danger');
+          },
+          complete:() => {
+            this.common.dismissloading();
           }
-        },
-        error:() => {
-          this.common.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.common.dismissloading();
-        }
-      })
+        })
+      )
     })
   }
 
   updateTicket(formData: any) {
     this.common.presentLoading().then(preLoad => {
-      this.httpDigital.updateTktToSchedule(formData).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.scheduleArr[0].ticket_id = formData.ticketid;
-            this.actionUpdateChecklist();
-            this.common.presentToast(this.ticketMsg, 'success');
-          } else {
-            this.common.presentToast(data.msg, 'warning');
+      this.trackSub(
+        this.httpDigital.updateTktToSchedule(formData).subscribe({
+          next:(data) => {
+            if (data.status) {
+              this.scheduleArr[0].ticket_id = formData.ticketid;
+              this.actionUpdateChecklist();
+              this.common.presentToast(this.ticketMsg, 'success');
+            } else {
+              this.common.presentToast(data.msg, 'warning');
+            }
+          },
+          error:() => {
+            this.common.dismissloading();
+            this.common.presentToast(environment.errMsg + ' Err: Ticket Update API', 'danger');
+          },
+          complete:() => {
+            this.common.dismissloading();
           }
-        },
-        error:() => {
-          this.common.dismissloading();
-          this.common.presentToast(environment.errMsg + ' Err: Ticket Update API', 'danger');
-        },
-        complete:() => {
-          this.common.dismissloading();
-        }
-      });
+        })
+      );
     })
 
   }

@@ -39,14 +39,16 @@
     </ion-slides>
   </ion-toolbar>
   <ion-toolbar>
-    <ion-segment [(ngModel)]='segmentStatus'>
-      <ion-segment-button value="assigned">
-        <ion-label>Assigned(<ion-text color="danger">{{assignCheckList.length}}</ion-text>)</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="attended">
-        <ion-label>Attended(<ion-text color="danger">{{attendedCheckList.length}}</ion-text>)</ion-label>
-      </ion-segment-button>
-    </ion-segment>
+    <div class="segment-wrapper">
+      <ion-segment [(ngModel)]='segmentStatus'>
+        <ion-segment-button value="assigned">
+          <ion-label>Assigned(<ion-text color="danger">{{assignCheckList.length}}</ion-text>)</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="attended">
+          <ion-label>Attended(<ion-text color="danger">{{attendedCheckList.length}}</ion-text>)</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>    
   </ion-toolbar>
 </ion-header>
 
@@ -65,10 +67,11 @@
               <ion-icon name="checkbox-outline"></ion-icon>
             </div>
             <div class="checklist-card__info">
-              <h2 class="checklist-card__title">{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</h2>              
+              <h2 class="checklist-card__title">{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</h2>
               <p class="checklist-card__meta">
                 <ion-icon name="time-outline"></ion-icon>
                 {{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm'}}
+                <span *ngIf="dat.sch_endDateTime"> &ndash; {{dat.sch_endDateTime | date: 'H:mm'}}</span>
               </p>
               <p class="checklist-card__meta">
                 <ion-icon name="location-outline"></ion-icon>
@@ -78,7 +81,7 @@
                 <ion-icon name="barcode-outline"></ion-icon>
                 {{dat.barcode}}
               </p>
-              <ion-badge class="checklist-card__badge" *ngIf="shouldShowJustification(dat)" color="danger">Overdue</ion-badge>
+              <ion-badge class="checklist-card__badge" *ngIf="shouldShowJustification(dat)" color="danger">Missed</ion-badge>
               <ion-badge class="checklist-card__badge" *ngIf="!shouldShowJustification(dat)" color="success">Active</ion-badge>
             </div>
           </div>
@@ -110,6 +113,7 @@
               <p class="checklist-card__meta">
                 <ion-icon name="time-outline"></ion-icon>
                 {{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm'}}
+                <span *ngIf="dat.sch_endDateTime"> &ndash; {{dat.sch_endDateTime | date: 'H:mm'}}</span>
               </p>
               <p class="checklist-card__meta">
                 <ion-icon name="location-outline"></ion-icon>

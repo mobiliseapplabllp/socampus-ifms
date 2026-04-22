@@ -154,3 +154,30 @@
   font-weight: 600;
   font-size: 13px;
 }
+
+.segment-wrapper {
+  background: transparent;
+
+  ion-segment {
+    --background: transparent;
+    background: transparent;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  ion-segment-button {
+    --background: transparent;
+    --background-checked: var(--ion-color-primary);
+    --color: var(--ion-color-medium-tint, #b8b8b8);
+    --color-checked: #fff;
+    --indicator-color: var(--ion-color-primary);
+    --border-radius: 999px;
+    --padding-start: 18px;
+    --padding-end: 18px;
+    min-height: 38px;
+  }
+
+  ion-segment-button::part(indicator-background) {
+    border-radius: 999px;
+  }
+}

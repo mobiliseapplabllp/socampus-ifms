@@ -241,7 +241,7 @@
             (change)="changeRemark(val)"
             [disabled]="!isEditable(dat)"></ion-input>
           <ion-buttons slot="end" [hidden]="!isEditable(dat)" *ngIf="isInternet">
-            <ion-button slot="icon-only" (click)="listenCondition(val)" [disabled]="questionKind(val) !== 'option'" color="primary">
+            <ion-button slot="icon-only" (click)="listenCondition(val)" color="primary">
               <ion-icon name="mic-outline"></ion-icon>
             </ion-button>
           </ion-buttons>

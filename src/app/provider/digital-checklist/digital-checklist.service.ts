@@ -146,22 +146,22 @@ export class DigitalChecklistService {
 
   getAutoFillData(payload: { scheduler_id: any; schedule_id: any; checklist_cat_id: any }): Observable<any> {
     // TODO: replace dummy with real API once backend is ready
-    // return this.http.post(this.baseurl + 'digicheck/get_autofill_data', payload);
-    const dummy = {
-      status: true,
-      msg: 'data found',
-      // Attachment (q_type 225) and Video (q_type 315) are excluded — no auto-fill (neither rspns nor remark)
-      data: [
-        { q_id: 1445, q_type: '227', rspns: '42',                        remark: 'Auto-filled number remark'      },
-        { q_id: 1447, q_type: '226', rspns: 'Yes',                       remark: 'Auto-filled option remark'      },
-        { q_id: 1448, q_type: '229', rspns: '2026-04-20',                remark: 'Auto-filled date remark'        },
-        { q_id: 1449, q_type: '308', rspns: 'Sample short text answer',  remark: 'Auto-filled shorttext remark'   },
-        { q_id: 1450, q_type: '313', rspns: '2026-04-20T10:30:00',       remark: 'Auto-filled datetime remark'    },
-        { q_id: 1451, q_type: '314', rspns: '55',                        remark: 'Auto-filled temperature remark' },
-        { q_id: 1464, q_type: '308', rspns: 'Another short text answer', remark: 'Auto-filled remark'             },
-      ],
-    };
-    return of(dummy).pipe(delay(300));
+    return this.http.post(this.baseurl + 'digicheck/offlineapp/get_autofill_data', payload);
+    // const dummy = {
+    //   status: true,
+    //   msg: 'data found',
+    //   // Attachment (q_type 225) and Video (q_type 315) are excluded — no auto-fill (neither rspns nor remark)
+    //   data: [
+    //     { q_id: 1445, q_type: '227', rspns: '42',                        remark: 'Auto-filled number remark'      },
+    //     { q_id: 1447, q_type: '226', rspns: 'Yes',                       remark: 'Auto-filled option remark'      },
+    //     { q_id: 1448, q_type: '229', rspns: '2026-04-20',                remark: 'Auto-filled date remark'        },
+    //     { q_id: 1449, q_type: '308', rspns: 'Sample short text answer',  remark: 'Auto-filled shorttext remark'   },
+    //     { q_id: 1450, q_type: '313', rspns: '2026-04-20T10:30:00',       remark: 'Auto-filled datetime remark'    },
+    //     { q_id: 1451, q_type: '314', rspns: '55',                        remark: 'Auto-filled temperature remark' },
+    //     { q_id: 1464, q_type: '308', rspns: 'Another short text answer', remark: 'Auto-filled remark'             },
+    //   ],
+    // };
+    // return of(dummy).pipe(delay(300));
   }
 
 }

@@ -100,9 +100,9 @@ export class OfflineDataComponent  implements OnInit {
         q.rspns = q.q_value;
       }
     } else if (kind === 'attachment' || kind === 'video') {
-      if (q.options?.[0]?.optn_id != null) {
-        q.rspns = q.options[0].optn_id;
-      }
+      // Attachment/Video questions: the file itself is the answer, so send it under `rspns`
+      // and do NOT carry `imagename` (which is reserved for the optional extra IMG row on other types).
+      q.rspns = q.imagename;
     }
     const trimmed: any = {
       q_desc: q.q_desc,
@@ -111,10 +111,13 @@ export class OfflineDataComponent  implements OnInit {
       question_type: q.question_type,
       cat_id: q.cat_id,
       q_max_score: q.q_max_score,
-      imagename: q.imagename,
       remark: q.remark,
       rspns: q.rspns,
     };
+    // Non file-type questions may still carry an optional extra attachment in `imagename`.
+    if (kind !== 'attachment' && kind !== 'video') {
+      trimmed.imagename = q.imagename;
+    }
     if (q.attach_ext != null) {
       trimmed.attach_ext = q.attach_ext;
     }
@@ -184,7 +187,7 @@ export class OfflineDataComponent  implements OnInit {
     var output = selectedChecklist.map((item: any) => ({
       method: 'POST',
       url: environment.url + 'digicheck/offlineapp/saveAllPendingChecklist',
-      data: this.convertToFormData(item)
+      data: this.convertToFormData(this.buildPayloadForFinalSubmit(item))
     }));
     this.common.presentLoading().then(preLoad => {
       this.httpDigi.postDynamicData(output).subscribe({
@@ -239,7 +242,8 @@ export class OfflineDataComponent  implements OnInit {
         const currentKey = parentKey ? `${parentKey}[${key}]` : key;
         const randomBase = Date.now() + Math.floor(Math.random() * 90000) + 10000;
         if (value instanceof File || (value instanceof Blob && typeof value !== 'string')) {
-          const ext = key === 'imagename' && (data as any).attach_ext ? (data as any).attach_ext : '.jpg';
+          const isQuestionFileField = key === 'rspns' || key === 'imagename';
+          const ext = isQuestionFileField && (data as any).attach_ext ? (data as any).attach_ext : '.jpg';
           formData.append(currentKey, value, randomBase + ext);
         } else if (Array.isArray(value)) {
           value.forEach((arrayItem, index) => {

@@ -297,3 +297,25 @@ section.inputbox {
 //   ) !important;
 //   }
 // }
+
+.segment-wrapper {
+  background: var(--ion-color-primary);
+  padding: 4px 16px 12px;
+  ion-segment {
+    --background: rgba(255, 255, 255, 0.15);
+    border-radius: 25px;
+    min-height: 40px;
+    ion-segment-button {
+      --color: #ffffff;
+      --color-checked: var(--ion-color-primary);
+      --indicator-color: #ffffff;
+      --indicator-height: 100%;
+      --border-radius: 25px;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      min-height: 36px;
+      text-transform: none;
+    }
+  }
+}
