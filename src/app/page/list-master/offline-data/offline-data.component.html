@@ -26,27 +26,47 @@
   </ion-segment>
   <div [ngSwitch]='status'>
     <div *ngSwitchCase= "'dc'">
-      <!-- <ion-row *ngIf="checkListSelect.length > 0">
-        <ion-col class="ion-text-right">
-          <ion-button size="small" (click)="submitAllDc()">Submit All</ion-button>
-        </ion-col>
-      </ion-row> -->
-      <ion-card *ngFor="let dat of checkList" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
-        <ion-item lines="none" color="none">
-          <!-- <ion-avatar slot="start" class="center">
-            <div>
-              <ion-checkbox [(ngModel)]="dat.isSelect" (ionChange)="changeDc()"></ion-checkbox>
-            </div>
-          </ion-avatar> -->
-          <ion-label class="ion-text-wrap" (click)="openPageUrl(dat)">
-            <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
-            <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
-            <p><b>({{dat.loc_id}}){{dat.location_desc}}</b></p>
-            <p><b>{{dat.barcode}}</b></p>
-            <p><b>Filled Time {{dat.fill_date_time | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
-          </ion-label>
-          <ion-button slot="end" size="small" fill="outline" (click)="submitDc(dat)">Submit</ion-button>
-        </ion-item>
+      <div class="offline-empty" *ngIf="!checkList?.length">
+        <ion-icon name="cloud-done-outline"></ion-icon>
+        <p>No offline checklists pending</p>
+        <span>All your filled reports are synced with the server.</span>
+      </div>
+
+      <ion-card class="offline-card" *ngFor="let dat of checkList" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left-color': dat.backgroundColor }">
+        <div class="offline-card__body" (click)="openPageUrl(dat)">
+          <div class="offline-card__thumb">
+            <ion-icon name="cloud-offline-outline"></ion-icon>
+          </div>
+          <div class="offline-card__info">
+            <h2 class="offline-card__title">{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</h2>
+            <p class="offline-card__meta">
+              <ion-icon name="time-outline"></ion-icon>
+              {{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm'}}
+            </p>
+            <p class="offline-card__meta">
+              <ion-icon name="location-outline"></ion-icon>
+              ({{dat.loc_id}}) {{dat.location_desc}}
+            </p>
+            <p class="offline-card__meta" *ngIf="dat.barcode">
+              <ion-icon name="barcode-outline"></ion-icon>
+              {{dat.barcode}}
+            </p>
+            <p class="offline-card__meta offline-card__meta--filled" *ngIf="dat.fill_date_time">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              Filled {{dat.fill_date_time | date: 'dd-MMM-yyyy H:mm'}}
+            </p>
+            <ion-badge class="offline-card__badge" color="warning">
+              <ion-icon name="cloud-upload-outline"></ion-icon>
+              Pending Sync
+            </ion-badge>
+          </div>
+        </div>
+        <div class="offline-card__actions">
+          <ion-button expand="block" shape="round" color="primary" fill="solid" class="offline-card__btn" (click)="submitDc(dat)">
+            <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+            Submit to Server
+          </ion-button>
+        </div>
       </ion-card>
     </div>
     <div *ngSwitchCase= "'complaint'">

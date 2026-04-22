@@ -1090,7 +1090,7 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
 
   async captureVideoForQuestion(val: any) {
     try {
-      const options: CaptureVideoOptions = { limit: 1, quality: 0, duration: 120 };
+      const options: CaptureVideoOptions = { limit: 1, quality: 0, duration: 90 };
       const data: any = await this.mediaCapture.captureVideo(options);
       if (data?.[0]?.fullPath) {
         await this.loadVideoPathIntoQuestion(val, data[0].fullPath);
@@ -1133,10 +1133,47 @@ export class FillReportComponent implements OnInit, ViewWillEnter {
     }
     val.isNotFill = false;
     this.actionUpdateChecklist();
+    this.uploadVideoIfOnline(val, blob);
     this.repeatLoop();
   }
 
+  private uploadVideoIfOnline(val: any, blob: Blob) {
+    this.common.checkInternet().then((online) => {
+      if (!online) {
+        return;
+      }
+      const formData = new FormData();
+      formData.append('schedule_id', String(this.schedule_id));
+      formData.append('q_id', String(val.q_id));
+      formData.append('cat_id', String(val.cat_id));
+      const fileName = `${Date.now()}${val.attach_ext || '.mp4'}`;
+      formData.append('video', blob, fileName);
+
+      val.video_uploading = true;
+      this.httpDigital.saveVideoResponse(formData).subscribe({
+        next: (data: any) => {
+          val.video_uploading = false;
+          if (data?.status) {
+            val.imagename = 'already_upload';
+            this.actionUpdateChecklist();
+            this.common.presentToast(data?.msg || 'Video uploaded successfully', 'success');
+          } else {
+            this.common.presentToast(data?.msg || 'Video upload failed, kept offline', 'warning');
+          }
+        },
+        error: () => {
+          val.video_uploading = false;
+          this.common.presentToast('Video upload failed, will retry on submit', 'warning');
+        }
+      });
+    });
+  }
+
   viewAttachment(val: any) {
+    if (val.imagename === 'already_upload') {
+      this.common.presentToast('Video uploaded to server', 'success');
+      return;
+    }
     if (!(val.imagename instanceof Blob)) {
       this.viewDocs(val.imagename, val.imagename_blob_tyep);
       return;

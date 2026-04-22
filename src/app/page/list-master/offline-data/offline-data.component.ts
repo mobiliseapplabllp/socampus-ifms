@@ -45,7 +45,8 @@ export class OfflineDataComponent  implements OnInit {
   }
 
   submitDc(dat: any) {
-    const formData = this.convertToFormData(dat);
+    const payload = this.buildPayloadForFinalSubmit(dat);
+    const formData = this.convertToFormData(payload);
     this.common.presentLoading().then(preLoad => {
       this.httpDigital.finalSubmitCheckList(formData).subscribe({
         next:(data) => {
@@ -67,6 +68,74 @@ export class OfflineDataComponent  implements OnInit {
         }
       });
     });
+  }
+
+  private buildPayloadForFinalSubmit(root: any): any {
+    return {
+      schedule_id: root.schedule_id,
+      schedule_unique_id: root.schedule_unique_id,
+      pc_id: root.pc_id,
+      loc_id: root.loc_id,
+      chk_cat_id: root.chk_cat_id,
+      chk_cat_name: root.chk_cat_name,
+      schedule_date: root.schedule_date,
+      schedule_status: root.schedule_status,
+      offline_save: root.offline_save,
+      final_remark: root.final_remark,
+      base64_sign: root.base64_sign,
+      fill_date_time: root.fill_date_time,
+      submitted_date: root.submitted_date,
+      user: root.user,
+      barcode: root.barcode,
+      scheduler_id: root.scheduler_id,
+      ticket_id: root.ticket_id,
+      qus: (root.qus || []).map((q: any) => this.mapQuestionForSubmitPayload({ ...q })),
+    };
+  }
+
+  private mapQuestionForSubmitPayload(q: any): any {
+    const kind = this.inferQuestionKind(q);
+    if (kind === 'date' || kind === 'datetime' || kind === 'number' || kind === 'temperature' || kind === 'shorttext') {
+      if (q.q_value != null && q.q_value !== '') {
+        q.rspns = q.q_value;
+      }
+    } else if (kind === 'attachment' || kind === 'video') {
+      if (q.options?.[0]?.optn_id != null) {
+        q.rspns = q.options[0].optn_id;
+      }
+    }
+    const trimmed: any = {
+      q_desc: q.q_desc,
+      q_id: q.q_id,
+      q_type: q.q_type,
+      question_type: q.question_type,
+      cat_id: q.cat_id,
+      q_max_score: q.q_max_score,
+      imagename: q.imagename,
+      remark: q.remark,
+      rspns: q.rspns,
+    };
+    if (q.attach_ext != null) {
+      trimmed.attach_ext = q.attach_ext;
+    }
+    return trimmed;
+  }
+
+  private inferQuestionKind(val: any): string {
+    const t = (val?.question_type || '').toString().trim().toLowerCase();
+    if (t.includes('date time') || t.includes('datetime')) { return 'datetime'; }
+    if (t.includes('date')) { return 'date'; }
+    if (t.includes('video')) { return 'video'; }
+    if (t.includes('attachment')) { return 'attachment'; }
+    if (t.includes('temperature')) { return 'temperature'; }
+    if (t.includes('short text')) { return 'shorttext'; }
+    if (t.includes('decimal') || (t.includes('number') && !t.includes('phone'))) { return 'number'; }
+    if (t.includes('option')) { return 'option'; }
+    const map: Record<string, string> = {
+      '315': 'video', '225': 'attachment', '229': 'date', '313': 'datetime',
+      '316': 'number', '314': 'temperature', '308': 'shorttext', '226': 'option',
+    };
+    return map[String(val?.q_type ?? '')] ?? 'option';
   }
 
   async presentAlertConfirm() {
@@ -163,11 +232,15 @@ export class OfflineDataComponent  implements OnInit {
     formData = formData || new FormData();
     for (const key in data) {
       if (data.hasOwnProperty(key)) {
+        if (key === 'attach_ext') {
+          continue;
+        }
         const value = data[key];
         const currentKey = parentKey ? `${parentKey}[${key}]` : key;
-        let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+        const randomBase = Date.now() + Math.floor(Math.random() * 90000) + 10000;
         if (value instanceof File || (value instanceof Blob && typeof value !== 'string')) {
-          formData.append(currentKey, value, random);
+          const ext = key === 'imagename' && (data as any).attach_ext ? (data as any).attach_ext : '.jpg';
+          formData.append(currentKey, value, randomBase + ext);
         } else if (Array.isArray(value)) {
           value.forEach((arrayItem, index) => {
             const arrayItemKey = `${currentKey}[${index}]`;

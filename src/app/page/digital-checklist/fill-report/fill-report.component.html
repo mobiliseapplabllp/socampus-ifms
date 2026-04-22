@@ -44,12 +44,14 @@
           [color]="!val.imagename ? 'primary' : 'success'"
           [fill]="!val.imagename ? 'outline' : 'solid'"
           (click)="onDocPick(val, mode)"
+          [disabled]="mode === 'video' && val.video_uploading"
           [ngClass]="{ redBorder: docPickRedBorder(val, mode) }">
           {{ docPickLabel(mode) }}
-          <ion-icon [name]="val.imagename ? 'checkmark-done-outline' : docPickIconPending(mode)" slot="end"></ion-icon>
+          <ion-spinner *ngIf="mode === 'video' && val.video_uploading" name="crescent" slot="end" class="fill-report-btn-spinner"></ion-spinner>
+          <ion-icon *ngIf="!(mode === 'video' && val.video_uploading)" [name]="val.imagename ? 'checkmark-done-outline' : docPickIconPending(mode)" slot="end"></ion-icon>
         </ion-button>
       </div>
-      <div *ngIf="val.imagename" class="fill-report-doc-row__view">
+      <div *ngIf="val.imagename && mode !== 'video'" class="fill-report-doc-row__view">
         <ion-button color="danger" (click)="viewAttachment(val)" fill="clear" size="small">
           <ion-icon [name]="viewIconForDocMode(mode)" slot="icon-only"></ion-icon>
         </ion-button>

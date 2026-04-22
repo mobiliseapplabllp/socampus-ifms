@@ -71,6 +71,10 @@ export class DigitalChecklistService {
     // return this.http.post('https://aov.mhbemp.in/test_script/RFID.php', formData);
   }
 
+  saveVideoResponse(formData: any): Observable<any> {
+    return this.http.post(this.baseurl + 'digicheck/offlineapp/saveVideoResponse', formData);
+  }
+
   updateTktToSchedule(formData: any): Observable<any> {
     return this.http.post(this.baseurl + 'digicheck/update_raised_issued_schudled', formData);
   }
