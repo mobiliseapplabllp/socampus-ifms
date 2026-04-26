@@ -425,7 +425,7 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
       this.showFillTimeOverAlert(data);
       return;
     }
-    if (this.platform.is('capacitor') && (!this.scanBarcodeDetail.isScanBarcode || data.is_site_level == 0)) {
+    if (this.platform.is('capacitor') && (!this.scanBarcodeDetail.isScanBarcode && data.is_site_level == 0)) {
       this.qrType = data.barcode ? 'verify' : 'loc-verify';
       this.qrObject = data;
       this.router.navigateByUrl('/barcode');

@@ -102,7 +102,13 @@ export class OfflineDataComponent  implements OnInit {
     } else if (kind === 'attachment' || kind === 'video') {
       // Attachment/Video questions: the file itself is the answer, so send it under `rspns`
       // and do NOT carry `imagename` (which is reserved for the optional extra IMG row on other types).
-      q.rspns = q.imagename;
+      // If the file was already uploaded via saveVideoResponse, submit the server-returned filename
+      // instead of re-uploading the Blob.
+      if (q.uploaded_attachment) {
+        q.rspns = q.uploaded_attachment;
+      } else {
+        q.rspns = q.imagename;
+      }
     }
     const trimmed: any = {
       q_desc: q.q_desc,

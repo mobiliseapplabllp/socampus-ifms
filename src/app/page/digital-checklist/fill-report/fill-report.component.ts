@@ -1256,6 +1256,8 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
           next: (data: any) => {
             val.video_uploading = false;
             if (data?.status) {
+              // Server-side filename (e.g. "vid_57476_1452_..mp4") — sent as `rspns` on final submit.
+              val.uploaded_attachment = data?.data?.attachment || '';
               val.imagename = 'already_upload';
               this.actionUpdateChecklist();
               this.common.presentToast(data?.msg || 'Video uploaded successfully', 'success');
@@ -1320,7 +1322,13 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
     } else if (k === 'attachment' || k === 'video') {
       // Attachment/Video questions: the file itself is the answer, so send it under `rspns`
       // and do NOT carry `imagename` (which is reserved for the optional extra IMG row on other types).
-      q.rspns = q.imagename;
+      // If the file was already uploaded via saveVideoResponse, submit the server-returned filename
+      // instead of re-uploading the Blob.
+      if (q.uploaded_attachment) {
+        q.rspns = q.uploaded_attachment;
+      } else {
+        q.rspns = q.imagename;
+      }
     }
     const trimmed: any = {
       q_desc: q.q_desc,
