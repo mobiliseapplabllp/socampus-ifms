@@ -239,7 +239,7 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
     this.common.presentLoading().then(() => {
       this.subscribeOnceToDexie(
         () => db.checklist
-          .filter((row: any) => row.schedule_date === date || Number(row.is_no_expiry) === 1)
+          .filter((row: any) => row.schedule_date === date || (Number(row.is_no_expiry) === 1 && (row.schedule_status === 'assigned' || row.schedule_date === getToday())))
           .sortBy('sch_dateTime'),
         data => {
           this.common.dismissloading();
@@ -346,7 +346,7 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
   private reloadLocalView(date: string) {
     this.subscribeOnceToDexie(
       () => db.checklist
-        .filter((row: any) => row.schedule_date === date || Number(row.is_no_expiry) === 1)
+        .filter((row: any) => row.schedule_date === date || (Number(row.is_no_expiry) === 1 && (row.schedule_status === 'assigned' || row.schedule_date === getToday())))
         .sortBy('sch_dateTime'),
       data => {
         this.splitChecklistsForUser(data);
