@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, IonDatetime, IonSlides, ModalController, Platform } from '@ionic/angular';
+import { Capacitor } from '@capacitor/core';
 import * as moment from 'moment';
 import { liveQuery, Subscription as DexieSubscription } from 'dexie';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -36,6 +37,10 @@ const PAGE_SIZE = 10;
 const OLD_DATA_RETENTION_DAYS = 3;
 const FETCHED_DATES_KEY = 'digitalChecklistFetchedDates';
 
+// TEST: override applies only on web (browser). On native (Android/iOS), always uses real today.
+const TODAY_OVERRIDE: string | null = Capacitor.isNativePlatform() ? null : '2026-05-24';
+const getToday = (): string => TODAY_OVERRIDE ?? moment().format('YYYY-MM-DD');
+
 @Component({
   selector: 'app-digital-checklist',
   templateUrl: './digital-checklist.page.html',
@@ -46,8 +51,8 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
   @ViewChild('popoverDatetime') popoverDatetime!: IonDatetime;
 
   segmentStatus: SegmentStatus = 'assigned';
-  selectedDate = moment().format('YYYY-MM-DD');
-  today = moment().format('YYYY-MM-DD');
+  selectedDate = getToday();
+  today = getToday();
 
   assignCheckList: any[] = [];
   attendedCheckList: any[] = [];
@@ -96,8 +101,9 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
       this.userData = JSON.parse(storedUser);
     }
     this.common.setBarcode('');
-    const retentionCutoff = moment().subtract(OLD_DATA_RETENTION_DAYS, 'day').format('YYYY-MM-DD');
+    const retentionCutoff = moment(getToday()).subtract(OLD_DATA_RETENTION_DAYS, 'day').format('YYYY-MM-DD');
     this.pruneOldChecklists(retentionCutoff);
+    this.pruneOldFetchedDates();
     this.buildCalendarStrip(this.selectedDate);
   }
 
@@ -173,7 +179,7 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
   }
 
   private loadChecklistByBarcode(type: string, value: string) {
-    const todayDate = moment().format('YYYY-MM-DD');
+    const todayDate = getToday();
     let filter: () => Promise<any[]>;
 
     if (type === 'complaint-qr-code') {
@@ -344,7 +350,7 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
     await db.checklist
       .where('schedule_date')
       .below(beforeDate)
-      .filter((row: any) => Number(row.is_no_expiry) !== 1)
+      .filter((row: any) => Number(row.is_no_expiry) !== 1 && !row.offline_save)
       .delete();
   }
 
@@ -358,12 +364,12 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
   }
 
   private isDateFetchedToday(date: string): boolean {
-    return this.getFetchedDates()[date] === moment().format('YYYY-MM-DD');
+    return this.getFetchedDates()[date] === getToday();
   }
 
   private setFetchedDate(date: string) {
     const map = this.getFetchedDates();
-    map[date] = moment().format('YYYY-MM-DD');
+    map[date] = getToday();
     localStorage.setItem(FETCHED_DATES_KEY, JSON.stringify(map));
   }
 
@@ -371,6 +377,18 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
     const map = this.getFetchedDates();
     delete map[date];
     localStorage.setItem(FETCHED_DATES_KEY, JSON.stringify(map));
+  }
+
+  private pruneOldFetchedDates() {
+    const map = this.getFetchedDates();
+    const today = getToday();
+    const cleaned: Record<string, string> = {};
+    for (const date in map) {
+      if (map[date] === today) {
+        cleaned[date] = map[date];
+      }
+    }
+    localStorage.setItem(FETCHED_DATES_KEY, JSON.stringify(cleaned));
   }
 
   /**
@@ -394,7 +412,7 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
 
     this.assignCheckList = data.filter(row => row.schedule_status === 'assigned' && isAssignedToUser(row));
     this.attendedCheckList = data.filter(row => row.schedule_status !== 'assigned' && isAssignedToUser(row));
-
+    console.log(this.assignCheckList);
     if (sortAssigned) {
       this.assignCheckList.sort(
         (a, b) => new Date(a.sch_dateTime).getTime() - new Date(b.sch_dateTime).getTime(),
@@ -439,7 +457,7 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
     if (Number(item.is_no_expiry) === 1) {
       return false;
     }
-    if (item.schedule_date !== moment().format('YYYY-MM-DD')) {
+    if (item.schedule_date !== getToday()) {
       return true;
     }
     return moment().isAfter(moment(item.sch_endDateTime));
@@ -523,7 +541,7 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
     }
 
     const scheduleDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
-    if (moment().format('YYYY-MM-DD') !== scheduleDate) {
+    if (getToday() !== scheduleDate) {
       this.common.presentToast('You can fill only Current Date Checklist', 'warning');
       return;
     }

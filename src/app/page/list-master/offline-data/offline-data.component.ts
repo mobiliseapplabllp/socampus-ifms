@@ -180,6 +180,7 @@ export class OfflineDataComponent  implements OnInit {
   cleanDb() {
     this.common.presentToast('Digital Checklist is Reset', 'success');
     db.checklist.clear();
+    localStorage.removeItem('digitalChecklistFetchedDates');
     this.navCtrl.pop();
   }
 

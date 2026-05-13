@@ -38,6 +38,11 @@
     border-left-color: #e53935;
   }
 
+  &--offline {
+    background: linear-gradient(180deg, rgba(46, 204, 113, 0.08), #fff 50%);
+    border-color: rgba(46, 204, 113, 0.35);
+  }
+
   &--attended {
     cursor: pointer;
   }

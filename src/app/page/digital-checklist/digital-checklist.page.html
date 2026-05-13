@@ -61,7 +61,7 @@
   <div [ngSwitch]='segmentStatus'>
     <div *ngSwitchCase= "'assigned'" style="margin-bottom:5px">
       <ng-container *ngFor="let dat of assignCheckList; trackBy: trackByScheduleId">
-        <ion-card class="checklist-card" [ngClass]="{'bg-color': dat.offline_save, 'checklist-card--overdue': shouldShowJustification(dat)}" [ngStyle]="{'border-left-color': dat.backgroundColor }">
+        <ion-card class="checklist-card" [ngClass]="{'checklist-card--offline': dat.offline_save === 'true', 'checklist-card--overdue': shouldShowJustification(dat)}" [ngStyle]="{'border-left-color': dat.offline_save === 'true' ? '#2ecc71' : dat.backgroundColor }">
           <div class="checklist-card__body">
             <div class="checklist-card__thumb checklist-card__thumb--assigned" [class.checklist-card__thumb--overdue]="shouldShowJustification(dat)">
               <ion-icon name="checkbox-outline"></ion-icon>
