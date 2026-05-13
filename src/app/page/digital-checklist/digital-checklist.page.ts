@@ -311,9 +311,17 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
   }
 
   private async bulkSaveChecklistsToDexie(rows: any[]) {
-    await db.checklist.bulkPut(rows);
+    const isFirstPage = this.pagination.offset === 0;
+    const date = this.selectedDate;
+
+    await db.transaction('rw', db.checklist, async () => {
+      if (isFirstPage) {
+        await db.checklist.filter((row: any) => (row.schedule_date === date || Number(row.is_no_expiry) === 1) && !row.offline_save).delete();
+      }
+      await db.checklist.bulkPut(rows);
+    });    
     if (this.pagination.hasMore && this.pagination.total > PAGE_SIZE) {
-      this.pagination.offset += PAGE_SIZE;
+      this.pagination.offset += PAGE_SIZE;      
       this.fetchChecklistFromServer(this.selectedDate, this.pagination.offset);
     } else {
       this.loadChecklistForDate(this.selectedDate);
