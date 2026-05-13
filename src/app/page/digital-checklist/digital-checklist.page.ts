@@ -33,12 +33,12 @@ interface Pagination {
   hasMore: boolean;
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 300;
 const OLD_DATA_RETENTION_DAYS = 3;
 const FETCHED_DATES_KEY = 'digitalChecklistFetchedDates';
 
 // TEST: override applies only on web (browser). On native (Android/iOS), always uses real today.
-const TODAY_OVERRIDE: string | null = Capacitor.isNativePlatform() ? null : '2026-05-24';
+const TODAY_OVERRIDE: string | null = Capacitor.isNativePlatform() ? null : '2026-05-13';
 const getToday = (): string => TODAY_OVERRIDE ?? moment().format('YYYY-MM-DD');
 
 @Component({
@@ -324,7 +324,15 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
           )
           .delete();
       }
-      await db.checklist.bulkPut(rows);
+      const incomingIds = rows.map((r: any) => r.schedule_id).filter((id: any) => id != null);
+      const existing = incomingIds.length
+        ? await db.checklist.where('schedule_id').anyOf(incomingIds).toArray()
+        : [];
+      const existingIds = new Set(existing.map((r: any) => r.schedule_id));
+      const filteredRows = rows.filter((r: any) => !existingIds.has(r.schedule_id));
+      if (filteredRows.length) {
+        await db.checklist.bulkPut(filteredRows);
+      }
     });
     if (this.pagination.hasMore && this.pagination.total > PAGE_SIZE) {
       this.pagination.offset += PAGE_SIZE;
