@@ -230,11 +230,14 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
   private loadChecklistForDate(date: string) {
     this.common.presentLoading().then(() => {
       this.subscribeOnceToDexie(
-        () => db.checklist.where({ schedule_date: date }).sortBy('sch_dateTime'),
+        () => db.checklist
+          .filter((row: any) => row.schedule_date === date || Number(row.is_no_expiry) === 1)
+          .sortBy('sch_dateTime'),
         data => {
           this.common.dismissloading();
           this.splitChecklistsForUser(data);
-          if (data.length === 0 && this.isInternet) {
+          const dateMatchCount = data.filter((row: any) => row.schedule_date === date).length;
+          if (dateMatchCount === 0 && this.isInternet) {
             this.fetchChecklistFromServer(date, this.pagination.offset);
           }
         },
@@ -318,7 +321,11 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
   }
 
   private async pruneOldChecklists(beforeDate: string) {
-    await db.checklist.where('schedule_date').below(beforeDate).delete();
+    await db.checklist
+      .where('schedule_date')
+      .below(beforeDate)
+      .filter((row: any) => Number(row.is_no_expiry) !== 1)
+      .delete();
   }
 
   /**
@@ -384,6 +391,9 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
   }
 
   shouldShowJustification(item: any): boolean {
+    if (Number(item.is_no_expiry) === 1) {
+      return false;
+    }
     if (item.schedule_date !== moment().format('YYYY-MM-DD')) {
       return true;
     }
@@ -437,6 +447,9 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
   /** Returns true if this assigned checklist's sch_endDateTime has already passed. */
   private isFillTimeOver(data: any): boolean {
     if (!data || data.schedule_status !== 'assigned' || !data.sch_endDateTime) {
+      return false;
+    }
+    if (Number(data.is_no_expiry) === 1) {
       return false;
     }
     return moment().isAfter(moment(data.sch_endDateTime));

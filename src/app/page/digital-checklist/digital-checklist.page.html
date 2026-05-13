@@ -67,7 +67,10 @@
               <ion-icon name="checkbox-outline"></ion-icon>
             </div>
             <div class="checklist-card__info">
-              <h2 class="checklist-card__title">{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</h2>
+              <h2 class="checklist-card__title">
+                {{dat.schedule_unique_id}}/{{dat.chk_cat_name}}
+                <ion-icon *ngIf="+dat.is_no_expiry === 1" name="infinite-outline" color="tertiary" class="checklist-card__no-expiry-icon" title="No Expiry"></ion-icon>
+              </h2>
               <p class="checklist-card__meta">
                 <ion-icon name="time-outline"></ion-icon>
                 {{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm'}}
@@ -109,7 +112,10 @@
               <ion-icon name="checkmark-done-circle-outline"></ion-icon>
             </div>
             <div class="checklist-card__info">
-              <h2 class="checklist-card__title">{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</h2>
+              <h2 class="checklist-card__title">
+                {{dat.schedule_unique_id}}/{{dat.chk_cat_name}}
+                <ion-icon *ngIf="+dat.is_no_expiry === 1" name="infinite-outline" color="tertiary" class="checklist-card__no-expiry-icon" title="No Expiry"></ion-icon>
+              </h2>
               <p class="checklist-card__meta">
                 <ion-icon name="time-outline"></ion-icon>
                 {{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm'}}
