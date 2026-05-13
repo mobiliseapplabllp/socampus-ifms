@@ -16,7 +16,7 @@ export class DigitalChecklistService {
 
   getOfflineCheckListFromServer(date: string, offset: number = 0): Observable<any> {    
     const apiCall$ = this.http.get(
-      `${this.baseurl}digicheck/offlineapp/getAllPendingChecklist?date=${date}&paginate=1&limit=300&offset=${offset}`
+      `${this.baseurl}digicheck/offlineapp/getAllPendingChecklist?date=${date}&paginate=1&limit=10&offset=${offset}`
     );
     if (offset === 0) {
       return apiCall$.pipe(

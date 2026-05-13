@@ -32,8 +32,9 @@ interface Pagination {
   hasMore: boolean;
 }
 
-const PAGE_SIZE = 300;
+const PAGE_SIZE = 10;
 const OLD_DATA_RETENTION_DAYS = 3;
+const FETCHED_DATES_KEY = 'digitalChecklistFetchedDates';
 
 @Component({
   selector: 'app-digital-checklist',
@@ -216,6 +217,7 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
         }
         this.assignCheckList = [];
         this.attendedCheckList = [];
+        this.clearFetchedDate(this.selectedDate);
         this.common.presentLoading('Deleteing Data from Local Database').then(() => {
           db.checklist.where('schedule_date').equals(this.selectedDate).delete().then(() => {
             this.common.dismissloading();
@@ -237,8 +239,9 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
           this.common.dismissloading();
           this.splitChecklistsForUser(data);
           const dateMatchCount = data.filter((row: any) => row.schedule_date === date).length;
-          if (dateMatchCount === 0 && this.isInternet) {
-            this.fetchChecklistFromServer(date, this.pagination.offset);
+          if (dateMatchCount === 0 && this.isInternet && !this.isDateFetchedToday(date)) {
+            this.pagination = { offset: 0, total: 0, hasMore: false };
+            this.fetchChecklistFromServer(date, 0);
           }
         },
         () => {
@@ -264,10 +267,13 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
               this.bulkSaveChecklistsToDexie(incoming);
             } else {
               this.pagination.hasMore = false;
-              this.loadChecklistForDate(this.selectedDate);
+              this.setFetchedDate(date);
+              this.reloadLocalView(this.selectedDate);
             }
           } else {
-            this.reloadFromDexieAfterFailure(date);
+            this.pagination.hasMore = false;
+            this.setFetchedDate(date);
+            this.reloadLocalView(this.selectedDate);
           }
         },
         error: (err: any) => {
@@ -298,34 +304,40 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
     return `Please Wait, Application is Fetching your Data ${percent}%`;
   }
 
-  private reloadFromDexieAfterFailure(date: string) {
-    this.common.presentLoading().then(() => {
-      this.subscribeOnceToDexie(
-        () => db.checklist.where({ schedule_date: date }).sortBy('sch_dateTime'),
-        data => {
-          this.common.dismissloading();
-          this.splitChecklistsForUser(data, /*sortAssigned*/ false, /*strictIdMatch*/ true);
-        },
-      );
-    });
-  }
-
   private async bulkSaveChecklistsToDexie(rows: any[]) {
     const isFirstPage = this.pagination.offset === 0;
     const date = this.selectedDate;
 
     await db.transaction('rw', db.checklist, async () => {
       if (isFirstPage) {
-        await db.checklist.filter((row: any) => (row.schedule_date === date || Number(row.is_no_expiry) === 1) && !row.offline_save).delete();
+        await db.checklist
+          .filter((row: any) =>
+            (row.schedule_date === date || Number(row.is_no_expiry) === 1)
+            && row.schedule_status === 'assigned'
+            && !row.offline_save,
+          )
+          .delete();
       }
       await db.checklist.bulkPut(rows);
-    });    
+    });
     if (this.pagination.hasMore && this.pagination.total > PAGE_SIZE) {
-      this.pagination.offset += PAGE_SIZE;      
+      this.pagination.offset += PAGE_SIZE;
       this.fetchChecklistFromServer(this.selectedDate, this.pagination.offset);
     } else {
-      this.loadChecklistForDate(this.selectedDate);
+      this.setFetchedDate(date);
+      this.reloadLocalView(this.selectedDate);
     }
+  }
+
+  private reloadLocalView(date: string) {
+    this.subscribeOnceToDexie(
+      () => db.checklist
+        .filter((row: any) => row.schedule_date === date || Number(row.is_no_expiry) === 1)
+        .sortBy('sch_dateTime'),
+      data => {
+        this.splitChecklistsForUser(data);
+      },
+    );
   }
 
   private async pruneOldChecklists(beforeDate: string) {
@@ -334,6 +346,31 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
       .below(beforeDate)
       .filter((row: any) => Number(row.is_no_expiry) !== 1)
       .delete();
+  }
+
+  private getFetchedDates(): Record<string, string> {
+    try {
+      const raw = localStorage.getItem(FETCHED_DATES_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  private isDateFetchedToday(date: string): boolean {
+    return this.getFetchedDates()[date] === moment().format('YYYY-MM-DD');
+  }
+
+  private setFetchedDate(date: string) {
+    const map = this.getFetchedDates();
+    map[date] = moment().format('YYYY-MM-DD');
+    localStorage.setItem(FETCHED_DATES_KEY, JSON.stringify(map));
+  }
+
+  private clearFetchedDate(date: string) {
+    const map = this.getFetchedDates();
+    delete map[date];
+    localStorage.setItem(FETCHED_DATES_KEY, JSON.stringify(map));
   }
 
   /**
