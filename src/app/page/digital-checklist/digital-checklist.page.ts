@@ -134,6 +134,9 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
   }
 
   private handleScannedBarcode(barcode: string | null | undefined) {
+    if (!barcode) {
+      return;
+    }
     const parts = barcode?.split('/') || [];
     if (parts.length !== 6) {
       this.common.presentToast('You are Scan Wrong QR Code', 'warning');
@@ -531,19 +534,14 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
     const alert = await this.alertController.create({
       mode: 'ios',
       header: 'Fill time over',
-      message: `Aap is checklist ko ab fill nahi kar sakte. Last fill time was ${endTimeLabel}. Please submit justification.`,
+      message: `You can no longer fill this checklist. Last fill time was ${endTimeLabel}. Please submit justification.`,
       buttons: ['OK'],
     });
     await alert.present();
   }
 
   openFillReport(data: any) {
-    if (!this.platform.is('capacitor')) {
-      this.navigateToFillReport(data);
-      return;
-    }
-
-    if (data.schedule_status !== 'assigned') {
+    if (!this.platform.is('capacitor') || data.schedule_status !== 'assigned' || data.is_no_expiry ===1) {
       this.navigateToFillReport(data);
       return;
     }

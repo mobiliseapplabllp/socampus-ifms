@@ -93,9 +93,9 @@
   color: var(--ion-color-dark);
   margin: 0 0 6px 0;
   line-height: 1.25;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .checklist-card__no-expiry-icon {
