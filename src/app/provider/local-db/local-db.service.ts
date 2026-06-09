@@ -55,6 +55,16 @@ export class AppDB extends Dexie {
     this.version(11).stores({
       checklist: '++unique_id, schedule_id, schedule_date, offline_save, [schedule_date+assign_to]'
     });
+    // schedule_id becomes the primary key so that repeated syncs upsert the same row
+    // instead of inserting duplicates. Existing rows are dropped on upgrade (data is
+    // daily/temporary and the next sync repopulates) — this also avoids a
+    // ConstraintError that Dexie's default copy migration would hit for users whose
+    // v11 table currently contains duplicate schedule_id values.
+    this.version(12).stores({
+      checklist: 'schedule_id, schedule_date, offline_save, [schedule_date+assign_to]'
+    }).upgrade(async tx => {
+      await tx.table('checklist').clear();
+    });
   }
 
   clearChecklists() {

@@ -294,7 +294,7 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   async addBulkCheckList(checkListData: any) {
-    await db.checklist.bulkAdd(checkListData).then(res => {
+    await db.checklist.bulkPut(checkListData).then(res => {
       if (this.isLoop && this.TOTAL_CHECKLIST > 300) {
         this.offset = this.offset + 300;
         this.getOfflineCheckListFromServer(this.selected_date, this.offset);

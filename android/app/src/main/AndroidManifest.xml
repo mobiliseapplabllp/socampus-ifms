@@ -46,9 +46,17 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>        
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- Block broad media permissions auto-merged from Cordova plugins (media-capture,
+         file). These code paths aren't invoked at runtime in this app (e.g. the video
+         capture button is commented out), so removing them keeps the app compliant with
+         Google Play's Photo and Video Permissions policy. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"  tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"  tools:node="remove"/>
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"  android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />    
