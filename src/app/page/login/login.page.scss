@@ -35,3 +35,21 @@ ion-content {
   font-size:11px;
   font-weight: 530;
 }
+
+// Hidden by default; activated while an SSO in-app browser is open so the bottom 100px
+// of the screen is solid white behind the (translucent on iOS 26) browser toolbar.
+.sso-bottom-cover {
+  display: none;
+
+  &.active {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100px;
+    background: #ffffff;
+    z-index: 99999;
+  }
+}

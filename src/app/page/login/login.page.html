@@ -110,7 +110,7 @@
         </ion-card>
       </div>
     </div>
-    <div style="flex-shrink: 0;padding-left:40px;padding-right:40px">
+    <div style="flex-shrink: 0;padding-left:40px;padding-right:40px" [style.visibility]="ssoBrowserOpen ? 'hidden' : 'visible'">
       <div class="container">
         <div class="line"></div>
         <div class="text">Powered By</div>
@@ -123,5 +123,7 @@
       </ion-row>
     </div>
   </div>
+  <!-- Solid white strip behind the SSO browser's translucent toolbar so nothing bleeds through -->
+  <div class="sso-bottom-cover" [class.active]="ssoBrowserOpen"></div>
 </ion-content>
 

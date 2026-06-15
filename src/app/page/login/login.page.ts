@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingController, MenuController, ModalController, Platform } from '@ionic/angular';
@@ -45,6 +45,11 @@ export class LoginPage implements OnInit {
   isProduction = environment.isProd;
   appVersion!: string;
   isDateValid!: boolean;
+  // Shared options so every in-app browser (SSO) opens with a styled bottom bar
+  // (white background, "Done" close button, brand-coloured nav buttons).
+  private readonly iabOptions = 'location=no,zoom=yes,toolbarcolor=#ffffff,toolbartranslucent=no,closebuttoncaption=Done,closebuttoncolor=#283897,navigationbuttoncolor=#283897';
+  // True while an SSO in-app browser is open, so the login footer can hide behind its toolbar.
+  ssoBrowserOpen = false;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -54,6 +59,7 @@ export class LoginPage implements OnInit {
     private loginPro: LoginService,
     private common: CommonService,
     private iab: InAppBrowser,
+    private zone: NgZone,
     private camera: CameraService) {
     this.loginForms = this.formbuilder.group({
       userid: ['', Validators.required],
@@ -167,8 +173,18 @@ export class LoginPage implements OnInit {
     });
   }
 
+  // The translucent SSO toolbar (iOS 26) shows the app screen behind it, so the login page's
+  // "Powered By" footer bleeds through. Hide that footer while an SSO browser is open and
+  // restore it when the browser is closed (exit fires on Done and on programmatic close).
+  private openSsoBrowser(url: string) {
+    this.ssoBrowserOpen = true;
+    const browser = this.iab.create(url, '_blank', this.iabOptions);
+    browser.on('exit').subscribe(() => this.zone.run(() => { this.ssoBrowserOpen = false; }));
+    return browser;
+  }
+
   openInAppBrowser() {
-    let browser = this.iab.create(environment.ssoUrl + 'ssoGates/saml2/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let browser = this.openSsoBrowser(environment.ssoUrl + 'ssoGates/saml2/index.php?sso');
     let count = 0;
     browser.on('loadstart').subscribe((data: any) => {
       if (data.url.match(environment.ssoUrl + '#/auth/ssoGates/')) {
@@ -191,7 +207,7 @@ export class LoginPage implements OnInit {
   }
 
   openKeyClock() {
-    let browser = this.iab.create(environment.ssoUrl + 'ssoGates/saml3/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let browser = this.openSsoBrowser(environment.ssoUrl + 'ssoGates/saml3/index.php?sso');
     let count = 0;
     browser.on('loadstart').subscribe(data => {
       if (data.url.match(environment.ssoUrl + '#/auth/ssoGates/')) {
@@ -366,8 +382,8 @@ export class LoginPage implements OnInit {
     if (this.isProduction) {
       return;
     }
-    // https://socampusstaging.mobilisepro.com/#/auth/ssoGates/oMin5mlOvLH1tCaoBEbdN21nUmVDa0Rza2l5V2g2TUlhTm52OVFTbVBWY2lCRTJuelhoODVMVkdwT1NkN0VqQ1plQVRUZm5DTmJzOW9kRjU5Z2E1endaZ2huUi9IYU9uenZnUS8rNExoa1ZFb0NKNk1XZGdqOWlRRkVWK25SODE0U0FGd3NEQnFKYStyTWpC
-    let token = 'oMin5mlOvLH1tCaoBEbdN21nUmVDa0Rza2l5V2g2TUlhTm52OVFTbVBWY2lCRTJuelhoODVMVkdwT1NkN0VqQ1plQVRUZm5DTmJzOW9kRjU5Z2E1endaZ2huUi9IYU9uenZnUS8rNExoa1ZFb0NKNk1XZGdqOWlRRkVWK25SODE0U0FGd3NEQnFKYStyTWpC';
+    // https://socampus.mobilisepro.com/#/auth/ssoGates/jTJSPQaxD7wnjJkyicpSS3h4aFdkNWtvUmJQVG8wRy9YSW85OGZrcHBXMGErODY3Y0tHYmViM1kwQml0UWVMeklWdkdydjZSN3p0Z0dtbXl6K1lvdVNCdlhvbXBiOERxWUNRUEVMU3Z1TXVzbWFVQnd5K1VIS1RUSFNmdi9TREJ6SENWRzFlTDgvYitMWUZ4
+    let token = 'jTJSPQaxD7wnjJkyicpSS3h4aFdkNWtvUmJQVG8wRy9YSW85OGZrcHBXMGErODY3Y0tHYmViM1kwQml0UWVMeklWdkdydjZSN3p0Z0dtbXl6K1lvdVNCdlhvbXBiOERxWUNRUEVMU3Z1TXVzbWFVQnd5K1VIS1RUSFNmdi9TREJ6SENWRzFlTDgvYitMWUZ4';
     this.getSsoEnc(token);
   }
 }
