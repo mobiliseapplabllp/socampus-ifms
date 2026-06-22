@@ -27,6 +27,7 @@ export class OrderPackingModalComponent  implements OnInit {
   }
 
   ngOnInit() {
+    console.log(this.scanData);
     if (this.pack_type === '0' && (this.scanData.ttl_left_portion <= this.cambroData.size)) {
       this.qty = this.scanData.ttl_left_portion;
     } else {
@@ -107,29 +108,7 @@ export class OrderPackingModalComponent  implements OnInit {
 
     if (decimalIndex !== -1 && value.length - decimalIndex - 1 > 2) {
         this.qty = value.slice(0, decimalIndex + 2);
-    }
-    // let qty, cambroSize, remQty;
-    // qty = this.qty || null;
-    // cambroSize = this.cambroData.size;
-    // remQty = this.scanData.ttl_left_portion;
-    // // if (!qty) {
-    // //   this.qty = null;
-    // //   return
-    // // }
-    // console.log(typeof(qty));
-    // console.log(cambroSize);
-    // console.log(remQty);
-
-    // if (qty > remQty) {
-    //   this.qty = null;
-    //   this.common.presentToast(`You can't enter more than Remaining Qty (${remQty})`, 'warning');
-    //   return;
-    // }
-    // if (qty > cambroSize) {
-    //   this.qty = null
-    //   this.common.presentToast(`You can't enter more than Camro Size (${this.cambroData.size})`, 'warning');
-    //   return
-    // }
+    }    
   }
 
   async presentLoading() {

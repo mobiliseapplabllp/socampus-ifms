@@ -39,8 +39,7 @@ export class OrderPackingDetailComponent  implements OnInit {
 
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
-      this.requestedData = JSON.parse(res['data']);
-      console.log(this.requestedData);
+      this.requestedData = JSON.parse(res['data']);      
     });
     this.getDispathOrderDetail(this.requestedData.order_id);
     this.getPackingType();
@@ -70,6 +69,7 @@ export class OrderPackingDetailComponent  implements OnInit {
       this.common.setBarcode('');
       let decBarcode = this.common.decryptValue(bar);
       console.log(decBarcode);
+      decBarcode = '1008145241';
       const obj = this.cambroArr.filter((val: any) => val.ext_asset_id === decBarcode);
       if (obj.length > 0) {
         this.openModal(obj[0], '0', decBarcode)
@@ -80,35 +80,9 @@ export class OrderPackingDetailComponent  implements OnInit {
     }
   }
 
-  // getDecBarcode(enc_barcode: string) {
-  //   this.presentLoading().then(preLoad => {
-  //     this.httpAsset.getDecBarcode(enc_barcode).subscribe({
-  //       next:(data) => {
-  //         console.log(data);
-  //         if (data.status) {
-  //           let tempQR = data.data.text;
-  //           const obj = this.cambroArr.filter((val: any) => val.ext_asset_id === tempQR);
-  //           if (obj.length > 0) {
-  //             this.openModal(obj[0])
-  //           } else {
-  //             this.common.presentToast(`You are Scanning Wrong QR ${tempQR}`, 'warning')
-  //           }
-  //         } else {
-  //           this.common.presentToast(data.msg, 'warning');
-  //         }
-  //       },
-  //       error:() => {
-  //         this.dismissloading();
-  //         this.common.presentToast(environment.errMsg, 'danger');
-  //       },
-  //       complete:() => {
-  //         this.dismissloading();
-  //       }
-  //     })
-  //   })
-  // }
 
   async openModal(obj: Object, pack_type: any, pack_no: any, select_type?: string, type_id?: number) {
+    console.log(obj);
     const modal = await this.modalCtrl.create({
       component: OrderPackingModalComponent,
       cssClass: 'my-modal',
@@ -200,7 +174,9 @@ export class OrderPackingDetailComponent  implements OnInit {
               if(this.orderArr[i].is_packed) {
                 packQty = packQty + 1;
               }
+              this.orderArr[i].is_packed = false;
             }
+            
             this.basicDetails.packQty = packQty
             this.getCamroByPc(this.basicDetails.cpu_pc_id);
             this.getDriverByPc(this.basicDetails.pc_id);
