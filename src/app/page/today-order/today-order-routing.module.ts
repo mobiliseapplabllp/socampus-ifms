@@ -14,7 +14,6 @@ import { ReturnCmroDriverDetailComponent } from './return-cmro-driver-detail/ret
 import { OrderPackingComponent } from './order-packing/order-packing.component';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
 import { OrderPackingDetailComponent } from './order-packing-detail/order-packing-detail.component';
-import { OrderPackingModalComponent } from './order-packing-modal/order-packing-modal.component';
 import { CkmsDashboardComponent } from './ckms-dashboard/ckms-dashboard.component';
 
 const routes: Routes = [
@@ -57,9 +56,6 @@ const routes: Routes = [
   }, {
     path: 'order-pack-detail',
     component: OrderPackingDetailComponent
-  }, {
-    path: 'order-packing-modal',
-    component: OrderPackingModalComponent
   }, {
     path: 'ckms-dashboard',
     component: CkmsDashboardComponent

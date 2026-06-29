@@ -19,7 +19,6 @@ import { ReturnCmroDriverDetailComponent } from './return-cmro-driver-detail/ret
 import { OrderPackingComponent } from './order-packing/order-packing.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { OrderPackingDetailComponent } from './order-packing-detail/order-packing-detail.component';
-import { OrderPackingModalComponent } from './order-packing-modal/order-packing-modal.component';
 import { CkmsDashboardComponent } from './ckms-dashboard/ckms-dashboard.component';
 @NgModule({
   imports: [
@@ -43,7 +42,6 @@ import { CkmsDashboardComponent } from './ckms-dashboard/ckms-dashboard.componen
     ReturnCmroDriverDetailComponent,
     OrderPackingComponent,
     OrderPackingDetailComponent,
-    OrderPackingModalComponent,
     CkmsDashboardComponent
   ]
 })

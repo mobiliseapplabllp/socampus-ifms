@@ -72,9 +72,9 @@ export class OrderPackingModalComponent  implements OnInit {
         this.common.presentToast('Please Enter Identify Key', 'warning');
         return;
       }
+      obj.camro_box_id = this.type_id,
       obj.pack_no = this.identify_key,
-      obj.pack_type = '1',
-      obj.camro_box_id = this.type_id
+      obj.pack_type = '1'      
     } else {
       obj.camro_box_id = this.cambroData.cambro_id,
       obj.pack_no = this.pack_no,

@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ActionSheetController, LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
+import { ActionSheetController, AlertController, LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 import { environment } from 'src/environments/environment';
-import { OrderPackingModalComponent } from '../order-packing-modal/order-packing-modal.component';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 @Component({
   selector: 'app-order-packing-detail',
@@ -25,6 +24,14 @@ export class OrderPackingDetailComponent  implements OnInit {
   packCambro: any = {};
   isDriverModal = false;
   packTypeArr: any = [];
+  packingList: any[] = []; // all locally-collected pack entries, submitted at once on "Pack"
+  // WEB-ONLY testing: cycle through available cambros so multi-cambro scan can be tested.
+  // On Android/iOS the real scanned barcode is always used.
+  webTestCambros: string[] = [
+    '1008347809', '1008123212', '1008232123',
+    '1008432213', '1008232133', '1008145243'
+  ];
+  webCambroIndex = 0;
   constructor(
     private activeRoute: ActivatedRoute,
     private httpTo: TodayOrderService,
@@ -32,8 +39,8 @@ export class OrderPackingDetailComponent  implements OnInit {
     private common: CommonService,
     private actionSheetCtrl: ActionSheetController,
     private router: Router,
-    private modalCtrl: ModalController,
     private modal: ModalController,
+    private alertCtrl: AlertController,
     private navCtrl: NavController,
     private platform: Platform
   ) { }
@@ -69,41 +76,123 @@ export class OrderPackingDetailComponent  implements OnInit {
     if (bar) {
       this.common.setBarcode('');
       let decBarcode = this.common.decryptValue(bar);
-      console.log(decBarcode);
-      decBarcode = '1008145241';
+      if (!this.platform.is('capacitor')) {
+        // WEB testing only: return next available cambro so each scan differs
+        decBarcode = this.webTestCambros[this.webCambroIndex % this.webTestCambros.length];
+        this.webCambroIndex++;
+      }
       const obj = this.cambroArr.filter((val: any) => val.ext_asset_id === decBarcode);
       if (obj.length > 0) {
-        this.openModal(obj[0], '0', decBarcode)
+        // same cambro box can't be scanned twice for this order
+        const already = this.packingList.some((p: any) => p.pack_type === '0' && p.camro_box_id === obj[0].cambro_id);
+        if (already) {
+          this.common.presentToast(`This Cambro is already scanned (${decBarcode})`, 'warning');
+          return;
+        }
+        this.addCambroPack(obj[0]);
       } else {
-        this.common.presentToast(`You are Scanning Wrong QR ${decBarcode}`, 'warning')
+        this.common.presentToast(`You are Scanning Wrong QR ${decBarcode}`, 'warning');
       }
-      // this.getDecBarcode(bar);
     }
   }
 
 
-  async openModal(obj: Object, pack_type: any, pack_no: any, select_type?: string, type_id?: number) {
-    console.log(obj);
-    const modal = await this.modalCtrl.create({
-      component: OrderPackingModalComponent,
-      cssClass: 'my-modal',
-      backdropDismiss:false,
-      componentProps: {
-        scanData: this.scanData,
-        cambroData: obj,
-        pack_type: pack_type,
-        pack_no: pack_no,
-        select_type: select_type,
-        type_id: type_id
-      }
+  // Cambro flow: auto-fill the scanned box up to its size, save the entry
+  // locally, then reopen the scanner until the whole recipe qty is packed.
+  addCambroPack(cambro: any) {
+    const item = this.scanData;
+    if (!item) {
+      return;
+    }
+    const qty = Math.min(Number(item.ttl_left_portion), Number(cambro.size));
+    if (qty <= 0) {
+      return;
+    }
+    const entry = {
+      dispatch_qty: qty,
+      item_id: item.item_id,
+      order_id: item.order_id,
+      txn_id: item.txn_id,
+      pack_no: cambro.ext_asset_id,
+      pack_type: '0',
+      camro_box_id: cambro.cambro_id
+    };
+    this.applyLocalPacking(entry, '0');
+    // big recipe → reopen scanner for the next cambro
+    if (item.ttl_left_portion > 0) {
+      this.router.navigateByUrl('/barcode');
+    }
+  }
+
+  // Non-cambro flow: only ask for the identify key, pack the whole
+  // remaining qty of the item into this asset.
+  async promptIdentifyKey(item: any, selectedItem: any) {
+    const alert = await this.alertCtrl.create({
+      header: selectedItem.label,
+      message: 'Enter Identify Key',
+      backdropDismiss: false,
+      inputs: [{ name: 'identify_key', type: 'text', placeholder: 'Identify Key' }],
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Save',
+          handler: (val: any) => {
+            const key = (val.identify_key || '').trim();
+            if (!key) {
+              this.common.presentToast('Please Enter Identify Key', 'warning');
+              return false;
+            }
+            const entry = {
+              dispatch_qty: Number(item.ttl_left_portion),
+              item_id: item.item_id,
+              order_id: item.order_id,
+              txn_id: item.txn_id,
+              pack_no: key,
+              pack_type: '1',
+              camro_box_id: selectedItem.value
+            };
+            this.scanData = item;
+            this.applyLocalPacking(entry, '1', selectedItem.label);
+            return true;
+          }
+        }
+      ]
     });
-    modal.onWillDismiss().then((disModal: any) => {
-      console.log(disModal);
-      if (disModal.role == true) {
-        this.getDispathOrderDetail(this.requestedData.order_id);
-      }
+    await alert.present();
+  }
+
+  // Patch one pack entry into local state (no API call here). The full
+  // packingList is sent in a single request when "Pack" is clicked.
+  applyLocalPacking(entry: any, pack_type: any, select_type?: string) {
+    const item = this.scanData;
+    if (!item) {
+      return;
+    }
+    const qty = Number(entry.dispatch_qty) || 0;
+    this.packingList.push(entry);
+    // update remaining / packed on the item so UI reflects immediately
+    item.ttl_left_portion = Number(item.ttl_left_portion) - qty;
+    if (item.ttl_left_portion < 0) {
+      item.ttl_left_portion = 0;
+    }
+    item.total_cambro_packed = Number(item.total_cambro_packed || 0) + qty;
+    if (!item.qr_data) {
+      item.qr_data = [];
+    }
+    // chip + detail-modal data
+    item.qr_data.push({
+      dispatch_qty: qty,
+      uom: item.uom,
+      order_id: item.order_id,
+      key: pack_type === '0' ? 'Cambro Box' : select_type,
+      val: entry.pack_no
     });
-    modal.present();
+    // mark packed only when the whole recipe qty is packed
+    if (item.ttl_left_portion <= 0) {
+      item.is_packed = true;
+    }
+    // header "Packed Recipe x/total"
+    this.basicDetails.packQty = this.orderArr.filter((o: any) => o.is_packed).length;
   }
 
   setOpen(val: any, data: any, isOpen: boolean) {
@@ -132,8 +221,28 @@ export class OrderPackingDetailComponent  implements OnInit {
       this.common.presentToast('Please mention the temperature and pack all the receipe', 'warning');
       return
     }
+    // single array: one entry per item carrying its temperature + its packs
+    const items = this.orderArr
+      .map((o: any) => ({
+        txn_id: o.txn_id,
+        item_id: o.item_id,
+        temperature: o.temperature,
+        packs: this.packingList
+          .filter((p: any) => p.txn_id === o.txn_id)
+          .map((p: any) => ({
+            dispatch_qty: p.dispatch_qty,
+            pack_no: p.pack_no,
+            pack_type: p.pack_type,
+            camro_box_id: p.camro_box_id
+          }))
+      }))
+      .filter((it: any) => it.packs.length > 0 ||
+        (it.temperature !== '' && it.temperature !== null && it.temperature !== undefined));
     this.presentLoading().then(preLoad => {
-      const obj = [{order_id: this.requestedData.order_id}];
+      const obj = {
+        order_id: this.requestedData.order_id,
+        items: items
+      };
       this.httpTo.actionOrderPack(obj).subscribe({
         next:(data) => {
           console.log(data);
@@ -177,7 +286,8 @@ export class OrderPackingDetailComponent  implements OnInit {
               }
               if (!this.platform.is('capacitor')) {
                 this.orderArr[i].is_packed = false;
-              }              
+              }   
+              // this.orderArr[i].temperature = '10';           
             }            
             this.basicDetails.packQty = packQty
             this.getCamroByPc(this.basicDetails.cpu_pc_id);
@@ -206,33 +316,12 @@ export class OrderPackingDetailComponent  implements OnInit {
   }
 
   updateTemperature(dat: any) {
-    if (!dat.temperature) {
+    // No API call here — temperature is kept locally and submitted in one go on "Pack".
+    if (dat.temperature === '' || dat.temperature === null || dat.temperature === undefined) {
+      dat.is_temperature = false;
       return;
     }
-    const obj = {
-      temperature: dat.temperature,
-      txn_id: dat.txn_id
-    }
-    this.presentLoading().then(preLoad => {
-      this.httpTo.updateTemperature(obj).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.common.presentToast(data.msg, 'success');
-            dat.is_temperature = true
-          } else {
-            this.common.presentToast(data.msg, 'warning');
-            dat.is_temperature = false
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
-    });
+    dat.is_temperature = true;
   }
 
   getCamroByPc(pc_id: string) {
@@ -298,13 +387,12 @@ export class OrderPackingDetailComponent  implements OnInit {
   }
 
   handleButtonClick(selectedItem: any, data: any) {
-    console.log(selectedItem);
     if (selectedItem.value === 39) {
       this.scanData = data;
       this.router.navigateByUrl('/barcode');
     } else {
       this.scanData = data;
-      this.openModal(data, '1', '', selectedItem.label, selectedItem.value);
+      this.promptIdentifyKey(data, selectedItem);
     }
   }
 

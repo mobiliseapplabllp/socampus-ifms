@@ -49,7 +49,7 @@ export class TodayOrderService {
   }
 
   actionOrderPack(formData: any): Observable<any> {
-    return this.https.post(environment.url + 'meal/order/order_packed_', formData);
+    return this.https.post(environment.url + 'meal/order/order_packed', formData);
   }
 
   updateDriver(obj: Object): Observable<any> {
