@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ActionSheetController, LoadingController, ModalController, NavController } from '@ionic/angular';
+import { ActionSheetController, LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 import { environment } from 'src/environments/environment';
@@ -34,7 +34,8 @@ export class OrderPackingDetailComponent  implements OnInit {
     private router: Router,
     private modalCtrl: ModalController,
     private modal: ModalController,
-    private navCtrl: NavController
+    private navCtrl: NavController,
+    private platform: Platform
   ) { }
 
   ngOnInit() {
@@ -174,9 +175,10 @@ export class OrderPackingDetailComponent  implements OnInit {
               if(this.orderArr[i].is_packed) {
                 packQty = packQty + 1;
               }
-              this.orderArr[i].is_packed = false;
-            }
-            
+              if (!this.platform.is('capacitor')) {
+                this.orderArr[i].is_packed = false;
+              }              
+            }            
             this.basicDetails.packQty = packQty
             this.getCamroByPc(this.basicDetails.cpu_pc_id);
             this.getDriverByPc(this.basicDetails.pc_id);
