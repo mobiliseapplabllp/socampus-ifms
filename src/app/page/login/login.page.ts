@@ -259,7 +259,8 @@ export class LoginPage implements OnInit {
             }
           }
         },
-        error:() => {
+        error:(err: any) => {
+          console.log(err);
           this.common.presentToast(environment.errMsg, 'danger');
           this.dismissloading();
         },

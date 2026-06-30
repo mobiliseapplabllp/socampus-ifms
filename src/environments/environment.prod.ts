@@ -1,3 +1,4 @@
+// https://industry-043739c72da7.herokuapp.com/
 export const environment = {
   production: true,
   // url: 'https://apac-ad81b25ce966.herokuapp.com/https://socampusstaging.mobilisepro.com/be/api/',
@@ -6,8 +7,8 @@ export const environment = {
   // ssoUrl: 'https://socampusstaging.mobilisepro.com/',
   // referUrl: 'https://socampusstaging.mobilisepro.com/',
   // isProd: false,
-  url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/be/api/',
-  url1: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/',
+  url: 'https://industry-043739c72da7.herokuapp.com/https://socampus.mobilisepro.com/be/api/',
+  url1: 'https://industry-043739c72da7.herokuapp.com/https://socampus.mobilisepro.com/',
   url2: 'https://socampus.mobilisepro.com/',
   ssoUrl: 'https://socampus.mobilisepro.com/',
   referUrl: 'https://socampus.mobilisepro.com/',
