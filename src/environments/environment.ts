@@ -1,7 +1,7 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
-
+// https://industry-043739c72da7.herokuapp.com/
 export const environment = {
   production: false,
   // url: 'https://apac-ad81b25ce966.herokuapp.com/https://socampusstaging.mobilisepro.com/be/api/',
@@ -10,8 +10,8 @@ export const environment = {
   // ssoUrl: 'https://socampusstaging.mobilisepro.com/',
   // referUrl: 'https://socampusstaging.mobilisepro.com/',
   // isProd: false,
-  url: 'https://industry-043739c72da7.herokuapp.com/https://socampus.mobilisepro.com/be/api/',
-  url1: 'https://industry-043739c72da7.herokuapp.com/https://socampus.mobilisepro.com/',
+  url: 'https://socampus.mobilisepro.com/be/api/', // ios k liye abhi proxy server lagega
+  url1: 'https://socampus.mobilisepro.com/',
   url2: 'https://socampus.mobilisepro.com/',
   ssoUrl: 'https://socampus.mobilisepro.com/',
   referUrl: 'https://socampus.mobilisepro.com/',

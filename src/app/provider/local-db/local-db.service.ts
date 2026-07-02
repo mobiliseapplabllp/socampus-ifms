@@ -51,7 +51,7 @@ export interface checklist {
 export class AppDB extends Dexie {
   checklist!: Table<checklist, number>;
   constructor() {
-    super('ngdexieliveQuery_v1');
+    super('ngdexieliveQuery_v2');
     this.version(11).stores({
       checklist: '++unique_id, schedule_id, schedule_date, offline_save, [schedule_date+assign_to]'
     });
