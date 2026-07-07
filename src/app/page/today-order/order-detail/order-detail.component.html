@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title (click)="dummy()"> Order Detail</ion-title>
+    <ion-title> Order Detail</ion-title>
   </ion-toolbar>
 </ion-header>
 <ion-content>
@@ -13,22 +13,7 @@
     </ion-fab-button>
   </ion-fab>
   <ion-card class="topCard">
-    <ion-row>
-      <!-- <ion-col size="12">
-        <div>
-          <p>PC - ({{requestedData.pc_ext_id}}) {{requestedData.pc_desc}}</p>
-        </div>
-      </ion-col>
-      <ion-col size="6">
-        <div>
-          <p>ORD ID: {{requestedData.order_id}}</p>
-        </div>
-      </ion-col>
-      <ion-col size="6">
-        <div>
-          <p>Total Receipe: {{order_details.length}}</p>
-        </div>
-      </ion-col> -->
+    <ion-row>      
       <ion-col size="12">
         <ion-text color="light">PC</ion-text><br>
         <ion-text color="light">({{requestedData.pc_ext_id}}) {{requestedData.pc_desc}}</ion-text>
@@ -40,11 +25,7 @@
       <ion-col size="6">
         <ion-text color="light">Total Receipe</ion-text><br>
         <ion-text color="light">{{order_details.length}}</ion-text>
-      </ion-col>
-      <!-- <ion-col size="6">
-        <ion-text color="light">Expt Preparation Time</ion-text><br>
-        <ion-text color="light">{{requestedData.expected_preparation_time}}</ion-text>
-      </ion-col> -->
+      </ion-col>      
       <ion-col size="6">
         <ion-text color="light">Packed Time</ion-text><br>
         <ion-text color="light">{{requestedData.packed_time}}</ion-text>

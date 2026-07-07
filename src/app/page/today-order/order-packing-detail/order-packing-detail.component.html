@@ -12,19 +12,7 @@
       <ion-col size="6">
         <ion-text color="light">Order Id</ion-text><br>
         <ion-text color="light">{{basicDetails.order_id}}</ion-text>
-      </ion-col>
-      <!-- <ion-col size="6">
-        <ion-text color="light">Total Recipe</ion-text><br>
-        <ion-text color="light">{{basicDetails.total_items}}</ion-text>
-      </ion-col> -->
-      <!-- <ion-col size="6">
-        <ion-text color="light">Pickup Time</ion-text><br>
-        <ion-text color="light">{{basicDetails.dispatch_time}}</ion-text>
-      </ion-col> -->
-      <!-- <ion-col size="6">
-        <ion-text color="light">Dispatch Time </ion-text><br>
-        <ion-text color="light">{{basicDetails.site_dlvry_time}}</ion-text>
-      </ion-col> -->
+      </ion-col>      
       <ion-col size="6">
         <ion-text color="light">Packed Recipe</ion-text><br>
         <ion-text color="light">{{basicDetails.packQty}}/{{basicDetails.total_items}}</ion-text>
@@ -106,15 +94,7 @@
       <ion-row>
         <ion-col size="4">{{packCambro.key === 'Cambro Box' ? 'Barcode No': 'Identify Key'}}</ion-col>
         <ion-col> {{packCambro.val}}</ion-col>
-      </ion-row>
-      <!-- <ion-row *ngIf="!packCambro.subgrp_desc">
-        <ion-col size="4">Cambro No</ion-col>
-        <ion-col>{{packCambro.ext_asset_id}}({{packCambro.size}}{{packCambro.uom}})</ion-col>
-      </ion-row>
-      <ion-row *ngIf="packCambro.subgrp_desc">
-        <ion-col size="4">{{packCambro.subgrp_desc}}</ion-col>
-        <ion-col>{{packCambro.ext_asset_id}}</ion-col>
-      </ion-row> -->
+      </ion-row>     
       <ion-row>
         <ion-col size="4">Recipe</ion-col>
         <ion-col>{{packCambro.item_name}}</ion-col>

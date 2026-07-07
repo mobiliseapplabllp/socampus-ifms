@@ -48,68 +48,19 @@ export class OrderReceivedComponent  implements OnInit {
         this.updateArr[this.index1].data[this.index2].isReceivedEnable = true;
         this.updateArr[this.index1].data[this.index2].showErr = false;
         this.updateArr[this.index1].data[this.index2].received_qty = this.updateArr[this.index1].data[this.index2].dispatch_qty;
-        this.updateArr[this.index1].data[this.index2].isReceivedEnable = true;
-              //     this.order_details[this.index].isReceivedEnable = true;
-              // this.order_details[this.index].showErr = false;
-              // this.order_details[this.index].received_qty = this.order_details[this.index].dispatch_qty;
-              // this.order_details[this.index].isScan = true;
+        this.updateArr[this.index1].data[this.index2].isReceivedEnable = true;              
       } else {
         this.common.presentToast('You are scanning wrong QR Code ' + decBarcode, 'warning');
-      }
-      // if (this.platform.is('capacitor')) {
-      //   // this.getDecBarcode(bar)
-      //   let decBarcode = this.common.decryptValue(bar);
-      //   console.log(this.updateArr);
-      //   console.log(this.updateArr[this.index1][this.index2]);
-      // } else {
-      //   // this.order_details[this.index].isReceivedEnable = true;
-      //   // this.order_details[this.index].showErr = false;
-      //   // this.order_details[this.index].received_qty = this.order_details[this.index].dispatch_qty;
-      //   // this.order_details[this.index].isScan = true;
-      //   setTimeout(() => {
-      //     // this.order_details[this.index].isAutoFocus = true;
-      //   }, 100);
-      // }
+      }      
     }
   }
 
   getDecBarcode(enc_barcode: string) {
-    // this.presentLoading().then(preLoad => {
-    //   this.httpAsset.getDecBarcode(enc_barcode).subscribe({
-    //     next:(data) => {
-    //       console.log(data);
-    //       if (data.status) {
-    //         let barcode = data.data.text;
-    //         if (barcode === this.order_details[this.index].ext_asset_id) {
-    //           this.order_details[this.index].isReceivedEnable = true;
-    //           this.order_details[this.index].showErr = false;
-    //           this.order_details[this.index].received_qty = this.order_details[this.index].dispatch_qty;
-    //           this.order_details[this.index].isScan = true;
-    //           setTimeout(() => {
-    //             this.order_details[this.index].isAutoFocus = true;
-    //           }, 100);
-    //         } else {
-    //           this.common.presentToast('Your are Scanning wrong QR Code', 'warning');
-    //         }
-    //       } else {
-    //         this.common.presentToast(data.msg, 'warning');
-    //       }
-    //     },
-    //     error:() => {
-    //       this.dismissloading();
-    //       this.common.presentToast(environment.errMsg, 'danger');
-    //     },
-    //     complete:() => {
-    //       this.dismissloading();
-    //     }
-    //   })
-    // })
+   
   }
 
   ScanBarcode(i: number, j: number){
-
-    if (this.requestedData.ord_status === 9) {
-      // this.index = ind;
+    if (this.requestedData.ord_status === 9) {      
       console.log(i, j);
       this.index1 = i;
       this.index2 = j
@@ -273,9 +224,7 @@ export class OrderReceivedComponent  implements OnInit {
     if (dat.received_qty > dat.dispatch_qty) {
       this.common.presentToast(`You can't Receive more than Dispatch Qty ${dat.dispatch_qty}`, 'warning');
       return;
-    }
-    // console.log(dat);
-    // return;
+    }    
     this.presentLoading().then(preLoad => {
       this.httpTo.reciveOrder(dat).subscribe({
         next:(data) => {
@@ -325,6 +274,30 @@ export class OrderReceivedComponent  implements OnInit {
         }
       });
     })
-
   }
+
+  orderReached() {    
+    this.presentLoading().then(preLoad => {
+      this.httpTo.orderReached(this.requestedData.order_id).subscribe({
+        next:(res) => {
+          if (res.status) {
+            this.common.presentToast(res.msg,'success');
+            // ab order reached ho gaya -> status 9, list wala phase khol do
+            this.requestedData.ord_status = 9;
+            this.getOrderDetail();
+          } else {
+            this.common.presentToast(res.msg, 'warning')
+          }
+        },
+        error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.dismissloading();
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+  }
+
 }

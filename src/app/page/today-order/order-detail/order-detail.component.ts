@@ -74,11 +74,7 @@ export class OrderDetailComponent  implements OnInit {
           this.updateInLocalDb(this.index, 1);
         } else {
           this.common.presentToast('You are scan wrong QR Code ' + barcode, 'warning');
-        }
-        // console.log(barcode);
-        // console.log(this.index);
-        // console.log(this.order_details[this.index]);
-        // console.log(this.decQr)
+        }        
       }
 
     }

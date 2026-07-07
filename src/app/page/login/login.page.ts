@@ -119,7 +119,7 @@ export class LoginPage implements OnInit {
       if (isLogin) {
         const decrypt = JSON.parse(isLogin);
         this.login.userid = decrypt.userid;
-        // this.login.password = decrypt.password;
+        this.login.password = decrypt.password;
       }
     }
   }

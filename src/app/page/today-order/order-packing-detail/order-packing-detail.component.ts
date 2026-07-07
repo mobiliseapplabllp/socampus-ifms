@@ -26,7 +26,7 @@ export class OrderPackingDetailComponent  implements OnInit {
   // WEB-ONLY testing: cycle through available cambros so multi-cambro scan can be tested.
   // On Android/iOS the real scanned barcode is always used.
   webTestCambros: string[] = [
-    '1008347809', '1008123212', '1008232123',
+    '1019432523', '1008123212', '1008232123',
     '1008432213', '1008232133', '1008145243'
   ];
   webCambroIndex = 0;
@@ -115,6 +115,7 @@ export class OrderPackingDetailComponent  implements OnInit {
       qty = size;
     }
     if (qty <= 0) {
+      console.log('zero');
       return;
     }
 
@@ -314,9 +315,9 @@ export class OrderPackingDetailComponent  implements OnInit {
               if(this.orderArr[i].is_packed) {
                 packQty = packQty + 1;
               }
-              if (!this.platform.is('capacitor')) {
-                this.orderArr[i].is_packed = false;
-              }
+              // if (!this.platform.is('capacitor')) {
+              //   this.orderArr[i].is_packed = false;
+              // }
             }
             this.basicDetails.packQty = packQty
             this.getCamroByPc(this.basicDetails.cpu_pc_id);
