@@ -1,104 +1,239 @@
+/* ---------- Top summary card (light primary tint) ---------- */
+.details {
+  border-radius: 14px;
+  margin: 12px;
+  background: linear-gradient(135deg, #eef1fe, #e5ebff);
+  border: 1px solid rgba(13, 31, 154, 0.10);
+  box-shadow: 0 3px 12px rgba(13, 31, 154, 0.08);
 
-.topCard {
-  border-radius: 10px;
-  background:rgba(177, 0, 0, 0.70);
-  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.18);
-  ion-row {
-    ion-col {
-      div {
-        p {
-          margin:5px;
-          color: #FFF;
-          font-size: 14px;
-          font-style: normal;
-          font-weight: 550;
-          line-height: normal;
-        }
-        span {
-          margin:5px;
-          font-size:20px;
-          font-weight: 500;
-          color:#fff;
-          width:100%;
-          text-align: center;
-        }
-      }
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 10px;
+    padding: 16px;
+  }
+
+  .cell {
+    display: flex;
+    flex-direction: column;
+
+    &.full {
+      grid-column: 1 / -1;
+    }
+
+    .lbl {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(4, 14, 81, 0.55);
+      margin-bottom: 2px;
+    }
+    .val {
+      font-size: 16px;
+      font-weight: 700;
+      color: #040E51;
     }
   }
 }
 
-ion-row {
-  ion-col {
-    div {
-      p {
-        margin:0px;
-        color: #000;
-        font-size: 11px;
-        font-style: normal;
-        font-weight: 500;
+/* ---------- Recipe item cards ---------- */
+.item-card {
+  position: relative;
+  margin: 10px 12px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(13, 31, 154, 0.09);
+  overflow: hidden;
 
+  &__accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background: linear-gradient(180deg, #0D1F9A, #040E51);
+  }
+
+  &__body {
+    padding: 12px 14px 12px 20px;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .idx {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--ion-color-primary);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .name {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 700;
+      color: #040E51;
+      line-height: 1.2;
+    }
+    .veg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+  }
+
+  /* temperature row */
+  .temp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0 0 32px;
+
+    label {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+    }
+    ion-input {
+      width: 84px;
+      flex: none;
+      border: 1px solid rgba(0, 0, 0, 0.22);
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
+      --padding-top: 6px;
+      --padding-bottom: 6px;
+      min-height: 36px;
+    }
+    ion-button {
+      --border-radius: 8px;
+      height: 36px;
+      width: 40px;
+      margin: 0;
+    }
+  }
+
+  /* cambro sub-rows */
+  .cambro-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    margin: 12px 0 0 32px;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e4ee;
+
+    .cambro-info {
+      flex: 1;
+      min-width: 0;
+
+      .c-id {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #040E51;
+
+        ion-icon {
+          font-size: 14px;
+          color: #0D1F9A;
+        }
       }
-      span {
-        color: #000;
-        font-size: 10px;
-        font-style: normal;
-        font-weight: 500;
+      .c-qty {
+        font-size: 12px;
+        color: #777;
+      }
+    }
 
+    .recv-qty {
+      width: 84px;
+      flex-shrink: 0;
+
+      label {
+        display: block;
+        font-size: 10px;
+        font-weight: 600;
+        color: #777;
+        margin-bottom: 3px;
       }
       ion-input {
-        height:28px;
-        font-weight: 530;
-        font-size:12px;
-        border:0.5px solid #040E51;
-        margin:0px !important;
-        border-radius: 5px;
-        padding-left: 2px !important;
+        border: 1px solid rgba(0, 0, 0, 0.22);
+        border-radius: 8px;
+        font-size: 13px;
         text-align: center;
+        min-height: 36px;
+        --padding-top: 6px;
+        --padding-bottom: 6px;
+        background: rgba(0, 0, 0, 0.05);
+
+        &.on {
+          background: #fff;
+        }
       }
+    }
+
+    .recv-action {
+      flex-shrink: 0;
+
+      ion-button {
+        --border-radius: 8px;
+        height: 36px;
+        width: 40px;
+        margin: 0;
+      }
+    }
+
+    &.err {
+      border-radius: 8px;
+      outline: 1.5px solid var(--ion-color-danger);
+      outline-offset: 2px;
     }
   }
 }
-// p {
-//   margin:0px;
-//   font-size:12px;
-//   line-height: 15px;
-// }
 
-ion-row {
-  border-bottom: 1px solid rgb(177, 173, 173);
-}
-
-.err {
-  border:1px solid red;
-}
-
+/* ---------- Reach-on-site CTA (phase 1) ---------- */
 .receiveCta {
-  margin: 32px 16px;
-  padding: 28px 20px;
-  border-radius: 12px;
+  margin: 28px 16px;
+  padding: 30px 20px;
+  border-radius: 14px;
   background: #fff;
-  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 12px rgba(13, 31, 154, 0.09);
   text-align: center;
 
   ion-icon {
-    font-size: 56px;
+    font-size: 58px;
     color: var(--ion-color-primary);
   }
   h3 {
-    margin: 12px 0 6px;
+    margin: 14px 0 6px;
     font-size: 17px;
     font-weight: 700;
     color: #040E51;
   }
   p {
-    margin: 0 0 20px;
+    margin: 0 0 22px;
     font-size: 13px;
     color: #555;
-    line-height: 1.4;
+    line-height: 1.45;
   }
   ion-button {
-    --border-radius: 8px;
-    height: 46px;
+    --border-radius: 10px;
+    height: 48px;
     font-weight: 600;
   }
+}
+
+/* ---------- Footer submit ---------- */
+ion-footer ion-button {
+  --border-radius: 10px;
+  height: 46px;
+  font-weight: 600;
 }

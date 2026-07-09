@@ -23,29 +23,34 @@
     </ion-slide>
   </ion-slides>
 
-  <ion-card *ngFor="let dat of packingArr" class="cards">
-    <ion-row>
-      <ion-col size="1" class="ion-text-center">
-        <div style="height:100%;width:5px;border-radius: 5px;background-color: #040E51; margin:auto"></div>
-      </ion-col>
-      <ion-col size="6" style="display: flex;align-items: center;">
-        <div>
-          <p><ion-text class="key">Order ID: </ion-text> <ion-text class="value">{{dat.order_id}}</ion-text> </p>
-          <p><ion-text class="key">Type: </ion-text> <ion-text class="value">{{dat.type_desc | uppercase}}</ion-text>   </p>
-          <p><ion-text class="key">PC Id:</ion-text> <ion-text class="value">{{dat.pc_id}}-{{dat.pc_desc}}</ion-text> </p>
-        </div>
-      </ion-col>
-      <ion-col size="5" style="display: flex;align-items: center;">
-        <div>
-          <ion-button size="small" class="ion-text-capitalize" color="success" (click)="openPage(dat)">View Items <ion-icon name="arrow-forward-outline" slot="end"></ion-icon> </ion-button>
-        </div>
-        <!-- <div>
-          <p><ion-text class="key">Excepted Dispatch Time</ion-text> <ion-text class="value">{{dat.expected_dispatch_time}}</ion-text> </p>
-          <p><ion-text class="key">Expected Packing Time: </ion-text> <ion-text class="value">{{dat.expected_packing_time | uppercase}}</ion-text>   </p>
-          <p><ion-text class="key">Expected Preparation Time:</ion-text> <ion-text class="value">{{dat.expected_preparation_time}}</ion-text> </p>
-        </div> -->
-      </ion-col>
-    </ion-row>
+  <ion-card *ngFor="let dat of packingArr" class="order-card" (click)="openPage(dat)">
+    <div class="order-card__accent"></div>
+    <div class="order-card__body">
+      <div class="order-card__head">
+        <div class="order-id"><span class="hash">#</span>{{dat.order_id}}</div>
+        <span class="type-chip" *ngIf="dat.type_desc">{{dat.type_desc | uppercase}}</span>
+      </div>
+
+      <div class="order-card__pc">
+        <ion-icon name="location-outline"></ion-icon>
+        <span>{{dat.pc_id}} · {{dat.pc_desc}}</span>
+      </div>
+
+      <div class="order-card__meta" *ngIf="dat.expected_packing_time || dat.expected_dispatch_time">
+        <span class="meta" *ngIf="dat.expected_packing_time">
+          <ion-icon name="cube-outline"></ion-icon> Pack {{dat.expected_packing_time}}
+        </span>
+        <span class="meta" *ngIf="dat.expected_dispatch_time">
+          <ion-icon name="car-outline"></ion-icon> Dispatch {{dat.expected_dispatch_time}}
+        </span>
+      </div>
+
+      <div class="order-card__foot">
+        <ion-button size="small" fill="solid" class="view-btn ion-text-capitalize" (click)="openPage(dat); $event.stopPropagation()">
+          View Items <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
   </ion-card>
 
   <div *ngIf="packingArr.length === 0 && isApiHit" style="padding-top:100px">

@@ -11,3 +11,195 @@ p {
   --border-radius: 20px !important;
 
 }
+
+/* ---------- Order card (matches order-packing list design) ---------- */
+.order-card {
+  position: relative;
+  margin: 12px 12px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(13, 31, 154, 0.09);
+  overflow: hidden;
+
+  &__accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background: linear-gradient(180deg, #0D1F9A, #040E51);
+  }
+
+  &__body {
+    padding: 14px 14px 12px 20px;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .order-id {
+    font-size: 20px;
+    font-weight: 700;
+    color: #040E51;
+    line-height: 1;
+
+    .hash {
+      opacity: 0.45;
+      font-weight: 600;
+      margin-right: 1px;
+    }
+  }
+
+  .type-chip {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: #0D1F9A;
+    background: rgba(13, 31, 154, 0.10);
+    padding: 4px 11px;
+    border-radius: 20px;
+  }
+
+  &__pc {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #3a3a48;
+    font-size: 13px;
+    font-weight: 500;
+
+    ion-icon {
+      font-size: 16px;
+      color: #0D1F9A;
+      flex-shrink: 0;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+
+    .meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #555;
+      background: #f2f3f9;
+      padding: 4px 9px;
+      border-radius: 8px;
+
+      ion-icon {
+        font-size: 14px;
+        color: #0D1F9A;
+      }
+      b {
+        color: #040E51;
+        font-weight: 700;
+      }
+      .ok {
+        color: #2dbd6e;
+      }
+    }
+
+    .status-chip {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      /* default / unknown status */
+      color: #5a6070;
+      background: #eceef3;
+
+      /* Ready / Packing (5) - blue */
+      &.st-5 {
+        color: #2b45c4;
+        background: #dbe4ff;
+      }
+      /* Order Dispatch (6) - orange */
+      &.st-6 {
+        color: #a85700;
+        background: #ffe3c2;
+      }
+      /* Reached on site (9) - green */
+      &.st-9 {
+        color: #0f7a3d;
+        background: #d6f5e3;
+      }
+    }
+  }
+
+  &__driver {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0D1F9A;
+    cursor: pointer;
+
+    ion-icon {
+      font-size: 16px;
+    }
+    span {
+      text-decoration: underline;
+    }
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+
+    .icon-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-right: auto;
+
+      a {
+        line-height: 0;
+      }
+      ion-button {
+        --padding-start: 6px;
+        --padding-end: 6px;
+        margin: 0;
+      }
+    }
+
+    .view-btn {
+      --background: #2dd36f;
+      --background-activated: #28ba62;
+      --border-radius: 9px;
+      --box-shadow: 0 3px 8px rgba(45, 211, 111, 0.35);
+      --padding-start: 14px;
+      --padding-end: 14px;
+      height: 36px;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .challan-btn {
+      --border-radius: 9px;
+      --border-color: rgba(13, 31, 154, 0.4);
+      --color: #0D1F9A;
+      height: 36px;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0;
+    }
+  }
+}

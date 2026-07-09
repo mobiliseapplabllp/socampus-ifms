@@ -315,6 +315,10 @@ export class OrderPackingDetailComponent  implements OnInit {
               if(this.orderArr[i].is_packed) {
                 packQty = packQty + 1;
               }
+              // server ab default temperature bhej raha hai -> agar value already hai
+              // to use valid maano (warna submit block ho jaata hai)
+              const temp = this.orderArr[i].temperature;
+              this.orderArr[i].is_temperature = temp !== '' && temp !== null && temp !== undefined;
               // if (!this.platform.is('capacitor')) {
               //   this.orderArr[i].is_packed = false;
               // }

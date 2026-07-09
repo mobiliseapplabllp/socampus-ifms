@@ -139,7 +139,7 @@ export class TodayOrderPage implements OnInit {
         next:(data) => {
           console.log(data);
           if (data.status) {
-            this.common.openDoc(data.url);
+            this.common.openImg(data.data.url, data.data.blob_type);
           } else {
             this.common.presentToast(data.msg, 'warning');
           }

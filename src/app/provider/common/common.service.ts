@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
-import { ToastController } from '@ionic/angular';
+import { LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { Network } from '@capacitor/network';
 import * as CryptoJS from 'crypto-js';
 import { environment } from 'src/environments/environment';
 import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { ImageViewComponent } from 'src/app/shared/image-view/image-view.component';
+import { PdfViewComponent } from 'src/app/shared/pdf-view/pdf-view.component';
 @Injectable({
   providedIn: 'root'
 })
@@ -12,8 +15,12 @@ export class CommonService {
   public barcode!: string;
   private isHomeLoad = new BehaviorSubject(true);
   public appVersion = new BehaviorSubject([]);
+  loading: any;
   constructor(
-    private toastController: ToastController
+    private toastController: ToastController,
+    private loadingController: LoadingController,
+    private http: HttpClient,
+    private modalCtrl: ModalController
   ) { }
 
   setHomeLoadStatus(value: boolean) {
@@ -71,6 +78,81 @@ export class CommonService {
       window.open(url, '_system', 'location=no,zoom=yes');
     } else {
       window.open(url, '_blank', 'location=no,zoom=yes');
+    }
+  }
+
+  setImageCondition(url: string, type: string, blobType?: string) {
+    // type httpurl, blob;
+    if (type === 'blob') {
+      this.openImg(url, blobType || 'PRIVATE');
+    } else {
+      this.openDoc(url)
+    }
+  }
+
+  openImg(url: string, blobType: string) {
+    const formData = new FormData();
+    formData.append('url', url);
+    formData.append('blob_name', blobType || ' ');
+    this.presentLoading().then(preLoad => {
+      this.http.post(environment.url + 'blob-url', formData).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            const filePath = data.name
+            const extension = filePath.split('.').pop();
+            if (extension === 'pdf') {
+              this.pdfView('data:application/pdf;base64,' + data.base64);
+            } else {
+              this.imageView('data:' + data.contentType + ';base64,' + data.base64, null);
+            }
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      });
+    });
+  }
+
+  async pdfView(pdfSrc: string) {
+    const modal = await this.modalCtrl.create({
+      component: PdfViewComponent,
+      componentProps: {
+        pdfSrc: pdfSrc,
+      }
+    });
+    modal.present();
+  }
+
+  async imageView(base64: any, blob: any) {
+    const modal = await this.modalCtrl.create({
+      component: ImageViewComponent,
+      backdropDismiss: false,
+      componentProps: {
+        base64: base64,
+        blob: blob
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+
+    });
+    return await modal.present();
+  }
+
+  async presentLoading(msg?: string) {
+    this.loading = await this.loadingController.create({
+      message: msg ? msg : 'Please Wait...',
+    });
+    await this.loading.present();
+  }
+
+  dismissloading() {
+    if (this.loading) {
+      this.loading.dismiss();
     }
   }
 

@@ -11,43 +11,59 @@
 </ion-header>
 
 <ion-content>
-  <ion-card *ngFor="let dat of todayOrder" style="box-shadow: none;background-color:#0D1F9A0D;border-radius: 10px;margin: 10px;padding:10px">
-    <ion-row>
-      <ion-col size="1" class="ion-text-center">
-        <div style="height:100%;width:5px;border-radius: 5px;background-color: #040E51; margin:auto"></div>
-      </ion-col>
-      <ion-col size="6" style="display: flex;align-items: center;">
-        <div>
-          <p>ORD ID: {{dat.order_id}}</p>
-          <p>Type: {{dat.type_desc}} </p>
-          <p>PC Name: {{dat.pc_desc}} </p>
-          <p *ngIf="id === '2'">No of Boxes: <span style="color:green">{{dat.rec_camro_box}}</span>/{{dat.total_camro_box}} </p>
-          <p *ngIf="id === '1'">No of Boxes: {{dat.total_camro_box}} </p>
-          <p *ngIf="id === '2'" (click)="openDriverModal(dat)"><u>Driver Detail</u></p>
-          <p>{{dat.order_status_label}} </p> <!--- {{dat.ord_status}}-->
-        </div>
-      </ion-col>
-      <ion-col size="5" style="display: flex;align-items: center;">
-        <div class="ion-text-right">
-          <p>PC: {{dat.pc_ext_id}} </p>
-          <ion-button class="ion-text-capitalize" *ngIf="id !== '1'" size="small" expand="block" (click)="viewBox(dat)" style="--border-radius: 10px;--background:rgba(177, 0, 0, 0.70)">View Box <ion-icon name="arrow-forward-outline" slot="end"></ion-icon></ion-button>
-          <p *ngIf="id === '1'">
-            <ion-button size="small" slot="icon-only" (click)="openGoogleMap(dat.latitude, dat.longitude)">
-              <ion-icon name="location-outline"></ion-icon>
+  <ion-card class="order-card" *ngFor="let dat of todayOrder">
+    <div class="order-card__accent"></div>
+    <div class="order-card__body">
+
+      <div class="order-card__head">
+        <div class="order-id"><span class="hash">#</span>{{dat.order_id}}</div>
+        <span class="type-chip" *ngIf="dat.type_desc">{{dat.type_desc | uppercase}}</span>
+      </div>
+
+      <div class="order-card__pc">
+        <ion-icon name="location-outline"></ion-icon>
+        <span>{{dat.pc_ext_id}} · {{dat.pc_desc}}</span>
+      </div>
+
+      <div class="order-card__meta">
+        <span class="meta" *ngIf="id === '2'">
+          <ion-icon name="cube-outline"></ion-icon> Boxes <b><span class="ok">{{dat.rec_camro_box}}</span>/{{dat.total_camro_box}}</b>
+        </span>
+        <span class="meta" *ngIf="id === '1'">
+          <ion-icon name="cube-outline"></ion-icon> Boxes <b>{{dat.total_camro_box}}</b>
+        </span>
+        <span class="status-chip" [ngClass]="'st-' + dat.ord_status" *ngIf="dat.order_status_label">{{dat.order_status_label}}</span>
+      </div>
+
+      <div class="order-card__driver" *ngIf="id === '2'" (click)="openDriverModal(dat)">
+        <ion-icon name="person-circle-outline"></ion-icon> <span>Driver Detail</span>
+      </div>
+
+      <div class="order-card__foot">
+        <div class="icon-actions" *ngIf="id === '1'">
+          <ion-button size="small" fill="clear" (click)="openGoogleMap(dat.latitude, dat.longitude)">
+            <ion-icon slot="icon-only" name="location-outline"></ion-icon>
+          </ion-button>
+          <a href="tel:{{dat.cont_1}}">
+            <ion-button size="small" fill="clear">
+              <ion-icon slot="icon-only" name="call-outline"></ion-icon>
             </ion-button>
-            <a href="tel:{{dat.cont_1}}" >
-              <ion-button size="small" slot="icon-only">
-                <ion-icon name="call-outline"></ion-icon>
-              </ion-button>
-            </a>
-            <ion-button size="small" slot="icon-only" *ngIf="dat.ord_status === 6 || dat.ord_status === 9" [color]="dat.ord_status === 6 ? 'primary': 'success' " (click)="orderReached(dat)">
-              <ion-icon name="checkmark-outline"></ion-icon>
-            </ion-button>
-          </p>
-          <ion-button *ngIf="dat.challan_btn_show === 1" size="small" (click)="challan(dat)">Challan</ion-button>
+          </a>
+          <ion-button size="small" *ngIf="dat.ord_status === 6 || dat.ord_status === 9" [color]="dat.ord_status === 6 ? 'primary': 'success' " (click)="orderReached(dat)">
+            <ion-icon slot="icon-only" name="checkmark-outline"></ion-icon>
+          </ion-button>
         </div>
-      </ion-col>
-    </ion-row>
+
+        <ion-button *ngIf="dat.challan_btn_show === 1" size="small" fill="outline" class="challan-btn ion-text-capitalize" (click)="challan(dat)">
+          <ion-icon name="document-text-outline" slot="start"></ion-icon> Challan
+        </ion-button>
+
+        <ion-button class="view-btn ion-text-capitalize" *ngIf="id !== '1'" size="small" (click)="viewBox(dat)">
+          View Box <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+
+    </div>
   </ion-card>
 
   <div *ngIf="todayOrder.length === 0 && isApiHit" style="padding-top:100px">
