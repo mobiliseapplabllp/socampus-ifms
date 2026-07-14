@@ -11,9 +11,11 @@ import { ReturnCmroComponent } from './return-cmro/return-cmro.component';
 import { CkmsSiteComponent } from './ckms-site/ckms-site.component';
 import { ReturnCaroDriverComponent } from './return-caro-driver/return-caro-driver.component';
 import { ReturnCmroDriverDetailComponent } from './return-cmro-driver-detail/return-cmro-driver-detail.component';
-import { OrderPackingComponent } from './order-packing/order-packing.component';
+import { OrderPackingComponent } from './packing/order-packing/order-packing.component';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
-import { OrderPackingDetailComponent } from './order-packing-detail/order-packing-detail.component';
+import { OrderPackingDetailComponent } from './packing/order-packing-detail/order-packing-detail.component';
+import { ItemPackingComponent } from './packing/item-packing/item-packing.component';
+import { ItemPackingDetailComponent } from './packing/item-packing-detail/item-packing-detail.component';
 import { CkmsDashboardComponent } from './ckms-dashboard/ckms-dashboard.component';
 
 const routes: Routes = [
@@ -56,6 +58,12 @@ const routes: Routes = [
   }, {
     path: 'order-pack-detail',
     component: OrderPackingDetailComponent
+  }, {
+    path: 'item-pack',
+    component: ItemPackingComponent
+  }, {
+    path: 'item-pack-detail',
+    component: ItemPackingDetailComponent
   }, {
     path: 'ckms-dashboard',
     component: CkmsDashboardComponent

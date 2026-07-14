@@ -4,6 +4,11 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>Order Packing</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openChooser()" title="Switch packing mode">
+        <ion-icon slot="icon-only" name="swap-horizontal-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content>
@@ -65,3 +70,37 @@
 
 
 </ion-content>
+
+<!-- Packing mode chooser — page load pe dikhta hai, choice ke baad hi API hit hoti hai -->
+<ion-modal [isOpen]="isChooserOpen" [backdropDismiss]="false" mode="ios">
+  <ng-template>
+    <div class="chooser">
+      <button class="chooser__close" (click)="closeChooser()" title="Close">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+      <div class="chooser__header">
+        <div class="chooser__badge"><ion-icon name="cube-outline"></ion-icon></div>
+        <h2>Packing Mode</h2>
+        <p>Select how you want to pack</p>
+      </div>
+
+      <button class="choice choice--order" (click)="chooseOrderWise()">
+        <div class="choice__icon"><ion-icon name="receipt-outline"></ion-icon></div>
+        <div class="choice__text">
+          <div class="choice__title">Order Wise Packing</div>
+          <div class="choice__sub">Pack each order's items separately</div>
+        </div>
+        <ion-icon class="choice__arrow" name="chevron-forward-outline"></ion-icon>
+      </button>
+
+      <button class="choice choice--recipe" (click)="chooseRecipeWise()">
+        <div class="choice__icon"><ion-icon name="restaurant-outline"></ion-icon></div>
+        <div class="choice__text">
+          <div class="choice__title">Recipe Wise Packing</div>
+          <div class="choice__sub">Pack one recipe for all sites at once</div>
+        </div>
+        <ion-icon class="choice__arrow" name="chevron-forward-outline"></ion-icon>
+      </button>
+    </div>
+  </ng-template>
+</ion-modal>

@@ -46,6 +46,8 @@ export class OrderPackingComponent  implements OnInit {
     }
   };
   isApiHit!: boolean;
+  isChooserOpen = false;   // entry pe packing-mode chooser modal
+  packMode = '';           // '' | 'order' — yaad rakhne ke liye (re-entry pe dobara modal na aaye)
   constructor(
     private modalController: ModalController,
     private formbuilder: FormBuilder,
@@ -59,8 +61,8 @@ export class OrderPackingComponent  implements OnInit {
 
   ngOnInit() {
     this.initForms();
-    this.getMealType();
-    this.getOrderStatus();
+    // this.getMealType();
+    // this.getOrderStatus();
     let start: any, end: any;
     end = moment().endOf('month').format('DD');
     let status, index = 0;
@@ -97,7 +99,40 @@ export class OrderPackingComponent  implements OnInit {
   }
 
   ionViewDidEnter() {
+    // API turant hit mat karo. Pehle mode chooser dikhao;
+    // "Order Wise" chunne ke baad hi order API hit hogi.
+    if (this.packMode === 'order') {
+      this.search();
+    } else {
+      this.isChooserOpen = true;
+    }
+  }
+
+  // Modal choice: Order Wise -> current order-wise flow (ab API hit)
+  chooseOrderWise() {
+    this.packMode = 'order';
+    this.isChooserOpen = false;
     this.search();
+  }
+
+  // Modal choice: Recipe Wise -> item-wise packing (Screen 1)
+  chooseRecipeWise() {
+    // Pehle modal band karo, phir navigate. Warna open overlay router
+    // transition ko block kar deta hai aur chooser stuck reh jaata hai.
+    this.isChooserOpen = false;
+    setTimeout(() => {
+      this.router.navigate(['/today-order/item-pack']);
+    }, 250);
+  }
+
+  // Header se mode dobara switch karne ke liye
+  openChooser() {
+    this.isChooserOpen = true;
+  }
+
+  // Chooser close — sirf modal band (koi navigation nahi)
+  closeChooser() {
+    this.isChooserOpen = false;
   }
 
   search() {

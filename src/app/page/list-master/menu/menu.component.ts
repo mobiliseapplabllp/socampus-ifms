@@ -106,7 +106,7 @@ export class MenuComponent  implements OnInit {
               link: '/t-order/2'
             }, {
               icon_path: 'assets/meal/i2.png',
-              smnu_desc: 'Order Pack',
+              smnu_desc: 'Packing',
               link: 'today-order/order-pack'
             }];
             for (var i = 0; i < obj.length; i++) {

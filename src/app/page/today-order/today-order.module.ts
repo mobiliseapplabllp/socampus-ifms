@@ -16,9 +16,12 @@ import { ReturnCmroComponent } from './return-cmro/return-cmro.component';
 import { CkmsSiteComponent } from './ckms-site/ckms-site.component';
 import { ReturnCaroDriverComponent } from './return-caro-driver/return-caro-driver.component';
 import { ReturnCmroDriverDetailComponent } from './return-cmro-driver-detail/return-cmro-driver-detail.component';
-import { OrderPackingComponent } from './order-packing/order-packing.component';
+import { OrderPackingComponent } from './packing/order-packing/order-packing.component';
 import { SharedModule } from 'src/app/shared/shared.module';
-import { OrderPackingDetailComponent } from './order-packing-detail/order-packing-detail.component';
+import { OrderPackingDetailComponent } from './packing/order-packing-detail/order-packing-detail.component';
+import { OrderPackingModalComponent } from './packing/order-packing-modal/order-packing-modal.component';
+import { ItemPackingComponent } from './packing/item-packing/item-packing.component';
+import { ItemPackingDetailComponent } from './packing/item-packing-detail/item-packing-detail.component';
 import { CkmsDashboardComponent } from './ckms-dashboard/ckms-dashboard.component';
 @NgModule({
   imports: [
@@ -42,6 +45,9 @@ import { CkmsDashboardComponent } from './ckms-dashboard/ckms-dashboard.componen
     ReturnCmroDriverDetailComponent,
     OrderPackingComponent,
     OrderPackingDetailComponent,
+    OrderPackingModalComponent,
+    ItemPackingComponent,
+    ItemPackingDetailComponent,
     CkmsDashboardComponent
   ]
 })

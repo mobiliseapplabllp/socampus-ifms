@@ -49,7 +49,8 @@
 
       <div class="item-card__meta">
         <span class="meta"><ion-icon name="people-outline"></ion-icon> Pax: {{dat.order_qty}}{{dat.uom}}</span>
-        <span class="meta"><ion-icon name="pie-chart-outline"></ion-icon> Portion: {{dat.ttl_portion}}</span>
+        <span class="meta"><ion-icon name="pie-chart-outline"></ion-icon> Portion: {{dat.ttl_portion}} {{dat.uom}}</span>
+        <span class="meta meta--left"><ion-icon name="cube-outline"></ion-icon> Left: {{dat.ttl_left_portion}} {{dat.uom}}</span>
       </div>
 
       <div class="item-card__chips" *ngIf="dat.qr_data.length > 0">
@@ -71,7 +72,7 @@
   </ion-card>
 </ion-content>
 
-<ion-footer class="ion-padding-start ion-padding-end">
+<ion-footer *ngIf="!requestedData.hidePack" class="ion-padding-start ion-padding-end">
   <ion-button expand="block" (click)="finalPack()">Pack</ion-button>
 </ion-footer>
 

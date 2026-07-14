@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ActionSheetController, AlertController, LoadingController, NavController, Platform } from '@ionic/angular';
+import { ActionSheetController, LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 import { environment } from 'src/environments/environment';
+import { OrderPackingModalComponent } from '../order-packing-modal/order-packing-modal.component';
 @Component({
   selector: 'app-order-packing-detail',
   templateUrl: './order-packing-detail.component.html',
@@ -22,11 +23,10 @@ export class OrderPackingDetailComponent  implements OnInit {
   packCambro: any = {};
   isDriverModal = false;
   packTypeArr: any = [];
-  packingList: any[] = []; // all locally-collected pack entries, submitted at once on "Pack"
   // WEB-ONLY testing: cycle through available cambros so multi-cambro scan can be tested.
   // On Android/iOS the real scanned barcode is always used.
   webTestCambros: string[] = [
-    '1019432523', '1008123212', '1008232123',
+    '1863150063', '1008123212', '1008232123',
     '1008432213', '1008232133', '1008145243'
   ];
   webCambroIndex = 0;
@@ -37,14 +37,14 @@ export class OrderPackingDetailComponent  implements OnInit {
     private common: CommonService,
     private actionSheetCtrl: ActionSheetController,
     private router: Router,
-    private alertCtrl: AlertController,
+    private modalCtrl: ModalController,
     private navCtrl: NavController,
     private platform: Platform
   ) { }
 
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
-      this.requestedData = JSON.parse(res['data']);      
+      this.requestedData = JSON.parse(res['data']);
     });
     this.getDispathOrderDetail(this.requestedData.order_id);
     this.getPackingType();
@@ -68,7 +68,7 @@ export class OrderPackingDetailComponent  implements OnInit {
     });
   }
 
-  // Cambro scan ke baad yahan wapas aate hain
+  // Cambro scan ke baad yahan wapas aate hain -> modal khol do (per-row save)
   ionViewDidEnter() {
     const bar = this.common.getBarcode();
     if (!bar) {
@@ -85,132 +85,36 @@ export class OrderPackingDetailComponent  implements OnInit {
     }
 
     // is QR ka cambro available list me hai ya nahi
-    const found = this.cambroArr.filter((c: any) => c.ext_asset_id === qrNo);
-    if (found.length === 0) {
+    const obj = this.cambroArr.filter((val: any) => val.ext_asset_id === qrNo);
+    if (obj.length > 0) {
+      this.openModal(obj[0], '0', qrNo);
+    } else {
       this.common.presentToast(`You are Scanning Wrong QR ${qrNo}`, 'warning');
-      return;
-    }
-    const cambro = found[0];
-
-    // yeh cambro pehle se scan to nahi ho gaya
-    const already = this.packingList.some((p: any) => p.pack_type === '0' && p.camro_box_id === cambro.cambro_id);
-    if (already) {
-      this.common.presentToast(`This Cambro is already scanned (${qrNo})`, 'warning');
-      return;
-    }
-
-    this.addCambroPack(cambro);
-  }
-
-
-  // CAMBRO: ek box me uski size jitni qty bharo, save karo, aur agar
-  // abhi qty bachi hai to scanner dobara khol do (agla cambro).
-  addCambroPack(cambro: any) {
-    const item = this.scanData;
-
-    // is cambro me kitni qty aayegi (box size ya bachi qty, jo chhoti ho)
-    let qty = item.ttl_left_portion;
-    const size = Number(cambro.size);
-    if (qty > size) {
-      qty = size;
-    }
-    if (qty <= 0) {
-      console.log('zero');
-      return;
-    }
-
-    const entry = {
-      dispatch_qty: qty,
-      item_id: item.item_id,
-      order_id: item.order_id,
-      txn_id: item.txn_id,
-      pack_no: cambro.ext_asset_id,   // QR number
-      pack_type: '0',                 // 0 = cambro
-      camro_box_id: cambro.cambro_id  // cambro ki id
-    };
-    this.addToPackingList(item, entry, 'Cambro Box');
-
-    // qty abhi bhi bachi hai to agla cambro scan karo
-    if (item.ttl_left_portion > 0) {
-      this.router.navigateByUrl('/barcode');
     }
   }
 
-  // NON-CAMBRO (Tray/Handi/Ice Box/Silver Pouch): sirf identify key poocho
-  // aur item ki poori bachi qty isi asset me pack kar do.
-  async promptIdentifyKey(item: any, selectedItem: any) {
-    const alert = await this.alertCtrl.create({
-      header: selectedItem.label,
-      message: 'Enter Identify Key',
+  // Packing modal kholo. Submit hone par modal khud server pe ek row save karta hai
+  // (updte_order_recipe_packing_qty), phir yahan wapas aakar screen refresh ho jati hai.
+  async openModal(obj: Object, pack_type: any, pack_no: any, select_type?: string, type_id?: number) {
+    const modal = await this.modalCtrl.create({
+      component: OrderPackingModalComponent,
+      cssClass: 'my-modal',
       backdropDismiss: false,
-      inputs: [{ name: 'identify_key', type: 'text', placeholder: 'Identify Key' }],
-      buttons: [
-        { text: 'Cancel', role: 'cancel' },
-        {
-          text: 'Save',
-          handler: (val: any) => {
-            const key = (val.identify_key || '').trim();
-            if (!key) {
-              this.common.presentToast('Please Enter Identify Key', 'warning');
-              return false; // alert khula rehne do
-            }
-            const entry = {
-              dispatch_qty: item.ttl_left_portion,
-              item_id: item.item_id,
-              order_id: item.order_id,
-              txn_id: item.txn_id,
-              pack_no: key,                     // identify key
-              pack_type: '1',                   // 1 = non-cambro
-              camro_box_id: selectedItem.value  // pack type ki value
-            };
-            this.scanData = item;
-            this.addToPackingList(item, entry, selectedItem.label);
-            return true;
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  // Ek pack ko local list me daalo aur screen par item update karo.
-  // (Yahan koi API call nahi — sab "Pack" button par ek saath jaata hai.)
-  addToPackingList(item: any, entry: any, typeLabel: string) {
-    // 1. pack ko list me rakho (baad me submit hoga)
-    this.packingList.push(entry);
-
-    // 2. item ki bachi qty kam karo
-    item.ttl_left_portion = item.ttl_left_portion - entry.dispatch_qty;
-    if (item.ttl_left_portion <= 0) {
-      item.ttl_left_portion = 0;
-      item.is_packed = true; // poora pack ho gaya
-    }
-
-    // 3. screen par ek chhota chip dikhao
-    if (!item.qr_data) {
-      item.qr_data = [];
-    }
-    item.qr_data.push({
-      dispatch_qty: entry.dispatch_qty,
-      uom: item.uom,
-      order_id: item.order_id,
-      key: typeLabel,
-      val: entry.pack_no
-    });
-
-    // 4. header ka "Packed Recipe x/total" update karo
-    this.basicDetails.packQty = this.getPackedCount();
-  }
-
-  // kitne item pack ho chuke
-  getPackedCount() {
-    let count = 0;
-    for (let i = 0; i < this.orderArr.length; i++) {
-      if (this.orderArr[i].is_packed) {
-        count++;
+      componentProps: {
+        scanData: this.scanData,
+        cambroData: obj,
+        pack_type: pack_type,
+        pack_no: pack_no,
+        select_type: select_type,
+        type_id: type_id
       }
-    }
-    return count;
+    });
+    modal.onWillDismiss().then((disModal: any) => {
+      if (disModal.role == true) {
+        this.getDispathOrderDetail(this.requestedData.order_id);
+      }
+    });
+    modal.present();
   }
 
   setOpen(val: any, data: any, isOpen: boolean) {
@@ -225,55 +129,23 @@ export class OrderPackingDetailComponent  implements OnInit {
     this.isDriverModal = isOpen;
   }
 
+  // Packing + temperature pehle hi per-row save ho chuke; yahan sirf finalize.
   finalPack() {
-    // check: har item ki temperature + packing honi chahiye
-    let notReady = 0;
-    for (let i = 0; i < this.orderArr.length; i++) {
-      const item = this.orderArr[i];
-      if (!item.is_temperature || !item.is_packed) {
-        item.err = true;
-        notReady++;
+    let count = 0;
+    for (var i = 0; i < this.orderArr.length; i++) {
+      if (!this.orderArr[i].is_temperature || !this.orderArr[i].is_packed) {
+        this.orderArr[i].err = true;
+        count = count + 1;
       } else {
-        item.err = false;
+        this.orderArr[i].err = false;
       }
     }
-    if (notReady > 0) {
+    if (count > 0) {
       this.common.presentToast('Please mention the temperature and pack all the receipe', 'warning');
       return;
     }
-
-    // ek array banao: har item ke saath uski temperature + uske packs
-    const items: any[] = [];
-    for (let i = 0; i < this.orderArr.length; i++) {
-      const item = this.orderArr[i];
-
-      // is item ke packs nikalo (packingList me se same txn_id wale)
-      const packs: any[] = [];
-      for (let j = 0; j < this.packingList.length; j++) {
-        const p = this.packingList[j];
-        if (p.txn_id === item.txn_id) {
-          packs.push({
-            dispatch_qty: p.dispatch_qty,
-            pack_no: p.pack_no,
-            pack_type: p.pack_type,
-            camro_box_id: p.camro_box_id
-          });
-        }
-      }
-
-      items.push({
-        txn_id: item.txn_id,
-        item_id: item.item_id,
-        temperature: item.temperature,
-        packs: packs
-      });
-    }
-
     this.presentLoading().then(preLoad => {
-      const obj = {
-        order_id: this.requestedData.order_id,
-        items: items
-      };
+      const obj = [{ order_id: this.requestedData.order_id }];
       this.httpTo.actionOrderPack(obj).subscribe({
         next:(data) => {
           console.log(data);
@@ -315,13 +187,9 @@ export class OrderPackingDetailComponent  implements OnInit {
               if(this.orderArr[i].is_packed) {
                 packQty = packQty + 1;
               }
-              // server ab default temperature bhej raha hai -> agar value already hai
-              // to use valid maano (warna submit block ho jaata hai)
+              // server default temperature bhejta hai -> value already ho to valid maano
               const temp = this.orderArr[i].temperature;
               this.orderArr[i].is_temperature = temp !== '' && temp !== null && temp !== undefined;
-              // if (!this.platform.is('capacitor')) {
-              //   this.orderArr[i].is_packed = false;
-              // }
             }
             this.basicDetails.packQty = packQty
             this.getCamroByPc(this.basicDetails.cpu_pc_id);
@@ -349,13 +217,36 @@ export class OrderPackingDetailComponent  implements OnInit {
     }
   }
 
+  // Har item ki temperature turant server pe save (updte_order_recipe_temp).
   updateTemperature(dat: any) {
-    // No API call here — temperature is kept locally and submitted in one go on "Pack".
-    if (dat.temperature === '' || dat.temperature === null || dat.temperature === undefined) {
+    if (!dat.temperature) {
       dat.is_temperature = false;
       return;
     }
-    dat.is_temperature = true;
+    const obj = {
+      temperature: dat.temperature,
+      txn_id: dat.txn_id
+    }
+    this.presentLoading().then(preLoad => {
+      this.httpTo.updateTemperature(obj).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            dat.is_temperature = true
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+            dat.is_temperature = false
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    });
   }
 
   getCamroByPc(pc_id: string) {
@@ -421,11 +312,13 @@ export class OrderPackingDetailComponent  implements OnInit {
 
   handleButtonClick(selectedItem: any, data: any) {
     if (selectedItem.value === 39) {
+      // Cambro Box -> scanner kholo, scan ke baad ionViewDidEnter modal khol dega
       this.scanData = data;
       this.router.navigateByUrl('/barcode');
     } else {
+      // Non-cambro (Tray/Handi/Ice Box/Silver Pouch) -> seedha modal (identify key)
       this.scanData = data;
-      this.promptIdentifyKey(data, selectedItem);
+      this.openModal(data, '1', '', selectedItem.label, selectedItem.value);
     }
   }
 

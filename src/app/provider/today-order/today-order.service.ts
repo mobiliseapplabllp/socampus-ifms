@@ -49,7 +49,7 @@ export class TodayOrderService {
   }
 
   actionOrderPack(formData: any): Observable<any> {
-    return this.https.post(environment.url + 'meal/order/order_packed_', formData);
+    return this.https.post(environment.url + 'meal/order/order_packed', formData);
   }
 
   updateDriver(obj: Object): Observable<any> {
@@ -167,6 +167,16 @@ export class TodayOrderService {
 
   getPackingType(): Observable<any> {
     return this.https.get(environment.url + 'meal/order/select_pack_type');
+  }
+
+  // Item/Recipe-wise packing — meal type ke hisaab se distinct recipe list (API-1)
+  getRecipeList(meal_type_id: any): Observable<any> {
+    return this.https.get(environment.url + 'meal/cpu-mgr/recipe-list?meal_type_id=' + meal_type_id);
+  }
+
+  // Recipe -> uske orders/sites + qty breakdown (API-2)
+  getRecipeOrders(meal_type_id: any, recipe_id: any): Observable<any> {
+    return this.https.get(environment.url + 'meal/cpu-mgr/recipe-orders?meal_type_id=' + meal_type_id + '&recipe_id=' + recipe_id);
   }
 
 }

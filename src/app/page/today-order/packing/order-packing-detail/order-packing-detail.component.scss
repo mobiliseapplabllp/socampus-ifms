@@ -123,6 +123,18 @@ ion-text {
         color: #0D1F9A;
       }
     }
+
+    .meta--left {
+      font-weight: 700;
+      color: #E8830C;
+      background: #fdeede;
+      padding: 2px 10px;
+      border-radius: 20px;
+
+      ion-icon {
+        color: #E8830C;
+      }
+    }
   }
 
   &__chips {
