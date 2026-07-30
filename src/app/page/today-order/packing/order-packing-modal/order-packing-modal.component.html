@@ -8,56 +8,87 @@
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding">
-  <fieldset>
-    <legend>Recipe Details</legend>
-    <ion-row>
-      <ion-col size="4">Items Details</ion-col>
-      <ion-col>{{scanData.item_name}}</ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="4">Requested Qty</ion-col>
-      <ion-col>{{scanData.order_qty}}</ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="4">Total Pack</ion-col>
-      <ion-col>{{scanData.total_cambro_packed}}</ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="4">Remaining Qty for Pack</ion-col>
-      <ion-col>{{scanData.ttl_left_portion}}</ion-col>
-    </ion-row>
-  </fieldset>
-  <fieldset *ngIf="pack_type === '1'">
-    <legend>Identify Key</legend>
-    <ion-input type="text" placeholder="Identify Key" [(ngModel)]="identify_key"></ion-input>
-  </fieldset>
 
-  <fieldset>
-    <legend>{{pack_type === '0'? 'Cambro': 'Packed With'}}</legend>
-    <div *ngIf="pack_type === '0'">
-      <ion-row>
-        <ion-col size="4">Cambro No</ion-col>
-        <ion-col>({{cambroData.cambro_id}}){{cambroData.ext_asset_id}}</ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="4">Cambro Size</ion-col>
-        <ion-col>{{cambroData.size}} {{cambroData.uom}}</ion-col>
-      </ion-row>
-    </div>
-    <div *ngIf="pack_type === '1'">
-      <ion-row>
-        <ion-col size="4">{{select_type}}</ion-col>
-      </ion-row>
+<ion-content>
+  <!-- Recipe summary -->
+  <div class="rp-head">
+    <div class="rname">{{scanData.item_name}}</div>
+    <div class="sub" *ngIf="scanData.site_name">
+      <ion-icon name="location-outline"></ion-icon> {{scanData.site_name}}
+      <span *ngIf="scanData.site_code">· {{scanData.site_code}}</span>
     </div>
 
-    <ion-input type="number" placeholder="Enter Packing Qty" [(ngModel)]="qty" (ionInput)="changeQty($event)" ></ion-input>
-    <p><b>Note:-</b> You can't enter more than remaining quantity</p>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <ion-button shape="round" (click)="submit()">Submit</ion-button>
-      </ion-col>
-    </ion-row>
-  </fieldset>
+    <div class="qty-row">
+      <div class="qty-box">
+        <span class="lbl">REQUESTED</span>
+        <span class="val">{{scanData.order_qty}}<em *ngIf="uom">{{uom}}</em></span>
+      </div>
+      <div class="qty-box">
+        <span class="lbl">PACKED</span>
+        <span class="val packed">{{scanData.total_cambro_packed}}<em *ngIf="uom">{{uom}}</em></span>
+      </div>
+      <div class="qty-box">
+        <span class="lbl">REMAINING</span>
+        <span class="val left">{{scanData.ttl_left_portion}}<em *ngIf="uom">{{uom}}</em></span>
+      </div>
+    </div>
 
+    <div class="bar">
+      <div class="bar__fill" [style.width.%]="packedPct"></div>
+    </div>
+  </div>
+
+  <!-- Identify key -->
+  <div class="card" *ngIf="pack_type === '1'">
+    <div class="card__title">Identify Key</div>
+    <label class="field">
+      <span class="field__lbl">Identify Key</span>
+      <ion-input type="text" placeholder="Enter identify key" [(ngModel)]="identify_key"></ion-input>
+    </label>
+  </div>
+
+  <!-- Cambro / Packed with -->
+  <div class="card">
+    <div class="card__title">{{pack_type === '0' ? 'Cambro' : 'Packed With'}}</div>
+
+    <div class="info" *ngIf="pack_type === '0'">
+      <div class="info__row">
+        <span class="k"><ion-icon name="cube-outline"></ion-icon> Cambro No</span>
+        <span class="v">({{cambroData.cambro_id}}){{cambroData.ext_asset_id}}</span>
+      </div>
+      <div class="info__row">
+        <span class="k"><ion-icon name="resize-outline"></ion-icon> Cambro Size</span>
+        <span class="v">{{cambroData.size}} {{cambroData.uom}}</span>
+      </div>
+    </div>
+
+    <div class="info" *ngIf="pack_type === '1'">
+      <div class="info__row">
+        <span class="k"><ion-icon name="cube-outline"></ion-icon> Type</span>
+        <span class="v">{{select_type}}</span>
+      </div>
+    </div>
+
+    <label class="field">
+      <span class="field__lbl">Packing Qty <i>*</i></span>
+      <div class="field__box">
+        <ion-input type="number" inputmode="decimal" min="1" placeholder="Enter packing qty"
+          [(ngModel)]="qty" (ionInput)="changeQty($event)"
+          onkeypress="return event.key !== '-' && event.key !== 'e'"></ion-input>
+        <span class="field__unit" *ngIf="uom">{{uom}}</span>
+      </div>
+    </label>
+
+    <div class="note">
+      <ion-icon name="information-circle-outline"></ion-icon>
+      <span>Minimum <b>1</b> qty required. You can't enter more than the remaining quantity
+        (<b>{{scanData.ttl_left_portion}}<ng-container *ngIf="uom"> {{uom}}</ng-container></b>).</span>
+    </div>
+  </div>
 </ion-content>
+
+<ion-footer class="foot">
+  <ion-button expand="block" shape="round" class="ion-text-capitalize" (click)="submit()">
+    <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon> Submit
+  </ion-button>
+</ion-footer>

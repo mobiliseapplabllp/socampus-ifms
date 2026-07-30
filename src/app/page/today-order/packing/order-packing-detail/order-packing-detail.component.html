@@ -47,9 +47,8 @@
         <img class="veg" [src]="dat.cat_image" *ngIf="dat.cat_image">
       </div>
 
-      <div class="item-card__meta">
-        <span class="meta"><ion-icon name="people-outline"></ion-icon> Pax: {{dat.order_qty}}{{dat.uom}}</span>
-        <span class="meta"><ion-icon name="pie-chart-outline"></ion-icon> Portion: {{dat.ttl_portion}} {{dat.uom}}</span>
+      <div class="item-card__meta">        
+        <span class="meta"><ion-icon name="pie-chart-outline"></ion-icon> Requested: {{dat.ttl_portion}} {{dat.uom}}</span>
         <span class="meta meta--left"><ion-icon name="cube-outline"></ion-icon> Left: {{dat.ttl_left_portion}} {{dat.uom}}</span>
       </div>
 
@@ -76,37 +75,48 @@
   <ion-button expand="block" (click)="finalPack()">Pack</ion-button>
 </ion-footer>
 
-<ion-modal [isOpen]="isModalOpen" [initialBreakpoint]="0.40" [breakpoints]="[0, 0.40]" handleBehavior="cycle" (willDismiss)="onWillDismiss()">
+<ion-modal [isOpen]="isModalOpen" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.5, 0.85]" handleBehavior="cycle" (willDismiss)="onWillDismiss()">
   <ng-template>
-    <ion-header>
+    <ion-header class="pk-head">
       <ion-toolbar>
-        <ion-title>Details</ion-title>
+        <ion-title>Packing Details</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="setOpen({}, {},false)">Close</ion-button>
+          <ion-button class="ion-text-capitalize" (click)="setOpen({}, {}, false)">Close</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-padding">
-      <ion-row>
-        <ion-col size="4">Order ID</ion-col>
-        <ion-col>{{packCambro.order_id}}</ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="4">Packing Type</ion-col>
-        <ion-col>{{packCambro.key}}</ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="4">{{packCambro.key === 'Cambro Box' ? 'Barcode No': 'Identify Key'}}</ion-col>
-        <ion-col> {{packCambro.val}}</ion-col>
-      </ion-row>     
-      <ion-row>
-        <ion-col size="4">Recipe</ion-col>
-        <ion-col>{{packCambro.item_name}}</ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="4">Packed Qty</ion-col>
-        <ion-col>{{packCambro.pack_qty}}</ion-col>
-      </ion-row>
+    <ion-content class="pk-modal">
+      <!-- Recipe + packed qty hero -->
+      <div class="pk-hero">
+        <div class="pk-hero__info">
+          <span class="lbl">Recipe</span>
+          <span class="name">{{packCambro.item_name}}</span>
+        </div>
+        <div class="pk-hero__qty">
+          <span class="lbl">PACKED</span>
+          <span class="val">{{packCambro.dispatch_qty}}</span>
+          <span class="uom" *ngIf="packCambro.uom">{{packCambro.uom}}</span>
+        </div>
+      </div>
+
+      <!-- Packing info -->
+      <div class="pk-card">
+        <div class="pk-row">
+          <span class="k"><ion-icon name="receipt-outline"></ion-icon> Order ID</span>
+          <span class="v">{{packCambro.order_id}}</span>
+        </div>
+        <div class="pk-row">
+          <span class="k"><ion-icon name="cube-outline"></ion-icon> Packing Type</span>
+          <span class="v"><span class="tag">{{packCambro.key}}</span></span>
+        </div>
+        <div class="pk-row">
+          <span class="k">
+            <ion-icon [name]="packCambro.key === 'Cambro Box' ? 'barcode-outline' : 'key-outline'"></ion-icon>
+            {{packCambro.key === 'Cambro Box' ? 'Barcode No' : 'Identify Key'}}
+          </span>
+          <span class="v mono">{{packCambro.val}}</span>
+        </div>
+      </div>
     </ion-content>
   </ng-template>
 </ion-modal>

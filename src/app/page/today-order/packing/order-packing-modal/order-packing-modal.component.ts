@@ -35,25 +35,40 @@ export class OrderPackingModalComponent  implements OnInit {
     }
   }
 
+  get uom() {
+    return this.scanData?.uom || '';
+  }
+
+  get packedPct() {
+    const total = Number(this.scanData?.order_qty) || 0;
+    if (!total) { return 0; }
+    return Math.min(100, ((Number(this.scanData?.total_cambro_packed) || 0) / total) * 100);
+  }
+
   closeModal(data: any, status: any) {
     this.modalCtrl.dismiss(data, status);
   }
 
   submit() {
-    if (!this.qty) {
+    if (this.qty === null || this.qty === undefined || this.qty === '') {
       this.common.presentToast('Please Enter Packing Qty', 'warning');
       return;
     }
-    if (this.qty == 0) {
-      this.common.presentToast(`You can't enter 0 qty`, 'warning');
+
+    const qtyNum = Number(this.qty);
+    if (isNaN(qtyNum) || qtyNum < 1) {
+      this.qty = null;
+      this.common.presentToast(`Packing Qty can't be less than 1`, 'warning');
       return;
     }
-    if (this.qty > this.cambroData.size) {
+    this.qty = qtyNum;
+
+    if (qtyNum > this.cambroData.size) {
       this.common.presentToast(`You can't enter more than Camro Size (${this.cambroData.size})`, 'warning');
       return;
     }
 
-    if (this.qty > this.scanData.ttl_left_portion) {
+    if (qtyNum > this.scanData.ttl_left_portion) {
       this.qty = null;
       this.common.presentToast(`You can't enter more than Remaining Qty (${this.scanData.ttl_left_portion})`, 'warning');
       return;
@@ -103,12 +118,20 @@ export class OrderPackingModalComponent  implements OnInit {
   }
 
   changeQty(event: any) {
-    const value = event.target.value;
-    const decimalIndex = value.indexOf('.');
+    let value = event.target.value;
+
+    // strip minus sign / negative values — packing qty can never be below 1
+    if (typeof value === 'string' && value.indexOf('-') !== -1) {
+      value = value.replace(/-/g, '');
+      this.qty = value;
+      event.target.value = value;
+    }
+
+    const decimalIndex = String(value).indexOf('.');
 
     if (decimalIndex !== -1 && value.length - decimalIndex - 1 > 2) {
         this.qty = value.slice(0, decimalIndex + 2);
-    }    
+    }
   }
 
   async presentLoading() {

@@ -118,9 +118,10 @@ export class OrderPackingDetailComponent  implements OnInit {
   }
 
   setOpen(val: any, data: any, isOpen: boolean) {
-    this.packCambro = val;
-    this.packCambro.item_name = data.item_name;
-    this.packCambro.pack_qty = val.dispatch_qty + '(' +val.uom + ')';
+    // close karte waqt purana data rakho, warna dismiss animation me blank flash hota hai
+    if (isOpen) {
+      this.packCambro = { ...val, item_name: data.item_name };
+    }
 
     this.isModalOpen = isOpen;
   }

@@ -1,7 +1,8 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
-
+// https://industry-043739c72da7.herokuapp.com
+// https://mobileapproxydev.mobilisepro.com
 export const environment = {
   production: false,  
   // url: 'https://socampus-8db369a81c0c.herokuapp.com/https://socampus.mobilisepro.com/be/api/',
@@ -10,18 +11,18 @@ export const environment = {
   // ssoUrl: 'https://socampus.mobilisepro.com/',
   // referUrl: 'https://socampus.mobilisepro.com/',
   // isProd: false,  
-  url: 'https://industry-043739c72da7.herokuapp.com/https://socampusdev.mobilisepro.com/be/api/',
-  url1: 'https://industry-043739c72da7.herokuapp.com/https://socampusdev.mobilisepro.com/',
-  url2: 'https://socampusdev.mobilisepro.com/',
-  ssoUrl: 'https://socampusdev.mobilisepro.com/',
-  referUrl: 'https://socampusdev.mobilisepro.com/',
-  isProd: false,  
-  // url: 'https://mobileapproxydev.mobilisepro.com/https://socampusstaging.mobilisepro.com/be/api/',
-  // url1: 'https://mobileapproxydev.mobilisepro.com/https://socampusstaging.mobilisepro.com/',
-  // url2: 'https://socampusstaging.mobilisepro.com/',
-  // ssoUrl: 'https://socampusstaging.mobilisepro.com/',
-  // referUrl: 'https://socampusstaging.mobilisepro.com/',  
+  // url: 'https://mobileapproxydev.mobilisepro.com/https://socampusdev.mobilisepro.com/be/api/',
+  // url1: 'https://mobileapproxydev.mobilisepro.com/https://socampusdev.mobilisepro.com/',
+  // url2: 'https://socampusdev.mobilisepro.com/',
+  // ssoUrl: 'https://socampusdev.mobilisepro.com/',
+  // referUrl: 'https://socampusdev.mobilisepro.com/',
   // isProd: false,  
+  url: 'https://industry-043739c72da7.herokuapp.com/https://socampusstaging.mobilisepro.com/be/api/',
+  url1: 'https://industry-043739c72da7.herokuapp.com/https://socampusstaging.mobilisepro.com/',
+  url2: 'https://socampusstaging.mobilisepro.com/',
+  ssoUrl: 'https://socampusstaging.mobilisepro.com/',
+  referUrl: 'https://socampusstaging.mobilisepro.com/',  
+  isProd: false,  
   db: 'socampuseng.db',
   db_location: 'default',
   errMsg: 'Internal Server Error Please try again!!!',

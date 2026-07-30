@@ -147,7 +147,7 @@ export class ItemPackingDetailComponent implements OnInit {
     };
     if (selectedItem.value === 39) {
       // Cambro Box -> us site ke cambros load karo, phir scanner
-      this.loadCambroThenScan(site.site_id);
+      this.loadCambroThenScan(site.cpu_pc_id);
     } else {
       // Non-cambro -> seedha modal (identify key)
       this.openModal(this.scanData, '1', '', selectedItem.label, selectedItem.value);

@@ -49,7 +49,7 @@
             {{site.site_name}}
             <ion-icon *ngIf="site.status === 'packed'" name="checkmark-circle" class="ok"></ion-icon>
           </div>
-          <div class="sub"><ion-icon name="receipt-outline"></ion-icon> {{site.ord_ext_id}} · {{site.site_code}}</div>
+          <div class="sub"><ion-icon name="receipt-outline"></ion-icon> Site Code: {{site.site_code}}</div>
           <div class="sub"><span class="k">Order Id:</span> {{site.order_id}}</div>
         </div>
         <span class="status-chip" [ngClass]="site.status">{{site.status}}</span>
@@ -58,15 +58,15 @@
       <div class="qty-row">
         <div class="qty-box">
           <span class="lbl">REQUESTED</span>
-          <span class="val">{{site.requested}}</span>
+          <span class="val">{{site.requested}} {{site.uom}}</span>
         </div>
         <div class="qty-box">
           <span class="lbl">PACKED</span>
-          <span class="val packed">{{site.packed}}</span>
+          <span class="val packed">{{site.packed}} {{site.uom}}</span>
         </div>
         <div class="qty-box">
           <span class="lbl">LEFT</span>
-          <span class="val left">{{site.left}}</span>
+          <span class="val left">{{site.left}} {{site.uom}}</span>
         </div>
       </div>
 

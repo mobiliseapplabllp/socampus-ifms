@@ -16,8 +16,8 @@ export class OrderReceivedComponent  implements OnInit {
   updateArr: any = [];
   requestedData: any  = [];
   loading: any;
-  index1!: number;
-  index2!: number;
+  index1?: number;
+  index2?: number;
   constructor(
     private activeRoute: ActivatedRoute,
     private httpTo: TodayOrderService,
@@ -32,27 +32,45 @@ export class OrderReceivedComponent  implements OnInit {
 
   ngOnInit() {
     this.common.setBarcode('');
-    this.activeRoute.queryParams.subscribe((res) => {
-      this.requestedData = JSON.parse(res['data']);
-      console.log(this.requestedData);
-    });
+    // query param sirf ek baar padho. subscribe rakhne par barcode page se wapas aate hi
+    // ye dobara fire hota tha aur orderReached() ka ord_status = 9 URL wale 6 se reset ho jata tha.
+    const data = this.activeRoute.snapshot.queryParams['data'];
+    this.requestedData = data ? JSON.parse(data) : {};
     this.getOrderDetail();
   }
 
   ionViewDidEnter() {
     let bar = this.common.getBarcode();
-    if (bar) {
-      this.common.setBarcode('');
-      let decBarcode = this.common.decryptValue(bar);
-      if(this.updateArr[this.index1].data[this.index2].ext_asset_id === decBarcode) {
-        this.updateArr[this.index1].data[this.index2].isReceivedEnable = true;
-        this.updateArr[this.index1].data[this.index2].showErr = false;
-        this.updateArr[this.index1].data[this.index2].received_qty = this.updateArr[this.index1].data[this.index2].dispatch_qty;
-        this.updateArr[this.index1].data[this.index2].isReceivedEnable = true;              
-      } else {
-        this.common.presentToast('You are scanning wrong QR Code ' + decBarcode, 'warning');
-      }      
+    if (!bar) {
+      return;
     }
+    this.common.setBarcode('');
+
+    // index1/index2 sirf ScanBarcode() se set hote hain. stale ya undefined index par
+    // pehle TypeError aata tha jo poore ionViewDidEnter ko chup-chaap kha jata tha.
+    if (this.index1 === undefined || this.index2 === undefined) {
+      return;
+    }
+    const cambro = this.updateArr[this.index1]?.data?.[this.index2];
+    if (!cambro) {
+      this.resetScanIndex();
+      return;
+    }
+
+    let decBarcode = this.common.decryptValue(bar);
+    if (cambro.ext_asset_id === decBarcode) {
+      cambro.isReceivedEnable = true;
+      cambro.showErr = false;
+      cambro.received_qty = cambro.dispatch_qty;
+    } else {
+      this.common.presentToast('You are scanning wrong QR Code ' + decBarcode, 'warning');
+    }
+    this.resetScanIndex();
+  }
+
+  private resetScanIndex() {
+    this.index1 = undefined;
+    this.index2 = undefined;
   }
 
   getDecBarcode(enc_barcode: string) {
@@ -70,9 +88,7 @@ export class OrderReceivedComponent  implements OnInit {
     }
   }
 
-  inputQty(dat: any, ev: any) {
-    console.log(dat);
-    console.log(ev.target.value);
+  inputQty(dat: any, ev: any) {    
     if (ev.target.value < 0 || ev.target.value == 0) {
       dat.received_qty = 0
       return;
