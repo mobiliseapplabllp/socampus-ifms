@@ -118,7 +118,6 @@ export class ListMasterPage implements OnInit {
     }, 1500);
     this.getHomeLoad();
     this.getNotification();
-    this.loginPingApi();
   }
 
   getHomeLoad() {
@@ -170,7 +169,6 @@ export class ListMasterPage implements OnInit {
   }
 
   changeEvent() {
-    this.loginPingApi();
     this.eventChange = true;
     this.isLoading = true;
     setTimeout(() => {
@@ -187,7 +185,6 @@ export class ListMasterPage implements OnInit {
     this.changeEvent();
     this.getNotification();
     this.loginPingApi();
-
   }
 
   loginPingApi() {
