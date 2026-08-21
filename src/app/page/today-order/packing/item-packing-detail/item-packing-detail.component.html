@@ -29,6 +29,19 @@
       </div>
       <div class="bar"><div class="bar__fill" [style.width.%]="basicDetails.packed_pct || 0"></div></div>
     </div>
+
+    <!-- Bulk temperature — ek recipe ek hi batch se, isliye ek value saare sites pe -->
+    <div class="rp-temp">
+      <label>Temperature</label>
+      <div class="rp-temp__row">
+        <ion-input type="number" placeholder="--" [(ngModel)]="bulkTemp" (ionChange)="changeBulkTemp()"></ion-input>
+        <span class="unit">&deg;C</span>
+        <ion-button size="small" color="light" class="ion-text-capitalize" (click)="applyTempToAll()">
+          <ion-icon name="thermometer-outline" slot="start"></ion-icon> Apply to all
+        </ion-button>
+      </div>
+      <div class="rp-temp__hint">Sets on all {{siteArr.length || 0}} site(s) &middot; -20 to 100&deg;</div>
+    </div>
   </div>
 
   <!-- Status filter chips -->
@@ -72,6 +85,14 @@
 
       <div class="bar">
         <div class="bar__fill" [style.width.%]="site.requested ? (site.packed / site.requested) * 100 : 0"></div>
+      </div>
+
+      <div class="site-temp">
+        <label>Temperature</label>
+        <ion-input type="number" placeholder="--" [(ngModel)]="site.temperature"
+          (ionChange)="changeTemp(site)" (change)="updateTemperature(site)"
+          [ngClass]="{'succ': site.is_temperature}"></ion-input>
+        <ion-icon class="tick" name="checkmark-circle" *ngIf="site.is_temperature"></ion-icon>
       </div>
 
       <div class="site-card__foot">

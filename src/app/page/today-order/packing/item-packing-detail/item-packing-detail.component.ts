@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { catchError, forkJoin, of } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActionSheetController, LoadingController, ModalController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -11,6 +12,8 @@ import { OrderPackingModalComponent } from '../order-packing-modal/order-packing
  * Packing order-packing-detail jaisa hi: LINK -> pack-type action sheet ->
  * cambro (site_id ke cambros load -> scan) ya non-cambro -> order-packing-modal
  * -> per-row updte_order_recipe_packing_qty. "View" -> order-pack-detail (finalPack).
+ * Temperature: header se bulk apply (ek recipe = ek batch) + har site card me override.
+ * Dono updte_order_recipe_temp {temperature, txn_id} hi hit karte hain.
  * Data: API-2 (meal/cpu-mgr/recipe-orders).
  */
 @Component({
@@ -27,6 +30,9 @@ export class ItemPackingDetailComponent implements OnInit {
   packTypeArr: any = [];
   cambroArr: any = [];
   scanData: any = {};
+  bulkTemp: any = null;       // header ka "sab sites pe lagao" wala temperature
+  tempCache: any = {};        // txn_id -> saved temperature; API abhi wapas nahi bhejti,
+                              // isliye refetch pe value udh na jaye
   loading: any;
   webCambroIndex = 0;
 
@@ -71,6 +77,18 @@ export class ItemPackingDetailComponent implements OnInit {
             this.basicDetails = (data.data && data.data.header) || {};
             this.counts = (data.data && data.data.counts) || {};
             this.siteArr = (data.data && data.data.orders) || [];
+            this.siteArr.forEach((s: any) => {
+              if (this.hasTemp(s.temperature)) {
+                // API value hi authority hai — server string ("40") bhejta hai,
+                // number me normalize karke cache bhi sync kar do
+                s.temperature = Number(s.temperature);
+                this.tempCache[s.txn_id] = s.temperature;
+              } else if (this.hasTemp(this.tempCache[s.txn_id])) {
+                // fallback: API temperature na bheje to is session me save ki hui value
+                s.temperature = this.tempCache[s.txn_id];
+              }
+              s.is_temperature = this.hasTemp(s.temperature);
+            });
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -219,6 +237,126 @@ export class ItemPackingDetailComponent implements OnInit {
 
   setStatusFilter(val: string) {
     this.statusFilter = val;
+  }
+
+  /* ================= Temperature ================= */
+
+  // 0 bhi valid temperature hai — sirf khaali/null/NaN ko missing maano
+  private hasTemp(val: any): boolean {
+    return val !== '' && val !== null && val !== undefined && !isNaN(Number(val));
+  }
+
+  // khaali value pe range check nahi (typing ke beech me toast na aaye)
+  private isTempInRange(val: any): boolean {
+    if (!this.hasTemp(val)) {
+      return true;
+    }
+    const n = Number(val);
+    return n >= -20 && n <= 100;
+  }
+
+  private tempRangeToast() {
+    this.common.presentToast('Temperature accept only -20 to 100 degree only', 'warning');
+  }
+
+  // Header ka bulk input — sirf range validate, save Apply pe hota hai
+  changeBulkTemp() {
+    if (!this.isTempInRange(this.bulkTemp)) {
+      this.bulkTemp = null;
+      this.tempRangeToast();
+    }
+  }
+
+  // Ek hi recipe ek hi batch se nikalti hai -> ek value saare sites pe.
+  applyTempToAll() {
+    if (!this.hasTemp(this.bulkTemp)) {
+      this.common.presentToast('Please Enter Temperature', 'warning');
+      return;
+    }
+    const temp = Number(this.bulkTemp);
+    const targets = this.siteArr.filter((s: any) => s.txn_id);
+    const skipped = this.siteArr.length - targets.length;
+    if (targets.length === 0) {
+      this.common.presentToast('Temperature set nahi ho payi - txn_id missing', 'warning');
+      return;
+    }
+    // forkJoin fail-fast hai — ek request error hui to baaki ke successful
+    // responses bhi gum ho jaate. Isliye har call ko alag se catch kar rahe hain.
+    const calls = targets.map((s: any) =>
+      this.httpTo.updateTemperature({ temperature: temp, txn_id: s.txn_id })
+        .pipe(catchError(() => of(null)))
+    );
+    this.presentLoading().then(preLoad => {
+      forkJoin(calls).subscribe({
+        next: (res: any[]) => {
+          let ok = 0;
+          res.forEach((r: any, i: number) => {
+            if (r && r.status) {
+              targets[i].temperature = temp;
+              targets[i].is_temperature = true;
+              this.tempCache[targets[i].txn_id] = temp;
+              ok++;
+            }
+          });
+          if (ok === this.siteArr.length) {
+            this.common.presentToast(`Temperature ${temp}\u00b0 applied to ${ok} site(s)`, 'success');
+          } else if (ok > 0) {
+            this.common.presentToast(`${ok}/${this.siteArr.length} site(s) updated` + (skipped ? ` (${skipped} skipped)` : ''), 'warning');
+          } else {
+            this.common.presentToast(environment.errMsg, 'danger');
+          }
+        },
+        error: () => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete: () => {
+          this.dismissloading();
+        }
+      });
+    });
+  }
+
+  // Site card ka input — har keystroke pe sirf range check
+  changeTemp(site: any) {
+    if (!this.isTempInRange(site.temperature)) {
+      site.temperature = null;
+      site.is_temperature = false;
+      this.tempRangeToast();
+    }
+  }
+
+  // Site card ka input blur — us site ki temperature turant save
+  updateTemperature(site: any) {
+    if (!this.hasTemp(site.temperature)) {
+      site.is_temperature = false;
+      return;
+    }
+    if (!site.txn_id) {
+      this.common.presentToast('Temperature save nahi ho payi - txn_id missing', 'warning');
+      return;
+    }
+    this.presentLoading().then(preLoad => {
+      this.httpTo.updateTemperature({ temperature: Number(site.temperature), txn_id: site.txn_id }).subscribe({
+        next: (data) => {
+          if (data.status) {
+            site.is_temperature = true;
+            this.tempCache[site.txn_id] = Number(site.temperature);
+            this.common.presentToast(data.msg, 'success');
+          } else {
+            site.is_temperature = false;
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error: () => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete: () => {
+          this.dismissloading();
+        }
+      });
+    });
   }
 
   async presentLoading() {
