@@ -60,7 +60,7 @@
       <div class="item-card__actions">
         <div class="temp-box">
           <label>Temperature</label>
-          <ion-input type="number" [(ngModel)]="dat.temperature" (ionChange)="changeTemp(dat)" (change)="updateTemperature(dat)" [ngClass]="{'succ': dat.is_temperature}"></ion-input>
+          <ion-input type="number" [(ngModel)]="dat.temperature" (change)="changeTemp(dat)" [ngClass]="{'succ': dat.is_temperature}"></ion-input>
         </div>
         <ion-button *ngIf="!dat.is_packed" (click)="presentActionSheet1(dat)" size="small" color="primary" class="ion-text-capitalize action-btn">LINK</ion-button>
         <ion-button *ngIf="dat.is_packed" size="small" color="success" class="ion-text-capitalize action-btn">
@@ -72,7 +72,7 @@
 </ion-content>
 
 <ion-footer *ngIf="!requestedData.hidePack" class="ion-padding-start ion-padding-end">
-  <ion-button expand="block" (click)="finalPack()">Pack</ion-button>
+  <ion-button expand="block" [disabled]="isPacking" (click)="finalPack()">Pack</ion-button>
 </ion-footer>
 
 <ion-modal [isOpen]="isModalOpen" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.5, 0.85]" handleBehavior="cycle" (willDismiss)="onWillDismiss()">

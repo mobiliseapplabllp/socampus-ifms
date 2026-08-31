@@ -30,6 +30,13 @@ export class OrderPackingDetailComponent  implements OnInit {
     '1008432213', '1008232133', '1008145243'
   ];
   webCambroIndex = 0;
+  // Pack button double-tap guard
+  isPacking = false;
+  // Blur wali temperature save abhi chal rahi ho to finalPack usko await karta hai
+  private tempSaves: Promise<void>[] = [];
+  // Ek hi loader screen pe rahe, chahe kitni bhi parallel requests chalein
+  private loaderCount = 0;
+  private loaderCreating: Promise<HTMLIonLoadingElement> | null = null;
   constructor(
     private activeRoute: ActivatedRoute,
     private httpTo: TodayOrderService,
@@ -131,7 +138,18 @@ export class OrderPackingDetailComponent  implements OnInit {
   }
 
   // Packing + temperature pehle hi per-row save ho chuke; yahan sirf finalize.
-  finalPack() {
+  async finalPack() {
+    if (this.isPacking) {
+      return;
+    }
+    this.isPacking = true;
+    // Temperature bharke seedha Pack dabaya -> blur wali save abhi in-flight hai.
+    // Uske poora hone se pehle validate karenge to is_temperature purana hi milega.
+    if (this.tempSaves.length > 0) {
+      await Promise.all(this.tempSaves);
+      this.tempSaves = [];
+    }
+
     let count = 0;
     for (var i = 0; i < this.orderArr.length; i++) {
       if (!this.orderArr[i].is_temperature || !this.orderArr[i].is_packed) {
@@ -142,30 +160,31 @@ export class OrderPackingDetailComponent  implements OnInit {
       }
     }
     if (count > 0) {
+      this.isPacking = false;
       this.common.presentToast('Please mention the temperature and pack all the receipe', 'warning');
       return;
     }
-    this.presentLoading().then(preLoad => {
-      const obj = [{ order_id: this.requestedData.order_id }];
-      this.httpTo.actionOrderPack(obj).subscribe({
-        next:(data) => {
-          console.log(data);
-          if (data.status) {
-            this.common.presentToast(data.msg, 'success');
-            this.navCtrl.pop();
-          } else {
-            this.common.presentToast(data.msg, 'warning');
-          }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
+    await this.presentLoading();
+    const obj = [{ order_id: this.requestedData.order_id }];
+    this.httpTo.actionOrderPack(obj).subscribe({
+      next:(data) => {
+        if (data.status) {
+          this.common.presentToast(data.msg, 'success');
+          this.navCtrl.pop();
+        } else {
+          this.common.presentToast(data.msg, 'warning');
         }
-      })
-    });
+      },
+      error:() => {
+        this.isPacking = false;
+        this.dismissloading();
+        this.common.presentToast(environment.errMsg, 'danger');
+      },
+      complete:() => {
+        this.isPacking = false;
+        this.dismissloading();
+      }
+    })
   }
 
   onWillDismiss(){
@@ -210,17 +229,29 @@ export class OrderPackingDetailComponent  implements OnInit {
     })
   }
 
+  // Native (change) = blur par chalta hai. Pehle range check, phir server pe save.
   changeTemp(dat: any) {
+    if (this.isEmptyTemp(dat.temperature)) {
+      dat.is_temperature = false;
+      return;
+    }
     if (dat.temperature < -20  || dat.temperature > 100) {
       dat.temperature = '';
+      dat.is_temperature = false;
       this.common.presentToast('Temperature accept only -20 to 100 degree only', 'warning');
       return;
     }
+    this.updateTemperature(dat);
+  }
+
+  // 0 degree valid temperature hai, isliye !value se check nahi kar sakte
+  private isEmptyTemp(temp: any) {
+    return temp === '' || temp === null || temp === undefined;
   }
 
   // Har item ki temperature turant server pe save (updte_order_recipe_temp).
   updateTemperature(dat: any) {
-    if (!dat.temperature) {
+    if (this.isEmptyTemp(dat.temperature)) {
       dat.is_temperature = false;
       return;
     }
@@ -228,26 +259,32 @@ export class OrderPackingDetailComponent  implements OnInit {
       temperature: dat.temperature,
       txn_id: dat.txn_id
     }
-    this.presentLoading().then(preLoad => {
-      this.httpTo.updateTemperature(obj).subscribe({
-        next:(data) => {
-          if (data.status) {
-            this.common.presentToast(data.msg, 'success');
-            dat.is_temperature = true
-          } else {
-            this.common.presentToast(data.msg, 'warning');
-            dat.is_temperature = false
+    // finalPack is promise ka intezaar karta hai, isliye track kar rahe hain
+    const save = new Promise<void>(resolve => {
+      this.presentLoading().then(preLoad => {
+        this.httpTo.updateTemperature(obj).subscribe({
+          next:(data) => {
+            if (data.status) {
+              this.common.presentToast(data.msg, 'success');
+              dat.is_temperature = true
+            } else {
+              this.common.presentToast(data.msg, 'warning');
+              dat.is_temperature = false
+            }
+          },
+          error:() => {
+            this.dismissloading();
+            this.common.presentToast(environment.errMsg, 'danger');
+            resolve();
+          },
+          complete:() => {
+            this.dismissloading();
+            resolve();
           }
-        },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg, 'danger');
-        },
-        complete:() => {
-          this.dismissloading();
-        }
-      })
+        })
+      });
     });
+    this.tempSaves.push(save);
   }
 
   getCamroByPc(pc_id: string) {
@@ -323,17 +360,50 @@ export class OrderPackingDetailComponent  implements OnInit {
     }
   }
 
+  // Ref-counted: pehle wali request ka loader dobara create karke overwrite nahi hota,
+  // warna purana loader orphan ho jata tha aur screen par atka reh jata tha.
   async presentLoading() {
-    this.loading = await this.loadingController.create({
+    this.loaderCount++;
+    if (this.loading || this.loaderCreating) {
+      await this.loaderCreating;
+      return;
+    }
+    this.loaderCreating = this.loadingController.create({
       cssClass: 'my-custom-class',
       message: 'Please wait...'
     });
+    const loader = await this.loaderCreating;
+    this.loaderCreating = null;
+    if (this.loaderCount === 0) {
+      // request itni jaldi khatam ho gayi ki ab dikhane ki zarurat hi nahi
+      return;
+    }
+    this.loading = loader;
     await this.loading.present();
   }
 
   async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
+    if (this.loaderCount > 0) {
+      this.loaderCount--;
+    }
+    if (this.loaderCount > 0) {
+      return;
+    }
+    await this.loaderCreating;
+    const loader = this.loading;
+    this.loading = null;
+    if (loader) {
+      await loader.dismiss();
+    }
+  }
+
+  // Safety net: page chhodte waqt koi loader bacha ho to saaf kar do
+  ionViewWillLeave() {
+    this.loaderCount = 0;
+    const loader = this.loading;
+    this.loading = null;
+    if (loader) {
+      loader.dismiss();
     }
   }
 

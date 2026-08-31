@@ -43,6 +43,22 @@ export class ItemPackingComponent implements OnInit {
     // TODO(API-1): getItemWisePacking(mealType) -> itemArr + summary bharna.
   }
 
+  // Ionic page ko cache me rakhta hai -> item-pack-detail se back aane par
+  // ngOnInit dobara nahi chalta. Isliye list yahan se refresh karte hain,
+  // warna pack karke wapas aane par purana data hi dikhta rehta tha.
+  ionViewWillEnter() {
+    // pehli entry par meal type chuna hi nahi hota -> faltu request mat bhejo
+    if (this.hasMealType()) {
+      this.getRecipeList(true);
+    }
+  }
+
+  private hasMealType(): boolean {
+    return this.selectedMealType !== undefined
+      && this.selectedMealType !== null
+      && this.selectedMealType !== '';
+  }
+
   // Meal type dropdown — meal/meal-type/get/dropdown
   getMealType() {
     this.httpComplaint.getMealType().subscribe({
@@ -62,15 +78,19 @@ export class ItemPackingComponent implements OnInit {
 
   // Meal type change -> us meal type ki recipe list (API-1)
   onMealTypeChange() {
-    if (this.selectedMealType === undefined || this.selectedMealType === null || this.selectedMealType === '') {
+    if (!this.hasMealType()) {
       return;
     }
     this.getRecipeList();
   }
 
   // API-1: meal/cpu-mgr/recipe-list?meal_type_id=
-  getRecipeList() {
-    this.itemArr = [];
+  getRecipeList(isRefresh = false) {
+    if (!isRefresh) {
+      // meal type badla hai -> purani list turant hatao.
+      // refresh par nahi, warna wapas aate hi list blank flash karti hai.
+      this.itemArr = [];
+    }
     this.presentLoading().then(preLoad => {
       this.httpTo.getRecipeList(this.selectedMealType).subscribe({
         next: (data) => {
