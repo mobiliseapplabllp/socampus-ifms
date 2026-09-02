@@ -45,9 +45,10 @@ export class LoginPage implements OnInit {
   isProduction = environment.isProd;
   appVersion!: string;
   isDateValid!: boolean;
-  // Shared options so every in-app browser (SSO) opens with a styled bottom bar
-  // (white background, "Done" close button, brand-coloured nav buttons).
-  private readonly iabOptions = 'location=no,zoom=yes,toolbarcolor=#ffffff,toolbartranslucent=no,closebuttoncaption=Done,closebuttoncolor=#283897,navigationbuttoncolor=#283897';
+  // Shared options for every in-app browser (SSO). Toolbar poora off hai - iOS par wo
+  // niche translucent "Done" + back/forward buttons deta tha jo SSO flow me kaam ke nahi.
+  // Browser ab sirf khud band hota hai: loadstart par redirect match hone par, ya loaderror par.
+  private readonly iabOptions = 'location=no,zoom=yes,toolbar=no';
   // True while an SSO in-app browser is open, so the login footer can hide behind its toolbar.
   ssoBrowserOpen = false;
   constructor(
@@ -197,6 +198,11 @@ export class LoginPage implements OnInit {
           this.getSsoEnc(token);
         }
       }
+      // Toolbar off hai, isliye page ka apna Back hi ekmatra exit hai - wo yahin land karta hai.
+      // openKeyClock() me bhi bilkul yahi condition hai.
+      if (data.url === environment.ssoUrl || data.url === environment.ssoUrl + 'be/apiloading' || data.url === environment.ssoUrl + '#/auth') {
+        browser.close();
+      }
     });
 
     browser.on('loaderror').subscribe(error => {
@@ -220,7 +226,8 @@ export class LoginPage implements OnInit {
           this.getSsoEnc(token);
         }
       }
-      if (data.url === environment.ssoUrl || data.url === environment.ssoUrl + 'be/apiloading') {
+      // https://socampusstaging.mobilisepro.com/#/auth
+      if (data.url === environment.ssoUrl || data.url === environment.ssoUrl + 'be/apiloading' || data.url === environment.ssoUrl + '#/auth') {
         browser.close();
       }
     });
@@ -383,8 +390,8 @@ export class LoginPage implements OnInit {
     if (this.isProduction) {
       return;
     }
-    // https://socampus.mobilisepro.com/#/auth/ssoGates/jTJSPQaxD7wnjJkyicpSS3h4aFdkNWtvUmJQVG8wRy9YSW85OGZrcHBXMGErODY3Y0tHYmViM1kwQml0UWVMeklWdkdydjZSN3p0Z0dtbXl6K1lvdVNCdlhvbXBiOERxWUNRUEVMU3Z1TXVzbWFVQnd5K1VIS1RUSFNmdi9TREJ6SENWRzFlTDgvYitMWUZ4
-    let token = 'jTJSPQaxD7wnjJkyicpSS3h4aFdkNWtvUmJQVG8wRy9YSW85OGZrcHBXMGErODY3Y0tHYmViM1kwQml0UWVMeklWdkdydjZSN3p0Z0dtbXl6K1lvdVNCdlhvbXBiOERxWUNRUEVMU3Z1TXVzbWFVQnd5K1VIS1RUSFNmdi9TREJ6SENWRzFlTDgvYitMWUZ4';
+    // https://socampus.mobilisepro.com/#/auth/ssoGates/axAhqtZjNy_pc3HYuSxkdEFCM1piRlJsN01sMGZBR3hha2d6aUhzMTl1VGh2dmJvb1lmM2pxc0VEbGUzcFNPS1hBRXM1cm9oak11U1JKcEpqRG9sTk8xZnJLV1liMVhib2w3Wmc0cGZVRURFNFhRYjlSV3pIeHZidlI5dXNRU3NueS9KRjNEWlJFcGQ3S2t5
+    let token = 'axAhqtZjNy_pc3HYuSxkdEFCM1piRlJsN01sMGZBR3hha2d6aUhzMTl1VGh2dmJvb1lmM2pxc0VEbGUzcFNPS1hBRXM1cm9oak11U1JKcEpqRG9sTk8xZnJLV1liMVhib2w3Wmc0cGZVRURFNFhRYjlSV3pIeHZidlI5dXNRU3NueS9KRjNEWlJFcGQ3S2t5';
     this.getSsoEnc(token);
   }
 }

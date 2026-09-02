@@ -292,6 +292,8 @@ export class DigitalChecklistPage implements OnInit {
         next:(data) => {
           this.common.dismissloading();
           this.allChecklist = data;
+          // console.log(this.allChecklist);
+          // console.log(this.userData.id);
           this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
           this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
           if (this.allChecklist.length === 0 && this.isInternet) {

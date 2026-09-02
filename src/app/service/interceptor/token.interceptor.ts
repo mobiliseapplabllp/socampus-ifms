@@ -44,41 +44,30 @@ export class TokenInterceptor implements HttpInterceptor {
 
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // AI Studio is a third party API - it has its own X-API-Key, so do not leak
+    // our Authorization/Referer1 headers to it (they also break CORS preflight).
+    // web par URL cors-proxy prefix ke saath aata hai, isliye startsWith nahi - includes
+    if (request.url.includes(environment.aiStudioUrl)) {
+      return next.handle(request);
+    }
     if (!localStorage.getItem('token1')) {
       const mod = request.clone({
         headers: request.headers.set('Referer1', environment.referUrl)
       })
       return next.handle(mod);
     } else {
-      if (request.url == 'https://translate.googleapis.com/language/translate/v2?key=AIzaSyDJjHphpheVQM7CRYNqHHdJqMqAgt0IY70') {
-        const userToken = localStorage.getItem('token1');
-        const modifiedReq = request.clone({headers: request.headers.set('Accept', 'application/json')});
-        return next.handle(modifiedReq).pipe(tap(() => {},
-          (err: any) => {
-          if (err instanceof HttpErrorResponse) {
-            if (err.status !== 401) {
-            return;
-            }
-            localStorage.clear();
-            alert('Your Session is timeout please login again');
-            this.router.navigateByUrl('/login',{replaceUrl: true});
+      const userToken = localStorage.getItem('token1');
+      const modifiedReq = request.clone({headers: request.headers.set('Authorization', `Bearer ${userToken}`).set('Accept', 'application/json').set('Referer1', environment.referUrl)});
+      return next.handle(modifiedReq).pipe(tap(() => {},
+        (err: any) => {
+        if (err instanceof HttpErrorResponse) {
+          if (err.status !== 401) {
+          return;
           }
-        }));
-      } else {
-        const userToken = localStorage.getItem('token1');
-        const modifiedReq = request.clone({headers: request.headers.set('Authorization', `Bearer ${userToken}`).set('Accept', 'application/json').set('Referer1', environment.referUrl)});
-        return next.handle(modifiedReq).pipe(tap(() => {},
-          (err: any) => {
-          if (err instanceof HttpErrorResponse) {
-            if (err.status !== 401) {
-            return;
-            }
-            alert('Your Session is timeout please login again');
-            this.router.navigateByUrl('/login',{replaceUrl: true});
-          }
-        }));
-      }
-
+          alert('Your Session is timeout please login again');
+          this.router.navigateByUrl('/login',{replaceUrl: true});
+        }
+      }));
     }
   }
 

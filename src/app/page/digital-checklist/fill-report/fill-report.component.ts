@@ -33,6 +33,7 @@ export class FillReportComponent  implements OnInit {
   remarkErr = false;
   arr: any = [];
   selectedLanguage =  'en';
+  originalQDesc: string[] = [];
   index: any;
   loop = false;
   isInternet!:boolean;
@@ -200,9 +201,9 @@ export class FillReportComponent  implements OnInit {
         this.listenAction(val, voiceResponse);
       } else {
         this.common.presentLoading('Translate String to  English Language').then(preLoad => {
-          this.httpDigital.googleTranslate([voiceResponseTemp], 'en').subscribe({
+          this.httpDigital.aiStudioTranslate(voiceResponseTemp, 'en').subscribe({
             next:(translateText) => {
-              voiceResponse = translateText.data.translations[0].translatedText;
+              voiceResponse = translateText;
               this.listenAction(val, voiceResponse);
             },
             error:() => {
@@ -477,71 +478,65 @@ export class FillReportComponent  implements OnInit {
   }
 
   changeLan(lang: string) {
-    var question: any = [], temp: any, options;
-    temp = this.scheduleArr[0].qus;
-    for (var i = 0 ; i < temp.length; i++) {
-      question.push(temp[i].q_desc);
+    var question: any = [];
+    // q_desc aur uske saare options ko ek hi flat array me, same order me push karte hain.
+    // Isse question/option kitne bhi ho ya unka text kuch bhi ho, sab dynamically translate ho jate hain.
+    let qIndex = 0;
+    for (var i = 0 ; i < this.scheduleArr.length; i++) {
+      for (var j = 0 ; j < this.scheduleArr[i].qus.length; j++) {
+        const q = this.scheduleArr[i].qus[j];
+        // Pehli baar ka English q_desc yaad rakh lete hain. Ye question object par nahi,
+        // component ki memory me rehta hai - warna ye field db me bhi save hota aur
+        // convertToFormData() ke through server ko bhi chala jaata.
+        if (this.originalQDesc[qIndex] === undefined) {
+          this.originalQDesc[qIndex] = q.q_desc;
+        }
+        if (lang == 'en') {
+          // English par sab kuch original se wapas - koi API call ki zaroorat nahi
+          q.q_desc = this.originalQDesc[qIndex];
+          if (q.options?.length) {
+            for (var k = 0 ; k < q.options.length; k++) {
+              q.options[k].optn_desc = q.options[k].optn_value;
+            }
+          }
+        } else {
+          // hamesha original English text bhejte hain, screen par dikh raha translated text nahi -
+          // warna hi -> ta karne par double translation hoti aur quality girti
+          question.push(this.originalQDesc[qIndex]);
+          if (q.options?.length) {
+            for (var k = 0 ; k < q.options.length; k++) {
+              question.push(q.options[k].optn_value);
+            }
+          }
+        }
+        qIndex++;
+      }
     }
-    question.push('yes');
-    question.push('no');
-    question.push('not applicable');
+    if (lang == 'en') {
+      this.selectedLanguage = lang;
+      return;
+    }
     this.translate(question, lang);
   }
 
-  // translate(data: any, lang: string) {
-  //   this.common.presentLoading().then(preLoad => {
-  //     this.httpDigital.googleTranslate(data, lang).subscribe({
-  //       next:(translateText) => {
-  //         const optionArr = translateText.data.translations.slice(-3);
-  //         for (var i = 0 ; i < this.scheduleArr.length;i++) {
-  //           for (var j = 0 ; j < this.scheduleArr[i].qus.length; j++) {
-  //             this.scheduleArr[i].qus[j].q_desc = translateText.data.translations[j].translatedText
-  //             if (lang == 'en') {
-  //               this.scheduleArr[i].qus[j].options[0].optn_desc = 'Yes';
-  //               this.scheduleArr[i].qus[j].options[1].optn_desc = 'No';
-  //               this.scheduleArr[i].qus[j].options[2].optn_desc = 'NA';
-  //             } else {
-  //               this.scheduleArr[i].qus[j].options[0].optn_desc = optionArr[0].translatedText;
-  //               this.scheduleArr[i].qus[j].options[1].optn_desc = optionArr[1].translatedText;
-  //               this.scheduleArr[i].qus[j].options[2].optn_desc = optionArr[2].translatedText;
-  //             }
-  //           }
-  //         }
-  //         this.selectedLanguage = lang;
-  //       },
-  //       error:(err) => {
-  //         this.common.dismissloading();
-  //         this.common.presentToast(environment.errMsg, 'warning');
-  //       },
-  //       complete:() => {
-  //         this.common.dismissloading();
-  //       }
-  //     })
-  //   });
-  // }
-
-  translate(data: any, lang: string) {
+  translate(data: any, lang: string) { // google se azure (AI Studio) par shift kiya hai
     this.common.presentLoading().then(preLoad => {
-      this.httpDigital.googleTranslate(data, lang).subscribe({
-        next: (translateText) => {
-          const optionArr = translateText.data.translations.slice(-3); // Last 3 translations = Yes, No, NA
+      this.httpDigital.aiStudioTranslateBatch(data, lang).subscribe({
+        next: (translations) => {
+          // aiStudioTranslateBatch same order me string[] deta hai (Google jaisa hi contract)
+          // changeLan() me jis exact order me push kiya tha (q_desc -> uske options),
+          // usi order me running counter se wapas read karte hain. Isliye indexing hamesha sahi rehti hai.
+          let idx = 0;
           for (let i = 0; i < this.scheduleArr.length; i++) {
             for (let j = 0; j < this.scheduleArr[i].qus.length; j++) {
-              this.scheduleArr[i].qus[j].q_desc = translateText.data.translations[j].translatedText;
-
-              if (this.scheduleArr[i].qus[j].options?.length) {
-                this.scheduleArr[i].qus[j].options.forEach((opt: any) => {
-                  // Check the original value (case-insensitive) and set translation
-                  if (lang === 'en') {
-                    if (opt.optn_value.toLowerCase() === 'yes') opt.optn_desc = 'Yes';
-                    if (opt.optn_value.toLowerCase() === 'no') opt.optn_desc = 'No';
-                    if (opt.optn_value.toLowerCase() === 'na') opt.optn_desc = 'NA';
-                  } else {
-                    if (opt.optn_value.toLowerCase() === 'yes') opt.optn_desc = optionArr[0].translatedText;
-                    if (opt.optn_value.toLowerCase() === 'no') opt.optn_desc = optionArr[1].translatedText;
-                    if (opt.optn_value.toLowerCase() === 'na') opt.optn_desc = optionArr[2].translatedText;
-                  }
-                });
+              const q = this.scheduleArr[i].qus[j];
+              q.q_desc = translations[idx];
+              idx++;
+              if (q.options?.length) {
+                for (let k = 0; k < q.options.length; k++) {
+                  q.options[k].optn_desc = translations[idx];
+                  idx++;
+                }
               }
             }
           }

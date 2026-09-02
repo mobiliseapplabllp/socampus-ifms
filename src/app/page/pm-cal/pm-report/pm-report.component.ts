@@ -646,9 +646,9 @@ export class PmReportComponent  implements OnInit {
         this.listenAction(val, voiceResponse);
       } else {
         this.presentLoading('Translate String to  English Language').then(preLoad => {
-          this.httpDigital.googleTranslate([voiceResponseTemp], 'en').subscribe({
+          this.httpDigital.aiStudioTranslate(voiceResponseTemp, 'en').subscribe({
             next:(translateText) => {
-              voiceResponse = translateText.data.translations[0].translatedText;
+              voiceResponse = translateText;
               this.listenAction(val, voiceResponse);
             },
             error:() => {
