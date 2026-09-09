@@ -72,12 +72,18 @@ export class ConciergePage implements OnInit {
 
   ngOnInit() {
     this.userData = JSON.parse(localStorage.getItem('user')!);
-    this.route.queryParams.subscribe(params => {
-      if (params['status']) {
-        this.status = params['status'];        
-        this.getTicketList(this.status, this.page);
-      }
-    });
+    // snapshot se padhte hain, observable se nahi. queryParams back-navigation par wahi purani
+    // value dobara emit karta hai (Ionic page ko destroy nahi karta, stack me rakhta hai),
+    // jiski wajah se list dobara load hokar duplicate ho jaati thi.
+    this.status = this.route.snapshot.queryParams['status'] || this.status;
+  }
+
+  // Har entry par list poori reset karke page 1 se laate hain. Isse duplicate to khatam hote
+  // hi hain, saath me conc-work me kiya gaya kaam bhi wapas aate hi list me dikh jaata hai.
+  ionViewWillEnter() {
+    this.page = 1;
+    this.ticketData = [];
+    this.getTicketList(this.status, this.page);
   }
 
   ionViewDidEnter() {
