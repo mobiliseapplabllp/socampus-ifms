@@ -44,13 +44,19 @@ export class TokenInterceptor implements HttpInterceptor {
 
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // AI Studio is a third party API - it has its own X-API-Key, so do not leak
+    // our Authorization/Referer1 headers to it (they also break CORS preflight).
+    // web par URL cors-proxy prefix ke saath aata hai, isliye startsWith nahi - includes
+    if (request.url.includes(environment.aiStudioUrl)) {
+      return next.handle(request);
+    }
     if (!localStorage.getItem('token1')) {
       const mod = request.clone({
         headers: request.headers.set('Referer1', environment.referUrl)
       })
       return next.handle(mod);
     } else {
-      if (request.url == 'https://translate.googleapis.com/language/translate/v2?key=AIzaSyDJjHphpheVQM7CRYNqHHdJqMqAgt0IY70' || request.url == 'https://aov.mhbemp.in/test_script/RFID.php') {
+      if (request.url == 'https://aov.mhbemp.in/test_script/RFID.php') {
         const userToken = localStorage.getItem('token1');
         const modifiedReq = request.clone({headers: request.headers.set('Accept', 'application/json')});
         return next.handle(modifiedReq).pipe(tap(() => {},

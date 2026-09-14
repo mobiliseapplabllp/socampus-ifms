@@ -39,7 +39,7 @@ const FETCHED_DATES_KEY = 'digitalChecklistFetchedDates';
 
 // TEST: override applies only on web (browser). On native (Android/iOS), always uses real today.
 const TODAY_OVERRIDE: string | null = Capacitor.isNativePlatform() ? null : '2026-05-13';
-const getToday = (): string => TODAY_OVERRIDE ?? moment().format('YYYY-MM-DD');
+const getToday = (): string => moment().format('YYYY-MM-DD') ?? moment().format('YYYY-MM-DD');
 
 @Component({
   selector: 'app-digital-checklist',

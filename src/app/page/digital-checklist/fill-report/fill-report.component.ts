@@ -27,6 +27,9 @@ export type QuestionKind =
   | 'temperature'
   | 'shorttext';
 
+/** Server par submit ki hui response files isi folder me rehti hain (jaise `imagename` / `base64_sign` me aata hai). */
+const RESPONSE_FILE_DIR = 'uploads/pms_cal/checklist_response_images/';
+
 const Q_TYPE_TO_KIND: Record<string, QuestionKind> = {
   '315': 'video',
   '225': 'attachment',
@@ -371,7 +374,7 @@ const I18N_LABELS: Record<string, I18nLabels> = {
     no: 'না',
     na: 'প্রযোজ্য নয়',
   },
-  ory: {
+  or: {
     fillReports: 'ରିପୋର୍ଟ ପୂରଣ କରନ୍ତୁ',
     pcName: 'ପିସି ନାମ',
     location: 'ସ୍ଥାନ',
@@ -431,7 +434,7 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
     { code: 'mr', label: 'Marathi' },
     { code: 'gu', label: 'Gujarati' },
     { code: 'bn', label: 'Bengali' },
-    { code: 'ory', label: 'Odia' },
+    { code: 'or', label: 'Odia' },
   ];
 
   private readonly ttsEngineHint =
@@ -447,6 +450,8 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
   on_behalf: any;
   remarkErr = false;
   selectedLanguage = 'en';
+  /** Pehli baar ka English q_desc, flat order me - taaki language switch par double translate na ho. */
+  originalQDesc: string[] = [];
   i18nLabels: I18nLabels = I18N_LABELS['en'];
   index: any;
   loop = false;
@@ -589,6 +594,7 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
     console.log(this.scheduleArr);
     this.scheduleArr[0].qus?.forEach((q: any) => {
       this.syncNonOptionMandatory(q);
+      this.applyServerResponseToUi(q);
       this.syncOptionResponseTempAfterLoad(q);
     });
     this.schedule_status = this.scheduleArr[0].schedule_status;
@@ -602,6 +608,53 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
         });
       })
     );
+  }
+
+  /**
+   * Reverse of `mapQuestionForSubmitPayload()`.
+   * Server har question ka jawab `rspnsval` me lautata hai aur `rspns` null bhejta hai, jabki UI
+   * scalars ko `q_value`, options ko `rspns` aur file ko `imagename` se bind karti hai. Ye mapping
+   * na ho to submit ki hui (attended/closed) checklist View karne par saare jawab blank dikhte hain.
+   * Sirf khaali UI field bharta hai - offline me locally bhari checklist ka data chhedta nahi.
+   */
+  private applyServerResponseToUi(q: any) {
+    const answer = q?.rspnsval;
+    if (answer === null || answer === undefined || answer === '') {
+      return;
+    }
+    const kind = this.questionKind(q);
+    if (kind === 'date' || kind === 'datetime' || kind === 'number' || kind === 'temperature' || kind === 'shorttext') {
+      if (q.q_value == null || q.q_value === '') {
+        q.q_value = answer;
+      }
+      return;
+    }
+    if (kind === 'attachment' || kind === 'video') {
+      if (!q.imagename) {
+        q.imagename = this.toServerFilePath(answer);
+        q.imagename_blob_tyep = q.imagename_blob_tyep || 'PRIVATE';
+      }
+      return;
+    }
+    if (q.rspns != null && q.rspns !== '') {
+      return;
+    }
+    // option: server optn_id bhej sakta hai ya optn_value/optn_desc - teeno se match kara lete hain
+    const needle = String(answer).trim().toLowerCase();
+    const opt = (q.options || []).find((o: any) =>
+      String(o.optn_id ?? '').trim().toLowerCase() === needle ||
+      String(o.optn_value ?? '').trim().toLowerCase() === needle ||
+      String(o.optn_desc ?? '').trim().toLowerCase() === needle
+    );
+    if (opt) {
+      q.rspns = opt.optn_id;
+    }
+  }
+
+  /** `rspnsval` sirf filename deta hai; `imagename`/`base64_sign` jaisa poora server path bana dete hain. */
+  private toServerFilePath(name: any): string {
+    const value = String(name);
+    return value.includes('/') ? value : RESPONSE_FILE_DIR + value;
   }
 
   /** After Dexie/liveQuery hydrate, match ion-radio temp so changeResponseAction does not treat it as a user change. */
@@ -1007,9 +1060,9 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
       } else {
         this.common.presentLoading('Translate String to  English Language').then(preLoad => {
           this.trackSub(
-            this.httpDigital.googleTranslate([voiceResponseTemp], 'en').subscribe({
+            this.httpDigital.aiStudioTranslate(voiceResponseTemp, 'en').subscribe({
               next:(translateText) => {
-                voiceResponse = translateText.data.translations[0].translatedText;
+                voiceResponse = translateText;
                 this.listenAction(val, voiceResponse);
               },
               error:() => {
@@ -1548,8 +1601,33 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
   changeLan(lang: string) {
     this.i18nLabels = I18N_LABELS[lang] ?? I18N_LABELS['en'];
     this.applyYesNoNaFromLabels();
-    const temp = this.scheduleArr[0]?.qus ?? [];
-    const question = temp.map((q: any) => q.q_desc);
+    // Saari rows ke q_desc ek hi flat array me, same order me. Isse question kitne bhi ho,
+    // translate() usi order me running counter se wapas set kar deta hai.
+    const question: string[] = [];
+    let qIndex = 0;
+    this.scheduleArr.forEach((row: any) => {
+      (row.qus || []).forEach((q: any) => {
+        // Pehli baar ka English q_desc component ki memory me yaad rakh lete hain. Ye question
+        // object par nahi rakha - warna ye field Dexie me bhi save hota aur submit payload me
+        // bhi server tak chala jaata.
+        if (this.originalQDesc[qIndex] === undefined) {
+          this.originalQDesc[qIndex] = q.q_desc;
+        }
+        if (lang === 'en') {
+          // English par original se wapas - koi API call ki zaroorat nahi
+          q.q_desc = this.originalQDesc[qIndex];
+        } else {
+          // hamesha original English text bhejte hain, screen par dikh raha translated text nahi -
+          // warna hi -> ta karne par double translation hoti aur quality girti
+          question.push(this.originalQDesc[qIndex]);
+        }
+        qIndex++;
+      });
+    });
+    if (lang === 'en') {
+      this.selectedLanguage = lang;
+      return;
+    }
     this.translate(question, lang);
   }
 
@@ -1573,14 +1651,19 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
     });
   }
 
-  translate(data: any, lang: string) {
+  translate(data: any, lang: string) { // google se azure (AI Studio) par shift kiya hai
     this.common.presentLoading().then(preLoad => {
       this.trackSub(
-        this.httpDigital.googleTranslate(data, lang).subscribe({
-          next: (translateText) => {
+        this.httpDigital.aiStudioTranslateBatch(data, lang).subscribe({
+          next: (translations) => {
+            // aiStudioTranslateBatch same order me string[] deta hai (Google jaisa hi contract).
+            // changeLan() ne jis order me push kiya tha, usi order me running counter se wapas
+            // read karte hain - isliye indexing hamesha sahi rehti hai.
+            let idx = 0;
             this.scheduleArr.forEach((row: any) => {
-              (row.qus || []).forEach((q: any, j: number) => {
-                q.q_desc = translateText.data.translations[j].translatedText;
+              (row.qus || []).forEach((q: any) => {
+                q.q_desc = translations[idx] ?? q.q_desc;
+                idx++;
               });
             });
             this.selectedLanguage = lang;
