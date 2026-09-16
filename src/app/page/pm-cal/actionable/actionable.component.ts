@@ -1,12 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IonDatetime, LoadingController } from '@ionic/angular';
+import { IonDatetime, LoadingController, ModalController } from '@ionic/angular';
 import * as moment from 'moment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { PmCalService } from 'src/app/provider/pm-cal/pm-cal.service';
 import { environment } from 'src/environments/environment';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CameraService } from 'src/app/provider/camera/camera.service';
+import { DowntimeComponent } from '../downtime/downtime.component';
 @Component({
   selector: 'app-actionable',
   templateUrl: './actionable.component.html',
@@ -37,7 +38,8 @@ export class ActionableComponent  implements OnInit {
     private common: CommonService,
     private formbuilder: FormBuilder,
     private router: Router,
-    private camera: CameraService
+    private camera: CameraService,
+    private modalCtrl: ModalController
   ) { }
 
   ngOnInit() {
@@ -72,6 +74,22 @@ export class ActionableComponent  implements OnInit {
     // this.getActionable();
   }
 
+  async openDowntimeModal() {
+    const modal = await this.modalCtrl.create({
+      component: DowntimeComponent,
+      cssClass: 'downtime-modal',
+      backdropDismiss: false,
+      componentProps: { wo_id: this.requestedData.id }
+    });
+    // DowntimeComponent save_downtime success par hi 'true' deta hai; tab wahi actionable dobara bhejte hain
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role == 'true') {
+        this.postUserAction();
+      }
+    });
+    modal.present();
+  }
+
   getScheduleUser() {
     this.presentLoading().then(preLoad => {
       this.httpPms.getScheduleUser(this.requestedData.id).subscribe({
@@ -87,7 +105,7 @@ export class ActionableComponent  implements OnInit {
                   index: index
                 }));
               return acc.concat(qusWithCatDesc);
-            }, []);            
+            }, []);
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -227,6 +245,19 @@ export class ActionableComponent  implements OnInit {
       this.formData.append(key, this.addResponse.value[key]);
     }
 
+    // Aakhri actionable sahi jawab ke saath close ho raha ho to server downtime maangta hai, isliye API se
+    // pehle hi downtime modal - save hone par openDowntimeModal() yahi formData postUserAction() se bhejta hai
+    const selected = (this.questionList.options || []).find((opt: any) => opt.optn_id === this.addResponse.value.corrective_action);
+    const isCorrect = !!selected && selected.is_correct !== 0 && selected.is_correct !== '0';
+    if (this.actionableArr.length === 1 && isCorrect) {
+      this.openDowntimeModal();
+      return;
+    }
+    this.postUserAction();
+  }
+
+  // Server phir bhi downtime maange (message me "downtime") to toast ki jagah modal - upar wale check ka backup
+  postUserAction() {
     this.presentLoading().then(preLoad => {
       this.httpPms.updateUserAction(this.formData).subscribe({
         next:(dat) => {
@@ -236,6 +267,8 @@ export class ActionableComponent  implements OnInit {
             this.initializeForm();
             this.isImgUpload = false;
             this.getScheduleUser();
+          } else if (/downtime/i.test(dat.msg || '')) {
+            this.openDowntimeModal();
           } else {
             this.common.presentToast(dat.msg, 'warning');
           }

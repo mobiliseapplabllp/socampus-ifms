@@ -182,6 +182,10 @@ export class PmCalService {
     return this.https.post(environment.url + 'pmscal/schedule/update_schedule_status', formData);
   }
 
+  saveDowntime(data: any): Observable<any> {
+    return this.https.post(environment.url + 'pmscal/save_downtime', data);
+  }
+
   getOtherCategory() : Observable<any> {
     return this.https.get(environment.url + 'otherCategory.php')
   }
