@@ -1,0 +1,133 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      Tracking Status
+      <span class="tm-live" *ngIf="live">● LIVE</span>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <!-- Permission status -->
+  <ion-list lines="none" class="tm-list">
+    <ion-item class="tm-row" *ngFor="let p of permissions" detail="false">
+      <ion-label class="tm-label">{{ p.label }}</ion-label>
+      <ion-text slot="end" [color]="p.granted ? 'success' : 'danger'" class="tm-value">
+        {{ p.granted ? 'Allowed' : 'Not Allowed' }}
+      </ion-text>
+    </ion-item>
+  </ion-list>
+
+  <!-- Session summary -->
+  <ion-list lines="none" class="tm-list tm-summary" *ngIf="status?.running">
+    <ion-item class="tm-row" detail="false">
+      <ion-label class="tm-label">GPS interval</ion-label>
+      <ion-text slot="end" class="tm-value">{{ intervalSec }}s</ion-text>
+    </ion-item>
+    <ion-item class="tm-row" detail="false">
+      <ion-label class="tm-label">Points recorded</ion-label>
+      <ion-text slot="end" class="tm-value">
+        {{ points.length }} <ion-text color="medium">/ {{ expectedPoints }} expected</ion-text>
+      </ion-text>
+    </ion-item>
+    <ion-item class="tm-row" detail="false" *ngIf="missedPoints > 0">
+      <ion-label class="tm-label">Missed</ion-label>
+      <ion-text slot="end" color="danger" class="tm-value">{{ missedPoints }}</ion-text>
+    </ion-item>
+    <ion-item class="tm-row" detail="false">
+      <ion-label class="tm-label">Last fix</ion-label>
+      <ion-text slot="end" class="tm-value" [color]="isStale ? 'danger' : ''">{{ lastFixText }}</ion-text>
+    </ion-item>
+    <ion-item class="tm-row" detail="false">
+      <ion-label class="tm-label">Distance</ion-label>
+      <ion-text slot="end" class="tm-value">{{ distanceText }}</ion-text>
+    </ion-item>
+    <ion-item class="tm-row" detail="false">
+      <ion-label class="tm-label">Duration</ion-label>
+      <ion-text slot="end" class="tm-value">{{ durationText }}</ion-text>
+    </ion-item>
+    <ion-item class="tm-row" detail="false">
+      <ion-label class="tm-label">Last server response</ion-label>
+      <ion-text slot="end" class="tm-value">{{ status?.lastUpload }}</ion-text>
+    </ion-item>
+  </ion-list>
+
+  <!-- Map -->
+  <div class="tm-map-head">
+    <ion-text color="primary"><b>Tracked Path</b></ion-text>
+    <span class="tm-legend">
+      <i class="tm-dot tm-dot-start"></i> Start
+      <i class="tm-dot tm-dot-over"></i> Over
+      <i class="tm-dot tm-dot-end"></i> End
+      <ion-button
+        *ngIf="points.length"
+        fill="clear"
+        size="small"
+        class="tm-fit-btn"
+        (click)="fitToPath()">
+        <ion-icon slot="icon-only" name="scan-outline"></ion-icon>
+      </ion-button>
+    </span>
+  </div>
+
+  <div class="tm-map-wrap">
+    <div id="live-track-map" class="tm-map" [class.tm-hidden]="!points.length"></div>
+
+    <div class="tm-empty" *ngIf="!loading && !points.length">
+      <ion-icon name="map-outline"></ion-icon>
+      <p>No points recorded yet</p>
+      <p class="tm-empty-sub">First point appears after about {{ intervalSec }}s</p>
+    </div>
+
+    <div class="tm-empty" *ngIf="loading">
+      <ion-spinner name="lines-sharp"></ion-spinner>
+    </div>
+  </div>
+
+  <!-- Overspeed log - testing ke liye, har fix jo limit se upar tha -->
+  <div class="tm-map-head" *ngIf="!loading">
+    <ion-text color="primary">
+      <b>Overspeed ({{ status?.speedLimitKmh }}+ km/h)</b>
+    </ion-text>
+    <span class="tm-legend" *ngIf="overspeedPoints.length">
+      Top {{ topSpeed.toFixed(0) }} km/h · {{ alarmCount }} alarm(s)
+    </span>
+  </div>
+
+  <div class="tm-over" *ngIf="!loading">
+    <p class="tm-over-none" *ngIf="!overspeedPoints.length">
+      No overspeed recorded in this session
+    </p>
+
+    <table class="tm-table" *ngIf="overspeedPoints.length">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Time</th>
+          <th class="tm-num">Speed</th>
+          <th class="tm-num">Accuracy</th>
+          <th>Alarm</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of overspeedPoints; let i = index">
+          <td class="tm-idx">{{ i + 1 }}</td>
+          <td>{{ formatTime(p.time) }}</td>
+          <td class="tm-num tm-over-speed">{{ p.speed.toFixed(1) }} km/h</td>
+          <td class="tm-num tm-muted">±{{ p.accuracy.toFixed(0) }} m</td>
+          <td>
+            <ion-icon *ngIf="p.alarmed" name="volume-high" color="danger"></ion-icon>
+            <span *ngIf="!p.alarmed" class="tm-muted">—</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</ion-content>

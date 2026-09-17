@@ -1,0 +1,85 @@
+<ion-card class="tracking-card" *ngIf="supported">
+  <ion-card-content class="ion-no-padding">
+
+    <div class="tc-head">
+      <div class="tc-title" (click)="onTitleTap()">
+        <ion-icon name="location-outline" color="primary"></ion-icon>
+        <ion-text color="primary"><b>Location Tracking</b></ion-text>
+      </div>
+
+      <!-- "i" sirf tab jab sab allowed ho - warna list neeche khud dikh rahi hai -->
+      <ion-button
+        *ngIf="allGranted"
+        class="tc-info-btn"
+        fill="clear"
+        size="small"
+        (click)="openDetails()">
+        <ion-icon
+          slot="icon-only"
+          name="information-circle-outline"
+          [color]="isStale ? 'danger' : 'medium'"></ion-icon>
+      </ion-button>
+    </div>
+
+    <!-- ============ State A: koi permission baaki hai ============ -->
+    <ng-container *ngIf="!allGranted">
+      <ion-list lines="none" class="tc-list">
+        <ion-item
+          *ngFor="let p of permissions"
+          class="tc-row"
+          detail="false"
+          [button]="!p.granted"
+          (click)="fix(p)">
+          <ion-label class="tc-row-label">{{ p.label }}</ion-label>
+          <ion-text slot="end" [color]="p.granted ? 'success' : 'danger'" class="tc-row-status">
+            {{ p.granted ? 'Allowed' : 'Not Allowed' }}
+          </ion-text>
+          <ion-icon
+            *ngIf="!p.granted"
+            slot="end"
+            name="chevron-forward-outline"
+            color="danger"
+            class="tc-row-arrow"></ion-icon>
+        </ion-item>
+      </ion-list>
+      <p class="tc-hint">Allow all permissions to start tracking</p>
+    </ng-container>
+
+    <!-- ============ State B: sab allowed ============ -->
+    <ng-container *ngIf="allGranted">
+      <div class="tc-body">
+        <div class="tc-status">
+          <ng-container *ngIf="status?.running; else notRunning">
+            <ion-text [color]="isStale ? 'danger' : 'success'">
+              <ion-icon name="ellipse" class="tc-dot"></ion-icon>
+              <b>Active</b>
+            </ion-text>
+            <p class="tc-sub">
+              {{ lastUpdateText }}
+              <span *ngIf="status?.points"> · {{ status?.points }} pts · {{ distanceText }}</span>
+            </p>
+          </ng-container>
+          <ng-template #notRunning>
+            <ion-text color="medium">
+              <ion-icon name="ellipse" class="tc-dot"></ion-icon>
+              <b>Not tracking</b>
+            </ion-text>
+            <p class="tc-sub">Start to send your location every minute</p>
+          </ng-template>
+        </div>
+
+        <ion-button
+          size="small"
+          class="ion-text-capitalize tc-action"
+          [color]="status?.running ? 'danger' : 'primary'"
+          [fill]="status?.running ? 'outline' : 'solid'"
+          [disabled]="busy"
+          (click)="toggleTracking()">
+          <ion-spinner *ngIf="busy" name="lines-sharp" slot="start"></ion-spinner>
+          {{ status?.running ? 'Stop Tracking' : 'Start Tracking' }}
+        </ion-button>
+      </div>
+    </ng-container>
+
+  </ion-card-content>
+</ion-card>

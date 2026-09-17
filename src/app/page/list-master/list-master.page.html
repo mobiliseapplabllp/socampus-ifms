@@ -40,6 +40,7 @@
     </ion-buttons> -->
     <ion-button size="small" slot="end" class="ion-text-capitalize" color="danger" (click)="openPlayStore(appUpdate.url)" *ngIf="isAndroid && appUpdate.is_view && currentVersion !== appUpdate.vesrion" >App Update</ion-button>
   </ion-item>
+  <app-tracking-card [didEnter]="didEnter"></app-tracking-card>
   <app-dashboard [eventChange]="eventChange" ></app-dashboard>
   <app-menu [didEnter]="didEnter"></app-menu>
   <app-pending-task [eventChange]="eventChange" [didEnter]="didEnter"  *ngIf="isInternet"></app-pending-task>

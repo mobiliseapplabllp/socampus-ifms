@@ -23,6 +23,8 @@ export const environment = {
   // ssoUrl: 'https://socampusdev.mobilisepro.com/',
   // referUrl: 'https://socampusdev.mobilisepro.com/',
   // isProd: false,
+  // Native LiveTracker service seedha hit karti hai - proxy sirf Angular HttpClient ke liye hai
+  liveLocationUrl: 'https://socampus.mobilisepro.com/be/api/shared/user-live-location',
   db: 'socampuseng.db',
   db_location: 'default',
   errMsg: 'Internal Server Error Please try again!!!',

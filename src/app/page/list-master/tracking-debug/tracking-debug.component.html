@@ -1,0 +1,102 @@
+<ion-header>
+  <ion-toolbar color="dark">
+    <ion-title>Tracking Test Settings</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="!loading">
+
+  <div class="td-note">
+    <ion-icon name="flask-outline"></ion-icon>
+    <span>Testing only. Changes apply immediately and restart tracking with a fresh session.</span>
+  </div>
+
+  <!-- GPS interval -->
+  <div class="td-block">
+    <div class="td-label">GPS interval</div>
+    <ion-item lines="none" class="td-item">
+      <ion-input
+        type="number"
+        inputmode="numeric"
+        [(ngModel)]="gpsIntervalSec"
+        min="1"></ion-input>
+      <ion-note slot="end">seconds</ion-note>
+    </ion-item>
+    <div class="td-presets">
+      <ion-button
+        *ngFor="let p of intervalPresets"
+        size="small"
+        class="ion-text-capitalize"
+        [fill]="gpsIntervalSec == p ? 'solid' : 'outline'"
+        (click)="setInterval(p)">
+        {{ p }}s
+      </ion-button>
+    </div>
+    <p class="td-hint">Lower = better accuracy and speed, more heat and battery.</p>
+  </div>
+
+  <!-- Speed limit -->
+  <div class="td-block">
+    <div class="td-label">Overspeed limit</div>
+    <ion-item lines="none" class="td-item">
+      <ion-input
+        type="number"
+        inputmode="numeric"
+        [(ngModel)]="speedLimitKmh"
+        min="1"></ion-input>
+      <ion-note slot="end">km/h</ion-note>
+    </ion-item>
+    <div class="td-presets">
+      <ion-button
+        *ngFor="let p of limitPresets"
+        size="small"
+        class="ion-text-capitalize"
+        [fill]="speedLimitKmh == p ? 'solid' : 'outline'"
+        (click)="setLimit(p)">
+        {{ p }} km/h
+      </ion-button>
+    </div>
+    <p class="td-hint">Set to 5 km/h to test the alarm and red notification on foot.</p>
+  </div>
+
+  <!-- Upload URL -->
+  <div class="td-block">
+    <div class="td-label">Upload URL</div>
+    <ion-item lines="none" class="td-item">
+      <ion-textarea
+        [(ngModel)]="url"
+        [autoGrow]="true"
+        rows="2"></ion-textarea>
+    </ion-item>
+    <div class="td-presets">
+      <ion-button size="small" fill="outline" class="ion-text-capitalize" (click)="resetUrl()">
+        Reset to default
+      </ion-button>
+    </div>
+    <p class="td-hint">
+      {{ urlCustom ? 'Using a custom URL. It stays until you reset it.' : 'Using the default URL from the app build.' }}
+    </p>
+  </div>
+
+  <div class="td-status" *ngIf="running">
+    <ion-icon name="information-circle-outline"></ion-icon>
+    Tracking is running — applying will restart it and clear the current points.
+  </div>
+
+  <div class="td-actions">
+    <ion-button expand="block" class="ion-text-capitalize" [disabled]="busy" (click)="apply()">
+      <ion-spinner *ngIf="busy" name="lines-sharp" slot="start"></ion-spinner>
+      Apply
+    </ion-button>
+  </div>
+
+</ion-content>
+
+<ion-content *ngIf="loading" class="ion-text-center">
+  <ion-spinner name="lines-sharp" class="td-loading"></ion-spinner>
+</ion-content>
