@@ -109,6 +109,8 @@ export class TrackingCardComponent implements OnInit, OnChanges, OnDestroy {
   async refresh(): Promise<void> {
     const status = await this.liveTracker.checkStatus();
     this.status = status;
+    // Native hi sach hai - localStorage wala activeTrip usi se mila lo
+    void this.liveTracker.syncActiveTrip();
     this.permissions = [
       { key: 'gps', label: 'Location Services (GPS)', granted: status.gps },
       { key: 'location', label: 'Location (Always Allow)', granted: status.location },

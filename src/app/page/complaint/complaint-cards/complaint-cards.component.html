@@ -143,5 +143,16 @@
           <ion-button style="width:80%;font-size:xx-small;" color="success" (click)="fsr(data.tkts_id)">EFSR</ion-button>
         </ion-col>
       </ion-row>
+      <!-- TESTING: hardcoded trip buttons - backend condition aane par hatenge -->
+      <ion-row *ngIf="showTripTest">
+        <ion-col class="ion-text-center">
+          <ion-button style="width:80%;font-size:xx-small;" color="tertiary" [disabled]="tripBusy" (click)="testStartTrip()">
+            {{ isThisTripActive ? '● Trip Running' : 'Start Trip' }}
+          </ion-button>
+        </ion-col>
+        <ion-col class="ion-text-center">
+          <ion-button style="width:80%;font-size:xx-small;" color="danger" [disabled]="tripBusy" (click)="testEndTrip()">End Trip</ion-button>
+        </ion-col>
+      </ion-row>
     </ion-grid>
 </ion-card>

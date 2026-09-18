@@ -31,6 +31,12 @@ class LiveTrackerPrefs {
     private static final String KEY_SPEED_LIMIT = "speed_limit_kmh";
     private static final String KEY_URL_CUSTOM = "url_custom";
 
+    // Module trip - service isi se jaanti hai ki fix trip_points me bhi likhna hai.
+    // localStorage wala activeTrip sirf JS guards ke liye hai, service use padh nahi sakti.
+    private static final String KEY_TRIP_MODULE = "trip_module";
+    private static final String KEY_TRIP_ID = "trip_id";
+    private static final String KEY_TRIP_STARTED_AT = "trip_started_at";
+
     static final long DEFAULT_GPS_INTERVAL_MS = 60_000L;
     static final float DEFAULT_SPEED_LIMIT_KMH = 50f;
 
@@ -124,6 +130,39 @@ class LiveTrackerPrefs {
 
     void setUrlCustom(boolean custom) {
         sp.edit().putBoolean(KEY_URL_CUSTOM, custom).apply();
+    }
+
+    boolean hasActiveTrip() {
+        return !getTripModule().isEmpty() && !getTripId().isEmpty();
+    }
+
+    String getTripModule() {
+        return sp.getString(KEY_TRIP_MODULE, "");
+    }
+
+    String getTripId() {
+        return sp.getString(KEY_TRIP_ID, "");
+    }
+
+    long getTripStartedAt() {
+        return sp.getLong(KEY_TRIP_STARTED_AT, 0L);
+    }
+
+    /** commit() - watchdog restart turant hua to bhi flag disk par hona chahiye */
+    void setActiveTrip(String module, String id, long startedAt) {
+        sp.edit()
+                .putString(KEY_TRIP_MODULE, module)
+                .putString(KEY_TRIP_ID, id)
+                .putLong(KEY_TRIP_STARTED_AT, startedAt)
+                .commit();
+    }
+
+    void clearActiveTrip() {
+        sp.edit()
+                .remove(KEY_TRIP_MODULE)
+                .remove(KEY_TRIP_ID)
+                .remove(KEY_TRIP_STARTED_AT)
+                .commit();
     }
 
     /** GPS har kitne millisecond par - debug screen se badalta hai */

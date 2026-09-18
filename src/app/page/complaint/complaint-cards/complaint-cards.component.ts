@@ -10,6 +10,9 @@ import { TicketTypeComponent } from '../ticket-type/ticket-type.component';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { TravelDetailComponent } from '../travel-detail/travel-detail.component';
 import { InstructionModalComponent } from '../instruction-modal/instruction-modal.component';
+import { TripEndComponent } from '../trip-end/trip-end.component';
+import { Geolocation } from '@capacitor/geolocation';
+import { LiveTrackerService } from 'src/app/provider/live-tracker/live-tracker.service';
 @Component({
   selector: 'app-complaint-cards',
   templateUrl: './complaint-cards.component.html',
@@ -27,13 +30,19 @@ export class ComplaintCardsComponent  implements OnInit {
   };
   userData: any = [];
   loading: any;
+
+  /** TESTING: hardcoded Start/End Trip - production build me nahi dikhte */
+  readonly showTripTest = !environment.isProd;
+  tripBusy = false;
+
   constructor(
     private modalCtrl: ModalController,
     private httpComplaint: ComplaintService,
     private common: CommonService,
     private router: Router,
     private alertController: AlertController,
-    private navCtrl: NavController
+    private navCtrl: NavController,
+    private liveTracker: LiveTrackerService
   ) {
 
   }
@@ -272,4 +281,74 @@ export class ComplaintCardsComponent  implements OnInit {
   }
 
 
+
+  // ------------------------------------------------------ trip (TESTING)
+  // Server ki condition aur start/end API abhi ready nahi - isliye hardcoded button.
+  // Nayi tracking start nahi hoti: home page wali tracking hi har fix is ticket ke
+  // against trip_points me bhi likhne lagti hai.
+
+  /** Is ticket ki trip abhi chal rahi hai? (localStorage - turant jawab) */
+  get isThisTripActive(): boolean {
+    const t = this.liveTracker.getLocalTrip();
+    return !!t && t.module === 'complaint' && String(t.id) === String(this.data?.tkts_id);
+  }
+
+  async testStartTrip(): Promise<void> {
+    if (this.tripBusy) {
+      return;
+    }
+    const active = await this.liveTracker.syncActiveTrip();
+    if (active) {
+      const same = active.module === 'complaint' && String(active.id) === String(this.data.tkts_id);
+      this.common.presentToast(
+        same
+          ? 'Trip is already running for this ticket'
+          : `Another trip is active (${active.module} #${active.id}). End it first.`,
+        'warning'
+      );
+      return;
+    }
+
+    this.tripBusy = true;
+    await this.common.presentLoading('Getting current location...');
+    try {
+      // Start point = abhi ki location. Server ko bhi yahi jayegi (API ready hone par),
+      // aur trip_points ka pehla point bhi yahi banta hai
+      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 20000 });
+      await this.liveTracker.startTrip('complaint', this.data.tkts_id, {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        accuracy: pos.coords.accuracy || 0
+      });
+      this.common.presentToast('Trip started', 'success');
+    } catch (e: any) {
+      console.error('startTrip', e);
+      this.common.presentToast(e?.message || 'Could not start the trip', 'warning');
+    } finally {
+      this.common.dismissloading();
+      this.tripBusy = false;
+    }
+  }
+
+  async testEndTrip(): Promise<void> {
+    if (this.tripBusy) {
+      return;
+    }
+    const active = await this.liveTracker.syncActiveTrip();
+    const same = !!active && active.module === 'complaint'
+      && String(active.id) === String(this.data.tkts_id);
+    if (!same) {
+      this.common.presentToast('No active trip for this ticket', 'warning');
+      return;
+    }
+
+    const modal = await this.modalCtrl.create({
+      component: TripEndComponent,
+      componentProps: {
+        module: 'complaint',
+        specificId: String(this.data.tkts_id)
+      }
+    });
+    await modal.present();
+  }
 }

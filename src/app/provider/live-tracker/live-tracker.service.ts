@@ -29,7 +29,33 @@ export interface LiveTrackerStatus {
   speedLimitKmh: number;
   /** GPS har kitne second par - debug screen se badalta hai */
   gpsIntervalSec: number;
+  tripActive: boolean;
+  tripModule: string;
+  tripId: string;
+  tripStartedAt: number;
 }
+
+export type TripModule = 'complaint' | 'concierge' | 'pms';
+
+export interface ActiveTrip {
+  active: boolean;
+  module: string;
+  id: string;
+  startedAt: number;
+}
+
+/** trip_points ki ek row - end card ka map, distance aur track_arr isi se */
+export interface TripPoint {
+  lat: number;
+  lng: number;
+  /** km/h */
+  speed: number;
+  accuracy: number;
+  time: number;
+}
+
+/** Sirf JS guards ke liye - punch-out/stop block aur doosre ticket ka start block */
+const ACTIVE_TRIP_KEY = 'activeTrip';
 
 export interface LiveTrackerConfig {
   gpsIntervalSec: number;
@@ -66,6 +92,12 @@ interface LiveTrackerPluginApi {
   getConfig(): Promise<LiveTrackerConfig>;
   setConfig(options: Partial<LiveTrackerConfig> & { resetUrl?: boolean }):
     Promise<LiveTrackerStatus & { restarted: boolean }>;
+  startTrip(options: { module: string; id: string; lat?: number; lng?: number; accuracy?: number }):
+    Promise<ActiveTrip>;
+  getTripPoints(options: { module: string; id: string }): Promise<{ points: TripPoint[] }>;
+  endTrip(options: { module: string; id: string }): Promise<ActiveTrip>;
+  clearTrip(options: { module: string; id: string }): Promise<void>;
+  getActiveTrip(): Promise<ActiveTrip>;
 }
 
 const LiveTracker = registerPlugin<LiveTrackerPluginApi>('LiveTracker');
@@ -87,7 +119,11 @@ const EMPTY_STATUS: LiveTrackerStatus = {
   lastSpeed: 0,
   lastGpsSpeed: 0,
   speedLimitKmh: 50,
-  gpsIntervalSec: 60
+  gpsIntervalSec: 60,
+  tripActive: false,
+  tripModule: '',
+  tripId: '',
+  tripStartedAt: 0
 };
 
 @Injectable({ providedIn: 'root' })
@@ -148,6 +184,90 @@ export class LiveTrackerService {
     } catch (e) {
       console.error('LiveTracker.getSessionPoints', e);
       return [];
+    }
+  }
+
+  // ---------------------------------------------------------------- trip
+
+  /**
+   * Module trip shuru. Nayi tracking start NAHI hoti - home page wali tracking hi
+   * har fix trip_points me bhi likhne lagti hai. Home tracking band ho to native
+   * reject kar deta hai.
+   */
+  async startTrip(module: TripModule, id: string | number,
+                  start: { lat: number; lng: number; accuracy?: number }): Promise<ActiveTrip> {
+    if (!this.isSupported()) {
+      throw new Error('Trip tracking works only in the Android app');
+    }
+    const trip = await LiveTracker.startTrip({
+      module,
+      id: String(id),
+      lat: start.lat,
+      lng: start.lng,
+      accuracy: start.accuracy
+    });
+    this.writeLocalTrip(trip);
+    return trip;
+  }
+
+  async getTripPoints(module: TripModule, id: string | number): Promise<TripPoint[]> {
+    if (!this.isSupported()) {
+      return [];
+    }
+    const { points } = await LiveTracker.getTripPoints({ module, id: String(id) });
+    return points || [];
+  }
+
+  /** Aage ke fix trip me nahi jayenge. Points yahan clear nahi hote. */
+  async endTrip(module: TripModule, id: string | number): Promise<void> {
+    if (!this.isSupported()) {
+      return;
+    }
+    const trip = await LiveTracker.endTrip({ module, id: String(id) });
+    this.writeLocalTrip(trip);
+  }
+
+  /** Production me end API success ke baad - sirf usi trip ka data */
+  async clearTrip(module: TripModule, id: string | number): Promise<void> {
+    if (!this.isSupported()) {
+      return;
+    }
+    await LiveTracker.clearTrip({ module, id: String(id) });
+  }
+
+  /**
+   * Native hi sach hai - localStorage ko usi se mila deta hai. App crash ya
+   * WebView data clear hone par dono alag na reh jayein.
+   */
+  async syncActiveTrip(): Promise<ActiveTrip | null> {
+    if (!this.isSupported()) {
+      return null;
+    }
+    try {
+      const trip = await LiveTracker.getActiveTrip();
+      this.writeLocalTrip(trip);
+      return trip.active ? trip : null;
+    } catch (e) {
+      console.error('LiveTracker.getActiveTrip', e);
+      return this.getLocalTrip();
+    }
+  }
+
+  /** Turant jawab ke liye (sync) - JS guards isi ko dekhte hain */
+  getLocalTrip(): ActiveTrip | null {
+    try {
+      const raw = localStorage.getItem(ACTIVE_TRIP_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private writeLocalTrip(trip: ActiveTrip): void {
+    if (trip?.active) {
+      localStorage.setItem(ACTIVE_TRIP_KEY, JSON.stringify(trip));
+    } else {
+      localStorage.removeItem(ACTIVE_TRIP_KEY);
     }
   }
 

@@ -1,0 +1,105 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>End Trip · #{{ specificId }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="te-loading" *ngIf="loading">
+    <ion-spinner name="lines-sharp"></ion-spinner>
+    <p>Getting trip path and current location...</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Start / End -->
+    <div class="te-points">
+      <div class="te-point">
+        <div class="te-point-head">
+          <i class="te-dot te-dot-start"></i> Start
+        </div>
+        <div class="te-point-coords">{{ formatCoords(start?.lat, start?.lng) }}</div>
+        <div class="te-point-time">{{ formatTime(start?.time || 0) }}</div>
+      </div>
+
+      <div class="te-point">
+        <div class="te-point-head">
+          <i class="te-dot te-dot-end"></i> End (current)
+        </div>
+        <ng-container *ngIf="end; else noEnd">
+          <div class="te-point-coords">{{ formatCoords(end.lat, end.lng) }}</div>
+          <div class="te-point-time">{{ formatTime(end.time) }} · ±{{ end.accuracy.toFixed(0) }} m</div>
+        </ng-container>
+        <ng-template #noEnd>
+          <div class="te-point-coords te-error">Location not available</div>
+          <ion-button size="small" fill="outline" class="ion-text-capitalize" (click)="retryLocation()">
+            Retry
+          </ion-button>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Distance -->
+    <ion-list lines="none" class="te-list">
+      <ion-item class="te-row" detail="false">
+        <ion-label class="te-label">Calculated distance</ion-label>
+        <ion-text slot="end" class="te-value">{{ calculatedKm.toFixed(2) }} km</ion-text>
+      </ion-item>
+      <ion-item class="te-row" detail="false">
+        <ion-label class="te-label">Points recorded</ion-label>
+        <ion-text slot="end" class="te-value">{{ points.length }}</ion-text>
+      </ion-item>
+      <ion-item class="te-row" detail="false">
+        <ion-label class="te-label">Duration</ion-label>
+        <ion-text slot="end" class="te-value">{{ durationText }}</ion-text>
+      </ion-item>
+    </ion-list>
+
+    <div class="te-block">
+      <div class="te-input-label">Manual km</div>
+      <ion-item lines="none" class="te-input">
+        <ion-input
+          type="number"
+          inputmode="decimal"
+          placeholder="Enter km as per odometer"
+          [(ngModel)]="manualKm"></ion-input>
+        <ion-note slot="end">km</ion-note>
+      </ion-item>
+    </div>
+
+    <!-- Map -->
+    <div class="te-map-head">
+      <ion-text color="primary"><b>Trip Path</b></ion-text>
+      <span class="te-legend">
+        <i class="te-dot te-dot-start"></i> Start
+        <i class="te-dot te-dot-end"></i> End
+      </span>
+    </div>
+    <div class="te-map-wrap">
+      <div id="trip-end-map" class="te-map" [class.te-hidden]="!points.length && !end"></div>
+      <div class="te-empty" *ngIf="!points.length && !end">
+        <ion-icon name="map-outline"></ion-icon>
+        <p>No points recorded for this trip</p>
+      </div>
+    </div>
+
+    <p class="te-note">
+      <ion-icon name="flask-outline"></ion-icon>
+      Testing build: Submit prints the payload in the console and ends the trip. Nothing is sent to the server yet.
+    </p>
+
+    <div class="te-actions">
+      <ion-button expand="block" class="ion-text-capitalize" color="danger" [disabled]="busy || !end" (click)="submit()">
+        <ion-spinner *ngIf="busy" name="lines-sharp" slot="start"></ion-spinner>
+        End Trip
+      </ion-button>
+    </div>
+
+  </ng-container>
+</ion-content>

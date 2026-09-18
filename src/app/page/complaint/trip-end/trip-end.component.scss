@@ -1,0 +1,180 @@
+.te-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 60px;
+  color: var(--ion-color-medium);
+  font-size: 13px;
+}
+
+.te-points {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+}
+
+.te-point {
+  flex: 1;
+  min-width: 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--ion-color-light);
+}
+
+.te-point-head {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--ion-color-medium);
+  margin-bottom: 4px;
+}
+
+.te-point-coords {
+  font-size: 13px;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.te-point-time {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+  margin-top: 2px;
+}
+
+.te-error {
+  color: var(--ion-color-danger);
+  margin-bottom: 6px;
+}
+
+.te-list {
+  background: transparent;
+  padding: 0;
+}
+
+.te-row {
+  --min-height: 34px;
+  --padding-start: 14px;
+  --inner-padding-end: 12px;
+  --background: transparent;
+}
+
+.te-label {
+  font-size: 13px;
+}
+
+.te-value {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.te-block {
+  margin: 8px 12px 4px 12px;
+}
+
+.te-input-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--ion-color-medium);
+  margin-bottom: 4px;
+}
+
+.te-input {
+  --background: var(--ion-color-light);
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  --min-height: 44px;
+  border-radius: 8px;
+}
+
+.te-map-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 8px 14px;
+}
+
+.te-legend {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+}
+
+.te-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin: 0 4px 0 8px;
+  vertical-align: middle;
+}
+
+.te-dot-start {
+  background: #2dd36f;
+}
+
+.te-dot-end {
+  background: #eb445a;
+}
+
+.te-map-wrap {
+  position: relative;
+  margin: 0 12px 12px 12px;
+  height: 45vh;
+  min-height: 260px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ion-color-light);
+}
+
+.te-map {
+  width: 100%;
+  height: 100%;
+}
+
+.te-hidden {
+  visibility: hidden;
+}
+
+.te-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--ion-color-medium);
+  font-size: 13px;
+
+  ion-icon {
+    font-size: 36px;
+    opacity: 0.5;
+  }
+}
+
+.te-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 12px 12px 12px;
+  font-size: 12px;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+.te-actions {
+  margin: 0 12px 24px 12px;
+
+  ion-spinner {
+    width: 16px;
+    height: 16px;
+  }
+}

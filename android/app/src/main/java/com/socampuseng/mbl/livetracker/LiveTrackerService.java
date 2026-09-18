@@ -194,7 +194,16 @@ public class LiveTrackerService extends Service {
             postOverspeedAlert(speed * KMH_PER_MS, lat, lng, now, alarmed);
         }
 
+        // Trip ki pehchaan fix ke waqt hi pakad lo - upload me 15s lag sakte hain,
+        // us beech trip end ho gayi to point galat trip me na chala jaye
+        final String tripModule = prefs.hasActiveTrip() ? prefs.getTripModule() : null;
+        final String tripId = prefs.hasActiveTrip() ? prefs.getTripId() : null;
+
         uploadExecutor.execute(() -> {
+            // Wahi fix, doosri manzil - koi nayi GPS request nahi
+            if (tripModule != null) {
+                points.insertTrip(tripModule, tripId, lat, lng, speed * KMH_PER_MS, accuracy, now);
+            }
             long rowId = points.insert(lat, lng, speed * KMH_PER_MS, accuracy, now, alarmed);
             String result = upload(lat, lng, speed);
             prefs.setLastUpload(result);
@@ -472,6 +481,15 @@ public class LiveTrackerService extends Service {
             details.append("Server:    ").append(prefs.getLastUpload()).append('\n');
             details.append('\n');
         }
+        if (prefs.hasActiveTrip()) {
+            details.append("Trip:      ").append(prefs.getTripModule())
+                    .append(" #").append(prefs.getTripId());
+            long tripStart = prefs.getTripStartedAt();
+            if (tripStart > 0) {
+                details.append(" · ").append(humanDuration(System.currentTimeMillis() - tripStart));
+            }
+            details.append('\n');
+        }
         details.append("Distance:  ").append(humanDistance(prefs.getDistance())).append('\n');
         details.append("Points:    ").append(points).append('\n');
         if (startedAt > 0) {
@@ -487,7 +505,9 @@ public class LiveTrackerService extends Service {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 // Header me label - concierge wali "Location Tracker" notification se
                 // alag pehchaan ke liye, kyunki dono ek saath dikh sakti hain
-                .setSubText("Live Tracking")
+                .setSubText(prefs.hasActiveTrip()
+                        ? "Live Tracking · Trip #" + prefs.getTripId()
+                        : "Live Tracking")
                 .setContentTitle(title)
                 .setContentText(summary)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(details.toString()))

@@ -160,6 +160,10 @@ public class LiveTrackerPlugin extends Plugin {
         ret.put("lastSpeed", prefs.getLastSpeed());
         ret.put("speedLimitKmh", prefs.getSpeedLimitKmh());
         ret.put("gpsIntervalSec", prefs.getGpsIntervalMs() / 1000L);
+        ret.put("tripActive", prefs.hasActiveTrip());
+        ret.put("tripModule", prefs.getTripModule());
+        ret.put("tripId", prefs.getTripId());
+        ret.put("tripStartedAt", prefs.getTripStartedAt());
         return ret;
     }
 
@@ -370,13 +374,138 @@ public class LiveTrackerPlugin extends Plugin {
     public void stop(PluginCall call) {
         try {
             Context ctx = getContext();
+            LiveTrackerPrefs prefs = new LiveTrackerPrefs(ctx);
+
+            // Trip isi tracking par tiki hai - band ki to trip ka path beech me kat jayega
+            if (prefs.hasActiveTrip()) {
+                call.reject("Finish the active trip before stopping tracking");
+                return;
+            }
+
             // Flag pehle - service onDestroy isi se decide karti hai ki watchdog
             // cancel karna hai ya nahi
-            new LiveTrackerPrefs(ctx).setEnabled(false);
+            prefs.setEnabled(false);
             ctx.stopService(new Intent(ctx, LiveTrackerService.class));
             call.resolve(buildStatus());
         } catch (Exception e) {
             call.reject("Failed to stop tracking: " + e.getMessage(), e);
         }
+    }
+
+    // ------------------------------------------------------------------ trip
+
+    /**
+     * Module trip shuru. Koi nayi GPS request nahi banti - home page wali chalti hui
+     * tracking hi har fix trip_points me bhi likhne lagti hai.
+     *
+     * Start ka current lat/lng pehla point ban jaata hai, warna path agle fix se
+     * (60s baad) shuru hota aur start wala hissa gayab rehta.
+     */
+    @PluginMethod
+    public void startTrip(PluginCall call) {
+        String module = call.getString("module", "");
+        String id = call.getString("id", "");
+        if (module == null || module.isEmpty() || id == null || id.isEmpty()) {
+            call.reject("Trip module and id are required");
+            return;
+        }
+
+        LiveTrackerPrefs prefs = new LiveTrackerPrefs(getContext());
+        if (!prefs.isEnabled()) {
+            call.reject("Start location tracking from the home page first");
+            return;
+        }
+
+        if (prefs.hasActiveTrip()) {
+            boolean same = module.equals(prefs.getTripModule()) && id.equals(prefs.getTripId());
+            if (!same) {
+                call.reject("Another trip is already active (" + prefs.getTripModule()
+                        + " #" + prefs.getTripId() + ")");
+                return;
+            }
+            // Wahi trip dobara - naya start point mat daalo, jo chal raha hai wahi lautao
+            call.resolve(tripStatus(prefs));
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        prefs.setActiveTrip(module, id, now);
+
+        Double lat = call.getDouble("lat");
+        Double lng = call.getDouble("lng");
+        if (lat != null && lng != null && (lat != 0 || lng != 0)) {
+            Double acc = call.getDouble("accuracy");
+            LivePointsDb.getInstance(getContext()).insertTrip(
+                    module, id, lat, lng, 0f, acc == null ? 0f : acc.floatValue(), now);
+        }
+        call.resolve(tripStatus(prefs));
+    }
+
+    /** Ek trip ka path - end card ka map, distance aur track_arr isi se */
+    @PluginMethod
+    public void getTripPoints(PluginCall call) {
+        String module = call.getString("module", "");
+        String id = call.getString("id", "");
+        if (module == null || module.isEmpty() || id == null || id.isEmpty()) {
+            call.reject("Trip module and id are required");
+            return;
+        }
+        try {
+            JSObject ret = new JSObject();
+            ret.put("points", LivePointsDb.getInstance(getContext()).getTrip(module, id));
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Failed to read trip points: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Trip band - aage ke fix trip_points me nahi jayenge. Points yahan clear NAHI
+     * hote; wo clearTrip() se, end API ke success ke baad hi.
+     */
+    @PluginMethod
+    public void endTrip(PluginCall call) {
+        String module = call.getString("module", "");
+        String id = call.getString("id", "");
+        LiveTrackerPrefs prefs = new LiveTrackerPrefs(getContext());
+
+        if (!prefs.hasActiveTrip()) {
+            call.resolve(tripStatus(prefs));
+            return;
+        }
+        if (!prefs.getTripModule().equals(module) || !prefs.getTripId().equals(id)) {
+            call.reject("This trip is not the active one (" + prefs.getTripModule()
+                    + " #" + prefs.getTripId() + ")");
+            return;
+        }
+        prefs.clearActiveTrip();
+        call.resolve(tripStatus(prefs));
+    }
+
+    /** Production me end API success ke baad - sirf usi trip ka data. */
+    @PluginMethod
+    public void clearTrip(PluginCall call) {
+        String module = call.getString("module", "");
+        String id = call.getString("id", "");
+        if (module == null || module.isEmpty() || id == null || id.isEmpty()) {
+            call.reject("Trip module and id are required");
+            return;
+        }
+        LivePointsDb.getInstance(getContext()).clearTrip(module, id);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void getActiveTrip(PluginCall call) {
+        call.resolve(tripStatus(new LiveTrackerPrefs(getContext())));
+    }
+
+    private JSObject tripStatus(LiveTrackerPrefs prefs) {
+        JSObject ret = new JSObject();
+        ret.put("active", prefs.hasActiveTrip());
+        ret.put("module", prefs.getTripModule());
+        ret.put("id", prefs.getTripId());
+        ret.put("startedAt", prefs.getTripStartedAt());
+        return ret;
     }
 }
