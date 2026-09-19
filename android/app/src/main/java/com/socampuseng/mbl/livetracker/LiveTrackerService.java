@@ -71,8 +71,14 @@ public class LiveTrackerService extends Service {
     private static final float SPEED_REARM_GAP_KMH = 5f;
     private static final float KMH_PER_MS = 3.6f;
 
-    /** Isse behtar fix par GPS ki apni speed par bharosa kiya ja sakta hai */
-    private static final float GOOD_ACCURACY_M = 15f;
+    /** GPS speed tabhi maani jaati hai jab fix itna pakka ho */
+    private static final float SPEED_TRUST_ACCURACY_M = 20f;
+    /** Android 8+ GPS speed ki apni galti bhi batata hai - isse zyada ho to reading chhodo */
+    private static final float SPEED_ACCURACY_MAX_MS = 3f;
+    /** Isse purana fix = cached location (service restart par aati hai) - speed nahi */
+    private static final long STALE_FIX_MS = 15_000L;
+    /** 180 km/h - isse upar = location koodi hai, asli chalna nahi */
+    private static final float MAX_PLAUSIBLE_SPEED_MS = 50f;
     /** Isse kam hilna GPS drift maana jaayega, distance me nahi judega */
     private static final float MIN_DISTANCE_STEP_M = 10f;
 
@@ -163,8 +169,9 @@ public class LiveTrackerService extends Service {
         final float gpsSpeed = loc.hasSpeed() ? loc.getSpeed() : 0f;
         final float accuracy = loc.hasAccuracy() ? loc.getAccuracy() : 0f;
         final long now = System.currentTimeMillis();
+        final float prevAccuracy = prefs.getLastAccuracy();
 
-        // Pichle fix se doori - derived speed aur total distance dono isi se
+        // Pichle fix se doori - sirf distance ke liye. Speed ab isse NAHI nikalti.
         float movedM = 0f;
         long dtMs = 0L;
         double prevLat = prefs.getLastLat();
@@ -177,20 +184,29 @@ public class LiveTrackerService extends Service {
             dtMs = now - prevTime;
         }
 
-        final float speed = resolveSpeed(gpsSpeed, accuracy, movedM, dtMs);
+        // Speed = us pal ki GPS (Doppler) speed. Position se nahi nikalte - andar phone
+        // ki location tower <-> GPS me koodti hai, aur us "koodne" ko chalna maan kar
+        // khade phone par bhi overspeed aa jaati thi.
+        final boolean speedTrusted = isSpeedTrusted(loc, accuracy);
+        final float speed = speedTrusted ? gpsSpeed : 0f;
 
-        // Khade hue bhi GPS ±37m tak drift karta hai - use distance me mat jodo
-        if (movedM > Math.max(accuracy, MIN_DISTANCE_STEP_M)) {
+        // Distance: dono fix ki galti jod ke dekho. Pichla fix ±400m (tower) aur naya ±10m
+        // ho to 300m ka farak asli chalna nahi, location ka koodna hai.
+        boolean drift = movedM <= Math.max(prevAccuracy + accuracy, MIN_DISTANCE_STEP_M);
+        boolean jump = dtMs > 0 && movedM / (dtMs / 1000f) > MAX_PLAUSIBLE_SPEED_MS;
+        if (!drift && !jump) {
             prefs.addDistance(movedM);
         }
 
-        prefs.recordFix(lat, lng, speed, gpsSpeed, accuracy, now);
-        final boolean alarmed = checkOverspeed(speed);
+        prefs.recordFix(lat, lng, speed, gpsSpeed, accuracy, now, speedTrusted);
+        // Bharosemand speed na ho to overspeed ka faisla hi mat lo - alarm ki haalat
+        // (armed / re-arm) bhi waisi hi rehti hai
+        final boolean alarmed = speedTrusted && checkOverspeed(speed);
         updateNotification();
 
         // Ongoing notification laal hoti hai par wo ek hi jagah update hoti rehti hai -
         // ye alag alert har overspeed reading ka apna record chhod jaata hai
-        if (speed * KMH_PER_MS >= prefs.getSpeedLimitKmh()) {
+        if (speedTrusted && speed * KMH_PER_MS >= prefs.getSpeedLimitKmh()) {
             postOverspeedAlert(speed * KMH_PER_MS, lat, lng, now, alarmed);
         }
 
@@ -213,26 +229,27 @@ public class LiveTrackerService extends Service {
     }
 
     /**
-     * 1-minute interval par GPS ki instantaneous (Doppler) speed bharosemand nahi hoti:
-     * chip har fix ke beech so jaata hai, isliye weak fix par 0 ya random value deta hai.
-     * Isliye position se nikali hui average speed use karte hain - is interval par wo
-     * kaafi behtar hai, kyunki 50 km/h par bike ek minute me ~830m chalti hai aur uske
-     * saamne ±37m ki error choti pad jaati hai.
+     * GPS speed tabhi maano jab reading pakki ho. Pehle test me 60s par ±37m wale fix
+     * ne paidal par 19 km/h aur bike par 0 diya tha - wo sab yahin chhant jaati hain.
+     * Chhati hui reading ki speed 0 maani jaati hai aur overspeed me gini nahi jaati.
      */
-    private float resolveSpeed(float gpsSpeed, float accuracy, float movedM, long dtMs) {
-        // Fix achha ho to GPS ki apni speed hi sabse sahi hai - wo instantaneous hai,
-        // ek minute ka average nahi
-        if (gpsSpeed > 0f && accuracy > 0f && accuracy <= GOOD_ACCURACY_M) {
-            return gpsSpeed;
+    private boolean isSpeedTrusted(Location loc, float accuracy) {
+        if (!loc.hasSpeed()) {
+            return false;       // tower / Wi-Fi location me speed hoti hi nahi
         }
-        if (dtMs <= 0) {
-            return 0f;
+        long ageMs = (SystemClock.elapsedRealtimeNanos() - loc.getElapsedRealtimeNanos()) / 1_000_000L;
+        if (ageMs > STALE_FIX_MS) {
+            return false;       // service restart par aane wali purani cached location
         }
-        // Hilna accuracy ke daayre me hai = drift maan lo, speed 0
-        if (movedM <= accuracy) {
-            return 0f;
+        if (accuracy <= 0f || accuracy > SPEED_TRUST_ACCURACY_M) {
+            return false;
         }
-        return movedM / (dtMs / 1000f);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                && loc.hasSpeedAccuracy()
+                && loc.getSpeedAccuracyMetersPerSecond() > SPEED_ACCURACY_MAX_MS) {
+            return false;
+        }
+        return loc.getSpeed() <= MAX_PLAUSIBLE_SPEED_MS;
     }
 
     /**
@@ -443,6 +460,10 @@ public class LiveTrackerService extends Service {
         // Line 1 = coordinates, Line 2 = speed / time / count / server status
         boolean overspeed = lastFix > 0 && isOverspeed();
         float kmh = prefs.getLastSpeed() * KMH_PER_MS;
+        // Chhati hui reading par 0 dikhana jhooth hoga - "khada hai" lagega
+        String speedText = prefs.isLastSpeedTrusted()
+                ? String.format(Locale.US, "%.1f km/h", kmh)
+                : "— km/h";
 
         String title;
         String summary;
@@ -451,8 +472,8 @@ public class LiveTrackerService extends Service {
                     ? String.format(Locale.US, "⚠ OVERSPEED · %.0f km/h", kmh)
                     : String.format(Locale.US, "%.6f, %.6f",
                             prefs.getLastLat(), prefs.getLastLng());
-            summary = String.format(Locale.US, "%.1f km/h · %s · %d pts · %s",
-                    kmh,
+            summary = String.format(Locale.US, "%s · %s · %d pts · %s",
+                    speedText,
                     clock.format(new Date(lastFix)),
                     points,
                     prefs.getLastUpload());
@@ -467,7 +488,7 @@ public class LiveTrackerService extends Service {
         if (lastFix > 0) {
             details.append("Lat:       ").append(String.format(Locale.US, "%.6f", prefs.getLastLat())).append('\n');
             details.append("Lng:       ").append(String.format(Locale.US, "%.6f", prefs.getLastLng())).append('\n');
-            details.append("Speed:     ").append(String.format(Locale.US, "%.1f km/h", kmh));
+            details.append("Speed:     ").append(speedText);
             details.append(overspeed ? "  ⚠\n" : "\n");
             details.append("Time:      ").append(clock.format(new Date(lastFix))).append('\n');
             details.append("Server:    ").append(prefs.getLastUpload()).append('\n');

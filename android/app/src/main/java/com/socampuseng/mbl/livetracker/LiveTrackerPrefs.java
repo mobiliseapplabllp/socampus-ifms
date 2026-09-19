@@ -25,6 +25,7 @@ class LiveTrackerPrefs {
     private static final String KEY_LAST_UPLOAD = "last_upload";
     private static final String KEY_LAST_GPS_SPEED = "last_gps_speed";
     private static final String KEY_DISTANCE = "distance_m";
+    private static final String KEY_LAST_SPEED_TRUSTED = "last_speed_trusted";
 
     // Debug screen se badalne wale config - default wahi hain jo pehle hardcoded the
     private static final String KEY_GPS_INTERVAL = "gps_interval_ms";
@@ -109,6 +110,11 @@ class LiveTrackerPrefs {
     /** GPS ki apni (Doppler) speed - sirf comparison ke liye rakhi hai */
     float getLastGpsSpeed() {
         return sp.getFloat(KEY_LAST_GPS_SPEED, 0f);
+    }
+
+    /** false = aakhri fix ki GPS speed bharosemand nahi thi (0 maani gayi) */
+    boolean isLastSpeedTrusted() {
+        return sp.getBoolean(KEY_LAST_SPEED_TRUSTED, false);
     }
 
     /** Session ka total distance, metres me */
@@ -199,9 +205,10 @@ class LiveTrackerPrefs {
 
     /**
      * Naya fix - counters badhao. Watchdog restart ke baad bhi count chalta rehta hai.
-     * speed = derived (position se nikali hui), gpsSpeed = GPS ki apni.
+     * speed = maani gayi speed (bharosemand na ho to 0), gpsSpeed = GPS ki kachchi reading.
      */
-    int recordFix(double lat, double lng, float speed, float gpsSpeed, float accuracy, long time) {
+    int recordFix(double lat, double lng, float speed, float gpsSpeed, float accuracy, long time,
+                  boolean speedTrusted) {
         int points = getPoints() + 1;
         sp.edit()
                 .putInt(KEY_POINTS, points)
@@ -211,6 +218,7 @@ class LiveTrackerPrefs {
                 .putFloat(KEY_LAST_SPEED, speed)
                 .putFloat(KEY_LAST_GPS_SPEED, gpsSpeed)
                 .putFloat(KEY_LAST_ACCURACY, accuracy)
+                .putBoolean(KEY_LAST_SPEED_TRUSTED, speedTrusted)
                 .apply();
         return points;
     }
