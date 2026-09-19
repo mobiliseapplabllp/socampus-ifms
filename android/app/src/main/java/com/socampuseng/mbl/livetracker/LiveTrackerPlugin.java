@@ -40,6 +40,10 @@ import com.google.android.gms.location.Priority;
                 }),
                 @Permission(alias = "notifications", strings = {
                         Manifest.permission.POST_NOTIFICATIONS
+                }),
+                // Android 10+ runtime; 9 aur neeche install par hi mil jaati hai
+                @Permission(alias = "activity", strings = {
+                        Manifest.permission.ACTIVITY_RECOGNITION
                 })
         }
 )
@@ -76,6 +80,11 @@ public class LiveTrackerPlugin extends Plugin {
         ret.put("url", prefs.getUrl());
         ret.put("urlCustom", prefs.isUrlCustom());
         ret.put("running", prefs.isEnabled());
+        ret.put("adaptive", prefs.isAdaptive());
+        ret.put("minIntervalSec", prefs.getMinIntervalMs() / 1000L);
+        ret.put("maxIntervalSec", prefs.getMaxIntervalMs() / 1000L);
+        ret.put("accGoodM", prefs.getAccGoodM());
+        ret.put("accRejectM", prefs.getAccRejectM());
         call.resolve(ret);
     }
 
@@ -97,6 +106,33 @@ public class LiveTrackerPlugin extends Plugin {
             Double limit = call.getDouble("speedLimitKmh");
             if (limit != null && limit > 0) {
                 prefs.setSpeedLimitKmh(limit.floatValue());
+            }
+            Boolean adaptive = call.getBoolean("adaptive");
+            if (adaptive != null) {
+                prefs.setAdaptive(adaptive);
+            }
+            Integer minSec = call.getInt("minIntervalSec");
+            Integer maxSec = call.getInt("maxIntervalSec");
+            if (minSec != null && minSec >= 5) {
+                prefs.setMinIntervalMs(minSec * 1000L);
+            }
+            if (maxSec != null && maxSec >= 5) {
+                prefs.setMaxIntervalMs(maxSec * 1000L);
+            }
+            // Ulte daale gaye to min hi jeete - max kabhi min se chhota nahi
+            if (prefs.getMaxIntervalMs() < prefs.getMinIntervalMs()) {
+                prefs.setMaxIntervalMs(prefs.getMinIntervalMs());
+            }
+            Double good = call.getDouble("accGoodM");
+            Double reject = call.getDouble("accRejectM");
+            if (good != null && good > 0) {
+                prefs.setAccGoodM(good.floatValue());
+            }
+            if (reject != null && reject > 0) {
+                prefs.setAccRejectM(reject.floatValue());
+            }
+            if (prefs.getAccRejectM() < prefs.getAccGoodM()) {
+                prefs.setAccRejectM(prefs.getAccGoodM());
             }
             if (Boolean.TRUE.equals(call.getBoolean("resetUrl"))) {
                 // Wapas default par - agla start() environment wala URL bhar dega
@@ -140,6 +176,7 @@ public class LiveTrackerPlugin extends Plugin {
         ret.put("location", hasAlwaysAllow(ctx));
         ret.put("battery", isBatteryOptimizationIgnored(ctx));
         ret.put("notifications", areNotificationsEnabled(ctx));
+        ret.put("activityPermission", LiveTrackerService.hasActivityPermission(ctx));
 
         // FINE grant hua ya nahi - JS isse decide karta hai ki runtime dialog
         // dikhana hai ya seedha app settings kholni hai (Android 11+ pe background
@@ -164,6 +201,13 @@ public class LiveTrackerPlugin extends Plugin {
         ret.put("tripModule", prefs.getTripModule());
         ret.put("tripId", prefs.getTripId());
         ret.put("tripStartedAt", prefs.getTripStartedAt());
+        ret.put("lastSpeedTrusted", prefs.isLastSpeedTrusted());
+        ret.put("adaptive", prefs.isAdaptive());
+        ret.put("currentIntervalSec", prefs.getCurrentIntervalMs() / 1000L);
+        ret.put("intervalReason", prefs.getIntervalReason());
+        ret.put("activity", prefs.getActivity());
+        ret.put("accGoodM", prefs.getAccGoodM());
+        ret.put("accRejectM", prefs.getAccRejectM());
         return ret;
     }
 
@@ -295,6 +339,49 @@ public class LiveTrackerPlugin extends Plugin {
     private void notifPermCallback(PluginCall call) {
         boolean opened = !areNotificationsEnabled(getContext()) && openNotificationSettingsScreen();
         call.resolve(new JSObject().put("opened", opened));
+    }
+
+    /**
+     * Physical activity - ek tap ka dialog. Pehle mana kar chuka ho (Android dobara
+     * dialog nahi dikhata) to seedha App Info.
+     */
+    @PluginMethod
+    public void openActivityPermission(PluginCall call) {
+        if (LiveTrackerService.hasActivityPermission(getContext())) {
+            nudgeService();
+            call.resolve(new JSObject().put("opened", false));
+            return;
+        }
+        requestPermissionForAlias("activity", call, "activityPermCallback");
+    }
+
+    @PermissionCallback
+    private void activityPermCallback(PluginCall call) {
+        if (LiveTrackerService.hasActivityPermission(getContext())) {
+            nudgeService();     // chalti service ko batao - activity updates abhi laga de
+            call.resolve(new JSObject().put("opened", false));
+            return;
+        }
+        call.resolve(new JSObject().put("opened", openAppDetailsSettings()));
+    }
+
+    /** Service chal rahi ho to use ek baar jagao - onStartCommand naye permission utha leta hai */
+    private void nudgeService() {
+        Context ctx = getContext();
+        if (!new LiveTrackerPrefs(ctx).isEnabled()) {
+            return;
+        }
+        try {
+            Intent i = new Intent(ctx, LiveTrackerService.class);
+            i.setAction(LiveTrackerService.ACTION_REFRESH);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ctx.startForegroundService(i);
+            } else {
+                ctx.startService(i);
+            }
+        } catch (Exception ignored) {
+            // agla watchdog (5 min) bhi yahi kar dega
+        }
     }
 
     private boolean openNotificationSettingsScreen() {
@@ -436,7 +523,8 @@ public class LiveTrackerPlugin extends Plugin {
         if (lat != null && lng != null && (lat != 0 || lng != 0)) {
             Double acc = call.getDouble("accuracy");
             LivePointsDb.getInstance(getContext()).insertTrip(
-                    module, id, lat, lng, 0f, acc == null ? 0f : acc.floatValue(), now);
+                    module, id, lat, lng, 0f, acc == null ? 0f : acc.floatValue(), now,
+                    true, "trip start", 0f, 0);
         }
         call.resolve(tripStatus(prefs));
     }

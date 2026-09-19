@@ -1,6 +1,7 @@
 package com.socampuseng.mbl.livetracker;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -12,6 +13,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.hardware.TriggerEvent;
+import android.hardware.TriggerEventListener;
 import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
@@ -23,6 +28,10 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
+import com.google.android.gms.location.ActivityRecognition;
+import com.google.android.gms.location.ActivityTransition;
+import com.google.android.gms.location.ActivityTransitionRequest;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -38,14 +47,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Duty-time live tracking: har 1 minute par ek fix, seedha server par POST,
- * aur wahi fix notification me bhi dikh jaata hai.
+ * Duty-time live tracking: har fix seedha server par POST, aur wahi fix notification
+ * me bhi dikh jaata hai. Interval speed ke hisaab se badalta hai (IntervalController),
+ * 15s se 5 min ke beech.
  *
  * Notification jaan-boojh kar detailed hai - backend ready hone tak yahi testing
  * ka zariya hai. Phone raat bhar chhod do, subah notification bata degi ki
@@ -64,6 +76,13 @@ public class LiveTrackerService extends Service {
     // taaki har test ke liye naya build na banana pade
 
     static final String WATCHDOG_ACTION = "com.socampuseng.mbl.livetracker.WATCHDOG";
+
+    /** LiveActivityReceiver se - user ki activity badli */
+    static final String ACTION_ACTIVITY = "com.socampuseng.mbl.livetracker.ACTIVITY_CHANGED";
+    static final String EXTRA_ACTIVITY = "activity";
+    static final String EXTRA_MOVING = "moving";
+    /** Plugin se - config/permission badli, activity updates dobara lagao */
+    static final String ACTION_REFRESH = "com.socampuseng.mbl.livetracker.REFRESH";
     private static final long WATCHDOG_INTERVAL_MS = 5 * 60 * 1000L;
 
     /** Alarm limit par bajta hai, dobara tabhi jab speed re-arm se neeche aake
@@ -72,7 +91,7 @@ public class LiveTrackerService extends Service {
     private static final float KMH_PER_MS = 3.6f;
 
     /** GPS speed tabhi maani jaati hai jab fix itna pakka ho */
-    private static final float SPEED_TRUST_ACCURACY_M = 20f;
+    private static final float SPEED_TRUST_ACCURACY_M = 25f;   // 20 par ±21 wali asli speed kat rahi thi
     /** Android 8+ GPS speed ki apni galti bhi batata hai - isse zyada ho to reading chhodo */
     private static final float SPEED_ACCURACY_MAX_MS = 3f;
     /** Isse purana fix = cached location (service restart par aati hai) - speed nahi */
@@ -81,6 +100,10 @@ public class LiveTrackerService extends Service {
     private static final float MAX_PLAUSIBLE_SPEED_MS = 50f;
     /** Isse kam hilna GPS drift maana jaayega, distance me nahi judega */
     private static final float MIN_DISTANCE_STEP_M = 10f;
+    /** 3 km/h se kam = khada. "1.4 km/h" dekh ke user sochta hai app galat hai */
+    private static final float STILL_DISPLAY_MS = 3f / 3.6f;
+    /** Anchor itna purana (sirf kharab fix aa rahe the) to naye fix ko nayi jagah maano */
+    private static final long ANCHOR_MAX_AGE_MS = 10 * 60 * 1000L;
 
     /** true = pichla fix limit se upar tha, alarm baj chuka hai */
     private boolean overspeedArmed = false;
@@ -91,6 +114,28 @@ public class LiveTrackerService extends Service {
     private LiveTrackerPrefs prefs;
     private SpeedAlarm speedAlarm;
     private LivePointsDb points;
+    private IntervalController intervals;
+
+    /**
+     * Significant motion - phone ka hardware sensor. User uth ke chalne lage / bike chale
+     * to kuch second me ek baar bajta hai. Sensor hub par chalta hai, battery na ke barabar.
+     * Ek baar bajne ke baad band ho jaata hai - isliye har baar dobara lagate hain.
+     */
+    private SensorManager sensorManager;
+    private Sensor motionSensor;
+    private final TriggerEventListener motionListener = new TriggerEventListener() {
+        @Override
+        public void onTrigger(TriggerEvent event) {
+            armMotionSensor();
+            onWake("motion", true);
+        }
+    };
+
+    /** Abhi GPS se kis interval par request lagi hai - badle tabhi dobara request */
+    private long requestedIntervalMs = 0L;
+    private boolean activityRegistered = false;
+    /** Aakhri fix filter se pass hua ya nahi - sirf notification ke liye */
+    private String lastFilter = "-";
 
     /** Upload aur notification build - dono main thread se hatakar. */
     private final ExecutorService uploadExecutor = Executors.newSingleThreadExecutor();
@@ -115,22 +160,170 @@ public class LiveTrackerService extends Service {
             }
         }
 
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        motionSensor = sensorManager != null
+                ? sensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION) : null;
+        if (motionSensor == null) {
+            Log.w(TAG, "no significant motion sensor - stop interval capped at 2m");
+        }
+        intervals = new IntervalController(prefs.getMinIntervalMs(), prefs.getMaxIntervalMs(),
+                System.currentTimeMillis(), motionSensor != null);
+        armMotionSensor();
+
         fused = LocationServices.getFusedLocationProviderClient(this);
-        startLocationUpdates();
+        if (prefs.isAdaptive()) {
+            prefs.setIntervalState(intervals.currentMs(), intervals.reason());
+            startLocationUpdates(intervals.currentMs());
+        } else {
+            prefs.setIntervalState(prefs.getGpsIntervalMs(), "fixed");
+            startLocationUpdates(prefs.getGpsIntervalMs());
+        }
+        ensureActivityUpdates();
         scheduleWatchdog();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // startForegroundService() ke baad Android 5s me startForeground() maangta hai -
+        // service pehle se chal rahi ho tab bhi (watchdog / activity receiver). Har baar
+        // bula dena surakshit hai, notification wahi rehti hai
+        try {
+            startInForeground(buildNotification());
+        } catch (Exception e) {
+            Log.w(TAG, "startForeground in onStartCommand failed: " + e.getMessage());
+        }
+
+        String action = intent != null ? intent.getAction() : null;
+        if (ACTION_ACTIVITY.equals(action)) {
+            onActivityChanged(
+                    intent.getStringExtra(EXTRA_ACTIVITY),
+                    intent.getBooleanExtra(EXTRA_MOVING, false));
+        }
+
         // Watchdog / START_STICKY restart par intent null hota hai - koi dikkat nahi,
         // saara state prefs me hai
+        ensureActivityUpdates();
         scheduleWatchdog();
         return START_STICKY;
     }
 
+    // ------------------------------------------------------------- activity
+
+    private void onActivityChanged(String label, boolean moving) {
+        if (moving) {
+            onWake(label == null || label.isEmpty() ? "activity" : label.toLowerCase(Locale.US), false);
+        } else {
+            updateNotification();
+        }
+    }
+
+    /**
+     * Motion sensor / Activity ne kaha "shayad chal pade". GPS ko turant 15s par jagao -
+     * hilna sach hai ya nahi, wo agle fix batayenge (IntervalController.onWake)
+     */
+    private void onWake(String why, boolean motion) {
+        if (prefs.isAdaptive() && intervals != null
+                && intervals.onWake(why, motion, System.currentTimeMillis())) {
+            Log.d(TAG, "woke by " + why);
+            prefs.setIntervalState(intervals.currentMs(), intervals.reason());
+            startLocationUpdates(intervals.currentMs());
+        }
+        updateNotification();
+    }
+
+    private void armMotionSensor() {
+        if (sensorManager == null || motionSensor == null) {
+            return;
+        }
+        try {
+            sensorManager.requestTriggerSensor(motionListener, motionSensor);
+        } catch (Exception e) {
+            Log.w(TAG, "motion sensor arm failed: " + e.getMessage());
+        }
+    }
+
+    static boolean hasActivityPermission(Context ctx) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            return true;    // 9 aur neeche - install par hi mil jaati hai
+        }
+        return ActivityCompat.checkSelfPermission(ctx, Manifest.permission.ACTIVITY_RECOGNITION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Activity ke sirf BADLAV par jagata hai (still/walking/running/cycling/riding) -
+     * lagataar nahi. Sensor hub par chalta hai, battery na ke barabar.
+     */
+    @SuppressLint("MissingPermission")
+    private void ensureActivityUpdates() {
+        if (activityRegistered || !hasActivityPermission(this)) {
+            return;
+        }
+        int[] types = {
+                DetectedActivity.STILL,
+                DetectedActivity.WALKING,
+                DetectedActivity.RUNNING,
+                DetectedActivity.ON_BICYCLE,
+                DetectedActivity.IN_VEHICLE
+        };
+        List<ActivityTransition> transitions = new ArrayList<>();
+        for (int t : types) {
+            transitions.add(new ActivityTransition.Builder()
+                    .setActivityType(t)
+                    .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                    .build());
+        }
+        // "Still se bahar" - Google ka sabse pehla ishara ki user hilne laga, Riding/Walking
+        // pakka hone se pehle hi aa jaata hai
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.STILL)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build());
+        try {
+            ActivityRecognition.getClient(this)
+                    .requestActivityTransitionUpdates(
+                            new ActivityTransitionRequest(transitions), activityIntent(this))
+                    .addOnSuccessListener(v -> activityRegistered = true)
+                    .addOnFailureListener(e -> Log.w(TAG, "activity updates failed: " + e.getMessage()));
+        } catch (Exception e) {
+            Log.w(TAG, "activity updates error: " + e.getMessage());
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void removeActivityUpdates() {
+        if (!activityRegistered) {
+            return;
+        }
+        try {
+            ActivityRecognition.getClient(this).removeActivityTransitionUpdates(activityIntent(this));
+        } catch (Exception ignored) {
+            // permission hat gayi ho to bhi band karte waqt kuch nahi bigadta
+        }
+        activityRegistered = false;
+    }
+
+    /**
+     * MUTABLE zaroori hai - Google isi intent me activity ki jaankari bhar ke bhejta hai.
+     * IMMUTABLE rakha to receiver ko khaali intent milega.
+     */
+    static PendingIntent activityIntent(Context ctx) {
+        Intent i = new Intent(ctx.getApplicationContext(), LiveActivityReceiver.class);
+        i.setAction(LiveActivityReceiver.ACTION);
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            flags |= PendingIntent.FLAG_MUTABLE;
+        }
+        return PendingIntent.getBroadcast(ctx.getApplicationContext(), 2, i, flags);
+    }
+
     // ------------------------------------------------------------- location
 
-    private void startLocationUpdates() {
+    /**
+     * GPS request lagao - interval badalne par bhi yahi, purani hata ke nayi.
+     * Ek hi callback, ek hi stream - koi module apni alag request nahi banata.
+     */
+    private void startLocationUpdates(long interval) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             Log.w(TAG, "Location permission gone - stopping");
@@ -138,29 +331,37 @@ public class LiveTrackerService extends Service {
             stopSelf();
             return;
         }
-
-        long interval = prefs.getGpsIntervalMs();
+        if (interval == requestedIntervalMs && callback != null) {
+            return;
+        }
         Log.d(TAG, "requesting location every " + (interval / 1000) + "s");
 
         LocationRequest req = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, interval)
-                .setMinUpdateIntervalMillis(Math.max(5_000L, interval / 2))
-                // Koi distance filter nahi - user khada ho tab bhi har minute point
-                // chahiye, warna "app zinda hai" ka pata hi nahi chalega
+                // Interval se jaldi nahi - koi aur app GPS tez chala rahi ho tab bhi hamari
+                // min seema (15s) na tootey
+                .setMinUpdateIntervalMillis(interval)
+                // Koi distance filter nahi - user khada ho tab bhi point chahiye,
+                // warna "app zinda hai" ka pata hi nahi chalega
                 .setMinUpdateDistanceMeters(0)
                 .setWaitForAccurateLocation(false)
                 .build();
 
-        callback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult result) {
-                if (result == null) return;
-                Location loc = result.getLastLocation();
-                if (loc == null) return;
-                handleFix(loc);
-            }
-        };
+        if (callback == null) {
+            callback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult result) {
+                    if (result == null) return;
+                    Location loc = result.getLastLocation();
+                    if (loc == null) return;
+                    handleFix(loc);
+                }
+            };
+        } else {
+            fused.removeLocationUpdates(callback);
+        }
 
         fused.requestLocationUpdates(req, callback, getMainLooper());
+        requestedIntervalMs = interval;
     }
 
     private void handleFix(Location loc) {
@@ -169,45 +370,122 @@ public class LiveTrackerService extends Service {
         final float gpsSpeed = loc.hasSpeed() ? loc.getSpeed() : 0f;
         final float accuracy = loc.hasAccuracy() ? loc.getAccuracy() : 0f;
         final long now = System.currentTimeMillis();
-        final float prevAccuracy = prefs.getLastAccuracy();
 
-        // Pichle fix se doori - sirf distance ke liye. Speed ab isse NAHI nikalti.
-        float movedM = 0f;
-        long dtMs = 0L;
-        double prevLat = prefs.getLastLat();
-        double prevLng = prefs.getLastLng();
-        long prevTime = prefs.getLastFixAt();
-        if (prevTime > 0 && (prevLat != 0 || prevLng != 0)) {
-            float[] d = new float[1];
-            Location.distanceBetween(prevLat, prevLng, lat, lng, d);
-            movedM = d[0];
-            dtMs = now - prevTime;
-        }
-
-        // Speed = us pal ki GPS (Doppler) speed. Position se nahi nikalte - andar phone
-        // ki location tower <-> GPS me koodti hai, aur us "koodne" ko chalna maan kar
-        // khade phone par bhi overspeed aa jaati thi.
+        // ---- 1. Speed = us pal ki GPS (Doppler) speed, sirf pakki reading par.
+        // Position se nahi nikalte - andar location tower <-> GPS me koodti hai.
         final boolean speedTrusted = isSpeedTrusted(loc, accuracy);
-        final float speed = speedTrusted ? gpsSpeed : 0f;
-
-        // Distance: dono fix ki galti jod ke dekho. Pichla fix ±400m (tower) aur naya ±10m
-        // ho to 300m ka farak asli chalna nahi, location ka koodna hai.
-        boolean drift = movedM <= Math.max(prevAccuracy + accuracy, MIN_DISTANCE_STEP_M);
-        boolean jump = dtMs > 0 && movedM / (dtMs / 1000f) > MAX_PLAUSIBLE_SPEED_MS;
-        if (!drift && !jump) {
-            prefs.addDistance(movedM);
+        float speedMs = speedTrusted ? gpsSpeed : 0f;
+        if (speedTrusted && speedMs < STILL_DISPLAY_MS) {
+            speedMs = 0f;
         }
+        final float speed = speedMs;
+        final float kmh = speed * KMH_PER_MS;
+
+        // ---- 2. Location filter - asli chalna ya location ka koodna?
+        // Doori/time ka hisaab FIX ke asli waqt se - callback ke waqt se nahi. GPS request
+        // dobara lagte hi Android ek purani cached location turant de deta hai; callback
+        // time se naapne par wo "180 km/h ka jump" ban jaati thi.
+        final long fixTime = loc.getTime();
+        final boolean accepted;
+        final String filterReason;
+        float addedM = 0f;
+        // Pichhli jagah se sach me hila? Interval isi par tay hota hai
+        boolean movedEvidence = false;
+        // Hila to doori / time - speed na mile tab interval ke liye (overspeed ke liye NAHI)
+        float derivedKmh = -1f;
+        boolean stale = false;
+
+        float good = prefs.getAccGoodM();
+        float reject = prefs.getAccRejectM();
+        boolean hasAnchor = prefs.hasAnchor();
+        float anchorDist = 0f;
+        if (hasAnchor) {
+            float[] d = new float[1];
+            Location.distanceBetween(prefs.getAnchorLat(), prefs.getAnchorLng(), lat, lng, d);
+            anchorDist = d[0];
+        }
+        long dt = hasAnchor ? fixTime - prefs.getAnchorAt() : 0L;
+
+        if (hasAnchor && dt <= 0) {
+            // Anchor se purana (cached) fix - na jagah badlo, na interval ka faisla lo
+            accepted = false;
+            stale = true;
+            filterReason = "stale fix";
+        } else if (accuracy <= 0f || accuracy > reject) {
+            accepted = false;
+            filterReason = "accuracy > " + (int) reject + "m";
+        } else if (!hasAnchor) {
+            accepted = true;
+            filterReason = "ok (first)";
+            prefs.setAnchor(lat, lng, accuracy, fixTime);
+        } else if (accuracy > good && dt > ANCHOR_MAX_AGE_MS) {
+            // Der tak sirf kharab fix aaye - shayad andar hi andar sach me hil gaya.
+            // Nayi jagah maano, par koodne ka shak hai isliye distance mat jodo
+            accepted = true;
+            filterReason = "anchor reset";
+            movedEvidence = true;
+            prefs.setAnchor(lat, lng, accuracy, fixTime);
+        } else if (accuracy > good && anchorDist <= 2f * accuracy) {
+            // Anchor naye fix ke (2x) daayre me hai - hilna sabit nahi hua, khada hai
+            accepted = false;
+            filterReason = "stayed at anchor";
+        } else {
+            accepted = true;
+            // Dono ki galti jod ke dekho - usse kam = GPS ka shor, chalna nahi
+            float anchorAcc = prefs.getAnchorAcc();
+            boolean drift = anchorDist <= Math.max(anchorAcc + accuracy, MIN_DISTANCE_STEP_M);
+            boolean jump = anchorDist / (dt / 1000f) > MAX_PLAUSIBLE_SPEED_MS;
+            if (jump) {
+                // 180 km/h se tez = location koodi. Nayi jagah le lo, par na distance,
+                // na "hila" - warna ek bounce interval ko tez kar deta
+                filterReason = "jump, not counted";
+                prefs.setAnchor(lat, lng, accuracy, fixTime);
+            } else if (drift) {
+                // Jagah wahi - anchor mat khisakao, bas "abhi bhi yahin" ki pushti.
+                // Dheere chalne ki doori isse jama hoti rehti hai aur kuch fix baad judti hai
+                filterReason = "ok";
+                prefs.touchAnchor(fixTime, accuracy);
+            } else {
+                filterReason = "ok";
+                movedEvidence = true;
+                derivedKmh = anchorDist / (dt / 1000f) * KMH_PER_MS;
+                addedM = anchorDist;
+                prefs.addDistance(anchorDist);
+                prefs.setAnchor(lat, lng, accuracy, fixTime);
+            }
+        }
+        lastFilter = accepted ? filterReason : "rejected: " + filterReason;
+        final float distAdded = addedM;
 
         prefs.recordFix(lat, lng, speed, gpsSpeed, accuracy, now, speedTrusted);
-        // Bharosemand speed na ho to overspeed ka faisla hi mat lo - alarm ki haalat
-        // (armed / re-arm) bhi waisi hi rehti hai
+
+        // ---- 3. Overspeed - bharosemand speed na ho to faisla hi mat lo
         final boolean alarmed = speedTrusted && checkOverspeed(speed);
+
+        // ---- 4. Agla interval - pichhli jagah se mila ke
+        if (prefs.isAdaptive() && intervals != null && !stale) {
+            // Hila = location ne saboot diya, ya pakki GPS speed khud 3 km/h+ bata rahi hai.
+            // Speed: pakki GPS wali, na mile to doori/time se nikali
+            boolean moved = movedEvidence || (speedTrusted && kmh >= 3f);
+            // Dono me jo bada - 14:18 wale test me GPS 0.0 bol raha tha jabki 2 min me
+            // 460m hil chuke the. Doori jhooth nahi bolti
+            float kmhForInterval = Math.max(speedTrusted ? kmh : -1f, derivedKmh);
+            // Accuracy hi kharab ho to fix se kuch pata nahi - na chalna, na rukna
+            boolean informative = accuracy > 0f && accuracy <= reject;
+            if (intervals.onFix(moved, kmhForInterval, movedEvidence ? anchorDist : 0f,
+                    informative, lat, lng, accuracy, fixTime)) {
+                startLocationUpdates(intervals.currentMs());
+            }
+            prefs.setIntervalState(intervals.currentMs(), intervals.reason());
+        }
+        final int intervalSec = (int) (prefs.getCurrentIntervalMs() / 1000L);
+
         updateNotification();
 
         // Ongoing notification laal hoti hai par wo ek hi jagah update hoti rehti hai -
         // ye alag alert har overspeed reading ka apna record chhod jaata hai
-        if (speedTrusted && speed * KMH_PER_MS >= prefs.getSpeedLimitKmh()) {
-            postOverspeedAlert(speed * KMH_PER_MS, lat, lng, now, alarmed);
+        if (speedTrusted && kmh >= prefs.getSpeedLimitKmh()) {
+            postOverspeedAlert(kmh, lat, lng, now, alarmed);
         }
 
         // Trip ki pehchaan fix ke waqt hi pakad lo - upload me 15s lag sakte hain,
@@ -216,11 +494,14 @@ public class LiveTrackerService extends Service {
         final String tripId = prefs.hasActiveTrip() ? prefs.getTripId() : null;
 
         uploadExecutor.execute(() -> {
-            // Wahi fix, doosri manzil - koi nayi GPS request nahi
+            // Wahi fix, doosri manzil - koi nayi GPS request nahi. Har fix save hota hai,
+            // kharab wala bhi - accepted/reason ke saath. Chhantna padhte waqt hota hai.
             if (tripModule != null) {
-                points.insertTrip(tripModule, tripId, lat, lng, speed * KMH_PER_MS, accuracy, now);
+                points.insertTrip(tripModule, tripId, lat, lng, kmh, accuracy, now,
+                        accepted, filterReason, distAdded, intervalSec);
             }
-            long rowId = points.insert(lat, lng, speed * KMH_PER_MS, accuracy, now, alarmed);
+            long rowId = points.insert(lat, lng, kmh, accuracy, now, alarmed,
+                    accepted, filterReason, distAdded, intervalSec);
             String result = upload(lat, lng, speed);
             prefs.setLastUpload(result);
             points.setUploadResult(rowId, result);
@@ -472,11 +753,12 @@ public class LiveTrackerService extends Service {
                     ? String.format(Locale.US, "⚠ OVERSPEED · %.0f km/h", kmh)
                     : String.format(Locale.US, "%.6f, %.6f",
                             prefs.getLastLat(), prefs.getLastLng());
-            summary = String.format(Locale.US, "%s · %s · %d pts · %s",
+            summary = String.format(Locale.US, "%s · %s · %d pts · %s · Next %s",
                     speedText,
                     clock.format(new Date(lastFix)),
                     points,
-                    prefs.getLastUpload());
+                    prefs.getLastUpload(),
+                    IntervalController.human(Math.max(prefs.getCurrentIntervalMs(), 1000L)));
         } else {
             title = "Waiting for first fix...";
             summary = startedAt > 0 ? "Started " + clock.format(new Date(startedAt)) : "Starting...";
@@ -497,6 +779,7 @@ public class LiveTrackerService extends Service {
             details.append("GPS speed: ").append(String.format(Locale.US, "%.1f km/h",
                     prefs.getLastGpsSpeed() * KMH_PER_MS)).append('\n');
             details.append("Accuracy:  ").append(String.format(Locale.US, "±%.0f m", prefs.getLastAccuracy())).append('\n');
+            details.append("Filter:    ").append(lastFilter).append('\n');
         } else {
             details.append("Waiting for first fix...\n");
             details.append("Server:    ").append(prefs.getLastUpload()).append('\n');
@@ -511,6 +794,27 @@ public class LiveTrackerService extends Service {
             }
             details.append('\n');
         }
+        details.append("Next:      ").append(IntervalController.human(Math.max(prefs.getCurrentIntervalMs(), 1000L)))
+                .append(prefs.isAdaptive() ? "" : " (fixed)").append('\n');
+        String act = prefs.getActivity();
+        String actText;
+        if (act.isEmpty()) {
+            actText = hasActivityPermission(this) ? "—" : "— (no permission)";
+        } else {
+            // Google sirf badlav par batata hai - purana jawab ho to umar dikhe, bhram na ho
+            long ageMin = (System.currentTimeMillis() - prefs.getActivityAt()) / 60000L;
+            actText = ageMin >= 1 ? act + " (" + ageMin + "m ago)" : act;
+        }
+        details.append("Activity:  ").append(actText).append('\n');
+        if (prefs.isAdaptive()) {
+            details.append("Reason:    ").append(prefs.getIntervalReason()).append('\n');
+            if (intervals != null) {
+                long stillMs = intervals.stillForMs(System.currentTimeMillis());
+                details.append("Still for: ").append(stillMs < 60_000L ? "-" : IntervalController.human(stillMs))
+                        .append('\n');
+            }
+        }
+        details.append('\n');
         details.append("Distance:  ").append(humanDistance(prefs.getDistance())).append('\n');
         details.append("Points:    ").append(points).append('\n');
         if (startedAt > 0) {
@@ -620,6 +924,10 @@ public class LiveTrackerService extends Service {
         super.onDestroy();
         if (fused != null && callback != null) {
             fused.removeLocationUpdates(callback);
+        }
+        removeActivityUpdates();
+        if (sensorManager != null && motionSensor != null) {
+            sensorManager.cancelTriggerSensor(motionListener, motionSensor);
         }
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();

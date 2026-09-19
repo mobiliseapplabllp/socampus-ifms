@@ -27,18 +27,35 @@
   <!-- Session summary -->
   <ion-list lines="none" class="tm-list tm-summary" *ngIf="status?.running">
     <ion-item class="tm-row" detail="false">
-      <ion-label class="tm-label">GPS interval</ion-label>
-      <ion-text slot="end" class="tm-value">{{ intervalSec }}s</ion-text>
-    </ion-item>
-    <ion-item class="tm-row" detail="false">
-      <ion-label class="tm-label">Points recorded</ion-label>
+      <ion-label class="tm-label">Next fix in</ion-label>
       <ion-text slot="end" class="tm-value">
-        {{ points.length }} <ion-text color="medium">/ {{ expectedPoints }} expected</ion-text>
+        {{ intervalSec }}s
+        <ion-text color="medium" *ngIf="status?.adaptive">· {{ status?.intervalReason }}</ion-text>
+        <ion-text color="medium" *ngIf="!status?.adaptive">· fixed</ion-text>
       </ion-text>
     </ion-item>
-    <ion-item class="tm-row" detail="false" *ngIf="missedPoints > 0">
-      <ion-label class="tm-label">Missed</ion-label>
-      <ion-text slot="end" color="danger" class="tm-value">{{ missedPoints }}</ion-text>
+    <ion-item class="tm-row" detail="false">
+      <ion-label class="tm-label">Activity</ion-label>
+      <ion-text slot="end" class="tm-value">{{ status?.activity || '—' }}</ion-text>
+    </ion-item>
+    <ion-item class="tm-row" detail="false">
+      <ion-label class="tm-label">Points</ion-label>
+      <ion-text slot="end" class="tm-value">
+        {{ keptCount }} kept <ion-text color="medium">/ {{ points.length }} total</ion-text>
+        <ion-text color="danger" *ngIf="rejectedCount"> · {{ rejectedCount }} rejected</ion-text>
+      </ion-text>
+    </ion-item>
+    <!-- Fixed interval par hi "expected" ka matlab hai - adaptive me interval badalta rehta hai -->
+    <ion-item class="tm-row" detail="false" *ngIf="!status?.adaptive">
+      <ion-label class="tm-label">Expected</ion-label>
+      <ion-text slot="end" class="tm-value">
+        {{ expectedPoints }}
+        <ion-text color="danger" *ngIf="missedPoints > 0"> · {{ missedPoints }} missed</ion-text>
+      </ion-text>
+    </ion-item>
+    <ion-item class="tm-row" detail="false">
+      <ion-label class="tm-label">Longest gap</ion-label>
+      <ion-text slot="end" class="tm-value">{{ longestGapText }}</ion-text>
     </ion-item>
     <ion-item class="tm-row" detail="false">
       <ion-label class="tm-label">Last fix</ion-label>
@@ -46,7 +63,9 @@
     </ion-item>
     <ion-item class="tm-row" detail="false">
       <ion-label class="tm-label">Distance</ion-label>
-      <ion-text slot="end" class="tm-value">{{ distanceText }}</ion-text>
+      <ion-text slot="end" class="tm-value">
+        {{ distanceText }} <ion-text color="medium">· raw {{ rawDistanceText }}</ion-text>
+      </ion-text>
     </ion-item>
     <ion-item class="tm-row" detail="false">
       <ion-label class="tm-label">Duration</ion-label>
@@ -59,21 +78,39 @@
   </ion-list>
 
   <!-- Map -->
+  <div class="tm-toggle" *ngIf="points.length">
+    <ion-segment [value]="mode" (ionChange)="setMode($any($event).detail.value)">
+      <ion-segment-button value="filtered">
+        <ion-label>Filtered</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+
   <div class="tm-map-head">
     <ion-text color="primary"><b>Tracked Path</b></ion-text>
-    <span class="tm-legend">
+    <span class="tm-legend" *ngIf="mode === 'filtered'">
       <i class="tm-dot tm-dot-start"></i> Start
       <i class="tm-dot tm-dot-over"></i> Over
+      <i class="tm-dot tm-dot-rej"></i> Rejected
       <i class="tm-dot tm-dot-end"></i> End
-      <ion-button
-        *ngIf="points.length"
-        fill="clear"
-        size="small"
-        class="tm-fit-btn"
-        (click)="fitToPath()">
-        <ion-icon slot="icon-only" name="scan-outline"></ion-icon>
-      </ion-button>
     </span>
+    <span class="tm-legend" *ngIf="mode === 'all'">
+      <i class="tm-dot" style="background:#2dd36f"></i>≤20
+      <i class="tm-dot" style="background:#ffc409"></i>≤50
+      <i class="tm-dot" style="background:#ff8c00"></i>≤150
+      <i class="tm-dot" style="background:#eb445a"></i>&gt;150m
+    </span>
+    <ion-button
+      *ngIf="points.length"
+      fill="clear"
+      size="small"
+      class="tm-fit-btn"
+      (click)="fitToPath()">
+      <ion-icon slot="icon-only" name="scan-outline"></ion-icon>
+    </ion-button>
   </div>
 
   <div class="tm-map-wrap">

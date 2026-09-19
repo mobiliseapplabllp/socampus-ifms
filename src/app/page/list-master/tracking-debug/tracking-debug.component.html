@@ -16,8 +16,59 @@
     <span>Testing only. Changes apply immediately and restart tracking with a fresh session.</span>
   </div>
 
-  <!-- GPS interval -->
+  <!-- Adaptive interval -->
   <div class="td-block">
+    <ion-item lines="none" class="td-item">
+      <ion-label>Adaptive interval</ion-label>
+      <ion-toggle slot="end" [(ngModel)]="adaptive"></ion-toggle>
+    </ion-item>
+    <p class="td-hint" *ngIf="adaptive">
+      Interval follows speed — fast when moving, slow when still. Always kept between min and max.
+    </p>
+    <p class="td-hint" *ngIf="!adaptive">
+      Fixed interval below is used for every fix.
+    </p>
+  </div>
+
+  <div class="td-block" *ngIf="adaptive">
+    <div class="td-label">Min / Max interval</div>
+    <div class="td-pair">
+      <ion-item lines="none" class="td-item">
+        <ion-input type="number" inputmode="numeric" [(ngModel)]="minIntervalSec"></ion-input>
+        <ion-note slot="end">s min</ion-note>
+      </ion-item>
+      <ion-item lines="none" class="td-item">
+        <ion-input type="number" inputmode="numeric" [(ngModel)]="maxIntervalSec"></ion-input>
+        <ion-note slot="end">s max</ion-note>
+      </ion-item>
+    </div>
+  </div>
+
+  <div class="td-block">
+    <div class="td-label">Location filter (accuracy)</div>
+    <div class="td-pair">
+      <ion-item lines="none" class="td-item">
+        <ion-input type="number" inputmode="numeric" [(ngModel)]="accGoodM"></ion-input>
+        <ion-note slot="end">m good</ion-note>
+      </ion-item>
+      <ion-item lines="none" class="td-item">
+        <ion-input type="number" inputmode="numeric" [(ngModel)]="accRejectM"></ion-input>
+        <ion-note slot="end">m reject</ion-note>
+      </ion-item>
+    </div>
+    <p class="td-hint">
+      Up to "good" is always kept. Between good and reject, kept only if the phone really moved.
+      Above reject is dropped from the path.
+    </p>
+    <div class="td-presets">
+      <ion-button size="small" fill="outline" class="ion-text-capitalize" (click)="resetAdaptiveDefaults()">
+        Reset to defaults (15s–5m, 50/150m)
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- GPS interval (fixed mode) -->
+  <div class="td-block" *ngIf="!adaptive">
     <div class="td-label">GPS interval</div>
     <ion-item lines="none" class="td-item">
       <ion-input

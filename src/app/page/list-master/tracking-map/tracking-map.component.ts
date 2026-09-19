@@ -28,6 +28,8 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
   loading = true;
   /** Tracking chal rahi ho to page khud refresh hota rehta hai */
   live = false;
+  /** Testing: filter ka asar dekhne ke liye - saare fix, ya sirf maane gaye */
+  mode: 'filtered' | 'all' = 'filtered';
 
   private map: any = null;
   private polyline: any = null;
@@ -114,6 +116,7 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
       { label: 'Location (Always Allow)', granted: status.location },
       { label: 'Battery Optimization', granted: status.battery },
       { label: 'Notifications', granted: status.notifications },
+      { label: 'Physical Activity', granted: status.activityPermission },
     ];
   }
 
@@ -130,8 +133,21 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
     this.markers = [];
   }
 
+  /** Line inhi points se banti hai - Filtered me sirf maane gaye */
+  private get linePoints(): LivePoint[] {
+    return this.mode === 'all' ? this.points : this.points.filter(p => p.accepted !== false);
+  }
+
   private get path(): { lat: number; lng: number }[] {
-    return this.points.map(p => ({ lat: p.lat, lng: p.lng }));
+    return this.linePoints.map(p => ({ lat: p.lat, lng: p.lng }));
+  }
+
+  setMode(mode: 'filtered' | 'all'): void {
+    if (this.mode === mode) {
+      return;
+    }
+    this.mode = mode;
+    this.updateOverlays();
   }
 
   private renderMap(): void {
@@ -141,7 +157,7 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const path = this.path;
+    const path = this.path.length ? this.path : this.points.map(p => ({ lat: p.lat, lng: p.lng }));
     this.map = new google.maps.Map(el, { center: path[0], zoom: 15 });
     this.updateOverlays();
     this.fitToPath();   // sirf pehli baar - baad me user ka zoom bana rehta hai
@@ -157,10 +173,8 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.clearOverlays();
-    const path = this.path;
-    if (!path.length) {
-      return;
-    }
+    const line = this.linePoints;
+    const path = line.map(p => ({ lat: p.lat, lng: p.lng }));
 
     if (path.length >= 2) {
       this.polyline = new google.maps.Polyline({
@@ -173,23 +187,45 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
       });
     }
 
-    // Beech ke points chhote dots - isse dikh jaata hai ki kaunse minute ka
-    // fix aaya aur kahan gap pada. Overspeed wale amber, taaki start/end ke
-    // green/red se na takrayein
-    path.forEach((p, i) => {
-      if (i === 0 || i === path.length - 1) {
+    // Filtered: chhante hue points grey khokhle dot - line me nahi, par dikhte hain
+    if (this.mode === 'filtered') {
+      this.points.forEach(p => {
+        if (p.accepted !== false) {
+          return;
+        }
+        this.markers.push(new google.maps.Marker({
+          position: { lat: p.lat, lng: p.lng },
+          map: this.map,
+          title: this.pointTitleOf(p),
+          zIndex: 0,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 5,
+            fillColor: '#ffffff',
+            fillOpacity: 0.6,
+            strokeColor: '#92949c',
+            strokeWeight: 2,
+          },
+        }));
+      });
+    }
+
+    // Beech ke points chhote dots. All = accuracy ka rang, Filtered = overspeed amber
+    line.forEach((p, i) => {
+      if (i === 0 || i === line.length - 1) {
         return;
       }
-      const over = this.isOver(this.points[i]);
+      const over = this.isOver(p);
+      const color = this.mode === 'all' ? this.accuracyColor(p.accuracy) : (over ? '#ffc409' : '#1a73e8');
       this.markers.push(new google.maps.Marker({
-        position: p,
+        position: { lat: p.lat, lng: p.lng },
         map: this.map,
-        title: this.pointTitle(i),
+        title: this.pointTitleOf(p),
         zIndex: over ? 2 : 1,
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
-          scale: over ? 6 : 4,
-          fillColor: over ? '#ffc409' : '#1a73e8',
+          scale: this.mode === 'all' ? 5 : (over ? 6 : 4),
+          fillColor: color,
           fillOpacity: 1,
           strokeColor: '#ffffff',
           strokeWeight: 1,
@@ -197,12 +233,28 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
       }));
     });
 
-    this.addEndMarker(path[0], '#2dd36f', 'Start · ' + this.pointTitle(0));
-    if (path.length > 1) {
-      const lastIdx = path.length - 1;
-      const label = this.status?.running ? 'Latest' : 'End';
-      this.addEndMarker(path[lastIdx], '#eb445a', label + ' · ' + this.pointTitle(lastIdx));
+    if (line.length) {
+      this.addEndMarker(path[0], '#2dd36f', 'Start · ' + this.pointTitleOf(line[0]));
     }
+    if (line.length > 1) {
+      const last = line[line.length - 1];
+      const label = this.status?.running ? 'Latest' : 'End';
+      this.addEndMarker(path[path.length - 1], '#eb445a', label + ' · ' + this.pointTitleOf(last));
+    }
+  }
+
+  /** All mode - ek nazar me dikhe kaunsa fix kitna pakka tha */
+  accuracyColor(acc: number): string {
+    if (acc <= 20) {
+      return '#2dd36f';       // pakka
+    }
+    if (acc <= 50) {
+      return '#ffc409';       // theek
+    }
+    if (acc <= 150) {
+      return '#ff8c00';       // anchor rule se jaancha jaata hai
+    }
+    return '#eb445a';         // kachra
   }
 
   private addEndMarker(p: { lat: number; lng: number }, color: string, title: string): void {
@@ -227,23 +279,77 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
     if (!this.map || !this.points.length) {
       return;
     }
-    const path = this.path;
-    if (path.length === 1) {
-      this.map.setCenter(path[0]);
+    // Hamesha saare points par fit - Filtered me bhi chhante hue grey dot dikhne chahiye
+    const all = this.points.map(p => ({ lat: p.lat, lng: p.lng }));
+    if (all.length === 1) {
+      this.map.setCenter(all[0]);
       this.map.setZoom(16);
       return;
     }
     const bounds = new google.maps.LatLngBounds();
-    path.forEach(p => bounds.extend(p));
+    all.forEach(p => bounds.extend(p));
     this.map.fitBounds(bounds, 48);
   }
 
-  private pointTitle(i: number): string {
-    const p = this.points[i];
-    if (!p) {
-      return '';
+  private pointTitleOf(p: LivePoint): string {
+    const parts = [
+      this.formatTime(p.time),
+      `${p.speed.toFixed(1)} km/h`,
+      `±${p.accuracy.toFixed(0)}m`,
+    ];
+    if (p.interval) {
+      parts.push(`next ${p.interval}s`);
     }
-    return `${this.formatTime(p.time)} · ${p.speed.toFixed(1)} km/h · ±${p.accuracy.toFixed(0)}m · ${p.upload}`;
+    parts.push(p.accepted === false ? `rejected: ${p.reason}` : (p.reason || 'ok'));
+    parts.push(p.upload);
+    return parts.join(' · ');
+  }
+
+  // --------------------------------------------------------------- filter
+
+  get keptCount(): number {
+    return this.points.filter(p => p.accepted !== false).length;
+  }
+
+  get rejectedCount(): number {
+    return this.points.length - this.keptCount;
+  }
+
+  /** Bina filter ke - har fix jod ke. Filter ne kitna jhootha km bachaya, ye isi se dikhta hai */
+  get rawDistanceText(): string {
+    let m = 0;
+    for (let i = 1; i < this.points.length; i++) {
+      m += this.haversineM(this.points[i - 1], this.points[i]);
+    }
+    return m < 1000 ? `${m.toFixed(0)} m` : `${(m / 1000).toFixed(2)} km`;
+  }
+
+  private haversineM(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+    const R = 6371000;
+    const dLat = (b.lat - a.lat) * Math.PI / 180;
+    const dLng = (b.lng - a.lng) * Math.PI / 180;
+    const h = Math.sin(dLat / 2) ** 2 +
+      Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  }
+
+  /** Adaptive me "expected" ka matlab nahi - sabse lamba gap batata hai service kab soyi */
+  get longestGapText(): string {
+    if (this.points.length < 2) {
+      return '-';
+    }
+    let gap = 0;
+    let at = 0;
+    for (let i = 1; i < this.points.length; i++) {
+      const g = this.points[i].time - this.points[i - 1].time;
+      if (g > gap) {
+        gap = g;
+        at = this.points[i - 1].time;
+      }
+    }
+    const s = Math.round(gap / 1000);
+    const txt = s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
+    return `${txt} at ${this.formatTime(at)}`;
   }
 
   // ------------------------------------------------------------ overspeed
@@ -318,6 +424,9 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
   }
 
   get intervalSec(): number {
+    if (this.status?.adaptive) {
+      return this.status.currentIntervalSec || 15;
+    }
     return this.status?.gpsIntervalSec || 60;
   }
 

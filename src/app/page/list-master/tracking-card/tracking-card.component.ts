@@ -116,6 +116,7 @@ export class TrackingCardComponent implements OnInit, OnChanges, OnDestroy {
       { key: 'location', label: 'Location (Always Allow)', granted: status.location },
       { key: 'battery', label: 'Battery Optimization', granted: status.battery },
       { key: 'notifications', label: 'Notifications', granted: status.notifications },
+      { key: 'activity', label: 'Physical Activity', granted: status.activityPermission },
     ];
     this.allGranted = this.permissions.every(p => p.granted);
   }

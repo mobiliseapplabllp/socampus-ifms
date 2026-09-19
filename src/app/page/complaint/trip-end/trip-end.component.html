@@ -53,7 +53,10 @@
       </ion-item>
       <ion-item class="te-row" detail="false">
         <ion-label class="te-label">Points recorded</ion-label>
-        <ion-text slot="end" class="te-value">{{ points.length }}</ion-text>
+        <ion-text slot="end" class="te-value">
+          {{ acceptedPoints.length }}
+          <ion-text color="medium" *ngIf="rejectedCount">· {{ rejectedCount }} rejected</ion-text>
+        </ion-text>
       </ion-item>
       <ion-item class="te-row" detail="false">
         <ion-label class="te-label">Duration</ion-label>

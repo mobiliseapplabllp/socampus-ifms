@@ -10,6 +10,8 @@ export interface LiveTrackerStatus {
   location: boolean;
   battery: boolean;
   notifications: boolean;
+  /** Physical activity permission (Android 9 aur neeche hamesha true) */
+  activityPermission: boolean;
   /** FINE mila ya nahi - JS ko nahi chahiye, native khud decide karta hai kya kholna hai */
   fineGranted: boolean;
   running: boolean;
@@ -21,8 +23,9 @@ export interface LiveTrackerStatus {
   lastUpload: string;
   /** Session ka total distance, metres me */
   distance: number;
-  /** Derived speed (position se), m/s */
+  /** Maani gayi speed, m/s - bharosemand na ho to 0 (lastSpeedTrusted false) */
   lastSpeed: number;
+  lastSpeedTrusted: boolean;
   /** GPS ki apni Doppler speed, m/s - comparison ke liye */
   lastGpsSpeed: number;
   /** Overspeed threshold - native se aata hai taaki dono jagah ek hi number rahe */
@@ -33,6 +36,15 @@ export interface LiveTrackerStatus {
   tripModule: string;
   tripId: string;
   tripStartedAt: number;
+  /** true = speed ke hisaab se interval, false = fixed gpsIntervalSec */
+  adaptive: boolean;
+  /** Abhi GPS kitne second par hai, aur kyun */
+  currentIntervalSec: number;
+  intervalReason: string;
+  /** "Still" / "Walking" / "Running" / "Cycling" / "Riding" - khaali = pata nahi */
+  activity: string;
+  accGoodM: number;
+  accRejectM: number;
 }
 
 export type TripModule = 'complaint' | 'concierge' | 'pms';
@@ -52,6 +64,12 @@ export interface TripPoint {
   speed: number;
   accuracy: number;
   time: number;
+  /** false = location filter ne chhaanta (koodi / accuracy kharab) - line/km me nahi */
+  accepted: boolean;
+  reason: string;
+  /** Is fix par distance me kitna juda, metres (drift/reject par 0) */
+  dist: number;
+  interval: number;
 }
 
 /** Sirf JS guards ke liye - punch-out/stop block aur doosre ticket ka start block */
@@ -64,6 +82,11 @@ export interface LiveTrackerConfig {
   /** true = URL debug screen se badla gaya hai, environment wala nahi */
   urlCustom: boolean;
   running: boolean;
+  adaptive: boolean;
+  minIntervalSec: number;
+  maxIntervalSec: number;
+  accGoodM: number;
+  accRejectM: number;
 }
 
 export interface LivePoint {
@@ -76,9 +99,16 @@ export interface LivePoint {
   upload: string;
   /** true = is fix par alarm baja tha (threshold cross hone par, har 50+ fix par nahi) */
   alarmed: boolean;
+  /** false = location filter ne chhaanta - Filtered map me grey, line me nahi */
+  accepted: boolean;
+  reason: string;
+  /** Is fix par distance me kitna juda, metres */
+  dist: number;
+  /** Us waqt GPS kitne second par tha */
+  interval: number;
 }
 
-export type PermissionKey = 'gps' | 'location' | 'battery' | 'notifications';
+export type PermissionKey = 'gps' | 'location' | 'battery' | 'notifications' | 'activity';
 
 interface LiveTrackerPluginApi {
   checkStatus(): Promise<LiveTrackerStatus>;
@@ -86,6 +116,7 @@ interface LiveTrackerPluginApi {
   openLocationPermission(): Promise<{ opened: boolean }>;
   openBatterySettings(): Promise<{ opened: boolean }>;
   openNotificationSettings(): Promise<{ opened: boolean }>;
+  openActivityPermission(): Promise<{ opened: boolean }>;
   start(options: { url: string; token: string }): Promise<LiveTrackerStatus>;
   stop(): Promise<LiveTrackerStatus>;
   getSessionPoints(): Promise<{ points: LivePoint[] }>;
@@ -107,6 +138,7 @@ const EMPTY_STATUS: LiveTrackerStatus = {
   location: false,
   battery: false,
   notifications: false,
+  activityPermission: false,
   fineGranted: false,
   running: false,
   points: 0,
@@ -117,13 +149,20 @@ const EMPTY_STATUS: LiveTrackerStatus = {
   lastUpload: '-',
   distance: 0,
   lastSpeed: 0,
+  lastSpeedTrusted: false,
   lastGpsSpeed: 0,
   speedLimitKmh: 50,
   gpsIntervalSec: 60,
   tripActive: false,
   tripModule: '',
   tripId: '',
-  tripStartedAt: 0
+  tripStartedAt: 0,
+  adaptive: true,
+  currentIntervalSec: 0,
+  intervalReason: '-',
+  activity: '',
+  accGoodM: 50,
+  accRejectM: 150
 };
 
 @Injectable({ providedIn: 'root' })
@@ -166,6 +205,9 @@ export class LiveTrackerService {
           break;
         case 'notifications':
           await LiveTracker.openNotificationSettings();
+          break;
+        case 'activity':
+          await LiveTracker.openActivityPermission();
           break;
       }
     } catch (e) {
@@ -279,7 +321,12 @@ export class LiveTrackerService {
         speedLimitKmh: 50,
         url: environment.liveLocationUrl,
         urlCustom: false,
-        running: false
+        running: false,
+        adaptive: true,
+        minIntervalSec: 15,
+        maxIntervalSec: 300,
+        accGoodM: 50,
+        accRejectM: 150
       };
     }
     return LiveTracker.getConfig();

@@ -38,8 +38,34 @@ class LiveTrackerPrefs {
     private static final String KEY_TRIP_ID = "trip_id";
     private static final String KEY_TRIP_STARTED_AT = "trip_started_at";
 
+    // Adaptive interval + location filter - sab debug screen se badalne layak
+    private static final String KEY_ADAPTIVE = "adaptive";
+    private static final String KEY_MIN_INTERVAL = "min_interval_ms";
+    private static final String KEY_MAX_INTERVAL = "max_interval_ms";
+    private static final String KEY_ACC_GOOD = "acc_good_m";
+    private static final String KEY_ACC_REJECT = "acc_reject_m";
+
+    // Abhi ka interval aur uski wajah - notification/card me dikhane ke liye
+    private static final String KEY_CUR_INTERVAL = "cur_interval_ms";
+    private static final String KEY_CUR_REASON = "cur_reason";
+
+    // Activity Recognition ka aakhri jawab
+    private static final String KEY_ACTIVITY = "activity";
+    private static final String KEY_ACTIVITY_AT = "activity_at";
+
+    // Anchor = aakhri pakki jagah. Location filter isi se tay karta hai ki naya
+    // fix asli chalna hai ya location ka koodna
+    private static final String KEY_ANCHOR_LAT = "anchor_lat";
+    private static final String KEY_ANCHOR_LNG = "anchor_lng";
+    private static final String KEY_ANCHOR_ACC = "anchor_acc";
+    private static final String KEY_ANCHOR_AT = "anchor_at";
+
     static final long DEFAULT_GPS_INTERVAL_MS = 60_000L;
     static final float DEFAULT_SPEED_LIMIT_KMH = 50f;
+    static final long DEFAULT_MIN_INTERVAL_MS = 15_000L;
+    static final long DEFAULT_MAX_INTERVAL_MS = 300_000L;
+    static final float DEFAULT_ACC_GOOD_M = 50f;
+    static final float DEFAULT_ACC_REJECT_M = 150f;
 
     private final SharedPreferences sp;
 
@@ -188,6 +214,115 @@ class LiveTrackerPrefs {
         sp.edit().putFloat(KEY_SPEED_LIMIT, kmh).apply();
     }
 
+    // ------------------------------------------------------------ adaptive
+
+    /** true = speed ke hisaab se interval, false = fixed gpsInterval (test ke liye) */
+    boolean isAdaptive() {
+        return sp.getBoolean(KEY_ADAPTIVE, true);
+    }
+
+    void setAdaptive(boolean adaptive) {
+        sp.edit().putBoolean(KEY_ADAPTIVE, adaptive).apply();
+    }
+
+    long getMinIntervalMs() {
+        return sp.getLong(KEY_MIN_INTERVAL, DEFAULT_MIN_INTERVAL_MS);
+    }
+
+    void setMinIntervalMs(long ms) {
+        sp.edit().putLong(KEY_MIN_INTERVAL, ms).apply();
+    }
+
+    long getMaxIntervalMs() {
+        return sp.getLong(KEY_MAX_INTERVAL, DEFAULT_MAX_INTERVAL_MS);
+    }
+
+    void setMaxIntervalMs(long ms) {
+        sp.edit().putLong(KEY_MAX_INTERVAL, ms).apply();
+    }
+
+    float getAccGoodM() {
+        return sp.getFloat(KEY_ACC_GOOD, DEFAULT_ACC_GOOD_M);
+    }
+
+    void setAccGoodM(float m) {
+        sp.edit().putFloat(KEY_ACC_GOOD, m).apply();
+    }
+
+    float getAccRejectM() {
+        return sp.getFloat(KEY_ACC_REJECT, DEFAULT_ACC_REJECT_M);
+    }
+
+    void setAccRejectM(float m) {
+        sp.edit().putFloat(KEY_ACC_REJECT, m).apply();
+    }
+
+    long getCurrentIntervalMs() {
+        return sp.getLong(KEY_CUR_INTERVAL, 0L);
+    }
+
+    String getIntervalReason() {
+        return sp.getString(KEY_CUR_REASON, "-");
+    }
+
+    void setIntervalState(long ms, String reason) {
+        sp.edit().putLong(KEY_CUR_INTERVAL, ms).putString(KEY_CUR_REASON, reason).apply();
+    }
+
+    // ------------------------------------------------------------ activity
+
+    /** "Still" / "Walking" / "Running" / "Cycling" / "Riding" - khaali = abhi pata nahi */
+    String getActivity() {
+        return sp.getString(KEY_ACTIVITY, "");
+    }
+
+    long getActivityAt() {
+        return sp.getLong(KEY_ACTIVITY_AT, 0L);
+    }
+
+    void setActivity(String label, long at) {
+        sp.edit().putString(KEY_ACTIVITY, label).putLong(KEY_ACTIVITY_AT, at).apply();
+    }
+
+    // -------------------------------------------------------------- anchor
+
+    boolean hasAnchor() {
+        return sp.getLong(KEY_ANCHOR_AT, 0L) > 0;
+    }
+
+    double getAnchorLat() {
+        return Double.longBitsToDouble(sp.getLong(KEY_ANCHOR_LAT, 0L));
+    }
+
+    double getAnchorLng() {
+        return Double.longBitsToDouble(sp.getLong(KEY_ANCHOR_LNG, 0L));
+    }
+
+    float getAnchorAcc() {
+        return sp.getFloat(KEY_ANCHOR_ACC, 0f);
+    }
+
+    long getAnchorAt() {
+        return sp.getLong(KEY_ANCHOR_AT, 0L);
+    }
+
+    void setAnchor(double lat, double lng, float acc, long at) {
+        sp.edit()
+                .putLong(KEY_ANCHOR_LAT, Double.doubleToRawLongBits(lat))
+                .putLong(KEY_ANCHOR_LNG, Double.doubleToRawLongBits(lng))
+                .putFloat(KEY_ANCHOR_ACC, acc)
+                .putLong(KEY_ANCHOR_AT, at)
+                .apply();
+    }
+
+    /** Jagah wahi, bas "abhi bhi yahin hoon" ki pushti - anchor ko purana hone se bachata hai */
+    void touchAnchor(long at, float acc) {
+        sp.edit()
+                .putLong(KEY_ANCHOR_AT, at)
+                .putFloat(KEY_ANCHOR_ACC, Math.min(acc, getAnchorAcc()))
+                .apply();
+    }
+
     /** Start par counters saaf - har session ka apna count aur start time. */
     void resetSession() {
         sp.edit()
@@ -200,6 +335,9 @@ class LiveTrackerPrefs {
                 .putFloat(KEY_LAST_GPS_SPEED, 0f)
                 .putFloat(KEY_DISTANCE, 0f)
                 .putString(KEY_LAST_UPLOAD, "-")
+                .putLong(KEY_ANCHOR_AT, 0L)
+                .putLong(KEY_CUR_INTERVAL, 0L)
+                .putString(KEY_CUR_REASON, "start")
                 .apply();
     }
 

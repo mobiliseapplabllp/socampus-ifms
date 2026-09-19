@@ -20,6 +20,11 @@ export class TrackingDebugComponent implements OnInit {
 
   gpsIntervalSec = 60;
   speedLimitKmh = 50;
+  adaptive = true;
+  minIntervalSec = 15;
+  maxIntervalSec = 300;
+  accGoodM = 50;
+  accRejectM = 150;
   url = '';
   urlCustom = false;
   running = false;
@@ -40,6 +45,11 @@ export class TrackingDebugComponent implements OnInit {
     const c = await this.liveTracker.getConfig();
     this.gpsIntervalSec = c.gpsIntervalSec;
     this.speedLimitKmh = c.speedLimitKmh;
+    this.adaptive = c.adaptive;
+    this.minIntervalSec = c.minIntervalSec;
+    this.maxIntervalSec = c.maxIntervalSec;
+    this.accGoodM = c.accGoodM;
+    this.accRejectM = c.accRejectM;
     this.url = c.url || environment.liveLocationUrl;
     this.urlCustom = c.urlCustom;
     this.running = c.running;
@@ -58,6 +68,15 @@ export class TrackingDebugComponent implements OnInit {
     this.speedLimitKmh = kmh;
   }
 
+  /** Jo tay hua tha - 15s..5min, 50m/150m */
+  resetAdaptiveDefaults(): void {
+    this.adaptive = true;
+    this.minIntervalSec = 15;
+    this.maxIntervalSec = 300;
+    this.accGoodM = 50;
+    this.accRejectM = 150;
+  }
+
   /** Default par wapas - aage har Start environment wala URL hi lagayega */
   async resetUrl(): Promise<void> {
     this.url = environment.liveLocationUrl;
@@ -72,6 +91,19 @@ export class TrackingDebugComponent implements OnInit {
     }
     const interval = Number(this.gpsIntervalSec);
     const limit = Number(this.speedLimitKmh);
+    const minI = Number(this.minIntervalSec);
+    const maxI = Number(this.maxIntervalSec);
+    const good = Number(this.accGoodM);
+    const reject = Number(this.accRejectM);
+
+    if (this.adaptive && (!Number.isFinite(minI) || minI < 5 || !Number.isFinite(maxI) || maxI < minI)) {
+      this.common.presentToast('Min interval must be at least 5s and max must be greater than min', 'warning');
+      return;
+    }
+    if (!Number.isFinite(good) || good <= 0 || !Number.isFinite(reject) || reject < good) {
+      this.common.presentToast('Reject accuracy must be greater than good accuracy', 'warning');
+      return;
+    }
 
     if (!Number.isFinite(interval) || interval < 1) {
       this.common.presentToast('GPS interval must be at least 1 second', 'warning');
@@ -90,6 +122,11 @@ export class TrackingDebugComponent implements OnInit {
       const restarted = await this.liveTracker.setConfig({
         gpsIntervalSec: interval,
         speedLimitKmh: limit,
+        adaptive: this.adaptive,
+        minIntervalSec: minI,
+        maxIntervalSec: maxI,
+        accGoodM: good,
+        accRejectM: reject,
         // Default hi likha ho to override mat banao - environment badle to app
         // apne aap naya URL utha legi
         ...(isDefault ? { resetUrl: true } : { url: typed })

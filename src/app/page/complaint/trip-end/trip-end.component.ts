@@ -100,18 +100,37 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
 
   // ------------------------------------------------------------- distance
 
-  /** Points ke beech ka sum + aakhri point se abhi ki location tak */
+  /** Location filter ne jo maane - koodne wale aur kharab accuracy wale bahar */
+  get acceptedPoints(): TripPoint[] {
+    return this.points.filter(p => p.accepted !== false);
+  }
+
+  get rejectedCount(): number {
+    return this.points.length - this.acceptedPoints.length;
+  }
+
+  /**
+   * Native ne har fix par jo distance joda (dist) - wahi jodo. Wahi hisaab jisse home
+   * ka distance banta hai, taaki trip km aur live km kabhi alag na ho.
+   * Phir aakhri maane gaye point se abhi ki location tak - bas agar dono ki galti se
+   * zyada door ho, warna wo GPS ka shor hai.
+   */
   private pathKm(): number {
-    const path = this.fullPath();
-    let total = 0;
-    for (let i = 1; i < path.length; i++) {
-      total += this.haversineKm(path[i - 1], path[i]);
+    let metres = this.points.reduce((sum, p) => sum + (p.accepted !== false ? (p.dist || 0) : 0), 0);
+
+    const ok = this.acceptedPoints;
+    const last = ok.length ? ok[ok.length - 1] : null;
+    if (last && this.end) {
+      const tail = this.haversineKm(last, this.end) * 1000;
+      if (tail > (last.accuracy || 0) + (this.end.accuracy || 0)) {
+        metres += tail;
+      }
     }
-    return total;
+    return metres / 1000;
   }
 
   private fullPath(): { lat: number; lng: number }[] {
-    const path = this.points.map(p => ({ lat: p.lat, lng: p.lng }));
+    const path = this.acceptedPoints.map(p => ({ lat: p.lat, lng: p.lng }));
     if (this.end) {
       path.push({ lat: this.end.lat, lng: this.end.lng });
     }
@@ -156,16 +175,27 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
       }));
     }
 
-    // Beech ke points - gap dikh jaata hai
-    this.points.forEach((p, i) => {
+    // Chhante hue points grey - line me nahi, par dikhe ki kahan location koodi
+    this.points.forEach(p => {
+      if (p.accepted !== false) {
+        return;
+      }
+      this.overlays.push(this.dot({ lat: p.lat, lng: p.lng }, '#c5c6cc', 5,
+        `${this.formatTime(p.time)} · ±${p.accuracy.toFixed(0)}m · rejected: ${p.reason}`));
+    });
+
+    // Beech ke maane gaye points - gap dikh jaata hai
+    const ok = this.acceptedPoints;
+    ok.forEach((p, i) => {
       if (i === 0) {
         return;
       }
-      this.overlays.push(this.dot({ lat: p.lat, lng: p.lng }, '#1a73e8', 4, this.formatTime(p.time)));
+      this.overlays.push(this.dot({ lat: p.lat, lng: p.lng }, '#1a73e8', 4,
+        `${this.formatTime(p.time)} · ±${p.accuracy.toFixed(0)}m`));
     });
 
-    if (this.points.length) {
-      const s = this.points[0];
+    if (ok.length) {
+      const s = ok[0];
       this.overlays.push(this.dot({ lat: s.lat, lng: s.lng }, '#2dd36f', 9, 'Start · ' + this.formatTime(s.time)));
     }
     if (this.end) {
@@ -244,7 +274,7 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
   // -------------------------------------------------------------- display
 
   get start(): TripPoint | null {
-    return this.points.length ? this.points[0] : null;
+    return this.points.length ? this.points[0] : null;   // trip start wala point hamesha pehla
   }
 
   formatTime(ts: number): string {

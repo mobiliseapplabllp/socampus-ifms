@@ -59,6 +59,12 @@
             </intent-filter>
         </receiver>
 
+        <!-- Activity Recognition ke badlav (still -> walking / riding) -->
+        <receiver
+            android:name="com.socampuseng.mbl.livetracker.LiveActivityReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
         <receiver
             android:name="com.socampuseng.mbl.livetracker.LiveBootReceiver"
             android:enabled="true"
@@ -100,6 +106,10 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Physical activity: Android 10+ runtime, 9 aur neeche gms wali install par -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"
+        android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     
