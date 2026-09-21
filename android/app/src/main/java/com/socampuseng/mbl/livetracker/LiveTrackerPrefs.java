@@ -15,6 +15,8 @@ class LiveTrackerPrefs {
     private static final String KEY_ENABLED = "enabled";
     private static final String KEY_URL = "url";
     private static final String KEY_TOKEN = "token";
+    /** Server isi se client (tenant) pehchaanta hai - environment.referUrl */
+    private static final String KEY_REFERER = "referer";
     private static final String KEY_POINTS = "points";
     private static final String KEY_STARTED_AT = "started_at";
     private static final String KEY_LAST_FIX_AT = "last_fix_at";
@@ -23,9 +25,15 @@ class LiveTrackerPrefs {
     private static final String KEY_LAST_SPEED = "last_speed";
     private static final String KEY_LAST_ACCURACY = "last_accuracy";
     private static final String KEY_LAST_UPLOAD = "last_upload";
+    /** Server ne aakhri ping kab store kiya (fix ka waqt) - minute me ek hi bhejte hain */
+    private static final String KEY_LAST_PING_AT = "last_ping_at";
     private static final String KEY_LAST_GPS_SPEED = "last_gps_speed";
     private static final String KEY_DISTANCE = "distance_m";
     private static final String KEY_LAST_SPEED_TRUSTED = "last_speed_trusted";
+    /** Speed GPS se nahi, doori/time se nikli hai - notification me "~" ke saath */
+    private static final String KEY_LAST_SPEED_EST = "last_speed_est";
+    /** Session ki sabse tez speed (km/h) - testing me dikhta hai ki GPS ne kya padha */
+    private static final String KEY_MAX_SPEED = "max_speed_kmh";
 
     // Debug screen se badalne wale config - default wahi hain jo pehle hardcoded the
     private static final String KEY_GPS_INTERVAL = "gps_interval_ms";
@@ -97,6 +105,14 @@ class LiveTrackerPrefs {
         sp.edit().putString(KEY_TOKEN, token).apply();
     }
 
+    String getReferer() {
+        return sp.getString(KEY_REFERER, "");
+    }
+
+    void setReferer(String referer) {
+        sp.edit().putString(KEY_REFERER, referer).apply();
+    }
+
     int getPoints() {
         return sp.getInt(KEY_POINTS, 0);
     }
@@ -133,6 +149,14 @@ class LiveTrackerPrefs {
         sp.edit().putString(KEY_LAST_UPLOAD, result).apply();
     }
 
+    long getLastPingAt() {
+        return sp.getLong(KEY_LAST_PING_AT, 0L);
+    }
+
+    void setLastPingAt(long at) {
+        sp.edit().putLong(KEY_LAST_PING_AT, at).apply();
+    }
+
     /** GPS ki apni (Doppler) speed - sirf comparison ke liye rakhi hai */
     float getLastGpsSpeed() {
         return sp.getFloat(KEY_LAST_GPS_SPEED, 0f);
@@ -141,6 +165,14 @@ class LiveTrackerPrefs {
     /** false = aakhri fix ki GPS speed bharosemand nahi thi (0 maani gayi) */
     boolean isLastSpeedTrusted() {
         return sp.getBoolean(KEY_LAST_SPEED_TRUSTED, false);
+    }
+
+    boolean isLastSpeedEstimated() {
+        return sp.getBoolean(KEY_LAST_SPEED_EST, false);
+    }
+
+    float getMaxSpeedKmh() {
+        return sp.getFloat(KEY_MAX_SPEED, 0f);
     }
 
     /** Session ka total distance, metres me */
@@ -335,6 +367,8 @@ class LiveTrackerPrefs {
                 .putFloat(KEY_LAST_GPS_SPEED, 0f)
                 .putFloat(KEY_DISTANCE, 0f)
                 .putString(KEY_LAST_UPLOAD, "-")
+                .putFloat(KEY_MAX_SPEED, 0f)
+                .putLong(KEY_LAST_PING_AT, 0L)
                 .putLong(KEY_ANCHOR_AT, 0L)
                 .putLong(KEY_CUR_INTERVAL, 0L)
                 .putString(KEY_CUR_REASON, "start")
@@ -346,8 +380,9 @@ class LiveTrackerPrefs {
      * speed = maani gayi speed (bharosemand na ho to 0), gpsSpeed = GPS ki kachchi reading.
      */
     int recordFix(double lat, double lng, float speed, float gpsSpeed, float accuracy, long time,
-                  boolean speedTrusted) {
+                  boolean speedTrusted, boolean speedEstimated) {
         int points = getPoints() + 1;
+        float kmh = speed * 3.6f;
         sp.edit()
                 .putInt(KEY_POINTS, points)
                 .putLong(KEY_LAST_FIX_AT, time)
@@ -357,6 +392,8 @@ class LiveTrackerPrefs {
                 .putFloat(KEY_LAST_GPS_SPEED, gpsSpeed)
                 .putFloat(KEY_LAST_ACCURACY, accuracy)
                 .putBoolean(KEY_LAST_SPEED_TRUSTED, speedTrusted)
+                .putBoolean(KEY_LAST_SPEED_EST, speedEstimated)
+                .putFloat(KEY_MAX_SPEED, Math.max(getMaxSpeedKmh(), kmh))
                 .apply();
         return points;
     }

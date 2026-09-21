@@ -202,6 +202,8 @@ public class LiveTrackerPlugin extends Plugin {
         ret.put("tripId", prefs.getTripId());
         ret.put("tripStartedAt", prefs.getTripStartedAt());
         ret.put("lastSpeedTrusted", prefs.isLastSpeedTrusted());
+        ret.put("lastSpeedEstimated", prefs.isLastSpeedEstimated());
+        ret.put("maxSpeedKmh", prefs.getMaxSpeedKmh());
         ret.put("adaptive", prefs.isAdaptive());
         ret.put("currentIntervalSec", prefs.getCurrentIntervalMs() / 1000L);
         ret.put("intervalReason", prefs.getIntervalReason());
@@ -427,6 +429,7 @@ public class LiveTrackerPlugin extends Plugin {
 
         String url = call.getString("url", "");
         String token = call.getString("token", "");
+        String referer = call.getString("referer", "");
         if (url == null || url.isEmpty()) {
             call.reject("Upload URL is required");
             return;
@@ -440,6 +443,7 @@ public class LiveTrackerPlugin extends Plugin {
                 prefs.setUrl(url);
             }
             prefs.setToken(token == null ? "" : token);
+            prefs.setReferer(referer == null ? "" : referer);
             prefs.resetSession();
             // Naya session = naya path. Purane points map par nahi aane chahiye
             LivePointsDb.getInstance(ctx).clear();

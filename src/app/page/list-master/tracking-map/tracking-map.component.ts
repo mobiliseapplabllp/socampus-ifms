@@ -34,6 +34,8 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
   private map: any = null;
   private polyline: any = null;
   private markers: any[] = [];
+  /** Ek hi window, sab dots ke liye - phone par title (hover) dikhta hi nahi */
+  private infoWindow: any = null;
   private ticker: any = null;
 
   constructor(
@@ -131,6 +133,9 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
       m.setMap(null);
     }
     this.markers = [];
+    if (this.infoWindow) {
+      this.infoWindow.close();
+    }
   }
 
   /** Line inhi points se banti hai - Filtered me sirf maane gaye */
@@ -193,7 +198,7 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
         if (p.accepted !== false) {
           return;
         }
-        this.markers.push(new google.maps.Marker({
+        this.addPointMarker(p, 'Rejected', {
           position: { lat: p.lat, lng: p.lng },
           map: this.map,
           title: this.pointTitleOf(p),
@@ -206,7 +211,7 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
             strokeColor: '#92949c',
             strokeWeight: 2,
           },
-        }));
+        });
       });
     }
 
@@ -217,7 +222,7 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
       }
       const over = this.isOver(p);
       const color = this.mode === 'all' ? this.accuracyColor(p.accuracy) : (over ? '#ffc409' : '#1a73e8');
-      this.markers.push(new google.maps.Marker({
+      this.addPointMarker(p, over ? 'Overspeed' : 'Point ' + (i + 1), {
         position: { lat: p.lat, lng: p.lng },
         map: this.map,
         title: this.pointTitleOf(p),
@@ -230,16 +235,16 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
           strokeColor: '#ffffff',
           strokeWeight: 1,
         },
-      }));
+      });
     });
 
     if (line.length) {
-      this.addEndMarker(path[0], '#2dd36f', 'Start · ' + this.pointTitleOf(line[0]));
+      this.addEndMarker(path[0], '#2dd36f', 'Start', line[0]);
     }
     if (line.length > 1) {
       const last = line[line.length - 1];
       const label = this.status?.running ? 'Latest' : 'End';
-      this.addEndMarker(path[path.length - 1], '#eb445a', label + ' · ' + this.pointTitleOf(last));
+      this.addEndMarker(path[path.length - 1], '#eb445a', label, last);
     }
   }
 
@@ -257,11 +262,12 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
     return '#eb445a';         // kachra
   }
 
-  private addEndMarker(p: { lat: number; lng: number }, color: string, title: string): void {
-    this.markers.push(new google.maps.Marker({
+  private addEndMarker(p: { lat: number; lng: number }, color: string, label: string,
+                       point: LivePoint): void {
+    this.addPointMarker(point, label, {
       position: p,
       map: this.map,
-      title,
+      title: label + ' · ' + this.pointTitleOf(point),
       zIndex: 3,
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
@@ -271,7 +277,51 @@ export class TrackingMapComponent implements AfterViewInit, OnDestroy {
         strokeColor: '#ffffff',
         strokeWeight: 2,
       },
-    }));
+    });
+  }
+
+  /**
+   * Dot banao aur tap par uski poori detail dikhao. Phone par marker ka title
+   * (hover wala tooltip) kabhi dikhta hi nahi, isliye InfoWindow chahiye.
+   */
+  private addPointMarker(p: LivePoint, heading: string, options: any): void {
+    const marker = new google.maps.Marker(options);
+    marker.addListener('click', () => {
+      if (!this.infoWindow) {
+        this.infoWindow = new google.maps.InfoWindow();
+      }
+      this.infoWindow.setContent(this.pointInfoHtml(p, heading));
+      this.infoWindow.open(this.map, marker);
+    });
+    this.markers.push(marker);
+  }
+
+  private pointInfoHtml(p: LivePoint, heading: string): string {
+    const rows: string[][] = [
+      ['Time', this.formatTime(p.time)],
+      ['Speed', `${p.speed.toFixed(1)} km/h`],
+      ['Accuracy', `±${p.accuracy.toFixed(0)} m`],
+    ];
+    if (p.interval) {
+      rows.push(['Next fix', `${p.interval}s`]);
+    }
+    if (p.dist) {
+      rows.push(['Distance', `${p.dist.toFixed(0)} m`]);
+    }
+    rows.push(['Filter', p.accepted === false ? `rejected: ${p.reason}` : (p.reason || 'ok')]);
+    rows.push(['Server', p.upload || '-']);
+    if (p.alarmed) {
+      rows.push(['Alarm', 'Speed limit crossed']);
+    }
+    rows.push(['Location', `${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}`]);
+
+    const body = rows
+      .map(r => `<tr><td style="color:#6b6f76;padding-right:10px">${r[0]}</td><td>${r[1]}</td></tr>`)
+      .join('');
+    return `<div style="font-size:12px;line-height:1.5;min-width:180px">
+      <div style="font-weight:600;margin-bottom:4px">${heading}</div>
+      <table>${body}</table>
+    </div>`;
   }
 
   /** Poore path par wapas zoom - user ne pan kar liya ho to kaam aata hai */

@@ -35,6 +35,13 @@
       </ion-text>
     </ion-item>
     <ion-item class="tm-row" detail="false">
+      <ion-label class="tm-label">Max speed</ion-label>
+      <ion-text slot="end" class="tm-value">
+        {{ (status?.maxSpeedKmh || 0).toFixed(0) }} km/h
+        <ion-text color="medium">· limit {{ status?.speedLimitKmh }}</ion-text>
+      </ion-text>
+    </ion-item>
+    <ion-item class="tm-row" detail="false">
       <ion-label class="tm-label">Activity</ion-label>
       <ion-text slot="end" class="tm-value">{{ status?.activity || '—' }}</ion-text>
     </ion-item>

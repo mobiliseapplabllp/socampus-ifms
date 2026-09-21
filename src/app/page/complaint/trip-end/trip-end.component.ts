@@ -38,6 +38,7 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
 
   private map: any = null;
   private overlays: any[] = [];
+  private infoWindow: any = null;
 
   constructor(
     private modalCtrl: ModalController,
@@ -181,7 +182,8 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
         return;
       }
       this.overlays.push(this.dot({ lat: p.lat, lng: p.lng }, '#c5c6cc', 5,
-        `${this.formatTime(p.time)} · ±${p.accuracy.toFixed(0)}m · rejected: ${p.reason}`));
+        `${this.formatTime(p.time)} · ±${p.accuracy.toFixed(0)}m · rejected: ${p.reason}`,
+        this.infoHtml('Rejected', p)));
     });
 
     // Beech ke maane gaye points - gap dikh jaata hai
@@ -191,12 +193,14 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
         return;
       }
       this.overlays.push(this.dot({ lat: p.lat, lng: p.lng }, '#1a73e8', 4,
-        `${this.formatTime(p.time)} · ±${p.accuracy.toFixed(0)}m`));
+        `${this.formatTime(p.time)} · ±${p.accuracy.toFixed(0)}m`,
+        this.infoHtml('Point ' + (i + 1), p)));
     });
 
     if (ok.length) {
       const s = ok[0];
-      this.overlays.push(this.dot({ lat: s.lat, lng: s.lng }, '#2dd36f', 9, 'Start · ' + this.formatTime(s.time)));
+      this.overlays.push(this.dot({ lat: s.lat, lng: s.lng }, '#2dd36f', 9,
+        'Start · ' + this.formatTime(s.time), this.infoHtml('Start', s)));
     }
     if (this.end) {
       this.overlays.push(this.dot({ lat: this.end.lat, lng: this.end.lng }, '#eb445a', 9, 'End · now'));
@@ -215,8 +219,30 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private dot(p: { lat: number; lng: number }, color: string, scale: number, title: string) {
-    return new google.maps.Marker({
+  /** Tap par detail - phone par marker ka title dikhta hi nahi */
+  private infoHtml(heading: string, p: TripPoint): string {
+    const rows: string[][] = [
+      ['Time', this.formatTime(p.time)],
+      ['Speed', `${p.speed.toFixed(1)} km/h`],
+      ['Accuracy', `±${p.accuracy.toFixed(0)} m`],
+    ];
+    if (p.dist) {
+      rows.push(['Distance', `${p.dist.toFixed(0)} m`]);
+    }
+    rows.push(['Filter', p.accepted === false ? `rejected: ${p.reason}` : (p.reason || 'ok')]);
+    rows.push(['Location', `${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}`]);
+    const body = rows
+      .map(r => `<tr><td style="color:#6b6f76;padding-right:10px">${r[0]}</td><td>${r[1]}</td></tr>`)
+      .join('');
+    return `<div style="font-size:12px;line-height:1.5;min-width:170px">
+      <div style="font-weight:600;margin-bottom:4px">${heading}</div>
+      <table>${body}</table>
+    </div>`;
+  }
+
+  private dot(p: { lat: number; lng: number }, color: string, scale: number, title: string,
+              info?: string) {
+    const marker = new google.maps.Marker({
       position: p,
       map: this.map,
       title,
@@ -230,6 +256,16 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
         strokeWeight: scale > 5 ? 2 : 1,
       },
     });
+    if (info) {
+      marker.addListener('click', () => {
+        if (!this.infoWindow) {
+          this.infoWindow = new google.maps.InfoWindow();
+        }
+        this.infoWindow.setContent(info);
+        this.infoWindow.open(this.map, marker);
+      });
+    }
+    return marker;
   }
 
   // --------------------------------------------------------------- submit

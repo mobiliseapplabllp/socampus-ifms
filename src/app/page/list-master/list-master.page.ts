@@ -11,6 +11,7 @@ import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 import { take } from 'rxjs';
 import { stat } from 'fs';
 import { cordovaInstance } from '@awesome-cordova-plugins/core';
+import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -118,6 +119,37 @@ export class ListMasterPage implements OnInit {
     }, 1500);
     this.getHomeLoad();
     this.getNotification();
+    if (!environment.isProd) {
+      this.testGpsPing();
+    }
+  }
+
+  /**
+   * TESTING: gps-mobile/ping ko dummy data se hit karke jawab dekhna.
+   * Interceptor token1 + Referer1 khud laga deta hai. Kaam ho jaye to hata dena -
+   * asli ping native service bhejti hai.
+   */
+  testGpsPing() {
+    const obj = {
+      lat: 19.0760,
+      lng: 72.8777,
+      speed: 34.5,
+      // sv-SE ka format hi "2026-09-19 12:30:00" hai - India ka time
+      recorded_at: new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Kolkata' }),
+      accuracy: 8.4
+    };
+    console.log('GPS PING request', obj);
+    this.httpLogin.gpsMobilePing(obj).subscribe({
+      next: (data: any) => {
+        console.log('GPS PING response', data);
+        const result = data?.stored ? 'stored' : data?.skipped ? 'skipped' : JSON.stringify(data);
+        this.common.presentToast('GPS ping: ' + result, data?.status ? 'success' : 'warning');
+      },
+      error: (err: any) => {
+        console.error('GPS PING error', err.status, err.error);
+        this.common.presentToast('GPS ping failed: ' + err.status + ' ' + (err.error?.error || err.message || ''), 'danger');
+      }
+    });
   }
 
   getHomeLoad() {

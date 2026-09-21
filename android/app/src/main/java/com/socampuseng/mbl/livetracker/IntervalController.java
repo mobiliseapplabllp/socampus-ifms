@@ -117,6 +117,11 @@ final class IntervalController {
         return reason;
     }
 
+    /** Algorithm ne pakka maan liya hai ki abhi chal rahe hain (2 fix mile hain) */
+    boolean movingConfirmed() {
+        return movingConfirmed;
+    }
+
     /** Kitni der se ruka hai (notification ke liye) */
     long stillForMs(long now) {
         return Math.max(0L, now - lastMovedAt);

@@ -26,6 +26,8 @@ export interface LiveTrackerStatus {
   /** Maani gayi speed, m/s - bharosemand na ho to 0 (lastSpeedTrusted false) */
   lastSpeed: number;
   lastSpeedTrusted: boolean;
+  lastSpeedEstimated: boolean;
+  maxSpeedKmh: number;
   /** GPS ki apni Doppler speed, m/s - comparison ke liye */
   lastGpsSpeed: number;
   /** Overspeed threshold - native se aata hai taaki dono jagah ek hi number rahe */
@@ -117,7 +119,7 @@ interface LiveTrackerPluginApi {
   openBatterySettings(): Promise<{ opened: boolean }>;
   openNotificationSettings(): Promise<{ opened: boolean }>;
   openActivityPermission(): Promise<{ opened: boolean }>;
-  start(options: { url: string; token: string }): Promise<LiveTrackerStatus>;
+  start(options: { url: string; token: string; referer: string }): Promise<LiveTrackerStatus>;
   stop(): Promise<LiveTrackerStatus>;
   getSessionPoints(): Promise<{ points: LivePoint[] }>;
   getConfig(): Promise<LiveTrackerConfig>;
@@ -150,6 +152,8 @@ const EMPTY_STATUS: LiveTrackerStatus = {
   distance: 0,
   lastSpeed: 0,
   lastSpeedTrusted: false,
+  lastSpeedEstimated: false,
+  maxSpeedKmh: 0,
   lastGpsSpeed: 0,
   speedLimitKmh: 50,
   gpsIntervalSec: 60,
@@ -348,7 +352,10 @@ export class LiveTrackerService {
     // Proxy wala environment.url nahi - native HTTP seedha jaata hai
     return LiveTracker.start({
       url: environment.liveLocationUrl,
-      token: localStorage.getItem('token1') || ''
+      token: localStorage.getItem('token1') || '',
+      // Server isi se client pehchaanta hai. Angular ka Referer1 sirf proxy ke liye -
+      // native seedha server par jaata hai, isliye asli Referer header
+      referer: environment.referUrl
     });
   }
 

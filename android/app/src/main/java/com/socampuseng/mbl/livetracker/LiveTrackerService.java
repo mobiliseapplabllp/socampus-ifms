@@ -19,7 +19,9 @@ import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
 import android.location.Location;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
@@ -31,6 +33,7 @@ import androidx.core.app.NotificationCompat;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityTransition;
 import com.google.android.gms.location.ActivityTransitionRequest;
+import com.google.android.gms.location.CurrentLocationRequest;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -42,6 +45,8 @@ import com.socampuseng.mbl.MainActivity;
 
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -51,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -91,9 +97,9 @@ public class LiveTrackerService extends Service {
     private static final float KMH_PER_MS = 3.6f;
 
     /** GPS speed tabhi maani jaati hai jab fix itna pakka ho */
-    private static final float SPEED_TRUST_ACCURACY_M = 25f;   // 20 par ±21 wali asli speed kat rahi thi
+    private static final float SPEED_TRUST_ACCURACY_M = 50f;   // 25 par 120 km/h wali ride ki speed kat gayi thi
     /** Android 8+ GPS speed ki apni galti bhi batata hai - isse zyada ho to reading chhodo */
-    private static final float SPEED_ACCURACY_MAX_MS = 3f;
+    private static final float SPEED_ACCURACY_MAX_MS = 5f;
     /** Isse purana fix = cached location (service restart par aati hai) - speed nahi */
     private static final long STALE_FIX_MS = 15_000L;
     /** 180 km/h - isse upar = location koodi hai, asli chalna nahi */
@@ -104,6 +110,18 @@ public class LiveTrackerService extends Service {
     private static final float STILL_DISPLAY_MS = 3f / 3.6f;
     /** Anchor itna purana (sirf kharab fix aa rahe the) to naye fix ko nayi jagah maano */
     private static final long ANCHOR_MAX_AGE_MS = 10 * 60 * 1000L;
+    /**
+     * Server minute me ek hi ping rakhta hai, baaki "skipped". Isse jaldi bhejna bekaar -
+     * ghane points (15-30s) phone ki SQLite / trip_points me rehte hain, server par live
+     * location 1/min
+     */
+    private static final long PING_EVERY_MS = 60_000L;
+    /**
+     * Fix itna late ho (interval ke upar) to khud maango. 16:45:50 wale test me 5m interval
+     * par agla fix 16:52 tak nahi aaya - Fused lambe interval par der kar deta hai
+     * (andar GPS lock, Doze, battery saver). Wait mat karo, getCurrentLocation se jagao
+     */
+    private static final long LATE_GRACE_MS = 45_000L;
 
     /** true = pichla fix limit se upar tha, alarm baj chuka hai */
     private boolean overspeedArmed = false;
@@ -134,6 +152,12 @@ public class LiveTrackerService extends Service {
     /** Abhi GPS se kis interval par request lagi hai - badle tabhi dobara request */
     private long requestedIntervalMs = 0L;
     private boolean activityRegistered = false;
+    /** Late fix ki jaanch - main thread par, har fix / request ke baad dobara lagti hai */
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Runnable lateCheck = this::checkLateFix;
+    /** Is session me kitni baar khud fix maangna pada - notification ke liye */
+    private int lateKicks = 0;
+
     /** Aakhri fix filter se pass hua ya nahi - sirf notification ke liye */
     private String lastFilter = "-";
 
@@ -204,6 +228,8 @@ public class LiveTrackerService extends Service {
         // saara state prefs me hai
         ensureActivityUpdates();
         scheduleWatchdog();
+        // Handler Doze me so sakta hai, watchdog alarm nahi - dono se jaanch
+        checkLateFix();
         return START_STICKY;
     }
 
@@ -362,9 +388,58 @@ public class LiveTrackerService extends Service {
 
         fused.requestLocationUpdates(req, callback, getMainLooper());
         requestedIntervalMs = interval;
+        armLateCheck();
+    }
+
+    private void armLateCheck() {
+        handler.removeCallbacks(lateCheck);
+        handler.postDelayed(lateCheck, Math.max(requestedIntervalMs, 1000L) + LATE_GRACE_MS);
+    }
+
+    /** Interval + 45s ho gaye aur fix nahi aaya - Fused ke bharose mat baitho, khud maango */
+    @SuppressLint("MissingPermission")
+    private void checkLateFix() {
+        if (fused == null || !prefs.isEnabled() || requestedIntervalMs <= 0) {
+            return;
+        }
+        long lateMs = lateByMs();
+        if (lateMs > LATE_GRACE_MS) {
+            lateKicks++;
+            Log.w(TAG, "fix late by " + (lateMs / 1000) + "s - asking for current location");
+            try {
+                // Cache wala nahi (wo purana hota hai, filter "stale" maan ke phenk deta) -
+                // naya fix, 30s tak koshish
+                CurrentLocationRequest req = new CurrentLocationRequest.Builder()
+                        .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                        .setMaxUpdateAgeMillis(0)
+                        .setDurationMillis(30_000L)
+                        .build();
+                fused.getCurrentLocation(req, null)
+                        .addOnSuccessListener(loc -> {
+                            // Stream wala fix bhi saath me aa gaya ho to handleFix use
+                            // "stale" maan ke chhod deta hai - double point nahi banega
+                            if (loc != null) handleFix(loc);
+                        })
+                        .addOnFailureListener(e -> Log.w(TAG, "current location failed: " + e.getMessage()));
+            } catch (Exception e) {
+                Log.w(TAG, "current location error: " + e.getMessage());
+            }
+            updateNotification();
+        }
+        armLateCheck();
+    }
+
+    /** Agla fix kitna late hai (0 = time par) */
+    private long lateByMs() {
+        long lastFix = prefs.getLastFixAt();
+        if (lastFix <= 0 || requestedIntervalMs <= 0) {
+            return 0L;
+        }
+        return Math.max(0L, System.currentTimeMillis() - lastFix - requestedIntervalMs);
     }
 
     private void handleFix(Location loc) {
+        armLateCheck();
         final double lat = loc.getLatitude();
         final double lng = loc.getLongitude();
         final float gpsSpeed = loc.hasSpeed() ? loc.getSpeed() : 0f;
@@ -378,8 +453,7 @@ public class LiveTrackerService extends Service {
         if (speedTrusted && speedMs < STILL_DISPLAY_MS) {
             speedMs = 0f;
         }
-        final float speed = speedMs;
-        final float kmh = speed * KMH_PER_MS;
+        final float kmh = speedMs * KMH_PER_MS;
 
         // ---- 2. Location filter - asli chalna ya location ka koodna?
         // Doori/time ka hisaab FIX ke asli waqt se - callback ke waqt se nahi. GPS request
@@ -391,7 +465,7 @@ public class LiveTrackerService extends Service {
         float addedM = 0f;
         // Pichhli jagah se sach me hila? Interval isi par tay hota hai
         boolean movedEvidence = false;
-        // Hila to doori / time - speed na mile tab interval ke liye (overspeed ke liye NAHI)
+        // Hila to doori / time - GPS ki apni speed na mile to yahi speed chalti hai
         float derivedKmh = -1f;
         boolean stale = false;
 
@@ -457,12 +531,7 @@ public class LiveTrackerService extends Service {
         lastFilter = accepted ? filterReason : "rejected: " + filterReason;
         final float distAdded = addedM;
 
-        prefs.recordFix(lat, lng, speed, gpsSpeed, accuracy, now, speedTrusted);
-
-        // ---- 3. Overspeed - bharosemand speed na ho to faisla hi mat lo
-        final boolean alarmed = speedTrusted && checkOverspeed(speed);
-
-        // ---- 4. Agla interval - pichhli jagah se mila ke
+        // ---- 3. Agla interval - pichhli jagah se mila ke
         if (prefs.isAdaptive() && intervals != null && !stale) {
             // Hila = location ne saboot diya, ya pakki GPS speed khud 3 km/h+ bata rahi hai.
             // Speed: pakki GPS wali, na mile to doori/time se nikali
@@ -480,12 +549,31 @@ public class LiveTrackerService extends Service {
         }
         final int intervalSec = (int) (prefs.getCurrentIntervalMs() / 1000L);
 
+        // ---- 4. Jo speed dikhegi / server jaayegi / overspeed dekhega.
+        // Pehli pasand GPS ki apni (Doppler) reading. Wo na mile par agar algorithm ne
+        // pakka kar liya ho ki chal rahe hain, to doori/time wali speed chalegi - 120 km/h
+        // wali ride me Doppler kat jaane se ek bhi overspeed nahi pakdi gayi thi.
+        // Khade phone ka bounce isme nahi aata, wahan chalna pakka hota hi nahi
+        boolean movingSure = intervals != null && prefs.isAdaptive()
+                ? intervals.movingConfirmed()
+                : movedEvidence;
+        boolean estimated = !speedTrusted && derivedKmh >= 0f && movingSure
+                && accuracy > 0f && accuracy <= good;
+        final float finalKmh = estimated ? derivedKmh : kmh;
+        final boolean haveSpeed = speedTrusted || estimated;
+
+        prefs.recordFix(lat, lng, finalKmh / KMH_PER_MS, gpsSpeed, accuracy, now,
+                speedTrusted, estimated);
+
+        // ---- 5. Overspeed
+        final boolean alarmed = haveSpeed && checkOverspeed(finalKmh);
+
         updateNotification();
 
         // Ongoing notification laal hoti hai par wo ek hi jagah update hoti rehti hai -
         // ye alag alert har overspeed reading ka apna record chhod jaata hai
-        if (speedTrusted && kmh >= prefs.getSpeedLimitKmh()) {
-            postOverspeedAlert(kmh, lat, lng, now, alarmed);
+        if (haveSpeed && finalKmh >= prefs.getSpeedLimitKmh()) {
+            postOverspeedAlert(finalKmh, lat, lng, now, alarmed);
         }
 
         // Trip ki pehchaan fix ke waqt hi pakad lo - upload me 15s lag sakte hain,
@@ -497,13 +585,24 @@ public class LiveTrackerService extends Service {
             // Wahi fix, doosri manzil - koi nayi GPS request nahi. Har fix save hota hai,
             // kharab wala bhi - accepted/reason ke saath. Chhantna padhte waqt hota hai.
             if (tripModule != null) {
-                points.insertTrip(tripModule, tripId, lat, lng, kmh, accuracy, now,
+                points.insertTrip(tripModule, tripId, lat, lng, finalKmh, accuracy, now,
                         accepted, filterReason, distAdded, intervalSec);
             }
-            long rowId = points.insert(lat, lng, kmh, accuracy, now, alarmed,
+            long rowId = points.insert(lat, lng, finalKmh, accuracy, now, alarmed,
                     accepted, filterReason, distAdded, intervalSec);
-            String result = upload(lat, lng, speed);
-            prefs.setLastUpload(result);
+            String result;
+            long sinceMs = fixTime - prefs.getLastPingAt();
+            if (prefs.getLastPingAt() > 0 && sinceMs >= 0 && sinceMs < PING_EVERY_MS) {
+                // Minute poora nahi hua - server skip hi karega, call bachao
+                result = "held " + (sinceMs / 1000L) + "s";
+            } else {
+                result = upload(lat, lng, finalKmh, accuracy, fixTime);
+                // Store hua to agla minute yahan se. Skip / fail par agla fix phir koshish karega
+                if (result.startsWith("2") && !result.endsWith("skipped")) {
+                    prefs.setLastPingAt(fixTime);
+                }
+                prefs.setLastUpload(result);
+            }
             points.setUploadResult(rowId, result);
             updateNotification();
         });
@@ -537,8 +636,7 @@ public class LiveTrackerService extends Service {
      * Hysteresis: 50 par bajao, 45 se neeche aane par hi dobara armed hota hai.
      * Bina iske 49.8/50.2 ke beech jhoolti speed har fix par alarm baja degi.
      */
-    private boolean checkOverspeed(float speedMs) {
-        float kmh = speedMs * KMH_PER_MS;
+    private boolean checkOverspeed(float kmh) {
         float limit = prefs.getSpeedLimitKmh();
 
         if (!overspeedArmed && kmh >= limit) {
@@ -564,7 +662,11 @@ public class LiveTrackerService extends Service {
      * Return value sirf notification me dikhane ke liye hai taaki testing me
      * pata chale ki server kya jawab de raha hai.
      */
-    private String upload(double lat, double lng, float speed) {
+    /**
+     * Live location ping - {lat, lng, speed (km/h), recorded_at (IST), accuracy (m)}.
+     * Server jawab deta hai {status, stored, skipped} - wahi notification me dikhta hai.
+     */
+    private String upload(double lat, double lng, float kmh, float accuracy, long fixTime) {
         String url = prefs.getUrl();
         if (url == null || url.isEmpty()) {
             return "no url";
@@ -575,7 +677,9 @@ public class LiveTrackerService extends Service {
             JSONObject body = new JSONObject();
             body.put("lat", lat);
             body.put("lng", lng);
-            body.put("speed", speed);
+            body.put("speed", Math.round(kmh * 10f) / 10d);
+            body.put("recorded_at", recordedAt(fixTime));
+            body.put("accuracy", Math.round(accuracy * 10f) / 10d);
 
             conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setRequestMethod("POST");
@@ -589,6 +693,11 @@ public class LiveTrackerService extends Service {
             if (token != null && !token.isEmpty()) {
                 conn.setRequestProperty("Authorization", "Bearer " + token);
             }
+            // Angular wala Referer1 sirf proxy ke liye hai - native seedha jaata hai, to Referer
+            String referer = prefs.getReferer();
+            if (referer != null && !referer.isEmpty()) {
+                conn.setRequestProperty("Referer", referer);
+            }
 
             byte[] payload = body.toString().getBytes(StandardCharsets.UTF_8);
             try (OutputStream os = conn.getOutputStream()) {
@@ -596,8 +705,19 @@ public class LiveTrackerService extends Service {
             }
 
             int code = conn.getResponseCode();
-            Log.d(TAG, "upload " + code + " " + lat + "," + lng);
-            return code + (code >= 200 && code < 300 ? " OK" : "");
+            Log.d(TAG, "ping " + code + " " + lat + "," + lng);
+            if (code < 200 || code >= 300) {
+                // Server wajah bhi bhejta hai - {"msg": "GPS Mobile is not enabled..."}
+                return code + serverMessage(conn.getErrorStream());
+            }
+            try {
+                JSONObject res = new JSONObject(readBody(conn.getInputStream()));
+                if (res.optBoolean("skipped", false)) return code + " skipped";
+                if (res.optBoolean("stored", false)) return code + " stored";
+            } catch (Exception ignored) {
+                // Jawab JSON nahi - 2xx hai to pahunch gaya maano
+            }
+            return code + " OK";
         } catch (Exception e) {
             Log.w(TAG, "upload failed: " + e.getMessage());
             return shortError(e);
@@ -610,6 +730,38 @@ public class LiveTrackerService extends Service {
      * Notification ki patli line me poora exception naam nahi samata, aur testing me
      * farak sirf itna chahiye: network tha ya nahi, server tak pahuncha ya nahi.
      */
+    /** Server ka format - India ka time, bina timezone ke: 2026-09-19 12:30:00 */
+    private static String recordedAt(long ms) {
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+        f.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
+        return f.format(new Date(ms));
+    }
+
+    /** Error jawab se msg / error nikaalo - notification me dikhane ke liye */
+    private static String serverMessage(@Nullable InputStream in) {
+        if (in == null) {
+            return "";
+        }
+        try {
+            JSONObject res = new JSONObject(readBody(in));
+            String msg = res.optString("msg", res.optString("error", ""));
+            return msg.isEmpty() ? "" : " " + msg;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private static String readBody(InputStream in) throws java.io.IOException {
+        try (InputStream is = in; ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            byte[] buf = new byte[1024];
+            int n;
+            while ((n = is.read(buf)) != -1 && out.size() < 16_384) {
+                out.write(buf, 0, n);
+            }
+            return out.toString("UTF-8");
+        }
+    }
+
     private String shortError(Exception e) {
         String name = e.getClass().getSimpleName();
         switch (name) {
@@ -742,9 +894,15 @@ public class LiveTrackerService extends Service {
         boolean overspeed = lastFix > 0 && isOverspeed();
         float kmh = prefs.getLastSpeed() * KMH_PER_MS;
         // Chhati hui reading par 0 dikhana jhooth hoga - "khada hai" lagega
-        String speedText = prefs.isLastSpeedTrusted()
-                ? String.format(Locale.US, "%.1f km/h", kmh)
-                : "— km/h";
+        String speedText;
+        if (prefs.isLastSpeedTrusted()) {
+            speedText = String.format(Locale.US, "%.1f km/h", kmh);
+        } else if (prefs.isLastSpeedEstimated()) {
+            // Doori se nikli - "~" batata hai ki GPS ki apni reading nahi thi
+            speedText = String.format(Locale.US, "~%.1f km/h", kmh);
+        } else {
+            speedText = "— km/h";
+        }
 
         String title;
         String summary;
@@ -779,6 +937,8 @@ public class LiveTrackerService extends Service {
             details.append("GPS speed: ").append(String.format(Locale.US, "%.1f km/h",
                     prefs.getLastGpsSpeed() * KMH_PER_MS)).append('\n');
             details.append("Accuracy:  ").append(String.format(Locale.US, "±%.0f m", prefs.getLastAccuracy())).append('\n');
+            details.append("Max speed: ").append(String.format(Locale.US, "%.0f km/h", prefs.getMaxSpeedKmh()))
+                    .append("  (limit ").append((int) prefs.getSpeedLimitKmh()).append(")\n");
             details.append("Filter:    ").append(lastFilter).append('\n');
         } else {
             details.append("Waiting for first fix...\n");
@@ -796,6 +956,21 @@ public class LiveTrackerService extends Service {
         }
         details.append("Next:      ").append(IntervalController.human(Math.max(prefs.getCurrentIntervalMs(), 1000L)))
                 .append(prefs.isAdaptive() ? "" : " (fixed)").append('\n');
+        long lateMs = lateByMs();
+        if (lateMs > 0 || lateKicks > 0) {
+            details.append("Late:      ").append(lateMs > 0 ? IntervalController.human(lateMs) : "-")
+                    .append(" · asked ").append(lateKicks).append("x\n");
+        }
+        // Fix late hone ki sabse aam wajah - test me dikhe
+        PowerManager pmDiag = (PowerManager) getSystemService(POWER_SERVICE);
+        if (pmDiag != null) {
+            boolean saver = pmDiag.isPowerSaveMode();
+            boolean doze = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && pmDiag.isDeviceIdleMode();
+            if (saver || doze) {
+                details.append("Power:     ").append(saver ? "Battery saver ON" : "")
+                        .append(saver && doze ? " · " : "").append(doze ? "Doze" : "").append('\n');
+            }
+        }
         String act = prefs.getActivity();
         String actText;
         if (act.isEmpty()) {
@@ -922,6 +1097,7 @@ public class LiveTrackerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        handler.removeCallbacks(lateCheck);
         if (fused != null && callback != null) {
             fused.removeLocationUpdates(callback);
         }

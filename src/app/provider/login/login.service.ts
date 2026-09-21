@@ -114,6 +114,11 @@ export class LoginService {
     return this.https.get(environment.url + 'login_ping');
   }
 
+  // Live location ping - native tracking service bhi yahi API hit karti hai (1/min)
+  gpsMobilePing(obj: any): Observable<any> {
+    return this.https.post(environment.url + 'gps-mobile/ping', obj);
+  }
+
   changePassword(userid: any, otp1: any, pass: any ) {
     return new Promise(resolve => {
       this.https.post(environment.url + 'change_password_otp', {user_id: userid, otp: otp1, password: pass, cpassword: pass }).subscribe({
