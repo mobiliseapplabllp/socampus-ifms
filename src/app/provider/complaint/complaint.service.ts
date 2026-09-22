@@ -187,8 +187,13 @@ export class ComplaintService {
     return this.https.post(environment.url + 'complaints/complaint_type_cfrm', form)
   }
 
-  getTravelType(tkt_id: any): Observable<any> {
-    return this.https.get(environment.url + 'complaints/get_distance_travel_type_info?tkts_id=' + tkt_id);
+  /**
+   * mode se server tay karta hai kaunsi list bheje - purani Travel Detail 'gps',
+   * naya GPS trip wala modal 'gps_mobile'
+   */
+  getTravelType(tkt_id: any, mode: string = 'gps'): Observable<any> {
+    return this.https.get(environment.url
+      + 'complaints/get_distance_travel_type_info?tkts_id=' + tkt_id + '&mode=' + mode);
   }
 
   otpSend(form: any): Observable<any> {
@@ -263,6 +268,16 @@ export class ComplaintService {
 
   submitTravelInfo(formData: any): Observable<any> {
     return this.https.post(environment.url + 'complaints/save_travel_info', formData);
+  }
+
+  /** GPS trip shuru - multipart (selfie + vehicle photo). Native tracking iske baad chalu hoti hai */
+  startGpsTrip(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'gps-mobile/start-trip', formData);
+  }
+
+  /** GPS trip khatam - distance, path aur end ki do photo */
+  endGpsTrip(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'gps-mobile/end-trip', formData);
   }
 
   resolveTicket(data: any) {

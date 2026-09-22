@@ -12,6 +12,20 @@ import { checklist, db } from './provider/local-db/local-db.service';
 import { CapacitorCookies } from '@capacitor/core';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 import { Geolocation } from '@capacitor/geolocation';
+import { ModalController } from '@ionic/angular';
+import { TrackingMapComponent } from './page/list-master/tracking-map/tracking-map.component';
+import { TrackingDebugComponent } from './page/list-master/tracking-debug/tracking-debug.component';
+import {
+  LiveTrackerService,
+  LiveTrackerStatus,
+  PermissionKey
+} from './provider/live-tracker/live-tracker.service';
+
+interface PermissionRow {
+  key: PermissionKey;
+  label: string;
+  granted: boolean;
+}
 
 
 @Component({
@@ -27,6 +41,25 @@ export class AppComponent {
   isAndroid!: boolean;
   isPunchIn = false;
   private isProgrammaticChange = false;
+
+  // ---- Location tracking (Availability ke saath) ----
+  trackingSupported = false;
+  trackingStatus: LiveTrackerStatus | null = null;
+  permissions: PermissionRow[] = [];
+  allGranted = false;
+  /**
+   * BehaviorSubject subscribe karte hi apni default value (false) bhej deta hai.
+   * Wo server ka jawab nahi hota - us par tracking band kar di to chalti hui
+   * tracking ka session hi ud jaata. Isliye pehla emission chhod dete hain.
+   */
+  private punchStatusSeen = false;
+  /** Ek waqt me ek hi start/stop - do emission saath aa jayein to bhi */
+  private trackingSyncBusy = false;
+  /** Punch API chal rahi hai - button tab tak band */
+  punchBusy = false;
+  /** Title par 5 tap = chhupa hua test screen */
+  private titleTaps = 0;
+  private titleTapTimer: any = null;
   constructor(
     private loginPro: LoginService,
     private router: Router,
@@ -36,12 +69,27 @@ export class AppComponent {
     private alertController: AlertController,
     private httpLogin: LoginService,
     private common: CommonService,
+    private liveTracker: LiveTrackerService,
+    private modalCtrl: ModalController,
+    private zone: NgZone,
     private iab: InAppBrowser) {
     this.platform.ready().then(res => {
       this.initApp();
-      this.getUserData();      
+      this.getUserData();
+      this.listenAppResume();
       this.loginPro.getPunchStatus().subscribe((status: any) => {        
-        this.setPunchIn(status);         
+        this.setPunchIn(status);
+        const firstValue = !this.punchStatusSeen;
+        this.punchStatusSeen = true;
+        if (status) {
+          // Server kehta hai punch in hai - tracking band ho to chalu kar do.
+          // Pehle emission ho ya baad ka, IN par hamesha chalana hai
+          void this.syncTrackingWithPunch('IN', true);
+        } else if (!firstValue) {
+          // OUT par tabhi band karo jab ye server ka asli jawab ho - subject ki
+          // default value (false) par band kiya to chalti tracking ka session ud jaata
+          void this.syncTrackingWithPunch('OUT', true);
+        }
       });
     });
   }
@@ -244,7 +292,22 @@ export class AppComponent {
   }
 
   getUserData() {
+    // Subject sirf usi session me bharta hai jisme login hua tha - app dobara kholne
+    // par khali hota hai, isliye menu me "User" dikh raha tha. Saved user pehle lo.
+    // Isi se punch payload ka userId bhi aata hai
+    const saved = localStorage.getItem('user');
+    if (saved) {
+      try {
+        this.userInfo = JSON.parse(saved);
+      } catch (e) {
+        console.error('saved user read', e);
+      }
+    }
     this.loginPro.getUserDataObs().subscribe((dat: any) => {
+      // Khali array/object aaye to saved wala mat mitao
+      if (!dat || Array.isArray(dat) || !Object.keys(dat).length) {
+        return;
+      }
       this.userInfo = dat;
       // if (this.userInfo.current_punch_status === 'IN') {        
       //   this.setPunchIn(true);
@@ -306,6 +369,7 @@ export class AppComponent {
   }
 
   openPage(data: any) {
+    
     this.router.navigateByUrl(data.link);
   }
 
@@ -315,18 +379,181 @@ export class AppComponent {
     setTimeout(() => this.isProgrammaticChange = false, 100);
   }
 
-  togglePunch(event: any) {    
-    if (this.isProgrammaticChange) return;
-    this.isPunchIn = event.detail.checked;
-    if (this.isPunchIn) {
-      void this.punchInOutApi('IN');
-    } else {
-      void this.punchInOutApi('OUT');
+  /**
+   * Punch In / Out - pehle poochho, phir API. Pehle yahan toggle tha, par wo apne aap
+   * chal padta tha: API fail hui ya trip chalu hone se rukna pada, to toast to aata
+   * tha par toggle galat haalat me atka rehta tha. Ab haal sirf server ke jawab se
+   * badalta hai (setPunchIn), UI apni marzi se kuch nahi badalta.
+   */
+  async confirmPunch(): Promise<void> {
+    if (this.punchBusy) {
+      return;
+    }
+    const goingIn = !this.isPunchIn;
+    const alert = await this.alertController.create({
+      header: goingIn ? 'Punch In' : 'Punch Out',
+      message: goingIn
+        ? 'You will be marked available and location tracking will start.'
+        : 'You will be marked not available and location tracking will stop.',
+      mode: 'ios',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: goingIn ? 'Punch In' : 'Punch Out',
+          handler: () => {
+            void this.punchInOutApi(goingIn ? 'IN' : 'OUT');
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  // ------------------------------------------------- location tracking
+
+  /**
+   * Menu khulte hi permission aur tracking ka haal taaza karo - settings se wapas
+   * aane par koi page change nahi hota, isliye yahi ek bharosemand mauka hai.
+   */
+  async refreshTracking(): Promise<void> {
+    this.trackingSupported = this.liveTracker.isSupported();
+    if (!this.trackingSupported) {
+      return;
+    }
+    const status = await this.liveTracker.checkStatus();
+    this.trackingStatus = status;
+    void this.liveTracker.syncActiveTrip();
+    this.permissions = [
+      { key: 'gps', label: 'Location Services (GPS)', granted: status.gps },
+      { key: 'location', label: 'Location (Always Allow)', granted: status.location },
+      { key: 'battery', label: 'Battery Optimization', granted: status.battery },
+      { key: 'notifications', label: 'Notifications', granted: status.notifications },
+      { key: 'activity', label: 'Physical Activity', granted: status.activityPermission },
+    ];
+    this.allGranted = this.permissions.every(p => p.granted);
+  }
+
+  /** Row tap - seedha usi setting par, user ko dhoondhna na pade */
+  async fixPermission(row: PermissionRow): Promise<void> {
+    if (row.granted) {
+      return;
+    }
+    await this.liveTracker.openSetting(row.key);
+    // Runtime wali permission (location/notification/activity) yahin mil jaati hai,
+    // to list turant hari ho jaye. Settings screen wali resume par pakdi jaayegi
+    await this.refreshTracking();
+  }
+
+  /**
+   * Settings se wapas aane par koi page change nahi hota aur menu pehle se khula
+   * rehta hai - isliye permission list wahin purani dikhti thi. Resume par refresh
+   * karna hi ek bharosemand mauka hai.
+   */
+  private listenAppResume(): void {
+    App.addListener('appStateChange', ({ isActive }) => {
+      if (isActive) {
+        this.zone.run(() => void this.refreshTracking());
+      }
+    });
+  }
+
+  /** "i" - permission status aur is session ka poora path map par (testing) */
+  async openTrackingDetails(): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: TrackingMapComponent,
+      componentProps: {
+        status: this.trackingStatus,
+        permissions: this.permissions
+      }
+    });
+    await modal.present();
+    await modal.onDidDismiss();
+    await this.refreshTracking();
+  }
+
+  /** Availability title par 5 tap, 3 second ke andar - chhupa hua debug screen */
+  onAvailabilityTap(): void {
+    this.titleTaps++;
+    if (this.titleTapTimer) {
+      clearTimeout(this.titleTapTimer);
+    }
+    this.titleTapTimer = setTimeout(() => this.titleTaps = 0, 3000);
+    if (this.titleTaps >= 5) {
+      this.titleTaps = 0;
+      void this.openTrackingDebug();
     }
   }
 
+  private async openTrackingDebug(): Promise<void> {
+    const modal = await this.modalCtrl.create({ component: TrackingDebugComponent });
+    await modal.present();
+    await modal.onDidDismiss();
+    await this.refreshTracking();
+  }
+
+  /**
+   * Punch ke saath hi tracking - available hue to chalu, nahi to band.
+   *
+   * @param silent app khulte waqt server ke status se mila rahe hain - engineer ne
+   *               abhi kuch dabaya nahi, isliye error ka toast dikhana theek nahi
+   */
+  private async syncTrackingWithPunch(type: string, silent = false): Promise<void> {
+    this.trackingSupported = this.liveTracker.isSupported();
+    if (!this.trackingSupported || this.trackingSyncBusy) {
+      return;
+    }
+    this.trackingSyncBusy = true;
+    try {
+      // Native se poochho ki abhi chal rahi hai ya nahi - chalu ko dobara start
+      // karne se session reset ho jaata (points, distance, path sab saaf)
+      const status = await this.liveTracker.checkStatus();
+      if (type === 'IN' && !status.running) {
+        this.trackingStatus = await this.liveTracker.start();
+      } else if (type === 'OUT' && status.running) {
+        this.trackingStatus = await this.liveTracker.stop();
+      }
+      await this.refreshTracking();
+    } catch (e: any) {
+      // Trip chalu ho to native stop mana kar deta hai - wo galti nahi, suraksha hai
+      console.error('tracking with punch', e);
+      if (!silent) {
+        this.common.presentToast(e?.message || 'Could not change location tracking', 'warning');
+      }
+      await this.refreshTracking();
+    } finally {
+      this.trackingSyncBusy = false;
+    }
+  }
+
+  get trackingStale(): boolean {
+    if (!this.trackingStatus?.running) {
+      return false;
+    }
+    const last = this.trackingStatus.lastFixAt || this.trackingStatus.startedAt || 0;
+    return last > 0 && (Date.now() - last) > 10 * 60 * 1000;
+  }
+
+  get trackingText(): string {
+    if (!this.trackingStatus?.running) {
+      return 'Location tracking off';
+    }
+    const last = this.trackingStatus.lastFixAt || 0;
+    if (!last) {
+      return 'Tracking on · waiting for location';
+    }
+    const mins = Math.floor((Date.now() - last) / 60000);
+    if (mins <= 0) {
+      return 'Tracking on · updated just now';
+    }
+    return `Tracking on · updated ${mins} min ago`;
+  }
+
+  /**
+   * Button wale UI me "revert" ki zaroorat nahi - haal chhua hi nahi jaata jab tak
+   * server haan na kahe. Naam purana rakha hai taaki baaki jagah ka code na toote.
+   */
   private revertPunchToggleAfterFailure(type: string) {
-    this.setPunchIn(type === 'IN' ? false : true);
+    this.punchBusy = false;
   }
 
   async punchInOutApi(type: string) {
@@ -365,12 +592,15 @@ export class AppComponent {
       actionType: 'REGULAR',
       userId: this.userInfo.id,
     };
+    this.punchBusy = true;
     this.common.presentLoading().then(() => {
       this.listMaster.punchIn(payload).subscribe({
         next: (res: any) => {
           if (res.status) {
             const val = type === 'IN';
             this.loginPro.setPunchStatus(val);
+            // Punch hi tracking ka switch hai - IN par chalu, OUT par band
+            void this.syncTrackingWithPunch(type);
           } else {
             this.common.presentToast(res.msg || 'Punch failed', 'warning');
             this.revertPunchToggleAfterFailure(type);
@@ -382,6 +612,7 @@ export class AppComponent {
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete: () => {
+          this.punchBusy = false;
           this.common.dismissloading();
         },
       });

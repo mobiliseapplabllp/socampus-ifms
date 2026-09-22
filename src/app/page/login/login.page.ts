@@ -63,8 +63,8 @@ export class LoginPage implements OnInit {
     private zone: NgZone,
     private camera: CameraService) {
     this.loginForms = this.formbuilder.group({
-      userid: ['', Validators.required],
-      password: ['' , Validators.required],
+      userid: ['MOBPUNEET', Validators.required],
+      password: ['Aiagent@987654321' , Validators.required],
     });
   }
 
@@ -128,17 +128,35 @@ export class LoginPage implements OnInit {
       this.isAndroid = true;
     }
     this.menu.enable(false);
-    if (localStorage.getItem('loginvalue')) {
-      const isLogin = localStorage.getItem('loginvalue');
-      if (isLogin) {
-        const decrypt = JSON.parse(isLogin);
-        this.login.userid = decrypt.userid;
-        // this.login.password = decrypt.password;
-      }
-    }
+    this.fillSavedLogin();
   }
   ionViewDidLeave() {    
     this.menu.enable(true);
+  }
+
+  /**
+   * Pichhli baar ka user id / password wapas form me. Login success par ye
+   * 'loginvalue' me save hota hai, to dobara aane par sab bhara hua milta hai.
+   */
+  fillSavedLogin() {
+    const saved = localStorage.getItem('loginvalue');
+    if (!saved) {
+      return;
+    }
+    try {
+      const value = JSON.parse(saved);
+      if (!value?.userid) {
+        return;
+      }
+      this.login.userid = value.userid;
+      this.login.password = value.password || '';
+      this.loginForms.patchValue({
+        userid: value.userid,
+        password: value.password || ''
+      });
+    } catch (e) {
+      console.error('saved login read', e);
+    }
   }
 
   changePass(_pass: any) { }
@@ -300,6 +318,9 @@ export class LoginPage implements OnInit {
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('punchStatus',JSON.stringify(data.current_punch_status));
             localStorage.setItem('isAlreadyLogin', 'true');
+            // Splash isi date se tay karta hai ki session zinda hai - bina iske
+            // har baar login screen par wapas bhej deta tha
+            localStorage.setItem('loginDate', moment().format('YYYY-MM-DD'));
             this.checkAppUpdate();
             // this.multiFactorSubmit();
           } else {

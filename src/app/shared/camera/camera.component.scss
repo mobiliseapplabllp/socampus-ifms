@@ -1,9 +1,140 @@
-ion-content {
+// ============ Camera - dark chrome, standard shutter ============
+$camera-chrome: #0b0d14;
+
+// Native preview is element ke peeche render hota hai, isliye ye see-through hi
+// rehna chahiye. Sirf #content par - neeche review screen ko asli background chahiye.
+ion-content#content {
   --background: transparent !important;
 }
 
-.overlay {
-  position:absolute;
-  z-index: 9999;
-  bottom: 0;
+// ---- Capture screen ----
+ion-footer.camera-footer,
+ion-footer.review-footer {
+  background: $camera-chrome;
+
+  // Material footer ke upar ::before se shadow banata hai; kaali patti par wo
+  // grey dhabba dikhta hai
+  &::before {
+    display: none;
+  }
+}
+
+.camera-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  // Shutter 72px ka hai - neeche thodi jagah chahiye warna patti se sata dikhta hai.
+  // Nav bar wali jagah global ion-footer rule se alag se milti hai
+  padding: 18px 30px 22px;
+
+  // Cancel / flip - side ke kaam, isliye chhote aur halke. Wazan shutter par
+  .ctrl-btn {
+    width: 46px;
+    height: 46px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+
+    ion-icon {
+      font-size: 22px;
+    }
+
+    &:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.22);
+    }
+  }
+
+  // Jaana-pehchaana shutter - patli ring ke andar safed gola
+  .shutter-btn {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    .shutter-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.9);
+    }
+
+    .shutter-core {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #ffffff;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    &:active .shutter-core {
+      transform: scale(0.86);
+      background: #e2e8f0;
+    }
+  }
+}
+
+// ---- Review screen ----
+ion-content.review-content {
+  --background: #{$camera-chrome};
+}
+
+.review-image {
+  width: 100%;
+  height: 100%;
+  // Pehle 100% x 100% kheench diya jaata tha, jisse har photo ka aspect bigad jaata
+  object-fit: contain;
+}
+
+.review-controls {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px 18px;
+
+  .review-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+
+    ion-icon {
+      font-size: 19px;
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+
+    // Retry wapas jaane ka raasta hai, Done pakka karne ka - dono ek jaise na dikhein
+    &.retry {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    &.done {
+      background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+      color: #ffffff;
+      box-shadow: 0 8px 18px -6px rgba(var(--ion-color-primary-rgb), 0.6);
+    }
+  }
 }

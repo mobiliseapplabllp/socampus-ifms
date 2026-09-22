@@ -23,6 +23,7 @@ import { TravelDetailComponent } from './travel-detail/travel-detail.component';
 import { HseAssignComponent } from './hse-assign/hse-assign.component';
 import { TicketHoldComponent } from './ticket-hold/ticket-hold.component';
 import { TripEndComponent } from './trip-end/trip-end.component';
+import { TripStartComponent } from './trip-start/trip-start.component';
 @NgModule({
   imports: [
     CommonModule,
@@ -47,7 +48,8 @@ import { TripEndComponent } from './trip-end/trip-end.component';
     TravelDetailComponent,
     HseAssignComponent,
     TicketHoldComponent,
-    TripEndComponent
+    TripEndComponent,
+    TripStartComponent
   ],
   exports: [
     ComplaintCardsComponent

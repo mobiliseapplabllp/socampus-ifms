@@ -79,6 +79,69 @@
   border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
+.punch-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+
+  .punch-card-title {
+    margin: 0;
+  }
+}
+
+.punch-info-btn {
+  --padding-start: 4px;
+  --padding-end: 4px;
+  height: 22px;
+  margin: -4px -6px -4px 0;
+}
+
+// Permission list - Availability se pehle wala step
+.perm-card {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 12px 14px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.perm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.92);
+
+  + .perm-row {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+}
+
+.perm-status {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 600;
+  color: #ffb4b4;
+  white-space: nowrap;
+
+  &.perm-ok {
+    color: #8effb0;
+  }
+
+  ion-icon {
+    font-size: 14px;
+  }
+}
+
+.punch-track {
+  margin-top: 4px;
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
 .punch-card-title {
   margin: 0 0 10px;
   font-size: 0.6875rem;
@@ -93,6 +156,30 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
+}
+
+.punch-state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffb4b4;
+
+  &.punch-state--in {
+    color: #8effb0;
+  }
+
+  ion-icon {
+    font-size: 12px;
+  }
+}
+
+.punch-action {
+  margin-top: 10px;
+  --border-radius: 10px;
+  height: 36px;
+  font-weight: 600;
 }
 
 .punch-side-label {

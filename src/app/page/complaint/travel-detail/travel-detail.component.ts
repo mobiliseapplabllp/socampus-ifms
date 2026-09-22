@@ -35,7 +35,7 @@ export class TravelDetailComponent  implements OnInit {
 
   getTravelType() {
     this.common.presentLoading().then(preLoad => {
-      this.httpComplaint.getTravelType(this.tkts_id).subscribe({
+      this.httpComplaint.getTravelType(this.tkts_id, 'gps').subscribe({
         next:(data) => {
           if (data.status) {
             this.travelNote = data.data?.travelInfo.remarkNote;

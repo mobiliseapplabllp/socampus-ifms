@@ -1,62 +1,205 @@
-.head {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-}
+// Ticket card - rang aur field wahi hain jo client ne approve kiye, sirf finishing:
+// ek jaisi spacing, padhne layak hierarchy aur button jo tootte nahi.
 
-.head1 {
-  color: var(--ion-color-medium);
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
+.myCards {
+  margin: 12px 17px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .wip {
-  border-right:2px solid yellow;
+  border-right: 3px solid var(--ion-color-warning);
 }
 
-.assign{
-  border-right:2px solid red;
+.assign {
+  border-right: 3px solid var(--ion-color-danger);
 }
 
-.resolve{
-  border-right:2px solid green;
+.resolve {
+  border-right: 3px solid var(--ion-color-success);
 }
-.myCards{
-  ion-card{
-    margin:0px;
-    background-color: rgb(129, 172, 236);
-    ion-row{
-      ion-col{
-        h4{
-          color: black;
-          margin: 0;
-          font-size: 13px;
-          font-weight: 600;
-        }
-        p{
-          font-size:13px;
-          font-weight: 600;
-          margin: 0;
-          color: black;
-          margin-top: 10px
-        }
-      }
-    }
+
+// ------------------------------------------------------------ header
+
+.tk-head {
+  // Dashboard card jaisa hi gradient - poore app me ek hi bhasha
+  background: linear-gradient(135deg, #2f5fae 0%, var(--ion-color-primary) 55%, #3b3f97 100%);
+  color: #ffffff;
+  padding: 12px 14px;
+}
+
+.tk-head-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tk-id {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.tk-chip {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  white-space: nowrap;
+}
+
+.tk-date {
+  margin-left: auto;
+  font-size: 11px;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.tk-head-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+// Teen barabar hisse - dashboard card ki tarah, pill ke dher ki jagah
+.tk-sla {
+  display: flex;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tk-sla-item {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+
+  + .tk-sla-item {
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
   }
-  // .grid1{
-    ion-row{
-      ion-col{
-        ion-label{
-          p{
-            color:black ;
-          }
-        }
-      }
-    }
-  // }
 }
 
-ion-text {
-  font-weight: 530;
+.tk-sla-value {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tk-sla-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: 10.5px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+// Rang API se - pehle ye poore text par tha aur neele par dikhta hi nahi tha
+.tk-sla-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.tk-assigned {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.9;
+
+  ion-icon {
+    font-size: 13px;
+  }
+}
+
+// -------------------------------------------------------------- body
+
+.tk-body {
+  padding: 10px 12px 2px;
+}
+
+.tk-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.tk-field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.tk-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ion-color-medium);
+}
+
+.tk-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  word-break: break-word;
+}
+
+.tk-remark {
+  margin-bottom: 10px;
+}
+
+// Lamba remark card ko kheenchne na de
+.tk-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tk-more {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+}
+
+// ----------------------------------------------------------- actions
+
+.tk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.tk-actions-trip {
+  padding-top: 10px;
+  border-top: 1px dashed var(--ion-color-light-shade);
+}
+
+.tk-btn {
+  flex: 1 1 30%;
+  min-width: 96px;
+  margin: 0;
+  height: 32px;
+  font-size: 12px;
+  text-transform: none;
+  --border-radius: 8px;
+  --padding-start: 10px;
+  --padding-end: 10px;
 }

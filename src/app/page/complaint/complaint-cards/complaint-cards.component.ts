@@ -11,7 +11,7 @@ import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component'
 import { TravelDetailComponent } from '../travel-detail/travel-detail.component';
 import { InstructionModalComponent } from '../instruction-modal/instruction-modal.component';
 import { TripEndComponent } from '../trip-end/trip-end.component';
-import { Geolocation } from '@capacitor/geolocation';
+import { TripStartComponent } from '../trip-start/trip-start.component';
 import { LiveTrackerService } from 'src/app/provider/live-tracker/live-tracker.service';
 @Component({
   selector: 'app-complaint-cards',
@@ -31,9 +31,44 @@ export class ComplaintCardsComponent  implements OnInit {
   userData: any = [];
   loading: any;
 
-  /** TESTING: hardcoded Start/End Trip - production build me nahi dikhte */
-  readonly showTripTest = !environment.isProd;
   tripBusy = false;
+
+  // ---------------------------------------------------------- trip buttons
+  // Sab kuch server ke hisaab se: har ticket ke saath gps_mobile_allow aur
+  // gps_mobile_trip { state, button_text, trip_id } aata hai.
+
+  /** Is ticket par trip ho sakti hai */
+  private get tripAllowed(): boolean {
+    return Number(this.data?.gps_mobile_allow) === 1;
+  }
+
+  private get tripState(): string {
+    return this.data?.gps_mobile_trip?.state || 'none';
+  }
+
+  /** Button ka text bhi server se - app apni taraf se naam nahi rakhti */
+  get tripButtonText(): string {
+    return this.data?.gps_mobile_trip?.button_text || '';
+  }
+
+  get showStartTrip(): boolean {
+    return this.tripAllowed && this.tripState === 'none';
+  }
+
+  get showEndTrip(): boolean {
+    return this.tripAllowed && this.tripState === 'running';
+  }
+
+  /** Trip ka koi button na bane, tabhi Work Now - aur uski apni purani shart bhi */
+  get showWorkNow(): boolean {
+    if (this.showStartTrip || this.showEndTrip) {
+      return false;
+    }
+    return (this.data?.canWork || this.data?.canDoTktConfirmationWork)
+      && !(this.data?.stage_id === 4 || this.data?.stage_id === 6);
+  }
+  /** Lamba remark 2 line me kata rehta hai - "more" par khulta hai */
+  remarkOpen = false;
 
   constructor(
     private modalCtrl: ModalController,
@@ -57,10 +92,14 @@ export class ComplaintCardsComponent  implements OnInit {
   check() {
   }
 
+  /** Sheet - neeche se uthta hai, jitna content utni hi jagah leta hai */
   async openSite() {
     const modal = await this.modalCtrl.create({
       component: SiteDetailComponent,
-      cssClass: 'my-modal2',
+      cssClass: 'app-sheet-modal',
+      breakpoints: [0, 0.75, 1],
+      initialBreakpoint: 0.75,
+      handle: true,
       componentProps: { ticketData: this.data }
     });
     modal.present();
@@ -69,7 +108,10 @@ export class ComplaintCardsComponent  implements OnInit {
   async history() {
     const modal = await this.modalCtrl.create({
       component: TicketHistoryComponent,
-      cssClass: 'my-modal',
+      cssClass: 'app-sheet-modal',
+      breakpoints: [0, 0.9, 1],
+      initialBreakpoint: 0.9,
+      handle: true,
       componentProps: { ticket_id: this.data.tkts_id }
     });
     modal.present();
@@ -297,7 +339,18 @@ export class ComplaintCardsComponent  implements OnInit {
     if (this.tripBusy) {
       return;
     }
-    const active = await this.liveTracker.syncActiveTrip();
+    // Tracking band hai to form kholna hi bekaar hai - warna engineer poora form
+    // bhar ke, server par trip banwa ke, aakhir me "punch in karo" padhta
+    if (this.liveTracker.isSupported()) {
+      const status = await this.liveTracker.checkStatus();
+      if (!status.running) {
+        this.common.presentToast(
+          'Please punch in from the side menu before starting a trip', 'warning');
+        return;
+      }
+    }
+
+    const active = await this.liveTracker.activeTrip();
     if (active) {
       const same = active.module === 'complaint' && String(active.id) === String(this.data.tkts_id);
       this.common.presentToast(
@@ -309,46 +362,45 @@ export class ComplaintCardsComponent  implements OnInit {
       return;
     }
 
+    // Do baar tap = do modal aur do API call - isliye jab tak modal khula hai tab tak band
     this.tripBusy = true;
-    await this.common.presentLoading('Getting current location...');
-    try {
-      // Start point = abhi ki location. Server ko bhi yahi jayegi (API ready hone par),
-      // aur trip_points ka pehla point bhi yahi banta hai
-      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 20000 });
-      await this.liveTracker.startTrip('complaint', this.data.tkts_id, {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-        accuracy: pos.coords.accuracy || 0
-      });
-      this.common.presentToast('Trip started', 'success');
-    } catch (e: any) {
-      console.error('startTrip', e);
-      this.common.presentToast(e?.message || 'Could not start the trip', 'warning');
-    } finally {
-      this.common.dismissloading();
+    // Form modal hi API par trip banata hai aur uske success par tracking chalu karta hai
+    const modal = await this.modalCtrl.create({
+      component: TripStartComponent,
+      componentProps: {
+        module: 'complaint',
+        tktId: String(this.data.tkts_id)
+      }
+    });
+    await modal.present();
+    void modal.onDidDismiss().then((res) => {
       this.tripBusy = false;
-    }
+      // Trip bani to card ka gps_mobile_trip purana ho gaya - list server se dobara
+      if (res?.data?.started) {
+        this.common.setHomeLoadStatus(true);
+        this.greetEvent.emit(true);
+      }
+    });
   }
 
   async testEndTrip(): Promise<void> {
-    if (this.tripBusy) {
-      return;
-    }
-    const active = await this.liveTracker.syncActiveTrip();
-    const same = !!active && active.module === 'complaint'
-      && String(active.id) === String(this.data.tkts_id);
-    if (!same) {
-      this.common.presentToast('No active trip for this ticket', 'warning');
-      return;
-    }
-
+    // Seedha modal - active trip ki jaanch modal khud aur native karte hain
     const modal = await this.modalCtrl.create({
       component: TripEndComponent,
       componentProps: {
         module: 'complaint',
-        specificId: String(this.data.tkts_id)
+        specificId: String(this.data.tkts_id),
+        // Server ki trip id sabse pakki - localStorage sirf backup hai
+        serverTripId: this.data?.gps_mobile_trip?.trip_id != null
+          ? String(this.data.gps_mobile_trip.trip_id) : ''
       }
     });
     await modal.present();
+    void modal.onDidDismiss().then((res) => {
+      if (res?.data?.ended) {
+        this.common.setHomeLoadStatus(true);
+        this.greetEvent.emit(true);
+      }
+    });
   }
 }

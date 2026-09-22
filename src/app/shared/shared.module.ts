@@ -24,6 +24,8 @@ import { BlockComponent } from './block/block.component';
 import { ImageViewComponent } from './image-view/image-view.component';
 import { PdfViewComponent } from './pdf-view/pdf-view.component';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { TrackingMapComponent } from '../page/list-master/tracking-map/tracking-map.component';
+import { TrackingDebugComponent } from '../page/list-master/tracking-debug/tracking-debug.component';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -45,8 +47,9 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     VideoPlayComponent,
     BlockComponent,
     ImageViewComponent,
-    PdfViewComponent
-
+    PdfViewComponent,
+    TrackingMapComponent,
+    TrackingDebugComponent
   ],
   imports: [
     CommonModule,
@@ -75,7 +78,9 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     VideoPlayComponent,
     BlockComponent,
     ImageViewComponent,
-    PdfViewComponent
+    PdfViewComponent,
+    TrackingMapComponent,
+    TrackingDebugComponent
   ],
   exports: [
     VideoComponent,

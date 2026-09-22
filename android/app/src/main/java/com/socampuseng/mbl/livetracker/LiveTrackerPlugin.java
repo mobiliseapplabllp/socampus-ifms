@@ -412,6 +412,23 @@ public class LiveTrackerPlugin extends Plugin {
         }
     }
 
+    /** Phone ki battery (0-100), na mile to -1 - trip ka pehla point bhi isse bharta hai */
+    private int batteryPercent() {
+        try {
+            android.os.BatteryManager bm =
+                    (android.os.BatteryManager) getContext().getSystemService(Context.BATTERY_SERVICE);
+            if (bm != null) {
+                int pct = bm.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY);
+                if (pct >= 0 && pct <= 100) {
+                    return pct;
+                }
+            }
+        } catch (Exception ignored) {
+            // battery na mile to point phir bhi save hona chahiye
+        }
+        return -1;
+    }
+
     // ------------------------------------------------------------ start/stop
 
     @PluginMethod
@@ -503,7 +520,7 @@ public class LiveTrackerPlugin extends Plugin {
 
         LiveTrackerPrefs prefs = new LiveTrackerPrefs(getContext());
         if (!prefs.isEnabled()) {
-            call.reject("Start location tracking from the home page first");
+            call.reject("Please punch in from the side menu before starting a trip");
             return;
         }
 
@@ -521,6 +538,8 @@ public class LiveTrackerPlugin extends Plugin {
 
         long now = System.currentTimeMillis();
         prefs.setActiveTrip(module, id, now);
+        // Har trip ko apna ek hooter - pichhli trip me baj chuka ho to bhula do
+        prefs.setAlarmPlayed(false);
 
         Double lat = call.getDouble("lat");
         Double lng = call.getDouble("lng");
@@ -528,7 +547,7 @@ public class LiveTrackerPlugin extends Plugin {
             Double acc = call.getDouble("accuracy");
             LivePointsDb.getInstance(getContext()).insertTrip(
                     module, id, lat, lng, 0f, acc == null ? 0f : acc.floatValue(), now,
-                    true, "trip start", 0f, 0);
+                    true, "trip start", 0f, 0, batteryPercent());
         }
         call.resolve(tripStatus(prefs));
     }
@@ -571,6 +590,8 @@ public class LiveTrackerPlugin extends Plugin {
             return;
         }
         prefs.clearActiveTrip();
+        // Trip khatam - agli trip (ya bina trip wali riding) ko apna hooter milega
+        prefs.setAlarmPlayed(false);
         call.resolve(tripStatus(prefs));
     }
 

@@ -5,6 +5,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import * as moment from 'moment';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { environment } from 'src/environments/environment';
+import { Platform } from '@ionic/angular';
 @Component({
   selector: 'app-splash',
   templateUrl: './splash.component.html',
@@ -16,6 +17,7 @@ export class SplashComponent  implements OnInit {
     private router: Router,
     private common: CommonService,
     private httpLogin: LoginService,
+    private platform: Platform
   ) { }
 
   ngOnInit() {
@@ -87,12 +89,17 @@ export class SplashComponent  implements OnInit {
   }
 
   private clearSessionAndRedirect(): void {
-    localStorage.clear();
+    if (this.platform.is('capacitor')) {
+      localStorage.clear();
+    }
+    
     this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 
   private clearSessionAndShowError(): void {
-    localStorage.clear();
+    if (this.platform.is('capacitor')) {
+      localStorage.clear();
+    }
     this.common.dismissloading();
   }
 

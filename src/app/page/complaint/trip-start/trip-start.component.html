@@ -1,0 +1,99 @@
+<ion-header mode="md">
+  <ion-toolbar color="primary">
+    <ion-title>Start Trip · #{{ tktId }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="ts-loading" *ngIf="loading">
+    <ion-spinner name="lines-sharp"></ion-spinner>
+    <p>Getting current location...</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Server ne mana kiya - wajah screen par hi rahegi, engineer padh sake -->
+    <div class="ts-blocked" *ngIf="loadError || canDoTravel !== 1">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <p class="ts-blocked-msg">{{ loadError || travelNote || 'Travel is not allowed for this ticket' }}</p>
+      <ion-button size="small" fill="outline" class="ion-text-capitalize" (click)="close()">Close</ion-button>
+    </div>
+
+    <ion-row *ngIf="travelNote && !loadError && canDoTravel === 1">
+      <ion-col class="left">
+        <ion-text color="danger">Note: {{ travelNote }}</ion-text>
+      </ion-col>
+    </ion-row>
+
+    <div *ngIf="!loadError && canDoTravel === 1">
+
+      <!-- Start point -->
+      <div class="ts-point">
+        <div class="ts-point-head"><i class="ts-dot"></i> Start location</div>
+        <ng-container *ngIf="start; else noStart">
+          <div class="ts-point-coords">{{ formatCoords() }}</div>
+          <div class="ts-point-time">±{{ start.accuracy.toFixed(0) }} m</div>
+        </ng-container>
+        <ng-template #noStart>
+          <div class="ts-point-coords ts-error">Location not available</div>
+          <ion-button size="small" fill="outline" class="ion-text-capitalize" (click)="retryLocation()">
+            Retry
+          </ion-button>
+        </ng-template>
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Travel Mode</ion-label>
+        <ion-select interface="action-sheet" mode="ios" [(ngModel)]="travelType">
+          <ion-select-option *ngFor="let dat of travelMode" [value]="dat.value">{{ dat.label }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Remark</ion-label>
+        <ion-textarea rows="3" [(ngModel)]="remark"></ion-textarea>
+      </ion-item>
+
+      <ion-row>
+        <ion-col size="4" class="ion-text-center">
+          <ion-button fill="clear" [color]="img1 ? 'success' : 'danger'" (click)="presentActionSheet(1)">
+            <ion-icon name="camera-outline"></ion-icon>
+          </ion-button><br>
+          <ion-text color="dark" size="small">{{ img1 ? 'Uploaded' : 'Selfie' }}</ion-text>
+        </ion-col>
+        <ion-col size="4" class="ion-text-center">
+          <ion-button fill="clear" [color]="img2 ? 'success' : 'danger'" (click)="presentActionSheet(2)">
+            <ion-icon name="camera-outline"></ion-icon>
+          </ion-button><br>
+          <ion-text color="dark" size="small">{{ img2 ? 'Uploaded' : 'Vehicle Detail' }}</ion-text>
+        </ion-col>
+      </ion-row>
+
+      <p class="ts-note">
+        <ion-icon name="navigate-circle-outline"></ion-icon>
+        Location tracking for this ticket starts once the trip is saved on the server.
+      </p>
+
+      <p class="ts-submit-error" *ngIf="submitError">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        {{ submitError }}
+      </p>
+
+      <ion-row>
+        <ion-col class="ion-text-center">
+          <ion-button shape="round" [disabled]="busy || !start" (click)="submit()">
+            <ion-spinner *ngIf="busy" name="lines-sharp" slot="start"></ion-spinner>
+            Start Trip
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </div>
+
+  </ng-container>
+</ion-content>

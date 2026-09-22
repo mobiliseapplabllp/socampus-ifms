@@ -1,29 +1,32 @@
-<ion-item lines="none">
-  <ion-buttons slot="start">
-    <ion-button></ion-button>
-  </ion-buttons>
-  <ion-label class="ion-text-center"><b>My Pending Task</b></ion-label>
-  <ion-button slot="end" (click)="changePendingTask()" fill="clear">
-    <ion-text *ngIf="pendingTask"><ion-icon src="assets/home_banner1/pie-chart.svg" style="height:20px;width:20px;"></ion-icon></ion-text>
-    <ion-text *ngIf="!pendingTask"><ion-icon src="assets/home_banner1/engineer.svg" style="height:20px;width:20px;"></ion-icon></ion-text>
+<!-- Heading baaki sections jaisi - bayein taraf. Khali spacer button hata diya -->
+<div class="hm-section-head">
+  <h3 class="hm-section-title">My Pending Task</h3>
+  <ion-button class="pt-switch" fill="clear" size="small" (click)="changePendingTask()">
+    <ion-icon slot="icon-only"
+      [src]="pendingTask ? 'assets/home_banner1/pie-chart.svg' : 'assets/home_banner1/engineer.svg'"></ion-icon>
   </ion-button>
-</ion-item>
+</div>
 
 <div *ngIf="pendingTask">
-  <ion-row style="background-color: rgb(227, 225, 225);">
-    <ion-col size="3">
-      <ion-button expand="block" [color]="segments === 'helpdesk'? 'primary':'medium'" (click)="clickCustomSegment('helpdesk')">Helpdesk</ion-button>
-    </ion-col>
-    <ion-col size="3">
-      <ion-button expand="block" [color]="segments === 'digital'? 'primary':'medium'" (click)="clickCustomSegment('digital')">Digital</ion-button>
-    </ion-col>
-    <ion-col size="3">
-      <ion-button expand="block" [color]="segments === 'pms'? 'primary':'medium'" (click)="clickCustomSegment('pms')">PPM</ion-button>
-    </ion-col>
-    <ion-col size="3">
-      <ion-button expand="block" [color]="segments === 'meter'? 'primary':'medium'" (click)="clickCustomSegment('meter')">Meter</ion-button>
-    </ion-col>
-  </ion-row>
+  <!-- Tabs - ek hi patti me 4 barabar hisse, chalu wala bhara hua -->
+  <div class="pt-tabs">
+    <button
+      class="pt-tab"
+      [class.pt-tab--on]="segments === 'helpdesk'"
+      (click)="clickCustomSegment('helpdesk')">Helpdesk</button>
+    <button
+      class="pt-tab"
+      [class.pt-tab--on]="segments === 'digital'"
+      (click)="clickCustomSegment('digital')">Digital</button>
+    <button
+      class="pt-tab"
+      [class.pt-tab--on]="segments === 'pms'"
+      (click)="clickCustomSegment('pms')">PPM</button>
+    <button
+      class="pt-tab"
+      [class.pt-tab--on]="segments === 'meter'"
+      (click)="clickCustomSegment('meter')">Meter</button>
+  </div>
   <div [ngSwitch]='segments'>
     <div *ngSwitchCase= "'helpdesk'">
       <div *ngFor="let dat of pendingTicket; let i = index">

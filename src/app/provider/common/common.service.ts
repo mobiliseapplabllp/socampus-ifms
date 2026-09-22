@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { Network } from '@capacitor/network';
+import { Capacitor } from '@capacitor/core';
+import { Geolocation } from '@capacitor/geolocation';
 import * as CryptoJS from 'crypto-js';
 import { environment } from 'src/environments/environment';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -37,6 +39,28 @@ export class CommonService {
 
   getBarcode() {
     return this.barcode;
+  }
+
+  /**
+   * Abhi ki location. Browser me GPS nahi milta (development), isliye wahan hamesha
+   * office wali dummy location - warna har form "Location not available" par atak jaata hai.
+   * Phone par hamesha asli GPS.
+   */
+  async currentPosition(): Promise<{ lat: number; lng: number; accuracy: number } | null> {
+    if (!Capacitor.isNativePlatform()) {
+      return { lat: 28.469259641634423, lng: 77.30539182504319, accuracy: 10 };
+    }
+    try {
+      const res = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 20000 });
+      return {
+        lat: res.coords.latitude,
+        lng: res.coords.longitude,
+        accuracy: res.coords.accuracy || 0
+      };
+    } catch (e) {
+      console.error('currentPosition', e);
+      return null;
+    }
   }
 
   async presentToast(msg: any, clr: any) {

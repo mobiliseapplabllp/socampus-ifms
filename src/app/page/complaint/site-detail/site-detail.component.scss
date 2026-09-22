@@ -1,3 +1,73 @@
-ion-text {
-  font-weight: 530;
+// Sheet modal - handle Ionic khud upar dikhata hai, isliye header patla aur
+// bina border ka rakha hai
+.sd-toolbar {
+  --background: #ffffff;
+  --border-width: 0;
+  --min-height: 48px;
+}
+
+.sd-title {
+  padding-inline: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+}
+
+.sd-close {
+  --color: var(--ion-color-medium);
+}
+
+.sd-card {
+  margin: 12px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+// Label bayein, value dayein - lambi value apni line me chali jaati hai
+.sd-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 14px;
+  text-decoration: none;
+
+  + .sd-row {
+    border-top: 1px solid #eef0f4;
+  }
+}
+
+.sd-label {
+  flex: 0 0 38%;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ion-color-medium);
+}
+
+.sd-value {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  word-break: break-word;
+}
+
+.sd-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  color: var(--ion-color-primary);
+
+  ion-icon {
+    font-size: 15px;
+  }
+}
+
+.sd-row-call:active {
+  background: #f2f5fb;
 }

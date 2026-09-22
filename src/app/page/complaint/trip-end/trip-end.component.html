@@ -92,9 +92,25 @@
       </div>
     </div>
 
-    <p class="te-note">
-      <ion-icon name="flask-outline"></ion-icon>
-      Testing build: Submit prints the payload in the console and ends the trip. Nothing is sent to the server yet.
+    <!-- End ki do photo - start wali tarah -->
+    <ion-row>
+      <ion-col size="4" class="ion-text-center">
+        <ion-button fill="clear" [color]="img1 ? 'success' : 'danger'" (click)="presentActionSheet(1)">
+          <ion-icon name="camera-outline"></ion-icon>
+        </ion-button><br>
+        <ion-text color="dark" size="small">{{ img1 ? 'Uploaded' : 'Selfie' }}</ion-text>
+      </ion-col>
+      <ion-col size="4" class="ion-text-center">
+        <ion-button fill="clear" [color]="img2 ? 'success' : 'danger'" (click)="presentActionSheet(2)">
+          <ion-icon name="camera-outline"></ion-icon>
+        </ion-button><br>
+        <ion-text color="dark" size="small">{{ img2 ? 'Uploaded' : 'Vehicle Detail' }}</ion-text>
+      </ion-col>
+    </ion-row>
+
+    <p class="te-submit-error" *ngIf="submitError">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      {{ submitError }}
     </p>
 
     <div class="te-actions">

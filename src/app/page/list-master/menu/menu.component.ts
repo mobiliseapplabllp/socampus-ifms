@@ -13,6 +13,8 @@ export class MenuComponent  implements OnInit {
   loading: any;
   menuTemp: any = [];
   menuNew: any = [];
+  /** Sab services ek line me - scroller isi par chalta hai */
+  menuItems: any = [];
   result: any = [];
   menuSlide = {
     initialSlide: 0,
@@ -87,6 +89,9 @@ export class MenuComponent  implements OnInit {
   }
 
   chunkedArray(array: any) {
+    // Seedhi list - naye scroller ko yahi chahiye. Chunk wala purana hisaab abhi
+    // rehne diya hai taaki kuch aur uspar tika ho to na toote
+    this.menuItems = Array.isArray(array) ? [...array] : [];
     const perChunk = 2
     const result = array.reduce((resultArray: any, item: any, index: any) => {
       const chunkIndex = Math.floor(index/perChunk)

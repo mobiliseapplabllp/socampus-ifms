@@ -1,5 +1,5 @@
 <ion-app>
-  <ion-menu contentId="main-content" side="start" menuId="app-menu">
+  <ion-menu contentId="main-content" side="start" menuId="app-menu" (ionWillOpen)="refreshTracking()">
     <ion-header class="menu-header ion-no-border">
       <ion-toolbar color="primary" class="menu-toolbar">
         <div class="menu-toolbar-inner">
@@ -16,25 +16,63 @@
             </div>
           </div>
 
+          <!-- Pehle saari permission - bina inke location tracking chal hi nahi sakti,
+               isliye tab tak Availability dikhate hi nahi -->
+          <div class="perm-card" *ngIf="trackingSupported && !allGranted">
+            <p class="punch-card-title">Permissions</p>
+            <div
+              class="perm-row"
+              *ngFor="let p of permissions"
+              (click)="fixPermission(p)">
+              <span class="perm-label">{{ p.label }}</span>
+              <span class="perm-status" [class.perm-ok]="p.granted">
+                {{ p.granted ? 'Allowed' : 'Allow' }}
+                <ion-icon *ngIf="!p.granted" name="chevron-forward-outline"></ion-icon>
+              </span>
+            </div>
+            <p class="punch-hint">Allow all to mark yourself available</p>
+          </div>
+
           <div
             class="punch-card"
+            *ngIf="!trackingSupported || allGranted"
             [class.punch-card--in]="isPunchIn"
             [class.punch-card--out]="!isPunchIn"
           >
-            <p class="punch-card-title">Concierge</p>
-            <div class="punch-row">
-              <span class="punch-side-label punch-out-text">Out</span>
-              <ion-toggle
-                color="success"
-                [checked]="isPunchIn"
-                (ionChange)="togglePunch($event)"
-                [class.toggle--in]="isPunchIn"
-                [class.toggle--out]="!isPunchIn"
-                aria-label="Punch in or punch out"
-              ></ion-toggle>
-              <span class="punch-side-label punch-in-text">In</span>
+            <div class="punch-card-head">
+              <p class="punch-card-title" (click)="onAvailabilityTap()">Availability</p>
+              <ion-button
+                *ngIf="trackingSupported"
+                class="punch-info-btn"
+                fill="clear"
+                size="small"
+                (click)="openTrackingDetails()">
+                <ion-icon
+                  slot="icon-only"
+                  name="information-circle-outline"
+                  [color]="trackingStale ? 'danger' : 'light'"></ion-icon>
+              </ion-button>
             </div>
-            <p class="punch-hint">{{ isPunchIn ? 'Currently punched in' : 'Currently punched out' }}</p>
+            <!-- Toggle ki jagah button - toggle apne aap chal padta tha aur API fail
+                 hone par UI galat haalat me atak jaata tha. Button ka haal hamesha
+                 server ke jawab se hi badalta hai -->
+            <div class="punch-row">
+              <span class="punch-state" [class.punch-state--in]="isPunchIn">
+                <ion-icon [name]="isPunchIn ? 'ellipse' : 'ellipse-outline'"></ion-icon>
+                {{ isPunchIn ? 'You are available' : 'You are not available' }}
+              </span>
+            </div>
+            <ion-button
+              expand="block"
+              size="small"
+              class="punch-action ion-text-capitalize"
+              [color]="isPunchIn ? 'danger' : 'success'"
+              [disabled]="punchBusy"
+              (click)="confirmPunch()">
+              <ion-spinner *ngIf="punchBusy" name="lines-sharp" slot="start"></ion-spinner>
+              {{ isPunchIn ? 'Punch Out' : 'Punch In' }}
+            </ion-button>
+            <p class="punch-hint punch-track" *ngIf="trackingSupported">{{ trackingText }}</p>
           </div>
         </div>
       </ion-toolbar>

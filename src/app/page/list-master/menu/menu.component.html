@@ -1,23 +1,15 @@
-<ion-row>
-  <ion-col class="ion-padding-start">
-    <ion-text color="primary"><b>Our Services</b></ion-text>
-  </ion-col>
-</ion-row>
-<ion-slides [options]="menuSlide" pager="false" style="padding: 10px">
-  <ion-slide *ngFor="let dat of menuNew" style="margin:0px !important;padding:0px !important">
-    <ion-grid style="padding:0px !important" >
-      <ion-row  style="padding:2px;margin:0px !important;">
-        <ion-col *ngFor="let val of dat.menu" size="12" style="margin:3px 0px">
-          <ion-card style="margin:0px; min-height: 80px;width:100%; box-shadow:1px 1px 8px #26589c;border-radius: 10px;" (click)="openPage(val)">
-            <div style="height:60px;width:100%" class="center">
-              <ion-img [src]="val.icon_path" style="height:35px;width:35px"></ion-img>
-            </div>
-            <div style="min-height:20px;width:100%" class="center">
-              <ion-text color="primary" style="font-weight: 500;"> {{val.smnu_desc}} </ion-text>
-            </div>
-          </ion-card>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </ion-slide>
-</ion-slides>
+<div class="hm-section-head">
+  <h3 class="hm-section-title">Our Services</h3>
+  <span class="hm-count-chip" *ngIf="menuItems.length">{{ menuItems.length }} modules</span>
+</div>
+<!-- Pehle yahan ion-slides tha - Swiper har touch par JS chalata hai, isliye
+     khisakne me dheema lagta tha. Ye seedha CSS scroll hai, browser khud
+     sambhalta hai, isliye ungli ke saath chalta hai -->
+<div class="ms-scroller">
+  <button class="ms-tile" *ngFor="let val of menuItems" (click)="openPage(val)">
+    <span class="ms-icon">
+      <ion-img [src]="val.icon_path"></ion-img>
+    </span>
+    <span class="ms-label">{{ val.smnu_desc }}</span>
+  </button>
+</div>

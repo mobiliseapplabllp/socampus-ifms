@@ -24,7 +24,10 @@ import org.json.JSONObject;
 class LivePointsDb extends SQLiteOpenHelper {
 
     private static final String DB = "live_tracker_points.db";
-    /** Production se pehle version 1 hi - schema badle to app reinstall. */
+    /**
+     * Production se pehle version 1 hi - schema badle to app ka data clear karke
+     * dobara install. Abhi sirf testing chal rahi hai, koi asli user nahi hai.
+     */
     private static final int VERSION = 1;
     private static final String TABLE = "live_points";
     private static final String TRIP_TABLE = "trip_points";
@@ -71,12 +74,14 @@ class LivePointsDb extends SQLiteOpenHelper {
      *   reason     kyun - map par tap karke dikhta hai
      *   dist_m     is fix par distance me kitna juda (0 = drift / reject)
      *   interval_s us waqt GPS kitne second par tha
+     *   battery    us waqt phone ki charge % (-1 = padh nahi paaye)
      */
     private static final String FILTER_COLUMNS =
             "accepted INTEGER DEFAULT 1," +
             "reason TEXT," +
             "dist_m REAL DEFAULT 0," +
-            "interval_s INTEGER DEFAULT 0";
+            "interval_s INTEGER DEFAULT 0," +
+            "battery INTEGER DEFAULT -1";
 
     private void createTripTable(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TRIP_TABLE + " (" +
@@ -115,11 +120,12 @@ class LivePointsDb extends SQLiteOpenHelper {
     }
 
     long insert(double lat, double lng, float speedKmh, float accuracy, long time, boolean alarmed,
-                boolean accepted, String reason, float distM, int intervalSec) {
+                boolean accepted, String reason, float distM, int intervalSec, int battery) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("accepted", accepted ? 1 : 0);
         cv.put("reason", reason);
+        cv.put("battery", battery);
         cv.put("dist_m", distM);
         cv.put("interval_s", intervalSec);
         cv.put("lat", lat);
@@ -153,7 +159,7 @@ class LivePointsDb extends SQLiteOpenHelper {
         Cursor c = null;
         try {
             c = getReadableDatabase().rawQuery(
-                    "SELECT lat, lng, speed, accuracy, time, upload, alarmed, accepted, reason, dist_m, interval_s FROM "
+                    "SELECT lat, lng, speed, accuracy, time, upload, alarmed, accepted, reason, dist_m, interval_s, battery FROM "
                             + TABLE + " ORDER BY id ASC", null);
             while (c.moveToNext()) {
                 JSONObject o = new JSONObject();
@@ -168,6 +174,7 @@ class LivePointsDb extends SQLiteOpenHelper {
                 o.put("reason", c.isNull(8) ? "" : c.getString(8));
                 o.put("dist", c.getDouble(9));
                 o.put("interval", c.getInt(10));
+                o.put("battery", c.getInt(11));
                 arr.put(o);
             }
         } catch (Exception ignored) {
@@ -182,12 +189,13 @@ class LivePointsDb extends SQLiteOpenHelper {
 
     void insertTrip(String moduleType, String specificId,
                     double lat, double lng, float speedKmh, float accuracy, long time,
-                    boolean accepted, String reason, float distM, int intervalSec) {
+                    boolean accepted, String reason, float distM, int intervalSec, int battery) {
         ContentValues cv = new ContentValues();
         cv.put("accepted", accepted ? 1 : 0);
         cv.put("reason", reason);
         cv.put("dist_m", distM);
         cv.put("interval_s", intervalSec);
+        cv.put("battery", battery);
         cv.put("module_type", moduleType);
         cv.put("specific_id", specificId);
         cv.put("lat", lat);
@@ -204,7 +212,7 @@ class LivePointsDb extends SQLiteOpenHelper {
         Cursor c = null;
         try {
             c = getReadableDatabase().rawQuery(
-                    "SELECT lat, lng, speed, accuracy, time, accepted, reason, dist_m, interval_s FROM " + TRIP_TABLE +
+                    "SELECT lat, lng, speed, accuracy, time, accepted, reason, dist_m, interval_s, battery FROM " + TRIP_TABLE +
                             " WHERE module_type = ? AND specific_id = ? ORDER BY id ASC",
                     new String[]{ moduleType, specificId });
             while (c.moveToNext()) {
@@ -218,6 +226,7 @@ class LivePointsDb extends SQLiteOpenHelper {
                 o.put("reason", c.isNull(6) ? "" : c.getString(6));
                 o.put("dist", c.getDouble(7));
                 o.put("interval", c.getInt(8));
+                o.put("battery", c.getInt(9));
                 arr.put(o);
             }
         } catch (Exception ignored) {

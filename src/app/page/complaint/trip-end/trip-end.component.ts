@@ -1,7 +1,9 @@
 import { AfterViewInit, Component, Input, OnDestroy } from '@angular/core';
-import { Geolocation } from '@capacitor/geolocation';
 import { ModalController } from '@ionic/angular';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 import { CommonService } from 'src/app/provider/common/common.service';
+import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
+import { environment } from 'src/environments/environment';
 import {
   LiveTrackerService,
   TripModule,
@@ -11,11 +13,10 @@ import {
 declare var google: any;
 
 /**
- * End trip card - start/end, calculated km, manual km, path.
+ * End trip card - start/end, calculated km, manual km, path aur end ki do photo.
  *
- * TESTING: backend abhi ready nahi hai, isliye Submit payload ko console me dikhata
- * hai aur trip band kar deta hai. trip_points ka data clear nahi hota - wo end API
- * ke success ke baad production me hoga (liveTracker.clearTrip).
+ * Kram start wala hi: pehle server par end-trip, success ke BAAD phone ki trip band
+ * aur uske points saaf. Ulta karte to server ko bina bataye path mit jaata.
  */
 @Component({
   selector: 'app-trip-end',
@@ -26,15 +27,24 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
 
   @Input() module!: TripModule;
   @Input() specificId!: string;
+  /** Server ki trip id - list API ke gps_mobile_trip.trip_id se aati hai */
+  @Input() serverTripId = '';
 
   points: TripPoint[] = [];
   end: { lat: number; lng: number; accuracy: number; time: number } | null = null;
   calculatedKm = 0;
   manualKm: any = '';
 
+  img1: any;          // end selfie ka naam
+  img2: any;          // end vehicle photo
+  private selfieBlob: Blob | null = null;
+  private vehicleBlob: Blob | null = null;
+
   loading = true;
   busy = false;
   locationError = false;
+  /** Submit fail hone ki wajah - screen par tiki rehti hai, toast ki tarah udti nahi */
+  submitError = '';
 
   private map: any = null;
   private overlays: any[] = [];
@@ -43,6 +53,8 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
   constructor(
     private modalCtrl: ModalController,
     private liveTracker: LiveTrackerService,
+    private httpComplaint: ComplaintService,
+    private camera: CameraService,
     private common: CommonService) {}
 
   async ngAfterViewInit(): Promise<void> {
@@ -78,18 +90,8 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
 
   /** End point = abhi ki location. SQLite me nahi jaata - payload me alag field hai. */
   private async getCurrentLocation() {
-    try {
-      const res = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 20000 });
-      return {
-        lat: res.coords.latitude,
-        lng: res.coords.longitude,
-        accuracy: res.coords.accuracy || 0,
-        time: Date.now()
-      };
-    } catch (e) {
-      console.error('trip-end current location', e);
-      return null;
-    }
+    const pos = await this.common.currentPosition();
+    return pos ? { ...pos, time: Date.now() } : null;
   }
 
   async retryLocation(): Promise<void> {
@@ -270,12 +272,66 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
 
   // --------------------------------------------------------------- submit
 
+  presentActionSheet(which: number): void {
+    this.camera.selectImage(['camera'], (blob: Blob) => {
+      const name = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+      if (which === 1) {
+        this.selfieBlob = blob;
+        this.img1 = name;
+      } else {
+        this.vehicleBlob = blob;
+        this.img2 = name;
+      }
+    });
+  }
+
+  /** Trip id sirf server se - app apni taraf se koi id nahi banati */
+  private get tripId(): string {
+    return this.serverTripId;
+  }
+
+  /**
+   * Poora raasta - sirf filter ke maane gaye points (GPS ke koode hue nahi),
+   * aakhir me abhi ki location. Har point wahi cheezein bhejta hai jo live ping
+   * bhejti hai, taaki server par dono ek jaise dikhein.
+   */
+  private trekPath(): any[] {
+    const path = this.acceptedPoints.map(p => this.pathPoint(
+      p.lat, p.lng, p.speed, p.accuracy, p.time, p.battery));
+    if (this.end) {
+      // Aakhri point ab ki location - battery is waqt ki nahi pata, isliye nahi bhejte
+      path.push(this.pathPoint(
+        this.end.lat, this.end.lng, 0, this.end.accuracy, this.end.time, -1));
+    }
+    return path;
+  }
+
+  private pathPoint(lat: number, lng: number, speed: number, accuracy: number,
+                    time: number, battery: number): any {
+    const point: any = {
+      lat,
+      lng,
+      speed: Math.round((speed || 0) * 10) / 10,
+      recorded_at: this.istFrom(time),
+      accuracy: Math.round((accuracy || 0) * 10) / 10
+    };
+    if (battery != null && battery >= 0) {
+      point.battery = battery;
+    }
+    return point;
+  }
+
   async submit(): Promise<void> {
     if (this.busy) {
       return;
     }
+    this.submitError = '';
     if (!this.end) {
       this.common.presentToast('Current location is required to end the trip', 'warning');
+      return;
+    }
+    if (!this.selfieBlob || !this.vehicleBlob) {
+      this.common.presentToast('Selfie and vehicle photo are both required', 'warning');
       return;
     }
     const manual = this.manualKm === '' || this.manualKm == null ? null : Number(this.manualKm);
@@ -283,28 +339,63 @@ export class TripEndComponent implements AfterViewInit, OnDestroy {
       this.common.presentToast('Please enter a valid manual km', 'warning');
       return;
     }
+    if (!this.tripId) {
+      this.submitError = 'Trip id not found. Please reload the list and try again.';
+      return;
+    }
+
+    const form = new FormData();
+    form.append('tkt_id', String(this.specificId));
+    form.append('module_type', '1');            // 1 = helpdesk
+    form.append('trip_id', this.tripId);
+    form.append('lat', String(this.end.lat));
+    form.append('lng', String(this.end.lng));
+    form.append('total_distance', this.calculatedKm.toFixed(2));
+    if (manual != null) {
+      form.append('adjusted_distance', String(manual));
+    }
+    form.append('trek_path', JSON.stringify(this.trekPath()));
+    form.append('recorded_at', this.nowIst());
+    form.append('selfie_img', this.selfieBlob, this.img1);
+    form.append('vehicle_img', this.vehicleBlob, this.img2);
 
     this.busy = true;
-    try {
-      const payload = {
-        lat: this.end.lat,
-        lng: this.end.lng,
-        google_kms: Number(this.calculatedKm.toFixed(2)),
-        manual_km: manual,
-        track_arr: this.points
-      };
-      // TESTING: API abhi ready nahi - payload yahin dekh lo
-      console.log('END TRIP PAYLOAD', this.module, this.specificId, payload);
+    this.httpComplaint.endGpsTrip(form).subscribe({
+      next: async (data: any) => {
+        if (!data.status) {
+          this.submitError = data.msg || 'Could not end the trip';
+          this.busy = false;
+          return;
+        }
+        try {
+          // Server ke paas path pahunch gaya - ab phone ki trip band aur uske points saaf
+          await this.liveTracker.endTrip(this.module, this.specificId);
+          await this.liveTracker.clearTrip(this.module, this.specificId);
+          this.liveTracker.clearLocalTrip();
+          this.common.presentToast(data.msg || 'Trip ended', 'success');
+          void this.modalCtrl.dismiss({ ended: true });
+        } catch (e: any) {
+          console.error('endTrip native', e);
+          this.submitError = e?.message || 'Trip saved on server but tracking did not stop';
+        } finally {
+          this.busy = false;
+        }
+      },
+      error: (err: any) => {
+        console.error('endGpsTrip', err);
+        this.submitError = err?.error?.msg || environment.errMsg;
+        this.busy = false;
+      }
+    });
+  }
 
-      await this.liveTracker.endTrip(this.module, this.specificId);
-      this.common.presentToast('Trip ended', 'success');
-      void this.modalCtrl.dismiss({ ended: true, payload });
-    } catch (e: any) {
-      console.error('endTrip', e);
-      this.common.presentToast(e?.message || 'Could not end the trip', 'warning');
-    } finally {
-      this.busy = false;
-    }
+  /** Server ka format - India ka time: 2026-09-21 16:20:00 */
+  private nowIst(): string {
+    return this.istFrom(Date.now());
+  }
+
+  private istFrom(ms: number): string {
+    return new Date(ms).toLocaleString('sv-SE', { timeZone: 'Asia/Kolkata' });
   }
 
   // -------------------------------------------------------------- display

@@ -34,6 +34,8 @@ class LiveTrackerPrefs {
     private static final String KEY_LAST_SPEED_EST = "last_speed_est";
     /** Session ki sabse tez speed (km/h) - testing me dikhta hai ki GPS ne kya padha */
     private static final String KEY_MAX_SPEED = "max_speed_kmh";
+    /** Hooter session me ek hi baar - service restart ho jaye tab bhi yaad rahe */
+    private static final String KEY_ALARM_PLAYED = "alarm_played";
 
     // Debug screen se badalne wale config - default wahi hain jo pehle hardcoded the
     private static final String KEY_GPS_INTERVAL = "gps_interval_ms";
@@ -173,6 +175,14 @@ class LiveTrackerPrefs {
 
     float getMaxSpeedKmh() {
         return sp.getFloat(KEY_MAX_SPEED, 0f);
+    }
+
+    boolean isAlarmPlayed() {
+        return sp.getBoolean(KEY_ALARM_PLAYED, false);
+    }
+
+    void setAlarmPlayed(boolean played) {
+        sp.edit().putBoolean(KEY_ALARM_PLAYED, played).apply();
     }
 
     /** Session ka total distance, metres me */
@@ -368,6 +378,7 @@ class LiveTrackerPrefs {
                 .putFloat(KEY_DISTANCE, 0f)
                 .putString(KEY_LAST_UPLOAD, "-")
                 .putFloat(KEY_MAX_SPEED, 0f)
+                .putBoolean(KEY_ALARM_PLAYED, false)
                 .putLong(KEY_LAST_PING_AT, 0L)
                 .putLong(KEY_ANCHOR_AT, 0L)
                 .putLong(KEY_CUR_INTERVAL, 0L)

@@ -1,158 +1,166 @@
-
 <ion-card class="myCards" [ngClass]="{'wip': data.status === 'work in progress', 'assign': data.status === 'assigned', 'resolve': data.status === 'resolved'}">
-  <div style="background-color:var(--ion-color-primary)">
-    <ion-row>
-      <ion-col>
-        <ion-text color="light" class="head">Ticket Id: {{data.tkts_id}}({{data.req_type_desc}})</ion-text>
-      </ion-col>
-      <ion-col>
-        <ion-text color="light" class="head">{{data.log_date | date: 'dd/MMM/yyyy H:mm:ss'}}</ion-text>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <ion-text class="head" [ngStyle]="{'color': data.attend_remark}">Attend: {{data.remain_attend}}</ion-text>
-      </ion-col>
-      <ion-col>
-        <ion-text class="head" [ngStyle]="{'color': data.resolve_remark}">Resolved: {{data.remain_resolve}}</ion-text>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <ion-text color="light" class="head">{{data.stage_desc}} ({{data.issue_desc}})</ion-text>
-      </ion-col>
-      <ion-col>
-        <ion-text color="light" class="head" *ngIf="data.rslv_date === '0000-00-00 00:00:00'"> Ticket Ageing: {{data.totalDelay}}</ion-text>
-        <ion-text color="light" class="head" *ngIf="data.rslv_date !== '0000-00-00 00:00:00'">Resolved Date: {{data.rslv_date}}</ion-text>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <ion-text color="light" class="head">Assigned To: {{data.assignedTo}}</ion-text>
-      </ion-col>
-    </ion-row>
-  </div>
-  <div>
-    <ion-row>
-      <ion-col size="6">
-        <ion-text  class="medium">Site</ion-text><br>
-        <ion-text color="dark">{{data.pc_ext_id}} {{data.pc_desc}}</ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text  class="medium">Requestee</ion-text><br>
-        <ion-text color="dark">{{data.is_behalf}}</ion-text>
-      </ion-col>
-    </ion-row>
-    <section *ngIf="data.issue_desc === 'Service'">
-      <ion-row>
-        <ion-col>
-          <ion-text class="medium">Category</ion-text><br>
-          <ion-text color="dark">{{data.cat_desc}} </ion-text>
-        </ion-col>
-        <ion-col>
-          <ion-text class="medium">Sub Category</ion-text><br>
-          <ion-text color="dark">{{data.subcat1_desc}}</ion-text>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col *ngIf="data.subcat2_desc">
-          <ion-text class="medium">Sub Category2</ion-text><br>
-          <ion-text color="dark">{{data.subcat2_desc}}</ion-text>
-        </ion-col>
-        <ion-col>
-          <ion-text class="medium">Log By</ion-text><br>
-          <ion-text color="dark">{{data.logged_by_name}} </ion-text>
-        </ion-col>
-      </ion-row>
-    </section>
-    <section *ngIf="data.issue_desc === 'Assets'">
-      <ion-row>
-        <ion-col>
-          <ion-text class="medium">Barcode</ion-text><br>
-          <ion-text color="dark">{{data.ext_asset_id}} </ion-text>
-        </ion-col>
-        <ion-col>
-          <ion-text class="medium">Device Name</ion-text><br>
-          <ion-text color="dark">{{data.grp_desc}}</ion-text>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col>
-          <ion-text class="medium">Manufacturer</ion-text><br>
-          <ion-text color="dark">{{data.mnfctrer_desc}}</ion-text>
-        </ion-col>
-        <ion-col>
-          <ion-text class="medium">Warranty Status</ion-text><br>
-          <ion-text color="dark">{{data.warranty_status}}</ion-text>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col>
-          <ion-text class="medium">Purchase Value</ion-text><br>
-          <ion-text color="dark">{{data.pur_value}} </ion-text>
-        </ion-col>
-        <ion-col>
-          <ion-text class="medium">Log By</ion-text><br>
-          <ion-text color="dark">{{data.user}} </ion-text>
-        </ion-col>
-      </ion-row>
-    </section>
-    <ion-row *ngIf="data.is_behalf === 'On Behalf' ">
-      <ion-col size="6">
-        <ion-text class="medium">Behalf Name</ion-text><br>
-        <ion-text color="dark">{{data.behalf_name}} </ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text class="medium">Behalf Mobile</ion-text><br>
-        <ion-text color="dark">{{data.behalf_mobile}} </ion-text>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text class="medium">Behalf Email</ion-text><br>
-        <ion-text color="dark">{{data.behalf_email}} </ion-text>
-      </ion-col>
-    </ion-row>
 
-    <ion-row>
-      <ion-col>
-        <ion-text class="medium">Remark</ion-text><br>
-        <ion-text color="dark">{{data.remark}} </ion-text>
-      </ion-col>
-    </ion-row>
+  <!-- ===================== Header ===================== -->
+  <div class="tk-head">
+
+    <div class="tk-head-top">
+      <span class="tk-id">#{{ data.tkts_id }}</span>
+      <span class="tk-chip" *ngIf="data.stage_desc">{{ data.stage_desc }}</span>
+      <span class="tk-date">{{ data.log_date | date: 'dd MMM, HH:mm' }}</span>
+    </div>
+
+    <div class="tk-head-sub" *ngIf="data.req_type_desc || data.issue_desc">
+      {{ data.req_type_desc }}<span *ngIf="data.req_type_desc && data.issue_desc"> · </span>{{ data.issue_desc }}
+    </div>
+
+    <!-- SLA ek hi line me, teen barabar hisse. Rang API se aata hai, par neele par
+         laal text padhna mushkil tha - isliye rang ab label ke aage chhote dot par -->
+    <div class="tk-sla">
+      <div class="tk-sla-item" *ngIf="data.remain_attend">
+        <span class="tk-sla-value">{{ data.remain_attend }}</span>
+        <span class="tk-sla-label">
+          <i class="tk-sla-dot" [ngStyle]="{'background': data.attend_remark}"></i> Attend
+        </span>
+      </div>
+      <div class="tk-sla-item" *ngIf="data.remain_resolve">
+        <span class="tk-sla-value">{{ data.remain_resolve }}</span>
+        <span class="tk-sla-label">
+          <i class="tk-sla-dot" [ngStyle]="{'background': data.resolve_remark}"></i> Resolve
+        </span>
+      </div>
+      <div class="tk-sla-item" *ngIf="data.rslv_date === '0000-00-00 00:00:00' && data.totalDelay">
+        <span class="tk-sla-value">{{ data.totalDelay }}</span>
+        <span class="tk-sla-label">Ageing</span>
+      </div>
+      <div class="tk-sla-item" *ngIf="data.rslv_date !== '0000-00-00 00:00:00'">
+        <span class="tk-sla-value">{{ data.rslv_date | date: 'dd MMM' }}</span>
+        <span class="tk-sla-label">Resolved on</span>
+      </div>
+    </div>
+
+    <div class="tk-assigned" *ngIf="data.assignedTo">
+      <ion-icon name="person-outline"></ion-icon> {{ data.assignedTo }}
+    </div>
   </div>
-    <ion-grid class="grid1">
-      <ion-row>
-        <ion-col class="ion-text-center" >
-          <ion-button style="width:80%;font-size:xx-small;" color="secondary" (click)="openSite()">Details</ion-button>
-        </ion-col>
-        <ion-col class="ion-text-center">
-          <ion-button style="width:80%;font-size:xx-small;" color="medium" (click)="history()">History </ion-button>
-        </ion-col>
-        <ion-col class="ion-text-center" *ngIf="(data.canWork || data.canDoTktConfirmationWork) && !(data.stage_id === 4 || data.stage_id === 6)">
-          <ion-button style="width:80%;font-size:xx-small;" color="warning" (click)="work_now()">Work Now</ion-button>
-        </ion-col>
-        <!-- <ion-col class="ion-text-center" *ngIf="data.canWork" >
-          <ion-button *ngIf="data.stage_id === 4 || data.stage_id === 6; else worknow" style="width:80%;font-size:xx-small;" color="success" (click)="fsr(data.tkts_id)">EFSR</ion-button>
-          <ng-template #worknow>
-            <ion-button style="width:80%;font-size:xx-small;" color="warning" (click)="work_now()">Work Now</ion-button>
-          </ng-template>
-        </ion-col> -->
-        <ion-col class="ion-text-center"  *ngIf="data.canAssign && (!(data.stage_id === 4 || data.stage_id === 6))">
-          <ion-button style="width:80%;font-size:xx-small;" color="success" (click)="assignTicket(data.tkts_id, data)">Assign</ion-button>
-        </ion-col>
-        <ion-col class="ion-text-center"  *ngIf="(data.stage_id === 4 || data.stage_id === 6) ">
-          <ion-button style="width:80%;font-size:xx-small;" color="success" (click)="fsr(data.tkts_id)">EFSR</ion-button>
-        </ion-col>
-      </ion-row>
-      <!-- TESTING: hardcoded trip buttons - backend condition aane par hatenge -->
-      <ion-row *ngIf="showTripTest">
-        <ion-col class="ion-text-center">
-          <ion-button style="width:80%;font-size:xx-small;" color="tertiary" [disabled]="tripBusy" (click)="testStartTrip()">
-            {{ isThisTripActive ? '● Trip Running' : 'Start Trip' }}
-          </ion-button>
-        </ion-col>
-        <ion-col class="ion-text-center">
-          <ion-button style="width:80%;font-size:xx-small;" color="danger" [disabled]="tripBusy" (click)="testEndTrip()">End Trip</ion-button>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+
+  <!-- ===================== Body ===================== -->
+  <div class="tk-body">
+
+    <div class="tk-grid">
+      <div class="tk-field" *ngIf="data.pc_ext_id || data.pc_desc">
+        <span class="tk-label">Site</span>
+        <span class="tk-value">{{ data.pc_ext_id }} {{ data.pc_desc }}</span>
+      </div>
+      <div class="tk-field" *ngIf="data.is_behalf">
+        <span class="tk-label">Requestee</span>
+        <span class="tk-value">{{ data.is_behalf }}</span>
+      </div>
+    </div>
+
+    <div class="tk-grid" *ngIf="data.issue_desc === 'Service'">
+      <div class="tk-field" *ngIf="data.cat_desc">
+        <span class="tk-label">Category</span>
+        <span class="tk-value">{{ data.cat_desc }}</span>
+      </div>
+      <div class="tk-field" *ngIf="data.subcat1_desc">
+        <span class="tk-label">Sub Category</span>
+        <span class="tk-value">{{ data.subcat1_desc }}</span>
+      </div>
+      <div class="tk-field" *ngIf="data.subcat2_desc">
+        <span class="tk-label">Sub Category 2</span>
+        <span class="tk-value">{{ data.subcat2_desc }}</span>
+      </div>
+      <div class="tk-field" *ngIf="data.logged_by_name">
+        <span class="tk-label">Log By</span>
+        <span class="tk-value">{{ data.logged_by_name }}</span>
+      </div>
+    </div>
+
+    <div class="tk-grid" *ngIf="data.issue_desc === 'Assets'">
+      <div class="tk-field" *ngIf="data.ext_asset_id">
+        <span class="tk-label">Barcode</span>
+        <span class="tk-value">{{ data.ext_asset_id }}</span>
+      </div>
+      <div class="tk-field" *ngIf="data.grp_desc">
+        <span class="tk-label">Device Name</span>
+        <span class="tk-value">{{ data.grp_desc }}</span>
+      </div>
+      <div class="tk-field" *ngIf="data.mnfctrer_desc">
+        <span class="tk-label">Manufacturer</span>
+        <span class="tk-value">{{ data.mnfctrer_desc }}</span>
+      </div>
+      <div class="tk-field" *ngIf="data.warranty_status">
+        <span class="tk-label">Warranty Status</span>
+        <span class="tk-value">{{ data.warranty_status }}</span>
+      </div>
+      <div class="tk-field" *ngIf="data.pur_value">
+        <span class="tk-label">Purchase Value</span>
+        <span class="tk-value">{{ data.pur_value }}</span>
+      </div>
+      <div class="tk-field" *ngIf="data.user">
+        <span class="tk-label">Log By</span>
+        <span class="tk-value">{{ data.user }}</span>
+      </div>
+    </div>
+
+    <div class="tk-grid" *ngIf="data.is_behalf === 'On Behalf'">
+      <div class="tk-field" *ngIf="data.behalf_name">
+        <span class="tk-label">Behalf Name</span>
+        <span class="tk-value">{{ data.behalf_name }}</span>
+      </div>
+      <div class="tk-field" *ngIf="data.behalf_mobile">
+        <span class="tk-label">Behalf Mobile</span>
+        <span class="tk-value">{{ data.behalf_mobile }}</span>
+      </div>
+      <div class="tk-field" *ngIf="data.behalf_email">
+        <span class="tk-label">Behalf Email</span>
+        <span class="tk-value">{{ data.behalf_email }}</span>
+      </div>
+    </div>
+
+    <!-- Remark lamba hota hai - 2 line, phir "more" -->
+    <div class="tk-field tk-remark" *ngIf="data.remark">
+      <span class="tk-label">Remark</span>
+      <span class="tk-value" [class.tk-clamp]="!remarkOpen">{{ data.remark }}</span>
+      <button class="tk-more" *ngIf="data.remark.length > 90" (click)="remarkOpen = !remarkOpen">
+        {{ remarkOpen ? 'less' : 'more' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== Actions ===================== -->
+  <div class="tk-actions">
+    <ion-button class="tk-btn" fill="outline" color="secondary" (click)="openSite()">Details</ion-button>
+    <ion-button class="tk-btn" fill="outline" color="medium" (click)="history()">History</ion-button>
+    <!-- Pehle trip ka number lagta hai (server ka gps_mobile_trip), uske baad hi Work Now -->
+    <ion-button
+      class="tk-btn"
+      color="tertiary"
+      *ngIf="showStartTrip"
+      [disabled]="tripBusy"
+      (click)="testStartTrip()">{{ tripButtonText || 'Start Trip' }}</ion-button>
+    <ion-button
+      class="tk-btn"
+      color="danger"
+      *ngIf="showEndTrip"
+      [disabled]="tripBusy"
+      (click)="testEndTrip()">{{ tripButtonText || 'End Trip' }}</ion-button>
+    <ion-button
+      class="tk-btn"
+      color="warning"
+      *ngIf="showWorkNow"
+      (click)="work_now()">Work Now</ion-button>
+    <ion-button
+      class="tk-btn"
+      color="success"
+      *ngIf="data.canAssign && !(data.stage_id === 4 || data.stage_id === 6)"
+      (click)="assignTicket(data.tkts_id, data)">Assign</ion-button>
+    <ion-button
+      class="tk-btn"
+      color="success"
+      *ngIf="data.stage_id === 4 || data.stage_id === 6"
+      (click)="fsr(data.tkts_id)">EFSR</ion-button>
+  </div>
+
+
 </ion-card>

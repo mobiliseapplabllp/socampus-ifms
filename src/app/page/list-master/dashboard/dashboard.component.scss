@@ -1,48 +1,171 @@
-.dashboard {
-  ion-card {
-    width:100%;
-    // height:130px;
-    box-shadow: none;
-    border-radius: 12px;
-    img {
-      object-fit: cover;
-      width:100%;
-    }
+// Section heading - Dashboard, Services aur Pending Task teeno ek jaise:
+// bayein taraf, ek hi size/rang, aur upar-neeche ek hi gap
+.hm-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 30px;
+  margin: 18px 17px 8px;
+}
+
+.hm-section-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2440;
+}
+
+// ---- Card ka andar ka layout ----
+// Reference wala card - gradient par safed text, icon apne halke tile me,
+// aur teen ank alag-alag rang me (theek / dhyan dene layak / zaroori)
+.dash-card {
+  width: 100%;
+  margin: 0;
+  padding: 16px;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px -12px rgba(38, 88, 156, 0.55);
+  color: #ffffff;
+  background: linear-gradient(135deg, #2f5fae 0%, var(--ion-color-primary) 55%, #3b3f97 100%);
+}
+
+.dash-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.16);
+
+  img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+}
+
+.dash-head-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dash-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.dash-sub {
+  margin-top: 2px;
+  font-size: 11.5px;
+  opacity: 0.8;
+}
+
+.dash-stats {
+  display: flex;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dash-stat {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+
+  + .dash-stat {
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+.dash-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+
+  &.dash-value--warn {
+    color: #ffd166;
   }
 
-  .swiper-slide-active {
-    transform: scale(1.1, 1.1);
-    ion-card {
-      background:linear-gradient(
-        195deg,
-        #25589c 20%,
-        var(--ion-color-primary) 100%
-        ) !important;
-    }
+  &.dash-value--alert {
+    color: #ff9b9b;
   }
+}
+
+.dash-label {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+// Card ki chaudai upar wale welcome card jitni - dono taraf 12px
+.dashboard ion-slides {
+  padding: 0;
+}
+
+.dash-pager {
+  margin-top: 10px;
+}
+
+// Gutter slide ki padding se aata hai, card se nahi - ion-slide flex hota hai,
+// isliye card ko margin dene par wo sikud kar content jitna reh jaata tha
+.dashboard ion-slide {
+  padding: 0 17px;
+  box-sizing: border-box;
+}
+
+.dashboard ion-card {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+// Bullets
+.dash-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+
+  ::ng-deep .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background: #c7cede;
+    opacity: 1;
+    transition: width 0.2s ease, background 0.2s ease;
+  }
+
+  ::ng-deep .swiper-pagination-bullet-active {
+    width: 18px;
+    background: var(--ion-color-primary);
+  }
+}
+
+.dashboard {
+  ion-card {
+    box-shadow: none;
+  }
+
+  // Card ab poori chaudai ka hai - scale karne par wo welcome card se chauda
+  // dikhta aur kinare padding kha jaate
 
   .swiper-slide {
     transform: 400ms all ease-in-out;
   }
 
-  .swiper-slide-prev {
-    ion-card {
-      background:linear-gradient(
-        195deg,
-        #25589c 20%,
-        var(--ion-color-primary) 100%
-        ) !important;
-    }
 
-  }
-
-  .swiper-slide-next {
-    ion-card {
-      background:linear-gradient(
-        195deg,
-        #25589c 20%,
-        var(--ion-color-primary) 100%
-        ) !important;
-    }
-  }
 }

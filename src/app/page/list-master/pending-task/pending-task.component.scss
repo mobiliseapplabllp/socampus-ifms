@@ -1,3 +1,66 @@
+// Section heading - Dashboard, Services aur Pending Task teeno ek jaise:
+// bayein taraf, ek hi size/rang, aur upar-neeche ek hi gap
+.hm-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 30px;
+  margin: 18px 17px 8px;
+}
+
+.hm-section-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2440;
+}
+
+.pt-switch {
+  --padding-start: 4px;
+  --padding-end: 4px;
+  height: 28px;
+  margin: 0;
+
+  ion-icon {
+    font-size: 20px;
+  }
+}
+
+// My Pending Task ke tabs - rang wahi (chalu = primary, baaki grey), bas ek
+// patti me barabar hisse, ek jaisi height aur saaf active state
+.pt-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 0 17px 12px;
+  padding: 7px;
+  border-radius: 14px;
+  background: rgb(237, 236, 236);
+}
+
+.pt-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 38px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ion-color-medium-shade);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pt-tab--on {
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  box-shadow: 0 1px 4px rgba(38, 88, 156, 0.35);
+}
+
 .bg-color {
   background-color: rgb(134, 240, 134)
 }

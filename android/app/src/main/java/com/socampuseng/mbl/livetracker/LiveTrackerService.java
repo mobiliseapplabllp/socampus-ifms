@@ -22,6 +22,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.BatteryManager;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
@@ -581,22 +582,25 @@ public class LiveTrackerService extends Service {
         final String tripModule = prefs.hasActiveTrip() ? prefs.getTripModule() : null;
         final String tripId = prefs.hasActiveTrip() ? prefs.getTripId() : null;
 
+        // Battery ek hi baar - point ke saath save bhi hoti hai aur ping me bhi jaati hai
+        final int batteryPct = batteryPercent();
+
         uploadExecutor.execute(() -> {
             // Wahi fix, doosri manzil - koi nayi GPS request nahi. Har fix save hota hai,
             // kharab wala bhi - accepted/reason ke saath. Chhantna padhte waqt hota hai.
             if (tripModule != null) {
                 points.insertTrip(tripModule, tripId, lat, lng, finalKmh, accuracy, now,
-                        accepted, filterReason, distAdded, intervalSec);
+                        accepted, filterReason, distAdded, intervalSec, batteryPct);
             }
             long rowId = points.insert(lat, lng, finalKmh, accuracy, now, alarmed,
-                    accepted, filterReason, distAdded, intervalSec);
+                    accepted, filterReason, distAdded, intervalSec, batteryPct);
             String result;
             long sinceMs = fixTime - prefs.getLastPingAt();
             if (prefs.getLastPingAt() > 0 && sinceMs >= 0 && sinceMs < PING_EVERY_MS) {
                 // Minute poora nahi hua - server skip hi karega, call bachao
                 result = "held " + (sinceMs / 1000L) + "s";
             } else {
-                result = upload(lat, lng, finalKmh, accuracy, fixTime);
+                result = upload(lat, lng, finalKmh, accuracy, fixTime, batteryPct);
                 // Store hua to agla minute yahan se. Skip / fail par agla fix phir koshish karega
                 if (result.startsWith("2") && !result.endsWith("skipped")) {
                     prefs.setLastPingAt(fixTime);
@@ -633,16 +637,25 @@ public class LiveTrackerService extends Service {
     }
 
     /**
+     * Hooter ek baar - trip ke andar ek, trip khatam hone par agli ke liye phir se ek.
+     * Bina trip wali riding me tracking session me ek. Baar-baar bajta hooter bike par
+     * khud khatra hai, aur record ke liye overspeed notification aur table to har
+     * reading par bante hi hain.
+     *
      * Hysteresis: 50 par bajao, 45 se neeche aane par hi dobara armed hota hai.
-     * Bina iske 49.8/50.2 ke beech jhoolti speed har fix par alarm baja degi.
      */
     private boolean checkOverspeed(float kmh) {
         float limit = prefs.getSpeedLimitKmh();
 
         if (!overspeedArmed && kmh >= limit) {
             overspeedArmed = true;
-            Log.d(TAG, "overspeed " + kmh + " km/h - alarm");
+            if (prefs.isAlarmPlayed()) {
+                Log.d(TAG, "overspeed " + kmh + " km/h - hooter is session me baj chuka");
+                return false;
+            }
+            Log.d(TAG, "overspeed " + kmh + " km/h - hooter");
             speedAlarm.trigger();
+            prefs.setAlarmPlayed(true);
             return true;
         }
         if (overspeedArmed && kmh < limit - SPEED_REARM_GAP_KMH) {
@@ -666,7 +679,8 @@ public class LiveTrackerService extends Service {
      * Live location ping - {lat, lng, speed (km/h), recorded_at (IST), accuracy (m)}.
      * Server jawab deta hai {status, stored, skipped} - wahi notification me dikhta hai.
      */
-    private String upload(double lat, double lng, float kmh, float accuracy, long fixTime) {
+    private String upload(double lat, double lng, float kmh, float accuracy, long fixTime,
+                          int battery) {
         String url = prefs.getUrl();
         if (url == null || url.isEmpty()) {
             return "no url";
@@ -680,6 +694,9 @@ public class LiveTrackerService extends Service {
             body.put("speed", Math.round(kmh * 10f) / 10d);
             body.put("recorded_at", recordedAt(fixTime));
             body.put("accuracy", Math.round(accuracy * 10f) / 10d);
+            if (battery >= 0) {
+                body.put("battery", battery);
+            }
 
             conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setRequestMethod("POST");
@@ -730,6 +747,22 @@ public class LiveTrackerService extends Service {
      * Notification ki patli line me poora exception naam nahi samata, aur testing me
      * farak sirf itna chahiye: network tha ya nahi, server tak pahuncha ya nahi.
      */
+    /** Phone ki battery (0-100), na mile to -1 */
+    private int batteryPercent() {
+        try {
+            BatteryManager bm = (BatteryManager) getSystemService(BATTERY_SERVICE);
+            if (bm != null) {
+                int pct = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+                if (pct >= 0 && pct <= 100) {
+                    return pct;
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "battery read failed: " + e.getMessage());
+        }
+        return -1;
+    }
+
     /** Server ka format - India ka time, bina timezone ke: 2026-09-19 12:30:00 */
     private static String recordedAt(long ms) {
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);

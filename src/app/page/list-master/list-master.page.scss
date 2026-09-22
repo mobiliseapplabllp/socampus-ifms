@@ -1,3 +1,132 @@
+/* Welcome card - naam aur availability ek hi jagah */
+.hm-welcome-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 17px;
+  padding: 12px 14px;
+  border: 1px solid #e8ebf3;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Naam ke do akshar - photo na hone par bhi card personal lagta hai */
+.hm-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(140deg, #3f6fb5, var(--ion-color-primary));
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.hm-avatar-dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  background: #b9bfcc;
+
+  &.hm-avatar-dot--in {
+    background: var(--ion-color-success);
+  }
+}
+
+.hm-welcome-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.hm-welcome-hi {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ion-color-medium);
+}
+
+.hm-welcome-name {
+  margin: 2px 0 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2440;
+  word-break: break-word;
+}
+
+.hm-update-btn {
+  margin: 8px 0 0;
+  --border-radius: 8px;
+}
+
+/* Availability chip - pehle toolbar me akela dot tha, jo kuch batata nahi tha.
+   Tap karne par side menu khulta hai, jahan Punch In/Out hai */
+.hm-punch-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid #e2e6ee;
+  border-radius: 20px;
+  background: #f4f6fa;
+  color: var(--ion-color-medium-shade);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  ion-icon {
+    font-size: 9px;
+    color: #b9bfcc;
+  }
+
+  &.hm-punch-chip--in {
+    border-color: rgba(45, 211, 111, 0.35);
+    background: rgba(45, 211, 111, 0.12);
+    color: #1d7a45;
+
+    ion-icon {
+      color: var(--ion-color-success);
+    }
+  }
+}
+
+/* Header ke gin-ti wale badge - pehle number seedha icon par chadh jaata tha */
+.hm-icon-btn {
+  position: relative;
+  overflow: visible;
+}
+
+.hm-badge {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--ion-color-danger);
+  border: 1.5px solid var(--ion-color-primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 13px;
+  text-align: center;
+}
+
 
 ion-slides {
   padding-bottom: 50px !important;

@@ -19,9 +19,6 @@ import { PendingTaskComponent } from './pending-task/pending-task.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ComplaintPageModule } from '../complaint/complaint.module';
 import { SosComponent } from './sos/sos.component';
-import { TrackingCardComponent } from './tracking-card/tracking-card.component';
-import { TrackingMapComponent } from './tracking-map/tracking-map.component';
-import { TrackingDebugComponent } from './tracking-debug/tracking-debug.component';
 
 @NgModule({
   imports: [
@@ -41,9 +38,6 @@ import { TrackingDebugComponent } from './tracking-debug/tracking-debug.componen
     ChartDashboardComponent,
     OfflineDataComponent,
     SosComponent,
-    TrackingCardComponent,
-    TrackingMapComponent,
-    TrackingDebugComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

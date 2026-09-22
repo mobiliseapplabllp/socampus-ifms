@@ -1,15 +1,168 @@
-.wip {
-  border-right:2px solid yellow;
+// Sheet modal ka header - patla aur bina border ka
+.th-toolbar {
+  --background: #ffffff;
+  --border-width: 0;
+  --min-height: 48px;
 }
 
-.assign{
-  border-right:2px solid red;
+.th-title {
+  padding-inline: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ion-color-primary);
 }
 
-.resolve{
-  border-right:2px solid green;
+.th-close {
+  --color: var(--ion-color-medium);
 }
 
-ion-text {
-  font-weight: 520;
+.th-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 60px;
+  color: var(--ion-color-medium);
+  font-size: 13px;
+
+  ion-icon {
+    font-size: 34px;
+  }
+}
+
+// ---- Timeline: bayein ek line, har entry par ek dot ----
+.th-list {
+  position: relative;
+  padding: 10px 12px 16px 26px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    bottom: 22px;
+    left: 16px;
+    width: 2px;
+    background: #e3e7ef;
+  }
+}
+
+.th-item {
+  position: relative;
+
+  + .th-item {
+    margin-top: 10px;
+  }
+}
+
+.th-dot {
+  position: absolute;
+  left: -14px;
+  top: 16px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ion-color-medium);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px #e3e7ef;
+}
+
+// Rang wahi jo card par tha - status se
+.th-item.wip .th-dot {
+  background: var(--ion-color-warning);
+}
+
+.th-item.assign .th-dot {
+  background: var(--ion-color-danger);
+}
+
+.th-item.resolve .th-dot {
+  background: var(--ion-color-success);
+}
+
+.th-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.th-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.th-stage {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+}
+
+.th-date {
+  font-size: 11px;
+  color: var(--ion-color-medium);
+  white-space: nowrap;
+}
+
+.th-desc {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ion-color-dark);
+  word-break: break-word;
+}
+
+.th-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--ion-color-medium);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  ion-icon {
+    font-size: 13px;
+  }
+}
+
+.th-scope {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #eef0f4;
+}
+
+.th-scope-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ion-color-medium);
+}
+
+.th-scope-value {
+  font-size: 13px;
+  color: var(--ion-color-dark);
+}
+
+.th-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.th-file-btn {
+  margin: 0;
+  height: 30px;
+  font-size: 12px;
+  text-transform: none;
+  --border-radius: 8px;
 }

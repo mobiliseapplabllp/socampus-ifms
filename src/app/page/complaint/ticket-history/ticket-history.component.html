@@ -1,86 +1,76 @@
-<ion-header mode="md">
-  <ion-toolbar color="primary">
-    <ion-title># Ticket Id {{ticket_id}}</ion-title>
+<ion-header mode="md" class="ion-no-border">
+  <ion-toolbar class="th-toolbar">
+    <ion-title class="th-title">History · #{{ ticket_id }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="closeModal()">
+      <ion-button class="th-close" (click)="closeModal()">
         <ion-icon slot="icon-only" name="close"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
+
 <ion-content>
 
-  <!-- <div  *ngIf="videoSource">
-    <video width="100%" height="50%" controls autoplay loop muted>
-      <source [src]="videoSource" type="video/mp4" style="height:100%;width:100%"/>
-      Browser not supported
-    </video>
-    <br>
-    <br>
-    <a [href]="videoSource" download="my_video.webm">
-      <button>Download Video</button>
-    </a>
+  <div class="th-empty" *ngIf="!history?.length">
+    <ion-icon name="time-outline"></ion-icon>
+    <p>No history for this ticket</p>
+  </div>
 
-  </div> -->
+  <!-- Timeline - har entry ek step, rang status ke hisaab se -->
+  <div class="th-list" *ngIf="history?.length">
+    <div
+      class="th-item"
+      *ngFor="let dat of history"
+      [ngClass]="{
+        'wip': dat.ticket_status === 'work in progress',
+        'assign': dat.ticket_status === 'assigned',
+        'resolve': dat.ticket_status === 'resolve'
+      }">
 
-  <ion-card *ngFor="let dat of history"  [ngClass]="{'wip': dat.ticket_status === 'work in progress', 'assign': dat.ticket_status === 'assigned', 'resolve': dat.ticket_status === 'resolve'}">
-    <ion-row>
-      <ion-col size="4">
-        <ion-text color="dark">Name</ion-text>
-      </ion-col>
-      <ion-col >
-        <ion-text color="warning">{{dat.user}}</ion-text>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="4">
-        <ion-text color="dark">Status</ion-text>
-      </ion-col>
-      <ion-col >
-        <ion-text color="warning">{{dat.stage_desc}}</ion-text>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="4">
-        <ion-text color="dark">Description</ion-text>
-      </ion-col>
-      <ion-col >
-        <ion-text color="warning" [innerHTML]="dat.txn_desc"></ion-text>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="4">
-        <ion-text color="dark">Date & Time</ion-text>
-      </ion-col>
-      <ion-col >
-        <ion-text color="warning">{{dat.txn_date | date: 'dd/MMM/yyyy'}}</ion-text>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="4">
-        <ion-text color="dark">Source</ion-text>
-      </ion-col>
-      <ion-col >
-        <ion-text color="warning">{{dat.source}}</ion-text>
-      </ion-col>
-    </ion-row>
-    <ion-row *ngIf="dat.scope_desc">
-      <ion-col size="4">
-        <ion-text color="dark">Scope Of Work</ion-text>
-      </ion-col>
-      <ion-col >
-        <ion-text color="warning">{{dat.scope_desc}}</ion-text>
-      </ion-col>
-    </ion-row>
-    <ion-row >
-      <ion-col class="ion-text-right">
-        <ion-button color="danger" [hidden]="!dat.ticket_file" size="small" fill="outline" (click)="viewDoc(dat.ticket_file, dat.ticket_file_blob_type)">
-          <ion-text *ngIf="dat.txn_desc === '#Video uploaded'">Video</ion-text>
-          <ion-text *ngIf="dat.txn_desc !== '#Video uploaded'">Img1 <ion-icon name="attach-outline" slot="end"></ion-icon></ion-text>
-          <ion-icon name="attach-outline" slot="end"></ion-icon>
-        </ion-button>
-        <ion-button color="danger" [hidden]="!dat.oth_file" size="small" fill="outline" (click)="viewDoc(dat.oth_file, dat.ticket_file_blob_type)">Img2 <ion-icon name="attach-outline" slot="end"></ion-icon> </ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-card>
+      <span class="th-dot"></span>
+
+      <div class="th-card">
+        <div class="th-head">
+          <span class="th-stage">{{ dat.stage_desc }}</span>
+          <span class="th-date">{{ dat.txn_date | date: 'dd MMM, HH:mm' }}</span>
+        </div>
+
+        <p class="th-desc" *ngIf="dat.txn_desc" [innerHTML]="dat.txn_desc"></p>
+
+        <div class="th-meta">
+          <span *ngIf="dat.user"><ion-icon name="person-outline"></ion-icon> {{ dat.user }}</span>
+          <span *ngIf="dat.source"><ion-icon name="phone-portrait-outline"></ion-icon> {{ dat.source }}</span>
+        </div>
+
+        <div class="th-scope" *ngIf="dat.scope_desc">
+          <span class="th-scope-label">Scope of work</span>
+          <span class="th-scope-value">{{ dat.scope_desc }}</span>
+        </div>
+
+        <div class="th-files" *ngIf="dat.ticket_file || dat.oth_file">
+          <ion-button
+            *ngIf="dat.ticket_file"
+            size="small"
+            fill="outline"
+            color="primary"
+            class="th-file-btn"
+            (click)="viewDoc(dat.ticket_file, dat.ticket_file_blob_type)">
+            <ion-icon slot="start" [name]="dat.txn_desc === '#Video uploaded' ? 'videocam-outline' : 'image-outline'"></ion-icon>
+            {{ dat.txn_desc === '#Video uploaded' ? 'Video' : 'Image 1' }}
+          </ion-button>
+          <ion-button
+            *ngIf="dat.oth_file"
+            size="small"
+            fill="outline"
+            color="primary"
+            class="th-file-btn"
+            (click)="viewDoc(dat.oth_file, dat.ticket_file_blob_type)">
+            <ion-icon slot="start" name="image-outline"></ion-icon>
+            Image 2
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </ion-content>

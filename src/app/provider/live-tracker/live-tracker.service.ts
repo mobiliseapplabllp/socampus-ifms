@@ -72,6 +72,8 @@ export interface TripPoint {
   /** Is fix par distance me kitna juda, metres (drift/reject par 0) */
   dist: number;
   interval: number;
+  /** Us fix ke waqt phone ki charge % (-1 = pata nahi chala) */
+  battery: number;
 }
 
 /** Sirf JS guards ke liye - punch-out/stop block aur doosre ticket ka start block */
@@ -108,6 +110,8 @@ export interface LivePoint {
   dist: number;
   /** Us waqt GPS kitne second par tha */
   interval: number;
+  /** Us fix ke waqt phone ki charge % (-1 = pata nahi chala) */
+  battery: number;
 }
 
 export type PermissionKey = 'gps' | 'location' | 'battery' | 'notifications' | 'activity';
@@ -297,6 +301,39 @@ export class LiveTrackerService {
       console.error('LiveTracker.getActiveTrip', e);
       return this.getLocalTrip();
     }
+  }
+
+  /**
+   * Trip chal rahi hai ya nahi - native ho to wahan se (wahi sach hai), warna
+   * localStorage se. Browser me bhi "ek waqt me ek trip" wala rule chale, isliye.
+   */
+  async activeTrip(): Promise<ActiveTrip | null> {
+    if (this.isSupported()) {
+      return this.syncActiveTrip();
+    }
+    const local = this.getLocalTrip();
+    return local?.active ? local : null;
+  }
+
+  /**
+   * "Is ticket par trip chal rahi hai" ka nishan. Iska ek hi kaam hai - pehredari:
+   * doosre ticket par nayi trip na bane, aur trip chalte hue side menu se tracking
+   * band na ho. Server ki trip_id yahan nahi rakhte, wo list API se hi aati hai.
+   */
+  setLocalTrip(module: TripModule, id: string | number): void {
+    const existing = this.getLocalTrip();
+    const same = existing?.module === module && String(existing?.id) === String(id);
+    const trip: ActiveTrip = {
+      active: true,
+      module,
+      id: String(id),
+      startedAt: same && existing?.startedAt ? existing.startedAt : Date.now()
+    };
+    localStorage.setItem(ACTIVE_TRIP_KEY, JSON.stringify(trip));
+  }
+
+  clearLocalTrip(): void {
+    localStorage.removeItem(ACTIVE_TRIP_KEY);
   }
 
   /** Turant jawab ke liye (sync) - JS guards isi ko dekhte hain */
