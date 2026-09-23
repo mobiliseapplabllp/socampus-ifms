@@ -5,8 +5,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  min-height: 30px;
-  margin: 18px 17px 8px;
+  margin: 10px 17px 8px;
 }
 
 .hm-section-title {
@@ -36,7 +35,7 @@
   grid-auto-columns: calc((100vw - 24px) / 3.2 - 10px);
   gap: 10px;
   // Side ki jagah heading ("Our Services") jitni - pehle tile kinare se chipka tha
-  padding: 2px 17px 8px;
+  padding: 2px 17px 0;
   scroll-padding-left: 17px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
@@ -82,11 +81,17 @@
   border-radius: 14px;
   background: rgba(38, 88, 156, 0.08);
 
-  ion-img {
-    width: 26px;
-    height: 26px;
-    object-fit: contain;
-  }
+}
+
+// Icon kaali aati hai - filter se primary neele me badal dete hain. Mask bhi try
+// kiya tha par kuch WebView me wo chalta hi nahi, isliye filter
+.ms-glyph {
+  display: block;
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(28%) sepia(45%) saturate(1450%)
+    hue-rotate(191deg) brightness(93%) contrast(92%);
 }
 
 // Lamba naam 2 line me - tile ki height tab bhi wahi rehti hai

@@ -26,6 +26,7 @@ import { PdfViewComponent } from './pdf-view/pdf-view.component';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { TrackingMapComponent } from '../page/list-master/tracking-map/tracking-map.component';
 import { TrackingDebugComponent } from '../page/list-master/tracking-debug/tracking-debug.component';
+import { PermissionGuideComponent } from './permission-guide/permission-guide.component';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -49,7 +50,8 @@ import { TrackingDebugComponent } from '../page/list-master/tracking-debug/track
     ImageViewComponent,
     PdfViewComponent,
     TrackingMapComponent,
-    TrackingDebugComponent
+    TrackingDebugComponent,
+    PermissionGuideComponent
   ],
   imports: [
     CommonModule,
@@ -80,7 +82,8 @@ import { TrackingDebugComponent } from '../page/list-master/tracking-debug/track
     ImageViewComponent,
     PdfViewComponent,
     TrackingMapComponent,
-    TrackingDebugComponent
+    TrackingDebugComponent,
+    PermissionGuideComponent
   ],
   exports: [
     VideoComponent,

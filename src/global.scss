@@ -312,30 +312,11 @@ section.inputbox {
   --padding-bottom: 0;
 }
 
-/* ---------------------------------------------------------------------------
-   Android 15/16 edge-to-edge
-   App ki screen ab navigation bar ke neeche tak jaati hai, isliye footer ke
-   button 3-button navigation ke peeche chhup jaate the. Naap native se aata hai
-   (MainActivity -> --ion-safe-area-bottom), yahan ek baar lagaya to har screen
-   par lag jaata hai.
---------------------------------------------------------------------------- */
-ion-footer {
-  /* Native se aaya naap ya WebView ka apna env() - jo bada ho. Kisi phone par ek
-     kaam karta hai, kisi par doosra */
-  padding-bottom: max(var(--ion-safe-area-bottom, 0px), env(safe-area-inset-bottom, 0px));
-}
+/* Android 15/16 edge-to-edge ka hisaab ab poora native me hai (MainActivity):
+   WebView hi system bars ke andar rehti hai aur bars ki jagah do patti bharti hain.
+   Isliye yahan ion-header / ion-footer / ion-modal ke liye kuch karne ki zaroorat
+   nahi - pehle wo sab yahan tha aur modal ke header bade dikhne lagte the. */
 
-/* Modal ka aakhri hissa (Submit / End Trip jaise button ion-content me hote hain) */
-ion-modal ion-content {
-  --padding-bottom: max(var(--ion-safe-area-bottom, 0px), env(safe-area-inset-bottom, 0px));
-}
-
-/* Landscape / cutout wale phone - side me bhi utni hi jagah */
-ion-footer,
-ion-modal ion-content {
-  padding-left: var(--ion-safe-area-left, 0px);
-  padding-right: var(--ion-safe-area-right, 0px);
-}
 
 /* ---------------------------------------------------------------------------
    Sheet modal - ticket card ke Details / History jaise chhote modal neeche se
@@ -349,3 +330,5 @@ ion-modal.app-sheet-modal {
 ion-modal.app-sheet-modal ion-content {
   --background: #f6f7fb;
 }
+
+

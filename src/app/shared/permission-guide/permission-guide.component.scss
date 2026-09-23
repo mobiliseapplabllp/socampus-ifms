@@ -1,0 +1,90 @@
+.pg-toolbar {
+  --background: #ffffff;
+  --border-width: 0;
+  --min-height: 48px;
+}
+
+.pg-title {
+  padding-inline: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+}
+
+.pg-close {
+  --color: var(--ion-color-medium);
+}
+
+.pg-intro {
+  margin: 4px 16px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ion-color-dark);
+}
+
+.pg-step {
+  margin: 0 16px 16px;
+}
+
+.pg-step-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+// Step ka number - gol badge, taaki kram saaf dikhe
+.pg-step-no {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--ion-color-primary);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pg-step-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+// Screenshot - laal ghera image me hi bana hua hai
+.pg-shot {
+  display: block;
+  width: 100%;
+  border: 1px solid #e3e7f0;
+  border-radius: 10px;
+}
+
+.pg-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 16px 16px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 15px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+.pg-actions {
+  padding: 10px 16px;
+  background: #ffffff;
+
+  ion-button {
+    --border-radius: 10px;
+    height: 44px;
+    font-weight: 600;
+  }
+}

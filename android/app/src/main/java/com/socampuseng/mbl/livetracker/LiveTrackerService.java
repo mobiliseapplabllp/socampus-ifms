@@ -697,6 +697,11 @@ public class LiveTrackerService extends Service {
             if (battery >= 0) {
                 body.put("battery", battery);
             }
+            // Us fix ke waqt engineer kya kar raha tha - Activity Recognition se
+            // (Still / Walking / Running / Cycling / Riding). Punch ke waqt ye bhejne
+            // ka matlab nahi tha, wahan engineer khada hi hota hai
+            String activity = prefs.getActivity();
+            body.put("activity", activity == null || activity.isEmpty() ? "Unknown" : activity);
 
             conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setRequestMethod("POST");

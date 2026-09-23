@@ -15,6 +15,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { ModalController } from '@ionic/angular';
 import { TrackingMapComponent } from './page/list-master/tracking-map/tracking-map.component';
 import { TrackingDebugComponent } from './page/list-master/tracking-debug/tracking-debug.component';
+import { PermissionGuideComponent } from './shared/permission-guide/permission-guide.component';
 import {
   LiveTrackerService,
   LiveTrackerStatus,
@@ -97,7 +98,12 @@ export class AppComponent {
   initApp() {
     this.getAppVersion();
     if (this.platform.is('capacitor')) {
-      StatusBar.setOverlaysWebView({ overlay: false });
+      // App ab hamesha status bar ke neeche tak jaati hai (MainActivity), aur uski
+      // jagah CSS se chhodi jaati hai - plugin se false karte to dono ladte
+      StatusBar.setOverlaysWebView({ overlay: true });
+      // Overlay ke saath background ka koi asar nahi hota - rang header ke primary se
+      // aata hai. Icons safed rehne chahiye, warna gehre neele par dikhte hi nahi
+      StatusBar.setStyle({ style: Style.Dark });
       StatusBar.setBackgroundColor({ 'color': '#040E51' })
       App.getInfo().then(res => {
         this.appVersion = res.version
@@ -390,6 +396,19 @@ export class AppComponent {
       return;
     }
     const goingIn = !this.isPunchIn;
+
+    // Trip chalu ho to punch out hone hi mat do - pehle native stop() mana karta tha,
+    // par ab punch API pehle chalti hai, to server par punch out ho jaata aur trip
+    // adhoori chalti rehti. Jaanch API se pehle honi chahiye
+    if (!goingIn) {
+      const trip = await this.liveTracker.activeTrip();
+      if (trip) {
+        this.common.presentToast(
+          `Finish the active trip (#${trip.id}) before punching out`, 'warning');
+        return;
+      }
+    }
+
     const alert = await this.alertController.create({
       header: goingIn ? 'Punch In' : 'Punch Out',
       message: goingIn
@@ -433,10 +452,39 @@ export class AppComponent {
     this.allGranted = this.permissions.every(p => p.granted);
   }
 
+  /**
+   * Sirf development ke liye - browser me permission guide ka UI dekhne ka raasta,
+   * kyunki wahan permission list dikhti hi nahi (native plugin nahi hota).
+   * Production build me ye kuch nahi karta.
+   */
+  async devOpenPermissionGuide(): Promise<void> {
+    if (environment.isProd) {
+      return;
+    }
+    const modal = await this.modalCtrl.create({
+      component: PermissionGuideComponent
+    });
+    await modal.present();
+  }
+
   /** Row tap - seedha usi setting par, user ko dhoondhna na pade */
   async fixPermission(row: PermissionRow): Promise<void> {
     if (row.granted) {
       return;
+    }
+    // "Allow all the time" Android khud nahi poochta - Settings me teen tap lagte
+    // hain. Seedha Settings kholne par engineer wahan atak jaata tha, isliye
+    // pehle chhota guide dikhate hain
+    if (row.key === 'location') {
+      // Poora page - sheet me teen screenshot scroll karne me tang the
+      const modal = await this.modalCtrl.create({
+        component: PermissionGuideComponent
+      });
+      await modal.present();
+      const { data } = await modal.onDidDismiss();
+      if (!data?.open) {
+        return;
+      }
     }
     await this.liveTracker.openSetting(row.key);
     // Runtime wali permission (location/notification/activity) yahin mil jaati hai,

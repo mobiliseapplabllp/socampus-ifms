@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, ModalController, NavController } from '@ionic/angular';
+import { AlertController, MenuController, ModalController, NavController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
@@ -72,6 +72,7 @@ export class ComplaintCardsComponent  implements OnInit {
 
   constructor(
     private modalCtrl: ModalController,
+    private menuCtrl: MenuController,
     private httpComplaint: ComplaintService,
     private common: CommonService,
     private router: Router,
@@ -346,6 +347,8 @@ export class ComplaintCardsComponent  implements OnInit {
       if (!status.running) {
         this.common.presentToast(
           'Please punch in from the side menu before starting a trip', 'warning');
+        // Message ke saath menu bhi khol do - engineer ko dhoondhna na pade
+        void this.menuCtrl.open('app-menu');
         return;
       }
     }

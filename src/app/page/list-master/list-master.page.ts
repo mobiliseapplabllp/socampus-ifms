@@ -8,6 +8,7 @@ import { SosComponent } from './sos/sos.component';
 import { App } from '@capacitor/app';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
+import { ActiveTrip, LiveTrackerService } from 'src/app/provider/live-tracker/live-tracker.service';
 import { take } from 'rxjs';
 import { stat } from 'fs';
 import { cordovaInstance } from '@awesome-cordova-plugins/core';
@@ -39,6 +40,7 @@ export class ListMasterPage implements OnInit {
     private menuCtrl: MenuController,
     private platform: Platform,
     private httpLogin: LoginService,
+    private liveTracker: LiveTrackerService,
     private iab: InAppBrowser,) {
     const user = localStorage.getItem('user');
     if (user) {
@@ -204,6 +206,32 @@ export class ListMasterPage implements OnInit {
 
       }
     });
+  }
+
+  /**
+   * Chal rahi trip (localStorage se, wahi record jo guards ke liye rakha hai).
+   * Getter hai taaki ticket card se trip shuru hote hi home par dikh jaye.
+   */
+  get activeTrip(): ActiveTrip | null {
+    const trip = this.liveTracker.getLocalTrip();
+    return trip?.active ? trip : null;
+  }
+
+  /** "12 min ago" jaisa - engineer ko andaaza rahe ki kab se chal rahi hai */
+  get tripSince(): string {
+    const at = this.activeTrip?.startedAt || 0;
+    if (!at) {
+      return 'just now';
+    }
+    const mins = Math.floor((Date.now() - at) / 60000);
+    if (mins <= 0) {
+      return 'just now';
+    }
+    if (mins < 60) {
+      return `${mins} min ago`;
+    }
+    const h = Math.floor(mins / 60);
+    return `${h}h ${mins % 60}m ago`;
   }
 
   /** Avatar me naam ke do akshar - "Prince Gupta" -> "PG" */

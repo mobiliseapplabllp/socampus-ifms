@@ -1,10 +1,61 @@
+/* Trip chalu hone ka patti-numa card - welcome card ke theek neeche */
+.hm-trip-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 17px 0;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 149, 0, 0.35);
+  border-radius: 14px;
+  background: rgba(255, 196, 9, 0.12);
+
+  > ion-icon {
+    margin-left: auto;
+    font-size: 20px;
+    color: #b06f00;
+  }
+}
+
+/* Halka blink - taaki nazar chali jaye, par chubhe na */
+.hm-trip-dot {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #f0a30a;
+  box-shadow: 0 0 0 3px rgba(240, 163, 10, 0.22);
+  animation: hm-trip-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes hm-trip-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.hm-trip-text {
+  min-width: 0;
+}
+
+.hm-trip-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #8a5300;
+}
+
+.hm-trip-sub {
+  margin: 1px 0 0;
+  font-size: 12px;
+  color: #a06a10;
+}
+
 /* Welcome card - naam aur availability ek hi jagah */
 .hm-welcome-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 17px;
+  margin: 14px 17px 0;
   padding: 12px 14px;
   border: 1px solid #e8ebf3;
   border-radius: 18px;

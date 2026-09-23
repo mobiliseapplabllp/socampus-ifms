@@ -1,0 +1,35 @@
+<ion-header mode="md" class="ion-no-border">
+  <ion-toolbar class="pg-toolbar">
+    <ion-title class="pg-title">{{ title }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="pg-close" (click)="close()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <p class="pg-intro">{{ intro }}</p>
+
+  <div class="pg-step" *ngFor="let step of steps; let i = index">
+    <div class="pg-step-head">
+      <span class="pg-step-no">{{ i + 1 }}</span>
+      <span class="pg-step-text">{{ step.text }}</span>
+    </div>
+    <img class="pg-shot" [src]="step.image" [alt]="step.text">
+  </div>
+
+  <p class="pg-note">
+    <ion-icon name="information-circle-outline"></ion-icon>
+    Your phone's screens may look a little different, but the steps are the same.
+  </p>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <div class="pg-actions">
+    <ion-button expand="block" class="ion-text-capitalize" (click)="openSettings()">
+      Open Settings
+    </ion-button>
+  </div>
+</ion-footer>

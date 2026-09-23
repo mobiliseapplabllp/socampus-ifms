@@ -6,6 +6,7 @@ export const environment = {
   // url1: 'https://mobileapproxyprod.mobilisepro.com/https://socampusstaging.mobilisepro.com/',
   // url2: 'https://socampusstaging.mobilisepro.com/',
   // ssoUrl: 'https://socampusstaging.mobilisepro.com/',
+  // liveLocationUrl: 'https://socampusstaging.mobilisepro.com/be/api/gps-mobile/ping',
   // referUrl: 'https://socampusstaging.mobilisepro.com/',
   // isProd: false,
   // url: 'https://mobileapproxyprod.mobilisepro.com/https://socampus.mobilisepro.com/be/api/', // ios k liye abhi proxy server lagega

@@ -8,7 +8,7 @@
 <div class="ms-scroller">
   <button class="ms-tile" *ngFor="let val of menuItems" (click)="openPage(val)">
     <span class="ms-icon">
-      <ion-img [src]="val.icon_path"></ion-img>
+      <img class="ms-glyph" [src]="val.icon_path" [alt]="val.smnu_desc">
     </span>
     <span class="ms-label">{{ val.smnu_desc }}</span>
   </button>
