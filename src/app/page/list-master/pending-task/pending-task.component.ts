@@ -850,7 +850,12 @@ export class PendingTaskComponent  implements OnInit {
   async assignTicket(ticket_id: any,  data: any) {
     const modal = await this.modalCtrl.create({
       component: AssignTicketComponent,
-      cssClass: 'my-modal',
+      // Poori height ka sheet - Ionic sirf top breakpoint par content scroll karne
+      // deta hai, aadhe par ungli sheet ko hi kheench leti hai
+      cssClass: 'app-sheet-modal',
+      breakpoints: [0, 1],
+      initialBreakpoint: 1,
+      handle: true,
       componentProps: {
         ticket_id: ticket_id,
         allData: data

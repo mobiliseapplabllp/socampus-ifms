@@ -1,30 +1,3 @@
-// Section heading - Dashboard, Services aur Pending Task teeno ek jaise:
-// bayein taraf, ek hi size/rang, aur upar-neeche ek hi gap
-.hm-section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 10px 17px 8px;
-}
-
-.hm-section-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1f2440;
-}
-
-.hm-count-chip {
-  margin-right: auto;
-  padding: 3px 9px;
-  border-radius: 20px;
-  background: #eef1f7;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ion-color-medium-shade);
-}
-
 // Services - do line ka horizontal scroller (Swiper ke bina)
 .ms-scroller {
   display: grid;
@@ -34,7 +7,9 @@
   // dono phone par utne hi tile dikhein
   grid-auto-columns: calc((100vw - 24px) / 3.2 - 10px);
   gap: 10px;
-  // Side ki jagah heading ("Our Services") jitni - pehle tile kinare se chipka tha
+  // Side ki jagah baaki cards jitni - pehle tile kinare se chipka tha.
+  // Heading hat gayi hai isliye upar ki jagah yahin se aati hai
+  margin-top: 14px;
   padding: 2px 17px 0;
   scroll-padding-left: 17px;
   overflow-x: auto;
@@ -58,7 +33,8 @@
   gap: 8px;
   height: 108px;
   padding: 12px 6px;
-  border: 1px solid #edf0f7;
+  // Halka primary border - pehle #edf0f7 tha jo safed background par dikhta hi nahi tha
+  border: 1px solid rgba(40, 56, 151, 0.22);
   border-radius: 18px;
   background: #ffffff;
   box-shadow: 0 2px 8px -4px rgba(31, 36, 64, 0.16);

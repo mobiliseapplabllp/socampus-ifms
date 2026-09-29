@@ -280,6 +280,11 @@ export class ComplaintService {
     return this.https.post(environment.url + 'gps-mobile/end-trip', formData);
   }
 
+  /** Ticket par kis-kis ko assign kiya ja sakta hai - abhi sirf console me dekh rahe hain */
+  getAssignList(tktId: any): Observable<any> {
+    return this.https.get(environment.url + 'gps-mobile/assign-list?tkt_id=' + tktId);
+  }
+
   resolveTicket(data: any) {
     return new Promise(resolve => {
       const url = environment.url + 'submit_ticket_transaction.php';

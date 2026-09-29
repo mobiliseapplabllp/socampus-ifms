@@ -1,18 +1,7 @@
-// Section heading - Dashboard, Services aur Pending Task teeno ek jaise:
-// bayein taraf, ek hi size/rang, aur upar-neeche ek hi gap
-.hm-section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 10px 17px 8px;
-}
-
-.hm-section-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1f2440;
+// Heading ("Service Dashboard") hata di hai - upar ki jagah ab card khud
+// chhodta hai, taaki welcome card se chipke nahi
+.dashboard {
+  margin-top: 14px;
 }
 
 // ---- Card ka andar ka layout ----

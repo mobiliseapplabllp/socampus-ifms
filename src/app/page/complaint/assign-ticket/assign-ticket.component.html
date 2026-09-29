@@ -12,14 +12,79 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-virtual-scroll [items]="empList" approxItemHeight="320px">
-    <ion-item *virtualItem="let item; let itemBounds = bounds;">
-      <ion-label class="ion-text-wrap">
-        <h3>{{item.label}}</h3>
-        <p>Ticket: <ion-text color="danger"><b>{{item.gpsData?.tkt_in_bucket}}</b></ion-text></p>
-        <p [hidden]="item.gpsData?.distance_in_m === 0">Distance: <ion-text color="danger" ><b>{{item.gpsData?.distance}}</b></ion-text></p>
-      </ion-label>
-      <ion-button slot="end" (click)="assign(item)">Assign</ion-button>
-    </ion-item>
-  </ion-virtual-scroll>
+  <!-- GPS wali assign - alag API, alag card. Purani wali neeche waise ki waisi hai -->
+  <ng-container *ngIf="isGpsAssign; else legacyList">
+    <!-- Site ke lat/lng nahi hain - list dikhegi par assign kisi ko nahi ho sakta -->
+    <div class="as-note" *ngIf="!siteHasCoords">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <span>This site has no coordinates. Distance cannot be calculated and tickets cannot be assigned.</span>
+    </div>
+
+    <div class="as-empty" *ngIf="gpsList.length === 0">No team member found.</div>
+
+    <div class="as-card" *ngFor="let item of gpsList; trackBy: trackByUser">
+      <span class="as-avatar" [class.as-avatar--on]="item.is_online == 1">
+        {{ initials(item.label) }}
+        <i class="as-dot" [class.as-dot--on]="item.is_online == 1"></i>
+      </span>
+
+      <div class="as-info">
+        <p class="as-name">{{ nameOf(item.label) }}</p>
+        <p class="as-code" *ngIf="codeOf(item.label)">{{ codeOf(item.label) }}</p>
+
+        <div class="as-meta">
+          <span class="as-chip" [class.as-chip--stale]="isStale(item)">
+            <ion-icon name="navigate-outline"></ion-icon>
+            {{ distanceText(item) }}
+          </span>
+          <span class="as-chip">
+            <ion-icon name="time-outline"></ion-icon>
+            {{ lastSeenText(item) }}
+          </span>
+          <span class="as-chip as-chip--tkt">
+            <ion-icon name="documents-outline"></ion-icon>
+            {{ item.tkt_in_bucket || 0 }} tickets
+          </span>
+        </div>
+
+        <!-- Disabled button tap nahi hota, isliye wajah yahin likhi hai -->
+        <p class="as-reason" *ngIf="!canAssign(item)">{{ assignBlockReason(item) }}</p>
+      </div>
+
+      <ion-button
+        class="as-btn"
+        size="small"
+        [disabled]="!canAssign(item)"
+        (click)="confirmAssign(item)">Assign</ion-button>
+    </div>
+  </ng-container>
+
+  <!-- Purani list - fields wahi hain jo pehle the, sirf dikhawa card jaisa kar diya.
+       ion-virtual-scroll hata diya: Ionic 6 me deprecated hai aur uska
+       approxItemHeight is row se mel hi nahi khata tha -->
+  <ng-template #legacyList>
+    <div class="as-empty" *ngIf="empList.length === 0">No team member found.</div>
+
+    <div class="as-card" *ngFor="let item of empList; trackBy: trackByUser">
+      <span class="as-avatar">{{ initials(item.label) }}</span>
+
+      <div class="as-info">
+        <p class="as-name">{{ nameOf(item.label) }}</p>
+        <p class="as-code" *ngIf="codeOf(item.label)">{{ codeOf(item.label) }}</p>
+
+        <div class="as-meta">
+          <span class="as-chip as-chip--tkt">
+            <ion-icon name="documents-outline"></ion-icon>
+            {{ item.gpsData?.tkt_in_bucket || 0 }} tickets
+          </span>
+          <span class="as-chip" *ngIf="item.gpsData?.distance_in_m !== 0">
+            <ion-icon name="navigate-outline"></ion-icon>
+            {{ item.gpsData?.distance }}
+          </span>
+        </div>
+      </div>
+
+      <ion-button class="as-btn" size="small" (click)="confirmAssign(item)">Assign</ion-button>
+    </div>
+  </ng-template>
 </ion-content>

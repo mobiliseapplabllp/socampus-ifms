@@ -473,7 +473,12 @@ export class TicketWorkComponent  implements OnInit {
   async assignTicket() {
     const modal = await this.modalCtrl.create({
       component: AssignTicketComponent,
-      cssClass: 'my-modal',
+      // Poori height ka sheet - Ionic sirf top breakpoint par content scroll karne
+      // deta hai, aadhe par ungli sheet ko hi kheench leti hai
+      cssClass: 'app-sheet-modal',
+      breakpoints: [0, 1],
+      initialBreakpoint: 1,
+      handle: true,
       componentProps: {
         ticket_id: this.ticket_id,
         allData: this.requestedData

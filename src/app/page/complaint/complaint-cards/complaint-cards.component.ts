@@ -109,9 +109,11 @@ export class ComplaintCardsComponent  implements OnInit {
   async history() {
     const modal = await this.modalCtrl.create({
       component: TicketHistoryComponent,
+      // Poori height ka sheet - Ionic sirf top breakpoint par content scroll karne
+      // deta hai, aadhe par ungli sheet ko hi kheench leti hai
       cssClass: 'app-sheet-modal',
-      breakpoints: [0, 0.9, 1],
-      initialBreakpoint: 0.9,
+      breakpoints: [0, 1],
+      initialBreakpoint: 1,
       handle: true,
       componentProps: { ticket_id: this.data.tkts_id }
     });
@@ -275,10 +277,14 @@ export class ComplaintCardsComponent  implements OnInit {
     });
   }
 
+  /** Details/History jaisa hi sheet - neeche se uthta hai */
   async assignTicket(ticket_id: any,  data: any) {
     const modal = await this.modalCtrl.create({
       component: AssignTicketComponent,
-      cssClass: 'my-modal',
+      cssClass: 'app-sheet-modal',
+      breakpoints: [0, 0.9, 1],
+      initialBreakpoint: 0.9,
+      handle: true,
       componentProps: {
         ticket_id: ticket_id,
         allData: data
