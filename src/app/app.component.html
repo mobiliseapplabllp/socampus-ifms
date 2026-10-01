@@ -18,9 +18,9 @@
             </div>
           </div>
 
-          <!-- Pehle saari permission - bina inke location tracking chal hi nahi sakti,
-               isliye tab tak Availability dikhate hi nahi -->
-          <div class="perm-card" *ngIf="trackingSupported && !allGranted">
+          <!-- ANDROID ka permission card - isme kuch nahi badla. iOS ka apna alag
+               card neeche hai, taaki ek platform ka badlav doosre ko na tode -->
+          <div class="perm-card" *ngIf="trackingSupported && !trackingIsIos && !allGranted">
             <p class="punch-card-title">Permissions</p>
             <div
               class="perm-row"
@@ -33,6 +33,32 @@
               </span>
             </div>
             <p class="punch-hint">Allow all to mark yourself available</p>
+          </div>
+
+          <!-- iOS ka permission card - rows alag hain (Precise Location aur Background
+               App Refresh), aur kuch sirf Settings se milti hain isliye "How to fix" -->
+          <div class="perm-card" *ngIf="trackingSupported && trackingIsIos && !allGranted">
+            <p class="punch-card-title">Permissions</p>
+            <div
+              class="perm-row perm-row--ios"
+              *ngFor="let p of permissions"
+              (click)="fixPermission(p)">
+              <span class="perm-text">
+                <span class="perm-label">{{ p.label }}</span>
+                <span class="perm-hint" *ngIf="!p.granted && p.hint">{{ p.hint }}</span>
+              </span>
+              <span class="perm-status" [class.perm-ok]="p.granted">
+                {{ p.granted ? 'Allowed' : (p.action === 'settings' ? 'How to fix' : 'Allow') }}
+                <ion-icon *ngIf="!p.granted" name="chevron-forward-outline"></ion-icon>
+              </span>
+            </div>
+            <p class="punch-hint">Allow all to mark yourself available</p>
+          </div>
+
+          <!-- Low Power Mode permission nahi hai - sirf chetavni, kisi ko rokti nahi -->
+          <div class="perm-warn" *ngIf="trackingSupported && trackingIsIos && lowPowerWarning">
+            <ion-icon name="battery-half-outline"></ion-icon>
+            <span>Low Power Mode is on — location updates may be delayed. Turn it off from Settings → Battery.</span>
           </div>
 
           <div

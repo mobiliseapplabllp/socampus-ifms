@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		008D0B5040AB0382A0C53D42 /* LiveTrackerPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 80EC361B3FB3E3132D8D33BC /* LiveTrackerPlugin.m */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
@@ -14,12 +15,20 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
+		74B3ECB5D59BD24EE559DF8F /* LiveUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A829F3814BA482AB2C407C74 /* LiveUploader.swift */; };
+		9B844A6AFCBF2128EBB8E2F3 /* LiveTrackerPrefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BA89068F2AA470CA0F5310 /* LiveTrackerPrefs.swift */; };
 		A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
+		BCA81868585CDB636D85A001 /* LivePointsDb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70471BBAB731C5F42D72C1EA /* LivePointsDb.swift */; };
+		BF2A35925C2C14DFE989ED2C /* SpeedAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57707A26C4C519A287442BBF /* SpeedAlert.swift */; };
+		D7F28DFB1E425257AF462DAA /* LiveTrackerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4210241883F07F429F207182 /* LiveTrackerManager.swift */; };
 		DB80B5532EAF3811006E3A65 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DB80B5522EAF3811006E3A65 /* GoogleService-Info.plist */; };
+		F12AE1D2B1EAF97395DC726F /* LiveTrackerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 014724989E4CAC0E6D044775 /* LiveTrackerPlugin.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		014724989E4CAC0E6D044775 /* LiveTrackerPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveTrackerPlugin.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
+		4210241883F07F429F207182 /* LiveTrackerManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveTrackerManager.swift; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -28,10 +37,15 @@
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
+		57707A26C4C519A287442BBF /* SpeedAlert.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeedAlert.swift; sourceTree = "<group>"; };
+		70471BBAB731C5F42D72C1EA /* LivePointsDb.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LivePointsDb.swift; sourceTree = "<group>"; };
+		80EC361B3FB3E3132D8D33BC /* LiveTrackerPlugin.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = LiveTrackerPlugin.m; sourceTree = "<group>"; };
+		A829F3814BA482AB2C407C74 /* LiveUploader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveUploader.swift; sourceTree = "<group>"; };
 		AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
 		DB80B5522EAF3811006E3A65 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DB80B5542EAF3AB8006E3A65 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
+		E1BA89068F2AA470CA0F5310 /* LiveTrackerPrefs.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveTrackerPrefs.swift; sourceTree = "<group>"; };
 		FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -86,6 +100,7 @@
 				504EC3131FED79650016851F /* Info.plist */,
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
+				B7A67F7D31D530393C454F96 /* LiveTracker */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -97,6 +112,21 @@
 				AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		B7A67F7D31D530393C454F96 /* LiveTracker */ = {
+			isa = PBXGroup;
+			children = (
+				E1BA89068F2AA470CA0F5310 /* LiveTrackerPrefs.swift */,
+				70471BBAB731C5F42D72C1EA /* LivePointsDb.swift */,
+				A829F3814BA482AB2C407C74 /* LiveUploader.swift */,
+				57707A26C4C519A287442BBF /* SpeedAlert.swift */,
+				4210241883F07F429F207182 /* LiveTrackerManager.swift */,
+				014724989E4CAC0E6D044775 /* LiveTrackerPlugin.swift */,
+				80EC361B3FB3E3132D8D33BC /* LiveTrackerPlugin.m */,
+			);
+			name = LiveTracker;
+			path = LiveTracker;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -230,6 +260,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
+				9B844A6AFCBF2128EBB8E2F3 /* LiveTrackerPrefs.swift in Sources */,
+				BCA81868585CDB636D85A001 /* LivePointsDb.swift in Sources */,
+				74B3ECB5D59BD24EE559DF8F /* LiveUploader.swift in Sources */,
+				BF2A35925C2C14DFE989ED2C /* SpeedAlert.swift in Sources */,
+				D7F28DFB1E425257AF462DAA /* LiveTrackerManager.swift in Sources */,
+				F12AE1D2B1EAF97395DC726F /* LiveTrackerPlugin.swift in Sources */,
+				008D0B5040AB0382A0C53D42 /* LiveTrackerPlugin.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

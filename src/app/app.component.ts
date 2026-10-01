@@ -26,6 +26,13 @@ interface PermissionRow {
   key: PermissionKey;
   label: string;
   granted: boolean;
+  /**
+   * 'allow'  = app ke andar hi prompt aa jaata hai (iOS: Location, Notifications)
+   * 'settings' = sirf Settings se milegi, isliye button par "How to fix"
+   */
+  action?: 'allow' | 'settings';
+  /** iOS ke row thode anjaan hain - ek line me bata dete hain kyun chahiye */
+  hint?: string;
 }
 
 
@@ -45,9 +52,13 @@ export class AppComponent {
 
   // ---- Location tracking (Availability ke saath) ----
   trackingSupported = false;
+  /** Card Android aur iOS ke liye alag hain - Android wala chhedna nahi hai */
+  trackingIsIos = false;
   trackingStatus: LiveTrackerStatus | null = null;
   permissions: PermissionRow[] = [];
   allGranted = false;
+  /** iOS - permission nahi, sirf chetavni: Low Power Mode me updates dheeme ho sakte hain */
+  lowPowerWarning = false;
   /**
    * BehaviorSubject subscribe karte hi apni default value (false) bhej deta hai.
    * Wo server ka jawab nahi hota - us par tracking band kar di to chalti hui
@@ -441,7 +452,19 @@ export class AppComponent {
     }
     const status = await this.liveTracker.checkStatus();
     this.trackingStatus = status;
+    this.trackingIsIos = this.liveTracker.isIos();
     void this.liveTracker.syncActiveTrip();
+
+    if (this.trackingIsIos) {
+      this.buildIosPermissions(status);
+    } else {
+      this.buildAndroidPermissions(status);
+    }
+  }
+
+  /** Android - jaisa pehle se chal raha hai, isme kuch nahi badla */
+  private buildAndroidPermissions(status: LiveTrackerStatus): void {
+    this.lowPowerWarning = false;
     this.permissions = [
       { key: 'gps', label: 'Location Services (GPS)', granted: status.gps },
       { key: 'location', label: 'Location (Always Allow)', granted: status.location },
@@ -449,6 +472,54 @@ export class AppComponent {
       { key: 'notifications', label: 'Notifications', granted: status.notifications },
       { key: 'activity', label: 'Physical Activity', granted: status.activityPermission },
     ];
+    this.allGranted = this.permissions.every(p => p.granted);
+  }
+
+  /**
+   * iOS - rows alag hain: Battery Optimization aur Physical Activity hoti hi nahi,
+   * uski jagah Precise Location aur Background App Refresh aate hain.
+   * Low Power Mode permission nahi hai, isliye wo `allGranted` me nahi ginta.
+   */
+  private buildIosPermissions(status: LiveTrackerStatus): void {
+    this.permissions = [
+      {
+        key: 'gps',
+        label: 'Location Services',
+        granted: status.gps,
+        action: 'settings',
+        hint: 'Settings → Privacy & Security → Location Services'
+      },
+      {
+        key: 'location',
+        label: 'Location Access — Always',
+        granted: status.location,
+        // iOS ka sheet app ke andar hi aata hai (Android me ye sirf Settings se milti hai)
+        action: 'allow',
+        hint: 'Choose "Allow While Using", then "Change to Always Allow"'
+      },
+      {
+        key: 'precise',
+        label: 'Precise Location',
+        granted: status.preciseLocation !== false,
+        action: 'settings',
+        hint: 'Without this your location can be off by 1-3 km'
+      },
+      {
+        key: 'backgroundRefresh',
+        label: 'Background App Refresh',
+        granted: status.backgroundRefresh !== false,
+        action: 'settings',
+        hint: 'Lets the app keep tracking when it is not open'
+      },
+      {
+        key: 'notifications',
+        label: 'Notifications',
+        granted: status.notifications,
+        action: 'allow',
+        hint: 'Used for overspeed and tracking alerts'
+      },
+    ];
+    this.lowPowerWarning = status.lowPowerMode === true;
     this.allGranted = this.permissions.every(p => p.granted);
   }
 
@@ -470,6 +541,15 @@ export class AppComponent {
   /** Row tap - seedha usi setting par, user ko dhoondhna na pade */
   async fixPermission(row: PermissionRow): Promise<void> {
     if (row.granted) {
+      return;
+    }
+
+    // iOS: Location aur Notifications ka prompt app ke andar hi aa jaata hai, isliye
+    // guide dikhane ki zaroorat nahi. Baaki do sirf Settings se milti hain, aur wahan
+    // teeno toggle app ke apne page par hote hain - to seedha wahi khol dete hain.
+    if (this.trackingIsIos) {
+      await this.liveTracker.openSetting(row.key);
+      await this.refreshTracking();
       return;
     }
     // "Allow all the time" Android khud nahi poochta - Settings me teen tap lagte

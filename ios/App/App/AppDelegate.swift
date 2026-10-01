@@ -11,7 +11,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         FirebaseApp.configure()
+
+        // Live tracking: iOS app ko background me KHUD dobara launch karta hai jab
+        // location event aata hai (SLC / region exit) - us waqt WebView load hi nahi hoti,
+        // isliye JS kuch nahi kar sakta. Yahan prefs dekh kar tracking wapas chalu karte
+        // hain. Android me yahi kaam boot receiver + watchdog karte hain.
+        LiveTrackerManager.shared.resumeIfEnabled()
+
         return true
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // App khulte hi: punch in tha par tracking band ho gayi thi (force-quit, ya
+        // permission beech me badal gayi) to chup-chaap wapas chalu kar do
+        LiveTrackerManager.shared.resumeIfEnabled()
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
@@ -26,10 +39,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

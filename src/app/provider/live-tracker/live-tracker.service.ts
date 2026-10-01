@@ -10,6 +10,12 @@ export interface LiveTrackerStatus {
   location: boolean;
   battery: boolean;
   notifications: boolean;
+  /** iOS 14+ - "Precise Location" on hai ya nahi. Android par hamesha true */
+  preciseLocation?: boolean;
+  /** iOS - Background App Refresh. Band ho to app background me dobara launch hi nahi hoti */
+  backgroundRefresh?: boolean;
+  /** iOS - Low Power Mode. Permission nahi, sirf warning: updates dheeme ho sakte hain */
+  lowPowerMode?: boolean;
   /** Physical activity permission (Android 9 aur neeche hamesha true) */
   activityPermission: boolean;
   /** FINE mila ya nahi - JS ko nahi chahiye, native khud decide karta hai kya kholna hai */
@@ -114,7 +120,10 @@ export interface LivePoint {
   battery: number;
 }
 
-export type PermissionKey = 'gps' | 'location' | 'battery' | 'notifications' | 'activity';
+export type PermissionKey =
+  | 'gps' | 'location' | 'battery' | 'notifications' | 'activity'
+  // iOS-only - Android plugin me ye method hain hi nahi, isliye sirf iOS rows me use hote hain
+  | 'precise' | 'backgroundRefresh';
 
 interface LiveTrackerPluginApi {
   checkStatus(): Promise<LiveTrackerStatus>;
@@ -123,6 +132,9 @@ interface LiveTrackerPluginApi {
   openBatterySettings(): Promise<{ opened: boolean }>;
   openNotificationSettings(): Promise<{ opened: boolean }>;
   openActivityPermission(): Promise<{ opened: boolean }>;
+  /** Sirf iOS - Android plugin me ye method nahi hai */
+  openPreciseLocation?(): Promise<{ opened: boolean }>;
+  openBackgroundRefresh?(): Promise<{ opened: boolean }>;
   start(options: { url: string; token: string; referer: string }): Promise<LiveTrackerStatus>;
   stop(): Promise<LiveTrackerStatus>;
   getSessionPoints(): Promise<{ points: LivePoint[] }>;
@@ -144,6 +156,9 @@ const EMPTY_STATUS: LiveTrackerStatus = {
   location: false,
   battery: false,
   notifications: false,
+  preciseLocation: false,
+  backgroundRefresh: false,
+  lowPowerMode: false,
   activityPermission: false,
   fineGranted: false,
   running: false,
@@ -178,9 +193,18 @@ export class LiveTrackerService {
 
   constructor(private platform: Platform) {}
 
-  /** Android native par hi chalta hai - browser aur iOS par card chhupa rehta hai */
+  /** Native (Android + iOS) par hi chalta hai - browser me card chhupa rehta hai */
   isSupported(): boolean {
-    return this.platform.is('capacitor') && this.platform.is('android');
+    return this.platform.is('capacitor')
+      && (this.platform.is('android') || this.platform.is('ios'));
+  }
+
+  /**
+   * Permission ke row aur unke fix karne ka tarika dono platform par alag hai,
+   * isliye side menu me card bhi alag hain (LIVE-TRACKING.md section 14)
+   */
+  isIos(): boolean {
+    return this.platform.is('capacitor') && this.platform.is('ios');
   }
 
   async checkStatus(): Promise<LiveTrackerStatus> {
@@ -216,6 +240,13 @@ export class LiveTrackerService {
           break;
         case 'activity':
           await LiveTracker.openActivityPermission();
+          break;
+        case 'precise':
+          // Method sirf iOS plugin me hai - Android par ye key banti hi nahi
+          await LiveTracker.openPreciseLocation?.();
+          break;
+        case 'backgroundRefresh':
+          await LiveTracker.openBackgroundRefresh?.();
           break;
       }
     } catch (e) {

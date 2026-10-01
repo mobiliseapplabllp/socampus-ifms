@@ -136,6 +136,47 @@
   }
 }
 
+// iOS ke row me label ke neeche ek chhoti line - wahan permission ke naam
+// (Precise Location, Background App Refresh) apne aap me saaf nahi hote
+.perm-row--ios {
+  align-items: flex-start;
+}
+
+.perm-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.perm-hint {
+  font-size: 0.6875rem;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+// Low Power Mode - permission nahi, sirf chetavni. Isliye rang peela aur koi button nahi
+.perm-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 196, 0, 0.16);
+  border: 1px solid rgba(255, 196, 0, 0.38);
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.9);
+
+  ion-icon {
+    flex: none;
+    margin-top: 1px;
+    font-size: 16px;
+    color: #ffd54f;
+  }
+}
+
 .punch-track {
   margin-top: 4px;
   font-size: 0.6875rem;
