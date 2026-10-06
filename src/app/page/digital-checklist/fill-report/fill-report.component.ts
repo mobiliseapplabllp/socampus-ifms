@@ -1,4 +1,5 @@
 import { Component, ElementRef, NgZone, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
 import { Filesystem } from '@capacitor/filesystem';
 import { ActivatedRoute } from '@angular/router';
@@ -446,6 +447,14 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
   schedule_id: any;
   remark: any;
   signatureBase64!: any;
+  /**
+   * Sirf dikhane ke liye. `signatureBase64` me asli cheez jaati hai (sign karte hi Blob,
+   * server se aayi hui checklist me "uploads/..." wala path) - us par seedha [src] nahi
+   * lag sakta, isliye preview alag rakhte hain.
+   */
+  signaturePreview: SafeUrl | string | null = null;
+  /** Blob se bana URL - page chhodte waqt chhodna padta hai, warna memory pakde rehti hai */
+  private signatureObjectUrl: string | null = null;
   schedule_status: any;
   on_behalf: any;
   remarkErr = false;
@@ -474,7 +483,8 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
     private httpComplaint: ComplaintService,
     private camera: CameraService,
     private mediaCapture: MediaCapture,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private sanitizer: DomSanitizer
   ) { }
 
   ngOnInit() {
@@ -600,6 +610,7 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
     this.schedule_status = this.scheduleArr[0].schedule_status;
     this.remark = this.scheduleArr[0].final_remark;
     this.signatureBase64 = this.scheduleArr[0].base64_sign;
+    this.setSignaturePreview(this.signatureBase64);
     this.offline_save = this.scheduleArr[0].offline_save;
     this.trackSub(
       this.ngZone.onStable.pipe(take(1)).subscribe(() => {
@@ -743,6 +754,8 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
 
     this.pendingTimers.forEach(id => clearTimeout(id));
     this.pendingTimers.length = 0;
+
+    this.releaseSignatureObjectUrl();
   }
 
   removeListen() {
@@ -1565,11 +1578,20 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   async viewSign() {
-    if (this.signatureBase64.startsWith('uploads/')) {
-      this.common.setImageCondition(this.signatureBase64, 'blob', 'PRIVATE');
-    } else {
-      this.common.imageView(this.signatureBase64, '');
+    const sign = this.signatureBase64;
+    if (!sign) {
+      return;
     }
+    // Sign karte hi ye Blob hota hai - us par startsWith chalane se error aata tha
+    if (sign instanceof Blob) {
+      this.common.imageView('', sign);
+      return;
+    }
+    if (typeof sign === 'string' && sign.startsWith('uploads/')) {
+      this.common.setImageCondition(sign, 'blob', 'PRIVATE');
+      return;
+    }
+    this.common.imageView(sign, '');
   }
 
   async openSign() {
@@ -1581,9 +1603,47 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
     modal.onWillDismiss().then(async disModal => {
       if (disModal.role) {
         this.signatureBase64 = this.dataUrlToBlob(disModal.data);
+        // Modal ka dataURL hi sabse saaf preview hai - Blob se dobara banane ki zaroorat nahi
+        this.setSignaturePreview(disModal.data);
       }
     });
     modal.present();
+  }
+
+  /**
+   * Teen soorat aati hain aur teeno alag hain:
+   *   - abhi sign kiya       -> "data:image/png;base64,..." (seedha dikh jaata hai)
+   *   - offline saved/Dexie  -> Blob (objectURL banana padta hai)
+   *   - submit ho chuki      -> "uploads/..." server ka path (inline nahi dikha sakte,
+   *                             uske liye View wala button hai)
+   */
+  private setSignaturePreview(value: any) {
+    this.releaseSignatureObjectUrl();
+
+    if (!value) {
+      this.signaturePreview = null;
+      return;
+    }
+
+    if (typeof value === 'string') {
+      this.signaturePreview = value.startsWith('data:') ? value : null;
+      return;
+    }
+
+    if (value instanceof Blob) {
+      this.signatureObjectUrl = URL.createObjectURL(value);
+      this.signaturePreview = this.sanitizer.bypassSecurityTrustUrl(this.signatureObjectUrl);
+      return;
+    }
+
+    this.signaturePreview = null;
+  }
+
+  private releaseSignatureObjectUrl() {
+    if (this.signatureObjectUrl) {
+      URL.revokeObjectURL(this.signatureObjectUrl);
+      this.signatureObjectUrl = null;
+    }
   }
 
   private dataUrlToBlob(dataUrl: string): Blob {

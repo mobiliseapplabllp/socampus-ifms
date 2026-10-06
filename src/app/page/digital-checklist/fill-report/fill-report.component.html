@@ -266,7 +266,15 @@
         {{ i18nLabels.signature }}
         <ion-icon name="checkmark-done-outline" slot="end" *ngIf="signatureBase64"></ion-icon>
       </ion-button>
-      <!-- <img [src]="signatureBase64" class="fill-report-sign-thumb" *ngIf="signatureBase64" /> -->
+      <!-- Chhota preview - engineer ko dikh jaye ki kya sign kiya hai. Tap par poora khulta hai.
+           Submit ho chuki checklist me server ka path aata hai, uska preview nahi banta -
+           wahan "View signature" wala button kaam karta hai -->
+      <img
+        *ngIf="signaturePreview"
+        [src]="signaturePreview"
+        class="fill-report-sign-thumb"
+        alt="signature"
+        (click)="viewSign()" />
     </div>
 
     <ion-button color="success" size="small" shape="round" (click)="viewSign()" *ngIf="(isInternet && signatureBase64) && schedule_status !== 'assigned' || offline_save === 'true'">

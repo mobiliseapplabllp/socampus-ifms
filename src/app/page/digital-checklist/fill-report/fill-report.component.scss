@@ -338,12 +338,15 @@ ion-text {
 }
 
 .fill-report-sign-thumb {
-  height: 36px;
-  width: 80px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 6px;
+  height: 44px;
+  width: 96px;
+  padding: 2px;
+  border: 1px solid rgba(var(--ion-color-success-rgb), 0.55);
+  border-radius: 8px;
   object-fit: contain;
   background: #fff;
+  // Tap par bada khulta hai - thoda ishara ki ye dabne wali cheez hai
+  cursor: pointer;
 }
 
 .fill-report-footer ion-toolbar {
