@@ -83,12 +83,43 @@
   src: url(assets/sansa_pro/sansapro_semibold.otf);
 }
 
+.blurred {
+  filter: blur(10px);
+}
+
+.alert-bold-btn {
+  font-weight: bold !important;
+  color: #000;   // optional
+}
+
+.alert-light-btn {
+  font-weight: 400 !important;
+  opacity: 0.9;  // light effect
+}
+
 ion-content {
   font-family: 'opensans_semibold' !important;
 }
 
 ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
   font-family: 'opensans_semibold' !important;
+}
+
+ion-segment-button {
+  text-transform: none !important;
+}
+
+.selectedRadioButton {
+  border:2px solid var(--ion-color-success) !important;
+  border-radius: 10px;
+  margin-bottom:20px
+}
+
+
+.radioButton {
+  border:2px solid var(--ion-color-primary);
+  border-radius: 10px;
+  margin-bottom:20px
 }
 
 .my-modal{
@@ -102,6 +133,43 @@ ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
   --border-radius: 5px;
   padding: 25px;
 }
+
+.my-modal-bottom {
+  --border-radius: 20px 20px 0px 0px;
+}
+
+.vc {
+  display: flex;
+  align-items: center;
+}
+
+// .my-modal-btm .modal-wrapper {
+//   position: absolute;
+//   bottom: 0px !important;
+//   top: auto; /* Ensure it is not centered */
+//   height: 50%; /* Set the height to 50% */
+//   width: 100%; /* Full width of the modal */
+//   border-radius: 16px 16px 0 0; /* Rounded top corners */
+//   margin: 0; /* Remove any default margin */
+//   padding: 0;
+// }
+
+.my-modal-ptw {
+  --width: 100%;
+  --height:50%;
+  --border-radius: 16px 16px 0 0; /* Rounded top corners */
+  --top: auto;
+  --bottom: 0px !important;
+}
+
+.my-modal-btm {
+  --width: 100%;
+  --height: 80%;
+  --border-radius: 16px 16px 0 0; /* Rounded top corners */
+  --top: auto;
+  --bottom: 0px !important;
+}
+
 
 .custom-otp-container {
   display: flex;
@@ -117,6 +185,7 @@ ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
   text-align: center;
   font-size: 18px !important;
   outline: none;
+  background-color: rgb(252, 251, 251);
 }
 
 .custom-otp-input:focus {
@@ -132,6 +201,20 @@ ion-card, ion-segment, ion-text, ion-label, ion-button, ion-input, ion-select{
 body.scanner-active {
   --background: '#00000000';
   --ion-background-color: '#00000000';
+}
+
+.custom-disabled-input {
+  background-color: #f0f0f0;
+  color: #888;
+  border: 1px solid #ccc;
+  cursor: not-allowed;
+  opacity: 1; /* override browser default */
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+ion-card {
+    box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
 }
 
 
@@ -155,6 +238,21 @@ section.inputbox {
       width:100%
     }
   }
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.my-modal-btm {
+  --width: 100%;
+  --height: 60%;
+  --border-radius: 16px 16px 0 0; /* Rounded top corners */
+  --top: auto;
+  --bottom: 0px !important;
 }
 
 // section.inputbox {
@@ -199,3 +297,17 @@ section.inputbox {
 //   ) !important;
 //   }
 // }
+
+/* Trip logs — track map modal (kept global to stay under component style budget) */
+.trip-track-map-modal {
+  --width: 100%;
+  --height: 100%;
+  --max-width: 520px;
+  --max-height: 85vh;
+  --border-radius: 12px;
+}
+
+.trip-track-map-modal ion-content {
+  --padding-top: 0;
+  --padding-bottom: 0;
+}

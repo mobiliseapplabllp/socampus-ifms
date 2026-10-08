@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { LoadingController, ModalController, NavParams } from '@ionic/angular';
+import { ModalController, NavParams } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { VideoPlayComponent } from 'src/app/shared/video-play/video-play.component';
@@ -15,9 +15,8 @@ export class TicketHistoryComponent  implements OnInit {
   ticket_id: any;
   history: any = []
   constructor(
-    public navParam: NavParams,
+    private navParam: NavParams,
     private modalCtrl: ModalController,
-    private loadingController: LoadingController,
     private complaint: ComplaintService,
     private common: CommonService
   ) { }
@@ -32,26 +31,14 @@ export class TicketHistoryComponent  implements OnInit {
   }
 
   getSpecificTicket() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.complaint.getSpecificTicket(this.ticket_id).subscribe(data => {
-        this.dismissloading();
+        this.common.dismissloading();
         if (data.status) {
           this.history = data.data.trans;
         }
       });
     })
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  dismissloading() {
-    this.loading.dismiss();
   }
 
   async videoPlay(url: string) {
@@ -68,13 +55,13 @@ export class TicketHistoryComponent  implements OnInit {
     modal.present();
   }
 
-  viewDoc(url: any) {
+  viewDoc(url: any, blobType: string) {
     const urlParts = url.split('?')[0];
     const filename = urlParts.split('.').pop();
     if (filename === 'mp4') {
       this.videoPlay(url);
     } else {
-      this.common.openDoc(url);
+      this.common.openImg(url, blobType)
     }
 
 

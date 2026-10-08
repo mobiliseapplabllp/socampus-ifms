@@ -40,7 +40,8 @@ export class MyAssetGetService {
   }
 
   getBlock(id: any): Observable<any> {
-    return this.https.get(environment.url + 'setups/organisation/get_blocks_list/' + id);
+    // return this.https.get(environment.url + 'setups/organisation/get_blocks_list/' + id);
+    return this.https.get(environment.url + 'shared/get_blocks_list/' + id);
   }
 
   getPrefixBarcode(id: any): Observable<any> {
@@ -56,7 +57,8 @@ export class MyAssetGetService {
   }
 
   getFloorList(id: any): Observable<any> {
-    return this.https.get(environment.url + 'setups/organisation/get_floors_list/' + id);
+    return this.https.get(environment.url + 'shared/get-floors-list/' + id);
+    // return this.https.get(environment.url + 'setups/organisation/get_floors_list/' + id);
   }
 
   getFloor(): Observable<any> {
@@ -64,7 +66,8 @@ export class MyAssetGetService {
   }
 
   getLocation(floor_id: any): Observable<any> {
-    return this.https.get(environment.url + 'setups/organisation/get_locations_list/' +  floor_id)
+    return this.https.get(environment.url + 'shared/get-locations-list/' +  floor_id)
+    // return this.https.get(environment.url + 'setups/organisation/get_locations_list/' +  floor_id)
   }
 
   getDepartment(): Observable<any> {

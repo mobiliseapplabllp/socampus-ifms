@@ -22,15 +22,15 @@
         <ion-card>
           <ion-item>
             <ion-label position="floating">Equipment Name</ion-label>
-            <ion-input type="text" formControlName="equipment_name"></ion-input>
+            <ion-input type="email" formControlName="equipment_name"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">Make</ion-label>
-            <ion-input type="text" formControlName="make"></ion-input>
+            <ion-input type="email" formControlName="make"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">Model</ion-label>
-            <ion-input type="text" formControlName="model"></ion-input>
+            <ion-input type="email" formControlName="model"></ion-input>
           </ion-item>
           <ion-row>
             <ion-col>
@@ -78,12 +78,12 @@
         </ion-row>
         <ion-row *ngFor="let val of dat.attach">
           <ion-col size="4">
-            <ion-button fill="clear" (click)="openDoc(val.user_manual)" *ngIf="val.user_manual">
+            <ion-button fill="clear" (click)="openDoc(val.user_manual, val.user_manual_blob_type)" *ngIf="val.user_manual">
               <ion-icon name="attach-outline"></ion-icon>
             </ion-button>
           </ion-col>
           <ion-col size="4">
-            <ion-button fill="clear" (click)="openDoc(val.service_manual)" *ngIf="val.service_manual">
+            <ion-button fill="clear" (click)="openDoc(val.service_manual, val.service_manual_blob_type)" *ngIf="val.service_manual">
               <ion-icon name="attach-outline"></ion-icon>
             </ion-button>
           </ion-col>
@@ -100,7 +100,7 @@
         </ion-item>
         <ion-item>
           <ion-label position="floating">Description</ion-label>
-          <ion-input type="text" formControlName="cat_desc"></ion-input>
+          <ion-input type="email" formControlName="cat_desc"></ion-input>
         </ion-item>
       </form>
       <ion-row>
@@ -131,14 +131,12 @@
         </ion-row>
         <ion-row>
           <ion-col>
-            <ion-button fill="clear" (click)="openDoc(dat.attach)">
+            <ion-button fill="clear" (click)="openDoc(dat.attach, dat.attach_blob_type)">
               <ion-icon name="attach-outline"></ion-icon>
             </ion-button>
           </ion-col>
         </ion-row>
       </ion-card>
-
-
     </div>
   </div>
 

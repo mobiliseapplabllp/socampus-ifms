@@ -1,0 +1,67 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title >Ticket Hold Approvals({{holdDataList.length}})</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="holdDataList?.length === 0 && isDataLoad">
+    <ion-text color="medium">
+      <h3 style="text-align:center; margin-top:20px;">There is no ticket for approval</h3>
+    </ion-text>
+  </div>
+  <ion-card *ngFor="let dat of holdDataList">
+    <ion-card-header color="primary">Ticket id: {{dat.tkts_id}}</ion-card-header>
+    <ion-card-content>
+      <ion-row>
+        <ion-col size="6">
+          <ion-text color="primary">Complaint Type</ion-text><br>
+          <ion-text color="medium">{{dat.pc_desc}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Site Name</ion-text><br>
+          <ion-text color="medium">{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Barcode</ion-text><br>
+          <ion-text color="medium">{{dat.ext_asset_id}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Logged By</ion-text><br>
+          <ion-text color="medium">{{dat.hold_by_name}}{{dat.hold_by_lname}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Loged ON</ion-text><br>
+          <ion-text color="medium">{{dat.hold_date}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Ticket ID</ion-text><br>
+          <ion-text color="medium">{{dat.tkts_id}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Complaint Remark</ion-text><br>
+          <ion-text color="medium">{{dat.hold_remarkk}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Reason for hold</ion-text><br>
+          <ion-text color="medium">{{dat.hold_remark}}</ion-text>
+        </ion-col>
+        <ion-col *ngIf="dat.hold_attachment">
+          <ion-button color="secondary" shape="round" fill="clear" (click)="openDoc(dat.hold_attachment, dat.hold_attachment_blob_type)">View <ion-icon name="attach-outline" slot="end"></ion-icon> </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="6">
+          <ion-button size="block" shape="round" fill="solid" color="success" (click)="presentAlertConfirm(dat, '1', 'Approve')">Approve <ion-icon name="checkmark-outline" slot="end"></ion-icon> </ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button size="block" shape="round" fill="outline" color="danger" (click)="presentAlertConfirm(dat, '2', 'Reject')">Reject <ion-icon name="close-outline" slot="end"></ion-icon> </ion-button>
+        </ion-col>
+        
+      </ion-row>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

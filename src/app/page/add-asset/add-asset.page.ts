@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IonDatetime, LoadingController, ModalController, Platform } from '@ionic/angular';
+import { IonDatetime, ModalController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { environment } from 'src/environments/environment';
@@ -8,13 +8,13 @@ import { environment } from 'src/environments/environment';
 import { AssetDepartmentComponent } from './asset-department/asset-department.component';
 import { AssetDevicenameComponent } from './asset-devicename/asset-devicename.component';
 import { AssetManufacturerComponent } from './asset-manufacturer/asset-manufacturer.component';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { Router } from '@angular/router';
 import * as moment from 'moment';
 import { FloorComponent } from 'src/app/shared/floor/floor.component';
 import { LocationComponent } from 'src/app/shared/location/location.component';
 import { DeviceGroupComponent } from 'src/app/shared/device-group/device-group.component';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-add-asset',
   templateUrl: './add-asset.page.html',
@@ -75,8 +75,8 @@ export class AddAssetPage implements OnInit {
     private httpAsset: MyAssetGetService,
     private modalController: ModalController,
     private httpCommon: CommonService,
-    private loadingController: LoadingController,
-    private router: Router) {
+    private router: Router,
+    private camera: CameraService) {
     this.addAsset = this.formbuilder.group({
       faciity_type: [''],
       site_id_description:[''],
@@ -109,6 +109,7 @@ export class AddAssetPage implements OnInit {
       manufacturer_id_desc: [''],
       accessories:[''],
       ownership_id :['', Validators.required],
+      end_of_life: [''],
       ledger_ref:[''],
       pur_order_no:[''],
       pur_date:[''],
@@ -248,7 +249,7 @@ export class AddAssetPage implements OnInit {
   }
 
   getDecBarcode(enc_barcode: string) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpAsset.getDecBarcode(enc_barcode).subscribe({
         next:(data) => {
           if (data.status) {
@@ -266,11 +267,11 @@ export class AddAssetPage implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       })
     })
@@ -289,16 +290,30 @@ export class AddAssetPage implements OnInit {
     this.router.navigateByUrl('/barcode');
   }
 
-  async presentActionSheet(val: any) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
+  async presentActionSheet(imageno: any) {
+    this.camera.selectImage(['camera', 'gallery'], (blob: any) => {
+      let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+      if (imageno === 1) {
+        this.img1 = random;
+        this.formData.delete('asset_img');
+        this.formData.append('asset_img', blob, random);
+      } else if (imageno === 2) {
+        this.img2 = random;
+        this.formData.delete('asset_img2');
+        this.formData.append('asset_img2', blob, random );
+      } else if (imageno === 3) {
+        this.img3 = random;
+        this.formData.delete('asset_img3');
+        this.formData.append('asset_img3', blob, random);
+      } else if (imageno === 4) {
+        this.img4 = random;
+        this.formData.delete('pur_invoice');
+        this.formData.append('pur_invoice', blob, random);
+      }
+      this.httpCommon.presentLoading().then(preLoad => {
+        this.httpCommon.dismissloading();
       });
-      this.readImg(image, val)
-    };
-    takePicture();
+    });
   }
 
   async readImg(photo: any, imageno: any) {
@@ -310,8 +325,8 @@ export class AddAssetPage implements OnInit {
       this.img1 = random;
       this.formData.delete('asset_img');
       this.formData.append('asset_img', blob, random);
-      this.presentLoading().then(preLoad => {
-        this.dismissloading();
+      this.httpCommon.presentLoading().then(preLoad => {
+        this.httpCommon.dismissloading();
         return;
       });
       return;
@@ -320,8 +335,8 @@ export class AddAssetPage implements OnInit {
       this.img2 = random;
       this.formData.delete('asset_img2');
       this.formData.append('asset_img2', blob, random );
-      this.presentLoading().then(preLoad => {
-        this.dismissloading();
+      this.httpCommon.presentLoading().then(preLoad => {
+        this.httpCommon.dismissloading();
         return;
       });
       return;
@@ -330,8 +345,8 @@ export class AddAssetPage implements OnInit {
       this.img3 = random;
       this.formData.delete('asset_img3');
       this.formData.append('asset_img3', blob, random);
-      this.presentLoading().then(preLoad => {
-        this.dismissloading();
+      this.httpCommon.presentLoading().then(preLoad => {
+        this.httpCommon.dismissloading();
         return;
       });
       return;
@@ -340,8 +355,8 @@ export class AddAssetPage implements OnInit {
       this.img4 = random;
       this.formData.delete('pur_invoice');
       this.formData.append('pur_invoice', blob, random);
-      this.presentLoading().then(preLoad => {
-        this.dismissloading();
+      this.httpCommon.presentLoading().then(preLoad => {
+        this.httpCommon.dismissloading();
         return;
       });
       return;
@@ -353,12 +368,81 @@ export class AddAssetPage implements OnInit {
     formData.append('barcodeno', barcode);
 
 
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       setTimeout(() => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
       }, 500)
     });
+
+    // const takePicture = async () => {
+    //   const image = await Camera.getPhoto({
+    //     quality: 80,
+    //     allowEditing: false,
+    //     resultType: CameraResultType.Uri,
+    //   });
+    //   this.readImg(image, val)
+    // };
+    // takePicture();
   }
+
+  // async readImg(photo: any, imageno: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+
+  //   if (imageno === 1) {
+  //     this.img1 = random;
+  //     this.formData.delete('asset_img');
+  //     this.formData.append('asset_img', blob, random);
+  //     this.presentLoading().then(preLoad => {
+  //       this.dismissloading();
+  //       return;
+  //     });
+  //     return;
+  //   }
+  //   if (imageno === 2) {
+  //     this.img2 = random;
+  //     this.formData.delete('asset_img2');
+  //     this.formData.append('asset_img2', blob, random );
+  //     this.presentLoading().then(preLoad => {
+  //       this.dismissloading();
+  //       return;
+  //     });
+  //     return;
+  //   }
+  //   if (imageno === 3) {
+  //     this.img3 = random;
+  //     this.formData.delete('asset_img3');
+  //     this.formData.append('asset_img3', blob, random);
+  //     this.presentLoading().then(preLoad => {
+  //       this.dismissloading();
+  //       return;
+  //     });
+  //     return;
+  //   }
+  //   if (imageno === 4) {
+  //     this.img4 = random;
+  //     this.formData.delete('pur_invoice');
+  //     this.formData.append('pur_invoice', blob, random);
+  //     this.presentLoading().then(preLoad => {
+  //       this.dismissloading();
+  //       return;
+  //     });
+  //     return;
+  //   }
+  //   let barcode, formData
+  //   barcode = this.addAsset.value.unique_no;
+  //   formData = new FormData();
+  //   formData.append('photo', blob, random);
+  //   formData.append('barcodeno', barcode);
+
+
+  //   this.presentLoading().then(preLoad => {
+  //     setTimeout(() => {
+  //       this.dismissloading();
+  //     }, 500)
+  //   });
+  // }
 
 
   async openSiteModal() {
@@ -379,7 +463,7 @@ export class AddAssetPage implements OnInit {
         this.addAsset.get('loc_id_desc')?.setValue('');
         this.addAsset.get('ext_asset_id_pre')?.setValue('');
         this.addAsset.get('input_asset_id')?.setValue('');
-        this.presentLoading().then(preLoad => {
+        this.httpCommon.presentLoading().then(preLoad => {
           this.httpAsset.getBlock(disModal.data.pc_id).subscribe({
             next:(data) => {
               if (data.status) {
@@ -387,11 +471,11 @@ export class AddAssetPage implements OnInit {
               }
             },
             error:() => {
-              this.dismissloading();
+              this.httpCommon.dismissloading();
               this.httpCommon.presentToast(environment.errMsg + ' Block Err', 'danger');
             },
             complete:() => {
-              this.dismissloading();
+              this.httpCommon.dismissloading();
             }
           });
         })
@@ -472,7 +556,7 @@ export class AddAssetPage implements OnInit {
     if (!ev.target.value) {
       return;
     }
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpAsset.getBuildingList(ev.target.value).subscribe({
         next:(data) => {
           if (data.status) {
@@ -485,11 +569,11 @@ export class AddAssetPage implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     })
@@ -547,7 +631,7 @@ export class AddAssetPage implements OnInit {
   }
 
   getFacilityType() {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpAsset.getFacilityType().subscribe({
         next:(data) => {
           if (data.status) {
@@ -560,11 +644,11 @@ export class AddAssetPage implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     })
@@ -607,14 +691,14 @@ export class AddAssetPage implements OnInit {
   }
 
   changeDepartment(id: any) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpAsset.getSubDepartment(id).subscribe(data => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         if (data.status) {
           this.mySubDepartment = data.data
         }
       }, err => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         this.httpCommon.presentToast(environment.errMsg, 'danger');
       });
     })
@@ -697,20 +781,6 @@ export class AddAssetPage implements OnInit {
     });
   }
 
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
-  }
-
   checkWarrantyCondition() {
     if (this.addAsset.value.warranty_id === 1 || this.addAsset.value.warranty_id === 2 || this.addAsset.value.warranty_id === 3) {
       if (!this.addAsset.value.warranty_start_date || !this.addAsset.value.warranty_end_date) {
@@ -738,12 +808,13 @@ export class AddAssetPage implements OnInit {
   }
 
   checkPmsCondition() {
-    if (this.addAsset.value.is_pms === '1' && !this.addAsset.value.pms_freq) {
-      alert('Please Enter PMS Frequency');
-      return false;
-    } else {
-      return true
-    }
+    return true;
+    // if (this.addAsset.value.is_pms === '1' && !this.addAsset.value.pms_freq) {
+    //   alert('Please Enter PMS Frequency');
+    //   return false;
+    // } else {
+    //   return true
+    // }
   }
 
   changeWarranty() {
@@ -758,21 +829,36 @@ export class AddAssetPage implements OnInit {
   }
 
   submitAsset() {
-    let prefix_barcode, barcode, fullbarcode, pur_date, install_date, warranty_start_date, warranty_end_date;
-    pur_date = this.addAsset.value.pur_date;
-    install_date = this.addAsset.value.install_date,
-    warranty_start_date = this.addAsset.value.warranty_start_date,
-    warranty_end_date = this.addAsset.value.warranty_end_date,
-    prefix_barcode = this.addAsset.value.ext_asset_id_pre;
-    barcode = this.addAsset.value.input_asset_id;
-    fullbarcode = prefix_barcode + barcode;
-    this.addAsset.get('pur_date')?.setValue(moment(pur_date).format('YYYY-MM-DD'));
-    this.addAsset.get('install_date')?.setValue(moment(install_date).format('YYYY-MM-DD'));
-    this.addAsset.get('warranty_start_date')?.setValue(moment(warranty_start_date).format('YYYY-MM-DD'));
-    this.addAsset.get('warranty_end_date')?.setValue(moment(warranty_end_date).format('YYYY-MM-DD'));
-    this.addAsset.get('ext_asset_id')?.setValue(fullbarcode);
+    // let prefix_barcode, barcode, fullbarcode, pur_date, install_date, warranty_start_date, warranty_end_date, end_of_life;
+    // pur_date = this.addAsset.value.pur_date;
+    // install_date = this.addAsset.value.install_date,
+    // warranty_start_date = this.addAsset.value.warranty_start_date,
+    // warranty_end_date = this.addAsset.value.warranty_end_date,
+    // prefix_barcode = this.addAsset.value.ext_asset_id_pre;
+    // barcode = this.addAsset.value.input_asset_id;
+    // end_of_life = this.addAsset.value.end_of_life
+    // fullbarcode = prefix_barcode + barcode;
+    // this.addAsset.get('pur_date')?.setValue(moment(pur_date).format('YYYY-MM-DD'));
+    // this.addAsset.get('install_date')?.setValue(moment(install_date).format('YYYY-MM-DD'));
+    // this.addAsset.get('warranty_start_date')?.setValue(moment(warranty_start_date).format('YYYY-MM-DD'));
+    // this.addAsset.get('warranty_end_date')?.setValue(moment(warranty_end_date).format('YYYY-MM-DD'));
+    // this.addAsset.get('end_of_life')?.setValue(moment(end_of_life).format('YYYY-MM-DD'));
+    // this.addAsset.get('ext_asset_id')?.setValue(fullbarcode);
+    const { pur_date, install_date, warranty_start_date, warranty_end_date, ext_asset_id_pre, input_asset_id, end_of_life } = this.addAsset.value;
+    const fullBarcode = `${ext_asset_id_pre}${input_asset_id}`;
+
+    const formatDate = (date: any) => date ? moment(date).format('YYYY-MM-DD') : '';
+
+    this.addAsset.patchValue({
+      pur_date: formatDate(pur_date),
+      install_date: formatDate(install_date),
+      warranty_start_date: formatDate(warranty_start_date),
+      warranty_end_date: formatDate(warranty_end_date),
+      end_of_life: formatDate(end_of_life),
+      ext_asset_id: fullBarcode
+    });
     this.stopRequest();
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       for(let key in this.addAsset.value) {
         this.formData.delete(key);
         this.formData.append(key, this.addAsset.value[key])
@@ -796,11 +882,11 @@ export class AddAssetPage implements OnInit {
         },
         error:() => {
           this.pendingApi = null;
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     })
@@ -812,7 +898,7 @@ export class AddAssetPage implements OnInit {
       if (this.pendingApi) {
         this.httpCommon.presentToastWithOk('Due to poor internet connectivity, your data submission failed. Please try again when your internet is stronger.', 'warning');
         this.pendingApi.unsubscribe();
-        this.dismissloading();
+        this.httpCommon.dismissloading();
       }
       this.clrTime();
     }, 90000);
@@ -842,20 +928,21 @@ export class AddAssetPage implements OnInit {
     }
 
     this.parentAssetObj = {};
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpAsset.getAssetParentId(this.addAsset.value.parent_asset_id, this.addAsset.value.site_id).subscribe({
         next:(data) => {
           if (data.status) {
             this.parentAssetObj = data.data;
           } else {
-            alert(data.msg);
+            this.httpCommon.presentToast(data.msg, 'warning');
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
+          this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     })
@@ -873,6 +960,7 @@ export class AddAssetPage implements OnInit {
     this.addAsset.get('is_child_asset')?.setValue('');
     this.addAsset.get('client_asset_id')?.setValue('');
     this.addAsset.get('serial_no')?.setValue('');
+    this.addAsset.get('end_of_life')?.setValue('');
     this.img1 = '';
     this.img2 = '';
     this.img3 = '';

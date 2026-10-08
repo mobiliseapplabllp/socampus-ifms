@@ -1,0 +1,23 @@
+<ion-header mode="md">
+  <ion-toolbar color="primary">
+    <ion-title>Block({{blockArrCopy.length}})</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal(null, false)">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar (ionChange)="search($event)" debounce="1000" mode="md"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-virtual-scroll [items]="blockArr" approxItemHeight="320px">
+    <ion-item *virtualItem="let item; let itemBounds = bounds;" (click)="closeModal(item, true)">
+      {{item.label}}
+    </ion-item>
+  </ion-virtual-scroll>
+
+</ion-content>

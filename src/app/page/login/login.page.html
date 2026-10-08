@@ -12,7 +12,7 @@
             <ion-row>
               <ion-col>
                 <h2>
-                  <ion-text color="primary">Login</ion-text>
+                  <ion-text color="primary" (click)="dummyLogin()">Login</ion-text>
                 </h2>
               </ion-col>
             </ion-row>
@@ -110,17 +110,19 @@
         </ion-card>
       </div>
     </div>
-    <div style="flex-shrink: 0;padding-left:40px;padding-right:40px">
+    <div style="flex-shrink: 0;padding-left:40px;padding-right:40px" [style.visibility]="ssoBrowserOpen ? 'hidden' : 'visible'">
       <div class="container">
         <div class="line"></div>
         <div class="text">Powered By</div>
         <div class="line"></div>
       </div>
       <ion-row >
-        <ion-col class="ion-text-center" (click)="dummyLogin()">
+        <ion-col class="ion-text-center" (click)="openBarcode()">
           <img src="assets/img/mobilise-logo.svg" style="height:50px;width:88px">
         </ion-col>
       </ion-row>
     </div>
   </div>
+  <!-- Solid white strip behind the SSO browser's translucent toolbar so nothing bleeds through -->
+  <div class="sso-bottom-cover" [class.active]="ssoBrowserOpen"></div>
 </ion-content>

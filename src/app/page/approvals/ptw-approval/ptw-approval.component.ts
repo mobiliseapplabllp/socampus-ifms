@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AlertController, LoadingController, NavController } from '@ionic/angular';
+import { AlertController, NavController } from '@ionic/angular';
 import { ApprovalService } from 'src/app/provider/approval/approval.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { environment } from 'src/environments/environment';
@@ -16,7 +16,6 @@ export class PtwApprovalComponent  implements OnInit {
   pendingList: any = [];
   constructor(
     private httpApproval: ApprovalService,
-    private loadingController: LoadingController,
     private common: CommonService,
     private alertController: AlertController,
     private activeRoute: ActivatedRoute,
@@ -25,14 +24,15 @@ export class PtwApprovalComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.activeRoute.queryParams.subscribe((res) => {
-      this.requestData = JSON.parse(res['data']);
-      this.pendingList = this.requestData;
-    });
+    this.getPendingPTW();
+    // this.activeRoute.queryParams.subscribe((res) => {
+    //   this.requestData = JSON.parse(res['data']);
+    //   this.pendingList = this.requestData;
+    // });
   }
 
   getPendingPTW() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpApproval.getPendingPTW().subscribe({
         next:(data) => {
           if (data.status) {
@@ -43,31 +43,17 @@ export class PtwApprovalComponent  implements OnInit {
         },
         error:() => {
           this.common.presentToast(environment.errMsg, 'danger');
-          this.dismissloading();
+          this.common.dismissloading();
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
   }
 
-  openDoc(url: string) {
-    this.common.openDoc(url);
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please Wait...',
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
+  openDoc(url: string, blobType: string) {
+    this.common.openImg(url, blobType);
   }
 
   changeSegment(ev: any) {
@@ -109,7 +95,7 @@ export class PtwApprovalComponent  implements OnInit {
   }
 
   actionPtw(obj: any) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpApproval.actionPtw(obj).subscribe({
         next:(data) => {
           if (data.status) {
@@ -123,11 +109,11 @@ export class PtwApprovalComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })

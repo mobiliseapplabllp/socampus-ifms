@@ -1,4 +1,163 @@
-<ion-header>
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{requestedData.wo_no}}</ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="primary">
+    <ion-item color="none" lines="none">
+      <ion-label color="light">{{requestedData.cat_desc}}</ion-label>
+      <svg width="40" height="40" viewBox="0 0 36 36" class="circular-chart" slot="end">
+        <path class="circle-bg"
+          d="M18 2.0845
+            a 15.9155 15.9155 0 0 1 0 31.831
+            a 15.9155 15.9155 0 0 1 0 -31.831"
+        />
+        <path class="circle"
+          [attr.stroke-dasharray]="requestedData.responded_questions * 100 / requestedData.total_questions + ', 100'"
+          d="M18 2.0845
+            a 15.9155 15.9155 0 0 1 0 31.831
+            a 15.9155 15.9155 0 0 1 0 -31.831"
+        />
+        <text x="18" y="20.35" class="percentage">{{ requestedData.action_done }} / {{ requestedData.total_length }}</text>
+      </svg>
+    </ion-item>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="main-class">
+  <ion-card *ngFor="let dat of requestedData.qus;let i = index" [ngClass]="{redBorder: dat.isDtlShow && dat.status === 0}" style="box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;padding:10px;margin:0px 20px 20px 20px;border-radius: 10px;">
+    <div id={{i}}></div>
+    <ion-row >
+      <ion-col size="6">
+        <ion-text color="primary-dark" style="font-size:22px">Q.{{i+1}}</ion-text>
+      </ion-col>
+      <ion-col size="6" class="ion-text-right ion-padding-right" style="display: flex; justify-content: end;">
+        <ion-text color="primary">Scope -</ion-text> <ion-text color="primary-dark">{{dat.scope_desc}}</ion-text> </ion-col>
+      <ion-col size="12">
+        <ion-text color="primary-dark"> {{dat.q_desc}}</ion-text>
+      </ion-col>
+      <ion-col size="6" >
+        <a (click)="openPreviousModal(dat)"><u>Previous Response</u></a>
+      </ion-col>
+      <ion-col style="display:flex;justify-content: right;">
+        <div (click)="openModal(dat)" style="height:24px;width:24px;border-radius: 50%;color:white;background-color: var(--ion-color-primary);" class="center">?</div>
+      </ion-col>
+    </ion-row>
+
+    <ion-radio-group color="none" mode="md" [(ngModel)]="dat.optn_id" disabled="true">
+      <ion-item class="radioButton" lines="none" *ngFor="let opt of dat.options" [ngClass]="{'selectedRadioButton': opt.optn_id ===  dat.optn_id }">
+        <ion-label>{{opt.optn_desc}}</ion-label>
+        <ion-radio slot="end" [value]="opt.optn_id" disabled></ion-radio>
+      </ion-item>
+    </ion-radio-group>
+
+    <section class="inputbox" >
+      <ion-text color="primary" >Remarks</ion-text>
+      <ion-item lines="none" [ngClass]="{redBorder: dat.is_rmrk_mandatory === 1 && !dat.remark}">
+        <ion-textarea rows="3" type="text" [(ngModel)]="dat.remark" placeholder="Enter your Remark" readonly></ion-textarea>
+      </ion-item>
+    </section>
+    <ion-row>
+      <ion-col *ngIf="dat.attachment1" class="ion-text-right">
+        <ion-button color="danger" (click)="viewDocs(dat.attachment1)" fill="clear">
+          <ion-icon name="attach-outline"></ion-icon>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+
+  <ion-modal class="previous" [isOpen]="isPreOpen" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismissPre()" >
+    <ng-template>
+      <ion-header>
+        <ion-toolbar >
+          <ion-title>Previous Response</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isPreOpen = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content style="--background: #dbdbdb; overflow: scroll;">
+        <div style="padding:16px" >
+          <ion-grid>
+            <ion-row class="row" *ngFor="let dat of responseList">
+              <ion-col size="1" class="ion-padding-start">
+                <div class="images"> <img src="assets/img/dot.jpeg"></div>
+                <div class="line"></div>
+              </ion-col>
+              <ion-col size="11" >
+                <ion-grid class="cards">
+                  <ion-row>
+                    <ion-col size="6">{{dat.action_date}}</ion-col>
+                    <ion-col class="ion-text-right" size="6">
+                      <ion-icon name="attach-outline" style="font-size:20px" (click)="viewDocs(dat.artifact)"></ion-icon>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="6" color="medium">Response</ion-col>
+                    <ion-col>{{dat.corrective_action}}</ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="6" color="medium">Remark</ion-col>
+                    <ion-col>{{dat.remark}}</ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal class="more-info" [isOpen]="isOpen" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismiss()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>More Information</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isOpen = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding-start">
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Requirement</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.requirement}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Sla</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.sla}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Critical Desc</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.critical_desc}}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4">
+            <ion-text color="primary">Scope Desc</ion-text>
+          </ion-col>
+          <ion-col size="8">{{data.scope_desc}}</ion-col>
+        </ion-row>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>
+
+
+
+<!-- <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
@@ -105,19 +264,19 @@
                 <ion-text color="primary">Original Attachment</ion-text><br>
               </ion-col>
               <ion-col>
-                <ion-button *ngIf="val.attachment1" fill="clear" (click)="viewDocs(val.attachment1)">
+                <ion-button *ngIf="val.attachment1" fill="clear" (click)="viewDocs(val.attachment1, val.attachment1_blob_type)">
                   <ion-icon name="attach-outline"></ion-icon>
                 </ion-button>
               </ion-col>
             </ion-row>
           </div>
           <ion-row>
-            <ion-col  size="6" *ngIf="val.response_txn.length > 0"> <!---->
+            <ion-col  size="6" *ngIf="val.response_txn.length > 0">
               <ion-button size="full" color="secondary" (click)="showMore(val)"> More
                 <ion-icon slot="end" [name]="val.showMore ? 'arrow-down-outline': 'arrow-forward-outline'"></ion-icon>
               </ion-button>
             </ion-col>
-            <ion-col class="ion-text-right"  size="6" *ngIf="val.isDtlShow && val.status === 0"> <!---->
+            <ion-col class="ion-text-right"  size="6" *ngIf="val.isDtlShow && val.status === 0">
               <ion-button color="success" size="full" (click)="addResponse(val, dat.created_at)"><ion-icon name="add-outline" slot="start"></ion-icon> Add Response</ion-button>
             </ion-col>
           </ion-row>
@@ -161,7 +320,7 @@
                     <ion-text color="primary">Evidence</ion-text>
                   </ion-col>
                   <ion-col>
-                    <ion-button fill="clear" (click)="viewDocs(txt.artifact)">
+                    <ion-button fill="clear" (click)="viewDocs(txt.artifact, txt.artifact_blob_type)">
                       <ion-icon name="attach-outline"></ion-icon>
                     </ion-button>
                   </ion-col>
@@ -173,4 +332,4 @@
       </div>
     </section>
   </div>
-</ion-content>
+</ion-content> -->

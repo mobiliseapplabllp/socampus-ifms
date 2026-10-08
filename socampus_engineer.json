@@ -1,0 +1,14 @@
+{
+  "key_store_name": "socampus_engineer.jks",
+  "alias_key_store_name": "socampus_engineer",
+  "key_store_password": "Welcome@mobilise@socampus_engineer",
+  "first_and_last_name": "socampus_engineer@mobilise",
+  "organizational_unit": "mobilise",
+  "organization": "mobilise",
+  "city": "faridabad",
+  "state": "haryana",
+  "two_later_country": "in",
+  "passphras": "Welcome@mobilise@socampus_engineer",
+  "package":"com.socampuseng.mbl",
+  "sku":"socampusengineer10111994"
+}

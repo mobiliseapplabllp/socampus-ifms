@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { LoadingController } from '@ionic/angular';
 import { IndentsService } from 'src/app/provider/indents/indents.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 @Component({
@@ -15,10 +13,8 @@ export class IndentsPage implements OnInit {
   indentView: any = [];
   loading: any;
   constructor(
-    public router: Router,
     private httpIndent: IndentsService,
-    private common: CommonService,
-    private loadingController: LoadingController) {
+    private common: CommonService) {
   }
 
   ngOnInit() {
@@ -26,7 +22,7 @@ export class IndentsPage implements OnInit {
   }
 
   getMyIndent() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpIndent.getMyIndent(this.page, this.status).subscribe({
         next:(data) => {
           if (data.status) {
@@ -37,11 +33,11 @@ export class IndentsPage implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     })
@@ -57,18 +53,6 @@ export class IndentsPage implements OnInit {
   infiniteScroll(ev: any) {
     ev.target.complete();
     this.getMyIndent();
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...',
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    this.loading.dismiss();
   }
 
   myCustom(ev: any) {

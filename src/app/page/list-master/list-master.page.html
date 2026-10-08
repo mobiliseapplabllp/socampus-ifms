@@ -3,10 +3,21 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title> {{userName}} </ion-title>
+    <ion-title> <ion-icon name="ellipse"  [color]="isPunchIn ? 'success' : 'medium'" style="padding-top: 2%;"></ion-icon> {{userName}} </ion-title>
     <ion-buttons slot="end" *ngIf="isInternet">
-      <ion-button (click)="openBarcode()">
+      <!-- CKMS - cambro ka QR scan -->
+      <ion-button slot="icon-only" (click)="openBarcode()">
         <ion-icon name="qr-code-outline"></ion-icon>
+      </ion-button>
+      <!-- <ion-button (click)="testRoute('/concierge/conc-menu')">C</ion-button> -->
+      <!-- <ion-button (click)="testRoute('/concierge')">Concierge</ion-button> -->
+       <!-- <ion-button (click)="notification('/notification')">
+        <ion-icon name="notifications-outline"></ion-icon>
+        <ion-text color="danger" style="position: absolute;top:0px;right:0px">{{alerts.length}}</ion-text>
+      </ion-button> -->
+      <ion-button slot="icon-only" (click)="notification('/notification')" style="position: relative;">        
+        <ion-icon name="notifications-outline"></ion-icon>
+        <ion-text color="danger" style="position: absolute;top:0px;right:0px">{{notiticationCount}}</ion-text>
       </ion-button>
       <ion-button slot="icon-only"  (click)="openPageRoute()" style="position: relative;">
         <ion-icon name="cloud-upload-outline"></ion-icon>
@@ -22,7 +33,7 @@
 <ion-content>
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
+  </ion-refresher>  
   <ion-item>
     <ion-label>
       <h2><b><ion-text color="primary">Welcome Home</ion-text></b></h2>
@@ -31,7 +42,7 @@
     <!-- <ion-buttons slot="end">
       <ion-button slot="end" color="danger" shape="round" fill="outline" (click)="openSosModal()">SOS</ion-button>
     </ion-buttons> -->
-    <ion-button size="small" slot="end" class="ion-text-capitalize" color="danger" (click)="downloadApp(appUpdate.url)" *ngIf="isAndroid && appUpdate.is_view && currentVersion !== appUpdate.vesrion" >App Update</ion-button>
+    <ion-button size="small" slot="end" class="ion-text-capitalize" color="danger" (click)="openPlayStore(appUpdate.url)" *ngIf="isAndroid && appUpdate.is_view && currentVersion !== appUpdate.vesrion" >App Update</ion-button>
   </ion-item>
   <app-dashboard [eventChange]="eventChange" ></app-dashboard>
   <app-menu [didEnter]="didEnter"></app-menu>

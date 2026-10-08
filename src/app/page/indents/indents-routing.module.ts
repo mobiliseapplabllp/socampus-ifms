@@ -3,14 +3,26 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { IndentsPage } from './indents.page';
 import { IndentCardComponent } from './indent-card/indent-card.component';
+import { CrIndentComponent } from './cr-indent/cr-indent.component';
+import { SparePartsComponent } from './spare-parts/spare-parts.component';
+import { MaterialDetailsComponent } from './material-details/material-details.component';
 
 const routes: Routes = [
   {
     path: '',
     component: IndentsPage
-  } , {
+  }, {
     path: 'indent-card',
     component: IndentCardComponent
+  }, {
+    path: 'cr-indent',
+    component: CrIndentComponent
+  }, {
+    path: 'spare-parts',
+    component: SparePartsComponent
+  }, {
+    path: 'material-details',
+    component: MaterialDetailsComponent
   }
 ];
 

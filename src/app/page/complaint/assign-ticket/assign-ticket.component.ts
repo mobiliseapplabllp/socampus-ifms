@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
@@ -21,7 +21,6 @@ export class AssignTicketComponent  implements OnInit {
     private modalCtrl: ModalController,
     private httpCommon: CommonService,
     private httpComplaint: ComplaintService,
-    private loadingController: LoadingController
   ) { }
 
   ngOnInit() {
@@ -33,7 +32,7 @@ export class AssignTicketComponent  implements OnInit {
   }
 
   getTeamsMember() {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.getTeam(this.allData.pc_id, 1).subscribe({
         next:(data) => {
           if (data.status) {
@@ -44,11 +43,11 @@ export class AssignTicketComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissLoading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissLoading();
+          this.httpCommon.dismissloading();
         }
       });
     })
@@ -75,7 +74,7 @@ export class AssignTicketComponent  implements OnInit {
       team: data.value + '-' + data.team_id,
       ticketId: this.ticket_id
     }
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.assignedTicket(obj).subscribe({
         next:(data) => {
           if (data.status) {
@@ -87,27 +86,13 @@ export class AssignTicketComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissLoading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissLoading();
+          this.httpCommon.dismissloading();
         }
       });
     });
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...',
-    });
-    await this.loading.present();
-  }
-
-  dismissLoading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
   }
 }

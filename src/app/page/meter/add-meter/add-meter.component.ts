@@ -5,12 +5,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MyAssetGetService } from 'src/app/provider/my-asset-get/my-asset-get.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { MeterService } from 'src/app/provider/meter/meter.service';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { DaysComponent } from '../days/days.component';
 import * as moment from 'moment';
 import { CostCenterComponent } from 'src/app/shared/cost-center/cost-center.component';
 import { AssignToComponent } from '../assign-to/assign-to.component';
 import { EscalateToComponent } from '../escalate-to/escalate-to.component';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-add-meter',
   templateUrl: './add-meter.component.html',
@@ -31,6 +31,9 @@ export class AddMeterComponent implements OnInit {
   img1!: string;
   img2!: string;
   img3!: string;
+  photoBlob1: Blob | null = null;
+  photoBlob2: Blob | null = null;
+  photoBlob3: Blob | null = null;
   days: any = [];
   daysLength: any = [];
   timeArr: any = [{
@@ -52,14 +55,13 @@ export class AddMeterComponent implements OnInit {
     private formbuilder: FormBuilder,
     private httpMeter: MeterService,
     private navCtrl: NavController,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
     this.initForm();
-    // this.getFacilityType();
     this.getEquipStatus();
-    // this.getMeterType();
     this.getUomMeter();
   }
 
@@ -107,9 +109,6 @@ export class AddMeterComponent implements OnInit {
       oth_mult_fact: [''],
       oth_mult_fact_val: [''],
       oth_inc: [''],
-      // mult_fact: ['', Validators.required],
-      // mult_fact_val: [''],
-      // inc: ['', Validators.required],
       back_date: ['', Validators.required],
       back_days: [''],
       edit_allow: ['', Validators.required],
@@ -513,33 +512,34 @@ export class AddMeterComponent implements OnInit {
   }
 
   async presentActionSheet(imageno: any) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image, imageno);
-    };
-    takePicture();
+    const existingBlob =
+      imageno === 1 ? this.photoBlob1 : imageno === 2 ? this.photoBlob2 : imageno === 3 ? this.photoBlob3 : null;
+    this.camera.selectImage(
+      ['camera', 'gallery'],
+      (blob: Blob) => {
+        this.readImg(blob, imageno);
+      },
+      existingBlob ?? undefined
+    );
   }
 
-  async readImg(photo: any, imageno: any) {
+  async readImg(blob: any, imageno: any) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     if (imageno === 1) {
       this.formData.delete('photo1');
       this.formData.append('photo1', blob, random + '.jpg');
       this.img1 = random;
+      this.photoBlob1 = blob;
     } else  if (imageno === 2) {
       this.formData.delete('photo2');
       this.formData.append('photo2', blob, random + '.jpg');
       this.img2 = random;
+      this.photoBlob2 = blob;
     } else if (imageno === 3) {
       this.formData.delete('photo3');
       this.formData.append('photo3', blob, random + '.jpg');
       this.img3 = random;
+      this.photoBlob3 = blob;
     }
     this.presentLoading().then(preLoad => {
       this.dismissloading();
@@ -552,13 +552,16 @@ export class AddMeterComponent implements OnInit {
       const file = event.target.files[0];
       if (index == 1) {
         this.formData.delete('photo1');
-        this.formData.append('photo1' , file, random)
+        this.formData.append('photo1' , file, random);
+        this.photoBlob1 = file;
       } else if (index == 2) {
         this.formData.delete('photo2');
-        this.formData.append('photo2' , file, random)
+        this.formData.append('photo2' , file, random);
+        this.photoBlob2 = file;
       } else if (index == 3) {
         this.formData.delete('photo3');
-        this.formData.append('photo3' , file, random)
+        this.formData.append('photo3' , file, random);
+        this.photoBlob3 = file;
       }
     }
   }

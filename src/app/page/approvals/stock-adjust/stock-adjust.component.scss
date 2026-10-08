@@ -1,0 +1,11 @@
+.center-modal::part(content) {
+    height: 50%;
+    border-radius: 16px;
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+  .center-modal {
+    --height: 50%;
+    align-items: center;
+  }
+    

@@ -67,11 +67,7 @@ const routes: Routes = [
   {
     path: 'meter',
     loadChildren: () => import('./page/meter/meter.module').then( m => m.MeterPageModule)
-  },
-  {
-    path: 'digital-checklist-offline',
-    loadChildren: () => import('./page/digital-checklist-offline/digital-checklist-offline.module').then( m => m.DigitalChecklistOfflinePageModule)
-  },
+  },  
   {
     path: 't-order/:id',
     loadChildren: () => import('./page/today-order/today-order.module').then( m => m.TodayOrderPageModule)
@@ -84,6 +80,14 @@ const routes: Routes = [
     path: 'approvals',
     loadChildren: () => import('./page/approvals/approvals.module').then( m => m.ApprovalsPageModule)
   },
+  {
+    path: 'concierge',
+    loadChildren: () => import('./page/concierge/concierge.module').then( m => m.ConciergePageModule)
+  },
+  {
+    path: 'notification',
+    loadChildren: () => import('./page/notification/notification.module').then( m => m.NotificationPageModule)
+  },  
 ];
 
 @NgModule({

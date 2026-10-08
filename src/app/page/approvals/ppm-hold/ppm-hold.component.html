@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>PPM Hold Approvals({{data.length}})</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card *ngFor="let dat of data">
+    <ion-card-header color="primary">PPM id: {{dat.ppm_work_order_id}}</ion-card-header>
+    <ion-card-content>
+      <ion-row>        
+        <ion-col size="6">
+          <ion-text color="primary">Site Name</ion-text><br>
+          <ion-text color="medium">{{dat.pc_desc}}</ion-text>
+        </ion-col>
+
+        <ion-col size="6">
+          <ion-text color="primary">Hold By</ion-text><br>
+          <ion-text color="medium">{{dat.hold_by_name}} {{dat.hold_by_lname}}</ion-text>
+        </ion-col>   
+        
+        <ion-col size="6">
+          <ion-text color="primary">Hold Request Date</ion-text><br>
+          <ion-text color="medium">{{dat.hold_date}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Assign To</ion-text><br>
+          <ion-text color="medium">{{dat.assigned_name}}</ion-text>
+        </ion-col>
+        <ion-col size="6">
+          <ion-text color="primary">Logged By</ion-text><br>
+          <ion-text color="medium">{{dat.hold_by_name}}{{dat.hold_by_lname}}</ion-text>
+        </ion-col>      
+           
+        <ion-col size="6">
+          <ion-text color="primary">Reason for hold</ion-text><br>
+          <ion-text color="medium">{{dat.hold_remark}}</ion-text>
+        </ion-col>  
+        
+        <ion-col *ngIf="dat.hold_attachment">
+          <ion-button color="secondary" shape="round" fill="clear" (click)="openDoc(dat.hold_attachment, dat.hold_attachment_blob_type)">View <ion-icon name="attach-outline" slot="end"></ion-icon> </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="6">
+          <ion-button size="block" shape="round" fill="solid" color="success" (click)="presentAlertConfirm(dat, '1', 'Approve')">Approve <ion-icon name="checkmark-outline" slot="end"></ion-icon> </ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button size="block" shape="round" fill="outline" color="danger" (click)="presentAlertConfirm(dat, '2', 'Reject')">Reject <ion-icon name="close-outline" slot="end"></ion-icon> </ion-button>
+        </ion-col>
+        
+      </ion-row>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

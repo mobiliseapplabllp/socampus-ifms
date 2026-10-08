@@ -4,8 +4,8 @@ import { ModalController, LoadingController, Platform } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { MeterService } from 'src/app/provider/meter/meter.service';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-meter',
   templateUrl: './meter.page.html',
@@ -24,7 +24,8 @@ export class MeterPage implements OnInit {
     private common: CommonService,
     private loadingController: LoadingController,
     private httpMeter: MeterService,
-    private platform: Platform
+    private platform: Platform,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -54,8 +55,14 @@ export class MeterPage implements OnInit {
   }
 
   getPendingWOusingBarcode(url: string) {
-    this.presentLoading().then(preLoad => {
-      this.httpMeter.getPendingWoBarcode(url).subscribe({
+    let lastEncryptedString = url.includes('meter-schedule-by-qrcode/') ? url.split('meter-schedule-by-qrcode/')[1] : '';
+    if (!lastEncryptedString) {
+      this.common.presentToast('You are scanning wrong QR', 'warning');
+      return;
+    }
+    let fullUrl = environment.url + 'meter/ifms/meter-schedule-by-qrcode/' + lastEncryptedString
+    this.common.presentLoading().then(preLoad => {
+      this.httpMeter.getPendingWoBarcode(fullUrl).subscribe({
         next:(data) => {
           if (data.status) {
             this.meterInfo = data.data;
@@ -65,11 +72,11 @@ export class MeterPage implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
@@ -77,7 +84,7 @@ export class MeterPage implements OnInit {
   }
 
   getPendingWo() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpMeter.getPendingWo().subscribe({
         next:(data) => {
           if (data.status) {
@@ -88,11 +95,11 @@ export class MeterPage implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     })
@@ -170,76 +177,51 @@ export class MeterPage implements OnInit {
     } else {
       dat.isQrVerify = true;
     }
-
   }
 
   checkConsumptionCondition(dat: any) {
     if (dat.is_consumption == 1 && !dat.consumption_reading) {
-      this.common.presentToast('Consumption Reading is Mandatory', 'tertiary');
+      this.common.presentToast('Consumption Reading is Mandatory', 'warning');
       return false;
     } else if (dat.is_consumption == 1 && dat.is_remark_req == 1 && !dat.con_remark) {
-      this.common.presentToast('Consumption Remark is Mandatory', 'tertiary');
+      this.common.presentToast('Consumption Remark is Mandatory', 'warning');
       return false;
     } else if (dat.is_consumption == 1 && dat.is_img_req && !dat.isConsumptionImg) {
-      this.common.presentToast('Consumption Image is Mandatory', 'tertiary');
+      this.common.presentToast('Consumption Image is Mandatory', 'warning');
       return false;
     } else {
       return true;
     }
-    // if (!dat.consumption_reading) {
-    //   alert('Please Enter Consumption Reading');
-    //   return false;
-    // } else if (dat.is_img_req == 1 && !dat.isConsumptionImg) {
-    //   alert('Consumption Image is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
 
   checkGenertionCondition(dat: any) {
     if (dat.is_generation == 1 && !dat.generate_reading) {
-      this.common.presentToast('Generation Reading is Mandatory', 'tertiary');
+      this.common.presentToast('Generation Reading is Mandatory', 'warning');
       return false;
     } else if (dat.is_generation == 1 && dat.is_remark_req == 1 && !dat.gen_remark) {
-      this.common.presentToast('Generation Remark is Mandatory', 'tertiary');
+      this.common.presentToast('Generation Remark is Mandatory', 'warning');
       return false;
     } else if (dat.is_generation == 1 && dat.is_img_req && !dat.isGenerationImg) {
-      this.common.presentToast('Generation Image is Mandatory', 'tertiary');
+      this.common.presentToast('Generation Image is Mandatory', 'warning');
       return false;
     } else {
       return true;
     }
-    // if (!dat.generate_reading) {
-    //   alert('Please Enter Generate Reading');
-    //   return false;
-    // } else if (dat.is_img_req == 1 && !dat.isGenerationImg) {
-    //   alert('Generation Image is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
 
   checkOtherCondition(dat: any) {
     if (dat.oth_read == 1 && !dat.other_reading) {
-      this.common.presentToast('Other Reading is Mandatory', 'tertiary');
+      this.common.presentToast('Other Reading is Mandatory', 'warning');
       return false;
     } else if (dat.oth_read == 1 && dat.is_remark_req == 1 && !dat.oth_remark) {
-      this.common.presentToast('Other Remark is Mandatory', 'tertiary');
+      this.common.presentToast('Other Remark is Mandatory', 'warning');
       return false;
     } else if (dat.oth_read == 1 && dat.is_img_req && !dat.isOtherImg) {
-      this.common.presentToast('Other Image is Mandatory', 'tertiary');
+      this.common.presentToast('Other Image is Mandatory', 'warning');
       return false;
     } else {
       return true;
     }
-    // if (!dat.other_reading && dat.oth_read == 1) {
-    //   alert('Other Reading is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
 
   save(obj: any, dat: any) {
@@ -247,7 +229,7 @@ export class MeterPage implements OnInit {
       this.formData.delete(key);
       this.formData.append(key, obj[key]);
     }
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpMeter.updateReading(this.formData).subscribe({
         next:(data) => {
           if (data.status) {
@@ -264,52 +246,42 @@ export class MeterPage implements OnInit {
         },
         error:() => {
           this.common.presentToast(environment.errMsg, 'danger');
-          this.dismissloading();
+          this.common.dismissloading();
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     })
   }
 
   checkPhotoCondition(dat: any, type: any) {
+    let obj: any = [];
     if (dat.is_gllry_upld_allwd == 1) {
-      this.presentActionSheet(1, dat , type);
+      obj = ['camera', 'gallery'];
+      this.presentActionSheet(obj, dat, type);
     } else if (dat.is_gllry_upld_allwd == 0) {
-      this.presentActionSheet(0, dat , type);
+      obj = ['camera'];
+      this.presentActionSheet(obj, dat, type);
     } else {
       alert('Gallery is Undefined ' + dat.is_gllry_upld_allwd);
     }
   }
 
   async presentActionSheet(val: any, data: any, type: any) {
-    const takePicture = async () => {
-      var obj: any = {};
-      if (val === 1) {
-        obj = {
-          quality: 80,
-          allowEditing: false,
-          resultType: CameraResultType.Uri,
-        }
-      } else {
-        obj = {
-          quality: 80,
-          allowEditing: false,
-          source: CameraSource.Camera,
-          resultType: CameraResultType.Uri,
-        }
-      }
-      const image = await Camera.getPhoto(obj);
-      this.readImg(image, data ,type)
-    };
-    takePicture();
+    let obj: any = [];
+    if (val === 1) {
+      obj = ['camera', 'gallery'];
+    } else {
+      obj = ['camera'];
+    }
+    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
+      this.readImg(blob, data ,type)
+    });
   }
 
-  async readImg(photo: any, data: any,type: any) {
+  async readImg(blob: any, data: any,type: any) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     if (type == 'consumption') {
         this.formData.delete('img1');
         this.formData.append('img1', blob, random);
@@ -338,12 +310,77 @@ export class MeterPage implements OnInit {
           }
         }
       }
-      this.presentLoading().then(preLoad => {
+      this.common.presentLoading().then(preLoad => {
         setTimeout(() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }, 500)
       })
-  }
+    }
+
+
+
+  // async presentActionSheet(val: any, data: any, type: any) {
+  //   const takePicture = async () => {
+  //     var obj: any = {};
+  //     if (val === 1) {
+  //       obj = {
+  //         quality: 80,
+  //         allowEditing: false,
+  //         resultType: CameraResultType.Uri,
+  //       }
+  //     } else {
+  //       obj = {
+  //         quality: 80,
+  //         allowEditing: false,
+  //         source: CameraSource.Camera,
+  //         resultType: CameraResultType.Uri,
+  //       }
+  //     }
+  //     const image = await Camera.getPhoto(obj);
+  //     this.readImg(image, data ,type)
+  //   };
+  //   takePicture();
+  // }
+
+  // async readImg(photo: any, data: any,type: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   if (type == 'consumption') {
+  //       this.formData.delete('img1');
+  //       this.formData.append('img1', blob, random);
+  //       data.isConsumptionImg = true;
+  //       for (var i = 0; i < this.meterInfo.length;i++) {
+  //         if (data.wo_id !== this.meterInfo[i].wo_id) {
+  //           this.meterInfo[i].isConsumptionImg = false;
+  //         }
+  //       }
+  //     } else if (type == 'generate_reading') {
+  //       this.formData.delete('img2');
+  //       this.formData.append('img2', blob, random);
+  //       data.isGenerationImg = true;
+  //       for (var i = 0; i < this.meterInfo.length;i++) {
+  //         if (data.wo_id !== this.meterInfo[i].wo_id) {
+  //           this.meterInfo[i].isGenerationImg = false;
+  //         }
+  //       }
+  //     } else if (type === 'other') {
+  //       this.formData.delete('img3');
+  //       this.formData.append('img3', blob, random);
+  //       data.isOtherImg = true;
+  //       for (var i = 0; i < this.meterInfo.length;i++) {
+  //         if (data.wo_id !== this.meterInfo[i].wo_id) {
+  //           this.meterInfo[i].isOtherImg = false;
+  //         }
+  //       }
+  //     }
+  //     this.presentLoading().then(preLoad => {
+  //       setTimeout(() => {
+  //         this.dismissloading();
+  //       }, 500)
+  //     })
+  // }
+
 
   async presentLoading() {
     this.loading = await this.loadingController.create({
@@ -374,8 +411,6 @@ export class MeterPage implements OnInit {
         return (dat.make.toLowerCase().indexOf(ev.target.value.toLowerCase()) > -1);
       } else if (dat.ext_id.toLowerCase().indexOf(ev.target.value.toLowerCase())> -1) {
         return (dat.ext_id.toLowerCase().indexOf(ev.target.value.toLowerCase()) > -1);
-      } else if (dat.wo_id.toLowerCase().indexOf(ev.target.value.toLowerCase())> -1) {
-        return (dat.wo_id.toLowerCase().indexOf(ev.target.value.toLowerCase()) > -1);
       }
       return;
     });

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, IonDatetime, IonSlides, LoadingController, Platform } from '@ionic/angular';
+import { AlertController, IonDatetime, IonSlides, Platform } from '@ionic/angular';
 import * as moment from 'moment';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
@@ -57,11 +57,13 @@ export class DigitalChecklistPage implements OnInit {
   userData: any = [];
   qrType = 'site';
   qrObject: any = {};
+  isLoop!: boolean;
+  offset = 0;
+  TOTAL_CHECKLIST = 0;
   constructor(
     private common: CommonService,
     private router: Router,
     private httpDigital: DigitalChecklistService,
-    private loadingController: LoadingController,
     private platform: Platform,
     private alertController: AlertController) {
   }
@@ -86,64 +88,119 @@ export class DigitalChecklistPage implements OnInit {
 
   ionViewDidLeave() {
     this.common.setBarcode('');
-    this.dismissloading();
+    this.common.dismissloading();
   }
 
-  ionViewDidEnter() {
-    let split, type, ecn_key, bar = this.common.getBarcode();
-    this.common.setBarcode('');
-    if (this.qrType === 'site') {
-      if (bar) {
-        this.scanBarcodeDetail.isScanBarcode = true;
-        split = bar.split('/');
-        if (split.length === 6) {
-          type = split[4];
-          ecn_key = split[5];
-          let val = this.common.decryptValue(ecn_key);
-          this.scanBarcodeDetail.QRType = type;
-          this.scanBarcodeDetail.QRValue = val;
-          if (val) {
-            this.getCheckListByBarcode(type, val);
-          } else {
-            this.common.presentToast('Invalid Encryption', 'warning');
-          }
-        } else {
-          this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-        }
-      } else if(this.scanBarcodeDetail.isScanBarcode) {
+  // ionViewDidEnter() {
+  //   let split, type, ecn_key, bar = this.common.getBarcode();
+  //   this.common.setBarcode('');
+  //   if (this.qrType === 'site') {
+  //     if (bar) {
+  //       this.scanBarcodeDetail.isScanBarcode = true;
+  //       split = bar.split('/');
+  //       if (split.length === 6) {
+  //         type = split[4];
+  //         ecn_key = split[5];
+  //         let val = this.common.decryptValue(ecn_key);
+  //         this.scanBarcodeDetail.QRType = type;
+  //         this.scanBarcodeDetail.QRValue = val;
+  //         if (val) {
+  //           this.getCheckListByBarcode(type, val);
+  //         } else {
+  //           this.common.presentToast('Invalid Encryption', 'warning');
+  //         }
+  //       } else {
+  //         this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+  //       }
+  //     } else if(this.scanBarcodeDetail.isScanBarcode) {
+  //       this.getCheckListByBarcode(this.scanBarcodeDetail.QRType, this.scanBarcodeDetail.QRValue);
+  //     } else {
+  //       this.checkCurrentDateDG(this.selectedDate);
+  //     }
+  //   } else if (this.qrType === 'verify') {
+  //     this.qrType = 'site';
+  //     split = bar.split('/');
+  //     if (split.length === 6) {
+  //       ecn_key = split[5];
+  //       let val = this.common.decryptValue(ecn_key);
+  //       this.qrType = 'site'
+  //       if (this.qrObject.barcode === val) {
+  //         this.openFillReport(this.qrObject);
+  //       } else {
+  //         this.common.presentToast('You are Scan Wrong QR Code ' + val, 'warning');
+  //       }
+  //     } else {
+  //       this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+  //     }
+  //   } else if (this.qrType === 'loc-verify') {
+  //     this.qrType = 'site';
+  //     split = bar.split('/');
+  //     if (split.length === 6) {
+  //       ecn_key = split[5];
+  //       let val = this.common.decryptValue(ecn_key);
+  //       if (this.qrObject.loc_id === parseInt(val, 10)) {
+  //         this.openFillReport(this.qrObject);
+  //       } else {
+  //         this.common.presentToast('You are Scan Wrong Location QR Code ' + val, 'warning');
+  //       }
+  //     } else {
+  //       this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+  //     }
+  //   }
+  // }
+
+  ionViewDidEnter() {    
+    const bar = this.common.getBarcode();
+    this.common.setBarcode('');    
+    if (!bar && this.qrType === 'site') {
+      if (this.scanBarcodeDetail.isScanBarcode) {
         this.getCheckListByBarcode(this.scanBarcodeDetail.QRType, this.scanBarcodeDetail.QRValue);
       } else {
         this.checkCurrentDateDG(this.selectedDate);
       }
-    } else if (this.qrType === 'verify') {
-      this.qrType = 'site';
-      split = bar.split('/');
-      if (split.length === 6) {
-        ecn_key = split[5];
-        let val = this.common.decryptValue(ecn_key);
-        this.qrType = 'site'
+      return;
+    }
+
+    const split = bar?.split('/') || [];
+    if (split.length !== 6) {
+      this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+      return;
+    }
+
+    const type = split[4];
+    const ecn_key = split[5];
+    const val = this.common.decryptValue(ecn_key);
+
+    switch (this.qrType) {
+      case 'site':
+      this.scanBarcodeDetail.isScanBarcode = true;
+      this.scanBarcodeDetail.QRType = type;
+      this.scanBarcodeDetail.QRValue = val;
+
+      if (val) {
+        this.getCheckListByBarcode(type, val);
+      } else {
+        this.common.presentToast('Invalid Encryption', 'warning');
+      }
+      break;
+
+      case 'verify':
+        this.qrType = 'site';
         if (this.qrObject.barcode === val) {
           this.openFillReport(this.qrObject);
         } else {
-          this.common.presentToast('You are Scan Wrong QR Code ' + val, 'warning');
+          this.common.presentToast(`You are Scan Wrong QR Code ${val}`, 'warning');
         }
-      } else {
-        this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-      }
-    } else if (this.qrType === 'loc-verify') {
-      this.qrType = 'site';
-      split = bar.split('/');
-      if (split.length === 6) {
-        ecn_key = split[5];
-        let val = this.common.decryptValue(ecn_key);
+      break;
+
+      case 'loc-verify':
+        this.qrType = 'site';
         if (this.qrObject.loc_id === parseInt(val, 10)) {
           this.openFillReport(this.qrObject);
         } else {
-          this.common.presentToast('You are Scan Wrong Location QR Code ' + val, 'warning');
+          this.common.presentToast(`You are Scan Wrong Location QR Code ${val}`, 'warning');
         }
-      } else {
-        this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-      }
+      break;
     }
   }
 
@@ -167,6 +224,9 @@ export class DigitalChecklistPage implements OnInit {
         this.allChecklist = data;
         this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned');
         this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned');
+        this.assignCheckList.sort((a: any, b: any) => {
+          return new Date(a.sch_dateTime).getTime() - new Date(b.sch_dateTime).getTime();
+        });
         setTimeout(() => {
           sub.unsubscribe();
         }, 1000);
@@ -208,7 +268,16 @@ export class DigitalChecklistPage implements OnInit {
         }
         this.assignCheckList = [];
         this.attendedCheckList = [];
-        this.getOfflineCheckListFromServer(this.selectedDate);
+        this.common.presentLoading('Deleteing Data from Local Database').then(preLoad => {
+          db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
+            this.common.dismissloading();
+            this.offset = 0;
+            this.TOTAL_CHECKLIST = 0;
+            this.getOfflineCheckListFromServer(this.selectedDate, 0);
+          });
+        })
+
+
         setTimeout(() => {
           sub.unsubscribe();
         },500);
@@ -217,55 +286,112 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   checkCurrentDateDG(date: string) {
-    const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).toArray());
-    const sub = friendsObservable.subscribe({
-      next:(data) => {
-        this.allChecklist = data;
-        this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-        this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-        if (this.allChecklist.length === 0 && this.isInternet) {
-          this.getOfflineCheckListFromServer(date);
+    this.common.presentLoading().then(preLoad => {
+      const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
+      const sub = friendsObservable.subscribe({
+        next:(data) => {
+          this.common.dismissloading();
+          this.allChecklist = data;
+          // console.log(this.allChecklist);
+          // console.log(this.userData.id);
+          this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+          this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+          if (this.allChecklist.length === 0 && this.isInternet) {
+            this.getOfflineCheckListFromServer(date, 0);
+          }
+          setTimeout(() => {
+            sub.unsubscribe();
+          }, 1000);
+        }, error:() => {
+          this.common.presentToast('Please clean your phone Cache', 'warning');
+          this.common.dismissloading();
         }
-        setTimeout(() => {
-          sub.unsubscribe();
-        }, 1000);
-      }
-    });
+      });
+    })
+
   }
 
-  getOfflineCheckListFromServer(date: string) {
-    this.presentLoading('Please Wait, Application is Fetching your Data').then(preLoad => {
-      this.httpDigital.getOfflineCheckListFromServer(date).subscribe({
+  getOfflineCheckListFromServer(date: string, offset: number) {
+    let percentage,tmp_per, msg;
+    if (this.offset && this.TOTAL_CHECKLIST) {
+      tmp_per = ((this.offset * 100) / this.TOTAL_CHECKLIST);
+      if (tmp_per > 100) {
+        tmp_per = 100;
+        percentage = tmp_per.toFixed(2);
+      } else {
+        percentage = tmp_per.toFixed(2);
+      }
+      msg = 'Please Wait, Application is Fetching your Data ' + percentage + '%';
+    } else {
+      msg = 'Please Wait, Application is Fetching your Data ';
+    }
+    this.common.presentLoading(msg).then(preLoad => {
+      this.httpDigital.getOfflineCheckListFromServer(date, offset).subscribe({
         next:(data: any) => {
           if (data.status) {
-            this.allChecklist = data.data;
-            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-            this.addBulkCheckList(this.allChecklist);
+            if(data.data?.data.length > 0) {
+              this.isLoop = true;
+              this.allChecklist = data.data.data;
+              if (this.offset === 0) {
+                this.TOTAL_CHECKLIST = data.data.total;
+              }
+              this.addBulkCheckList(this.allChecklist);
+            } else {
+              this.isLoop = false;
+              this.checkCurrentDateDG(this.selectedDate);
+            }
           } else {
-            this.common.presentToast(data.msg, 'warning');
+            this.common.presentLoading().then(preLoad => {
+              const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
+              const sub = friendsObservable.subscribe({
+                next:(data) => {
+                  this.common.dismissloading();
+                  this.allChecklist = data;
+                  this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+                  this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+                  setTimeout(() => {
+                    sub.unsubscribe();
+                  }, 1000);
+                }
+              });
+            });
           }
         },
-        error:() => {
-          this.dismissloading();
-          this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
+        error:(err: any) => {                    
+          this.common.dismissloading();
+          if (err.message === 'TIMEOUT') {
+            const retry = confirm('Timeout error. Do you want to retry the request?');
+            if (retry) {          
+              this.getOfflineCheckListFromServer(date, offset);
+            }
+          } else {
+            this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
+          }          
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
   }
 
-  async addBulkCheckList(checkListData: any) {
-    await db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
-      await db.checklist.bulkAdd(checkListData);
+  async addBulkCheckList(checkListData: any) {    
+    await db.checklist.bulkPut(checkListData).then(res => {
+      if (this.isLoop && this.TOTAL_CHECKLIST > 300) {
+        this.offset = this.offset + 300;
+        this.getOfflineCheckListFromServer(this.selectedDate, this.offset);
+      } else {
+        this.checkCurrentDateDG(this.selectedDate);
+      }
     });
+    // await db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
+    //   await db.checklist.bulkAdd(checkListData);
+    // });
   }
 
   async deleteCheckList(date: any) {
-    let newDate = moment(date).add(1, 'day').format('YYYY-MM-DD');
-    await db.checklist.where("schedule_date").below(newDate).delete();
+    // let newDate = moment(date).add(3, 'day').format('YYYY-MM-DD');
+    await db.checklist.where("schedule_date").below(date).delete();
   }
 
   async clearChecList() {
@@ -274,26 +400,6 @@ export class DigitalChecklistPage implements OnInit {
 
   openPage(url: string) {
     this.router.navigateByUrl(url);
-  }
-
-  async presentLoading(msg?: any) {
-    let message;
-    if(msg) {
-      message = msg
-    } else {
-      message = 'Please Wait.';
-    }
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: message,
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
   }
 
   changeDateComponent(ev: any) {
@@ -337,6 +443,15 @@ export class DigitalChecklistPage implements OnInit {
       }
     } else {
       this.openFillReport(data);
+      // if (data.barcode) {
+      //   this.qrType = 'verify';
+      //   this.qrObject = data;
+      //   this.router.navigateByUrl('/barcode');
+      // } else {
+      //   this.qrType = 'loc-verify';
+      //   this.qrObject = data;
+      //   this.router.navigateByUrl('/barcode');
+      // }
     }
 
   }
@@ -376,7 +491,7 @@ export class DigitalChecklistPage implements OnInit {
   }
 
   // verifyBarcode(obj: any){
-  //   this.presentLoading().then(preLoad => {
+  //   this.common.presentLoading().then(preLoad => {
   //     this.httpDigital.verifyAssetByQr(obj).subscribe({
   //       next:(dat: any) => {
   //         if (dat.status) {
@@ -386,10 +501,10 @@ export class DigitalChecklistPage implements OnInit {
   //           this.common.presentToast(dat.msg, 'warning');
   //         }
   //       }, error:() => {
-  //         this.dismissloading();
+  //         this.common.dismissloading();
   //         this.common.presentToast(environment.errMsg, 'danger');
   //       }, complete:() => {
-  //         this.dismissloading();
+  //         this.common.dismissloading();
   //       }
   //     })
   //   })

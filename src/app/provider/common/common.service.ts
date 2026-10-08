@@ -3,7 +3,7 @@ import { LoadingController, ModalController, ToastController } from '@ionic/angu
 import { Network } from '@capacitor/network';
 import * as CryptoJS from 'crypto-js';
 import { environment } from 'src/environments/environment';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ImageViewComponent } from 'src/app/shared/image-view/image-view.component';
 import { PdfViewComponent } from 'src/app/shared/pdf-view/pdf-view.component';
@@ -65,6 +65,15 @@ export class CommonService {
     const { role } = await toast.onDidDismiss();
   }
 
+  setImageCondition(url: string, type: string, blobType?: string) {
+    // type httpurl, blob;
+    if (type === 'blob') {
+      this.openImg(url, blobType || 'PRIVATE');
+    } else {
+      this.openDoc(url)
+    }
+  }
+
   openDoc(url: any) {
     if (!url) {
       alert('Attachment Not Available');
@@ -78,15 +87,6 @@ export class CommonService {
       window.open(url, '_system', 'location=no,zoom=yes');
     } else {
       window.open(url, '_blank', 'location=no,zoom=yes');
-    }
-  }
-
-  setImageCondition(url: string, type: string, blobType?: string) {
-    // type httpurl, blob;
-    if (type === 'blob') {
-      this.openImg(url, blobType || 'PRIVATE');
-    } else {
-      this.openDoc(url)
     }
   }
 
@@ -104,7 +104,7 @@ export class CommonService {
               this.pdfView('data:application/pdf;base64,' + data.base64);
             } else {
               this.imageView('data:' + data.contentType + ';base64,' + data.base64, null);
-            }
+            }           
           }
         },
         error:() => {
@@ -143,14 +143,14 @@ export class CommonService {
     return await modal.present();
   }
 
-  async presentLoading(msg?: string) {
+  async presentLoading(msg?: string) {    
     this.loading = await this.loadingController.create({
       message: msg ? msg : 'Please Wait...',
     });
     await this.loading.present();
   }
 
-  dismissloading() {
+  dismissloading() {    
     if (this.loading) {
       this.loading.dismiss();
     }
@@ -163,9 +163,37 @@ export class CommonService {
     });
   }
 
+  async checkNetworkSpeed(): Promise<'Fast' | 'Moderate' | 'Slow' | 'No Internet'> {
+    const { connected } = await Network.getStatus();
+    console.log('Connected:', connected);
+    if (!connected) {
+      return 'No Internet';
+    }
+    
+    const testUrl = environment.url1 + 'img/px.gif';
+    const startTime = Date.now();
+
+    try {
+      await firstValueFrom(this.http.get(testUrl, { responseType: 'blob' }));
+
+      const duration = Date.now() - startTime;
+      console.log('Response time (ms):', duration);
+
+      let speed: 'Fast' | 'Moderate' | 'Slow';
+      if (duration < 500) speed = 'Fast';
+      else if (duration < 1500) speed = 'Moderate';
+      else speed = 'Slow';
+
+      return speed;
+    } catch (error) {
+      console.error('Speed check error:', error);
+      return 'No Internet';
+    }
+  }
+
   decryptValue(encryptedValue: string) {
     var encrypted: any, iv, value, key, key1, decrypted,decrypted1,regex,matches,extractedString
-    encrypted = decodeURIComponent(encryptedValue);
+    encrypted = decodeURIComponent(decodeURIComponent(encryptedValue)); // double decodeURIComponent punit ne lagwai hai kyuki kuch QR Code m double encode lga hua hai pta nhi kese
     try {
       encrypted = atob(encrypted);
       encrypted = JSON.parse(encrypted);

@@ -1,7 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { delay, forkJoin, mergeMap, Observable, of } from 'rxjs';
+import { delay, forkJoin, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
+import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { environment } from 'src/environments/environment';
+import { timeout, catchError } from 'rxjs/operators';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -11,9 +14,27 @@ export class DigitalChecklistService {
     private http: HttpClient
   ) { }
 
-  getOfflineCheckListFromServer(date: string): Observable<any> {
-    // return this.http.get('assets/data/offline_checklist' + date + '.json');
-    return this.http.get(this.baseurl + 'digicheck/offlineapp/getAllPendingChecklist?date=' + date);
+  // getOfflineCheckListFromServer(date: string, offset?: number): Observable<any> {    
+  //   return this.http.get(this.baseurl + 'digicheck/offlineapp/getAllPendingChecklist?date=' + date + '&paginate=1&limit=300&offset=' + offset);
+  // }
+
+  getOfflineCheckListFromServer(date: string, offset: number = 0): Observable<any> {    
+    const apiCall$ = this.http.get(
+      `${this.baseurl}digicheck/offlineapp/getAllPendingChecklist?date=${date}&paginate=1&limit=300&offset=${offset}`
+    );
+    if (offset === 0) {
+      return apiCall$.pipe(
+        timeout(70000), 
+        catchError(err => {
+          if (err.name === 'TimeoutError') {
+            return throwError(() => new Error('TIMEOUT'));
+          }
+          return throwError(() => err);
+        })
+      );
+    } else {
+      return apiCall$;
+    }
   }
 
   getSchedule(): Observable<any> {
@@ -56,11 +77,103 @@ export class DigitalChecklistService {
     return this.http.post(this.baseurl + 'digicheck/update_raised_issued_schudled', formData);
   }
 
-  googleTranslate(data: any, lang: string): Observable<any> {
-    return this.http.post('https://translate.googleapis.com/language/translate/v2?key=AIzaSyDJjHphpheVQM7CRYNqHHdJqMqAgt0IY70', {
-      "q": data,
-      "target": lang
+  // ---------------- AI Studio translate ----------------
+  // AI Studio ka CORS middleware Origin header aate hi 500 deta hai.
+  // Native: CapacitorHttp OS ke HTTP stack se jaata hai - na Origin, na preflight.
+  // Web: browser Origin bhejega hi, isliye cors proxy ke through Angular HttpClient.
+  private get aiStudioHeaders(): any {
+    return {
+      'X-API-Key': environment.aiStudioKey,
+      'X-Environment': environment.aiStudioEnv,
+      'Content-Type': 'application/json'
+    };
+  }
+
+  aiStudioPost(path: string, body: any): Observable<any> {
+    if (Capacitor.isNativePlatform()) {
+      return from(CapacitorHttp.post({
+        url: environment.aiStudioUrl + path,
+        headers: this.aiStudioHeaders,
+        data: body
+      })).pipe(
+        // CapacitorHttp 4xx/5xx par reject nahi karta, isliye status khud check karna padta hai
+        mergeMap((res: any) => res.status >= 400
+          ? throwError(() => ({ status: res.status, statusText: 'Error', error: res.data }))
+          : of(res.data))
+      );
+    }
+    return this.http.post(
+      environment.aiStudioWebProxy + environment.aiStudioUrl + path,
+      body,
+      { headers: new HttpHeaders(this.aiStudioHeaders) }
+    );
+  }
+
+  // ek hi string translate karke sirf translated text deta hai (voice response ke liye)
+  aiStudioTranslate(text: string, lang: string): Observable<string> {
+    return this.aiStudioTranslateBatch([text], lang).pipe(map(res => res[0] || text));
+  }
+
+  // API ek call me sirf 5000 characters leta hai, isliye 4500 par chunk todte hain
+  private readonly aiChunkLimit = 4500;
+  private readonly aiTextLimit = 5000;
+
+  // Contract: string[] andar, string[] bahar, same order.
+  // Andar: saari lines ek hi call me '\n' se jodkar jaati hain (API line breaks preserve karta hai).
+  aiStudioTranslateBatch(strings: any[], lang: string): Observable<string[]> {
+    // Question ke andar khud ka \n ho sakta hai - usse split par line count badal jaata,
+    // isliye pehle usko space bana dete hain. Yahi is approach ki sabse zaroori safety hai.
+    const lines: string[] = (strings || []).map((val: any) =>
+      (val === null || val === undefined ? '' : String(val)).replace(/[\r\n]+/g, ' ').trim()
+    );
+
+    const chunks: string[][] = [];
+    let current: string[] = [];
+    let currentLen = 0;
+    lines.forEach((line: string) => {
+      const size = line.length + 1;
+      if (current.length && currentLen + size > this.aiChunkLimit) {
+        chunks.push(current);
+        current = [];
+        currentLen = 0;
+      }
+      current.push(line);
+      currentLen = currentLen + size;
     });
+    if (current.length) {
+      chunks.push(current);
+    }
+    if (!chunks.length) {
+      return of([]);
+    }
+
+    const calls = chunks.map((chunk: string[]) => {
+      const text = chunk.join('\n');
+      // khaali chunk ya ek hi line limit se badi - API call ka fayda nahi, original hi rakho
+      if (!text.trim() || text.length > this.aiTextLimit) {
+        return of({ lines: chunk, ok: true, err: null });
+      }
+      return this.aiStudioPost('translate', { text, to: lang }).pipe(
+        map((res: any) => {
+          const out = res?.data?.translations?.[0]?.text;
+          const back = typeof out === 'string' ? out.split('\n').map((val: string) => val.trim()) : [];
+          // count match na ho to translation bharosemand nahi - warna galat text galat
+          // question par lag jaayega. Aise me us chunk ka original text hi rehne dete hain.
+          return { lines: back.length === chunk.length ? back : chunk, ok: true, err: null };
+        }),
+        catchError((err: any) => of({ lines: chunk, ok: false, err }))
+      );
+    });
+
+    return forkJoin(calls).pipe(
+      mergeMap((res: any[]) => {
+        // ek-aadha chunk fail ho to baaki translate dikha dete hain, sab fail ho to error
+        if (res.every((val: any) => !val.ok)) {
+          return throwError(() => res[0].err);
+        }
+        return of(([] as string[]).concat(...res.map((val: any) => val.lines)));
+      })
+    );
   }
 
   getMultipleData(data: any): Observable<any[]> {
@@ -107,7 +220,7 @@ export class DigitalChecklistService {
   //     const { method, url, data, delayTime, id } = request;
 
   //     // Check if a delayTime is provided and if it's for the specific id
-  //     const delayObservable = url === 'https://hr-access.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/dash/mobile_app_engineer_dashboard'
+  //     const delayObservable = url === 'https://socampus-8db369a81c0c.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/dash/mobile_app_engineer_dashboard'
   //       ? of(null).pipe(delay(10000))
   //       : of(null);
 

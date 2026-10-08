@@ -10,10 +10,12 @@ import { environment } from 'src/environments/environment';
 })
 export class PmAssignComponent  implements OnInit {
   allTeamMember: any = [];
+  allTeamMemberCopy: any = [];
   user_id!: string;
   data: any;
   work_order: any = [];
   loading: any;
+  wo_no!: string;
   constructor(
     private httpPms: PmCalService,
     private loadingController: LoadingController,
@@ -21,13 +23,17 @@ export class PmAssignComponent  implements OnInit {
     private modalCtrl: ModalController
   ) { }
 
-  ngOnInit() {
+  ngOnInit() {        
     if (this.data) {
       if (this.data.length) {
+        if (this.data.length === 1) {
+          this.wo_no = this.data[0].wo_no
+        }
         for (var i = 0 ; i < this.data.length; i++) {
           this.work_order.push(this.data[i]);
         }
       } else {
+        this.wo_no = this.data.wo_no
         this.work_order.push(this.data);
       }
     }
@@ -36,11 +42,18 @@ export class PmAssignComponent  implements OnInit {
 
 
   getAllEmp() {
-    this.presentLoading().then(preLoad => {
-      this.httpPms.getAllEmployee().subscribe({
+    let pc_id: any;
+    if (this.data.length > 0) {
+      pc_id = this.data[0].pc_id
+    } else {
+      pc_id = this.data.pc_id;
+    }
+    this.presentLoading().then(preLoad => {      
+      this.httpPms.getAllEmployee(pc_id).subscribe({
         next:(data) => {
           if (data.status) {
             this.allTeamMember = data.data;
+            this.allTeamMemberCopy = data.data
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -86,6 +99,20 @@ export class PmAssignComponent  implements OnInit {
         }
       });
     });
+  }
+
+  search(ev: any) {
+    let val: any;
+    val = ev.target.value;
+    this.allTeamMember = this.allTeamMemberCopy;
+    if (val && val.trim() !== '') {
+      this.allTeamMember = this.allTeamMember.filter((dat: any) => {
+        if ((dat.label.toLowerCase().indexOf(val.toLowerCase()) > -1)) {
+          return (dat.label.toLowerCase().indexOf(val.toLowerCase()) > -1);
+        }
+        return
+      });
+    }
   }
 
   async presentLoading() {

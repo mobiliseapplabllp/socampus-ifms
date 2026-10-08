@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingController, MenuController, ModalController, Platform } from '@ionic/angular';
@@ -9,7 +9,9 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
 import { env } from 'process';
 import { App } from '@capacitor/app';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 import * as moment from 'moment';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +19,7 @@ import * as moment from 'moment';
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage implements OnInit {
-  login = { userid: '', password: ''};
+  login = { userid: 'Admin', password: '' };
   submitted = false;
   userValue: any = [];
   isHidden = true;
@@ -42,6 +44,13 @@ export class LoginPage implements OnInit {
   currentVersion: any = [];
   isProduction = environment.isProd;
   appVersion!: string;
+  isDateValid!: boolean;
+  // Shared options for every in-app browser (SSO). Toolbar poora off hai - iOS par wo
+  // niche translucent "Done" + back/forward buttons deta tha jo SSO flow me kaam ke nahi.
+  // Browser ab sirf khud band hota hai: loadstart par redirect match hone par, ya loaderror par.
+  private readonly iabOptions = 'location=no,zoom=yes,toolbar=no';
+  // True while an SSO in-app browser is open, so the login footer can hide behind its toolbar.
+  ssoBrowserOpen = false;
   constructor(
     private formbuilder: FormBuilder,
     private platform: Platform,
@@ -50,7 +59,9 @@ export class LoginPage implements OnInit {
     private router: Router,
     private loginPro: LoginService,
     private common: CommonService,
-    private iab: InAppBrowser) {
+    private iab: InAppBrowser,
+    private zone: NgZone,
+    private camera: CameraService) {
     this.loginForms = this.formbuilder.group({
       userid: ['', Validators.required],
       password: ['' , Validators.required],
@@ -59,6 +70,9 @@ export class LoginPage implements OnInit {
 
 
   ngOnInit() {    
+    if (moment().format('YYYY-MM-DD') === '2025-09-19') {
+      this.isDateValid = true;      
+    }
     this.common.setBarcode('');
     if (this.platform.is('capacitor')) {
       this.initFcm();
@@ -160,8 +174,18 @@ export class LoginPage implements OnInit {
     });
   }
 
+  // The translucent SSO toolbar (iOS 26) shows the app screen behind it, so the login page's
+  // "Powered By" footer bleeds through. Hide that footer while an SSO browser is open and
+  // restore it when the browser is closed (exit fires on Done and on programmatic close).
+  private openSsoBrowser(url: string) {
+    this.ssoBrowserOpen = true;
+    const browser = this.iab.create(url, '_blank', this.iabOptions);
+    browser.on('exit').subscribe(() => this.zone.run(() => { this.ssoBrowserOpen = false; }));
+    return browser;
+  }
+
   openInAppBrowser() {
-    let browser = this.iab.create(environment.ssoUrl + 'ssoGates/saml2/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let browser = this.openSsoBrowser(environment.ssoUrl + 'ssoGates/saml2/index.php?sso');
     let count = 0;
     browser.on('loadstart').subscribe((data: any) => {
       if (data.url.match(environment.ssoUrl + '#/auth/ssoGates/')) {
@@ -174,6 +198,11 @@ export class LoginPage implements OnInit {
           this.getSsoEnc(token);
         }
       }
+      // Toolbar off hai, isliye page ka apna Back hi ekmatra exit hai - wo yahin land karta hai.
+      // openKeyClock() me bhi bilkul yahi condition hai.
+      if (data.url === environment.ssoUrl || data.url === environment.ssoUrl + 'be/apiloading' || data.url === environment.ssoUrl + '#/auth') {
+        browser.close();
+      }
     });
 
     browser.on('loaderror').subscribe(error => {
@@ -184,7 +213,7 @@ export class LoginPage implements OnInit {
   }
 
   openKeyClock() {
-    let browser = this.iab.create(environment.ssoUrl + 'ssoGates/saml3/index.php?sso', '_blank', 'location=no,zoom=yes');
+    let browser = this.openSsoBrowser(environment.ssoUrl + 'ssoGates/saml3/index.php?sso');
     let count = 0;
     browser.on('loadstart').subscribe(data => {
       if (data.url.match(environment.ssoUrl + '#/auth/ssoGates/')) {
@@ -197,9 +226,15 @@ export class LoginPage implements OnInit {
           this.getSsoEnc(token);
         }
       }
-      if (data.url === environment.ssoUrl || data.url === environment.ssoUrl + 'be/apiloading') {
+      // https://socampusstaging.mobilisepro.com/#/auth
+      if (data.url === environment.ssoUrl || data.url === environment.ssoUrl + 'be/apiloading' || data.url === environment.ssoUrl + '#/auth') {
         browser.close();
       }
+    });
+
+    browser.on('loaderror').subscribe(error => {            
+      alert(JSON.stringify(error));
+      browser.close();
     });
 
     browser.on('loaderror').subscribe(error => {
@@ -230,12 +265,15 @@ export class LoginPage implements OnInit {
               localStorage.setItem('user', JSON.stringify(this.userValue.user));
               localStorage.setItem('isAlreadyLogin', 'true');
               localStorage.setItem('loginDate', moment().format('YYYY-MM-DD'));
-              // this.multiFactorSubmit();
+              this.loginPro.username.next(this.userValue.user);
+              let val = this.userValue.user.current_punch_status === 'IN' || this.userValue.user.current_punch_status === 'FORCE_PUNCH_IN'  ? true: false;
+              this.loginPro.setPunchStatus(val);              
               this.checkAppUpdate();
             }
           }
         },
-        error:() => {
+        error:(err: any) => {
+          console.log(err);
           this.common.presentToast(environment.errMsg, 'danger');
           this.dismissloading();
         },
@@ -266,6 +304,7 @@ export class LoginPage implements OnInit {
             localStorage.setItem('token1', data.token);
             localStorage.setItem('enc_id', data.enc_id);
             localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('punchStatus',JSON.stringify(data.current_punch_status));
             localStorage.setItem('isAlreadyLogin', 'true');
             this.checkAppUpdate();
             // this.multiFactorSubmit();
@@ -285,16 +324,18 @@ export class LoginPage implements OnInit {
   }
 
   checkAppUpdate() {
-    this.common.getAppVersionObs().subscribe(data => {
+    this.common.getAppVersionObs().pipe(take(1)).subscribe(data => {
       this.appUpdate = data;
-      if (this.platform.is('android')) {
+      if (this.platform.is('capacitor')) {
         this.isAndroid = true;
         App.getInfo().then(res => {
           const curVersion = res.version.toString();
           this.currentVersion = curVersion.toString();
           if (this.appUpdate.is_view && this.appUpdate.forceupdate && (this.appUpdate.vesrion !== this.currentVersion)) {
-            this.openPlayStore(this.appUpdate.url);
             this.common.presentToast('Please Update your App', 'warning');
+            setTimeout(() => {
+              this.openPlayStore(this.appUpdate.url);            
+            });            
           } else {
             this.multiFactorSubmit();
           }
@@ -306,8 +347,8 @@ export class LoginPage implements OnInit {
     });
   }
 
-  openPlayStore(url: string) {
-    window.open(url);
+  openPlayStore(url: string) {    
+    this.iab.create(url, '_system', 'location=no,zoom=yes');
   }
 
   multiFactorSubmit() {
@@ -331,23 +372,32 @@ export class LoginPage implements OnInit {
   openPage(url: any) {
     this.router.navigateByUrl(url);
   }
-
+  
+ //|| !this.isDateValid
   changeAuth() {
-    if (!this.isProduction) {
-      this.viewCondition = 'login';
+    if (this.isProduction) {
+      return;
     }
+    this.viewCondition = 'login';
   }
 
   openBarcode() {
-    return;    
+    return;
+    if (!this.isProduction) {
+      // this.router.navigateByUrl('/barcode');
+      this.camera.selectImage(['camera'], (blob: any) => {
+        let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg';
+
+      });
+    }
   }
 
   dummyLogin() {
     if (this.isProduction) {
       return;
     }
-    // https://socampus.mobilisepro.com/#/auth/ssoGates/aUrotW37P_wDb2S-E-jKCExITnBIYnozWG54Y2w1NVlCOWRmdm8zWWRocGdjV3FEYlRxVWJaUmxqakZFbUlyOE4zcStEMXhrbEQ1b2ZsSGJ2TWVPc25HSGM2eDc5eVdGb1EyWnRnemNrWWlkZU1xMHkrcm5YOUw0RUt2aVdnSG5iaXdlUjlwQTQrYitzQzV6
-    let token = 'aUrotW37P_wDb2S-E-jKCExITnBIYnozWG54Y2w1NVlCOWRmdm8zWWRocGdjV3FEYlRxVWJaUmxqakZFbUlyOE4zcStEMXhrbEQ1b2ZsSGJ2TWVPc25HSGM2eDc5eVdGb1EyWnRnemNrWWlkZU1xMHkrcm5YOUw0RUt2aVdnSG5iaXdlUjlwQTQrYitzQzV6';
+    // https://socampus.mobilisepro.com/#/auth/ssoGates/rYtHCfzt_YuSA1KhKsBS3W4yWHVTSDc2NjJ0M1ZqT2VYZnR3Mk92eFFZOW4vc2RhMXlmZzZhZll2WHYvU1lTb0JudVEyZ3ZySWVLakNuUExYNmloUjJaN2tsZUVxa29ZK2g3SlNSM1RPNXJRdGxCTzF5dkJtTHpGZjlLR243cXp3d1ExL0J0ckNUQmJkS0dZ
+    let token = 'rYtHCfzt_YuSA1KhKsBS3W4yWHVTSDc2NjJ0M1ZqT2VYZnR3Mk92eFFZOW4vc2RhMXlmZzZhZll2WHYvU1lTb0JudVEyZ3ZySWVLakNuUExYNmloUjJaN2tsZUVxa29ZK2g3SlNSM1RPNXJRdGxCTzF5dkJtTHpGZjlLR243cXp3d1ExL0J0ckNUQmJkS0dZ';
     this.getSsoEnc(token);
   }
 }

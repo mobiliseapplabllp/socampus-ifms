@@ -1,121 +1,276 @@
+// ——— App side menu ———
+.menu-header {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+
+.menu-toolbar {
+  --min-height: auto;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+.menu-toolbar-inner {
+  padding: 16px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.menu-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.menu-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 28px;
+    color: rgba(255, 255, 255, 0.95);
+  }
+}
+
+.menu-profile-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.menu-user-name {
+  margin: 0 0 4px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.menu-user-meta {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.menu-user-type {
+  text-transform: capitalize;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+// Punch card (on primary toolbar)
+.punch-card {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 12px 14px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.punch-card-title {
+  margin: 0 0 10px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.punch-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.punch-side-label {
+  font-weight: 700;
+  font-size: 0.875rem;
+  min-width: 2rem;
+  text-align: center;
+}
+
+.punch-in-text {
+  color: #8effb0;
+}
+
+.punch-out-text {
+  color: #ffb4b4;
+}
+
+.punch-hint {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+ion-toggle.toggle--in {
+  --background: rgba(46, 204, 113, 0.55);
+  --handle-background: #fff;
+}
+
+ion-toggle.toggle--out {
+  --background: rgba(231, 76, 60, 0.5);
+  --handle-background: #fff;
+}
+
+// Menu body
+.menu-content {
+  --background: var(--ion-color-light, #f4f5f8);
+}
+
+.menu-list {
+  background: transparent;
+  padding: 12px 10px 24px;
+}
+
+.menu-item {
+  --background: var(--ion-background-color, #fff);
+  --border-radius: 12px;
+  --padding-start: 12px;
+  --padding-end: 10px;
+  --inner-padding-end: 8px;
+  --min-height: 52px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.menu-item-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--ion-color-light, #f4f5f8);
+  margin-inline-end: 4px;
+}
+
+.menu-item-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.menu-item-ion-icon {
+  font-size: 22px;
+  margin-inline-end: 4px;
+  color: var(--ion-color-danger, #eb445a);
+}
+
+.menu-item-label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+}
+
+.menu-item-chevron {
+  font-size: 18px;
+  color: var(--ion-color-medium, #92949c);
+  opacity: 0.7;
+}
+
+.menu-item--logout {
+  --background: rgba(var(--ion-color-danger-rgb, 235, 68, 90), 0.08);
+
+  .menu-item-label {
+    color: var(--ion-color-danger-shade, #cf3c4f);
+    font-weight: 700;
+  }
+}
+
+.menu-divider {
+  height: 1px;
+  margin: 16px 8px;
+  background: var(--ion-color-step-150, #d7d8da);
+  opacity: 0.6;
+}
+
+// Footer version
+.menu-footer-toolbar {
+  --min-height: 52px;
+  --background: var(--ion-color-light, #f4f5f8);
+  --border-width: 0;
+}
+
+.version-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 auto;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ion-color-step-100, #e7e8ea);
+  color: var(--ion-color-medium-shade, #737373);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+
+  ion-icon {
+    font-size: 16px;
+    opacity: 0.85;
+  }
+
+  &:active {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+// Legacy Ionic menu templates (keep for platform tweaks)
 ion-menu ion-content {
   --background: var(--ion-item-background, var(--ion-background-color, #fff));
 }
 
 ion-menu.md ion-content {
-  --padding-start: 8px;
-  --padding-end: 8px;
-  --padding-top: 20px;
-  --padding-bottom: 20px;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
 }
 
 ion-menu.md ion-list {
-  padding: 20px 0;
-}
-
-ion-menu.md ion-note {
-  margin-bottom: 30px;
-}
-
-ion-menu.md ion-list-header,
-ion-menu.md ion-note {
-  padding-left: 10px;
-}
-
-ion-menu.md ion-list#inbox-list {
-  border-bottom: 1px solid var(--ion-color-step-150, #d7d8da);
-}
-
-ion-menu.md ion-list#inbox-list ion-list-header {
-  font-size: 22px;
-  font-weight: 600;
-
-  min-height: 20px;
-}
-
-ion-menu.md ion-list#labels-list ion-list-header {
-  font-size: 16px;
-
-  margin-bottom: 18px;
-
-  color: #757575;
-
-  min-height: 26px;
+  padding: 0;
 }
 
 ion-menu.md ion-item {
   --padding-start: 10px;
   --padding-end: 10px;
-  border-radius: 4px;
-}
-
-ion-menu.md ion-item.selected {
-  --background: rgba(var(--ion-color-primary-rgb), 0.14);
-}
-
-ion-menu.md ion-item.selected ion-icon {
-  color: var(--ion-color-primary);
-}
-
-ion-menu.md ion-item ion-icon {
-  color: #616e7e;
-}
-
-ion-menu.md ion-item ion-label {
-  font-weight: 500;
 }
 
 ion-menu.ios ion-content {
-  --padding-bottom: 20px;
+  --padding-bottom: 8px;
 }
 
 ion-menu.ios ion-list {
-  padding: 20px 0 0 0;
-}
-
-ion-menu.ios ion-note {
-  line-height: 24px;
-  margin-bottom: 20px;
+  padding: 0;
 }
 
 ion-menu.ios ion-item {
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --min-height: 50px;
-}
-
-ion-menu.ios ion-item.selected ion-icon {
-  color: var(--ion-color-primary);
-}
-
-ion-menu.ios ion-item ion-icon {
-  font-size: 24px;
-  color: #73849a;
-}
-
-ion-menu.ios ion-list#labels-list ion-list-header {
-  margin-bottom: 8px;
-}
-
-ion-menu.ios ion-list-header,
-ion-menu.ios ion-note {
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-ion-menu.ios ion-note {
-  margin-bottom: 8px;
-}
-
-ion-note {
-  display: inline-block;
-  font-size: 16px;
-
-  color: var(--ion-color-medium-shade);
+  --padding-start: 12px;
+  --padding-end: 12px;
 }
 
 ion-item.selected {
   --color: var(--ion-color-primary);
 }
-
-

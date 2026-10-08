@@ -1,17 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ActionSheetController, AlertController, LoadingController, ModalController, NavController, Platform } from '@ionic/angular';
+import { ActionSheetController, AlertController, ModalController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
-import { Camera, CameraResultType } from '@capacitor/camera';
 import { AssignTicketComponent } from '../assign-ticket/assign-ticket.component';
 import { SignatureComponent } from 'src/app/shared/signature/signature.component';
 import { InstructionModalComponent } from '../instruction-modal/instruction-modal.component';
 import { MediaCapture, CaptureVideoOptions } from '@awesome-cordova-plugins/media-capture/ngx';
 import { Filesystem } from '@capacitor/filesystem';
 import { CaptureComponent } from 'src/app/shared/capture/capture.component';
+import { CameraService } from 'src/app/provider/camera/camera.service';
+import { TicketHoldComponent } from '../ticket-hold/ticket-hold.component';
 
 @Component({
   selector: 'app-ticket-work',
@@ -59,7 +60,10 @@ export class TicketWorkComponent  implements OnInit {
   selectedFile: any;
 
   videoBlob: Blob | null = null;
-  compressedVideoUrl: string | null = null;
+  compressedVideoUrl: string | null = null;  
+  canHoldTicket!: boolean;
+  canUnHoldticket!: boolean;
+  canCreateIndent!: boolean;
   constructor(
     private activeRoute: ActivatedRoute,
     private formbuilder: FormBuilder,
@@ -70,15 +74,25 @@ export class TicketWorkComponent  implements OnInit {
     private modalCtrl: ModalController,
     private actionSheetController: ActionSheetController,
     private router: Router,
-    private loadingController: LoadingController,
     private mediaCapture: MediaCapture,
     private modalController: ModalController,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
     this.activeRoute.queryParams.subscribe((res) => {
-      this.requestedData_TEMP = JSON.parse(res['data']);
-      this.requestedData = this.requestedData_TEMP.data;
+      this.requestedData_TEMP = JSON.parse(res['data']);                  
+      console.log(this.requestedData_TEMP);
+      // <ion-button expand="block" shape="round" color="tertiary" class="ion-text-capitalize" *ngIf="requestedData_TEMP?.pi_action_permision?.can_hold_ticket" (click)="openTicketHold()">Place on Hold</ion-button>
+      // <ion-button expand="block" shape="round" color="success" class="ion-text-capitalize" *ngIf="requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold" (click)="presentAlertConfirm()">Remove on Hold</ion-button>
+
+      this.canHoldTicket = this.requestedData_TEMP?.pi_action_permision?.can_hold_ticket;
+      this.canUnHoldticket = this.requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold;
+      
+      // this.canCreateIndent = this.requestedData_TEMP?.data?.tkts_asset_id !== null && this.requestedData_TEMP?.data?.tkts_asset_id !== 0 && this.requestedData_TEMP?.pi_action_permision.can_perform_pi_action;
+      this.canCreateIndent = this.requestedData_TEMP?.pi_action_permision.can_perform_pi_action;
+      console.log(this.canCreateIndent);
+      this.requestedData = this.requestedData_TEMP.data;      
       this.ticket_id = this.requestedData.tkts_id;
       this.mobile = this.requestedData.mobile
       this.initForm();
@@ -113,14 +127,14 @@ export class TicketWorkComponent  implements OnInit {
       this.formData.append('img[]', file, random);
       this.fileName = random;
       this.isOtpSent = false;
-      this.presentLoading().then(preLoad => {
-        this.dismissLoading();
+      this.httpCommon.presentLoading().then(preLoad => {
+        this.httpCommon.dismissloading();
       });
     }
   }
 
   getSpecificTicket(ticket_id: any) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.getSpecificTicket(ticket_id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -154,11 +168,11 @@ export class TicketWorkComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissLoading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissLoading();
+          this.httpCommon.dismissloading();
         }
       });
     });
@@ -196,7 +210,7 @@ export class TicketWorkComponent  implements OnInit {
       id: ev.target.value,
       ticket_id: this.ticket_id,
     }
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.changePriority(obj).subscribe({
         next:(data) => {
           if (data.status) {
@@ -208,11 +222,11 @@ export class TicketWorkComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissLoading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissLoading();
+          this.httpCommon.dismissloading();
         }
       });
     });
@@ -253,15 +267,15 @@ export class TicketWorkComponent  implements OnInit {
         this.httpCommon.presentToast(environment.errMsg, 'danger');
       },
       complete:() => {
-        this.dismissLoading();
+        this.httpCommon.dismissloading();
       }
     });
   }
 
   getTicketStages() {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.getTicketStages().subscribe(data => {
-        this.dismissLoading();
+        this.httpCommon.dismissloading();
         if (data.status) {
           this.ticketStages = data.data;
 
@@ -293,6 +307,9 @@ export class TicketWorkComponent  implements OnInit {
 
           setTimeout(() => {
             this.workSpace.get('status')?.setValue(3);
+            if (this.requestedData_TEMP?.pi_action_permision?.is_ticket_on_hold || this.requestedData_TEMP?.pi_action_permision?.ticket_is_on_hold_process) {
+              this.workSpace.disable();
+            }      
           }, 1000);
         }
       });
@@ -308,6 +325,28 @@ export class TicketWorkComponent  implements OnInit {
     } else {
       this.submitTicket();
     }
+  }
+
+  async openTicketHold() {
+    const modal = await this.modalCtrl.create({
+      component: TicketHoldComponent,
+      cssClass: 'my-modal_',
+      backdropDismiss:false,
+      componentProps: { 
+        pc_id: this.requestedData_TEMP.data.pc_id,
+        tkts_id: this.requestedData_TEMP.data.tkts_id,
+        hold_validation: this.requestedData_TEMP.pi_action_permision?.hold_validation
+      }
+    });    
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role == 'true') {
+        this.workSpace.disable();         
+        // this.requestedData_TEMP.pi_action_permision.can_hold_ticket = false;
+        this.canHoldTicket = !this.canHoldTicket;
+        this.canUnHoldticket = !this.canUnHoldticket;
+      }
+    });
+    modal.present();
   }
 
   async openInstructionModal() {
@@ -380,7 +419,7 @@ export class TicketWorkComponent  implements OnInit {
       return;
     }
 
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.submitTicketTransaction(this.formData).subscribe({
         next:(data) => {
           if (data.status) {
@@ -394,11 +433,11 @@ export class TicketWorkComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissLoading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissLoading();
+          this.httpCommon.dismissloading();
         }
       });
     })
@@ -419,14 +458,14 @@ export class TicketWorkComponent  implements OnInit {
       path: fullPath,
     });
 
-    this.presentLoading().then(async preLoad => {
+    this.httpCommon.presentLoading().then(async preLoad => {
       const base64Video = `data:video/mp4;base64,${file.data}`
       const base64Response = await fetch(base64Video);
       const blob = await base64Response.blob();
       this.formData.delete('video');
       this.formData.append('video', blob, random);
       this.isVidUpl = true;
-      this.dismissLoading();
+      this.httpCommon.dismissloading();
     })
 
 }
@@ -464,7 +503,7 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   getScopeOfWork() {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.getScopeOfWork().subscribe({
         next:(data) => {
           if (data.status) {
@@ -477,7 +516,7 @@ export class TicketWorkComponent  implements OnInit {
           this.httpCommon.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissLoading();
+          this.httpCommon.dismissloading();
         }
       })
     });
@@ -490,48 +529,26 @@ export class TicketWorkComponent  implements OnInit {
   }
 
   async presentActionSheet(val: string) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-      this.readImg(image, val)
-    };
-    takePicture();
+    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
+      this.readImg(blob, val);
+    });
   }
 
   async readImg(photo: any, val: string) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     if (val === 'image') {
       this.formData.delete('img[]');
-      this.formData.append('img[]', blob, random);
+      this.formData.append('img[]', photo, random);
       this.fileName = random;
     } else if (val === 'ppe') {
       this.formData.delete('ppeKitAttach');
-      this.formData.append('ppeKitAttach', blob, random);
+      this.formData.append('ppeKitAttach', photo, random);
       this.ppeFileName = random;
     }
 
-    this.presentLoading().then(preLoad => {
-      this.dismissLoading();
+    this.httpCommon.presentLoading().then(preLoad => {
+      this.httpCommon.dismissloading()
     })
-  }
-
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...',
-    });
-    await this.loading.present();
-  }
-
-  dismissLoading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
   }
 
   viewAttachment(img: string) {
@@ -543,10 +560,10 @@ export class TicketWorkComponent  implements OnInit {
       phone_no: this.mobile,
       ticket_id: this.ticket_id
     }
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.isOtpSent = false;
       this.httpComplaint.otpSend(obj).subscribe(data => {
-        this.dismissLoading();
+        this.httpCommon.dismissloading();
         if (data.status) {
           this.httpCommon.presentToast(data.msg, 'success');
           this.isOtpSent = true;
@@ -564,9 +581,9 @@ export class TicketWorkComponent  implements OnInit {
       otp: this.workSpace.value.otp,
       ticket_id: this.ticket_id
     }
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpComplaint.verify_otp(obj).subscribe(data => {
-        this.dismissLoading();
+        this.httpCommon.dismissloading();
         if (data.status) {
           this.httpCommon.presentToast(data.msg, 'success');
           this.isVerifyOtp = true;
@@ -671,5 +688,77 @@ export class TicketWorkComponent  implements OnInit {
     this.isOtpSent = false;
     this.isVerifyOtp = false;
   }
+
+  openRoute(url: string) {    
+    this.router.navigate([url], {
+      state: {
+        data: this.requestedData_TEMP,
+        type: 'ticket',
+      }
+    });
+  }
+
+  async presentAlertConfirm() {
+    const alert = await this.alertCtrl.create({
+      cssClass: 'my-custom-class',
+      header: 'Warning',
+      message: 'Once the Status is changed, it can not be undone.',
+      mode: 'ios',
+      inputs: [{
+        name: 'remark',
+        type:'textarea',
+        placeholder: 'Enter Remarks',
+      }],
+      buttons: [{
+        text:'In Progress',
+        cssClass: 'alert-bold-btn',
+        handler: (dat) => {
+          if(dat.remark){
+            const obj = {
+              unHoldRemark: dat.remark,
+              tkts_id: this.ticket_id,
+              pc_id: this.requestedData.pc_id,
+              source: environment.source,
+              action_type: 'UNHOLD'
+            }                          
+            this.unholdAction(obj);
+          } else {
+            this.httpCommon.presentToast('Please Enter Remark', 'warning');
+          }
+        }
+      }, {
+        text: 'Cancel',
+        cssClass: 'alert-light-btn',
+        handler: (data) => {
+        }
+      }]
+    });
+    await alert.present();
+  }
+
+  unholdAction(obj: any) {
+    this.httpCommon.presentLoading().then(preLoad => {
+      this.httpComplaint.ticketHoldAction(obj).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.canHoldTicket = !this.canHoldTicket;
+            this.canUnHoldticket = !this.canUnHoldticket;
+            this.httpCommon.presentToast(data.msg, 'success');
+            this.workSpace.enable();
+          } else {
+            this.httpCommon.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.httpCommon.dismissloading();
+          this.httpCommon.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.httpCommon.dismissloading();
+        }
+      });
+    });    
+  }
+
 
 }

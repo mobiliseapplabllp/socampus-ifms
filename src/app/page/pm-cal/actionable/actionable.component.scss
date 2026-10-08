@@ -1,0 +1,134 @@
+ion-progress-bar {
+  height:7px;
+  border-radius:3px;
+}
+
+.disabled {
+  pointer-events: none; /* Disables click events */
+  opacity: 0.5; /* Makes the div look disabled */
+  // background-color: #e0e0e0; /* Optional: gives a grayed-out effect */
+}
+
+ion-segment-button {
+  text-transform: none; /* Or capitalize, lowercase */
+}
+
+.modal-content1 {
+  --background:linear-gradient(180deg, var(--ion-color-primary-dark), var(--ion-color-primary));
+}
+
+ion-modal.previous {
+  --border-radius: 20px 20px 0 0; /* Apply border-radius to the top */
+  --width: 100%;
+  --height: 50%;
+  --border-radius: 16px 16px 0 0; /* Rounded top corners */
+  --top: auto;
+  --bottom: 0px !important;
+
+  font-weight: 600;
+  ion-row {
+    ion-col {
+      padding:1px;
+    }
+    ion-col:nth-child(odd) {
+      color: rgba(42, 41, 92, 0.72);
+      font-family: 'opensans_bold' !important;
+    }
+    ion-col:nth-child(even) {
+      color: #2A295C;
+      font-family: 'opensans_regular' !important;
+
+    }
+  }
+}
+
+ion-modal.more-info {
+  --border-radius: 20px 20px 0 0; /* Apply border-radius to the top */
+  --width: 100%;
+  --height: 30%;
+  --border-radius: 16px 16px 0 0; /* Rounded top corners */
+  --top: auto;
+  --bottom: 0px !important;
+  font-weight: 600;
+  ion-row {
+    ion-col {
+      padding:1px;
+      font-size: 12px
+    }
+    ion-col:nth-child(odd) {
+      color: rgba(42, 41, 92, 0.72);
+      font-family: 'opensans_bold' !important;
+    }
+    ion-col:nth-child(even) {
+      color: #2A295C;
+      font-family: 'opensans_regular' !important;
+
+    }
+  }
+}
+
+.images {
+  border: 2px solid #C4C4C4;
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+  margin-left: -7px;
+  background-color: #fff ;
+  text-align: center;
+}
+
+.line {
+  height: 100%;
+  width: 3px;
+  background-color: #C4C4C4;
+  position: relative;
+  margin-left: 6px;
+}
+
+.date {
+  font-size: 16px;
+  font-weight: bold;
+  color: #212486;
+}
+
+.response-text, .remark-text {
+  font-size: 14px;
+  color: #212486;
+  margin-bottom: 0;
+}
+
+.attachment-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.card {
+  background-color: #F5F6FA;
+
+  padding: 15px;
+}
+
+.container {
+  max-width: 500px;
+}
+
+.cards {
+  font-family: 'opensans_medium' !important;
+  font-weight: 600;
+  ion-row {
+    ion-col {
+      font-size: 13px
+    }
+    ion-col:nth-child(odd) {
+      color: rgba(42, 41, 92, 0.72);
+    }
+    ion-col:nth-child(even) {
+      color: #2A295C;
+
+    }
+  }
+}
+
+
+
+

@@ -1,0 +1,173 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{labelName[status]}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleFilter()" class="filter-btn">
+        <ion-icon slot="icon-only" name="funnel-outline"></ion-icon>
+        <span class="filter-btn__dot" *ngIf="fromDate || toDate || statusFilter || tatBreachFilter"></span>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <!-- <ion-toolbar class="medium ion-no-padding">
+    <ion-segment  [(ngModel)]='status' (ionChange)="changeSegment($event)">
+      <ion-segment-button value="assignto">
+        <ion-label>Assigned Case </ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="created">
+        <ion-label>My Case </ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="completed">
+        <ion-label>Completed </ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar> -->
+</ion-header>
+<ion-content mode="md">
+  <!-- <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
+    <ion-fab-button fill="clear" color="primary" (click)="createTicket()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab> -->
+
+  <div class="filter-panel" *ngIf="showFilter">
+    <div class="filter-panel__row">
+      <div class="filter-panel__col">
+        <label class="filter-panel__label">From Date</label>
+        <ion-item lines="none" class="filter-panel__item">
+          <ion-input type="date" [(ngModel)]="fromDate"></ion-input>
+        </ion-item>
+      </div>
+      <div class="filter-panel__col">
+        <label class="filter-panel__label">To Date</label>
+        <ion-item lines="none" class="filter-panel__item">
+          <ion-input type="date" [(ngModel)]="toDate"></ion-input>
+        </ion-item>
+      </div>
+    </div>
+    <div class="filter-panel__row">
+      <div class="filter-panel__col filter-panel__col--full">
+        <label class="filter-panel__label">Status</label>
+        <ion-item lines="none" class="filter-panel__item">
+          <ion-select interface="action-sheet" mode="ios" placeholder="All" [(ngModel)]="statusFilter">
+            <ion-select-option [value]="''">Select</ion-select-option>
+            <ion-select-option *ngFor="let opt of getStatusOptions()" [value]="opt.value">{{opt.label}}</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+    </div>
+    <div class="filter-panel__row" *ngIf="status === 'assignto' || status === 'all_active_req'">
+      <div class="filter-panel__col filter-panel__col--full">
+        <label class="filter-panel__label">TAT Breach</label>
+        <ion-item lines="none" class="filter-panel__item">
+          <ion-select interface="action-sheet" mode="ios" placeholder="All" [(ngModel)]="tatBreachFilter">
+            <ion-select-option [value]="''">Select</ion-select-option>
+            <ion-select-option *ngFor="let opt of tatBreachOptions" [value]="opt.value">{{opt.label}}</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+    </div>
+    <div class="filter-panel__actions">
+      <ion-button size="small" fill="outline" color="medium" (click)="clearFilter()">
+        <ion-icon name="close-outline" slot="start"></ion-icon> Clear
+      </ion-button>
+      <ion-button size="small" color="primary" (click)="applyFilter()">
+        <ion-icon name="checkmark-outline" slot="start"></ion-icon> Apply
+      </ion-button>
+    </div>
+  </div>
+
+  <div class="ticket-list">
+    <div *ngFor="let dat of ticketData" class="ticket-card"
+      [style.border-left-color]="getStatusBorderColor(dat.stage_desc)">
+
+      <div class="ticket-header" (click)="workNow(dat, 'details')" role="button" tabindex="0">
+        <div class="ticket-id">
+          {{dat.ext_id}}
+        </div>
+        <div class="ticket-header__right">
+          <span class="status-badge" [ngClass]="getStatusClass(dat.stage_desc)">{{dat.stage_desc}}</span>
+          <span class="view-details-hint">
+            View
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </span>
+        </div>
+      </div>
+
+      <div class="ticket-body">
+        <div class="ticket-row">
+          <ion-icon name="flag-outline" class="row-icon"></ion-icon>
+          <span class="row-label">Urgency</span>
+          <span class="priority-badge" [ngClass]="{
+            'high': dat.priority?.toLowerCase() === 'high',
+            'medium': dat.priority?.toLowerCase() === 'medium',
+            'low': dat.priority?.toLowerCase() === 'low'
+          }">{{dat.priority}}</span>
+        </div>
+
+        <div class="ticket-row">
+          <ion-icon name="folder-outline" class="row-icon"></ion-icon>
+          <span class="row-label">Category</span>
+          <span class="row-value">{{dat.cat_desc}}</span>
+        </div>
+        <div class="ticket-row">
+          <ion-icon name="pricetag-outline" class="row-icon"></ion-icon>
+          <span class="row-label">Sub Category</span>
+          <span class="row-value">{{dat.subcat_desc}}</span>
+        </div>
+        <div class="ticket-row">
+          <ion-icon name="calendar-outline" class="row-icon"></ion-icon>
+          <span class="row-label">Request Date</span>
+          <span class="row-value">{{dat.created_at | slice:0:16}}</span>
+        </div>
+        <div class="ticket-row">
+          <ion-icon name="person-outline" class="row-icon"></ion-icon>
+          <span class="row-label">Assigned To</span>
+          <span class="row-value">{{dat.username}} {{dat.name}} {{dat.lname}}</span>
+        </div>
+        <div class="ticket-row" *ngIf="dat.tat_resp_date">
+          <ion-icon name="arrow-forward-outline" class="row-icon"></ion-icon>
+          <span class="row-label">Response Time</span>
+          <span class="row-value"
+            [style.color]="isPastDate(dat.tat_resp_date) ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
+            {{dat.tat_resp_date | date:'dd-MM-yyyy HH:mm'}}
+          </span>
+        </div>
+        <div class="ticket-row" *ngIf="dat.tat_res_date">
+          <ion-icon name="checkmark-done-outline" class="row-icon"></ion-icon>
+          <span class="row-label">Resolution Time</span>
+          <span class="row-value"
+            [style.color]="isPastDate(dat.tat_res_date) ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
+            {{dat.tat_res_date | date:'dd-MM-yyyy HH:mm'}}
+          </span>
+        </div>
+      </div>
+
+      <div class="ticket-actions">
+        <ion-button size="small" fill="outline" color="medium" (click)="openHistory(dat)">
+          <ion-icon name="time-outline" slot="start"></ion-icon> Logs
+        </ion-button>
+        <ion-button size="small" fill="outline" color="tertiary" (click)="openTripLogs(dat)">
+          <ion-icon name="navigate-outline" slot="start"></ion-icon> Trip Log
+        </ion-button>
+        <ion-button *ngIf="(status === 'assignto' || status === 'request_raise_byme' || status === 'all_active_req') && dat.show_asn_btn" size="small" fill="outline" color="primary" [disabled]="dat.tckt_trip === '2'" (click)="assignUser(dat)">
+          <ion-icon name="people-outline" slot="start"></ion-icon> Assign
+        </ion-button>
+        <ion-button *ngIf="(status === 'assignto') && userData.id === dat.assign_to" size="small" fill="outline"
+          color="success" (click)="workNow(dat, 'action')">
+          <ion-icon name="hammer-outline" slot="start"></ion-icon> Work Now
+        </ion-button>
+        <ion-button *ngIf="status === 'completed' && dat.tckt_status === 4" size="small" fill="outline" color="danger"
+          (click)="presentAlertConfirm(dat)">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon> RE-Open
+        </ion-button>
+      </div>
+    </div>
+    <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)" *ngIf="canLoadMore">
+      <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+  </div>
+</ion-content>

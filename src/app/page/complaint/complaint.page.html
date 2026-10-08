@@ -23,7 +23,7 @@
       <ion-label>Assigned Ticket </ion-label>
     </ion-segment-button>
     <ion-segment-button value="resolved">
-      <ion-label>Resolved </ion-label>
+      <ion-label>Resolved/Closed </ion-label>
     </ion-segment-button>
   </ion-segment>
   <div [ngSwitch]='status'>
@@ -43,15 +43,15 @@
         <ion-col [hidden]="searchBy === 'all' || !searchBy">
           <ion-item *ngIf="searchBy === 'ticketId'">
             <ion-label position="floating">Ticket NO</ion-label>
-            <ion-input type="text" [(ngModel)]="searchValue"> </ion-input>
+            <ion-input type="email" [(ngModel)]="searchValue"> </ion-input>
           </ion-item>
           <ion-item *ngIf="searchBy === 'pc_id'" (click)="openRoName()">
             <ion-label position="floating">Select Site</ion-label>
-            <ion-input type="text" [(ngModel)]="searchValueDesc" readonly> </ion-input>
+            <ion-input type="email" [(ngModel)]="searchValueDesc" readonly> </ion-input>
           </ion-item>
           <ion-item *ngIf="searchBy === 'asset_id'">
             <ion-label position="floating">Barcode No</ion-label>
-            <ion-input type="text" [(ngModel)]="searchValue"> </ion-input>
+            <ion-input type="email" [(ngModel)]="searchValue"> </ion-input>
           </ion-item>
         </ion-col>
       </ion-row>

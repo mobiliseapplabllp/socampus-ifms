@@ -1,0 +1,72 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Logs {{ext_id}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close(null, false)">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="history-content">
+
+  <div *ngIf="txnData.length === 0" class="empty-state">
+    <ion-icon name="document-text-outline" class="empty-state__icon"></ion-icon>
+    <ion-text color="medium">No logs found.</ion-text>
+  </div>
+
+  <div class="timeline" *ngIf="txnData.length > 0">
+    <div class="timeline-item" *ngFor="let dat of txnData; let i = index; let last = last">
+
+      <!-- Timeline rail -->
+      <div class="timeline-rail">
+        <div class="timeline-dot"
+          [ngClass]="{
+            'timeline-dot--first': i === 0,
+            'timeline-dot--last': last
+          }">
+          <ion-icon
+            [name]="i === 0 ? 'radio-button-on-outline' : (last ? 'checkmark-circle-outline' : 'ellipse-outline')"
+            class="timeline-dot__icon"
+            [class.timeline-dot__icon--first]="i === 0"
+            [class.timeline-dot__icon--last]="last">
+          </ion-icon>
+        </div>
+        <div class="timeline-line" *ngIf="!last"></div>
+      </div>
+
+      <!-- Content card -->
+      <div class="timeline-card">
+        <div class="timeline-card__header">
+          <span class="timeline-card__status">{{ dat.tckt_status }}</span>
+          <span class="timeline-card__date">
+            <ion-icon name="time-outline" class="timeline-card__date-icon"></ion-icon>
+            {{ dat.txn_date | date: 'dd MMM yyyy, h:mm a' }}
+          </span>
+        </div>
+
+        <div class="timeline-card__body">
+          <div class="timeline-card__row">
+            <ion-icon name="document-text-outline" class="timeline-card__row-icon"></ion-icon>
+            <span class="timeline-card__row-text">{{ dat.txn_desc }}</span>
+          </div>
+
+          <div class="timeline-card__row" *ngIf="dat.remark">
+            <ion-icon name="chatbox-ellipses-outline" class="timeline-card__row-icon"></ion-icon>
+            <span class="timeline-card__row-text timeline-card__row-text--remark">{{ dat.remark }}</span>
+          </div>
+        </div>
+
+        <div class="timeline-card__footer" *ngIf="dat.document">
+          <ion-button fill="outline" size="small" color="tertiary" shape="round" class="timeline-card__attach-btn" (click)="openDoc(dat)">
+            <ion-icon slot="start" name="eye-outline"></ion-icon>
+            View Attachment
+          </ion-button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</ion-content>

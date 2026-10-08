@@ -15,23 +15,32 @@
           <ion-item (click)="changeLan('en')" >
             <ion-label>English</ion-label>
           </ion-item>
-          <ion-item (click)="changeLan('fr')" >
-            <ion-label>French</ion-label>
-          </ion-item>
           <ion-item (click)="changeLan('hi')" >
             <ion-label>Hindi</ion-label>
+          </ion-item>
+          <ion-item (click)="changeLan('te')" >
+            <ion-label>Telugu</ion-label>
           </ion-item>
           <ion-item (click)="changeLan('ta')" >
             <ion-label>Tamil</ion-label>
           </ion-item>
+          <ion-item (click)="changeLan('kn')" >
+            <ion-label>Kannada</ion-label>
+          </ion-item>
           <ion-item (click)="changeLan('ml')" >
-            <ion-label>Malyalam</ion-label>
+            <ion-label>Malayalam</ion-label>
           </ion-item>
-          <ion-item (click)="changeLan('ar')" >
-            <ion-label>Arabic</ion-label>
+          <ion-item (click)="changeLan('mr')" >
+            <ion-label>Marathi</ion-label>
           </ion-item>
-          <ion-item (click)="changeLan('te')" >
-            <ion-label>Telegu</ion-label>
+          <ion-item (click)="changeLan('gu')" >
+            <ion-label>Gujarati</ion-label>
+          </ion-item>    
+          <ion-item (click)="changeLan('bn')" >
+            <ion-label>Bengali</ion-label>
+          </ion-item>
+          <ion-item (click)="changeLan('or')" >
+            <ion-label>Odia</ion-label>
           </ion-item>
         </ion-content>
       </ng-template>
@@ -110,7 +119,7 @@
           </ion-col>
         </ion-row>
         <ion-item [ngClass]="{redBorder: val.isRemarkMandatory === 1 && !val.remark }">
-          <ion-input type="text" [(ngModel)]="val.remark" placeholder="Enter Remark" (change)="changeRemark(val)" [disabled]="dat.schedule_status !== 'assigned' || !val.rspns || offline_save === 'true'"></ion-input>
+          <ion-input type="email" [(ngModel)]="val.remark" placeholder="Enter Remark" (change)="changeRemark(val)" [disabled]="dat.schedule_status !== 'assigned' || !val.rspns || offline_save === 'true'"></ion-input>
           <ion-buttons slot="end" [hidden]="dat.schedule_status !== 'assigned' || offline_save === 'true' " *ngIf="isInternet">
             <ion-button slot="icon-only" (click)="listenCondition(val)">
               <ion-icon name="mic-outline"></ion-icon>
@@ -128,7 +137,7 @@
             </div>
           </ion-col>
           <ion-col size="6" class="ion-text-right" *ngIf="val.imagename">
-            <ion-button color="danger" (click)="viewDocs(val.imagename)" fill="clear">
+            <ion-button color="danger" (click)="viewDocs(val.imagename, val.imagename_blob_tyep)" fill="clear">
               <ion-icon name="attach-outline"></ion-icon>
             </ion-button>
           </ion-col>
@@ -138,9 +147,10 @@
   </div>
   <ion-item [ngClass]="{fullborder: remarkErr && !remark}">
     <ion-label position="floating">Remark</ion-label>
-    <ion-input type="text" [(ngModel)]="remark" [disabled]="schedule_status !== 'assigned' || offline_save === 'true' "></ion-input>
+    <ion-input type="email" [(ngModel)]="remark" [disabled]="schedule_status !== 'assigned' || offline_save === 'true' "></ion-input>
   </ion-item>
-  <img [src]="signatureBase64" style="width:200px;height:200px;" *ngIf="(isInternet && signatureBase64) && schedule_status !== 'assigned' || offline_save === 'true' " style="border:1px solid black">
+  <!-- <img [src]="signatureBase64" style="width:200px;height:200px;" *ngIf="(isInternet && signatureBase64) && schedule_status !== 'assigned' || offline_save === 'true' " style="border:1px solid black"> -->
+  <ion-button color="success" size="small" (click)="viewSign()" *ngIf="(isInternet && signatureBase64) && schedule_status !== 'assigned' || offline_save === 'true' ">View Signature</ion-button>
   <ion-item lines="none" [hidden]="schedule_status !== 'assigned' || offline_save === 'true'">
     <ion-button (click)="openSign()" [fill]="signatureBase64 ? 'solid':'outline'">Signature <ion-icon name="checkmark-done-outline" slot="end" *ngIf="signatureBase64"></ion-icon></ion-button>
     <img [src]="signatureBase64" style="height:30px;width:30px;border:1px solid black" slot="end" *ngIf="signatureBase64">

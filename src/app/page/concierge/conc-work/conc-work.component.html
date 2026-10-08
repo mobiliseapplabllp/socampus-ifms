@@ -1,0 +1,566 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Request Detail (#{{requestData.ext_id}})</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content style="--background: var(--ion-color-light);">
+
+  <ion-segment [(ngModel)]='segStatus' *ngIf="!isSegDisable">
+    <ion-segment-button value="action" >
+      <ion-label>Action </ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="details">
+      <ion-label>Request Details </ion-label>
+    </ion-segment-button>
+  </ion-segment>
+  <div [ngSwitch]='segStatus'>
+    <div *ngSwitchCase="'action'" class="ion-padding action-wrap">
+      <div class="action-card">
+        <div class="action-card__header">
+          <ion-icon name="settings-outline" class="action-card__icon"></ion-icon>
+          <span class="action-card__title">Update Status</span>
+        </div>
+        <div class="action-card__body">
+          <ion-item>
+            <ion-label color="primary" position="floating">Status <ion-text color="danger">*</ion-text></ion-label>
+            <ion-select interface="action-sheet" mode="ios" [(ngModel)]="status" (ionChange)="changeStatus($event)">
+              <ion-select-option *ngFor="let dat of statusData" [value]="dat.value">{{dat.label}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+      </div>
+
+      <div class="action-card" *ngIf="status === 3">
+        <div class="action-card__header">
+          <ion-icon name="create-outline" class="action-card__icon"></ion-icon>
+          <span class="action-card__title">In-Progress Details</span>
+        </div>
+        <div class="action-card__body">
+          <ion-item>
+            <ion-label color="primary" position="floating">Remark <ion-text color="danger">*</ion-text></ion-label>
+            <ion-textarea rows="4" [(ngModel)]="remark"></ion-textarea>
+          </ion-item>
+
+          <div class="action-card__attachment">
+            <ion-button size="small" fill="outline" shape="round" (click)="attachment('in_progress')"
+              [color]="captureImage.inProgressImage ? 'success' : 'primary'" class="ion-text-capitalize">
+              <ion-icon slot="start"
+                [name]="captureImage.inProgressImage ? 'checkmark-done-outline' : 'attach-outline'"></ion-icon>
+              Attachment
+            </ion-button>
+          </div>
+
+          <div class="action-card__actions">
+            <ion-button *ngIf="specificTicketObj.tckt_status == 3 && specificTicketObj.tckt_trip == '1'" expand="block"
+              fill="outline" color="success" shape="round" (click)="openTripStartModal()">
+              <ion-icon slot="start" name="navigate-outline"></ion-icon>
+              {{specificTicketObj.tckt_trip_btnName}}
+            </ion-button>
+            <ion-button *ngIf="specificTicketObj.tckt_status == 3 && specificTicketObj.tckt_trip == '2'" expand="block"
+              fill="outline" color="danger" shape="round" (click)="openTripEndModal()">
+              <ion-icon slot="start" name="stop-circle-outline"></ion-icon>
+              {{specificTicketObj.tckt_trip_btnName}}
+            </ion-button>
+            <ion-button color="primary" expand="block" shape="round" (click)="actionInProgress()"
+              class="ion-text-capitalize">
+              <ion-icon slot="start" name="send-outline"></ion-icon>
+              Submit
+            </ion-button>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-card" *ngIf="status === 4">
+        <div class="action-card__header">
+          <ion-icon name="checkmark-circle-outline" class="action-card__icon"></ion-icon>
+          <span class="action-card__title">Resolve Details</span>
+        </div>
+        <div class="action-card__body">
+          <ion-item>
+            <ion-label color="primary" position="floating">Action Taken <ion-text
+                color="danger">*</ion-text></ion-label>
+            <ion-textarea rows="2" [(ngModel)]="action_taken"></ion-textarea>
+          </ion-item>
+
+          <div class="action-card__attachment">
+            <ion-button size="small" fill="outline" shape="round" (click)="attachment('resolved')"
+              [color]="captureImage.resolveImage ? 'success' : 'primary'" class="ion-text-capitalize">
+              <ion-icon slot="start"
+                [name]="captureImage.resolveImage ? 'checkmark-done-outline' : 'attach-outline'"></ion-icon>
+              Attachment
+            </ion-button>
+          </div>
+
+          <div class="action-card__actions">
+            <ion-button color="primary" expand="block" shape="round" (click)="actionResolve()">
+              <ion-icon slot="start" name="send-outline"></ion-icon>
+              Submit
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngSwitchCase="'details'" class="ion-padding details-wrap">
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <ion-icon name="document-text-outline" class="detail-card__icon"></ion-icon>
+          <span class="detail-card__title">Request Info</span>
+          <ion-badge
+            [color]="requestData.stage_desc?.toLowerCase().includes('progress') ? 'warning' : requestData.stage_desc?.toLowerCase().includes('close') || requestData.stage_desc?.toLowerCase().includes('resolve') ? 'success' : 'primary'">
+            {{requestData.stage_desc}}
+          </ion-badge>
+        </div>
+        <div class="detail-card__body">
+          <div class="detail-row">
+            <div class="detail-row__label">
+              <ion-icon name="receipt-outline" class="detail-row__icon"></ion-icon>
+              Request
+            </div>
+            <div class="detail-row__value">{{requestData.ext_id || '—'}}</div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-row__label">
+              <ion-icon name="business-outline" class="detail-row__icon"></ion-icon>
+              Site
+            </div>
+            <div class="detail-row__value">{{requestData.pc_ext_id}} {{requestData.pc_desc || '—'}}</div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-row__label">
+              <ion-icon name="folder-outline" class="detail-row__icon"></ion-icon>
+              Category
+            </div>
+            <div class="detail-row__value">{{requestData.cat_desc || '—'}}</div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-row__label">
+              <ion-icon name="pricetag-outline" class="detail-row__icon"></ion-icon>
+              Sub Category
+            </div>
+            <div class="detail-row__value">{{requestData.subcat_desc || '—'}}</div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-row__label">
+              <ion-icon name="flag-outline" class="detail-row__icon"></ion-icon>
+              Priority
+            </div>
+            <div class="detail-row__value">
+              <span class="priority-pill" [ngClass]="{
+                'priority-pill--high': requestData.priority?.toLowerCase() === 'high',
+                'priority-pill--medium': requestData.priority?.toLowerCase() === 'medium',
+                'priority-pill--low': requestData.priority?.toLowerCase() === 'low'
+              }">{{requestData.priority || '—'}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <ion-icon name="person-outline" class="detail-card__icon"></ion-icon>
+          <span class="detail-card__title">Requestee</span>
+          <ion-badge color="primary">{{requestData.request_for || '—'}}</ion-badge>
+        </div>
+        <div class="detail-card__body">
+          <div class="detail-row">
+            <div class="detail-row__label">
+              <ion-icon name="person-circle-outline" class="detail-row__icon"></ion-icon>
+              Name
+            </div>
+            <div class="detail-row__value">{{requestData.req_name || '—'}}</div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-row__label">
+              <ion-icon name="call-outline" class="detail-row__icon"></ion-icon>
+              Mobile
+            </div>
+            <div class="detail-row__value">
+              <a *ngIf="requestData.req_mobile" href="tel:{{requestData.req_mobile}}">{{requestData.req_mobile}}</a>
+              <span *ngIf="!requestData.req_mobile">—</span>
+            </div>
+          </div>
+          <div class="detail-row detail-row--last">
+            <div class="detail-row__label">
+              <ion-icon name="mail-outline" class="detail-row__icon"></ion-icon>
+              Email
+            </div>
+            <div class="detail-row__value">
+              <a *ngIf="requestData.req_email" href="mailto:{{requestData.req_email}}">{{requestData.req_email}}</a>
+              <span *ngIf="!requestData.req_email">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <ion-icon name="time-outline" class="detail-card__icon"></ion-icon>
+          <span class="detail-card__title">Timeline</span>
+        </div>
+        <div class="detail-card__body">
+          <div class="detail-row">
+            <div class="detail-row__label">
+              <ion-icon name="hourglass-outline" class="detail-row__icon"></ion-icon>
+              Total Age
+            </div>
+            <div class="detail-row__value">{{requestData.request_age || '—'}}</div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-row__label">
+              <ion-icon name="arrow-forward-outline" class="detail-row__icon"></ion-icon>
+              Response Time
+            </div>
+            <div class="detail-row__value">
+              <span *ngIf="requestData.tat_resp_date; else respDash"
+                [style.color]="isPastDate(requestData.tat_resp_date) ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
+                {{requestData.tat_resp_date | date:'dd-MM-yyyy HH:mm'}}
+              </span>
+              <ng-template #respDash>—</ng-template>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-row__label">
+              <ion-icon name="checkmark-done-outline" class="detail-row__icon"></ion-icon>
+              Resolution Time
+            </div>
+            <div class="detail-row__value">
+              <span *ngIf="requestData.tat_res_date; else resDash"
+                [style.color]="isPastDate(requestData.tat_res_date) ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
+                {{requestData.tat_res_date | date:'dd-MM-yyyy HH:mm'}}
+              </span>
+              <ng-template #resDash>—</ng-template>
+            </div>
+          </div>
+          <div class="detail-row detail-row--last">
+            <div class="detail-row__label">
+              <ion-icon name="card-outline" class="detail-row__icon"></ion-icon>
+              Billed To
+            </div>
+            <div class="detail-row__value">{{requestData.billed_to || '—'}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ion-modal [isOpen]="isTripModalOpen" (willDismiss)="closeTripStartModal()" cssClass="center-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Start Trip</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeTripStartModal()">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="start-trip-content">
+        <form [formGroup]="tripForm" class="start-trip-form">
+
+          <!-- Trip Type Selection -->
+          <div class="st-card">
+            <div class="st-card__header">
+              <ion-icon name="swap-horizontal-outline" class="st-card__icon"></ion-icon>
+              <span class="st-card__title">Select Trip Type</span>
+            </div>
+            <div class="st-card__body">
+              <ion-radio-group formControlName="tripType">
+                <div class="st-type-grid">
+                  <div class="st-type-option" [class.st-type-option--active]="tripForm.value.tripType === 'manual'"
+                    (click)="tripForm.controls['tripType'].setValue('manual')">
+                    <ion-radio value="manual"></ion-radio>
+                    <ion-icon name="create-outline" class="st-type-option__icon"></ion-icon>
+                    <span class="st-type-option__label">Manual</span>
+                  </div>
+                  <div class="st-type-option" [class.st-type-option--active]="tripForm.value.tripType === 'gps'"
+                    (click)="tripForm.controls['tripType'].setValue('gps')">
+                    <ion-radio value="gps"></ion-radio>
+                    <ion-icon name="navigate-outline" class="st-type-option__icon"></ion-icon>
+                    <span class="st-type-option__label">GPS</span>
+                  </div>
+                </div>
+              </ion-radio-group>
+            </div>
+          </div>
+
+          <!-- Manual Section -->
+          <div class="st-card" *ngIf="tripForm.value.tripType === 'manual'">
+            <div class="st-card__header">
+              <ion-icon name="speedometer-outline" class="st-card__icon"></ion-icon>
+              <span class="st-card__title">Odometer Reading</span>
+            </div>
+            <div class="st-card__body">
+              <ion-item>
+                <ion-label color="primary" position="floating">Trip Start Reading <ion-text color="danger">*</ion-text></ion-label>
+                <ion-input type="number" inputmode="decimal" step="0.01" formControlName="trip_start_odometer_reading"
+                  placeholder="e.g. 19.22" (ionInput)="clampTripStartOdometerDecimals($event)"
+                  (ionBlur)="onTripStartOdometerBlur()"></ion-input>
+              </ion-item>
+              <div class="st-card__attachment">
+                <ion-button shape="round" fill="outline" [color]="captureImage.start_trip ? 'success' : 'primary'"
+                  class="ion-text-capitalize" (click)="openCamera('start_trip', false)">
+                  <ion-icon slot="start"
+                    [name]="!captureImage.start_trip ? 'camera-outline' : 'checkmark-done-outline'"></ion-icon>
+                  Capture OD Reading
+                </ion-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- GPS Section -->
+          <div class="st-card" *ngIf="tripForm.value.tripType === 'gps'">
+            <div class="st-card__header">
+              <ion-icon name="location-outline" class="st-card__icon"></ion-icon>
+              <span class="st-card__title">GPS Location</span>
+            </div>
+            <div class="st-card__body">
+              <ion-button expand="block" shape="round" [color]="lat ? 'success' : 'primary'" class="st-locate-btn"
+                (click)="setStartLocationFromGps()">
+                <ion-icon slot="start" name="locate-outline"></ion-icon>
+                Use Current Location
+              </ion-button>
+
+              <div class="st-location-info" *ngIf="lat && lng">
+                <div class="st-location-info__row">
+                  <ion-icon name="pin-outline" class="st-location-info__icon"></ion-icon>
+                  <div>
+                    <span class="st-location-info__label">Selected Start Location</span>
+                    <span class="st-location-info__coords">Lat: {{lat}} | Long: {{lng}}</span>
+                  </div>
+                </div>
+              </div>
+
+              <p *ngIf="!isCapacitorGps() && lat && lng" class="st-browser-note">
+                <ion-icon name="information-circle-outline"></ion-icon>
+                Browser uses sample coordinates; live GPS and background path tracking run in the app.
+              </p>
+
+              <div class="st-map-wrap">
+                <div id="map" class="st-map"></div>
+              </div>
+              <div class="st-map-hint">
+                <ion-icon name="finger-print-outline"></ion-icon>
+                Tap on the map to change the marker position.
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <ion-button expand="block" color="primary" shape="round" class="st-submit-btn" (click)="submitTripStart()">
+            <ion-icon slot="start" name="send-outline"></ion-icon>
+            Submit
+          </ion-button>
+
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="isEndTripModalOpen" (willDismiss)="closeTripEndModal()" cssClass="center-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>End Trip</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeTripEndModal()">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="end-trip-content">
+        <!-- ════ GPS ════ -->
+        <div class="et-form" *ngIf="specificTicketObj.trip_type === 'gps'">
+
+          <!-- Location Info Card -->
+          <div class="st-card">
+            <div class="st-card__header">
+              <ion-icon name="location-outline" class="st-card__icon"></ion-icon>
+              <span class="st-card__title">Trip Locations</span>
+            </div>
+            <div class="st-card__body et-locations">
+              <div class="et-loc-row">
+                <div class="et-loc-dot et-loc-dot--start"></div>
+                <div class="et-loc-info">
+                  <span class="et-loc-label">Start Location</span>
+                  <span class="et-loc-coords">Lat: {{specificTicketObj.trip_start_lat}} | Long:
+                    {{specificTicketObj.trip_start_lng}}</span>
+                </div>
+              </div>
+              <div class="et-loc-connector"></div>
+              <div class="et-loc-row">
+                <div class="et-loc-dot et-loc-dot--end"></div>
+                <div class="et-loc-info">
+                  <span class="et-loc-label">End Location</span>
+                  <span class="et-loc-coords">Lat: {{specificTicketObj.trip_end_lat}} | Long:
+                    {{specificTicketObj.trip_end_lng}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Distance Card -->
+          <div class="st-card">
+            <div class="st-card__header">
+              <ion-icon name="analytics-outline" class="st-card__icon"></ion-icon>
+              <span class="st-card__title">Distance</span>
+              <span class="et-distance-badge">{{specificTicketObj.distance}} km</span>
+            </div>
+            <div class="st-card__body">
+              <ion-item>
+                <ion-label color="primary" position="floating">Adjust Distance (km)</ion-label>
+                <ion-input type="number" inputmode="decimal" step="0.01" [(ngModel)]="distanceAdjust"
+                  placeholder="e.g. 19.22" (ionInput)="clampDistanceAdjustDecimals($event)"
+                  (ionBlur)="onDistanceAdjustBlur()"></ion-input>
+              </ion-item>
+            </div>
+          </div>
+
+          <!-- Toll Card -->
+          <div class="st-card">
+            <div class="st-card__header">
+              <ion-icon name="cash-outline" class="st-card__icon"></ion-icon>
+              <span class="st-card__title">Toll Details</span>
+            </div>
+            <div class="st-card__body">
+              <ion-item>
+                <ion-label color="primary" position="floating">Toll Amount (Rs)</ion-label>
+                <ion-input type="number" inputmode="decimal" step="0.01" [(ngModel)]="tollAmount"
+                  placeholder="e.g. 19.22" (ionInput)="clampTollAmountDecimals($event)"
+                  (ionBlur)="onTollAmountBlur()"></ion-input>
+              </ion-item>
+              <div class="st-card__attachment">
+                <ion-button shape="round" fill="outline" size="small"
+                  [color]="captureImage.toll_img ? 'success' : 'primary'" (click)="openCamera('toll_img', true)">
+                  <ion-icon slot="start"
+                    [name]="captureImage.toll_img ? 'checkmark-done-outline' : 'camera-outline'"></ion-icon>
+                  Toll Receipt
+                </ion-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Map Card -->
+          <div class="st-card">
+            <div class="st-card__header">
+              <ion-icon name="map-outline" class="st-card__icon"></ion-icon>
+              <span class="st-card__title">Map</span>
+            </div>
+            <div class="st-card__body">
+              <div class="st-browser-note">
+                <ion-icon name="information-circle-outline"></ion-icon>
+                Current location is auto-loaded. Tap on the map to adjust.
+              </div>
+              <p *ngIf="!isCapacitorGps()" class="st-browser-note">
+                <ion-icon name="information-circle-outline"></ion-icon>
+                Recorded trek path is saved only in the app; the map still works here for preview.
+              </p>
+              <div class="st-map-wrap">
+                <div id="map" class="st-map"></div>
+              </div>
+              <div class="st-map-hint">
+                <ion-icon name="finger-print-outline"></ion-icon>
+                Changing the marker will update end location and distance.
+              </div>
+            </div>
+          </div>
+
+          <!-- Trek Path Card -->
+          <div class="st-card" *ngIf="trekPath?.length">
+            <div class="st-card__header">
+              <ion-icon name="trail-sign-outline" class="st-card__icon"></ion-icon>
+              <span class="st-card__title">Recorded Trek Path</span>
+            </div>
+            <div class="st-card__body">
+              <div class="end-trip-route-map-wrap">
+                <div id="mapRoute"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <ion-button expand="block" color="primary" shape="round" class="st-submit-btn" (click)="submitTripEndGps()">
+            <ion-icon slot="start" name="send-outline"></ion-icon>
+            Submit
+          </ion-button>
+        </div>
+
+        <!-- ════ Manual ════ -->
+        <div class="et-form" *ngIf="specificTicketObj.trip_type === 'manual'">
+
+          <!-- Odometer Card -->
+          <div class="st-card">
+            <div class="st-card__header">
+              <ion-icon name="speedometer-outline" class="st-card__icon"></ion-icon>
+              <span class="st-card__title">Odometer Reading</span>
+            </div>
+            <div class="st-card__body">
+              <div class="et-start-reading">
+                <div class="et-start-reading__row">
+                  <ion-icon name="play-outline" class="et-start-reading__icon"></ion-icon>
+                  <span class="et-start-reading__label">Start Reading</span>
+                  <span class="et-start-reading__value">{{specificTicketObj.trip_start_odometer_reading || '—'}}</span>
+                </div>
+              </div>
+
+              <ion-item>
+                <ion-label color="primary" position="floating">Trip End Reading <ion-text color="danger">*</ion-text></ion-label>
+                <ion-input type="number" inputmode="decimal" step="0.01" [(ngModel)]="endReading"
+                  placeholder="e.g. 19.22" (ionInput)="clampEndReadingDecimals($event)"
+                  (ionBlur)="onEndReadingBlur()"></ion-input>
+              </ion-item>
+              <div class="st-card__attachment">
+                <ion-button shape="round" fill="outline" size="small" [color]="captureImage.trip_end ? 'success' : 'primary'" (click)="openCamera('end_trip', false)">
+                  <ion-icon slot="start" [name]="captureImage.trip_end ? 'checkmark-done-outline' : 'camera-outline'"></ion-icon>
+                  Capture OD Reading
+                </ion-button>
+              </div>
+
+              <div class="et-distance-summary" *ngIf="endReading && specificTicketObj.trip_start_odometer_reading">
+                <ion-icon name="analytics-outline" class="et-distance-summary__icon"></ion-icon>
+                <span class="et-distance-summary__label">Total Distance</span>
+                <span class="et-distance-summary__value">{{(endReading - specificTicketObj.trip_start_odometer_reading) | number:'1.2-2'}}
+                  km</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toll Card -->
+          <div class="st-card">
+            <div class="st-card__header">
+              <ion-icon name="cash-outline" class="st-card__icon"></ion-icon>
+              <span class="st-card__title">Toll Details</span>
+            </div>
+            <div class="st-card__body">
+              <ion-item>
+                <ion-label color="primary" position="floating">Toll Amount (Rs)</ion-label>
+                <ion-input type="number" inputmode="decimal" step="0.01" [(ngModel)]="tollAmount" placeholder="e.g. 19.22" (ionInput)="clampTollAmountDecimals($event)" (ionBlur)="onTollAmountBlur()"></ion-input>
+              </ion-item>
+              <div class="st-card__attachment">
+                <ion-button shape="round" fill="outline" size="small"
+                  [color]="captureImage.toll_img ? 'success' : 'primary'" (click)="openCamera('toll_img', true)">
+                  <ion-icon slot="start"
+                    [name]="captureImage.toll_img ? 'checkmark-done-outline' : 'camera-outline'"></ion-icon>
+                  Toll Receipt
+                </ion-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <ion-button expand="block" color="primary" shape="round" class="st-submit-btn"
+            (click)="submitTripEndManual()">
+            <ion-icon slot="start" name="send-outline"></ion-icon>
+            Submit
+          </ion-button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

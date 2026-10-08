@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { IonDatetime, LoadingController } from '@ionic/angular';
+import { IonDatetime } from '@ionic/angular';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import Chart from 'chart.js/auto';
 import * as moment from 'moment';
@@ -57,7 +57,6 @@ export class ChartDashboardComponent  implements OnInit {
   scheduleDate = moment().format('YYYY-MM-DD');
   constructor(
     private httpCompalint: ComplaintService,
-    private loadingController: LoadingController,
     private common: CommonService
   ) { }
 
@@ -98,7 +97,7 @@ export class ChartDashboardComponent  implements OnInit {
   }
 
   getTicketDashboard(date: string) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpCompalint.getTicketDashboard(date).subscribe({
         next:(data) => {
           if (data.status) {
@@ -107,30 +106,16 @@ export class ChartDashboardComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg + ' In helpdesk-graph', 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
-
   }
 
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...',
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
-  }
 
   getScheduleDashboard(date: string,cat_id: string, sub_cat_id: string) {
     this.httpCompalint.getScheduleDashboard(date,cat_id, sub_cat_id).subscribe({

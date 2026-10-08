@@ -9,6 +9,7 @@ import { CommonService } from 'src/app/provider/common/common.service';
 })
 export class BarcodeComponent  implements OnInit {
   barcodeNo: any;
+  torchStatus = false;
   constructor(
     private navCtrl: NavController,
     private platform: Platform,
@@ -21,10 +22,7 @@ export class BarcodeComponent  implements OnInit {
     if (this.platform.is('capacitor')) {
       this.startScan();
     } else {
-      let random = 'eyJpdiI6IkxJTmNzdVNrekZQQVY3ZFR6OWhUZmc9PSIsInZhbHVlIjoiL3krUTF3UTR4dUhBblNRUVlWUWVPeGNmV2pVRmNUSmRIdzF5VU5TMWpZYz0iLCJtYWMiOiJkMzc5NTQ3MWZiODQ0ZTMyOTk5MWRmMTg4MTBmYzBhOGQyMWJlYjU5MjUyYmQyZDZhNDlkMDExNDI4N2ViYTVlIn0%3D';
-      // let random = 'https://ifmsuat.mobilisepro.com/#/create-ticket-qr-code/eyJpdiI6Ii8xUmxlTjhyMkRFVUQ1WkVabHQvTmc9PSIsInZhbHVlIjoiVHhZUGJveXord3RqdjB0eHlYZDdjTjYwejArUXpuQ0lYMEUzdy96Wmp1ST0iLCJtYWMiOiI0ZGExYzc0MWQ3OGQ0ODU3ZjVjYjAzOGFiYTIzZDRhMTA0ZTExOTY2Yjc1NTY3ZGFjZDQ5MDFlNGQzYzlmZjk0In0%3D';
-      // https://ifmsuat.mobilisepro.com/#/complaint-qr-code/eyJpdiI6InZqV3ljU3gweE5mcDJuMm5DTHNTZWc9PSIsInZhbHVlIjoibEdNZlR5YVc3SDJFM1FxZGdwaXBrQT09IiwibWFjIjoiZGY0OGViNDdhYmFhN2M5NzY5NzFmMjIxNmJhZjY5OGYzYjBhZTAwNWZlM2U2YjNkMjAxMGNlNjYxNWIxM2VlNiJ9
-      // https://ifmsuat.mobilisepro.com/#/complaint-qr-code/eyJpdiI6Ikkwcnd4YlNZWlY1SUJXaTd6akRHUlE9PSIsInZhbHVlIjoiaHdBd3JVcDJiT09qY2M1NDV4dkZsQT09IiwibWFjIjoiOTdmMmM0YTM1NGZjYWYwNmI3NzI5OTZhNjg1NzMzMmJlODJiMDIyNjkzZTdiYmY4MzlmMGNmZjgyNjRiNzYxMyJ9
+      let random = 'https://socampusstaging.mobilisepro.com/#/create-ticket-qr-code/eyJpdiI6Imo3ZG03bWszdDNRSFIxZmU5aW1laWc9PSIsInZhbHVlIjoieTZmTUJ0bVFqUWRHNExRVk9aTVF0SEJsc056ZVJseUViZzdYVGNCRkNFST0iLCJtYWMiOiI3ZDk4ODg4NDliMTUxOTcyNjMyZjljZWQ3NTU3NzNiMTg0NWFkNzY1ZjZkOTkzOTVkYjI1NDUyMjVkN2ViNmEzIiwidGFnIjoiIn0%3D';
       this.barcodeNo = random;
       setTimeout(() => {
         this.common.setBarcode(this.barcodeNo);
@@ -73,5 +71,15 @@ export class BarcodeComponent  implements OnInit {
   stopScanner() {
     this.stopScan();
     this.navCtrl.pop();
+  }
+
+  torchToggle() {
+    if (this.torchStatus === false) {
+      BarcodeScanner.enableTorch();
+      this.torchStatus = true;
+    } else {
+      BarcodeScanner.disableTorch();
+      this.torchStatus = false;
+    }
   }
 }

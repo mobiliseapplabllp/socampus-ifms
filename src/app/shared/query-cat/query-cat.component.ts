@@ -15,6 +15,7 @@ export class QueryCatComponent  implements OnInit {
   allQueryCat: any = [];
   allQueryCatCopy: any = [];
   loading: any;
+  barcode!: string;
   constructor(
     private modalCtrl: ModalController,
     private httpComp: ComplaintService,
@@ -23,6 +24,8 @@ export class QueryCatComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
+    console.log(this.barcode);
+    console.log(this.pc_id);
     if (this.data.length > 0) {
       this.allQueryCat = this.data;
       this.allQueryCatCopy = this.data;
@@ -43,7 +46,7 @@ export class QueryCatComponent  implements OnInit {
 
   getQueryCagegory() {
     this.presentLoading().then(preLoad => {
-      this.httpComp.getQueryCategoryTicket(this.issue_id, this.pc_id).subscribe({
+      this.httpComp.getQueryCategoryTicket(this.issue_id, this.pc_id, this.barcode).subscribe({
         next:(data) => {
           if (data.status) {
             this.allQueryCat = data.data;

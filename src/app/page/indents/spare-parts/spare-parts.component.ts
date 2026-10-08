@@ -1,0 +1,308 @@
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AlertController, ModalController } from '@ionic/angular';
+import { CommonService } from 'src/app/provider/common/common.service';
+import { IndentsService } from 'src/app/provider/indents/indents.service';
+import { environment } from 'src/environments/environment';
+import { MaterialDetailsComponent } from '../material-details/material-details.component';
+import { env } from 'process';
+
+@Component({
+  selector: 'app-spare-parts',
+  templateUrl: './spare-parts.component.html',
+  styleUrls: ['./spare-parts.component.scss'],
+})
+export class SparePartsComponent  implements OnInit {
+  all_data: any;
+  pms_req_data: any;
+  req_indent: any;
+  isModalOpen = false;  
+  indentLogs: any = [];
+  selectedIndent: any = {};
+  pi_action_permision: any = {};
+  test = true;
+  req_type!: string;
+  currentUser: any;
+  canCreateIndent = false;
+  isLoading = false; 
+  isDataLoadLogs = false;
+  totalPrice = 0;
+  constructor(    
+    private router: Router,
+    private httpIndent: IndentsService,
+    private common: CommonService,
+    private modalCtrl: ModalController,
+    private alertController: AlertController
+  ) { }
+
+  // ngOnInit() {    
+  //   const userStr = localStorage.getItem('user'); 
+  //   console.log(userStr);
+  //   const navigation = this.router.getCurrentNavigation();    
+  //   if (navigation?.extras?.state?.['data']) {      
+  //     this.req_type = navigation.extras.state['type']; // ticket, ppm      
+  //     if (this.req_type === 'ticket') {
+  //       this.all_data = navigation.extras.state['data'];   
+  //       console.log(this.all_data);              
+  //     } else {
+  //       this.pms_req_data = navigation.extras.state['data'];                    
+  //     }        
+  //   } else {
+  //     console.warn('No data found in router state.');    
+  //   }
+  // }
+  ngOnInit() {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      this.currentUser = JSON.parse(userStr);
+      console.log(this.currentUser);
+    }
+    const navigation = this.router.getCurrentNavigation();
+    if (navigation?.extras?.state?.['data']) {
+      this.req_type = navigation.extras.state['type'];
+  
+      if (this.req_type?.toLowerCase() === 'ticket') {
+        this.all_data = navigation.extras.state['data'];
+        this.canCreateIndent = true; 
+      } else {
+        this.pms_req_data = navigation.extras.state['data'];
+        this.canCreateIndent =
+          this.currentUser?.username === this.pms_req_data?.username;
+      }
+    }
+  }
+  
+
+  ionViewDidEnter() {    
+    if (this.req_type === 'ticket') {
+      this.getTktTran(this.all_data?.data?.tkts_id);
+    } else {
+      this.getPmsTnx()
+    }    
+  }
+
+  getTktTran(id: any) {
+    this.common.presentLoading().then(preLoad => {
+      this.httpIndent.getTktTran(id).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.req_indent = data.reqIndent;
+            this.pi_action_permision = data.pi_action_permision;            
+
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      });
+    }); 
+  }
+
+  getPmsTnx() {    
+    this.common.presentLoading().then(preLoad => {
+      this.httpIndent.getPmsTnx(this.pms_req_data.enc_id).subscribe({
+        next:(data: any) => {          
+          if (data.status) {
+            this.req_indent = data.data.data;
+            this.pi_action_permision = data.permission;
+            this.totalPrice = this.req_indent.reduce((acc: number, item: any) => acc + (item.actl_price || 0), 0);
+            
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      });  
+    });    
+  }
+
+  crIndent() {
+    this.router.navigate(['/indents/cr-indent'], {
+      state: {
+        data: this.req_type === 'ticket' ? this.all_data : this.pms_req_data,        
+        req_type: this.req_type
+      }
+    });
+  }
+
+  edit(dat: any) {    
+    this.common.presentLoading().then(preLoad => {
+      this.httpIndent.editIndent(dat.rqst_id).subscribe({
+        next:(data: any) => {          
+          if (data.status) {
+            this.openMaterialDetails(data.data[0]);
+          } else {
+
+          }
+        },
+        error:() => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      });
+    });    
+  }
+
+  async openMaterialDetails(data: any) {                  
+    const modal = await this.modalCtrl.create({
+      component: MaterialDetailsComponent,
+      initialBreakpoint: 1,
+      breakpoints: [1],    
+      mode: 'ios',  
+      componentProps: {           
+        index: -1,
+        mtrl_type: data.mtrl_type,
+        arr: data,
+        org_id: this.req_type === 'ticket' ? this.all_data.data.org_id : this.pms_req_data.org_id,
+      }
+    });
+    modal.onWillDismiss().then(async disModal => {
+      if (disModal.role) {            
+        // this.getTktTran(this.all_data?.data?.tkts_id);                      
+        if (this.req_type === 'ticket') {
+          this.getTktTran(this.all_data?.data?.tkts_id);
+        } else {
+          this.getPmsTnx()
+        }
+      }
+    });
+    modal.present();
+  } 
+
+  async presentAlertConfirm(data: any) {
+    const alert = await this.alertController.create({
+      cssClass: 'my-custom-class',
+      header: 'Delete ' + data.rqst_no + '?',
+      mode: 'ios',
+      inputs: [{
+        name: 'remark',
+        type:'textarea',
+        placeholder: 'Enter Remarks',
+      }],
+      buttons: [{
+        text: 'Cancel',
+          handler: (data) => {
+          }
+        },{
+          text: 'Submit',
+          handler: (dat) => {
+            if(dat.remark){
+              const obj = {
+                rqst_id: data.rqst_id,
+                cancel_remark: dat.remark
+              }
+              this.deleteIndent(obj, data);
+            } else {              
+              this.common.presentToast('Please Enter Remarks', 'warning');
+              this.presentAlertConfirm(data);
+            }
+          }
+        }]
+    });
+    await alert.present();
+  }
+
+  deleteIndent(obj: Object, fullObject: any) {
+    this.common.presentLoading().then(preLoad => {
+      this.httpIndent.cancelIndent(obj).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            fullObject.status_id = 4;            
+            this.common.presentToast(data.msg, 'success');
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      });
+    })   
+  }
+
+  viewIndent(dat: any) {      
+    this.selectedIndent = dat;
+    this.isModalOpen = true;
+    this.getIndentLogs(dat.rqst_id);
+  }
+
+  getIndentLogs(rqst_id: number) {
+    this.isDataLoadLogs = false
+    this.common.presentLoading().then(preLoad => {
+      this.httpIndent.getIndentLogs(rqst_id).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            let count = 0
+            this.indentLogs = data.data.data;            
+            this.indentLogs.forEach((element: any) => {
+              if (element.changed_fields) {
+                count = count + 1;
+                const entries = Object.entries(element.changed_fields).map(([key, value]) => ({
+                  key: this.formatKey(key),
+                  value
+                }));                         
+                element.changed_fields1 = entries;                
+              }            
+            });            
+            if (count === 0) {
+              console.log('No changed fields found in any log entry.');
+              this.isDataLoadLogs = true;
+            }
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {          
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.common.dismissloading();
+        },
+        complete:() => {          
+          this.common.dismissloading();
+        }
+      });
+    })
+    
+  }
+
+  formatKey(key: string): string {
+    return key.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  onWillDismiss() {
+    this.indentLogs = [];
+    this.isModalOpen = false
+  }
+
+  viewImg(url: string, blobType: string) {
+    this.common.openImg(url, blobType);
+  }
+  getCurrentUser() {
+    this.currentUser = localStorage.getItem('user') || sessionStorage.getItem('user_id');
+    console.log(this.currentUser);
+    // this.currentUserName = localStorage.getItem('user_name') || sessionStorage.getItem('user_name');
+  }
+
+  // get totalPrice(): number {
+  //   if (!Array.isArray(this.req_indent)) return 0;
+  //   return this.req_indent.reduce( (sum, item) => sum + (Number(item.actl_price) || 0), 0 );
+  // }
+}

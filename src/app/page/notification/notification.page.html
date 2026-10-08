@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Notifications</ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="ion-text-capitalize" (click)="markAllRead()" fill="clear"[disabled]="notiticationCount ==0" >Mark all as read</ion-button>
+    </ion-buttons>    
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-list lines="full" mode="ios">
+    <ion-item *ngFor="let alert of alerts" [ngClass]="alert.status === 'read'  ? 'read' : 'unread'" class="ion-no-padding">
+      <ion-grid>
+        <ion-row>
+          <ion-col size="1">
+            <!-- <ion-icon name="ellipse" class="dot" *ngIf="alert.status !== 'read'"></ion-icon>
+            <ion-icon name="checkmark-done-outline" class="dot" *ngIf="alert.status !== 'unread'"></ion-icon> -->
+            <ion-icon [name]="alert.status === 'read'?'checkmark-done-outline':'ellipse'" [class]="alert.status ==='read'? 'dot2' : 'dot'"></ion-icon>
+          </ion-col>
+          <ion-col size="8" class="ion-text-start">
+            <ion-text class="color" style="font-size:14px">{{alert.title}}</ion-text>
+          </ion-col>          
+          <ion-col size="3" class="ion-text-end">
+            <ion-text class="color" style="font-size:13px">{{ getTimeAgo(alert.datetime) }}</ion-text>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="1"></ion-col>
+          <ion-col size="11"><ion-text style="font-size:13px;">{{alert.body}}</ion-text></ion-col>
+        </ion-row>      
+      </ion-grid>
+    </ion-item>
+  </ion-list>
+  <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)" *ngIf="canLoadData">
+    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

@@ -1,5 +1,5 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { LoadingController, ModalController, Platform } from '@ionic/angular';
+import { Component, Input, OnInit } from '@angular/core';
+import { ModalController, Platform } from '@ionic/angular';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
@@ -13,9 +13,11 @@ import { SiteDetailComponent } from '../../complaint/site-detail/site-detail.com
 import { TicketHistoryComponent } from '../../complaint/ticket-history/ticket-history.component';
 import { TicketTypeComponent } from '../../complaint/ticket-type/ticket-type.component';
 import { Router } from '@angular/router';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { liveQuery } from 'dexie';
 import { db } from '../../../provider/local-db/local-db.service';
+import { PtwUploadComponent } from '../../pm-cal/ptw-upload/ptw-upload.component';
+import { LogsComponent } from '../../pm-cal/logs/logs.component';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 @Component({
   selector: 'app-pending-task',
   templateUrl: './pending-task.component.html',
@@ -29,18 +31,30 @@ export class PendingTaskComponent  implements OnInit {
   segments = 'helpdesk';
   page = 1;
   pendingTicket: any = [];
+  isPendingTicketLoad!: boolean;
   allChecklist: any = [];
   assignCheckList: any = [];
   attendedCheckList: any = [];
   pmsList: any = [];
+  pmsListLoad!: boolean;
   meterInfo: any = [];
+  meterInfoLoad!: boolean;
   formData = new FormData();
   userData: any;
   isInternet: any;
   qrType!: string;
   qrObject: any = {};
+  offset = 0;
+  TOTAL_CHECKLIST = 0;
+  isLoop!: boolean;
+  selected_date =  moment().format('YYYY-MM-DD');
+  isPreOpen = false;
+  selectedData: any = [];
+  logs: any = [];
+  closeRemark!: string;
+  isCloseAction = false;
+  selectedCancel: any = [];
   constructor(
-    private loadingController: LoadingController,
     private httpCompalint: ComplaintService,
     private common: CommonService,
     private httpDigital: DigitalChecklistService,
@@ -48,7 +62,8 @@ export class PendingTaskComponent  implements OnInit {
     private modalCtrl: ModalController,
     private httpMeter: MeterService,
     private router: Router,
-    private platform: Platform
+    private platform: Platform,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -70,54 +85,101 @@ export class PendingTaskComponent  implements OnInit {
       this.getData();
     }
     if (this.didEnter) {
-      let split, ecn_key, val ,bar = this.common.getBarcode();
+      const barcode = this.common.getBarcode();
+
+    if (barcode) {
       this.common.setBarcode('');
-      if (bar && this.qrType === 'verify') {
-        this.qrType = '';
-        split = bar.split('/');
-        if (split.length === 6) {
-          ecn_key = split[5];
-          val = this.common.decryptValue(ecn_key);
-          if (this.qrObject.barcode === val) {
+
+      const split = barcode.split('/');
+      const ecnKey = split[split.length - 1];
+      const decryptedValue = this.common.decryptValue(ecnKey);
+
+      switch (this.qrType) {
+        case 'verify':
+          this.qrType = '';
+          if (this.qrObject.barcode === decryptedValue) {
             this.openFillReport(this.qrObject);
           } else {
-            this.common.presentToastWithOk('You are Scan Wrong QR Code ' + val, 'warning');
+            this.common.presentToastWithOk(`You scanned the wrong QR Code: ${decryptedValue}`, 'warning');
           }
-        } else {
-          this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-        }
-      } else if (bar && this.qrType === 'verify_meter') {
-        split = bar.split('/');
-        ecn_key = split[split.length - 1];
-        val = this.common.decryptValue(ecn_key);
-        if (this.qrObject.ext_id === val) {
-          this.qrObject.isQrVerify = true;
-        } else {
-          this.common.presentToastWithOk(`You are Scanning Wrong QR Code. ${val}`, 'warning');
-        }
-      } else if (bar && this.qrType === 'pms') {
-        split = bar.split('/');
-        ecn_key = split[split.length - 1];
-        val = this.common.decryptValue(ecn_key);
-        if (this.qrObject.ext_asset_id === val) {
-          this.openFillReportPms(this.qrObject);
-        } else {
-          this.common.presentToastWithOk(`You are Scanning Wrong Asset QR Code. ${val}`, 'warning');
-        }
-      } else if (bar && this.qrType === 'loc-verify') {
-        split = bar.split('/');
-        if (split.length === 6) {
-          ecn_key = split[5];
-          let val = this.common.decryptValue(ecn_key);
-          if (this.qrObject.loc_id === parseInt(val, 10)) {
+          break;
+
+        case 'verify_meter':
+          if (this.qrObject.ext_id === decryptedValue) {
+            this.qrObject.isQrVerify = true;
+          } else {
+            this.common.presentToastWithOk(`You scanned the wrong QR Code: ${decryptedValue}`, 'warning');
+          }
+          break;
+
+        case 'pms':
+          if (this.qrObject.ext_asset_id === decryptedValue) {
+            this.openFillReportPms(this.qrObject);
+          } else {
+            this.common.presentToastWithOk(`You scanned the wrong asset QR Code: ${decryptedValue}`, 'warning');
+          }
+          break;
+
+        case 'loc-verify':
+          if (this.qrObject.loc_id === parseInt(decryptedValue, 10)) {
             this.openFillReport(this.qrObject);
           } else {
-            this.common.presentToast('You are Scan Wrong Location QR Code ' + val, 'warning');
+            this.common.presentToast(`You scanned the wrong location QR Code: ${decryptedValue}`, 'warning');
           }
-        } else {
-          this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-        }
+          break;
+
+        default:
+          this.common.presentToast('Unknown QR Type', 'warning');
       }
+    }
+
+
+      // if (bar && this.qrType === 'verify') {
+      //   this.qrType = '';
+      //   split = bar.split('/');
+      //   if (split.length === 6) {
+      //     ecn_key = split[5];
+      //     val = this.common.decryptValue(ecn_key);
+      //     if (this.qrObject.barcode === val) {
+      //       this.openFillReport(this.qrObject);
+      //     } else {
+      //       this.common.presentToastWithOk('You are Scan Wrong QR Code ' + val, 'warning');
+      //     }
+      //   } else {
+      //     this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+      //   }
+      // } else if (bar && this.qrType === 'verify_meter') {
+      //   split = bar.split('/');
+      //   ecn_key = split[split.length - 1];
+      //   val = this.common.decryptValue(ecn_key);
+      //   if (this.qrObject.ext_id === val) {
+      //     this.qrObject.isQrVerify = true;
+      //   } else {
+      //     this.common.presentToastWithOk(`You are Scanning Wrong QR Code. ${val}`, 'warning');
+      //   }
+      // } else if (bar && this.qrType === 'pms') {
+      //   split = bar.split('/');
+      //   ecn_key = split[split.length - 1];
+      //   val = this.common.decryptValue(ecn_key);
+      //   if (this.qrObject.ext_asset_id === val) {
+      //     this.openFillReportPms(this.qrObject);
+      //   } else {
+      //     this.common.presentToastWithOk(`You are Scanning Wrong Asset QR Code. ${val}`, 'warning');
+      //   }
+      // } else if (bar && this.qrType === 'loc-verify') {
+      //   split = bar.split('/');
+      //   if (split.length === 6) {
+      //     ecn_key = split[5];
+      //     let val = this.common.decryptValue(ecn_key);
+      //     if (this.qrObject.loc_id === parseInt(val, 10)) {
+      //       this.openFillReport(this.qrObject);
+      //     } else {
+      //       this.common.presentToast('You are Scan Wrong Location QR Code ' + val, 'warning');
+      //     }
+      //   } else {
+      //     this.common.presentToast('You are Scan Wrong QR Code', 'warning');
+      //   }
+      // }
     }
   }
 
@@ -127,7 +189,7 @@ export class PendingTaskComponent  implements OnInit {
       this.pendingTicket = [];
       this.getPendingTicket();
     } else if (this.segments === 'digital') {
-      this.checkCurrentDateDG(moment().format('YYYY-MM-DD'));
+      this.checkCurrentDateDG(this.selected_date);
     } else if (this.segments === 'pms') {
       this.getPendingPms();
     } else if (this.segments === 'meter') {
@@ -146,7 +208,7 @@ export class PendingTaskComponent  implements OnInit {
     if (val === 'helpdesk') {
       this.getPendingTicket();
     } else if (val === 'digital') {
-      this.checkCurrentDateDG(moment().format('YYYY-MM-DD'));
+      this.checkCurrentDateDG(this.selected_date);
     } else if (val === 'pms') {
       this.getPendingPms();
     } else if (val === 'meter') {
@@ -155,49 +217,93 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   checkCurrentDateDG(date: string) {
-    const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).toArray());
-    const sub = friendsObservable.subscribe({
-      next:(data) => {
-        this.allChecklist = data;
-        this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-        this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-        if (this.allChecklist.length === 0 && this.isInternet) {
-          this.getOfflineCheckListFromServer(date);
+    this.common.presentLoading().then(preLoad => {
+      const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
+      const sub = friendsObservable.subscribe({
+        next:(data) => {
+          this.common.dismissloading();
+          this.allChecklist = data;
+          this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+          this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+          if (this.allChecklist.length === 0 && this.isInternet) {
+            this.getOfflineCheckListFromServer(date, 0);
+          }
+          setTimeout(() => {
+            sub.unsubscribe();
+          }, 1000);
         }
-        setTimeout(() => {
-          sub.unsubscribe();
-        }, 1000);
-      }
+      });
     });
   }
 
-  getOfflineCheckListFromServer(date: string) {
-    this.presentLoading('Please Wait, Application is Fetching your Data').then(preLoad => {
-      this.httpDigital.getOfflineCheckListFromServer(date).subscribe({
+  getOfflineCheckListFromServer(date: string, offset: number) {
+    let percentage,tmp_per, msg;
+    if (this.offset && this.TOTAL_CHECKLIST) {
+      tmp_per = ((this.offset * 100) / this.TOTAL_CHECKLIST);
+      if (tmp_per > 100) {
+        tmp_per = 100;
+        percentage = tmp_per.toFixed(2);
+      } else {
+        percentage = tmp_per.toFixed(2);
+      }
+      msg = 'Please Wait, Application is Fetching your Data ' + percentage + '%';
+    } else {
+      msg = 'Please Wait, Application is Fetching your Data ';
+    }
+    this.common.presentLoading(msg).then(preLoad => {
+      this.httpDigital.getOfflineCheckListFromServer(date, offset).subscribe({
         next:(data: any) => {
           if (data.status) {
-            this.allChecklist = data.data;
-            this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-            this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-            this.addBulkCheckList(this.allChecklist);
+            if(data.data?.data.length > 0) {
+              this.isLoop = true;
+              this.allChecklist = data.data.data;
+              if (this.offset === 0) {
+                this.TOTAL_CHECKLIST = data.data.total;
+              }
+              this.addBulkCheckList(this.allChecklist);
+            } else {
+              this.isLoop = false;
+              this.checkCurrentDateDG(date);
+            }
           } else {
-            this.common.presentToast(data.msg, 'warning');
+            this.common.presentLoading().then(preLoad => {
+              const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
+              const sub = friendsObservable.subscribe({
+                next:(data) => {
+                  this.common.dismissloading();
+                  this.allChecklist = data;
+                  this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
+                  this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
+                  setTimeout(() => {
+                    sub.unsubscribe();
+                  }, 1000);
+                }
+              });
+            });
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
   }
 
   async addBulkCheckList(checkListData: any) {
-    await db.checklist.bulkAdd(checkListData);
+    await db.checklist.bulkPut(checkListData).then(res => {
+      if (this.isLoop && this.TOTAL_CHECKLIST > 300) {
+        this.offset = this.offset + 300;
+        this.getOfflineCheckListFromServer(this.selected_date, this.offset);
+      } else {
+        this.checkCurrentDateDG(this.selected_date);
+      }
+    });
   }
+
 
   getPendingTicket() {
     this.httpCompalint.getTicketMaster(null, this.page).subscribe({
@@ -205,16 +311,18 @@ export class PendingTaskComponent  implements OnInit {
         if (data.status) {
           this.page = this.page + 1;
           this.pendingTicket = [...this.pendingTicket, ...data.data.data];
-        } else {
-          this.common.presentToast(data.msg, 'warning');
         }
+        // else {
+        //   this.common.presentToast(data.msg, 'warning');
+        // }
       },
       error:() => {
-        this.dismissloading();
+        this.common.dismissloading();
         this.common.presentToast(environment.errMsg, 'warning');
       },
       complete:() => {
-        this.dismissloading();
+        this.isPendingTicketLoad = true;
+        this.common.dismissloading();
       }
     });
   }
@@ -240,7 +348,7 @@ export class PendingTaskComponent  implements OnInit {
   fsr(ticket_id: number) {}
 
   async work_now(allData: any) {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpCompalint.checkTicketConfirm(allData.tkts_id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -250,11 +358,11 @@ export class PendingTaskComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     });
@@ -293,7 +401,7 @@ export class PendingTaskComponent  implements OnInit {
     this.allChecklist = [];
     this.assignCheckList = [];
     this.attendedCheckList = [];
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpDigital.getScheduleHistory(date).subscribe({
         next:(data) => {
           if (data.status) {
@@ -305,18 +413,18 @@ export class PendingTaskComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger')
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
   }
 
   getPendingPms(){
-    this.presentLoading().then(() => {
+    this.common.presentLoading().then(() => {
       this.httpPm.getPm(1, 1).subscribe({
         next:(dat) => {
           if (dat.status) {
@@ -328,11 +436,12 @@ export class PendingTaskComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'warning');
         },
         complete:() => {
-          this.dismissloading();
+          this.pmsListLoad = true;
+          this.common.dismissloading();
         }
       });
     });
@@ -352,7 +461,7 @@ export class PendingTaskComponent  implements OnInit {
   }
 
   openBarcode(type: string, dat: any) {
-    if (!this.platform.is('capacitor') && type === 'verify') {
+    if (!this.platform.is('capacitor') && (type === 'verify' || type === 'verify_meter')) {
       dat.isQrVerify = true;
       return;
     }
@@ -421,14 +530,35 @@ export class PendingTaskComponent  implements OnInit {
   //   });
   // }
 
-  uploadPtw(dat: any) {}
-
-  viewAttachment(url: string) {
-    this.common.openDoc(url);
+  async uploadPtw(dat: any, type: string) {    
+    const modal = await this.modalCtrl.create({
+      component: PtwUploadComponent,
+      cssClass: 'my-modal-ptw',
+      initialBreakpoint: 1,
+      breakpoints: [1],
+      componentProps : {
+        data: dat,
+        req_for: type
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {        
+        if (type === 'vendor') {
+          this.pmsList = this.pmsList.filter((val: any) => val.id !== dat.id);
+        } else {
+          dat.ptw_attach = disModal.data.ptw_attach
+        }        
+      }      
+    });
+    return await modal.present();
   }
 
+  // viewAttachment(url: string) {
+  //   this.common.openDoc(url);
+  // }
+
   getPendingMeter() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpMeter.getPendingWo().subscribe({
         next:(data) => {
           if (data.status) {
@@ -438,53 +568,91 @@ export class PendingTaskComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
+          this.meterInfoLoad = true;
         }
       });
     })
   }
 
+  onWillDismissClose() {
+    this.isCloseAction = false;
+    this.selectedCancel = [];
+  }
+
+  singleCancel(data: any) {
+    this.isCloseAction = true;
+    // data.isSelect = true;
+    this.selectedCancel = data;
+
+  }
+
+  filterIds() {
+    let submitObj: any;
+    submitObj = {
+      id: [this.selectedCancel.id],
+      data: {
+        cancel_remark: this.closeRemark
+      }
+    }
+    this.multiCancelAction(submitObj);
+  }
+
+  multiCancelAction(submitObj: any) {
+    if (!this.closeRemark) {
+      this.common.presentToast('Please Enter Remark', 'warning');
+      return;
+    }
+
+    this.common.presentLoading().then(preLoad => {
+      this.httpPm.closePms(submitObj).subscribe({
+        next:(data: any) => {
+          if (data.status) {
+            this.common.presentToast(data.msg, 'success');
+            this.closeRemark = '';
+            this.isCloseAction = false;
+            this.pmsList = this.pmsList.filter((item: any) => !submitObj.id.includes(item.id));
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      })
+    })
+
+  }
+
   checkPhotoCondition(dat: any, type: any) {
+    let obj: any = []
     if (dat.is_gllry_upld_allwd == 1) {
-      this.presentActionSheet(1, dat , type);
+      obj = ['camera', 'gallery'];
+      this.customActionSheet(obj, dat, type);
     } else if (dat.is_gllry_upld_allwd == 0) {
-      this.presentActionSheet(0, dat , type);
+      obj ['camera'];
+      this.customActionSheet(obj, dat, type);
     } else {
       alert('Gallery is Undefined ' + dat.is_gllry_upld_allwd);
     }
   }
 
-  async presentActionSheet(val: any, data: any, type: any) {
-    const takePicture = async () => {
-      var obj: any = {};
-      if (val === 1) {
-        obj = {
-          quality: 80,
-          allowEditing: false,
-          resultType: CameraResultType.Uri,
-        }
-      } else {
-        obj = {
-          quality: 80,
-          allowEditing: false,
-          source: CameraSource.Camera,
-          resultType: CameraResultType.Uri,
-        }
-      }
-      const image = await Camera.getPhoto(obj);
-      this.readImg(image, data ,type)
-    };
-    takePicture();
+  async customActionSheet(obj: any, data: any, type: any) {
+    this.camera.selectImage(obj, (blob: Blob) => {
+      this.setImage(blob, data, type);
+    });
   }
 
-  async readImg(photo: any, data: any,type: any) {
+  setImage(blob: any, data: any, type: string) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     if (type == 'consumption') {
       this.formData.delete('img1');
       this.formData.append('img1', blob, random);
@@ -513,9 +681,9 @@ export class PendingTaskComponent  implements OnInit {
         }
       }
     }
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       setTimeout(() => {
-        this.dismissloading();
+        this.common.dismissloading();
       }, 500)
     })
   }
@@ -580,15 +748,6 @@ export class PendingTaskComponent  implements OnInit {
     } else {
       return true;
     }
-    // if (!dat.consumption_reading) {
-    //   alert('Please Enter Consumption Reading');
-    //   return false;
-    // } else if (dat.is_img_req == 1 && !dat.isConsumptionImg) {
-    //   alert('Consumption Image is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
 
   checkGenertionCondition(dat: any) {
@@ -604,15 +763,6 @@ export class PendingTaskComponent  implements OnInit {
     } else {
       return true;
     }
-    // if (!dat.generate_reading) {
-    //   alert('Please Enter Generate Reading');
-    //   return false;
-    // } else if (dat.is_img_req == 1 && !dat.isGenerationImg) {
-    //   alert('Generation Image is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
 
   checkOtherCondition(dat: any) {
@@ -628,21 +778,14 @@ export class PendingTaskComponent  implements OnInit {
     } else {
       return true;
     }
-    // if (!dat.other_reading && dat.oth_read == 1) {
-    //   alert('Other Reading is Required');
-    //   return false;
-    // } else {
-    //   return true;
-    // }
   }
-
 
   save(obj: any, dat: any) {
     for (let key in obj) {
       this.formData.delete(key);
       this.formData.append(key, obj[key]);
     }
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpMeter.updateReading(this.formData).subscribe({
         next:(data) => {
           if (data.status) {
@@ -650,6 +793,7 @@ export class PendingTaskComponent  implements OnInit {
             dat.isRemove = true
             setTimeout(() => {
               this.meterInfo = this.meterInfo.filter((val: any) => val.wo_id !== obj.wo_id);
+              this.formData = new FormData();
             }, 500);
           } else {
             this.common.presentToast(data.msg, 'warning');
@@ -657,18 +801,24 @@ export class PendingTaskComponent  implements OnInit {
         },
         error:() => {
           this.common.presentToast(environment.errMsg, 'danger');
-          this.dismissloading();
+          this.common.dismissloading();
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       });
     })
   }
 
-  checkPms(type: string, data: any) {
-    if (data.ext_asset_id) {
-      this.openBarcode(type, data);
+  checkPms(data: any) {
+    if (this.platform.is('capacitor')) {
+      if (data.ext_asset_id) {
+        this.qrType = 'pms';
+        this.qrObject = data;
+        this.router.navigateByUrl('/barcode');
+      } else {
+        this.openFillReportPms(data);
+      }
     } else {
       this.openFillReportPms(data);
     }
@@ -682,31 +832,18 @@ export class PendingTaskComponent  implements OnInit {
     });
   }
 
-  //   openFillReport(data: any) {
-  //   if (data.ext_asset_id) {
-  //     this.selectedObj = data;
-  //     this.openBarcode(data)
-  //   } else {
-  //     this.openPage(data);
-  //   }
+  // openPage(data: any) {
+  //   this.router.navigate(['/pm-calibration/pm-report'], {
+  //     queryParams: {
+  //       data: JSON.stringify(data),
+  //     }
+  //   });
   // }
-
-  // openBarcode(data: any) {
-  //   this.router.navigateByUrl('/barcode');
-  // }
-
-  openPage(data: any) {
-    this.router.navigate(['/pm-calibration/pm-report'], {
-      queryParams: {
-        data: JSON.stringify(data),
-      }
-    });
-  }
 
   changePendingTask() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.pendingTask = !this.pendingTask;
-      this.dismissloading();
+      this.common.dismissloading();
     })
   }
 
@@ -730,7 +867,9 @@ export class PendingTaskComponent  implements OnInit {
   async pmAssign(dat: any) {
     const modal = await this.modalCtrl.create({
       component: PmAssignComponent,
-      cssClass: 'my-modal',
+      cssClass: 'my-modal-btm',
+      initialBreakpoint: 1,
+      breakpoints: [1],
       componentProps: { data: dat }
     });
     modal.onWillDismiss().then(disModal => {
@@ -741,23 +880,84 @@ export class PendingTaskComponent  implements OnInit {
     modal.present();
   }
 
-  async presentLoading(msg?: string) {
-    let message;
-    if (msg) {
-      message = msg;
-    } else {
-      message = 'Please Wait'
-    }
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: message,
+  async ptwLogs(dat: any) {
+    const modal = await this.modalCtrl.create({
+      component: LogsComponent,
+      cssClass: 'my-modal',
+      componentProps: { data: dat }
     });
-    await this.loading.present();
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role) {
+
+      }
+    });
+    modal.present();
   }
 
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
+  openModal(data: any) {
+    this.isPreOpen = true;
+    this.selectedData = data;
+    this.getPpmPending(this.selectedData.id);
   }
+
+  viewAttachment(url: string) {
+    this.common.setImageCondition(url, 'blob');
+  }
+
+  onWillDismiss() {
+    this.isPreOpen = false;
+    this.selectedData = [];
+    this.logs = [];
+  }
+
+  getPpmPending(id: any) {
+    this.common.presentLoading().then(preLoad => {
+      this.httpPm.PpmPtwApproval(id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            const tmp = data.data;
+            for (var i = 0; i < tmp.length; i++) {
+              let status = tmp[i].status_id;
+
+              if(status !== ""){
+                this.logs.push({
+                  'status' :  (status == "0")?'Rejected':"Approved",
+                  'status_id':tmp[i].status_id,
+                  'date':tmp[i].appr_date,
+                  'action_by':tmp[i].ap_username+' '+tmp[i].approver,
+                  'remark':tmp[i].remark,
+                  'attach':'',
+                  // 'ind':i+2
+                });
+              }
+              this.logs.push({
+                'status' :  'Request Raised',
+                'status_id':"",
+                'date':tmp[i].created_at,
+                'action_by':tmp[i].username+' '+tmp[i].creater,
+                'remark':tmp[i].ptw_remark,
+                'attach':tmp[i].ptw_attach,
+                // 'ind':i+1
+              });
+            }
+
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.common.dismissloading();
+        }
+      });
+    })
+  }
+
+  changeCheckbox(data: any) {
+
+  }
+
 }

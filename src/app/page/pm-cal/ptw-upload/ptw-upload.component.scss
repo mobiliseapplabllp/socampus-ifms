@@ -1,10 +1,19 @@
 .custom-file-upload{
-  background: #f7f7f7;
-  padding: 8px;
-  border: 1px solid #e3e3e3;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  padding: 6px 16px;
+  border-radius: 26px;
+  border: 2px solid var(--ion-color-primary);
   display: inline-block;
-  // padding: 6px 12px;
+  color:var(--ion-color-primary);
   cursor: pointer;
+  margin-top:3px;
+}
+
+.custom-file-upload-succ {
+  padding: 6px 16px;
+  border-radius: 26px;
+  border: 2px solid var(--ion-color-success);
+  display: inline-block;
+  color:var(--ion-color-success);
+  cursor: pointer;
+  margin-top:3px;
 }

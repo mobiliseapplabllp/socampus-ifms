@@ -1,0 +1,155 @@
+setup for seding push notification in ios device
+
+Step 1. Createing a project in firebase console and download GoogleService-info.plist file
+
+Step 2. go your identifier and tick Push Notification(NOTES: NO NEED TO ATTACH CERTIFICATE)
+
+Step 3. go to keys if already is created then download .p8 file and also APNS ENVIRONMENT is Sandbox & Production (NOTE agar yeah download ho chuki hai toh frr download nhi hogi ishe safe jagah rakhe )
+
+Step 4. Go to firebase console -> project -> cloud messaging -> select App
+   => APNs Authentication Key(here uploadyour .p8) with key ID and Team ID
+    -> kEY_ID GO TO YOUR KEYS AND FIND KEY_ID 
+    -> TEAM_ID go to https://developer.apple.com/account and go to member details fine Team ID here
+
+step 5. open xcode this command npx cap open ios and Drag a GoogleService-Info.plist file in App/App/GoogleService-info.plist here
+
+Step 6. open ios/App/Podfile
+  target 'App' do
+  capacitor_pods
+  # Add your Pods here
+  pod 'Firebase/Messaging' // ADD THIS LINE
+end
+
+STEP 7 RUN COMMAND 
+ => npx cap update ios
+
+step 8
+
+import UIKit
+import Capacitor
+import Firebase
+import FirebaseMessaging
+
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    var window: UIWindow?
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Override point for customization after application launch.
+        FirebaseApp.configure()
+        return true
+    }
+
+    func applicationWillResignActive(_ application: UIApplication) {
+        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+    }
+
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
+        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    }
+
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    }
+
+    func applicationWillTerminate(_ application: UIApplication) {
+        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        // Called when the app was launched with a url. Feel free to add additional processing here,
+        // but if you want the App API to support tracking app url opens, make sure to keep this call
+        return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
+    }
+
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        // Called when the app was launched with an activity, including Universal Links.
+        // Feel free to add additional processing here, but if you want the App API to support
+        // tracking app url opens, make sure to keep this call
+        return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        print("📦 APNs token received: \(deviceToken.map { String(format: "%02.2hhx", $0) }.joined())")    
+        // Send APNs token to Firebase
+        Messaging.messaging().apnsToken = deviceToken
+
+        // Request the FCM token from Firebase
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("❌ Error getting FCM token: \(error.localizedDescription)")
+                NotificationCenter.default.post(name: Notification.Name(CAPNotifications.DidFailToRegisterForRemoteNotificationsWithError.name()), object: error)
+            } else if let token = token {
+                print("✅ FCM Token from Firebase: \(token)")
+                NotificationCenter.default.post(name: Notification.Name(CAPNotifications.DidRegisterForRemoteNotificationsWithDeviceToken.name()), object: token)
+            }
+        }
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+      NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
+    }
+
+}
+
+step 9:
+
+now open xcode "npx cap open ios"
+Go to "Signing & Capability" -> +Capability -> 
+    1.Push Notificatoin
+    2.Background Modes
+      ->Remote Notifications
+
+step 10:  go to ios/App/App 
+ =>App.entitlements (auto generate)
+ <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+	    <key>aps-environment</key>
+	    <string>production</string>
+    </dict>
+    </plist>
+
+ =>AppDebug.Entitlements (Manully generate)
+
+ step 11: in xcode go to Buildin Setting
+ =>Signing
+    Code Signing Entitlements
+        Debug -   App/AppDebug.entitlements
+        Release - App/App.entitlements 
+
+
+
+
+
+
+
+Important Topic
+
+generate key n developers account and SANDBOX AND PRODUCTION BOTH ARE ENABLED
+in xcode target app +capability 
+=> Background Modes
+    true remote notification
+=>push notification enable
+
+Build Setting
+ => Code Signing Entitlements
+     -Debug    App/AppDebug.entitlements
+     -Release  App/App.entitlements
+
+     <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>aps-environment</key>
+	<string>production</string>
+</dict>
+</plist>

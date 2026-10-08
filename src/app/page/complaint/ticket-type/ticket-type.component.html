@@ -44,7 +44,7 @@
       </ion-item>
       <ion-item *ngIf="ticketForm.value.is_barcode === '1'">
         <ion-label position="floating">Barcode</ion-label>
-        <ion-input type="text" formControlName="barcode"> </ion-input>
+        <ion-input type="email" formControlName="barcode"> </ion-input>
         <ion-button size="small" slot="end" fill="outline" color="red" [disabled]="!ticketForm.value.barcode" (click)="searchClientId()">Search <ion-icon name="search-outline" slot="end"></ion-icon> </ion-button>
       </ion-item>
       <section *ngIf="ticketForm.value.is_barcode === '1'">
@@ -65,64 +65,39 @@
       </section>
     </div>
     <div *ngIf="ticketForm.value.issue_type === 2">
-      <!-- <ion-item>
-        <ion-label position="floating">Query Category</ion-label>
-        <ion-select interface="action-sheet" formControlName="category" (ionChange)="changeQuery($event)" mode="ios">
-          <ion-select-option *ngFor="let dat of query" [value]="dat.value">{{dat.label}}</ion-select-option>
-        </ion-select>
-      </ion-item> -->
 
       <ion-item (click)="openCategory()">
         <ion-label position="floating">Query Category  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="category_desc" readonly></ion-input>
+        <ion-input type="email" formControlName="category_desc" readonly></ion-input>
       </ion-item>
 
-      <!-- <ion-item>
-        <ion-label position="floating">Query Sub Category One</ion-label>
-        <ion-select interface="action-sheet" formControlName="subcat1_id" (ionChange)="changeSubCat($event)" mode="ios">
-          <ion-select-option *ngFor="let dat of subCategory" [value]="dat.value">{{dat.label}}</ion-select-option>
-        </ion-select>
-      </ion-item> -->
       <ion-item (click)="openCategorySubCat()" *ngIf="subCategory.length > 0 || ticketForm.value.subcat1_id_desc">
         <ion-label position="floating">Query Sub Category One  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="subcat1_id_desc" readonly></ion-input>
+        <ion-input type="email" formControlName="subcat1_id_desc" readonly></ion-input>
       </ion-item>
-
-
-      <!-- <ion-item *ngIf="subCategory2.length > 0">
-        <ion-label position="floating">Query Sub Category Two</ion-label>
-        <ion-select interface="action-sheet" formControlName="subcat2_id" mode="ios">
-          <ion-select-option *ngFor="let dat of subCategory2" [value]="dat.value">{{dat.label}}</ion-select-option>
-        </ion-select>
-      </ion-item> -->
 
       <ion-item (click)="openCategorySubCat2()" *ngIf="subCategory2.length > 0 || ticketForm.value.subcat2_id_desc">
         <ion-label position="floating">Query Sub Category Two  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="subcat2_id_desc" readonly></ion-input>
+        <ion-input type="email" formControlName="subcat2_id_desc" readonly></ion-input>
       </ion-item>
     </div>
     <section *ngIf="((ticketForm.value.issue_type === 2) || (ticketForm.value.issue_type === 1 && ticketForm.value.is_barcode === '0')) && isShowBuilding  ">
+      <ion-item (click)="openBlock()">
+        <ion-label position="floating">Blocks  <ion-text color="danger">*</ion-text> </ion-label>
+        <ion-input type="email" formControlName="block_id_desc" readonly></ion-input>
+      </ion-item>
       <ion-item (click)="openBuilding()">
         <ion-label position="floating">Building  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="bldg_id_desc" readonly></ion-input>
-        <!-- <ion-select interface="action-sheet" mode="ios" formControlName="bldg_id" (ionChange)="changeBuilding($event)">
-          <ion-select-option *ngFor="let dat of buildingArr" [value]="dat.value">{{dat.label}}</ion-select-option>
-        </ion-select> -->
+        <ion-input type="email" formControlName="bldg_id_desc" readonly></ion-input>
       </ion-item>
       <ion-item (click)="openFloorModal()">
         <ion-label position="floating">Floor  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="floor_id_desc" readonly></ion-input>
-        <!-- <ion-select interface="action-sheet" mode="ios" formControlName="floor_id" (ionChange)="changeFloor($event)">
-          <ion-select-option *ngFor="let dat of floorArr" [value]="dat.value">{{dat.label}}</ion-select-option>
-        </ion-select> -->
+        <ion-input type="email" formControlName="floor_id_desc" readonly></ion-input>
       </ion-item>
 
       <ion-item (click)="openLocationModal()" *ngIf="allData.source !== 'QRCODE' ">
         <ion-label position="floating">Location  <ion-text color="danger">*</ion-text> </ion-label>
-        <ion-input type="text" formControlName="loc_code_desc" readonly></ion-input>
-        <!-- <ion-select interface="action-sheet" mode="ios" formControlName="loc_code">
-          <ion-select-option *ngFor="let dat of locationArr" [value]="dat.value">{{dat.label}}</ion-select-option>
-        </ion-select> -->
+        <ion-input type="email" formControlName="loc_code_desc" readonly></ion-input>
       </ion-item>
     </section>
 
@@ -145,7 +120,7 @@
     </ion-row>
     <ion-item id="open-modal" (click)="hseAssign('assign')">
       <ion-label position="floating">Assign To <ion-text color="danger">*</ion-text> </ion-label>
-      <ion-input type="text" readonly formControlName="assignToName"></ion-input>
+      <ion-input type="email" readonly formControlName="assignToName"></ion-input>
     </ion-item>
     <ion-note *ngIf="assignUserSelect.label" color="danger" class="ion-margin-start">{{assignUserSelect.label}} {{assignUserSelect.status}} {{assignUserSelect.distance}}</ion-note>
     <h3 [hidden]="pc_hse_conf.ptw_allow === 0 && pc_hse_conf.ppekit_allow === 0 && pc_hse_conf.buddy_allow === 0" class="ion-padding-start">HSE Detail</h3>
@@ -180,7 +155,7 @@
       <ion-col size="6" *ngIf="ticketForm.value.buddy_req === '1'">
         <ion-item (click)="hseAssign('buddy')">
           <ion-label position="floating">Buddy Assign <ion-text color="danger">*</ion-text></ion-label>
-          <ion-input type="text" formControlName="buddyName" readonly></ion-input>
+          <ion-input type="email" formControlName="buddyName" readonly></ion-input>
         </ion-item>
         <ion-note *ngIf="buddyUserSelect.label" color="danger" class="ion-margin-start">{{buddyUserSelect.label}} {{buddyUserSelect.status}} {{buddyUserSelect.distance}}</ion-note>
       </ion-col>

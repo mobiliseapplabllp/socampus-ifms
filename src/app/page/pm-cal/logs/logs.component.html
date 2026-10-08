@@ -1,0 +1,22 @@
+<ion-header mode="md">
+  <ion-toolbar color="primary">
+    <ion-title>PTW Logs</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close(null, false)">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-item *ngFor="let dat of List">
+    <ion-label class="ion-text-wrap">
+      <h2>{{dat.name}} {{dat.lname}}</h2>
+      <p>{{dat.ptw_remark}}</p>
+      <p>{{dat.created_at}}</p>
+    </ion-label>
+    <ion-button slot="end" (click)="openDoc(dat.ptw_attach, dat.ptw_attach_blob_type)" fill="clear">
+      <ion-icon name="attach-outline"></ion-icon>
+    </ion-button>
+  </ion-item>
+</ion-content>

@@ -14,6 +14,7 @@ import { AssignTicketComponent } from './assign-ticket/assign-ticket.component';
 import { InstructionModalComponent } from './instruction-modal/instruction-modal.component';
 import { TravelDetailComponent } from './travel-detail/travel-detail.component';
 import { HseAssignComponent } from './hse-assign/hse-assign.component';
+import { TicketHoldComponent } from './ticket-hold/ticket-hold.component';
 
 const routes: Routes = [
   {
@@ -67,6 +68,10 @@ const routes: Routes = [
   {
     path: 'hse-assign',
     component: HseAssignComponent
+  },
+  {
+    path: 'ticket-hold',
+    component: TicketHoldComponent
   }
 ];
 

@@ -1,0 +1,124 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Indent Approval</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card *ngFor="let dat of pendingData">
+    <ion-card-header color="primary" style="padding:10px">
+      <ion-row class="ion-no-padding">
+        <ion-col size="12">
+          MR No : {{dat?.rqst_no}}
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+  
+    <ion-card-content>
+      <ion-row>
+        <ion-col size="6">
+          <ion-text color="primary">Site Name :</ion-text><br>
+          <ion-text color="medium">{{dat?.pc_name}}</ion-text>
+        </ion-col>
+
+
+        
+        
+  
+        <ion-col size="6">
+          <ion-text color="primary">Warehouse :</ion-text><br>
+          <ion-text color="medium">{{dat?.wh_desc}}</ion-text>
+        </ion-col>
+  
+        <ion-col size="6">
+          <ion-text color="primary">Requested By :</ion-text><br>
+          <ion-text color="medium">
+            {{dat?.requestor_name}} {{dat?.requestor_lname}}
+            ({{dat?.requestor_username}})
+          </ion-text>
+        </ion-col>
+  
+        <ion-col size="6">
+          <ion-text color="primary">Requested At :</ion-text><br>
+          <ion-text color="medium">{{dat?.created_at}}</ion-text>
+        </ion-col>
+  
+        <ion-col size="6">
+          <ion-text color="primary">Remark :</ion-text><br>
+          <ion-text color="medium">{{dat?.remark}}</ion-text>
+        </ion-col>
+  
+        <ion-col size="6">
+          <ion-text color="primary">Material :</ion-text><br>
+          <ion-text color="medium">{{dat?.mtrl_desc}}</ion-text>
+        </ion-col>
+  
+        <ion-col size="6">
+          <ion-text color="primary">Qty :</ion-text><br>
+          <ion-text color="medium">{{dat?.qty}} {{dat?.uom_desc}}</ion-text>
+        </ion-col>
+
+        <ion-col size="6">
+          <ion-text color="primary">Txn ID :</ion-text><br>
+          <ion-text color="medium">{{dat?.txn_id}}</ion-text>
+        </ion-col>
+  
+  
+      </ion-row>
+  
+      <ion-row>
+        <ion-col size="6">
+          <ion-button size="block" shape="round" fill="outline" color="danger"(click)="presentAlertConfirm(dat, '0', 'Reject')">Reject
+           <ion-icon name="close-outline" slot="end"></ion-icon>
+          </ion-button>
+        </ion-col>
+  
+        <ion-col size="6">
+          <ion-button size="block" shape="round" fill="solid" color="success" (click)="presentAlertConfirm(dat, '1', 'Approve')"> Approve
+            <ion-icon name="checkmark-outline" slot="end"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+  
+    </ion-card-content>
+  </ion-card>
+  
+<!-- 
+  <ion-modal [isOpen]="isMaterialModalOpen" class="center-modal">
+    <ng-template>
+
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Material Details</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeMaterialModal()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-card *ngFor="let mat of materialData">
+          <ion-card-content>
+            <ion-row>
+              <ion-col size="6">
+                <b>Material Name:</b><br>
+                {{mat?.mtrl_name}}
+              </ion-col>
+              <ion-col size="6">
+                <b>Qty: </b>
+               <strong> {{mat?.receipt_qty}}</strong> 
+              </ion-col>
+              <ion-col size="6">
+                <b>Description:</b><br>
+                {{mat?.mtrl_desc}}
+              </ion-col>
+            </ion-row>
+          </ion-card-content>
+        </ion-card>
+      </ion-content>
+    </ng-template>
+  </ion-modal> -->
+
+</ion-content>

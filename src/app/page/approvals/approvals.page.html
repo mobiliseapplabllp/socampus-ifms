@@ -8,6 +8,9 @@
 </ion-header>
 
 <ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
   <ion-grid>
     <ion-row  style="padding:2px;margin:0px !important;">
       <ion-col *ngFor="let val of approvalsList" size="4" style="margin:3px 0px">

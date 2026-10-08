@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { env } from 'process';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 @Injectable({
@@ -23,8 +24,11 @@ export class PmCalService {
     return this.assignPmCal;
   }
 
-  getPm(stage_id: any, current_page: any): Observable<any> {
+  PpmPtwApproval(id: any): Observable<any> {
+    return this.https.get(environment.url + 'pmscal/get_pms_ptw_logs/' + id);
+  }
 
+  getPm(stage_id: any, current_page: any): Observable<any> {
     return this.https.get(environment.url + 'pmscal/get_ppm_work_area_work_order?limit=20&page=' + current_page + '&stage_id=' + stage_id + '&shource_from=app');
     // return this.https.get(environment.url + 'pmscal/get_work_order?limit=10&page=' + current_page + '&stage_id=' + stage_id + '&shource_from=app');
   }
@@ -36,9 +40,21 @@ export class PmCalService {
   searchTicketFromServer(key: any, value: any): Observable<any> {
     let url;
     url = 'limit=40&page=1&' + key + '=' + value + '&shource_from=app';
-    return this.https.get(environment.url + 'pmscal/get_work_order?' + url);
+    return this.https.get(environment.url + 'pmscal/get_ppm_work_area_work_order?' + url);
+    // return this.https.get(environment.url + 'pmscal/get_work_order?' + url);
   }
 
+  getCategory(cat_id: any): Observable<any> {
+    return this.https.get(environment.url + 'pmscal/schedule/get_wo_categories/' + cat_id);
+  }
+
+  getQuestionList(cat_id: any, wo_id: any): Observable<any> {
+    return this.https.get(environment.url + 'pmscal/schedule/get_questions?wo_id=' + wo_id + '&cat_id=' + cat_id)
+  }
+
+  getActionableQuestion(wo_id: any): Observable<any> {
+    return this.https.get(environment.url + 'pmscal/schedule/get_actionable_ques/' + wo_id);
+  }
 
   getScheduleQuestion(wo_id: any): Observable<any> {
     return this.https.get(environment.url + 'pmscal/schedule/get_schedule_questions/' + wo_id);
@@ -52,12 +68,17 @@ export class PmCalService {
     return this.https.post(environment.url + 'pmscal/schedule/update_user_action', formData)
   }
 
+  closePms(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'pmscal/cancel_wo_action', formData);
+  }
+
   verifyBarcode(barcode: any, sid: any) {
     return this.https.get(environment.url + 'verify_pms_barcode_sales.php?barcode_no=' + barcode + '&schedule_id=' + sid);
   }
 
-  getAllEmployee(): Observable<any> {
-    return this.https.get(environment.url + 'setups/teams/get_team_members');
+  getAllEmployee(pc_id: any): Observable<any> {
+    // return this.https.get(environment.url + 'setups/teams/get_team_members');
+    return this.https.get(environment.url + 'setups/teams/ppm/get_site_team_members?pc_id=' + pc_id);
   }
 
   getAssets(wo_id: any): Observable<any> {
@@ -88,8 +109,26 @@ export class PmCalService {
     return this.https.get(environment.url + 'pmscal/get_My_work_order?limit=10&page=1');
   }
 
-  uploadPtw(formdata: any): Observable<any> {
-    return this.https.post(environment.url + 'pmscal/uploadPTW', formdata);
+  // uploadPtw(formdata: any): Observable<any> {
+  //   return this.https.post(environment.url + 'pmscal/uploadPTW', formdata);
+  // }
+
+  uploadPtw(formdata: any, req_for?: string): Observable<any> {
+    let url: string;
+    if (req_for === 'vendor') {
+      url = environment.url + 'pmscal/uploadVendorProof';
+    } else {
+      url = environment.url + 'pmscal/uploadPTW';
+    }
+    return this.https.post(url, formdata);
+  }
+
+  getInternalUser(pc_id: any): Observable<any> {
+    return this.https.get(environment.url + 'ppm_search_internal_users?pc_id=' + pc_id);
+  }
+
+  pmsHoldAction(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'pmscal/ppm/ppm_work_order_on_hold', formData);
   }
 
   resolvePmCal(remarks: any, ticketInfo: any, empID: any, img: any, completionDate: any) {

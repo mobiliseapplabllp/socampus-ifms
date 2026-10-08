@@ -21,6 +21,7 @@ import { VideoComponent } from './video/video.component';
 import { CaptureComponent } from './capture/capture.component';
 import { TimesPipe } from '../pipes/times.pipe';
 import { VideoPlayComponent } from './video-play/video-play.component';
+import { BlockComponent } from './block/block.component';
 import { ImageViewComponent } from './image-view/image-view.component';
 import { PdfViewComponent } from './pdf-view/pdf-view.component';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
@@ -44,6 +45,7 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     CaptureComponent,
     TimesPipe,
     VideoPlayComponent,
+    BlockComponent,
     ImageViewComponent,
     PdfViewComponent
 
@@ -74,6 +76,7 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     VideoComponent,
     CaptureComponent,
     VideoPlayComponent,
+    BlockComponent,
     ImageViewComponent,
     PdfViewComponent
   ],

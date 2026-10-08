@@ -18,7 +18,7 @@
       <ion-button expand="block" [color]="segments === 'digital'? 'primary':'medium'" (click)="clickCustomSegment('digital')">Digital</ion-button>
     </ion-col>
     <ion-col size="3">
-      <ion-button expand="block" [color]="segments === 'pms'? 'primary':'medium'" (click)="clickCustomSegment('pms')">PMS</ion-button>
+      <ion-button expand="block" [color]="segments === 'pms'? 'primary':'medium'" (click)="clickCustomSegment('pms')">PPM</ion-button>
     </ion-col>
     <ion-col size="3">
       <ion-button expand="block" [color]="segments === 'meter'? 'primary':'medium'" (click)="clickCustomSegment('meter')">Meter</ion-button>
@@ -28,6 +28,12 @@
     <div *ngSwitchCase= "'helpdesk'">
       <div *ngFor="let dat of pendingTicket; let i = index">
         <app-complaint-cards [data]="dat" [ticketType]="dat.status"  (greetEvent)="myCustom($event)"></app-complaint-cards>
+      </div>
+      <div *ngIf="pendingTicket.length === 0 && isPendingTicketLoad">
+        <br>
+        <ion-row>
+          <ion-col class="ion-text-center">No tasks are assign to you.</ion-col>
+        </ion-row>
       </div>
       <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)" *ngIf="pendingTicket.length > 0">
         <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
@@ -40,20 +46,100 @@
           <ion-label class="ion-text-wrap">
             <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
             <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
-            <p><b>({{dat.loc_id}}){{dat.location_desc}}</b></p>
+            <p><b>({{dat.scheduler_id}}){{dat.location_desc}}</b></p>
             <p><b>{{dat.barcode}}</b></p>
           </ion-label>
           <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize" >Fill</ion-button>
         </ion-item>
       </ion-card>
+      <div *ngIf="assignCheckList.length === 0">
+        <br>
+        <ion-row>
+          <ion-col class="ion-text-center">No tasks are assign to you.</ion-col>
+        </ion-row>
+      </div>
     </div>
     <div *ngSwitchCase= "'pms'">
-      <ion-card *ngFor="let dat of pmsList; let i = index" >
+      <ion-card *ngFor="let dat of pmsList; let i = index" class="cards" style="border-left:5px solid #915FC8" mode="md">
+        <ion-grid >
+          <ion-row>
+            <!-- <ion-col size="1" class="center">
+              <ion-checkbox [(ngModel)]="dat.isSelect" color="primary-dark" (click)="changeCheckbox(dat.isSelect)"></ion-checkbox>
+            </ion-col> -->
+            <ion-col style="color: var(--ion-color-primary-dark); font-size:16px">WO {{dat.wo_no}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Site Name</ion-col>
+            <ion-col>{{dat.pc_desc}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Date</ion-col>
+            <ion-col>{{dat.log_date}}</ion-col>
+          </ion-row>
+          <ion-row *ngIf="dat.ext_asset_id">
+            <ion-col size="5">Asset ID</ion-col>
+            <ion-col>{{dat.ext_asset_id}}</ion-col>
+          </ion-row>
+          <ion-row *ngIf="dat.ext_asset_id">
+            <ion-col size="5">Device</ion-col>
+            <ion-col>{{dat.subgrp_desc}}</ion-col>
+          </ion-row>
+          <ion-row *ngIf="!dat.ext_asset_id">
+            <ion-col size="5">Checklist Desc</ion-col>
+            <ion-col>{{dat.chklist_desc}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="5">Assigned To</ion-col>
+            <ion-col>{{dat.user}}</ion-col>
+          </ion-row>
+          <ion-row *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
+            <ion-col size="5">Ptw Status</ion-col>
+            <ion-col>
+              <u><ion-text (click)="openModal(dat)" color="primary-dark">In Approval</ion-text> </u>
+            </ion-col>
+          </ion-row>
+          <ion-row *ngIf="dat.ptw_status === '0' && dat.ptw_mandatory === 1 ">
+            <ion-col size="5">Ptw Status</ion-col>
+            <ion-col>
+              <u><ion-text (click)="openModal(dat)" color="danger">Rejected</ion-text> </u>
+            </ion-col>
+          </ion-row>
+          <ion-row *ngIf="dat.ptw_status === '1' && dat.ptw_mandatory === 1 ">
+            <ion-col size="5">Ptw Status</ion-col>
+            <ion-col>
+              <u><ion-text (click)="openModal(dat)" color="success">Approved</ion-text> </u>
+            </ion-col>
+          </ion-row>
+          <!-- <ion-row style="border-top: 1px solid #c2c2c2ab">
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="singleCancel(dat)"> Cancel </ion-button>
+            </ion-col>
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="pmAssign(dat)"> ReAssign </ion-button>
+            </ion-col>
+            <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1 ">
+              <ion-button class="ion-text-capitalize" size="small" color="primary-dark" shape="round" fill="outline" *ngIf="((!dat.ptw_attach && dat.ptw_mandatory === 1) || (dat.ptw_status === '0' && dat.ptw_mandatory === 1 ))" expand="block" (click)="uploadPtw(dat , 'ptw')" >Upload PTW</ion-button>
+              <ion-button class="ion-text-capitalize" color="primary-dark" size="small" shape="round" fill="outline" expand="block" (click)="checkPms(dat)" *ngIf="(dat.ptw_attach !== '' && dat.ptw_status === '1') || dat.ptw_mandatory === 0">Fill Checklist  </ion-button>
+            </ion-col>
+          </ion-row> -->
+          <ion-row style="border-top: 1px solid #c2c2c2ab">
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" (click)="singleCancel(dat)" color="primary-dark" shape="round" fill="outline" size="small" expand="block" *ngIf="dat.can_cancel_wo_btn"> Cancel </ion-button>
+            </ion-col>
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="pmAssign(dat)" *ngIf="dat.can_assign_wo_btn"> ReAssign </ion-button>
+            </ion-col>
+            <ion-col size="4">
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" size="small" fill="outline" expand="block" (click)="uploadPtw(dat, 'ptw')"  *ngIf="dat.is_for_ptw_upload_btn">Upload PTW</ion-button>
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="openFillReport(dat)" *ngIf="dat.can_fill_chklist_btn">Fill Checklist</ion-button>
+              <ion-button class="ion-text-capitalize" color="primary-dark" shape="round" fill="outline" size="small" expand="block" (click)="uploadPtw(dat , 'vendor')" *ngIf="dat.is_sr_btn">Upload SR</ion-button>
+            </ion-col>            
+          </ion-row>
+        </ion-grid>
+      </ion-card>
+      <!-- <ion-card *ngFor="let dat of pmsList; let i = index" >
         <ion-card-header color="primary" style="padding:0px">
           <ion-row class="ion-no-padding">
-            <!-- <ion-col size="1" class="center">
-              <ion-checkbox color="danger" [(ngModel)]="dat.isSelect" (click)="changeCheckbox(dat.isSelect)"></ion-checkbox>
-            </ion-col> -->
             <ion-col size="7" style="display: flex;align-items: center;">
               <b>{{i+1}}. {{dat.pc_desc}} ( {{dat.chklist_desc}} )</b>
             </ion-col>
@@ -65,8 +151,8 @@
         </ion-card-header>
         <ion-card-content style="background-color: var(--ion-color-light);padding-bottom: 0px !important;">
           <ion-row>
-            <ion-col size="6">
-              <ion-text color="medium">WO </ion-text><br>
+            <ion-col size="6" (click)="ptwLogs(dat)">
+              <ion-text color="medium">WO </ion-text> <ion-icon name="information-outline" style="size:20px;color:red"></ion-icon><br>
               <ion-text color="dark">{{dat.wo_no}}</ion-text>
             </ion-col>
             <ion-col size="6">
@@ -81,210 +167,53 @@
               <ion-text color="medium">Assigned To</ion-text><br>
               <ion-text color="dark">{{dat.user}}-{{dat.username}}</ion-text>
             </ion-col>
+            <ion-col size="6" *ngIf="!dat.ptw_status && dat.ptw_attach !== '' && dat.ptw_mandatory === 1 ">
+              <ion-text style="color:orange" >PTW In Approval</ion-text>
+            </ion-col>
+            <ion-col size="6" *ngIf="dat.ptw_status === '0' && dat.ptw_mandatory === 1 ">
+              <ion-text color="danger" >PTW Rejected</ion-text>
+            </ion-col>
           </ion-row>
-          <ion-row >
+          <ion-row>
             <ion-col size="4">
               <ion-button class="ion-text-capitalize" color="secondary" size="small" expand="block" (click)="pmAssign(dat)"> Assign </ion-button>
             </ion-col>
-            <ion-col size="4">
-              <div *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
-                <ion-button class="ion-text-capitalize" size="small" color="danger" *ngIf="!dat.ptw_attach && !dat.ptw_status" expand="block" (click)="uploadPtw(dat)" >Upload PTW</ion-button>
-              </div>
-              <ion-button class="ion-text-capitalize" size="small" color="medium" *ngIf="dat.ptw_attach" expand="block" (click)="viewAttachment(dat.ptw_attach)" >PTW Img</ion-button>
+            <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1 ">
+              <ion-button class="ion-text-capitalize" size="small" color="danger" *ngIf="((!dat.ptw_attach && dat.ptw_mandatory === 1) || (dat.ptw_status === '0' && dat.ptw_mandatory === 1 ))" expand="block" (click)="uploadPtw(dat, 'ptw')" >Upload PTW</ion-button>              
+              <ion-button class="ion-text-capitalize" color="tertiary" size="small" expand="block" (click)="checkPms('pms', dat)" *ngIf="(dat.ptw_attach !== '' && dat.ptw_status === '1') || dat.ptw_mandatory === 0">Fill Checklist  </ion-button>
             </ion-col>
-            <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
-              <ion-button class="ion-text-capitalize" color="tertiary" size="small" expand="block" (click)="checkPms('pms', dat)" *ngIf="(dat.ptw_attach && dat.ptw_status === 1) || !dat.ptw_mandatory">Fill Checklist  </ion-button>
-            </ion-col>
+            <ion-col *ngIf="dat.wo_for === 1">
+              <ion-button size="small" expand="block" class="ion-text-capitalize" (click)="uploadPtw(dat , 'vendor')" >Upload Certificate</ion-button>
+            </ion-col>            
           </ion-row>
         </ion-card-content>
-      </ion-card>
-      <!-- <ion-card *ngFor="let dat of pmsList" style="padding: 5px;margin:5px" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
-        <ion-item lines="none" color="none">
-          <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
-          <ion-label class="ion-text-wrap">
-            <h2><b>{{dat.pc_desc}}</b></h2>
-            <p><b>{{dat.wo_no}}</b></p>
-            <p><b>{{dat.log_date}}</b></p>
-            <p><b>{{dat.ext_asset_id}}</b></p>
-          </ion-label>
-        </ion-item>
-        <ion-row>
-          <ion-col size="4">
-            <ion-button class="ion-text-capitalize" color="secondary" size="small" expand="block" (click)="pmAssign(dat)"> Assign </ion-button>
-          </ion-col>
-          <ion-col size="4">
-            <div *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
-              <ion-button class="ion-text-capitalize" size="small" color="danger" *ngIf="!dat.ptw_attach && !dat.ptw_status" expand="block" (click)="uploadPtw(dat)" >Upload PTW</ion-button>
-            </div>
-            <ion-button class="ion-text-capitalize" size="small" color="medium" *ngIf="dat.ptw_attach" expand="block" (click)="viewAttachment(dat.ptw_attach)" >PTW Img</ion-button>
-          </ion-col>
-          <ion-col size="4" *ngIf="dat.can_fill_chklist && dat.stage_id === 1">
-            <ion-button class="ion-text-capitalize" color="tertiary" size="small" expand="block" (click)="checkPms('pms', dat)" *ngIf="(dat.ptw_attach && dat.ptw_status === 1) || !dat.ptw_mandatory">Fill Checklist  </ion-button>
-          </ion-col>
-        </ion-row>
       </ion-card> -->
+      <div *ngIf="pmsList.length === 0 && pmsListLoad">
+        <br>
+        <ion-row>
+          <ion-col class="ion-text-center">No tasks are assign to you.</ion-col>
+        </ion-row>
+      </div>
     </div>
     <div *ngSwitchCase= "'meter'">
-      <ion-card  *ngFor="let dat of meterInfo;let i = index" style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}">
+      <div *ngIf="meterInfo.length === 0 && meterInfoLoad">
+        <br>
+        <ion-row>
+          <ion-col class="ion-text-center">No tasks are assign to you.</ion-col>
+        </ion-row>
+      </div>
+      <ion-card  *ngFor="let dat of meterInfo;let i = index" style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}" [ngStyle]="{'border-left': '3px solid ' + dat.color_code}">
         <ion-item>
-          <img src="assets/img/meter-left1.jpeg" style="height:120px;width:auto;margin-right:10px" slot="start" >
           <ion-label class="ion-text-wrap">
-            <p><ion-text color="dark">Meter ID:</ion-text> {{dat.meter_id}}</p>
             <p><ion-text color="dark">Reading ID:</ion-text> {{dat.wo_id}}</p>
-            <p><ion-text>{{dat.sch_datetime | date: 'dd-MMM-yyyy hh:mm:ss'}}</ion-text></p>
+            <p><ion-text>{{dat.sch_datetime | date: 'dd-MM-yy hh:mm'}}</ion-text></p>
             <p><ion-text color="dark">Building:</ion-text> {{dat.building_desc}} </p>
             <p><ion-text color="dark">Floor:</ion-text> {{dat.floor_desc}} </p>
             <p><ion-text color="dark">Location:</ion-text> {{dat.location_desc}}</p>
           </ion-label>
           <ion-button slot="end" class="ion-text-capitalize" (click)="dat.isMore = !dat.isMore" fill="outline">
-            <ion-text *ngIf="!dat.isMore">View Detail</ion-text>
-            <ion-text *ngIf="dat.isMore">Less Detail</ion-text>
-          </ion-button>
-        </ion-item>
-        <div *ngIf="dat.isMore">
-          <ion-row>
-            <ion-col size="6" class="ion-padding-start">
-              <ion-text color="dark">Site</ion-text><br>
-              <ion-text>{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="dark">Meter Name</ion-text><br>
-              <ion-text>{{dat.meter_name}}</ion-text>
-            </ion-col>
-            <ion-col size="6" class="ion-padding-start">
-              <ion-text color="dark">Block</ion-text><br>
-              <ion-text>{{dat.block_desc}}</ion-text>
-            </ion-col>
-            <ion-col size="6">
-              <ion-text color="dark">Meter Type</ion-text><br>
-              <ion-text>{{dat.meter_type}}</ion-text>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col class="ion-padding-start" size="12">
-              <ion-text color="dark">Reading Type</ion-text><br>
-              <ion-text *ngIf="dat.is_consumption === 1">Consumption </ion-text><br>
-              <ion-text *ngIf="dat.is_generation === 1">Generation </ion-text><br>
-              <ion-text *ngIf="dat.oth_read === 1">Other </ion-text>
-            </ion-col>
-          </ion-row>
-        </div>
-
-        <section *ngIf="dat.canCapture">
-          <div *ngIf="!dat.isQrVerify">
-            <ion-row>
-              <ion-col>
-                <ion-button expand="block" (click)="openBarcode('verify', dat)">SCAN QR <ion-icon name="qr-code-outline" slot="end"></ion-icon></ion-button>
-              </ion-col>
-            </ion-row>
-          </div>
-          <div *ngIf="dat.isQrVerify">
-            <fieldset *ngIf="dat.is_consumption === 1">
-              <legend>Consumption</legend>
-              <ion-row >
-                <ion-col size="12">
-                  <section class="inputbox">
-                    <ion-text color="primary" >Consumption</ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="number" placeholder="Consumption" [(ngModel)]="dat.consumption_reading"></ion-input>
-                      <ion-buttons slot="end" class="ion-no-margin">
-                        <ion-button class="ion-text-capitalize" shape="round" [color]="!dat.isConsumptionImg ? 'primary': 'success'" [fill]="!dat.isConsumptionImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat , 'consumption')">
-                          <ion-icon name="camera-outline"  *ngIf="!dat.isConsumptionImg"></ion-icon>
-                          <ion-icon name="checkmark-outline" [slot]="dat.isConsumptionImg ? 'icon-only': 'end' " *ngIf="dat.isConsumptionImg"></ion-icon>
-                          <ion-text *ngIf="dat.is_img_req === 1 && !dat.isConsumptionImg" color="danger">*</ion-text>
-                        </ion-button>
-                      </ion-buttons>
-                    </ion-item>
-                  </section>
-                </ion-col>
-                <ion-col size="12">
-                  <section class="inputbox">
-                    <ion-text color="primary" >Remark <span *ngIf="dat.is_remark_req === 1">*</span> </ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="text" placeholder=" Remark" [(ngModel)]="dat.con_remark"></ion-input>
-                    </ion-item>
-                  </section>
-                </ion-col>
-              </ion-row>
-            </fieldset>
-
-            <fieldset *ngIf="dat.is_generation === 1">
-              <legend>Generation</legend>
-              <ion-row >
-                <ion-col size="12">
-                  <section class="inputbox">
-                    <ion-text color="primary" >Generation</ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="number" placeholder="Generation" [(ngModel)]="dat.generate_reading"></ion-input>
-                      <ion-buttons slot="end" class="ion-no-margin">
-                        <ion-button class="ion-text-capitalize" shape="round"  [color]="!dat.isGenerationImg ? 'primary': 'success'" [fill]="!dat.isGenerationImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat, 'generate_reading')">
-                          <ion-icon name="camera-outline" *ngIf="!dat.isGenerationImg"></ion-icon>
-                          <ion-icon name="checkmark-outline" [slot]="dat.isGenerationImg ? '': 'end' " *ngIf="dat.isGenerationImg"></ion-icon>
-                          <ion-text *ngIf="dat.is_img_req === 1 && !dat.isGenerationImg" color="danger">*</ion-text>
-                        </ion-button>
-                      </ion-buttons>
-                    </ion-item>
-                  </section>
-                </ion-col>
-                <ion-col size="12" >
-                  <section class="inputbox">
-                    <ion-text color="primary" > Remark <span *ngIf="dat.is_remark_req === 1" >*</span> </ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="text" placeholder=" Remark" [(ngModel)]="dat.gen_remark"></ion-input>
-                    </ion-item>
-                  </section>
-                </ion-col>
-              </ion-row>
-            </fieldset>
-            <fieldset *ngIf="dat.oth_read === 1 ">
-              <legend>Other</legend>
-              <ion-row >
-                <ion-col size="12">
-                  <section class="inputbox">
-                    <ion-text color="primary" >Other</ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="number" placeholder="Other " [(ngModel)]="dat.other_reading"></ion-input>
-                      <ion-buttons slot="end" class="ion-no-margin">
-                        <ion-button class="ion-text-capitalize" shape="round" [color]="!dat.isOtherImg ? 'primary': 'success'" [fill]="!dat.isOtherImg ? 'clear': 'solid'" (click)="checkPhotoCondition(dat, 'other')">
-                          <ion-icon name="camera-outline" *ngIf="!dat.isOtherImg"></ion-icon>
-                          <ion-icon name="checkmark-outline" [slot]="dat.isOtherImg ? '': 'end' " *ngIf="dat.isOtherImg"></ion-icon>
-                          <ion-text *ngIf="dat.is_img_req === 1 && !dat.isOtherImg" color="danger">*</ion-text>
-                        </ion-button>
-                      </ion-buttons>
-                    </ion-item>
-                  </section>
-                </ion-col>
-                <ion-col size="12" >
-                  <section class="inputbox">
-                    <ion-text color="primary" > Remark <span *ngIf="dat.is_remark_req === 1">*</span></ion-text>
-                    <ion-item lines="none">
-                      <ion-input type="text" placeholder=" Remark" [(ngModel)]="dat.oth_remark"></ion-input>
-                    </ion-item>
-                  </section>
-                </ion-col>
-              </ion-row>
-            </fieldset>
-            <ion-row>
-              <ion-col>
-                <ion-button expand="block"  (click)="updRead(dat)">Submit <ion-icon name="save-outline" slot="end"></ion-icon> </ion-button>
-              </ion-col>
-            </ion-row>
-          </div>
-        </section>
-      </ion-card>
-      <!-- <ion-card  *ngFor="let dat of meterInfo;let i = index" style="border:2px solid rgb(208, 200, 200);" [ngClass]="{'animate__animated animate__slideOutLeft': dat.isRemove}">
-        <ion-item>
-          <img src="assets/img/meter-left1.jpeg" style="height:100px;width:auto;margin-right:10px" slot="start" >
-          <ion-label class="ion-text-wrap">
-            <p><ion-text color="dark">Reading ID:</ion-text> {{dat.wo_id}}</p>
-            <p><ion-text>{{dat.sch_datetime | date: 'dd-MMM-yyyy hh:mm:ss'}}</ion-text></p>
-            <p><ion-text color="dark">Building:</ion-text> {{dat.building_desc}} </p>
-            <p><ion-text color="dark">Floor:</ion-text> {{dat.floor_desc}} </p>
-            <p><ion-text color="dark">Location:</ion-text> {{dat.location_desc}}</p>
-          </ion-label>
-          <ion-button slot="end" class="ion-text-capitalize" (click)="dat.isMore = !dat.isMore" fill="outline">
-            <ion-text *ngIf="!dat.isMore">View Detail</ion-text>
-            <ion-text *ngIf="dat.isMore">Less Detail</ion-text>
+            <ion-text *ngIf="!dat.isMore">View Details</ion-text>
+            <ion-text *ngIf="dat.isMore">Less Details</ion-text>
           </ion-button>
         </ion-item>
         <div *ngIf="dat.isMore">
@@ -347,7 +276,7 @@
                 <section class="inputbox">
                   <ion-text color="primary" >Consumption Remark <span *ngIf="dat.is_remark_req === 1">*</span> </ion-text>
                   <ion-item lines="none">
-                    <ion-input type="text" placeholder="Consumption Remark" [(ngModel)]="dat.con_remark"></ion-input>
+                    <ion-input type="email" placeholder="Consumption Remark" [(ngModel)]="dat.con_remark"></ion-input>
                   </ion-item>
                 </section>
               </ion-col>
@@ -372,7 +301,7 @@
                 <section class="inputbox">
                   <ion-text color="primary" >Generation Remark <span *ngIf="dat.is_remark_req === 1">*</span> </ion-text>
                   <ion-item lines="none">
-                    <ion-input type="text" placeholder="Generation Remark" [(ngModel)]="dat.gen_remark"></ion-input>
+                    <ion-input type="email" placeholder="Generation Remark" [(ngModel)]="dat.gen_remark"></ion-input>
                   </ion-item>
                 </section>
               </ion-col>
@@ -397,7 +326,7 @@
                 <section class="inputbox">
                   <ion-text color="primary" >Other Remark <span *ngIf="dat.is_remark_req === 1">*</span></ion-text>
                   <ion-item lines="none">
-                    <ion-input type="text" placeholder="Other Remark" [(ngModel)]="dat.oth_remark"></ion-input>
+                    <ion-input type="email" placeholder="Other Remark" [(ngModel)]="dat.oth_remark"></ion-input>
                   </ion-item>
                 </section>
               </ion-col>
@@ -409,10 +338,93 @@
             </ion-row>
           </div>
         </section>
-      </ion-card> -->
+      </ion-card>
     </div>
   </div>
 </div>
 <div *ngIf="!pendingTask">
   <app-chart-dashboard></app-chart-dashboard>
 </div>
+
+<ion-modal class="previous" [isOpen]="isPreOpen" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismiss()">
+  <ng-template>
+    <ion-header>
+      <ion-item lines="none">
+        <ion-label>
+          <h2><ion-text color="primary-dark">{{selectedData.wo_no}}</ion-text></h2>
+          <p ><ion-text color="primary-dark" style="font-family: 'opensans_light' !important;">Approver Transaction</ion-text></p>
+        </ion-label>
+        <ion-buttons slot="end">
+          <ion-button (click)="isPreOpen = false">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-item>
+    </ion-header>
+    <ion-content>
+      <div style="padding:16px">
+        <ion-grid>
+          <ion-row class="row" *ngFor="let dat of logs; let i = index">
+            <ion-col size="1" class="ion-padding-start">
+              <div class="images"> <img [src]="dat.status_id === '0' ? 'assets/img/red_dot.jpg' : 'assets/img/dot.jpeg'"></div>
+              <div class="line" [hidden] = "i === (logs.length - 1) "></div>
+            </ion-col>
+            <ion-col size="11" >
+              <ion-card class="approver_card">
+                <ion-card-content class="ion-no-padding">
+                  <ion-row style="width:100%;height:auto;padding:5px;background-color:rgb(230, 232, 254)">
+                    <ion-col size="6">{{dat.status}}</ion-col>
+                    <ion-col class="ion-text-right" size="6" *ngIf="dat.attach !== ''">
+                      <ion-icon name="attach-outline" style="font-size:20px" (click)="viewAttachment(dat.attach)"></ion-icon>
+                    </ion-col>
+                    <!-- <ion-col class="ion-text-right">{{dat.date}}</ion-col> -->
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="6" color="medium">{{dat.status_id === '0' ? 'Rejected By': 'Approve by'}}</ion-col>
+                    <ion-col size="6">{{dat.action_by}}</ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="6" color="medium">Date Time</ion-col>
+                    <ion-col size="6">{{dat.date}}</ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="6" color="medium">Remark</ion-col>
+                    <ion-col size="6">{{dat.remark}}</ion-col>
+                  </ion-row>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal class="cancel" [isOpen]="isCloseAction" [initialBreakpoint]="1" [breakpoints]="[1]" (willDismiss)="onWillDismissClose()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Cancel</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="isCloseAction = false">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <section class="inputbox" style="height:100%;">
+        <ion-text color="primary" >Enter Remark</ion-text>
+        <ion-item lines="none" style="border:2px solid rgba(42, 41, 92, 0.20);">
+          <ion-textarea rows="3" type="text" placeholder="Enter Remark here..." [(ngModel)]="closeRemark"> </ion-textarea>
+        </ion-item>
+      </section>
+    </ion-content>
+    <ion-footer>
+      <ion-toolbar style="padding-left: 16px; padding-right:16px">
+        <ion-button expand="block" color="primary" (click)="filterIds()">Submit</ion-button>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>

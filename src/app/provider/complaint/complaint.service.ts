@@ -61,6 +61,14 @@ export class ComplaintService {
     return this.https.get(environment.url + 'complaints/get_ticket_stages');
   }
 
+  getInternalUser(pc_id: any): Observable<any> {
+    return this.https.get(environment.url + 'search_internal_users?pc_id=' + pc_id);
+  }
+
+  ticketHoldAction(formData: any): Observable<any> {
+    return this.https.post(environment.url + 'complaints/helpdesk_ticket_on_hold', formData);
+  }
+
 
   getTicketMaster(status: any, page: any): Observable<any> {
     let url;
@@ -88,7 +96,8 @@ export class ComplaintService {
   }
 
   getResolvedTicket(): Observable<any> {
-    return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=40&page=1&status=4')
+    // return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=40&page=1&status=4')
+    return this.https.get(environment.url + 'complaints/get_assign_ticket_master?limit=40&page=1&status=4,6') //when backend api is ready then we will send
   }
 
   searchTicketFromServer(key: any, value: any): Observable<any> {
@@ -125,8 +134,14 @@ export class ComplaintService {
     return this.https.get(environment.url + 'complaints/select_tkt_req_type?issue_id=' + id)
   }
 
-  getQueryCategoryTicket(cat_id: any, pc_id: any): Observable<any> {
-    return this.https.get(environment.url + 'complaints/select_category/' + cat_id + '?pc_id=' + pc_id);
+  getQueryCategoryTicket(cat_id: any, pc_id: any, barcode?: string): Observable<any> {
+    let type;
+    if (barcode) {
+      type = 'barcode=' + barcode;
+    } else {
+      type = 'pc_id=' + pc_id;
+    }
+    return this.https.get(environment.url + 'complaints/select_category/' + cat_id + '?' + type);
   }
 
   getQueryCategory(cat_id: any): Observable<any> {
@@ -154,7 +169,7 @@ export class ComplaintService {
   }
 
   getCostCenter() : Observable<any> {
-    return this.https.get(environment.url + 'shared/get-user-pc-code');
+    return this.https.post(environment.url + 'shared/get-user-pc-code', {});
   }
 
   getCpuSite(): Observable<any> {
@@ -170,7 +185,7 @@ export class ComplaintService {
   }
 
   getBuildingList(id: any): Observable<any> {
-    return this.https.get(environment.url + 'shared/get-buildings-list/' + id);
+    return this.https.get(environment.url + 'shared/get_building_list/' + id);    
   }
 
   getFloorList(id: any): Observable<any> {
@@ -339,7 +354,7 @@ export class ComplaintService {
 
   verifyOtp(mobile: any, otp: any) {
     return new Promise(resolve => {
-      this.https.get(environment.url + '/customer_verify_otp.php?mobile=' + mobile + '&otp=' + otp).subscribe({
+      this.https.get(environment.url + 'customer_verify_otp.php?mobile=' + mobile + '&otp=' + otp).subscribe({
         next:(data) => {
           resolve(data)
         },

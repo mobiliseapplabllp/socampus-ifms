@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
@@ -46,7 +46,6 @@ export class ComplaintPage implements OnInit {
     private httpCompalint: ComplaintService,
     private httpCommon: CommonService,
     private router: Router,
-    private loadingController: LoadingController,
     private modalController: ModalController
   ) { }
 
@@ -129,183 +128,6 @@ saveBlobAsFile(blob: any, fileName: any) {
   window.URL.revokeObjectURL(url);
 }
 
-//   startRecording() {
-//     const videoElement: HTMLVideoElement = this.videoElement.nativeElement;
-//     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
-//       videoElement.srcObject = stream;
-//       this.mediaRecorder = new MediaRecorder(stream);
-//       this.mediaRecorder.ondataavailable = (event: any) => {
-//         if (event.data.size > 0) {
-//           // console.log(event.data);
-//           this.recordedChunks.push(event.data);
-//           // this.splitAndSaveChunks(this.recordedChunks, 1048576 * 4 );
-//         }
-//       };
-//       this.mediaRecorder.start();
-//     }).catch((err) => {
-//       console.error('Error accessing media devices: ', err);
-//     });
-//   }
-
-//   async splitAndSaveChunks(blob: any, maxSizeInBytes: number, startIndex = 0) {
-//     const chunkSize = maxSizeInBytes;
-//     const numChunks = Math.ceil(blob.size / chunkSize);
-
-//     if (startIndex >= numChunks) {
-//         return; // All chunks processed
-//     }
-
-//     const start = startIndex * chunkSize;
-//     const end = Math.min(start + chunkSize, blob.size);
-//     const chunkBlob = blob.slice(start, end, 'video/webm');
-
-//     await this.saveBlobAsFile(chunkBlob, `video_chunk_${startIndex}.webm`);
-
-//     await this.splitAndSaveChunks(blob, maxSizeInBytes, startIndex + 1); // Process next chunk
-// }
-
-// async convertAndSaveVideos(recordedChunks: any, maxSizeInBytes: any) {
-//   const concatenatedBlob = new Blob(recordedChunks, { type: 'video/webm' });
-
-//   const numChunks = Math.ceil(concatenatedBlob.size / maxSizeInBytes);
-
-//   for (let i = 0; i < numChunks; i++) {
-//       const start = i * maxSizeInBytes;
-//       const end = Math.min(start + maxSizeInBytes, concatenatedBlob.size);
-//       const chunkBlob = concatenatedBlob.slice(start, end, 'video/webm');
-
-//       if (chunkBlob.size > 0) {
-//           await this.saveBlobAsFile(chunkBlob, `video_chunk_${i}.webm`);
-//       }
-//   }
-// }
-
-// async saveBlobAsFile(blob: any, fileName: any) {
-//   console.log(fileName);
-//   console.log(blob);
-//   const a: any = document.createElement('a');
-//   document.body.appendChild(a);
-//   a.style = 'display: none';
-//   const url = window.URL.createObjectURL(blob);
-//   a.href = url;
-//   a.download = fileName;
-//   a.click();
-//   window.URL.revokeObjectURL(url);
-// }
-
-//   convertAndSaveVideos(recordedChunks: any, maxSizeInBytes: any) {
-//     // Concatenate recorded chunks into a single Blob
-//     const concatenatedBlob = new Blob(recordedChunks, { type: 'video/webm' });
-
-//     // Check if concatenated Blob size exceeds maxSizeInBytes
-//     if (concatenatedBlob.size > maxSizeInBytes) {
-//         const numChunks = Math.ceil(concatenatedBlob.size / maxSizeInBytes);
-//         const chunkSize = Math.ceil(concatenatedBlob.size / numChunks);
-
-//         let start = 0;
-//         let end = chunkSize;
-//         let chunkIndex = 0;
-
-
-//         const chunkBlob: any = concatenatedBlob.slice(3490734, 6981468, 'video/webm');
-//         this.saveBlobAsFile(chunkBlob, `video_chunk_${chunkIndex}.webm`, start, end);
-//         // Split Blob into smaller Blobs
-//         // while (start < concatenatedBlob.size) {
-//         //     const chunkBlob: any = concatenatedBlob.slice(start, end, 'video/webm');
-//         //     this.saveBlobAsFile(chunkBlob, `video_chunk_${chunkIndex}.webm`, start, end);
-//         //     start = end;
-//         //     end = Math.min(start + chunkSize, concatenatedBlob.size);
-//         //     chunkIndex++;
-//         // }
-//     } else {
-//         // Save the single Blob as a video file
-//         console.log('Single Video');
-//         this.saveBlobAsFile(concatenatedBlob, 'video.webm', '', '');
-//     }
-// }
-
-
-
-// 4050658
-
-// saveBlobAsFile(blob: any, fileName: any, start?: any, end?: any) {
-//   console.log('start= ' + start + ' End=' + end);
-//   // this.allRecording.push(blob);
-//   // console.log(this.allRecording);
-//   // return;
-//   const a: any = document.createElement('a');
-//   document.body.appendChild(a);
-//   a.style = 'display: none';
-//   const url = window.URL.createObjectURL(blob);
-//   a.href = url;
-//   a.download = fileName;
-//   a.click();
-//   window.URL.revokeObjectURL(url);
-// }
-
-// down(blob: any) {
-//   console.log(blob);
-//   const a: any = document.createElement('a');
-//   document.body.appendChild(a);
-//   a.style = 'display: none';
-//   const url = window.URL.createObjectURL(blob);
-//   a.href = url;
-//   a.download = 'video.webm';
-//   a.click();
-//   window.URL.revokeObjectURL(url);
-// }
-
-
-//   stopRecording() {
-//     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-//       this.mediaRecorder.stop();
-//       setTimeout(() => {
-//         const maxSizeInBytes = 5 * 1024 * 1024;
-//         this.convertAndSaveVideos(this.recordedChunks, maxSizeInBytes);
-//         // console.log(this.recordedChunks);
-
-//         // const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
-
-//         // this.output = blob;
-//         // this.splitAndSaveChunks(blob, 1048576 * 4 );
-//         // console.log(this.output);
-//         const stream = this.videoElement.nativeElement.srcObject as MediaStream;
-//         const tracks = stream.getTracks();
-//         tracks.forEach(track => track.stop());
-//         this.videoElement.nativeElement.srcObject = null;
-//         this.playRecordedVideo();
-//       }, 1000);
-
-//     }
-//   }
-
-//   downloadVideo() {
-//     const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
-//     console.log(blob);
-//     const url = window.URL.createObjectURL(blob);
-//     const a = document.createElement('a');
-//     document.body.appendChild(a);
-//     a.style.display = 'none';
-//     a.href = url;
-//     a.download = 'recorded-video.webm';
-//     a.click();
-//     window.URL.revokeObjectURL(url);
-//   }
-
-
-  // playRecordedVideo() {
-  //   if (this.output) {
-  //     const url = window.URL.createObjectURL(this.output);
-  //     this.video.nativeElement.src = url;
-  //     this.video.nativeElement.play();
-  //     // Revoke object URL when video playback is done
-  //     this.video.nativeElement.onended = () => {
-  //       window.URL.revokeObjectURL(url);
-  //     };
-  //   }
-  // }
-
-
   ionViewWillEnter() {
     this.getTicketStages();
     this.page = 1;
@@ -329,7 +151,7 @@ saveBlobAsFile(blob: any, fileName: any) {
   }
 
   getTicketMaster(status: any, page: any) {
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpCompalint.getTicketMaster(status, page).subscribe({
         next:(data) => {
           if (data.status) {
@@ -342,11 +164,11 @@ saveBlobAsFile(blob: any, fileName: any) {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
           this.httpCommon.presentToast(environment.errMsg, 'warning');
         },
         complete:() => {
-          this.dismissloading();
+          this.httpCommon.dismissloading();
         }
       });
     });
@@ -366,9 +188,9 @@ saveBlobAsFile(blob: any, fileName: any) {
       this.getTicketMaster(null, 1);
       return;
     }
-    this.presentLoading().then(preLoad => {
+    this.httpCommon.presentLoading().then(preLoad => {
       this.httpCompalint.searchTicketFromServer(this.searchBy, this.searchValue).subscribe(data => {
-        this.dismissloading();
+        this.httpCommon.dismissloading();
         if (data.status) {
           this.page = this.page + 1;
           this.tickets = data.data.data;
@@ -401,20 +223,9 @@ saveBlobAsFile(blob: any, fileName: any) {
     });
   }
 
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    this.loading.dismiss();
-  }
   changeSegment(ev: any) {
     if (ev.target.value == 'resolved') {
-      this.presentLoading().then(preLoad => {
+      this.httpCommon.presentLoading().then(preLoad => {
         this.resolveTicket = [];
         this.httpCompalint.getResolvedTicket().subscribe({
           next:(data) => {
@@ -425,11 +236,11 @@ saveBlobAsFile(blob: any, fileName: any) {
             }
           },
           error:() => {
-            this.dismissloading();
+            this.httpCommon.dismissloading();
             this.httpCommon.presentToast(environment.errMsg, 'danger');
           },
           complete:() => {
-            this.dismissloading();
+            this.httpCommon.dismissloading();
           }
         });
       });

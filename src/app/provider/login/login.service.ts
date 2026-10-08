@@ -9,6 +9,7 @@ import { CommonService } from '../common/common.service';
 export class LoginService {
   userDataTemp: any = [];
   username = new BehaviorSubject([]);
+  punchStatus = new BehaviorSubject(false);
   userData: any = [];
   constructor(
     private https: HttpClient,
@@ -16,7 +17,7 @@ export class LoginService {
   ) { }
 
   uploadVideo(formData: any): Observable<any> {
-    return this.https.post('https://hr-access.herokuapp.com/https://backend.demosocampus.mobilisepro.com/upload-video', formData);
+    return this.https.post('https://socampus-8db369a81c0c.herokuapp.com/https://backend.demosocampus.mobilisepro.com/upload-video', formData);
   }
 
   LoginAuth(login: any, fcmToken: any) {
@@ -33,6 +34,7 @@ export class LoginService {
           if (this.userDataTemp.status) {
             this.userData = this.userDataTemp.user;
             this.username.next(this.userData);
+            // this.setPunchStatus(this.userDataTemp.current_punch_status);
           }
           resolve(data);
         },
@@ -51,16 +53,18 @@ export class LoginService {
     });
   }
 
-  // ssoGatesLoginDetails(data: any, fcm_token: string): Observable<any> {
-  //   let param: any = new HttpParams();
-  //   param.append('data', data);
-  //   param.append('fcm_token', fcm_token);
-  //   return this.https.get(`${environment.url}/ssoGatesLoginDetails`,{
-  //     params: param,
-  //   });
-  // }
 
-   ssoGatesLoginDetails(data: any, fcm_token: string, appVersion: string, isAndroid: boolean): Observable<any> {
+  setPunchStatus(status: boolean) {
+    console.log('status', status);
+    this.punchStatus.next(status);
+  }
+
+  getPunchStatus() {
+    return this.punchStatus.asObservable();
+  }
+
+
+  ssoGatesLoginDetails(data: any, fcm_token: string, appVersion: string, isAndroid: boolean): Observable<any> {
     let param: any = new HttpParams();
     param = param.append('data', data);
     param = param.append('fcm_token', fcm_token);
@@ -72,16 +76,15 @@ export class LoginService {
     });
   }
 
-
   verifyOtp(formData: any): Observable<any> {
-    return this.https.post(environment.url + '/verify_login_otp', formData);
+    return this.https.post(environment.url + 'verify_login_otp', formData);
   }
 
 
   getAppVersion(platform: string): Observable<any> {
     const obj = {
       platform: platform,
-      req_for: 'ServiceApp'
+      req_for: 'nServiceApp'
     }
     return this.https.post(environment.url + 'app_version', obj)
   }
@@ -97,6 +100,18 @@ export class LoginService {
 
   refreshToken(): Observable<any> {
     return this.https.get(environment.url + 'refresh');
+  }
+
+  logout(ips: string): Observable<any> {
+    const obj = {
+      ip: ips,
+      source: environment.source
+    }
+    return this.https.post(environment.url + 'logout', obj);
+  }
+
+  loginPingApi(): Observable<any> {
+    return this.https.get(environment.url + 'login_ping');
   }
 
   changePassword(userid: any, otp1: any, pass: any ) {
@@ -136,5 +151,9 @@ export class LoginService {
         }
       });
     });
+  }
+
+  getNotification(date : any): Observable<any> {
+    return this.https.post(environment.url + 'complaints/app/get-fcm-push-notification-list', date);
   }
 }

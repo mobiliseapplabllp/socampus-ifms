@@ -4,17 +4,24 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>Scan QrCode</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="torchToggle()">
+        <ion-icon [name]="torchStatus ? 'flash-off':  'flash'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content>
   <section>
-    <ion-row class="scanner-buttons">
-      <ion-col size="1"></ion-col>
-      <ion-col size="10" class="ion-no-padding">
-        <ion-button expand="full" (click)="stopScanner()">Stop Scanner</ion-button>
-      </ion-col>
-      <ion-col size="1"></ion-col>
-    </ion-row>
+    <ion-grid class="scanner-buttons">
+      <ion-row >
+        <ion-col size="2"></ion-col>
+        <ion-col size="8" class="ion-no-padding">
+          <ion-button expand="full" (click)="stopScanner()">Stop Scanner</ion-button>
+        </ion-col>
+        <ion-col size="2"></ion-col>
+      </ion-row>
+    </ion-grid>
     <div class="scan-box" ></div>
   </section>
 </ion-content>

@@ -1,0 +1,121 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Create Request</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card>
+    <form [formGroup]="forms">
+      <ion-item (click)="openRoName()">
+        <ion-label color="primary" position="floating">Select Site <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="email" formControlName="site_id_desc" readonly></ion-input>
+      </ion-item>
+      <div class="toggle-field">
+        <span class="toggle-field__label">Requestee <ion-text color="danger">*</ion-text></span>
+        <div class="toggle-btns">
+          <button type="button" class="toggle-btn" [class.toggle-btn--active]="forms.value.request_for === 'Self'" (click)="forms.controls['request_for'].setValue('Self'); changeRequest()">Self</button>
+          <button type="button" class="toggle-btn" [class.toggle-btn--active]="forms.value.request_for === 'On Behalf'" (click)="forms.controls['request_for'].setValue('On Behalf'); changeRequest()">On behalf</button>
+        </div>
+      </div>
+      <ion-item>
+        <ion-label color="primary" position="floating">Name <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="email" formControlName="name" [readonly]="forms.value.request_for === 'Self' ? true: false "></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label color="primary" position="floating">Email</ion-label>
+        <ion-input type="email" formControlName="email"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Mobile <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="number" formControlName="mobile"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Select Category  <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet"  mode="ios" formControlName="cat_id" (ionChange)="changeCategory()">
+          <ion-select-option *ngFor="let dat of categoryArr" [value]="dat.value">{{dat.label}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Select Subcategory  <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet"  mode="ios" formControlName="subcat_id" (ionChange)="changeSubCat()">
+          <ion-select-option *ngFor="let dat of subCatArr" [value]="dat.value">{{dat.label}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Response Time <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="text" formControlName="tckt_response" readonly></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Resolve Time <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="text" formControlName="tckt_resolve" readonly></ion-input>
+      </ion-item>
+
+      <div class="toggle-field">
+        <span class="toggle-field__label">Billed To <ion-text color="danger">*</ion-text></span>
+        <div class="toggle-btns">
+          <button type="button" class="toggle-btn" [class.toggle-btn--active]="forms.value.billed_to === 'company'" (click)="forms.controls['billed_to'].setValue('company')">Company</button>
+          <button type="button" class="toggle-btn" [class.toggle-btn--active]="forms.value.billed_to === 'employee'" (click)="forms.controls['billed_to'].setValue('employee')">Employee</button>
+        </div>
+      </div>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Select Urgency  <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select interface="action-sheet"  mode="ios" formControlName="priority" (ionChange)="onPriorityChange($event)">
+          <ion-select-option value="Low">Low</ion-select-option>
+          <ion-select-option value="Medium">Medium</ion-select-option>
+          <ion-select-option value="High">High</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div *ngIf="showDate" class="datetime-field">
+        <span class="datetime-field__label">
+          <ion-icon name="calendar-outline"></ion-icon>
+          Requested Date &amp; Time <ion-text color="danger">*</ion-text>
+        </span>
+        <div class="datetime-field__row">
+          <div class="datetime-field__col">
+            <label class="datetime-field__sub-label">Date</label>
+            <ion-item>
+              <ion-input type="date" formControlName="date_urgency_date"></ion-input>
+            </ion-item>
+          </div>
+          <div class="datetime-field__col">
+            <label class="datetime-field__sub-label">Time</label>
+            <ion-item>
+              <ion-input type="time" formControlName="date_urgency_time"></ion-input>
+            </ion-item>
+          </div>
+        </div>
+      </div>
+
+      <ion-item>
+        <ion-label color="primary" position="floating">Remark  <ion-text color="danger">*</ion-text></ion-label>
+        <ion-textarea rows="4" type="text" formControlName="remark"></ion-textarea>
+      </ion-item>
+
+      <ion-button size="small" (click)="attachment()" class="ion-padding-start" [color]="isAttachment ? 'success' : 'primary' ">Attachment</ion-button>
+      <br>
+      <!-- <br>
+      <ion-row>
+        <ion-col>
+          <ion-button expand="block" class="ion-text-capitalize" (click)="submit()" [disabled]="forms.invalid">Create Ticket</ion-button>
+        </ion-col>
+      </ion-row> -->
+    </form>
+
+  </ion-card>
+
+</ion-content>
+<ion-footer>
+  <ion-toolbar style="padding-left: 8px;padding-right: 8px;">
+    <ion-button expand="block" class="ion-text-capitalize" (click)="submit()" [disabled]="forms.invalid">Create Request</ion-button>
+  </ion-toolbar>
+</ion-footer>

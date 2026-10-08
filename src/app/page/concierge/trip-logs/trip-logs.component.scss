@@ -1,0 +1,262 @@
+.trip-logs-content {
+  --background: #f2f4f8;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  gap: 12px;
+
+  &__icon {
+    font-size: 48px;
+    color: #ccc;
+  }
+}
+
+/* ── Card ── */
+.tl-card {
+  background: #fff;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    background: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  &__header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__trip-no {
+    font-weight: 700;
+    font-size: 15px;
+    color: #222;
+  }
+
+  &__body {
+    padding: 14px 16px 16px;
+  }
+}
+
+/* Type badge */
+.tl-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+  ion-icon {
+    font-size: 13px;
+  }
+
+  &--gps {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+
+  &--manual {
+    background: #fef3c7;
+    color: #92400e;
+  }
+}
+
+/* ── Section (Start / End) ── */
+.tl-section {
+  margin-bottom: 0;
+}
+
+.tl-section__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.tl-section__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &--start {
+    background: var(--ion-color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.2);
+  }
+
+  &--end {
+    background: var(--ion-color-success);
+    box-shadow: 0 0 0 3px rgba(var(--ion-color-success-rgb), 0.2);
+  }
+}
+
+.tl-section__title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #555;
+}
+
+/* Connector */
+.tl-connector {
+  display: flex;
+  justify-content: 5px;
+  padding: 4px 0 4px 4px;
+
+  &__line {
+    width: 0;
+    height: 20px;
+    border-left: 2px dashed rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* ── Fields / Rows ── */
+.tl-fields {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fafbfc;
+
+  &--toll {
+    background: #fffdf5;
+  }
+}
+
+.tl-row {
+  display: flex;
+  align-items: center;
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  gap: 8px;
+
+  &--last {
+    border-bottom: none;
+  }
+
+  &--action {
+    align-items: center;
+  }
+
+  &__icon {
+    font-size: 16px;
+    color: #b0b0b0;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    font-size: 12px;
+    color: #888;
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+
+  &__value {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    text-align: right;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+
+    &--highlight {
+      font-weight: 700;
+      color: var(--ion-color-primary);
+    }
+
+    &--actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+  }
+}
+
+@media (max-width: 380px) {
+  .tl-row {
+    flex-wrap: wrap;
+
+    &__label {
+      min-width: 70px;
+    }
+
+    &__value {
+      text-align: left;
+    }
+  }
+}
+
+/* Image view buttons */
+.tl-img-btn {
+  --border-radius: 16px;
+  --padding-start: 8px;
+  --padding-end: 10px;
+  height: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  margin: 0;
+}
+
+/* View Track */
+.tl-track-btn {
+  margin-top: 14px;
+  margin-bottom: 4px;
+  --border-radius: 20px;
+  --border-width: 2px;
+  font-weight: 600;
+  text-transform: none;
+  font-size: 14px;
+}
+
+/* ── Toll ── */
+.tl-toll {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  &__icon {
+    font-size: 16px;
+    color: #e6a817;
+  }
+
+  &__title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #555;
+  }
+}
+
+/* Map modal */
+.trip-track-map {
+  width: 100%;
+  height: 100%;
+}

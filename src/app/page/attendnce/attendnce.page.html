@@ -28,7 +28,7 @@
       <ion-grid>
         <ion-item (click)="openRoName()">
           <ion-label position="floating">Select Site <ion-text color="danger">*</ion-text></ion-label>
-          <ion-input type="text" [(ngModel)]="costCenter" readonly></ion-input>
+          <ion-input type="email" [(ngModel)]="costCenter" readonly></ion-input>
         </ion-item>
         <ion-row *ngIf="checkLastAttendanceStatus">
           <ion-col class="ion-text-center">

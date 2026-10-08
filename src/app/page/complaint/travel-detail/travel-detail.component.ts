@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { LoadingController, ModalController } from '@ionic/angular';
+import { CameraService } from 'src/app/provider/camera/camera.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { environment } from 'src/environments/environment';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 @Component({
   selector: 'app-travel-detail',
   templateUrl: './travel-detail.component.html',
@@ -24,9 +24,9 @@ export class TravelDetailComponent  implements OnInit {
   canDoTravel = 0;
   constructor(
     private modalCtrl: ModalController,
-    private httpComplaint: ComplaintService,
-    private loadingController: LoadingController,
-    private common: CommonService
+    private httpComplaint: ComplaintService,    
+    private common: CommonService,
+    private camera: CameraService
   ) { }
 
   ngOnInit() {
@@ -34,7 +34,7 @@ export class TravelDetailComponent  implements OnInit {
   }
 
   getTravelType() {
-    this.presentLoading().then(preLoad => {
+    this.common.presentLoading().then(preLoad => {
       this.httpComplaint.getTravelType(this.tkts_id).subscribe({
         next:(data) => {
           if (data.status) {
@@ -47,11 +47,11 @@ export class TravelDetailComponent  implements OnInit {
           }
         },
         error:() => {
-          this.dismissloading();
+          this.common.dismissloading();
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete:() => {
-          this.dismissloading();
+          this.common.dismissloading();
         }
       })
     })
@@ -61,54 +61,49 @@ export class TravelDetailComponent  implements OnInit {
     this.selectedTravel = this.travelMode.filter((val: any) => val.value === ev.target.value)[0];
   }
 
-  async presentLoading() {
-    this.loading = await this.loadingController.create({
-      cssClass: 'my-custom-class',
-      message: 'Please wait...'
-    });
-    await this.loading.present();
-  }
-
-  async dismissloading() {
-    if (this.loading) {
-      this.loading.dismiss();
-    }
-  }
-
   closeModal(data: any, status: any) {
     this.modalCtrl.dismiss(data, status);
   }
 
   async presentActionSheet(val: any) {
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera
-      });
-      this.readImg(image, val)
-    };
-    takePicture();
+    this.camera.selectImage(['camera'], (blob: Blob) => {
+      this.readImg(blob, val);
+    });
   }
 
   async readImg(photo: any, imageno: any) {
     let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
-    const response = await fetch(photo.webPath);
-    const blob = await response.blob();
     if (imageno === 1) {
       this.img1 = random;
       this.formData.delete('travelImg1');
-      this.formData.append('travelImg1', blob, random);
+      this.formData.append('travelImg1', photo, random);
     } else if (imageno === 2) {
       this.img2 = random;
       this.formData.delete('travelImg2');
-      this.formData.append('travelImg2', blob, random );
+      this.formData.append('travelImg2', photo, random );
     }
-    this.presentLoading().then(preLoad => {
-      this.dismissloading();
+    this.common.presentLoading().then(preLoad => {
+      this.common.dismissloading();
     });
   }
+
+  // async readImg(photo: any, imageno: any) {
+  //   let random = Date.now() + Math.floor(Math.random() * 90000) + 10000 + '.jpg'
+  //   const response = await fetch(photo.webPath);
+  //   const blob = await response.blob();
+  //   if (imageno === 1) {
+  //     this.img1 = random;
+  //     this.formData.delete('travelImg1');
+  //     this.formData.append('travelImg1', blob, random);
+  //   } else if (imageno === 2) {
+  //     this.img2 = random;
+  //     this.formData.delete('travelImg2');
+  //     this.formData.append('travelImg2', blob, random );
+  //   }
+  //   this.common.presentLoading().then(preLoad => {
+  //     this.common.dismissloading();
+  //   });
+  // }
 
   submit() {
     if (!this.travelType) {
@@ -133,7 +128,7 @@ export class TravelDetailComponent  implements OnInit {
       this.formData.append('startTravel', '1');
       this.formData.append('ticketId', this.tkts_id);
       this.formData.append('travelNote', this.travelNote);
-      this.presentLoading().then(preLoad => {
+      this.common.presentLoading().then(preLoad => {
         this.httpComplaint.submitTravelInfo(this.formData).subscribe({
           next:(data) => {
             if(data.status) {
@@ -145,11 +140,11 @@ export class TravelDetailComponent  implements OnInit {
             }
           },
           error:() => {
-            this.dismissloading();
+            this.common.dismissloading();
             this.common.presentToast(environment.errMsg, 'danger');
           },
           complete:() => {
-            this.dismissloading();
+            this.common.dismissloading();
           }
         })
       });

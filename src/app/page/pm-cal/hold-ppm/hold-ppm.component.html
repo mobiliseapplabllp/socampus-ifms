@@ -1,0 +1,88 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>PPM Hold</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal(null, 'false')">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-row>
+    <ion-col class="ion-padding">
+      <ion-text>Request to Place Ticket #{{tkts_id}} on Hold</ion-text>
+    </ion-col>
+  </ion-row>
+  <ion-card>
+    <ion-item>
+      <ion-label position="floating">Reason <ion-text color="danger">*</ion-text></ion-label>
+      <ion-textarea autoGrow="true" type="text" rows="2" [(ngModel)]="formObj.onHoldRemark"></ion-textarea>
+    </ion-item>
+    <ion-row>
+      <ion-col>
+        <ion-button class="ion-text-capitalize" size="small" (click)="presentActionSheet()"
+          [color]="formObj.isImgUpload ? 'success' : 'primary'">
+          Attachment
+        </ion-button>
+      </ion-col>
+    </ion-row>
+    <div style="margin:10px;border-radius: 10px;background-color: rgb(231, 230, 230);padding:10px" *ngIf="hold_validation.is_sodexo_email_required === 1 || hold_validation.is_external_email_required === 1">
+      <ion-text style="font-size:12px">Approval Required From</ion-text>
+      <ion-item (click)="openModal('sodexo_user')" color="none" *ngIf="hold_validation.is_sodexo_email_required === 1">
+        <ion-label color="primary" position="floating">Sodexo<ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="text" [(ngModel)]="formObj.onHoldInternalUsers_desc" readonly></ion-input>
+      </ion-item>
+      <ion-item (click)="openModal('external_user')" color="none" *ngIf="hold_validation.is_external_email_required === 1">
+        <ion-label color="primary" position="floating">Client<ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="text" [(ngModel)]="formObj.onHoldExternalUsers_desc" readonly></ion-input>
+      </ion-item>
+    </div>
+
+    <ion-row>
+      <ion-col class="ion-padding-start ion-padding-end">
+        <ion-text style="font-size: 12px;line-height: 12px;color:var(--ion-color-dark)" *ngIf="hold_validation.is_sodexo_email_required === 1 && hold_validation.is_external_email_required === 1">Note: One approval from Internal and one approval from Client are mandatory</ion-text>
+        <ion-text style="font-size: 12px;line-height: 12px;color:var(--ion-color-dark)" *ngIf="hold_validation.is_sodexo_email_required === 1 && hold_validation.is_external_email_required !== 1">Note: One approval from Internal is mandatory</ion-text>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <ion-button (click)="submit()">Submit</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+</ion-content>
+
+<ion-modal class="myModal" [isOpen]="isModalOpen" [initialBreakpoint]="1" [breakpoints]="[1]"
+  (willDismiss)="onWillDismiss()" [backdropDismiss]="false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{currentModal === 'sodexo_user' ? 'Sodexo User': 'External User' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="onWillDismiss()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar (ionChange)="changeSearch($event)"></ion-searchbar>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-item *ngFor="let dat of allArr">
+        <ion-checkbox slot="start" [checked]="dat.select_by === 'sodexo_user' || dat.select_by === 'external_user'"
+          [disabled]="(dat.select_by == 'sodexo_user' && currentModal == 'external_user') || (dat.select_by == 'external_user' && currentModal === 'sodexo_user')"
+          (ionChange)="changeCheckBox(dat, $event)"></ion-checkbox>
+        <ion-label>
+          <h3>{{dat.label}}</h3>
+        </ion-label>
+      </ion-item>
+    </ion-content>
+    <ion-footer class="ion-no-border">
+      <ion-toolbar>
+        <ion-button expand="block" (click)="done()">Done</ion-button>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
