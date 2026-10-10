@@ -15,14 +15,30 @@ export class CameraComponent  implements OnInit {
     private modal: ModalController,
     private sanitizer: DomSanitizer) { }
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  // Modal ka layout ban jaane ke baad hi preview start karna hai, warna
+  // #content ka size 0 milta hai - isliye ngOnInit ki jagah ionViewDidEnter
+  ionViewDidEnter() {
     this.launchCamera();
   }
 
-  ionViewDidLoad() {}
-
   launchCamera() {
-    CameraPreview.start({parent: 'content', className: '', width: window.screen.width, height: window.screen.height-150, toBack: false, disableAudio: true, disableExifHeaderStripping: false}).catch(res => {
+    // Native preview screen-coordinates me draw hota hai aur 'parent' ko
+    // native par ignore karta hai - isliye footer ke upar wala asli area
+    // naap kar wahi x/y/width/height dete hain, phone ho ya tablet
+    const rect = document.getElementById('content')?.getBoundingClientRect();
+    CameraPreview.start({
+      parent: 'content',
+      className: '',
+      x: Math.round(rect?.left ?? 0),
+      y: Math.round(rect?.top ?? 0),
+      width: Math.round(rect?.width || window.innerWidth),
+      height: Math.round(rect?.height || window.innerHeight - 150),
+      toBack: false,
+      disableAudio: true,
+      disableExifHeaderStripping: false
+    }).catch(res => {
       alert(JSON.stringify(res));
     });
     this.cameraActive = true;
@@ -38,8 +54,10 @@ export class CameraComponent  implements OnInit {
   }
 
   retry() {
-    this.launchCamera();
+    // Pehle finalImage clear karo taaki *ngIf se #content wapas render ho,
+    // tabhi launchCamera use naap payega
     this.finalImage = '';
+    setTimeout(() => this.launchCamera(), 50);
   }
 
   done() {

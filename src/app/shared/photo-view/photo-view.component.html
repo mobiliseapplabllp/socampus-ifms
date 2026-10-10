@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Image</ion-title>
+    <ion-title>Photo View</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="closeModal(null, false)">
         <ion-icon name="close-outline"></ion-icon>
@@ -9,5 +9,5 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <img [src]="imageUrl" alt="Image from Blob" style="height:100%;width:100%">
+  <img [src]="imageUrl" alt="Image from Blob" style="height:100%;width:100%;object-fit:contain">
 </ion-content>

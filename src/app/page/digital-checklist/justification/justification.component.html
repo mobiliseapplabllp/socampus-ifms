@@ -33,16 +33,48 @@
 
         <div class="attachment-block">
           <p class="attachment-label">Supporting document</p>
-          <ion-button
-            expand="block"
-            fill="outline"
-            shape="round"
-            (click)="openCamera()"
-            [color]="image ? 'success' : 'primary'"
-          >
-            <ion-icon slot="start" [name]="image ? 'checkmark-circle-outline' : 'attach-outline'"></ion-icon>
-            {{ image ? 'Attachment added' : 'Add attachment' }}
-          </ion-button>
+
+          <!-- Edit mode: purani server wali image - view/remove -->
+          <ng-container *ngIf="hasExistingImage() && !image; else pickNew">
+            <ion-button
+              expand="block"
+              fill="outline"
+              shape="round"
+              color="primary"
+              (click)="openImg(view_obj.attachment)"
+            >
+              <ion-icon slot="start" name="image-outline"></ion-icon>
+              View attachment
+            </ion-button>
+            <ion-button
+              expand="block"
+              fill="outline"
+              shape="round"
+              color="danger"
+              (click)="removeExistingImage()"
+            >
+              <ion-icon slot="start" name="trash-outline"></ion-icon>
+              Remove attachment
+            </ion-button>
+          </ng-container>
+
+          <ng-template #pickNew>
+            <div class="attachment-removed-row" *ngIf="isImgDeleted && !image">
+              <ion-note color="danger">Attachment will be removed on update</ion-note>
+              <ion-button fill="clear" size="small" (click)="undoRemoveImage()">Undo</ion-button>
+            </div>
+            <ion-button
+              expand="block"
+              fill="outline"
+              shape="round"
+              (click)="openCamera()"
+              [color]="image ? 'success' : 'primary'"
+            >
+              <ion-icon slot="start" [name]="image ? 'checkmark-circle-outline' : 'attach-outline'"></ion-icon>
+              {{ image ? 'Attachment added' : (isImgDeleted ? 'Add new attachment' : 'Add attachment') }}
+            </ion-button>
+          </ng-template>
+
           <ion-note color="medium" class="attachment-hint">Optional — camera or gallery</ion-note>
         </div>
 

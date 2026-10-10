@@ -134,6 +134,15 @@ ion-segment-button {
   padding: 25px;
 }
 
+// Camera preview native layer screen-coordinates me draw hota hai; tablet par
+// Ionic ka centered-card modal uske neeche dab jaata tha. Isliye camera modal
+// har device par full-screen hi khulta hai.
+.camera-modal {
+  --width: 100%;
+  --height: 100%;
+  --border-radius: 0;
+}
+
 .my-modal-bottom {
   --border-radius: 20px 20px 0px 0px;
 }

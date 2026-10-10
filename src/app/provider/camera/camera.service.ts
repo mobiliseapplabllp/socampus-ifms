@@ -78,6 +78,7 @@ export class CameraService {
   private async openOuterCamera(callback: (blob: Blob) => void) {
     const modal = await this.modalCtrl.create({
       component: CameraComponent,
+      cssClass: 'camera-modal',
       backdropDismiss: false
     });
 

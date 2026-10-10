@@ -417,7 +417,10 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
       if (strictIdMatch) {
         return row.assign_to === this.userData.id;
       }
-      const assignIds = String(row.assign_to || '').split(',').map(id => id.trim());
+      // Live app ke liye assign_to me single id hi aati rahegi; comma-separated list
+      // backend ab assign_to_all me bhejta hai. Purani cached/offline rows me
+      // assign_to_all nahi hoga, isliye fallback assign_to par.
+      const assignIds = String(row.assign_to_all || row.assign_to || '').split(',').map(id => id.trim());
       return assignIds.includes(userId);
     };
 

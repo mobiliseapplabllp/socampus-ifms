@@ -1756,7 +1756,6 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
   async openPhotoViewer(blob: Blob) {
     const modal = await this.modalCtrl.create({
       component: PhotoViewComponent,
-      cssClass: 'my-modal',
       componentProps: { blobFile: blob }
     });
     modal.present();

@@ -17,6 +17,7 @@ export class JustificationComponent  implements OnInit {
   isUpdate = false;
   image: any;
   remark!: string;
+  isImgDeleted = false;
   constructor(
     private modalCtrl: ModalController,
     private httpDigi: DigitalChecklistService,
@@ -113,6 +114,9 @@ export class JustificationComponent  implements OnInit {
     if (this.image) {
       formData.append('attachment', this.image, random);
     }
+    if (this.isImgDeleted) {
+      formData.append('is_img_delete', 'true');
+    }
     
     this.common.presentLoading().then(preLoad => {
       this.httpDigi.updateJusti(formData).subscribe({
@@ -182,6 +186,34 @@ export class JustificationComponent  implements OnInit {
     this.view_status = 'add';
     this.isUpdate = true;
     this.remark = this.view_obj.remark;
+    this.image = null;
+    this.isImgDeleted = false;
+  }
+
+  hasExistingImage(): boolean {
+    return this.isUpdate && !!this.view_obj?.attachment && !this.isImgDeleted;
+  }
+
+  // Yahan sirf flag set hota hai - server se asli delete Update dabane par
+  // is_img_delete ke saath hota hai, tab tak Undo se wapas aa sakta hai
+  async removeExistingImage() {
+    const confirm = await this.alertCtrl.create({
+      message: 'Remove this attachment?',
+      buttons: [{
+        text: 'Cancel',
+        handler: () => {}
+      }, {
+        text: 'Confirm',
+        handler: () => {
+          this.isImgDeleted = true;
+        }
+      }]
+    });
+    await confirm.present();
+  }
+
+  undoRemoveImage() {
+    this.isImgDeleted = false;
   }
 
 }

@@ -54,6 +54,25 @@
   color: var(--ion-color-dark, #222428);
 }
 
+.attachment-removed-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  ion-note {
+    font-size: 0.8125rem;
+  }
+
+  ion-button {
+    margin: 0;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    font-weight: 600;
+  }
+}
+
 .attachment-hint {
   display: block;
   margin-top: 8px;
