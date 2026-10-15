@@ -91,7 +91,7 @@
           <div class="checklist-card__actions">
             <ion-button *ngIf="shouldShowJustification(dat); else fillBtn" expand="block" fill="solid" shape="round" color="warning" class="ion-text-capitalize checklist-card__btn" (click)="openJustification(dat)">
               <ion-icon name="document-text-outline" slot="start"></ion-icon>
-              Justification
+              {{ dat.fill_justification_status ? 'View Justification' : 'Justification' }}
             </ion-button>
             <ng-template #fillBtn>
               <ion-button expand="block" (click)="verifyQr(dat)" fill="solid" shape="round" color="primary" class="ion-text-capitalize checklist-card__btn">

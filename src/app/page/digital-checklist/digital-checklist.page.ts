@@ -183,18 +183,27 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
 
   private loadChecklistByBarcode(type: string, value: string) {
     const todayDate = getToday();
+    // Aaj ki row, ya kisi bhi date ki no-expiry assigned row — date view (loadChecklistForDate) wala hi rule
+    const matchesDateOrNoExpiry = (row: any) =>
+      row.schedule_date === todayDate
+      || (Number(row.is_no_expiry) === 1 && row.schedule_status === 'assigned');
     let filter: () => Promise<any[]>;
 
     if (type === 'complaint-qr-code') {
-      filter = () => db.checklist.where({ loc_id: parseInt(value, 10), schedule_date: todayDate }).toArray();
+      const locId = parseInt(value, 10);
+      filter = () => db.checklist
+        .filter((row: any) => Number(row.loc_id) === locId && matchesDateOrNoExpiry(row))
+        .toArray();
     } else if (type === 'create-ticket-qr-code') {
-      filter = () => db.checklist.where({ barcode: value, schedule_date: todayDate }).toArray();
+      filter = () => db.checklist
+        .filter((row: any) => row.barcode === value && matchesDateOrNoExpiry(row))
+        .toArray();
     } else {
       return;
     }
 
     this.subscribeOnceToDexie(filter, data => {
-      this.splitChecklistsForUser(data, /*sortAssigned*/ true);
+      this.splitChecklistsForUser(data, /*sortAssigned*/ true, /*matchUser*/ false);
     });
   }
 
@@ -403,19 +412,21 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
   }
 
   /**
-   * Split Dexie result into assigned vs attended lists for the current user.
-   * strictIdMatch=true uses exact equality (legacy behavior of the error branch);
-   * default uses comma-split contains (the common path).
+   * Split Dexie result into assigned vs attended lists.
+   * matchUser=false (scan path): user match skip — location/barcode ki saari
+   * checklists dikhti hain. Default (date view): sirf logged-in user ki.
    */
   private splitChecklistsForUser(
     data: any[],
     sortAssigned: boolean = false,
-    strictIdMatch: boolean = false,
+    matchUser: boolean = true,
   ) {
+    console.log(data);
     const userId = String(this.userData.id);
+    console.log(userId);
     const isAssignedToUser = (row: any): boolean => {
-      if (strictIdMatch) {
-        return row.assign_to === this.userData.id;
+      if (!matchUser) {
+        return true;
       }
       // Live app ke liye assign_to me single id hi aati rahegi; comma-separated list
       // backend ab assign_to_all me bhejta hai. Purani cached/offline rows me
@@ -625,6 +636,12 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
       component: JustificationComponent,
       cssClass: 'my-modal',
       componentProps: { data },
+    });
+    modal.onDidDismiss().then(res => {
+      // Save/delete hone par usi visit me label update — Dexie dobara padhne ki zaroorat nahi
+      if (res.data && typeof res.data.fill_justification_status === 'boolean') {
+        data.fill_justification_status = res.data.fill_justification_status;
+      }
     });
     modal.present();
   }

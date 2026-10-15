@@ -4,6 +4,7 @@ import { CameraService } from 'src/app/provider/camera/camera.service';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { environment } from 'src/environments/environment';
+import { db } from 'src/app/provider/local-db/local-db.service';
 
 @Component({
   selector: 'app-justification',
@@ -37,6 +38,14 @@ export class JustificationComponent  implements OnInit {
           if (data.status) {
             this.view_status = data.data.view_status;
             this.view_obj = data.data;
+            // Web/dusre device se bhari ya delete hui justification ka stale
+            // Dexie status yahin sync ho jata hai; this.data parent list ka
+            // wahi row object hai, to label bhi turant update hota hai
+            const filled = this.view_status === 'view';
+            if (this.data.fill_justification_status !== filled) {
+              this.data.fill_justification_status = filled;
+              this.syncDexieStatus(filled);
+            }
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -54,6 +63,23 @@ export class JustificationComponent  implements OnInit {
 
   closeModal() {
     this.modalCtrl.dismiss()
+  }
+
+  private syncDexieStatus(status: boolean) {
+    return db.checklist
+      .where('schedule_id')
+      .equals(this.data.schedule_id)
+      .modify({ fill_justification_status: status });
+  }
+
+  // API success ke baad Dexie row sync karke status ke saath modal band —
+  // parent isi se usi visit me label update karta hai
+  private async closeWithStatus(status: boolean) {
+    try {
+      await this.syncDexieStatus(status);
+    } finally {
+      this.modalCtrl.dismiss({ fill_justification_status: status });
+    }
   }
 
   async openCamera() {
@@ -89,7 +115,7 @@ export class JustificationComponent  implements OnInit {
         next:(data: any) => {
           if (data.status) {
             this.common.presentToast(data.msg, 'success');
-            this.closeModal();
+            this.closeWithStatus(true);
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -123,7 +149,7 @@ export class JustificationComponent  implements OnInit {
         next:(data: any) => {
           if (data.status) {
             this.common.presentToast(data.msg, 'success');
-            this.closeModal();
+            this.closeWithStatus(true);
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
@@ -161,7 +187,7 @@ export class JustificationComponent  implements OnInit {
         next:(data: any) => {
           if (data.status) {
             this.common.presentToast(data.msg, 'success');
-            this.closeModal();
+            this.closeWithStatus(false);
           } else {
             this.common.presentToast(data.msg, 'warning');
           }
