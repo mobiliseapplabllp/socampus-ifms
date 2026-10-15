@@ -100,6 +100,9 @@ export class CameraService {
   private async openOuterCamera(callback: (blob: Blob) => void) {
     const modal = await this.modalCtrl.create({
       component: CameraComponent,
+      // Tablet width par Ionic modal ko 600x600 card bana deta hai - viewfinder
+      // floating card me kaam ka nahi, isliye ye hamesha full screen rehta hai.
+      cssClass: 'camera-modal',
       backdropDismiss: false
     });
 

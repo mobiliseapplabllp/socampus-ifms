@@ -1,31 +1,48 @@
 // ============ Camera - dark chrome, standard shutter ============
 $camera-chrome: #0b0d14;
 
-// Native preview is element ke peeche render hota hai, isliye ye see-through hi
-// rehna chahiye. Sirf #content par - neeche review screen ko asli background chahiye.
-ion-content#content {
-  --background: transparent !important;
+// Native preview full screen WebView ke PEECHHE chalta hai, isliye ye component
+// sirf chrome banata hai. Jaan-boojh kar ion-content/ion-footer use nahi kiye
+// aur modal ke apne layout par bharosa nahi hai - sab kuch is wrapper box par
+// pinned hai, aur wrapper ko global.scss viewport par pin karta hai.
+:host {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+}
+
+.camera-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+// Jaan-boojh kar see-through: preview WebView ke peechhe se yahin dikhta hai.
+.preview-area {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.camera-footer,
+.review-footer {
+  flex: 0 0 auto;
+  background: $camera-chrome;
 }
 
 // ---- Capture screen ----
-ion-footer.camera-footer,
-ion-footer.review-footer {
-  background: $camera-chrome;
-
-  // Material footer ke upar ::before se shadow banata hai; kaali patti par wo
-  // grey dhabba dikhta hai
-  &::before {
-    display: none;
-  }
-}
-
 .camera-controls {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  // Shutter 72px ka hai - neeche thodi jagah chahiye warna patti se sata dikhta hai.
-  // Nav bar wali jagah global ion-footer rule se alag se milti hai
-  padding: 18px 30px 22px;
+  padding: 16px 30px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
 
   // Cancel / flip - side ke kaam, isliye chhote aur halke. Wazan shutter par
   .ctrl-btn {
@@ -87,11 +104,17 @@ ion-footer.review-footer {
 }
 
 // ---- Review screen ----
-ion-content.review-content {
-  --background: #{$camera-chrome};
+.review-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  background: $camera-chrome;
+  // Status bar is area ke upar baithti hai; thodi headroom photo ko usse
+  // door rakhti hai.
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .review-image {
+  display: block;
   width: 100%;
   height: 100%;
   // Pehle 100% x 100% kheench diya jaata tha, jisse har photo ka aspect bigad jaata
@@ -101,7 +124,8 @@ ion-content.review-content {
 .review-controls {
   display: flex;
   gap: 12px;
-  padding: 14px 16px 18px;
+  padding: 14px 16px;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
 
   .review-btn {
     flex: 1;

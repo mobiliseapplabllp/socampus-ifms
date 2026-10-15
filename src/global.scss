@@ -332,3 +332,73 @@ ion-modal.app-sheet-modal ion-content {
 }
 
 
+/* ---------------------------------------------------------------------------
+   Custom camera (app-camera) - full-screen modal + toBack preview layering
+--------------------------------------------------------------------------- */
+// Tablet width (>= 768px) par Ionic modal ko 600x600 card bana deta hai -
+// viewfinder floating card me kaam ka nahi, isliye hamesha full screen.
+// --max-height bhi zaroori hai: max-height kisi bhi set ki hui height ko
+// clamp kar deta hai, aur wahi clamp footer ke neeche gap ban jaata hai.
+ion-modal.camera-modal {
+  --width: 100%;
+  --height: 100%;
+  --max-height: 100%;
+  --border-radius: 0;
+  --box-shadow: none;
+}
+
+// Camera chalte waqt native preview WebView ke PEECHHE hota hai (toBack),
+// isliye upar ki har layer see-through chahiye - aur camera modal ke neeche
+// ka app content chhupna chahiye, warna preview ki jagah wahi dikh jaayega.
+// CameraComponent ye class toggle karta hai.
+body.camera-preview-active {
+  background: transparent !important;
+
+  ion-app {
+    background: transparent !important;
+  }
+
+  ion-app > * {
+    visibility: hidden;
+  }
+
+  ion-app > ion-modal.camera-modal {
+    visibility: visible;
+  }
+
+  ion-modal.camera-modal {
+    --background: transparent;
+    --backdrop-opacity: 0;
+  }
+}
+
+// Belt and braces: camera modal ke wrapper ko asli viewport par pin karo
+// taaki koi app-wide modal styling (height, clamp, offset) ise dobara resize
+// na kar sake. transform/opacity ko !important chahiye kyunki enter animation
+// apne end values wrapper par chhod deti hai.
+ion-modal.camera-modal::part(content) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  max-height: none !important;
+  min-height: 0 !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+// Web par camera-preview plugin preview div me raw <video id="video"> daal
+// deta hai (wahan native layer nahi hoti) - use bhi native preview jaisa poora
+// area bharna chahiye. Plugin inject karta hai, isliye component-scoped styles
+// isse miss kar jaate hain.
+app-camera .preview-area video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+

@@ -1,33 +1,37 @@
-<ion-content id="content" *ngIf="!finalImage"></ion-content>
-<ion-footer class="camera-footer" *ngIf="!finalImage">
-  <div class="camera-controls">
-    <button type="button" class="ctrl-btn" (click)="closeAction('', false)" aria-label="Cancel">
-      <ion-icon name="close-outline"></ion-icon>
-    </button>
+<div class="camera-screen" *ngIf="!finalImage">
+  <div class="preview-area" id="previewArea"></div>
+  <div class="camera-footer">
+    <div class="camera-controls">
+      <button type="button" class="ctrl-btn" (click)="closeAction('', false)" aria-label="Cancel">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
 
-    <button type="button" class="shutter-btn" (click)="takePicture()" aria-label="Take photo">
-      <span class="shutter-ring"></span>
-      <span class="shutter-core"></span>
-    </button>
+      <button type="button" class="shutter-btn" (click)="takePicture()" aria-label="Take photo">
+        <span class="shutter-ring"></span>
+        <span class="shutter-core"></span>
+      </button>
 
-    <button type="button" class="ctrl-btn" (click)="flipCamera()" aria-label="Switch camera">
-      <ion-icon name="camera-reverse-outline"></ion-icon>
-    </button>
+      <button type="button" class="ctrl-btn" (click)="flipCamera()" aria-label="Switch camera">
+        <ion-icon name="camera-reverse-outline"></ion-icon>
+      </button>
+    </div>
   </div>
-</ion-footer>
+</div>
 
-<ion-content class="review-content" *ngIf="finalImage">
-  <img [src]="finalImage" alt="Captured photo" class="review-image">
-</ion-content>
-<ion-footer class="review-footer" *ngIf="finalImage">
-  <div class="review-controls">
-    <button type="button" class="review-btn retry" (click)="retry()">
-      <ion-icon name="refresh-outline"></ion-icon>
-      <span>Retry</span>
-    </button>
-    <button type="button" class="review-btn done" (click)="done()">
-      <ion-icon name="checkmark-outline"></ion-icon>
-      <span>Done</span>
-    </button>
+<div class="camera-screen" *ngIf="finalImage">
+  <div class="review-area">
+    <img [src]="finalImage" alt="Captured photo" class="review-image">
   </div>
-</ion-footer>
+  <div class="review-footer">
+    <div class="review-controls">
+      <button type="button" class="review-btn retry" (click)="retry()">
+        <ion-icon name="refresh-outline"></ion-icon>
+        <span>Retry</span>
+      </button>
+      <button type="button" class="review-btn done" (click)="done()">
+        <ion-icon name="checkmark-outline"></ion-icon>
+        <span>Done</span>
+      </button>
+    </div>
+  </div>
+</div>
