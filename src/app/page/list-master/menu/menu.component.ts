@@ -87,6 +87,12 @@ export class MenuComponent  implements OnInit {
   }
 
   chunkedArray(array: any) {
+    // TODO: dummy tile hai, backend menu API me Location QR entry aane par hata dena
+    array = [...(array || []), {
+      smnu_desc: 'Location QR',
+      icon_path: 'assets/img/location-qr.svg',
+      link: '/location-qr'
+    }];
     const perChunk = 2
     const result = array.reduce((resultArray: any, item: any, index: any) => {
       const chunkIndex = Math.floor(index/perChunk)
