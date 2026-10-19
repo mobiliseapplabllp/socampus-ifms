@@ -56,6 +56,12 @@
           <ion-icon [name]="viewIconForDocMode(mode)" slot="icon-only"></ion-icon>
         </ion-button>
       </div>
+      <!-- Video preview: upload ke baad aur attended me bhi (local Dexie ya server se) -->
+      <div *ngIf="mode === 'video' && hasVideo(val)" class="fill-report-doc-row__view">
+        <ion-button color="primary" (click)="playVideo(val)" fill="clear" size="small">
+          <ion-icon name="play-circle-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
     </div>
   </ng-template>
 
@@ -152,6 +158,12 @@
               <span class="fill-report-q-type">{{ val.question_type }}</span>
             </p>
           </ion-label>
+          <!-- Admin ka reference file (q_attchmnt_url) - view-only, isliye submit ke baad bhi dikhta hai -->
+          <ion-buttons slot="end" *ngIf="val.q_attchmnt_url">
+            <ion-button slot="icon-only" color="primary" (click)="viewQuestionAttachment(val)">
+              <ion-icon name="attach-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
           <ion-buttons slot="end" (click)="speakCondition(val, i)" [hidden]="!isEditable(dat)">
             <ion-button slot="icon-only" color="primary">
               <ion-icon name="volume-high-outline"></ion-icon>
@@ -283,20 +295,6 @@
     </ion-button>
   </ion-card>
 </ion-content>
-
-<ion-modal [isOpen]="videoPreviewOpen" (didDismiss)="closeVideoPreview()">
-  <ion-header>
-    <ion-toolbar color="primary">
-      <ion-title>{{ i18nLabels.video }}</ion-title>
-      <ion-buttons slot="end">
-        <ion-button (click)="closeVideoPreview()">{{ i18nLabels.close }}</ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
-  <ion-content class="ion-padding">
-    <video *ngIf="videoObjectUrl" [src]="videoObjectUrl" controls playsinline class="fill-report-video-preview"></video>
-  </ion-content>
-</ion-modal>
 
 <ion-footer *ngIf="scheduleArr.length > 0" [hidden]="schedule_status !== 'assigned'" class="fill-report-footer">
   <ion-toolbar>

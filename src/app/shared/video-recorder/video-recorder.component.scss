@@ -1,0 +1,56 @@
+.video-recorder-content {
+  --background: #000;
+}
+
+.video-recorder-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-recorder-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.video-recorder-spinner {
+  position: absolute;
+}
+
+.video-recorder-timer {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+
+  &.is-recording {
+    background: rgba(var(--ion-color-danger-rgb), 0.85);
+  }
+}
+
+.video-recorder-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  animation: video-recorder-blink 1s infinite;
+}
+
+@keyframes video-recorder-blink {
+  50% {
+    opacity: 0.2;
+  }
+}

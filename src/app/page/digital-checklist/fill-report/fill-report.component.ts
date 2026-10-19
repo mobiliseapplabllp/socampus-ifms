@@ -13,6 +13,8 @@ import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
 import { CameraService } from 'src/app/provider/camera/camera.service';
 import { SignatureComponent } from 'src/app/shared/signature/signature.component';
 import { PhotoViewComponent } from 'src/app/shared/photo-view/photo-view.component';
+import { RecordedVideo, VideoRecorderComponent, videoExtFromType } from 'src/app/shared/video-recorder/video-recorder.component';
+import { VideoPreviewComponent } from 'src/app/shared/video-preview/video-preview.component';
 import { environment } from 'src/environments/environment';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
@@ -468,8 +470,6 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
   offline_save!: string;
   userData: any = {};
   ticketMsg!: string;
-  videoPreviewOpen = false;
-  videoObjectUrl = '';
   private videoPickTarget: any = null;
 
   constructor(
@@ -641,7 +641,7 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
       return;
     }
     if (kind === 'attachment' || kind === 'video') {
-      if (!q.imagename) {
+      if (!q.imagename || q.imagename === 'already_upload') {
         q.imagename = this.toServerFilePath(answer);
         q.imagename_blob_tyep = q.imagename_blob_tyep || 'PRIVATE';
       }
@@ -718,14 +718,12 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
   ionViewDidLeave() {
     this.loop = false;
     this.removeListen();
-    this.closeVideoPreview();
     this.disposeAll();
     TextToSpeech.stop().catch(() => { /* safe noop */ });
   }
 
   ngOnDestroy() {
     this.disposeAll();
-    this.closeVideoPreview();
   }
 
   /** Track an RxJS subscription so it gets torn down on leave/destroy. */
@@ -1247,34 +1245,55 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   pickVideo(val: any) {
+    this.captureVideoForQuestion(val);
+  }
+
+  /** In-app recorder (480p ~1 Mbps). Camera na mile to purana native capture / file picker. */
+  async captureVideoForQuestion(val: any) {
+    const modal = await this.modalCtrl.create({
+      component: VideoRecorderComponent,
+      backdropDismiss: false,
+      // Tablet par Ionic modal chhota centered card banata hai - video poori screen par chahiye
+      cssClass: 'camera-modal',
+    });
+    await modal.present();
+    const { data, role } = await modal.onWillDismiss<RecordedVideo>();
+    if (role === 'recorded' && data?.blob) {
+      this.applyVideoBlob(val, data.blob, data.ext);
+    } else if (role === 'unsupported') {
+      this.captureVideoFallback(val);
+    }
+  }
+
+  private captureVideoFallback(val: any) {
     if (this.platform.is('capacitor')) {
-      this.captureVideoForQuestion(val);
+      this.captureVideoNative(val);
     } else {
       this.videoPickTarget = val;
       this.scheduleTimer(() => this.videoFileInput?.nativeElement?.click(), 0);
     }
   }
 
-  async captureVideoForQuestion(val: any) {
+  async captureVideoNative(val: any) {
     try {
-      const options: CaptureVideoOptions = { limit: 1, quality: 0, duration: 90 };
+      const options: CaptureVideoOptions = { limit: 1, quality: 0, duration: 60 };
       const data: any = await this.mediaCapture.captureVideo(options);
       if (data?.[0]?.fullPath) {
-        await this.loadVideoPathIntoQuestion(val, data[0].fullPath);
+        await this.loadVideoPathIntoQuestion(val, data[0].fullPath, data[0].type);
       }
     } catch {
       this.common.presentToast('Video capture cancelled or failed', 'warning');
     }
   }
 
-  async loadVideoPathIntoQuestion(val: any, fullPath: string) {
+  async loadVideoPathIntoQuestion(val: any, fullPath: string, type?: string) {
     this.common.presentLoading().then(() => {});
     try {
       const file = await Filesystem.readFile({ path: fullPath });
-      const base64Video = `data:video/mp4;base64,${file.data}`;
-      const base64Response = await fetch(base64Video);
+      const mime = type || 'video/mp4';
+      const base64Response = await fetch(`data:${mime};base64,${file.data}`);
       const blob = await base64Response.blob();
-      this.applyVideoBlob(val, blob);
+      this.applyVideoBlob(val, blob, videoExtFromType(mime));
     } catch {
       this.common.presentToast('Could not read video file', 'warning');
     } finally {
@@ -1286,15 +1305,21 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
     const input = ev.target as HTMLInputElement;
     const file = input.files?.[0];
     if (file && this.videoPickTarget) {
-      this.applyVideoBlob(this.videoPickTarget, file);
+      this.applyVideoBlob(this.videoPickTarget, file, videoExtFromType(file.type));
       this.videoPickTarget = null;
     }
     input.value = '';
   }
 
-  applyVideoBlob(val: any, blob: Blob) {
+  /**
+   * `local_video` me Blob Dexie me rehta hai taaki upload ke baad bhi (attended me) bina internet chale.
+   * Naya video aate hi purana `uploaded_attachment` hata dete hain - warna upload fail hone par purani video submit hoti.
+   */
+  applyVideoBlob(val: any, blob: Blob, ext = '.mp4') {
     val.imagename = blob;
-    val.attach_ext = '.mp4';
+    val.local_video = blob;
+    val.uploaded_attachment = '';
+    val.attach_ext = ext;
     if (val.options?.[0]) {
       val.rspns = val.options[0].optn_id;
     }
@@ -1320,11 +1345,17 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
       this.trackSub(
         this.httpDigital.saveVideoResponse(formData).subscribe({
           next: (data: any) => {
+            // Beech me dobara record ho gaya to ye purane video ka jawab hai - ignore
+            if (val.local_video !== blob) {
+              return;
+            }
             val.video_uploading = false;
-            if (data?.status) {
+            const attachment = data?.data?.attachment;
+            if (data?.status && attachment) {
               // Server-side filename (e.g. "vid_57476_1452_..mp4") — sent as `rspns` on final submit.
-              val.uploaded_attachment = data?.data?.attachment || '';
-              val.imagename = 'already_upload';
+              val.uploaded_attachment = attachment;
+              val.imagename = this.toServerFilePath(attachment);
+              val.imagename_blob_tyep = val.imagename_blob_tyep || 'PRIVATE';
               this.actionUpdateChecklist();
               this.common.presentToast(data?.msg || 'Video uploaded successfully', 'success');
             } else {
@@ -1332,6 +1363,9 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
             }
           },
           error: () => {
+            if (val.local_video !== blob) {
+              return;
+            }
             val.video_uploading = false;
             this.common.presentToast('Video upload failed, will retry on submit', 'warning');
           }
@@ -1341,31 +1375,53 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   viewAttachment(val: any) {
-    if (val.imagename === 'already_upload') {
-      this.common.presentToast('Video uploaded to server', 'success');
+    if (this.questionKind(val) === 'video') {
+      this.playVideo(val);
       return;
     }
     if (!(val.imagename instanceof Blob)) {
       this.viewDocs(val.imagename, val.imagename_blob_tyep);
       return;
     }
-    if (this.questionKind(val) === 'video') {
-      if (this.videoObjectUrl) {
-        URL.revokeObjectURL(this.videoObjectUrl);
-      }
-      this.videoObjectUrl = URL.createObjectURL(val.imagename);
-      this.videoPreviewOpen = true;
-    } else {
-      this.openPhotoViewer(val.imagename);
-    }
+    this.openPhotoViewer(val.imagename);
   }
 
-  closeVideoPreview() {
-    this.videoPreviewOpen = false;
-    if (this.videoObjectUrl) {
-      URL.revokeObjectURL(this.videoObjectUrl);
-      this.videoObjectUrl = '';
+  hasVideo(val: any): boolean {
+    return !!(val.local_video || val.imagename);
+  }
+
+  /** Pehle phone me rakhi video (Dexie), warna server path se - dono ek hi player me */
+  async playVideo(val: any) {
+    const blob = val.local_video instanceof Blob ? val.local_video
+      : val.imagename instanceof Blob ? val.imagename : null;
+    let url = '';
+    if (!blob) {
+      // Purane records me upload ke baad imagename = 'already_upload' rehta tha
+      if (typeof val.imagename === 'string' && val.imagename && val.imagename !== 'already_upload') {
+        url = val.imagename;
+      } else if (val.uploaded_attachment) {
+        url = this.toServerFilePath(val.uploaded_attachment);
+      }
+      if (!url) {
+        this.common.presentToast('Video not available', 'warning');
+        return;
+      }
+      if (!(await this.common.checkInternet())) {
+        this.common.presentToast('Internet Not Working', 'warning');
+        return;
+      }
     }
+    const modal = await this.modalCtrl.create({
+      component: VideoPreviewComponent,
+      cssClass: 'camera-modal',
+      componentProps: {
+        blob,
+        url,
+        blobType: val.imagename_blob_tyep || 'PRIVATE',
+        title: this.i18nLabels.video,
+      },
+    });
+    await modal.present();
   }
 
   /**
@@ -1751,6 +1807,11 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
       }
       this.common.setImageCondition(obj, 'blob', blobType)
     }
+  }
+
+  /** Question ke saath admin ka diya reference file - response images jaisa hi khulta hai */
+  viewQuestionAttachment(val: any) {
+    this.viewDocs(val.q_attchmnt_url, val.q_attchmnt_blob_type || 'PRIVATE');
   }
 
   async openPhotoViewer(blob: Blob) {

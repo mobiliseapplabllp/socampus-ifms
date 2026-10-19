@@ -24,6 +24,8 @@ import { BlockComponent } from './block/block.component';
 import { ImageViewComponent } from './image-view/image-view.component';
 import { PdfViewComponent } from './pdf-view/pdf-view.component';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { VideoRecorderComponent } from './video-recorder/video-recorder.component';
+import { VideoPreviewComponent } from './video-preview/video-preview.component';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -45,7 +47,9 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     VideoPlayComponent,
     BlockComponent,
     ImageViewComponent,
-    PdfViewComponent
+    PdfViewComponent,
+    VideoRecorderComponent,
+    VideoPreviewComponent
 
   ],
   imports: [
@@ -75,7 +79,9 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     VideoPlayComponent,
     BlockComponent,
     ImageViewComponent,
-    PdfViewComponent
+    PdfViewComponent,
+    VideoRecorderComponent,
+    VideoPreviewComponent
   ],
   exports: [
     VideoComponent,
