@@ -84,33 +84,33 @@ export class MenuComponent  implements OnInit {
         this.result = data;
         if (this.result.status == true) {
           this.myMenu = this.result.data[0].submenu;
-          if (this.userData.user_type === 'Driver') {
-            const obj1 = [{
-              icon_path: 'assets/meal/i1.png',
-              smnu_desc: 'Order Dispatch',
-              link: '/t-order/1'
-            }]
-            for (var i = 0; i < obj1.length; i++) {
-              this.myMenu.unshift(obj1[i]);
-            }
-          } else {
-            const obj = [{
-              icon_path: 'assets/meal/i1.png',
-              smnu_desc: 'Order Dispatch',
-              link: '/t-order/4'
-            }, {
-              icon_path: 'assets/meal/i2.png',
-              smnu_desc: 'Order Received',
-              link: '/t-order/2'
-            }, {
-              icon_path: 'assets/meal/i2.png',
-              smnu_desc: 'Packing',
-              link: 'today-order/order-pack'
-            }];
-            for (var i = 0; i < obj.length; i++) {
-              this.myMenu.unshift(obj[i]);
-            }
-          }
+          // if (this.userData.user_type === 'Driver') {
+          //   const obj1 = [{
+          //     icon_path: 'assets/meal/i1.png',
+          //     smnu_desc: 'Order Dispatch',
+          //     link: '/t-order/1'
+          //   }]
+          //   for (var i = 0; i < obj1.length; i++) {
+          //     this.myMenu.unshift(obj1[i]);
+          //   }
+          // } else {
+          //   const obj = [{
+          //     icon_path: 'assets/meal/i1.png',
+          //     smnu_desc: 'Order Dispatch',
+          //     link: '/t-order/4'
+          //   }, {
+          //     icon_path: 'assets/meal/i2.png',
+          //     smnu_desc: 'Order Received',
+          //     link: '/t-order/2'
+          //   }, {
+          //     icon_path: 'assets/meal/i2.png',
+          //     smnu_desc: 'Packing',
+          //     link: 'today-order/order-pack'
+          //   }];
+          //   for (var i = 0; i < obj.length; i++) {
+          //     this.myMenu.unshift(obj[i]);
+          //   }
+          // }
           this.chunkedArray(this.myMenu)
           localStorage.setItem('home_menu', JSON.stringify(this.myMenu));
         }

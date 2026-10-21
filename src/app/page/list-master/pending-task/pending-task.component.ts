@@ -564,7 +564,7 @@ export class PendingTaskComponent  implements OnInit {
           if (data.status) {
             this.meterInfo = data.data;
           } else {
-            this.common.presentToast(data.info, 'warning');
+            this.common.presentToast(data.msg, 'warning');
           }
         },
         error:() => {
@@ -638,7 +638,7 @@ export class PendingTaskComponent  implements OnInit {
       obj = ['camera', 'gallery'];
       this.customActionSheet(obj, dat, type);
     } else if (dat.is_gllry_upld_allwd == 0) {
-      obj ['camera'];
+      obj = ['camera'];
       this.customActionSheet(obj, dat, type);
     } else {
       alert('Gallery is Undefined ' + dat.is_gllry_upld_allwd);
