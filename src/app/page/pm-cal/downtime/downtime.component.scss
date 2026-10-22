@@ -1,0 +1,28 @@
+// actionable me peeche wala modal bhi safed hai - dialog halka blue taaki alag dikhe (inputs safed hi rehte hain)
+ion-toolbar,
+ion-content {
+  --background: rgb(230, 232, 254);
+}
+
+.downtime-hint {
+  font-size: 14px;
+}
+
+.downtime-fields {
+  margin-top: 16px;
+}
+
+.downtime-label {
+  font-size: 14px;
+}
+
+.downtime-input {
+  border: 1px solid var(--ion-color-medium);
+  border-radius: 6px;
+  margin-top: 6px;
+  --min-height: 40px;
+}
+
+.downtime-actions {
+  padding: 0px 10px;
+}

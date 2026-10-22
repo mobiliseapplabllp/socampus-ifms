@@ -1,0 +1,41 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Add Downtime</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal(null, 'false')">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <ion-text color="medium" class="downtime-hint">Enter downtime duration for this work order.</ion-text>
+  <ion-row class="downtime-fields">
+    <ion-col size="4">
+      <ion-label class="downtime-label">Days</ion-label>
+      <ion-item lines="none" class="downtime-input">
+        <ion-input type="number" inputmode="numeric" min="0" [(ngModel)]="days"></ion-input>
+      </ion-item>
+    </ion-col>
+    <ion-col size="4">
+      <ion-label class="downtime-label">Hours</ion-label>
+      <ion-item lines="none" class="downtime-input">
+        <ion-input type="number" inputmode="numeric" min="0" [(ngModel)]="hours"></ion-input>
+      </ion-item>
+    </ion-col>
+    <ion-col size="4">
+      <ion-label class="downtime-label">Minutes</ion-label>
+      <ion-item lines="none" class="downtime-input">
+        <ion-input type="number" inputmode="numeric" min="0" [(ngModel)]="minutes"></ion-input>
+      </ion-item>
+    </ion-col>
+  </ion-row>
+</ion-content>
+<ion-footer class="ion-no-border">
+  <ion-toolbar class="downtime-actions">
+    <ion-buttons slot="end">
+      <ion-button fill="outline" shape="round" class="ion-text-capitalize" (click)="closeModal(null, 'false')">Cancel</ion-button>
+      <ion-button fill="solid" shape="round" color="primary" class="ion-text-capitalize" (click)="save()">Save Downtime</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

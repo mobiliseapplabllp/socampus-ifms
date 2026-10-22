@@ -9,6 +9,7 @@ import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { CameraService } from 'src/app/provider/camera/camera.service';
 import { HoldPpmComponent } from '../hold-ppm/hold-ppm.component';
+import { DowntimeComponent } from '../downtime/downtime.component';
 @Component({
   selector: 'app-pm-report',
   templateUrl: './pm-report.component.html',
@@ -498,6 +499,18 @@ export class PmReportComponent  implements OnInit {
         NACat.push(this.myCategory[i].cat_id);
       }
     }
+    // Chune hue option ka is_correct dekhte hain, q.is_correct nahi - pm-report load par wo set hi nahi hota
+    const hasWrongAnswer = this.myCategory.some((cat: any) =>
+      (cat.qus || []).some((q: any) => {
+        const selected = (q.options || []).find((opt: any) => opt.optn_id === q.rspns);
+        return !!selected && (selected.is_correct === 0 || selected.is_correct === '0');
+      })
+    );
+    // Ek bhi galat jawab ho to pehle jaisa seedha submit; saare sahi hon to pehle downtime modal
+    if (!hasWrongAnswer) {
+      this.openDowntimeModal(NACat);
+      return;
+    }
     // for (let i = 0; i < this.myCategory.length; i++) {
     //   if (!this.myCategory[i].is_applicable) {
     //     this.httpCommon.presentToastWithOk(`Please Add Response for Category ${i+1} ${this.myCategory[i].cat_desc}` , 'warning');
@@ -522,6 +535,26 @@ export class PmReportComponent  implements OnInit {
     //     }
     //   }
     // }
+    this.submitScheduleStatus(NACat);
+  }
+
+  async openDowntimeModal(NACat: any) {
+    const modal = await this.modalCtrl.create({
+      component: DowntimeComponent,
+      cssClass: 'downtime-modal',
+      backdropDismiss: false,
+      componentProps: { wo_id: this.requestedData.id }
+    });
+    // role 'true' sirf save_downtime success par aata hai, isliye uske baad hi final submit
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role == 'true') {
+        this.submitScheduleStatus(NACat);
+      }
+    });
+    modal.present();
+  }
+
+  submitScheduleStatus(NACat: any) {
     const obj: any = {
       status: 2,
       // wo_id: this.requestedData.wo_id, //yeah hatwai hai backend k hisab se 

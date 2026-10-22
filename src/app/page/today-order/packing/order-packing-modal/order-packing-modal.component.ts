@@ -55,10 +55,11 @@ export class OrderPackingModalComponent  implements OnInit {
       return;
     }
 
+    // decimal allowed (0.5, 0.1 ...) — sirf 0, khaali ya invalid rokte hain
     const qtyNum = Number(this.qty);
-    if (isNaN(qtyNum) || qtyNum < 1) {
+    if (isNaN(qtyNum) || qtyNum <= 0) {
       this.qty = null;
-      this.common.presentToast(`Packing Qty can't be less than 1`, 'warning');
+      this.common.presentToast('Packing Qty must be greater than 0', 'warning');
       return;
     }
     this.qty = qtyNum;
@@ -127,10 +128,12 @@ export class OrderPackingModalComponent  implements OnInit {
       event.target.value = value;
     }
 
+    // max 2 decimal digits — pehle 3rd digit par 1 digit tak kat jaata tha (0.25 -> 0.2)
     const decimalIndex = String(value).indexOf('.');
 
     if (decimalIndex !== -1 && value.length - decimalIndex - 1 > 2) {
-        this.qty = value.slice(0, decimalIndex + 2);
+        this.qty = value.slice(0, decimalIndex + 3);
+        event.target.value = this.qty;
     }
   }
 

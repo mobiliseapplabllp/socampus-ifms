@@ -43,7 +43,7 @@
     </ion-row>
 
     <ion-radio-group color="none" mode="md" [(ngModel)]="dat.rspns"  (ionChange)="changeOptionResponse(dat, $event)" >
-      <ion-item class="radioButton" lines="none" *ngFor="let opt of dat.options" [ngClass]="{'selectedRadioButton': opt.optn_id ===  dat.rspns }">
+      <ion-item class="radioButton" lines="none" *ngFor="let opt of dat.options" [ngClass]="{'selectedRadioButton': opt.optn_id ===  dat.rspns, 'wrongRadioButton': opt.optn_id === dat.rspns && (opt.is_correct === 0 || opt.is_correct === '0') }">
         <ion-label>{{opt.optn_desc}}</ion-label>
         <ion-radio slot="end" [value]="opt.optn_id"></ion-radio>
       </ion-item>
