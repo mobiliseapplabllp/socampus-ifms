@@ -48,6 +48,12 @@ export class AppComponent {
   appVersion!: string;
   isAndroid!: boolean;
   isPunchIn = false;
+  /**
+   * Backend `punch_allowed: false` de to Punch In band. Punch Out hamesha chalta hai,
+   * warna IN wala banda available me atka rahega aur tracking band nahi kar paayega.
+   * Card chhupta nahi - user ko dikhe ki button hai par uske liye band hai.
+   */
+  canPunch = true;
   private isProgrammaticChange = false;
 
   // ---- Location tracking (Availability ke saath) ----
@@ -316,6 +322,7 @@ export class AppComponent {
     if (saved) {
       try {
         this.userInfo = JSON.parse(saved);
+        this.canPunch = this.loginPro.isPunchAllowed(this.userInfo);
       } catch (e) {
         console.error('saved user read', e);
       }
@@ -326,6 +333,8 @@ export class AppComponent {
         return;
       }
       this.userInfo = dat;
+      // SSO login aur login_ping (applyPunchAllowed) dono yahin se aate hain
+      this.canPunch = this.loginPro.isPunchAllowed(this.userInfo);
       // if (this.userInfo.current_punch_status === 'IN') {        
       //   this.setPunchIn(true);
       //   this.loginPro.setPunchStatus(true);
@@ -407,6 +416,12 @@ export class AppComponent {
       return;
     }
     const goingIn = !this.isPunchIn;
+
+    // Button disabled hai, par double safety - ijazat nahi to Punch In API tak mat jao
+    if (goingIn && !this.canPunch) {
+      this.common.presentToast('Punch in is not enabled for your account', 'warning');
+      return;
+    }
 
     // Trip chalu ho to punch out hone hi mat do - pehle native stop() mana karta tha,
     // par ab punch API pehle chalti hai, to server par punch out ho jaata aur trip

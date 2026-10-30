@@ -95,11 +95,14 @@
               size="small"
               class="punch-action ion-text-capitalize"
               [color]="isPunchIn ? 'danger' : 'success'"
-              [disabled]="punchBusy"
+              [disabled]="punchBusy || (!isPunchIn && !canPunch)"
               (click)="confirmPunch()">
               <ion-spinner *ngIf="punchBusy" name="lines-sharp" slot="start"></ion-spinner>
               {{ isPunchIn ? 'Punch Out' : 'Punch In' }}
             </ion-button>
+            <!-- Backend ne punch_allowed: false bheja - button dikhta hai par band. Punch Out
+                 par ye nahi aata, wo hamesha chalta hai -->
+            <p class="punch-hint" *ngIf="!isPunchIn && !canPunch">Punch in is not enabled for your account</p>
             <p class="punch-hint punch-track" *ngIf="trackingSupported">{{ trackingText }}</p>
           </div>
         </div>

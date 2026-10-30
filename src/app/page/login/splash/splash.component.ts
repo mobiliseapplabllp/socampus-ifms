@@ -66,7 +66,9 @@ export class SplashComponent  implements OnInit {
           console.log(data);
           if (data.status) { 
             let val = data.data.current_punch_status === 'IN' || data.data.current_punch_status == 'FORCE_PUNCH_IN' ? true : false;
-            this.httpLogin.setPunchStatus(val);           
+            this.httpLogin.setPunchStatus(val);
+            // punch_allowed bhi isi jawab me aata hai - saved user me daal do
+            this.httpLogin.applyPunchAllowed(data.data);
             this.router.navigateByUrl('/list-master', { replaceUrl: true });
           } else {
             this.common.presentToast(data.msg, 'warning');

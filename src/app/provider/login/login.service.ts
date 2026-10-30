@@ -94,6 +94,39 @@ export class LoginService {
     return this.username;
   }
 
+  /**
+   * Punch In ki ijazat - backend `punch_allowed: true/false` deta hai (ssoGatesLoginDetails
+   * ke user me aur login_ping me, wahi jagah jahan current_punch_status aata hai).
+   * SIRF saaf `false` par band. Key na ho (purana backend / dev OTP login), null ho,
+   * true ho - sab me button chalu rehta hai.
+   */
+  isPunchAllowed(user: any): boolean {
+    const v = user?.punch_allowed;
+    return !(v === false || v === 'false' || v === 0 || v === '0');
+  }
+
+  /**
+   * login_ping se aayi punch_allowed ko saved user me daal do aur subject fire karo,
+   * taaki side menu ka button bina app restart ke badal jaaye. Key aayi hi na ho to
+   * kuch mat chhedo - purani value hi sach hai.
+   */
+  applyPunchAllowed(data: any): void {
+    if (!data || !('punch_allowed' in data)) {
+      return;
+    }
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user || typeof user !== 'object') {
+        return;
+      }
+      user.punch_allowed = data.punch_allowed;
+      localStorage.setItem('user', JSON.stringify(user));
+      this.username.next(user);
+    } catch (e) {
+      console.error('applyPunchAllowed', e);
+    }
+  }
+
   getLoginUserValue() {
     return this.userData;
   }
