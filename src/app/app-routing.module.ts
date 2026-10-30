@@ -79,7 +79,11 @@ const routes: Routes = [
   {
     path: 'notification',
     loadChildren: () => import('./page/notification/notification.module').then( m => m.NotificationPageModule)
-  },  
+  },
+  {
+    path: 'location-qr',
+    loadChildren: () => import('./page/location-qr/location-qr.module').then( m => m.LocationQrPageModule)
+  },
 ];
 
 @NgModule({
