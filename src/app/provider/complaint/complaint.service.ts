@@ -280,6 +280,15 @@ export class ComplaintService {
     return this.https.post(environment.url + 'gps-mobile/end-trip', formData);
   }
 
+  /**
+   * Server par is ticket ki trip ka haal - { status, state: 'running'|'none'|'completed',
+   * trip_id, user_id }. Home ke "Trip is active" card tap par: End Trip ka response
+   * raaste me kho gaya ho to phone ka record server se milaya jaata hai.
+   */
+  getTripState(tktId: any): Observable<any> {
+    return this.https.get(environment.url + 'gps-mobile/trip-state?tkt_id=' + tktId);
+  }
+
   /** Ticket par kis-kis ko assign kiya ja sakta hai - abhi sirf console me dekh rahe hain */
   getAssignList(tktId: any): Observable<any> {
     return this.https.get(environment.url + 'gps-mobile/assign-list?tkt_id=' + tktId);

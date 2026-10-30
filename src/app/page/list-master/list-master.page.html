@@ -54,15 +54,18 @@
       {{ isPunchIn ? 'Available' : 'Not available' }}
     </button>
   </div>
-  <!-- Trip chalu ho to home par turant dikhe ki kis ticket ki chal rahi hai -->
-  <div class="hm-trip-card" *ngIf="activeTrip">
+  <!-- Trip chalu ho to home par turant dikhe ki kis ticket ki chal rahi hai.
+       Tap = server se haal milao (End Trip ka response kho gaya ho to yahin se nikalte hain) -->
+  <button type="button" class="hm-trip-card" *ngIf="activeTrip"
+          [disabled]="tripCardBusy" (click)="onTripCardTap()">
     <span class="hm-trip-dot"></span>
     <div class="hm-trip-text">
       <p class="hm-trip-title">Trip is active</p>
       <p class="hm-trip-sub">Ticket #{{ activeTrip.id }} · started {{ tripSince }}</p>
+      <p class="hm-trip-hint">{{ tripCardBusy ? 'Checking…' : 'Tap to check status' }}</p>
     </div>
-    <ion-icon name="navigate-circle-outline"></ion-icon>
-  </div>
+    <ion-icon name="chevron-forward-outline"></ion-icon>
+  </button>
 
   <app-dashboard [eventChange]="eventChange" ></app-dashboard>
   <app-menu [didEnter]="didEnter"></app-menu>

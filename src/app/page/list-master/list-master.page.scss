@@ -3,17 +3,43 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  /* <button> hai - margin ke saath width bhi, warna inline-ish chhota reh jaata hai */
+  width: calc(100% - 34px);
   margin: 10px 17px 0;
   padding: 10px 14px;
   border: 1px solid rgba(255, 149, 0, 0.35);
   border-radius: 14px;
   background: rgba(255, 196, 9, 0.12);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.1s ease;
+
+  &:active {
+    transform: scale(0.985);
+    background: rgba(255, 196, 9, 0.22);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: default;
+  }
 
   > ion-icon {
     margin-left: auto;
+    flex-shrink: 0;
     font-size: 20px;
     color: #b06f00;
   }
+}
+
+/* "Tap to check status" - chhoti, halki, taaki pata chale ki card dabta hai */
+.hm-trip-hint {
+  margin: 3px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #b06f00;
+  opacity: 0.85;
 }
 
 /* Halka blink - taaki nazar chali jaye, par chubhe na */

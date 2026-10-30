@@ -8,8 +8,10 @@ import { SosComponent } from './sos/sos.component';
 import { App } from '@capacitor/app';
 import { LoginService } from 'src/app/provider/login/login.service';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
-import { ActiveTrip, LiveTrackerService } from 'src/app/provider/live-tracker/live-tracker.service';
-import { take } from 'rxjs';
+import { ActiveTrip, LiveTrackerService, TripModule } from 'src/app/provider/live-tracker/live-tracker.service';
+import { ComplaintService } from 'src/app/provider/complaint/complaint.service';
+import { environment } from 'src/environments/environment';
+import { firstValueFrom, take } from 'rxjs';
 import { stat } from 'fs';
 import { cordovaInstance } from '@awesome-cordova-plugins/core';
 @Component({
@@ -32,6 +34,8 @@ export class ListMasterPage implements OnInit {
   currentVersion!: string;
   isAndroid!: boolean;
   isPunchIn = false;
+  /** Trip card tap par API chal rahi hai - do tap = do API na ho */
+  tripCardBusy = false;
   constructor(
     private common: CommonService,
     private alertController: AlertController,
@@ -41,6 +45,7 @@ export class ListMasterPage implements OnInit {
     private platform: Platform,
     private httpLogin: LoginService,
     private liveTracker: LiveTrackerService,
+    private httpComplaint: ComplaintService,
     private iab: InAppBrowser,) {
     const user = localStorage.getItem('user');
     if (user) {
@@ -234,6 +239,86 @@ export class ListMasterPage implements OnInit {
     }
     const h = Math.floor(mins / 60);
     return `${h}h ${mins % 60}m ago`;
+  }
+
+  /**
+   * "Trip is active" card tap - server se is ticket ki trip ka haal poochho.
+   *
+   * Kyun: End Trip API server par chal gayi par response phone tak nahi pahuncha
+   * (timeout / net gaya) to trip-end ka cleanup kabhi chala hi nahi. Ticket par
+   * server se Work Now aa jaata hai par phone par trip "chalu" rehti hai - home card
+   * atka, doosri ticket par Start block, Punch Out block, aur native har fix us
+   * ticket ke trip_points me likhta rehta hai.
+   *
+   * Sirf status true + state 'completed' par, aur wo bhi user ke haan ke baad,
+   * wahi teen kaam jo trip-end success par hote hain. Baaki har haalat (running,
+   * none, status false, error) me sirf toast - phone ka record chhua nahi jaata.
+   */
+  async onTripCardTap(): Promise<void> {
+    const trip = this.activeTrip;
+    if (!trip || this.tripCardBusy) {
+      return;
+    }
+    this.tripCardBusy = true;
+    let res: any;
+    try {
+      await this.common.presentLoading('Checking trip status...');
+      res = await firstValueFrom(this.httpComplaint.getTripState(trip.id));
+    } catch (e) {
+      console.error('trip-state', e);
+      this.common.presentToast(environment.errMsg, 'danger');
+      return;
+    } finally {
+      // Alert se pehle loader band - dono ek saath nahi
+      this.common.dismissloading();
+      this.tripCardBusy = false;
+    }
+
+    if (!res?.status) {
+      this.common.presentToast(res?.msg || 'Could not check trip status', 'warning');
+      return;
+    }
+    if (res.state === 'running') {
+      this.common.presentToast('Trip is still running', 'warning');
+      return;
+    }
+    if (res.state !== 'completed') {
+      // 'none' ya koi anjaan state - server ke paas trip nahi, par phone ka record
+      // apne aap nahi hataate; wo faisla alag hai
+      this.common.presentToast('No completed trip found for this ticket', 'warning');
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: 'Trip already completed',
+      message: `This trip for ticket #${trip.id} is already completed on the server. `
+        + 'Do you want to close it on this device?',
+      mode: 'ios',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Close Trip',
+          handler: () => {
+            void this.closeCompletedTrip(trip.module as TripModule, trip.id);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  /** Wahi cleanup jo trip-end success par hota hai - endTrip, clearTrip, local record */
+  private async closeCompletedTrip(module: TripModule, id: string): Promise<void> {
+    try {
+      await this.liveTracker.endTrip(module, id);
+      await this.liveTracker.clearTrip(module, id);
+      this.liveTracker.clearLocalTrip();
+      this.common.presentToast('Trip closed on this device', 'success');
+    } catch (e: any) {
+      // Native mana kar de (doosri trip active) to aadha saaf mat karo
+      console.error('closeCompletedTrip', e);
+      this.common.presentToast(e?.message || 'Could not close the trip', 'warning');
+    }
   }
 
   /** Avatar me naam ke do akshar - "Prince Gupta" -> "PG" */
