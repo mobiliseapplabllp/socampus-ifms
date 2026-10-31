@@ -1,0 +1,152 @@
+// GPS wali list ka card - wahi styles jo assign-ticket me hain, taaki Ticket Type ka
+// "Assign To" aur ticket card ka Assign ek jaise dikhein. Purani list in classes ko
+// use nahi karti.
+
+// Aakhri card kinare se chipak jaata tha - list ke neeche thodi khali jagah
+:host ion-content {
+  --padding-bottom: 20px;
+}
+
+.as-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 12px 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(var(--ion-color-warning-rgb), 0.16);
+  border: 1px solid rgba(var(--ion-color-warning-rgb), 0.45);
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: #6b4d00;
+
+  ion-icon {
+    flex: none;
+    margin-top: 1px;
+    font-size: 17px;
+    color: var(--ion-color-warning-shade);
+  }
+}
+
+.as-empty {
+  padding: 28px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ion-color-medium);
+}
+
+.as-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 10px 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid rgba(40, 56, 151, 0.18);
+  box-shadow: 0 2px 8px -5px rgba(31, 36, 64, 0.35);
+}
+
+// Avatar par hara/grey dot - ek nazar me online ya offline
+.as-avatar {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef1f7;
+  color: var(--ion-color-medium-shade);
+  font-size: 13px;
+  font-weight: 700;
+
+  &.as-avatar--on {
+    background: rgba(var(--ion-color-primary-rgb), 0.12);
+    color: var(--ion-color-primary);
+  }
+}
+
+.as-dot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  background: var(--ion-color-medium);
+
+  &.as-dot--on {
+    background: var(--ion-color-success);
+  }
+}
+
+.as-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.as-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ion-color-dark);
+}
+
+.as-code {
+  margin: 1px 0 0;
+  font-size: 11px;
+  color: var(--ion-color-medium);
+}
+
+.as-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.as-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: #f1f3f8;
+  font-size: 11px;
+  font-weight: 600;
+  color: #3d4560;
+
+  ion-icon {
+    font-size: 12px;
+  }
+
+  // Purana fix - aankda bharosemand nahi, isliye halka
+  &.as-chip--stale {
+    opacity: 0.55;
+  }
+
+  &.as-chip--tkt {
+    background: rgba(var(--ion-color-danger-rgb), 0.1);
+    color: var(--ion-color-danger-shade);
+  }
+}
+
+.as-reason {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ion-color-danger);
+}
+
+.as-btn {
+  flex: none;
+  align-self: center;
+  margin: 0;
+  height: 30px;
+  font-size: 12px;
+  text-transform: none;
+  --border-radius: 8px;
+}

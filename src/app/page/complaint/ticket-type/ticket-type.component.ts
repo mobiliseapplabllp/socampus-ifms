@@ -98,7 +98,7 @@ export class TicketTypeComponent  implements OnInit {
       assignToName: ['', Validators.required],
       assignTo: [''],
       buddy_req: [''],
-      buddyId: [''],
+      buddyId: [[]],
       buddyName: [''],
       pc_id: [this.requestedData?.data?.pc_id]
     });
@@ -629,11 +629,11 @@ export class TicketTypeComponent  implements OnInit {
           this.ticketForm.get('assignTo')?.setValue(this.assignUserSelect.value + '-' + this.assignUserSelect.team_id);
           this.buddyUserSelect = [];
           this.ticketForm.get('buddyName')?.setValue('');
-          this.ticketForm.get('buddyId')?.setValue('');
+          this.ticketForm.get('buddyId')?.setValue([]);
         } else if (val === 'buddy') {
           this.buddyUserSelect = disModal.data
           this.ticketForm.get('buddyName')?.setValue(this.buddyUserSelect.label);
-          this.ticketForm.get('buddyId')?.setValue(this.buddyUserSelect.value + '-' + this.buddyUserSelect.team_id);
+          this.ticketForm.get('buddyId')?.setValue([this.buddyUserSelect.value + '-' + this.buddyUserSelect.team_id]);
         }
       }
     });

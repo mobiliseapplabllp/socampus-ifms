@@ -1,22 +1,78 @@
 <ion-header mode="md">
   <ion-toolbar color="primary">
-    <ion-title>Assign To</ion-title>
+    <ion-title>{{ val === 'buddy' ? 'Select Buddy' : 'Assign To' }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="close(null, false)">Cancel</ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding">
-  <ion-item>
-    <ion-input type="email" placeholder="Searcy By..." (ionInput)="search($event)"> </ion-input>
-    <ion-button slot="end" class="ion-text-capitalize" (click)="sortArr()"> SORT <ion-icon [name]="isAscending ? 'chevron-up-sharp':'chevron-down-sharp' "></ion-icon> </ion-button>
-  </ion-item>
-  <ion-item *ngFor="let dat of assignUser" (click)="close(dat, true)" mode="md">
-    <ion-label class="ion-text-wrap">
-      <h2>{{dat.label}}</h2>
-      <p *ngIf="pc_hse_conf?.gps_allow === 1 && val === 'assign'">{{dat.gpsData?.status_label}}</p>
-      <p>Ticket: <ion-text color="danger"><b>{{dat.gpsData?.tkt_in_bucket}}</b></ion-text></p>
-    </ion-label>
-    <ion-text slot="end" *ngIf="pc_hse_conf?.gps_allow === 1 && val === 'assign'">{{dat.gpsData?.distance}}</ion-text>
-  </ion-item>
+
+<!-- GPS wali list - alag API, card UI (wahi jo ticket card ke Assign modal me hai).
+     Yahan tap = sirf chunna, assign API complaintTypeConfirm ke saath jaati hai -->
+<ion-content *ngIf="isGpsAssign; else legacyList">
+  <ion-toolbar>
+    <ion-searchbar (ionChange)="search($event)" debounce="1000"></ion-searchbar>
+  </ion-toolbar>
+
+  <!-- Site ke lat/lng nahi hain - list dikhegi par chunna band -->
+  <div class="as-note" *ngIf="!siteHasCoords">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <span>This site has no coordinates. Distance cannot be calculated and tickets cannot be assigned.</span>
+  </div>
+
+  <div class="as-empty" *ngIf="gpsList.length === 0">No team member found.</div>
+
+  <div class="as-card" *ngFor="let item of gpsList; trackBy: trackByUser">
+    <span class="as-avatar" [class.as-avatar--on]="item.is_online == 1">
+      {{ initials(item.label) }}
+      <i class="as-dot" [class.as-dot--on]="item.is_online == 1"></i>
+    </span>
+
+    <div class="as-info">
+      <p class="as-name">{{ nameOf(item.label) }}</p>
+      <p class="as-code" *ngIf="codeOf(item.label)">{{ codeOf(item.label) }}</p>
+
+      <div class="as-meta">
+        <span class="as-chip" [class.as-chip--stale]="isStale(item)">
+          <ion-icon name="navigate-outline"></ion-icon>
+          {{ distanceText(item) }}
+        </span>
+        <span class="as-chip">
+          <ion-icon name="time-outline"></ion-icon>
+          {{ lastSeenText(item) }}
+        </span>
+        <span class="as-chip as-chip--tkt">
+          <ion-icon name="documents-outline"></ion-icon>
+          {{ item.tkt_in_bucket || 0 }} tickets
+        </span>
+      </div>
+
+      <!-- Disabled button tap nahi hota, isliye wajah yahin likhi hai -->
+      <p class="as-reason" *ngIf="!canAssign(item)">{{ assignBlockReason(item) }}</p>
+    </div>
+
+    <ion-button
+      class="as-btn"
+      size="small"
+      [disabled]="!canAssign(item)"
+      (click)="close(item, true)">Select</ion-button>
+  </div>
 </ion-content>
+
+<!-- Purani list - pehle jaisi, isme kuch nahi badla (buddy bhi isi se) -->
+<ng-template #legacyList>
+  <ion-content class="ion-padding">
+    <ion-item>
+      <ion-input type="email" placeholder="Searcy By..." (ionInput)="search($event)"> </ion-input>
+      <ion-button slot="end" class="ion-text-capitalize" (click)="sortArr()"> SORT <ion-icon [name]="isAscending ? 'chevron-up-sharp':'chevron-down-sharp' "></ion-icon> </ion-button>
+    </ion-item>
+    <ion-item *ngFor="let dat of assignUser" (click)="close(dat, true)" mode="md">
+      <ion-label class="ion-text-wrap">
+        <h2>{{dat.label}}</h2>
+        <p *ngIf="pc_hse_conf?.gps_allow === 1 && val === 'assign'">{{dat.gpsData?.status_label}}</p>
+        <p>Ticket: <ion-text color="danger"><b>{{dat.gpsData?.tkt_in_bucket}}</b></ion-text></p>
+      </ion-label>
+      <ion-text slot="end" *ngIf="pc_hse_conf?.gps_allow === 1 && val === 'assign'">{{dat.gpsData?.distance}}</ion-text>
+    </ion-item>
+  </ion-content>
+</ng-template>

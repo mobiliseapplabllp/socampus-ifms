@@ -41,9 +41,9 @@ export class AssignTicketComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    if (this.isGpsAssign) {
+    if (this.isGpsAssign) {      
       this.getGpsAssignList();
-    } else {
+    } else { 
       this.getTeamsMember();
     }
   }
@@ -151,7 +151,7 @@ export class AssignTicketComponent  implements OnInit {
 
   getTeamsMember() {
     this.httpCommon.presentLoading().then(preLoad => {
-      this.httpComplaint.getTeam(this.allData.pc_id, 1).subscribe({
+      this.httpComplaint.getTeam(this.allData.pc_id, 0).subscribe({
         next:(data) => {
           if (data.status) {
             this.empList = data.data;
