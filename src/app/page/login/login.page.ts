@@ -411,8 +411,8 @@ export class LoginPage implements OnInit {
     if (this.isProduction) {
       return;
     }
-    // https://socampusstaging.mobilisepro.com/#/auth/ssoGates/t3_-3XfxmvntZQ5kvmdqAlhZMlBnU0pkNUVnT1JnOXlKWE9Da0hXc3ViajZGS0Rmbkdyd2QwTitwWHVqU0p0ekJLTGYzL1ExNm9Hdm56Ti9sUVVBVGd2RWlxblBGWXJJKzNxVHJ5ZGUvRlBtczlGRVJsZFJNZDFGWWxTMkxKVG5nUnV2ZlRXNFpUUnloV2Q4
-    let token = 't3_-3XfxmvntZQ5kvmdqAlhZMlBnU0pkNUVnT1JnOXlKWE9Da0hXc3ViajZGS0Rmbkdyd2QwTitwWHVqU0p0ekJLTGYzL1ExNm9Hdm56Ti9sUVVBVGd2RWlxblBGWXJJKzNxVHJ5ZGUvRlBtczlGRVJsZFJNZDFGWWxTMkxKVG5nUnV2ZlRXNFpUUnloV2Q4';
+    // https://socampus.mobilisepro.com/#/auth/ssoGates/_tfegfc93RE5uBu5N11-dWpqYVZFaHgrbnVQL3E0dnd3QnVrNmt1aWlQVFFRUHR4aUNmcmcxTWxWWCtpNkZ2RldHNTVURkJNOGlERFp6MkNKeXhCV3d0STQ0UmhPd1hGUnhuaGpSbXYxNDlibjBLcUNzUnpVU3VvS1lnK2RvdlFtQUtMRmk0UGVuSXYyUTJS
+    let token = '_tfegfc93RE5uBu5N11-dWpqYVZFaHgrbnVQL3E0dnd3QnVrNmt1aWlQVFFRUHR4aUNmcmcxTWxWWCtpNkZ2RldHNTVURkJNOGlERFp6MkNKeXhCV3d0STQ0UmhPd1hGUnhuaGpSbXYxNDlibjBLcUNzUnpVU3VvS1lnK2RvdlFtQUtMRmk0UGVuSXYyUTJS';
     this.getSsoEnc(token);
   }
 }
