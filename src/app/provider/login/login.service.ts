@@ -71,6 +71,7 @@ export class LoginService {
     param = param.append('source', environment.source);
     param = param.append('app_version', appVersion);
     param = param.append('is_android', isAndroid);
+    param = param.append('version', '1'); // 13 Nov, 26 android (6.1) ios(4.2.8)
     return this.https.get(`${environment.url}ssoGatesLoginDetails`,{
       params: param,
     });

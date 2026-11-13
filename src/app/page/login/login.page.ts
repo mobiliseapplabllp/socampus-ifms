@@ -126,6 +126,8 @@ export class LoginPage implements OnInit {
   ionViewDidEnter() {
     if (this.platform.is('android')) {
       this.isAndroid = true;
+    } else {
+      this.isAndroid = false
     }
     this.menu.enable(false);
     this.fillSavedLogin();

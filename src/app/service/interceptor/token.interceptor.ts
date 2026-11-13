@@ -52,12 +52,12 @@ export class TokenInterceptor implements HttpInterceptor {
     }
     if (!localStorage.getItem('token1')) {
       const mod = request.clone({
-        headers: request.headers.set('Referer1', environment.referUrl)
+        headers: request.headers.set('Referer1', environment.referUrl).set('X-API-Source', 'Mobile')
       })
       return next.handle(mod);
     } else {
       const userToken = localStorage.getItem('token1');
-      const modifiedReq = request.clone({headers: request.headers.set('Authorization', `Bearer ${userToken}`).set('Accept', 'application/json').set('Referer1', environment.referUrl)});
+      const modifiedReq = request.clone({headers: request.headers.set('Authorization', `Bearer ${userToken}`).set('Accept', 'application/json').set('Referer1', environment.referUrl).set('X-API-Source', 'Mobile')});
       return next.handle(modifiedReq).pipe(tap(() => {},
         (err: any) => {
         if (err instanceof HttpErrorResponse) {
