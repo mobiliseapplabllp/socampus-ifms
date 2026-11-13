@@ -170,7 +170,7 @@ export class ListMasterPage implements OnInit {
       this.didEnter = false;
     }, 1500);
     this.getHomeLoad();
-    this.getNotification();
+    
   }
 
   async openCambroStatus(data: any) {
@@ -208,6 +208,7 @@ export class ListMasterPage implements OnInit {
       if (res) {
         this.isInternet = true;
         this.getOffLineCheckList();
+        this.getNotification();
       } else {
         this.isInternet = false
       }

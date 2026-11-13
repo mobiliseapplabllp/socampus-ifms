@@ -1,0 +1,170 @@
+.sig-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  ion-icon {
+    font-size: 20px;
+  }
+}
+
+.sig-content {
+  --background: #f4f6fa;
+}
+
+.sig-instruction {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 16px 10px;
+  padding: 10px 14px;
+  background: #fff;
+  border-radius: 10px;
+  border-left: 3px solid var(--ion-color-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ion-color-dark);
+
+  ion-icon {
+    font-size: 18px;
+    color: var(--ion-color-primary);
+    flex-shrink: 0;
+  }
+}
+
+.sig-canvas-wrapper {
+  position: relative;
+  margin: 0 14px 12px;
+  padding: 18px 14px 10px;
+  background: #fff;
+  border: 2px dashed rgba(38, 88, 156, 0.35);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  min-height: 300px;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+
+  &--drawn {
+    border-style: solid;
+    border-color: var(--ion-color-success);
+    box-shadow: 0 4px 16px rgba(45, 211, 111, 0.15);
+  }
+
+  signature-pad {
+    display: block;
+  }
+
+  ::ng-deep signature-pad canvas {
+    display: block;
+    touch-action: none;
+    background: transparent;
+  }
+}
+
+.sig-canvas-baseline {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 48px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+
+  .sig-canvas-x {
+    font-size: 22px;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.25);
+    line-height: 1;
+  }
+
+  .sig-canvas-line {
+    flex: 1;
+    height: 1px;
+    border-bottom: 1.5px dashed rgba(0, 0, 0, 0.2);
+  }
+}
+
+.sig-canvas-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -70%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  color: rgba(0, 0, 0, 0.25);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+
+  ion-icon {
+    font-size: 32px;
+    animation: sig-bounce 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes sig-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-4px);
+    opacity: 0.85;
+  }
+}
+
+.sig-canvas-clear {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  height: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.sig-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 18px 10px;
+  font-size: 11.5px;
+  color: var(--ion-color-medium-shade);
+
+  ion-icon {
+    font-size: 14px;
+    color: var(--ion-color-success);
+  }
+}
+
+.sig-footer {
+  ion-toolbar {
+    --background: #fff;
+    --padding-top: 6px;
+    --padding-bottom: 8px;
+    --padding-start: 12px;
+    --padding-end: 12px;
+  }
+
+  ion-row {
+    margin: 0;
+  }
+
+  ion-col {
+    padding: 4px;
+  }
+}
+
+.sig-submit {
+  --box-shadow: 0 4px 14px rgba(38, 88, 156, 0.3);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}

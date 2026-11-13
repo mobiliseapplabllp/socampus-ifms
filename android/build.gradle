@@ -24,6 +24,28 @@ allprojects {
     }
 }
 
+// AGP 8 har library module me namespace maangta hai, par purane Capacitor 4.x
+// plugins aur generated cordova module sirf manifest ka package attribute dete
+// hain. Ye block aise har module ko uska namespace manifest se nikal kar de
+// deta hai - node_modules ya generated files ko haath lagaye bina.
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                if (namespace == null) {
+                    def manifestFile = project.file('src/main/AndroidManifest.xml')
+                    if (manifestFile.exists()) {
+                        def pkg = new groovy.xml.XmlSlurper().parse(manifestFile).@package.text()
+                        if (pkg) {
+                            namespace = pkg
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

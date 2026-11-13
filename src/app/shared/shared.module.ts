@@ -28,6 +28,8 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { TrackingMapComponent } from '../page/list-master/tracking-map/tracking-map.component';
 import { TrackingDebugComponent } from '../page/list-master/tracking-debug/tracking-debug.component';
 import { PermissionGuideComponent } from './permission-guide/permission-guide.component';
+import { VideoRecorderComponent } from './video-recorder/video-recorder.component';
+import { VideoPreviewComponent } from './video-preview/video-preview.component';
 @NgModule({
   declarations: [
     SignatureComponent,
@@ -53,7 +55,9 @@ import { PermissionGuideComponent } from './permission-guide/permission-guide.co
     PdfViewComponent,
     TrackingMapComponent,
     TrackingDebugComponent,
-    PermissionGuideComponent
+    PermissionGuideComponent,
+    VideoRecorderComponent,
+    VideoPreviewComponent
   ],
   imports: [
     CommonModule,
@@ -86,7 +90,9 @@ import { PermissionGuideComponent } from './permission-guide/permission-guide.co
     PdfViewComponent,
     TrackingMapComponent,
     TrackingDebugComponent,
-    PermissionGuideComponent
+    PermissionGuideComponent,
+    VideoRecorderComponent,
+    VideoPreviewComponent
   ],
   exports: [
     VideoComponent,

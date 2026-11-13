@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { DigitalChecklistPage } from './digital-checklist.page';
 import { FillReportComponent } from './fill-report/fill-report.component';
+import { JustificationComponent } from './justification/justification.component';
 
 const routes: Routes = [
   {
@@ -14,6 +15,9 @@ const routes: Routes = [
   }, {
     path: 'fill-report',
     component: FillReportComponent
+  }, {
+    path: 'justification',
+    component: JustificationComponent
   }
 ];
 

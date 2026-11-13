@@ -1,6 +1,11 @@
 <ion-header mode="md">
   <ion-toolbar color="primary">
-    <ion-title>Signature</ion-title>
+    <ion-title>
+      <div class="sig-title">
+        <ion-icon name="create-outline"></ion-icon>
+        <span>Signature</span>
+      </div>
+    </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="closeModal(null, false)">
         <ion-icon slot="icon-only" name="close"></ion-icon>
@@ -8,18 +13,50 @@
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
-<ion-content>
-  <div style="border:1px solid black;margin:10px" >
-    <signature-pad [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad>
+
+<ion-content class="sig-content">
+  <div class="sig-instruction">
+    <ion-icon name="hand-right-outline"></ion-icon>
+    <span>Please draw your signature in the box below</span>
   </div>
-  <ion-row>
-    <ion-col>
-      <ion-text color="danger">Please Write Signature</ion-text>
-    </ion-col>
-  </ion-row>
-  <ion-row>
-    <ion-col class="ion-text-center" (click)="submit()">
-      <ion-button>Submit</ion-button>
-    </ion-col>
-  </ion-row>
+
+  <div class="sig-canvas-wrapper" [class.sig-canvas-wrapper--drawn]="hasDrawn">
+    <div class="sig-canvas-baseline">
+      <span class="sig-canvas-x">X</span>
+      <span class="sig-canvas-line"></span>
+    </div>
+    <signature-pad [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad>
+    <div class="sig-canvas-hint" *ngIf="!hasDrawn">
+      <ion-icon name="finger-print-outline"></ion-icon>
+      <span>Sign here</span>
+    </div>
+    <ion-button class="sig-canvas-clear" fill="clear" size="small" color="medium" (click)="clear()" *ngIf="hasDrawn">
+      <ion-icon name="refresh-outline" slot="start"></ion-icon>
+      Clear
+    </ion-button>
+  </div>
+
+  <div class="sig-meta">
+    <ion-icon name="shield-checkmark-outline"></ion-icon>
+    <span>Your signature will be attached securely with this report</span>
+  </div>
 </ion-content>
+
+<ion-footer class="sig-footer">
+  <ion-toolbar>
+    <ion-row>
+      <ion-col size="5">
+        <ion-button expand="block" fill="outline" shape="round" color="medium" (click)="closeModal(null, false)">
+          <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+          Cancel
+        </ion-button>
+      </ion-col>
+      <ion-col size="7">
+        <ion-button expand="block" shape="round" color="primary" (click)="submit()" [disabled]="!hasDrawn" class="sig-submit">
+          <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
+          Submit
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-footer>

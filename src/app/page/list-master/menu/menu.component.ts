@@ -17,29 +17,6 @@ export class MenuComponent  implements OnInit {
   /** Sab services ek line me - scroller isi par chalta hai */
   menuItems: any = [];
   result: any = [];
-  menuSlide = {
-    initialSlide: 0,
-    slidesPerView: 3.5,
-    autoplay: false,
-    spaceBetween: 0,
-    breakpoints: {
-      320: {
-        slidesPerView: 3.2,
-      },
-      480: {
-        slidesPerView: 3.7,
-      },
-      530: {
-        slidesPerView: 3.9,
-      },
-      640: {
-        slidesPerView: 4.1,
-      },
-      700: {
-        slidesPerView: 4.2,
-      },
-    }
-  }
   isQrScanning = false;
   isInternet!: boolean;
   userData: any = [];

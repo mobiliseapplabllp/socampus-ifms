@@ -142,6 +142,19 @@ export class CommonService {
     });
   }
 
+  /** openImg wali hi blob-url API, lekin viewer kholne ki jagah Blob lautata hai (video player ke liye) */
+  async fetchPrivateFile(url: string, blobType: string): Promise<Blob> {
+    const formData = new FormData();
+    formData.append('url', url);
+    formData.append('blob_name', blobType || ' ');
+    const data: any = await firstValueFrom(this.http.post(environment.url + 'blob-url', formData));
+    if (!data?.status || !data?.base64) {
+      throw new Error(data?.msg || 'File not available');
+    }
+    const res = await fetch(`data:${data.contentType || 'application/octet-stream'};base64,${data.base64}`);
+    return res.blob();
+  }
+
   async pdfView(pdfSrc: string) {
     const modal = await this.modalCtrl.create({
       component: PdfViewComponent,

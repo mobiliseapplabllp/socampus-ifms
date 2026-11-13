@@ -41,26 +41,9 @@
         <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
       </ion-infinite-scroll>
     </div>
-    <div *ngSwitchCase= "'digital'">
-      <ion-card *ngFor="let dat of assignCheckList" style="padding: 5px;margin:5px" [ngClass]="{'bg-color': dat.offline_save}" [ngStyle]="{'border-left': '3px solid' + dat.backgroundColor }">
-        <ion-item lines="none" color="none" (click)="verifyQr(dat)">
-          <img src="assets/img/meter-left1.jpeg" style="height:80px;width:auto;margin-right:10px" slot="start" >
-          <ion-label class="ion-text-wrap">
-            <h2><b>{{dat.schedule_unique_id}}/{{dat.chk_cat_name}}</b></h2>
-            <p><b>{{dat.sch_dateTime | date: 'dd-MMM-yyyy H:mm:ss'}}</b></p>
-            <p><b>({{dat.scheduler_id}}){{dat.location_desc}}</b></p>
-            <p><b>{{dat.barcode}}</b></p>
-          </ion-label>
-          <ion-button slot="end" shape="round" color="primary" class="ion-text-capitalize" >Fill</ion-button>
-        </ion-item>
-      </ion-card>
-      <div *ngIf="assignCheckList.length === 0">
-        <br>
-        <ion-row>
-          <ion-col class="ion-text-center">No tasks are assign to you.</ion-col>
-        </ion-row>
-      </div>
-    </div>
+    <!-- DIGITAL ka tab seedha digital-checklist module par le jaata hai, isliye yahan
+         koi list nahi hai (pehle uski ek purani copy thi) -->
+
     <div *ngSwitchCase= "'pms'">
       <ion-card *ngFor="let dat of pmsList; let i = index" class="cards" style="border-left:5px solid #915FC8" mode="md">
         <ion-grid >

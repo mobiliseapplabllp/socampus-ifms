@@ -4,6 +4,7 @@ import { delay, forkJoin, from, map, mergeMap, Observable, of, throwError } from
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { environment } from 'src/environments/environment';
 import { timeout, catchError } from 'rxjs/operators';
+import { stat } from 'fs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,10 +14,6 @@ export class DigitalChecklistService {
   constructor(
     private http: HttpClient
   ) { }
-
-  // getOfflineCheckListFromServer(date: string, offset?: number): Observable<any> {    
-  //   return this.http.get(this.baseurl + 'digicheck/offlineapp/getAllPendingChecklist?date=' + date + '&paginate=1&limit=300&offset=' + offset);
-  // }
 
   getOfflineCheckListFromServer(date: string, offset: number = 0): Observable<any> {    
     const apiCall$ = this.http.get(
@@ -70,7 +67,13 @@ export class DigitalChecklistService {
   }
 
   finalSubmitCheckList(formData: any): Observable<any> {
-    return this.http.post(this.baseurl + 'digicheck/offlineapp/saveAllPendingChecklist', formData);
+    // https://aov.mhbemp.in/test_script/RFID.php?djdkmnkmsnd
+    return this.http.post(this.baseurl + 'digicheck/offlineapp/saveAllPendingChecklistV2', formData);
+    // return this.http.post('https://aov.mhbemp.in/test_script/RFID.php', formData);
+  }
+
+  saveVideoResponse(formData: any): Observable<any> {
+    return this.http.post(this.baseurl + 'digicheck/offlineapp/saveVideoResponse', formData);
   }
 
   updateTktToSchedule(formData: any): Observable<any> {
@@ -215,32 +218,43 @@ export class DigitalChecklistService {
     return this.http.get('https://aovsshdashboard.com/Webservices/test_image.php' , {params: data})
   }
 
-  // postDynamicData(apiRequests: any[]): Observable<any[]> {
-  //   const observables = apiRequests.map(request => {
-  //     const { method, url, data, delayTime, id } = request;
+  getJustification(schedule_id: string): Observable<any> {
+    let obj = {
+      schedule_id: schedule_id
+    }
+    return this.http.post(this.baseurl + 'digicheck/missed_justification/status', obj);
+  }
 
-  //     // Check if a delayTime is provided and if it's for the specific id
-  //     const delayObservable = url === 'https://socampus-8db369a81c0c.herokuapp.com/https://ifmsuat.mobilisepro.com/backend/api/complaints/dash/mobile_app_engineer_dashboard'
-  //       ? of(null).pipe(delay(10000))
-  //       : of(null);
+  submitJusti(formData: any): Observable<any> {
+    return this.http.post(this.baseurl + 'digicheck/missed_justification/add', formData);
+  }
 
-  //     const apiRequestObservable = this.makeApiRequest(method, url, data);
+  updateJusti(formData: any): Observable<any> {
+    return this.http.post(this.baseurl + 'digicheck/missed_justification/update', formData);
+  }
 
-  //     // Use mergeMap to merge the delay and the actual API request
-  //     return delayObservable.pipe(
-  //       mergeMap(() => apiRequestObservable)
-  //     );
-  //   });
+  deleteJust(id: any): Observable<any> {
+    return this.http.delete(this.baseurl + 'digicheck/missed_justification/delete?id=' + id);
+  }
 
-  //   return forkJoin(observables);
-  // }
-
-  // private makeApiRequest(method: string, url: string, data: any): Observable<any> {
-  //   if (method.toLowerCase() === 'post') {
-  //     return this.http.post(url, data);
-  //   } else {
-  //     return this.http.get(url);
-  //   }
-  // }
+  getAutoFillData(payload: { scheduler_id: any; schedule_id: any; checklist_cat_id: any }): Observable<any> {
+    // TODO: replace dummy with real API once backend is ready
+    return this.http.post(this.baseurl + 'digicheck/offlineapp/get_autofill_data', payload);
+    // const dummy = {
+    //   status: true,
+    //   msg: 'data found',
+    //   // Attachment (q_type 225) and Video (q_type 315) are excluded — no auto-fill (neither rspns nor remark)
+    //   data: [
+    //     { q_id: 1445, q_type: '227', rspns: '42',                        remark: 'Auto-filled number remark'      },
+    //     { q_id: 1447, q_type: '226', rspns: 'Yes',                       remark: 'Auto-filled option remark'      },
+    //     { q_id: 1448, q_type: '229', rspns: '2026-04-20',                remark: 'Auto-filled date remark'        },
+    //     { q_id: 1449, q_type: '308', rspns: 'Sample short text answer',  remark: 'Auto-filled shorttext remark'   },
+    //     { q_id: 1450, q_type: '313', rspns: '2026-04-20T10:30:00',       remark: 'Auto-filled datetime remark'    },
+    //     { q_id: 1451, q_type: '314', rspns: '55',                        remark: 'Auto-filled temperature remark' },
+    //     { q_id: 1464, q_type: '308', rspns: 'Another short text answer', remark: 'Auto-filled remark'             },
+    //   ],
+    // };
+    // return of(dummy).pipe(delay(300));
+  }
 
 }

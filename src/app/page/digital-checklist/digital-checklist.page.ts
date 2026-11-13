@@ -1,236 +1,209 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, IonDatetime, IonSlides, Platform } from '@ionic/angular';
+import { AlertController, IonDatetime, IonSlides, ModalController, Platform } from '@ionic/angular';
+import { Capacitor } from '@capacitor/core';
 import * as moment from 'moment';
+import { liveQuery, Subscription as DexieSubscription } from 'dexie';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { DigitalChecklistService } from 'src/app/provider/digital-checklist/digital-checklist.service';
 import { environment } from 'src/environments/environment';
 import { db } from '../../provider/local-db/local-db.service';
-import { liveQuery } from 'dexie';
+import { JustificationComponent } from './justification/justification.component';
+
+type SegmentStatus = 'assigned' | 'attended';
+type QrFlow = 'site' | 'verify' | 'loc-verify';
+
+interface CalendarDay {
+  date: string;
+  day: string;
+  fulldate: string;
+  ind: number;
+  isSelect: boolean;
+}
+
+interface ScanState {
+  isScanBarcode: boolean;
+  QRType: string;
+  QRValue: string;
+}
+
+interface Pagination {
+  offset: number;
+  total: number;
+  hasMore: boolean;
+}
+
+const PAGE_SIZE = 300;
+const OLD_DATA_RETENTION_DAYS = 3;
+const FETCHED_DATES_KEY = 'digitalChecklistFetchedDates';
+
+// TEST: override applies only on web (browser). On native (Android/iOS), always uses real today.
+const TODAY_OVERRIDE: string | null = Capacitor.isNativePlatform() ? null : '2026-05-13';
+const getToday = (): string => moment().format('YYYY-MM-DD') ?? moment().format('YYYY-MM-DD');
+
 @Component({
   selector: 'app-digital-checklist',
   templateUrl: './digital-checklist.page.html',
   styleUrls: ['./digital-checklist.page.scss'],
 })
-export class DigitalChecklistPage implements OnInit {
+export class DigitalChecklistPage implements OnInit, OnDestroy {
   @ViewChild(IonSlides) slides!: IonSlides;
-  @ViewChild('popoverDatetime')  popoverDatetime!: IonDatetime;
-  temp: any = [];
-  assignCheckList$: any;
-  segmentStatus = 'assigned';
-  allChecklist: any = [];
-  loading: any;
-  selectedDate = moment().format('YYYY-MM-DD');
-  today = moment().format('YYYY-MM-DD')
-  scanBarcodeDetail: any = {
-    isScanBarcode: false,
-    QRType: '',
-    QRValue: ''
-  };
+  @ViewChild('popoverDatetime') popoverDatetime!: IonDatetime;
+
+  segmentStatus: SegmentStatus = 'assigned';
+  selectedDate = getToday();
+  today = getToday();
+
+  assignCheckList: any[] = [];
+  attendedCheckList: any[] = [];
+  dateArr: CalendarDay[] = [];
+
+  isInternet = false;
   isOnBehalf = 0;
-  assignCheckList: any = [];
-  attendedCheckList: any = [];
+  userData: any = {};
+
+  scanBarcodeDetail: ScanState = { isScanBarcode: false, QRType: '', QRValue: '' };
+  qrType: QrFlow = 'site';
+  qrObject: any = {};
+
+  pagination: Pagination = { offset: 0, total: 0, hasMore: false };
+
   slideBanner = {
     initialSlide: 0,
     slidesPerView: 5,
     autoplay: false,
     breakpoints: {
-      320: {
-        slidesPerView: 5,
-      },
-      480: {
-        slidesPerView: 6,
-      },
-      530: {
-        slidesPerView: 7,
-      },
-      640: {
-        slidesPerView: 8,
-      },
-      700: {
-        slidesPerView: 9,
-      },
-    }
+      320: { slidesPerView: 5 },
+      480: { slidesPerView: 6 },
+      530: { slidesPerView: 7 },
+      640: { slidesPerView: 8 },
+      700: { slidesPerView: 9 },
+    },
   };
-  dateArr: any = [];
-  isInternet!: boolean;
-  userData: any = [];
-  qrType = 'site';
-  qrObject: any = {};
-  isLoop!: boolean;
-  offset = 0;
-  TOTAL_CHECKLIST = 0;
+
+  private activeDexieSubs: DexieSubscription[] = [];
+
   constructor(
     private common: CommonService,
     private router: Router,
     private httpDigital: DigitalChecklistService,
     private platform: Platform,
-    private alertController: AlertController) {
-  }
+    private alertController: AlertController,
+    private modalCtrl: ModalController,
+  ) {}
 
   ngOnInit() {
-    this.common.checkInternet().then(res => {
-      if (res) {
-        this.isInternet = true;
-      } else {
-        this.isInternet = false;
-      }
+    this.common.checkInternet().then(online => {
+      this.isInternet = !!online;
     });
-    const user = localStorage.getItem('user');
-    if (user) {
-      this.userData = JSON.parse(user);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      this.userData = JSON.parse(storedUser);
     }
-    let date = moment().format('YYYY-MM-DD');
     this.common.setBarcode('');
-    this.deleteCheckList(moment().subtract(3, 'day').format('YYYY-MM-DD'));
-    this.createCustomCalendar(date);
+    const retentionCutoff = moment(getToday()).subtract(OLD_DATA_RETENTION_DAYS, 'day').format('YYYY-MM-DD');
+    this.pruneOldChecklists(retentionCutoff);
+    this.pruneOldFetchedDates();
+    this.buildCalendarStrip(this.selectedDate);
+  }
+
+  ngOnDestroy() {
+    this.disposeDexieSubs();
   }
 
   ionViewDidLeave() {
     this.common.setBarcode('');
     this.common.dismissloading();
+    this.disposeDexieSubs();
   }
 
-  // ionViewDidEnter() {
-  //   let split, type, ecn_key, bar = this.common.getBarcode();
-  //   this.common.setBarcode('');
-  //   if (this.qrType === 'site') {
-  //     if (bar) {
-  //       this.scanBarcodeDetail.isScanBarcode = true;
-  //       split = bar.split('/');
-  //       if (split.length === 6) {
-  //         type = split[4];
-  //         ecn_key = split[5];
-  //         let val = this.common.decryptValue(ecn_key);
-  //         this.scanBarcodeDetail.QRType = type;
-  //         this.scanBarcodeDetail.QRValue = val;
-  //         if (val) {
-  //           this.getCheckListByBarcode(type, val);
-  //         } else {
-  //           this.common.presentToast('Invalid Encryption', 'warning');
-  //         }
-  //       } else {
-  //         this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-  //       }
-  //     } else if(this.scanBarcodeDetail.isScanBarcode) {
-  //       this.getCheckListByBarcode(this.scanBarcodeDetail.QRType, this.scanBarcodeDetail.QRValue);
-  //     } else {
-  //       this.checkCurrentDateDG(this.selectedDate);
-  //     }
-  //   } else if (this.qrType === 'verify') {
-  //     this.qrType = 'site';
-  //     split = bar.split('/');
-  //     if (split.length === 6) {
-  //       ecn_key = split[5];
-  //       let val = this.common.decryptValue(ecn_key);
-  //       this.qrType = 'site'
-  //       if (this.qrObject.barcode === val) {
-  //         this.openFillReport(this.qrObject);
-  //       } else {
-  //         this.common.presentToast('You are Scan Wrong QR Code ' + val, 'warning');
-  //       }
-  //     } else {
-  //       this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-  //     }
-  //   } else if (this.qrType === 'loc-verify') {
-  //     this.qrType = 'site';
-  //     split = bar.split('/');
-  //     if (split.length === 6) {
-  //       ecn_key = split[5];
-  //       let val = this.common.decryptValue(ecn_key);
-  //       if (this.qrObject.loc_id === parseInt(val, 10)) {
-  //         this.openFillReport(this.qrObject);
-  //       } else {
-  //         this.common.presentToast('You are Scan Wrong Location QR Code ' + val, 'warning');
-  //       }
-  //     } else {
-  //       this.common.presentToast('You are Scan Wrong QR Code', 'warning');
-  //     }
-  //   }
-  // }
+  ionViewDidEnter() {
+    const barcode = this.common.getBarcode();
+    this.common.setBarcode('');
 
-  ionViewDidEnter() {    
-    const bar = this.common.getBarcode();
-    this.common.setBarcode('');    
-    if (!bar && this.qrType === 'site') {
+    if (!barcode && this.qrType === 'site') {
       if (this.scanBarcodeDetail.isScanBarcode) {
-        this.getCheckListByBarcode(this.scanBarcodeDetail.QRType, this.scanBarcodeDetail.QRValue);
+        this.loadChecklistByBarcode(this.scanBarcodeDetail.QRType, this.scanBarcodeDetail.QRValue);
       } else {
-        this.checkCurrentDateDG(this.selectedDate);
+        this.loadChecklistForDate(this.selectedDate);
       }
       return;
     }
 
-    const split = bar?.split('/') || [];
-    if (split.length !== 6) {
+    this.handleScannedBarcode(barcode);
+  }
+
+  private handleScannedBarcode(barcode: string | null | undefined) {
+    if (!barcode) {
+      return;
+    }
+    const parts = barcode?.split('/') || [];
+    if (parts.length !== 6) {
       this.common.presentToast('You are Scan Wrong QR Code', 'warning');
       return;
     }
 
-    const type = split[4];
-    const ecn_key = split[5];
-    const val = this.common.decryptValue(ecn_key);
+    const scannedType = parts[4];
+    const decodedValue = this.common.decryptValue(parts[5]);
 
     switch (this.qrType) {
       case 'site':
-      this.scanBarcodeDetail.isScanBarcode = true;
-      this.scanBarcodeDetail.QRType = type;
-      this.scanBarcodeDetail.QRValue = val;
-
-      if (val) {
-        this.getCheckListByBarcode(type, val);
-      } else {
-        this.common.presentToast('Invalid Encryption', 'warning');
-      }
-      break;
+        this.scanBarcodeDetail = { isScanBarcode: true, QRType: scannedType, QRValue: decodedValue };
+        if (decodedValue) {
+          this.loadChecklistByBarcode(scannedType, decodedValue);
+        } else {
+          this.common.presentToast('Invalid Encryption', 'warning');
+        }
+        break;
 
       case 'verify':
         this.qrType = 'site';
-        if (this.qrObject.barcode === val) {
-          this.openFillReport(this.qrObject);
+        if (this.qrObject.barcode === decodedValue) {
+          this.navigateToFillReport(this.qrObject);
         } else {
-          this.common.presentToast(`You are Scan Wrong QR Code ${val}`, 'warning');
+          this.common.presentToast(`You are Scan Wrong QR Code ${decodedValue}`, 'warning');
         }
-      break;
+        break;
 
       case 'loc-verify':
         this.qrType = 'site';
-        if (this.qrObject.loc_id === parseInt(val, 10)) {
-          this.openFillReport(this.qrObject);
+        if (this.qrObject.loc_id === parseInt(decodedValue, 10)) {
+          this.navigateToFillReport(this.qrObject);
         } else {
-          this.common.presentToast(`You are Scan Wrong Location QR Code ${val}`, 'warning');
+          this.common.presentToast(`You are Scan Wrong Location QR Code ${decodedValue}`, 'warning');
         }
-      break;
+        break;
     }
   }
 
   myCheckList() {
-    this.scanBarcodeDetail.isScanBarcode = false;
-    this.scanBarcodeDetail.QRType = '';
-    this.scanBarcodeDetail.QRValue = '';
-    this.checkCurrentDateDG(this.selectedDate);
+    this.scanBarcodeDetail = { isScanBarcode: false, QRType: '', QRValue: '' };
+    this.loadChecklistForDate(this.selectedDate);
   }
 
-  getCheckListByBarcode(type: string, val: any) {
+  private loadChecklistByBarcode(type: string, value: string) {
+    const todayDate = getToday();
+    // Aaj ki row, ya kisi bhi date ki no-expiry assigned row — date view (loadChecklistForDate) wala hi rule
+    const matchesDateOrNoExpiry = (row: any) =>
+      row.schedule_date === todayDate
+      || (Number(row.is_no_expiry) === 1 && row.schedule_status === 'assigned');
+    let filter: () => Promise<any[]>;
+
     if (type === 'complaint-qr-code') {
-      var friendsObservable = liveQuery (() => db.checklist.where({loc_id:parseInt(val, 10), schedule_date: moment().format('YYYY-MM-DD')}).toArray());
+      const locId = parseInt(value, 10);
+      filter = () => db.checklist
+        .filter((row: any) => Number(row.loc_id) === locId && matchesDateOrNoExpiry(row))
+        .toArray();
     } else if (type === 'create-ticket-qr-code') {
-      var friendsObservable = liveQuery (() => db.checklist.where({barcode:val, schedule_date: moment().format('YYYY-MM-DD')}).toArray());
+      filter = () => db.checklist
+        .filter((row: any) => row.barcode === value && matchesDateOrNoExpiry(row))
+        .toArray();
     } else {
-      return
+      return;
     }
-    const sub = friendsObservable.subscribe({
-      next:(data) => {
-        this.allChecklist = data;
-        this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned');
-        this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned');
-        this.assignCheckList.sort((a: any, b: any) => {
-          return new Date(a.sch_dateTime).getTime() - new Date(b.sch_dateTime).getTime();
-        });
-        setTimeout(() => {
-          sub.unsubscribe();
-        }, 1000);
-      }
+
+    this.subscribeOnceToDexie(filter, data => {
+      this.splitChecklistsForUser(data, /*sortAssigned*/ true, /*matchUser*/ false);
     });
   }
 
@@ -240,313 +213,436 @@ export class DigitalChecklistPage implements OnInit {
       header: 'REFRESH DIGITAL CHECKLIST?',
       message: 'are you sure want to Refresh Digital Checklist?',
       mode: 'ios',
-      buttons: [{
-        text: 'Cancel',
-          handler: (data) => {
-          }
-        },{
-          text: 'YES',
-          handler: (data) => {
-            this.checkOfflineStatus();
-          }
-        }]
+      buttons: [
+        { text: 'Cancel', handler: () => {} },
+        { text: 'YES', handler: () => this.refreshIfNoOfflinePending() },
+      ],
     });
     await alert.present();
   }
 
-  async checkOfflineStatus() {
-    const friendsObservable = liveQuery (() => db.checklist.where({offline_save: "true"}).toArray());
-    const sub = friendsObservable.subscribe({
-      next:(data) => {
+  private refreshIfNoOfflinePending() {
+    this.subscribeOnceToDexie(
+      () => db.checklist.where({ offline_save: 'true' }).toArray(),
+      data => {
         if (data.length > 0) {
-          setTimeout(() => {
-            sub.unsubscribe();
-          }, 500);
-          this.common.presentToastWithOk('Warning!!! You have ' + data.length + ' Digital Checklist saved in your local Db Please Submit these checklist to server otherwise your saved Checklist will destroyed ', 'danger');
+          this.common.presentToastWithOk(
+            `Warning!!! You have ${data.length} Digital Checklist saved in your local Db Please Submit these checklist to server otherwise your saved Checklist will destroyed `,
+            'danger',
+          );
           this.router.navigateByUrl('/list-master/offline-data');
           return;
         }
         this.assignCheckList = [];
         this.attendedCheckList = [];
-        this.common.presentLoading('Deleteing Data from Local Database').then(preLoad => {
-          db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
+        this.clearFetchedDate(this.selectedDate);
+        this.common.presentLoading('Deleteing Data from Local Database').then(() => {
+          db.checklist.where('schedule_date').equals(this.selectedDate).delete().then(() => {
             this.common.dismissloading();
-            this.offset = 0;
-            this.TOTAL_CHECKLIST = 0;
-            this.getOfflineCheckListFromServer(this.selectedDate, 0);
+            this.pagination = { offset: 0, total: 0, hasMore: false };
+            this.fetchChecklistFromServer(this.selectedDate, 0);
           });
-        })
+        });
+      },
+    );
+  }
 
-
-        setTimeout(() => {
-          sub.unsubscribe();
-        },500);
-      }
+  private loadChecklistForDate(date: string) {
+    this.common.presentLoading().then(() => {
+      this.subscribeOnceToDexie(
+        () => db.checklist
+          .filter((row: any) => row.schedule_date === date || (Number(row.is_no_expiry) === 1 && (row.schedule_status === 'assigned' || row.schedule_date === getToday())))
+          .sortBy('sch_dateTime'),
+        data => {
+          this.common.dismissloading();
+          this.splitChecklistsForUser(data);
+          const dateMatchCount = data.filter((row: any) => row.schedule_date === date).length;
+          if (dateMatchCount === 0 && this.isInternet && !this.isDateFetchedToday(date)) {
+            this.pagination = { offset: 0, total: 0, hasMore: false };
+            this.fetchChecklistFromServer(date, 0);
+          }
+        },
+        () => {
+          this.common.presentToast('Please clean your phone Cache', 'warning');
+          this.common.dismissloading();
+        },
+      );
     });
   }
 
-  checkCurrentDateDG(date: string) {
-    this.common.presentLoading().then(preLoad => {
-      const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
-      const sub = friendsObservable.subscribe({
-        next:(data) => {
-          this.common.dismissloading();
-          this.allChecklist = data;
-          // console.log(this.allChecklist);
-          // console.log(this.userData.id);
-          this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-          this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-          if (this.allChecklist.length === 0 && this.isInternet) {
-            this.getOfflineCheckListFromServer(date, 0);
-          }
-          setTimeout(() => {
-            sub.unsubscribe();
-          }, 1000);
-        }, error:() => {
-          this.common.presentToast('Please clean your phone Cache', 'warning');
-          this.common.dismissloading();
-        }
-      });
-    })
-
-  }
-
-  getOfflineCheckListFromServer(date: string, offset: number) {
-    let percentage,tmp_per, msg;
-    if (this.offset && this.TOTAL_CHECKLIST) {
-      tmp_per = ((this.offset * 100) / this.TOTAL_CHECKLIST);
-      if (tmp_per > 100) {
-        tmp_per = 100;
-        percentage = tmp_per.toFixed(2);
-      } else {
-        percentage = tmp_per.toFixed(2);
-      }
-      msg = 'Please Wait, Application is Fetching your Data ' + percentage + '%';
-    } else {
-      msg = 'Please Wait, Application is Fetching your Data ';
-    }
-    this.common.presentLoading(msg).then(preLoad => {
+  private fetchChecklistFromServer(date: string, offset: number) {
+    const message = this.buildFetchLoadingMessage();
+    this.common.presentLoading(message).then(() => {
       this.httpDigital.getOfflineCheckListFromServer(date, offset).subscribe({
-        next:(data: any) => {
-          if (data.status) {
-            if(data.data?.data.length > 0) {
-              this.isLoop = true;
-              this.allChecklist = data.data.data;
-              if (this.offset === 0) {
-                this.TOTAL_CHECKLIST = data.data.total;
+        next: (res: any) => {
+          if (res.status) {
+            const incoming = res.data?.data || [];
+            if (incoming.length > 0) {
+              this.pagination.hasMore = true;
+              if (this.pagination.offset === 0) {
+                this.pagination.total = res.data.total;
               }
-              this.addBulkCheckList(this.allChecklist);
+              this.bulkSaveChecklistsToDexie(incoming);
             } else {
-              this.isLoop = false;
-              this.checkCurrentDateDG(this.selectedDate);
+              this.pagination.hasMore = false;
+              this.setFetchedDate(date);
+              this.reloadLocalView(this.selectedDate);
             }
           } else {
-            this.common.presentLoading().then(preLoad => {
-              const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
-              const sub = friendsObservable.subscribe({
-                next:(data) => {
-                  this.common.dismissloading();
-                  this.allChecklist = data;
-                  this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-                  this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-                  setTimeout(() => {
-                    sub.unsubscribe();
-                  }, 1000);
-                }
-              });
-            });
+            this.pagination.hasMore = false;
+            this.setFetchedDate(date);
+            this.reloadLocalView(this.selectedDate);
           }
         },
-        error:(err: any) => {                    
+        error: (err: any) => {
           this.common.dismissloading();
           if (err.message === 'TIMEOUT') {
-            const retry = confirm('Timeout error. Do you want to retry the request?');
-            if (retry) {          
-              this.getOfflineCheckListFromServer(date, offset);
+            const shouldRetry = confirm('Timeout error. Do you want to retry the request?');
+            if (shouldRetry) {
+              this.fetchChecklistFromServer(date, offset);
             }
           } else {
             this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
-          }          
+          }
         },
-        complete:() => {
+        complete: () => {
           this.common.dismissloading();
-        }
-      })
-    })
+        },
+      });
+    });
   }
 
-  async addBulkCheckList(checkListData: any) {    
-    await db.checklist.bulkPut(checkListData).then(res => {
-      if (this.isLoop && this.TOTAL_CHECKLIST > 300) {
-        this.offset = this.offset + 300;
-        this.getOfflineCheckListFromServer(this.selectedDate, this.offset);
-      } else {
-        this.checkCurrentDateDG(this.selectedDate);
+  private buildFetchLoadingMessage(): string {
+    const { offset, total } = this.pagination;
+    if (!offset || !total) {
+      return 'Please Wait, Application is Fetching your Data ';
+    }
+    const rawPercent = (offset * 100) / total;
+    const percent = (rawPercent > 100 ? 100 : rawPercent).toFixed(2);
+    return `Please Wait, Application is Fetching your Data ${percent}%`;
+  }
+
+  private async bulkSaveChecklistsToDexie(rows: any[]) {
+    const isFirstPage = this.pagination.offset === 0;
+    const date = this.selectedDate;
+
+    await db.transaction('rw', db.checklist, async () => {
+      if (isFirstPage) {
+        await db.checklist
+          .filter((row: any) =>
+            (row.schedule_date === date || Number(row.is_no_expiry) === 1)
+            && row.schedule_status === 'assigned'
+            && !row.offline_save,
+          )
+          .delete();
+      }
+      const incomingIds = rows.map((r: any) => r.schedule_id).filter((id: any) => id != null);
+      const existing = incomingIds.length
+        ? await db.checklist.where('schedule_id').anyOf(incomingIds).toArray()
+        : [];
+      const existingIds = new Set(existing.map((r: any) => r.schedule_id));
+      const filteredRows = rows.filter((r: any) => !existingIds.has(r.schedule_id));
+      if (filteredRows.length) {
+        await db.checklist.bulkPut(filteredRows);
       }
     });
-    // await db.checklist.where("schedule_date").equals(this.selectedDate).delete().then(async res => {
-    //   await db.checklist.bulkAdd(checkListData);
-    // });
+    if (this.pagination.hasMore && this.pagination.total > PAGE_SIZE) {
+      this.pagination.offset += PAGE_SIZE;
+      this.fetchChecklistFromServer(this.selectedDate, this.pagination.offset);
+    } else {
+      this.setFetchedDate(date);
+      this.reloadLocalView(this.selectedDate);
+    }
   }
 
-  async deleteCheckList(date: any) {
-    // let newDate = moment(date).add(3, 'day').format('YYYY-MM-DD');
-    await db.checklist.where("schedule_date").below(date).delete();
+  private reloadLocalView(date: string) {
+    this.subscribeOnceToDexie(
+      () => db.checklist
+        .filter((row: any) => row.schedule_date === date || (Number(row.is_no_expiry) === 1 && (row.schedule_status === 'assigned' || row.schedule_date === getToday())))
+        .sortBy('sch_dateTime'),
+      data => {
+        this.splitChecklistsForUser(data);
+      },
+    );
   }
 
-  async clearChecList() {
-    return await db.checklist.clear();
+  private async pruneOldChecklists(beforeDate: string) {
+    await db.checklist
+      .where('schedule_date')
+      .below(beforeDate)
+      .filter((row: any) => Number(row.is_no_expiry) !== 1 && !row.offline_save)
+      .delete();
   }
 
-  openPage(url: string) {
-    this.router.navigateByUrl(url);
+  private getFetchedDates(): Record<string, string> {
+    try {
+      const raw = localStorage.getItem(FETCHED_DATES_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  private isDateFetchedToday(date: string): boolean {
+    return this.getFetchedDates()[date] === getToday();
+  }
+
+  private setFetchedDate(date: string) {
+    const map = this.getFetchedDates();
+    map[date] = getToday();
+    localStorage.setItem(FETCHED_DATES_KEY, JSON.stringify(map));
+  }
+
+  private clearFetchedDate(date: string) {
+    const map = this.getFetchedDates();
+    delete map[date];
+    localStorage.setItem(FETCHED_DATES_KEY, JSON.stringify(map));
+  }
+
+  private pruneOldFetchedDates() {
+    const map = this.getFetchedDates();
+    const today = getToday();
+    const cleaned: Record<string, string> = {};
+    for (const date in map) {
+      if (map[date] === today) {
+        cleaned[date] = map[date];
+      }
+    }
+    localStorage.setItem(FETCHED_DATES_KEY, JSON.stringify(cleaned));
+  }
+
+  /**
+   * Split Dexie result into assigned vs attended lists.
+   * matchUser=false (scan path): user match skip — location/barcode ki saari
+   * checklists dikhti hain. Default (date view): sirf logged-in user ki.
+   */
+  private splitChecklistsForUser(
+    data: any[],
+    sortAssigned: boolean = false,
+    matchUser: boolean = true,
+  ) {
+    console.log(data);
+    const userId = String(this.userData.id);
+    console.log(userId);
+    const isAssignedToUser = (row: any): boolean => {
+      if (!matchUser) {
+        return true;
+      }
+      // Live app ke liye assign_to me single id hi aati rahegi; comma-separated list
+      // backend ab assign_to_all me bhejta hai. Purani cached/offline rows me
+      // assign_to_all nahi hoga, isliye fallback assign_to par.
+      const assignIds = String(row.assign_to_all || row.assign_to || '').split(',').map(id => id.trim());
+      return assignIds.includes(userId);
+    };
+
+    this.assignCheckList = data.filter(row => row.schedule_status === 'assigned' && isAssignedToUser(row));
+    this.attendedCheckList = data.filter(row => row.schedule_status !== 'assigned' && isAssignedToUser(row));
+    console.log(this.assignCheckList);
+    if (sortAssigned) {
+      this.assignCheckList.sort(
+        (a, b) => new Date(a.sch_dateTime).getTime() - new Date(b.sch_dateTime).getTime(),
+      );
+    }
+  }
+
+  /**
+   * Subscribe to a Dexie liveQuery for one emission, then unsubscribe immediately.
+   * Tracks every subscription so `ngOnDestroy` / `ionViewDidLeave` can tear them down
+   * even if data never arrives.
+   */
+  private subscribeOnceToDexie<T>(
+    source: () => Promise<T>,
+    onNext: (data: T) => void,
+    onError?: (err: any) => void,
+  ) {
+    const query$ = liveQuery(source);
+    const sub = query$.subscribe({
+      next: data => {
+        onNext(data);
+        sub.unsubscribe();
+        this.activeDexieSubs = this.activeDexieSubs.filter(s => s !== sub);
+      },
+      error: err => {
+        if (onError) {
+          onError(err);
+        }
+        sub.unsubscribe();
+        this.activeDexieSubs = this.activeDexieSubs.filter(s => s !== sub);
+      },
+    });
+    this.activeDexieSubs.push(sub);
+  }
+
+  private disposeDexieSubs() {
+    this.activeDexieSubs.forEach(sub => sub.unsubscribe());
+    this.activeDexieSubs = [];
+  }
+
+  shouldShowJustification(item: any): boolean {
+    if (Number(item.is_no_expiry) === 1) {
+      return false;
+    }
+    if (item.schedule_date !== getToday()) {
+      return true;
+    }
+    return moment().isAfter(moment(item.sch_endDateTime));
+  }
+
+  trackByScheduleId(_index: number, item: any): any {
+    return item?.schedule_id ?? item?.schedule_unique_id ?? _index;
   }
 
   changeDateComponent(ev: any) {
-    this.selectedDate = moment(ev.detail.value).format('YYYY-MM-DD');
-    const data = {
-      date: moment(ev.detail.value).format('DD'),
-      day: moment(ev.detail.value).format('dddd')[0],
-      fulldate: moment(ev.detail.value).format('YYYY-MM-DD'),
-      ind: parseInt(moment(ev.detail.value).format('DD'), 10),
-    }
-    this.createCustomCalendar(moment(ev.detail.value).format('YYYY-MM-DD'));
-    this.changeCalendarDate(data);
+    const picked = moment(ev.detail.value);
+    const fulldate = picked.format('YYYY-MM-DD');
+    this.selectedDate = fulldate;
+    const day: CalendarDay = {
+      date: picked.format('DD'),
+      day: picked.format('dddd')[0],
+      fulldate,
+      ind: parseInt(picked.format('DD'), 10),
+      isSelect: true,
+    };
+    this.buildCalendarStrip(fulldate);
+    this.changeCalendarDate(day);
     this.popoverDatetime.confirm(true);
   }
 
-  changeCalendarDate(dat: any) {
-    this.slides.slideTo(dat.ind - 3);
-    for (var i = 0 ; i < this.dateArr.length; i++) {
-      if (dat.date == this.dateArr[i].date) {
-        this.dateArr[i].isSelect= true;
-      } else {
-        this.dateArr[i].isSelect= false;
-      }
-    }
-    this.selectedDate = dat.fulldate;
+  changeCalendarDate(day: CalendarDay) {
+    const slideIndex = Math.max(0, day.ind - 3);
+    this.slides.slideTo(slideIndex);
+    this.dateArr.forEach(d => (d.isSelect = d.date === day.date));
+    this.selectedDate = day.fulldate;
     this.assignCheckList = [];
     this.attendedCheckList = [];
-    this.checkCurrentDateDG(this.selectedDate);
+    this.loadChecklistForDate(this.selectedDate);
   }
 
   verifyQr(data: any) {
-    if (this.platform.is('capacitor')) {
-      if (data.barcode) {
-        this.qrType = 'verify';
-        this.qrObject = data;
-        this.router.navigateByUrl('/barcode');
-      } else {
-        this.qrType = 'loc-verify';
-        this.qrObject = data;
-        this.router.navigateByUrl('/barcode');
-      }
+    if (this.isFillTimeOver(data)) {
+      this.showFillTimeOverAlert(data);
+      return;
+    }
+    if (this.platform.is('capacitor') && (!this.scanBarcodeDetail.isScanBarcode && data.is_site_level == 0)) {
+      this.qrType = data.barcode ? 'verify' : 'loc-verify';
+      this.qrObject = data;
+      this.router.navigateByUrl('/barcode');
     } else {
       this.openFillReport(data);
-      // if (data.barcode) {
-      //   this.qrType = 'verify';
-      //   this.qrObject = data;
-      //   this.router.navigateByUrl('/barcode');
-      // } else {
-      //   this.qrType = 'loc-verify';
-      //   this.qrObject = data;
-      //   this.router.navigateByUrl('/barcode');
-      // }
     }
+  }
 
+  /** Returns true if this assigned checklist's sch_endDateTime has already passed. */
+  private isFillTimeOver(data: any): boolean {
+    if (!data || data.schedule_status !== 'assigned' || !data.sch_endDateTime) {
+      return false;
+    }
+    if (Number(data.is_no_expiry) === 1) {
+      return false;
+    }
+    return moment().isAfter(moment(data.sch_endDateTime));
+  }
+
+  private async showFillTimeOverAlert(data: any) {
+    const endTimeLabel = moment(data.sch_endDateTime).format('h:mm A');
+    const alert = await this.alertController.create({
+      mode: 'ios',
+      header: 'Fill time over',
+      message: `You can no longer fill this checklist. Last fill time was ${endTimeLabel}. Please submit justification.`,
+      buttons: ['OK'],
+    });
+    await alert.present();
   }
 
   openFillReport(data: any) {
-    if (this.platform.is('capacitor')) {
-      if (data.schedule_status !== 'assigned') {
-        this.openPageUrl(data);
-      } else {
-        const pastDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
-        const currentDate = moment(moment().format('YYYY-MM-DD'));
-        if (!currentDate.isSame(pastDate)) {
-          this.common.presentToast('You can fill only Current Date Checklist', 'warning');
-          return;
-        }
-        const pastDateTime = moment(data.sch_dateTime);
-        const currentDateTime = moment();
-        const isCurrentDatetimeBigger = currentDateTime.isAfter(pastDateTime);
-        if (!isCurrentDatetimeBigger) {
-          this.common.presentToast('You cant fill Checklist before Time, this Checklist time is ' + moment(data.sch_dateTime).format('h:mm:ss'), 'warning')
-          return;
-        }
-        this.openPageUrl(data);
-      }
-    } else {
-      this.openPageUrl(data);
+    if (!this.platform.is('capacitor') || data.schedule_status !== 'assigned' || data.is_no_expiry ===1) {
+      this.navigateToFillReport(data);
+      return;
     }
+
+    const scheduleDate = moment(data.sch_dateTime).format('YYYY-MM-DD');
+    if (getToday() !== scheduleDate) {
+      this.common.presentToast('You can fill only Current Date Checklist', 'warning');
+      return;
+    }
+
+    const scheduleStartTime = moment(data.sch_dateTime);
+    const scheduleEndTime = moment(data.sch_endDateTime);
+    const currentTime = moment();
+
+    if (currentTime.isBefore(scheduleStartTime)) {
+      this.common.presentToast(
+        `You cant fill Checklist before Time, this Checklist time is ${scheduleStartTime.format('h:mm:ss A')}`,
+        'warning',
+      );
+      return;
+    }
+    if (currentTime.isAfter(scheduleEndTime)) {
+      this.common.presentToast(
+        `Checklist time is over. You can not fill after ${scheduleEndTime.format('h:mm:ss A')}`,
+        'warning',
+      );
+      return;
+    }
+
+    this.navigateToFillReport(data);
   }
 
-  openPageUrl(data: any) {
+  private navigateToFillReport(data: any) {
     this.router.navigate(['/digital-checklist/fill-report/'], {
       queryParams: {
         isOnBehalf: this.isOnBehalf,
-        schedule_id: data.schedule_id
-      }
+        schedule_id: data.schedule_id,
+      },
     });
   }
 
-  // verifyBarcode(obj: any){
-  //   this.common.presentLoading().then(preLoad => {
-  //     this.httpDigital.verifyAssetByQr(obj).subscribe({
-  //       next:(dat: any) => {
-  //         if (dat.status) {
-  //           this.common.presentToast(dat.msg, 'success');
-  //           this.router.navigateByUrl('/digital-checklist/fill-report/' + obj.sch_id + '/' + this.isOnBehalf);
-  //         } else {
-  //           this.common.presentToast(dat.msg, 'warning');
-  //         }
-  //       }, error:() => {
-  //         this.common.dismissloading();
-  //         this.common.presentToast(environment.errMsg, 'danger');
-  //       }, complete:() => {
-  //         this.common.dismissloading();
-  //       }
-  //     })
-  //   })
-  // }
-
-  changeDate(action: any) {
-    if (action == 'next') {
-      let next = moment(this.selectedDate).add(1, 'day').format('YYYY-MM-DD');
-      this.selectedDate = next;
-    } else {
-      let prev = moment(this.selectedDate).subtract(1, 'day').format('YYYY-MM-DD');
-      this.selectedDate = prev;
-    }
-  }
-
   openBarcode() {
-    this.allChecklist = [];
     this.qrType = 'site';
     this.router.navigateByUrl('/barcode');
   }
 
-  createCustomCalendar(DATE: any) {
-    let status: any, index = 0 ,end: any;
-    end = moment(DATE).endOf('month').format('DD');
+  private buildCalendarStrip(forDate: string) {
+    const anchor = moment(forDate);
+    const anchorFormatted = anchor.format('YYYY-MM-DD');
+    const daysInMonth = parseInt(anchor.endOf('month').format('DD'), 10);
+    const monthStart = moment(forDate).startOf('month');
+
+    let selectedIndex = 0;
     this.dateArr = [];
-    for (let i = 1; i <= end ; i++) {
-      if (moment(DATE).format('YYYY-MM-DD') ==  moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')) {
-        status = true;
-        index = i;
-      } else {
-        status = false
+    for (let i = 1; i <= daysInMonth; i++) {
+      const dayDate = monthStart.clone().add(i - 1, 'day');
+      const fulldate = dayDate.format('YYYY-MM-DD');
+      const isSelect = fulldate === anchorFormatted;
+      if (isSelect) {
+        selectedIndex = i;
       }
       this.dateArr.push({
-        date: moment(DATE).startOf('month').add(i - 1, 'day').format('DD'),
-        day: moment(DATE).startOf('month').add(i - 1, 'day').format('dddd')[0],
-        isSelect: status,
+        date: dayDate.format('DD'),
+        day: dayDate.format('dddd')[0],
+        isSelect,
         ind: i,
-        fulldate : moment(DATE).startOf('month').add(i - 1, 'day').format('YYYY-MM-DD')
-      })
+        fulldate,
+      });
     }
+
     setTimeout(() => {
-      this.slides.slideTo(index - 3);
+      this.slides?.slideTo(Math.max(0, selectedIndex - 3));
     }, 50);
+  }
+
+  async openJustification(data: any) {
+    const modal = await this.modalCtrl.create({
+      component: JustificationComponent,
+      cssClass: 'my-modal',
+      componentProps: { data },
+    });
+    modal.onDidDismiss().then(res => {
+      // Save/delete hone par usi visit me label update — Dexie dobara padhne ki zaroorat nahi
+      if (res.data && typeof res.data.fill_justification_status === 'boolean') {
+        data.fill_justification_status = res.data.fill_justification_status;
+      }
+    });
+    modal.present();
   }
 }

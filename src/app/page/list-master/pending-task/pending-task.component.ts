@@ -188,8 +188,6 @@ export class PendingTaskComponent  implements OnInit {
       this.page = 1;
       this.pendingTicket = [];
       this.getPendingTicket();
-    } else if (this.segments === 'digital') {
-      this.checkCurrentDateDG(this.selected_date);
     } else if (this.segments === 'pms') {
       this.getPendingPms();
     } else if (this.segments === 'meter') {
@@ -208,7 +206,11 @@ export class PendingTaskComponent  implements OnInit {
     if (val === 'helpdesk') {
       this.getPendingTicket();
     } else if (val === 'digital') {
-      this.checkCurrentDateDG(this.selected_date);
+      // Digital Checklist ka poora flow apne module me hai (download, dedupe, QR, calendar).
+      // Yahan dobara wahi code rakhne se do jagah bug theek karne padte the, isliye seedha
+      // wahin bhej dete hain. Tab wapas HELPDESK par, warna lautne par khaali tab dikhta hai
+      this.segments = 'helpdesk';
+      this.router.navigateByUrl('/digital-checklist');
     } else if (val === 'pms') {
       this.getPendingPms();
     } else if (val === 'meter') {
@@ -216,94 +218,9 @@ export class PendingTaskComponent  implements OnInit {
     }
   }
 
-  checkCurrentDateDG(date: string) {
-    this.common.presentLoading().then(preLoad => {
-      const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
-      const sub = friendsObservable.subscribe({
-        next:(data) => {
-          this.common.dismissloading();
-          this.allChecklist = data;
-          this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-          this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-          if (this.allChecklist.length === 0 && this.isInternet) {
-            this.getOfflineCheckListFromServer(date, 0);
-          }
-          setTimeout(() => {
-            sub.unsubscribe();
-          }, 1000);
-        }
-      });
-    });
-  }
-
-  getOfflineCheckListFromServer(date: string, offset: number) {
-    let percentage,tmp_per, msg;
-    if (this.offset && this.TOTAL_CHECKLIST) {
-      tmp_per = ((this.offset * 100) / this.TOTAL_CHECKLIST);
-      if (tmp_per > 100) {
-        tmp_per = 100;
-        percentage = tmp_per.toFixed(2);
-      } else {
-        percentage = tmp_per.toFixed(2);
-      }
-      msg = 'Please Wait, Application is Fetching your Data ' + percentage + '%';
-    } else {
-      msg = 'Please Wait, Application is Fetching your Data ';
-    }
-    this.common.presentLoading(msg).then(preLoad => {
-      this.httpDigital.getOfflineCheckListFromServer(date, offset).subscribe({
-        next:(data: any) => {
-          if (data.status) {
-            if(data.data?.data.length > 0) {
-              this.isLoop = true;
-              this.allChecklist = data.data.data;
-              if (this.offset === 0) {
-                this.TOTAL_CHECKLIST = data.data.total;
-              }
-              this.addBulkCheckList(this.allChecklist);
-            } else {
-              this.isLoop = false;
-              this.checkCurrentDateDG(date);
-            }
-          } else {
-            this.common.presentLoading().then(preLoad => {
-              const friendsObservable = liveQuery (() => db.checklist.where({schedule_date: date}).sortBy('sch_dateTime'));
-              const sub = friendsObservable.subscribe({
-                next:(data) => {
-                  this.common.dismissloading();
-                  this.allChecklist = data;
-                  this.assignCheckList = this.allChecklist.filter((val: any) => val.schedule_status === 'assigned' && val.assign_to === this.userData.id);
-                  this.attendedCheckList = this.allChecklist.filter((val: any) => val.schedule_status !== 'assigned' && val.assign_to === this.userData.id);
-                  setTimeout(() => {
-                    sub.unsubscribe();
-                  }, 1000);
-                }
-              });
-            });
-          }
-        },
-        error:() => {
-          this.common.dismissloading();
-          this.common.presentToast(environment.errMsg + ' In Saving Checklist Offline Mode', 'danger');
-        },
-        complete:() => {
-          this.common.dismissloading();
-        }
-      })
-    })
-  }
-
-  async addBulkCheckList(checkListData: any) {
-    await db.checklist.bulkPut(checkListData).then(res => {
-      if (this.isLoop && this.TOTAL_CHECKLIST > 300) {
-        this.offset = this.offset + 300;
-        this.getOfflineCheckListFromServer(this.selected_date, this.offset);
-      } else {
-        this.checkCurrentDateDG(this.selected_date);
-      }
-    });
-  }
-
+  // Digital Checklist ka download/dedupe/QR - sab kuch ab digital-checklist module me hai.
+  // Pehle yahan uski ek purani copy thi (assign_to ka sakht match, bulkAdd se duplicate,
+  // atakta hua loader). Use hata diya gaya hai - tab seedha us page par le jaata hai.
 
   getPendingTicket() {
     this.httpCompalint.getTicketMaster(null, this.page).subscribe({
