@@ -6,11 +6,28 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class ComplaintService {
-  private assignTickets = new BehaviorSubject('');
-  // private rslvTicket = new BehaviorSubject({});
+  public assignTickets = new BehaviorSubject('');
+  public testVar = new BehaviorSubject('');
+  normalText = '';
   constructor(
     private https: HttpClient
   ) { }
+
+  setNormalData(str: string) {
+    this.normalText = str
+  }
+
+  getNormalData() {
+    return this.normalText
+  }
+
+  setDataTest(str: string) {
+    this.testVar.next(str)
+  }
+
+  getDataTest() {
+    return this.testVar;
+  }
 
   setData(data: any) {
     this.assignTickets.next(data);
@@ -153,6 +170,18 @@ export class ComplaintService {
 
   getCostCenter() : Observable<any> {
     return this.https.post(environment.url + 'shared/get-user-pc-code', {});
+  }
+
+  getCpuSite(): Observable<any> {
+    return this.https.get(environment.url + 'meal/cpu/cpu_site_map_data')
+  }
+
+  getMealType(): Observable<any> {
+    return this.https.get(environment.url + 'meal/meal-type/get/dropdown')
+  }
+
+  getOrderStatus(): Observable<any> {
+    return this.https.get(environment.url + 'meal/order/get_order_dropdown')
   }
 
   getBuildingList(id: any): Observable<any> {

@@ -67,6 +67,14 @@ const routes: Routes = [
   {
     path: 'meter',
     loadChildren: () => import('./page/meter/meter.module').then( m => m.MeterPageModule)
+  },  
+  {
+    path: 't-order/:id',
+    loadChildren: () => import('./page/today-order/today-order.module').then( m => m.TodayOrderPageModule)
+  },
+  {
+    path: 'today-order',
+    loadChildren: () => import('./page/today-order/today-order.module').then( m => m.TodayOrderPageModule)
   },
   {
     path: 'approvals',

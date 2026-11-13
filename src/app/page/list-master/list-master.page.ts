@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { db } from '../../provider/local-db/local-db.service';
 import { liveQuery } from 'dexie';
-import { AlertController, MenuController, ModalController, Platform, } from '@ionic/angular';
+import { AlertController, LoadingController, MenuController, ModalController, Platform, } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { SosComponent } from './sos/sos.component';
 import { App } from '@capacitor/app';
@@ -14,6 +14,9 @@ import { environment } from 'src/environments/environment';
 import { firstValueFrom, take } from 'rxjs';
 import { stat } from 'fs';
 import { cordovaInstance } from '@awesome-cordova-plugins/core';
+// CKMS - cambro QR scan
+import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
+import { CambroStatusComponent } from './cambro-status/cambro-status.component';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -36,6 +39,9 @@ export class ListMasterPage implements OnInit {
   isPunchIn = false;
   /** Trip card tap par API chal rahi hai - do tap = do API na ho */
   tripCardBusy = false;
+  /** CKMS - QR se cambro status dekhna hai (barcode page se wapas aane par) */
+  isScanQr!: boolean;
+  loading: any;
   constructor(
     private common: CommonService,
     private alertController: AlertController,
@@ -46,6 +52,8 @@ export class ListMasterPage implements OnInit {
     private httpLogin: LoginService,
     private liveTracker: LiveTrackerService,
     private httpComplaint: ComplaintService,
+    private httpTo: TodayOrderService,
+    private loadingController: LoadingController,
     private iab: InAppBrowser,) {
     const user = localStorage.getItem('user');
     if (user) {
@@ -113,7 +121,44 @@ export class ListMasterPage implements OnInit {
     }
   }
 
+  openBarcode() {
+    this.isScanQr = true;
+    this.router.navigateByUrl('/barcode');
+  }
+
   ionViewWillEnter() {
+    // CKMS - barcode page se cambro ka QR lekar laute hain, tab home ka normal
+    // load nahi chalta, sirf cambro status kholte hain
+    if (this.isScanQr) {
+      // Lautte hi reset - bina scan ke back aane par flag atka rehta tha, phir home
+      // ka normal load band aur ticket/PM ka QR bhi cambro samajh liya jaata tha
+      this.isScanQr = false;
+      const bar = this.common.getBarcode();
+      if (bar) {
+        this.common.setBarcode('');
+        this.presentLoading().then(preLoad => {
+          this.httpTo.getCambroStatus(bar).subscribe({
+            next: (data) => {
+              if (data.status) {
+                this.openCambroStatus(data.data);
+              } else {
+                this.common.presentToast(data.msg, 'warning');
+              }
+            },
+            error: () => {
+              this.dismissloading();
+              this.common.presentToast(environment.errMsg, 'danger');
+            },
+            complete: () => {
+              this.dismissloading();
+            }
+          });
+        });
+        return;
+      }
+      // Scan nahi hua - neeche home ka normal load chalne do
+    }
+
     this.subs = this.common.getHomeLoadStatus().subscribe(val => {
       if (val) {
         this.changeEvent();
@@ -126,6 +171,36 @@ export class ListMasterPage implements OnInit {
     }, 1500);
     this.getHomeLoad();
     this.getNotification();
+  }
+
+  async openCambroStatus(data: any) {
+    const modal = await this.modalCtrl.create({
+      component: CambroStatusComponent,
+      cssClass: 'my-modal',
+      backdropDismiss: false,
+      componentProps: {
+        data: data
+      }
+    });
+    modal.onWillDismiss().then(disModal => {
+      if (disModal.role == 'true') {
+      }
+    });
+    modal.present();
+  }
+
+  async presentLoading() {
+    this.loading = await this.loadingController.create({
+      cssClass: 'my-custom-class',
+      message: 'Please wait...',
+    });
+    await this.loading.present();
+  }
+
+  async dismissloading() {
+    if (this.loading) {
+      this.loading.dismiss();
+    }
   }
 
   getHomeLoad() {

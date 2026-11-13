@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Driver Detail</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal(null, false)">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="drv-detail">
+
+  <div class="drv-hero">
+    <img class="drv-avatar" [src]="requestedData.driver_img" onError="src = 'assets/img/person_img.png'">
+    <h2 class="drv-name">{{requestedData.driver_fname}} {{requestedData.driver_lname}}</h2>
+    <span class="drv-vehicle" *ngIf="requestedData.driver_vehicle_no">
+      <ion-icon name="car-outline"></ion-icon> {{requestedData.driver_vehicle_no}}
+    </span>
+  </div>
+
+  <div class="drv-info">
+    <a class="info-row" href="tel:{{requestedData.driver_mobile}}">
+      <div class="ic"><ion-icon name="call-outline"></ion-icon></div>
+      <div class="txt">
+        <span class="lbl">Mobile</span>
+        <span class="val link">{{requestedData.driver_mobile}}</span>
+      </div>
+    </a>
+
+    <div class="info-row">
+      <div class="ic"><ion-icon name="car-outline"></ion-icon></div>
+      <div class="txt">
+        <span class="lbl">Vehicle Detail</span>
+        <span class="val">{{requestedData.driver_vehicle_no || '—'}}</span>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="ic"><ion-icon name="mail-outline"></ion-icon></div>
+      <div class="txt">
+        <span class="lbl">Email</span>
+        <span class="val">{{requestedData.driver_email || '—'}}</span>
+      </div>
+    </div>
+  </div>
+
+  <ion-button expand="block" class="call-btn" href="tel:{{requestedData.driver_mobile}}">
+    <ion-icon slot="start" name="call-outline"></ion-icon> Call Driver
+  </ion-button>
+
+  <img [src]="myurl" *ngIf="myurl" class="map-img">
+</ion-content>

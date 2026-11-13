@@ -1,0 +1,93 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Order Receive</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card class="details">
+    <div class="details__grid">
+      <div class="cell full">
+        <span class="lbl">PC Name</span>
+        <span class="val">{{requestedData.pc_ext_id}} {{requestedData.pc_desc}}</span>
+      </div>
+      <div class="cell">
+        <span class="lbl">ORD ID</span>
+        <span class="val">{{requestedData.order_id}}</span>
+      </div>
+      <div class="cell">
+        <span class="lbl">Total Recipe</span>
+        <span class="val">{{updateArr.length}}</span>
+      </div>
+      <div class="cell">
+        <span class="lbl">Dispatch Time</span>
+        <span class="val">{{requestedData.dispatch_time}}</span>
+      </div>
+      <div class="cell">
+        <span class="lbl">Expt Delivery Time</span>
+        <span class="val">{{requestedData.expected_site_dlvry_time}}</span>
+      </div>
+    </div>
+  </ion-card>
+
+  <!-- Phase 1: order abhi site pe reached nahi hua (ord_status 6) -> pehle Receive karo -->
+  <div class="receiveCta" *ngIf="requestedData.ord_status == 6">
+    <ion-icon name="cube-outline"></ion-icon>
+    <h3>Order not received yet</h3>
+    <p>Mark the order as reached on site first, then you can receive the quantity for each recipe.</p>
+    <ion-button expand="block" (click)="orderReached()">Reach on Site</ion-button>
+  </div>
+
+  <!-- Phase 2: order reached (ord_status 9) -> ab quantity receive karo -->
+  <ng-container *ngIf="requestedData.ord_status == 9">
+  <ion-card class="item-card" *ngFor="let dat of updateArr;let i = index">
+    <div class="item-card__accent"></div>
+    <div class="item-card__body">
+
+      <div class="item-card__head">
+        <div class="idx">{{i+1}}</div>
+        <div class="name">{{dat.item_name}}</div>
+        <img class="veg" [src]="dat.cat_image" *ngIf="dat.cat_image">
+      </div>
+
+      <div class="temp-row">
+        <label>Temperature</label>
+        <ion-input type="number" [(ngModel)]="dat.received_temperature"></ion-input>
+        <ion-button fill="solid" (click)="updateTemp(dat)" size="small" [color]="dat.temperature_status ?  'success': 'primary' ">
+          <ion-icon slot="icon-only" [name]="dat.temperature_status ? 'checkmark-done-outline': 'checkmark-outline' "></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="cambro-row" *ngFor="let val of dat.data; let j = index" [ngClass]="{'err': val.showErr}">
+        <div class="cambro-info">
+          <span class="c-id"><ion-icon name="cube-outline"></ion-icon> {{val.ext_asset_id}}</span>
+          <span class="c-qty">Qty: {{val.dispatch_qty}}</span>
+        </div>
+        <div class="recv-qty">
+          <label>Receive Qty</label>
+          <ion-input type="number" [ngClass]="{'on': val.isReceivedEnable}" [disabled]="val.isReceivedEnable ? false: true " [(ngModel)]="val.received_qty" (ionInput)="inputQty(val, $event)" (ionChange)="changeFun(val)" [autofocus]="val.isAutoFocus ? true:false"></ion-input>
+        </div>
+        <div class="recv-action">
+          <ion-button *ngIf="(val.received_qty < 0 || !val.received_qty) && val.pack_type === 0" size="small" fill="outline" color="primary" (click)="ScanBarcode(i, j)">
+            <ion-icon slot="icon-only" name="qr-code-outline"></ion-icon>
+          </ion-button>
+          <ion-button *ngIf="val.isRec " size="small" color="success">
+            <ion-icon slot="icon-only" name="checkmark-done-outline"></ion-icon>
+          </ion-button>
+          <ion-button *ngIf="((val.isScan && !val.isRec && val.received_qty > 0) || (val.pack_type === 1 && val.received_qty > 0 && !val.isRec))" size="small" color="primary" (click)="changeRecQty(val)">
+            <ion-icon slot="icon-only" name="checkmark-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+
+    </div>
+  </ion-card>
+  </ng-container>
+</ion-content>
+<ion-footer class="ion-no-border ion-padding-start ion-padding-end" *ngIf="requestedData.ord_status == 9">
+  <ion-toolbar>
+    <ion-button expand="block" (click)="submit()">Submit</ion-button>
+  </ion-toolbar>
+</ion-footer>

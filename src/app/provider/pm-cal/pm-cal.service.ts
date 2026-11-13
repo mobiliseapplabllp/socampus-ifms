@@ -14,6 +14,8 @@ export class PmCalService {
     public https: HttpClient,
   ) { }
 
+
+
   setData(data: any) {
     this.assignPmCal.next(data);
   }
@@ -180,6 +182,10 @@ export class PmCalService {
 
   finalSubmitCheckList(formData: any): Observable<any> {
     return this.https.post(environment.url + 'pmscal/schedule/update_schedule_status', formData);
+  }
+
+  saveDowntime(data: any): Observable<any> {
+    return this.https.post(environment.url + 'pmscal/save_downtime', data);
   }
 
   getOtherCategory() : Observable<any> {

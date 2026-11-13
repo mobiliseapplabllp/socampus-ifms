@@ -1,0 +1,181 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Order Packing Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card class="details">
+    <div class="details__grid">
+      <div class="cell">
+        <span class="lbl">Order Id</span>
+        <span class="val">{{basicDetails.order_id}}</span>
+      </div>
+      <div class="cell">
+        <span class="lbl">Packed Recipe</span>
+        <span class="val">{{basicDetails.packQty}}/{{basicDetails.total_items}}</span>
+      </div>
+      <div class="cell">
+        <span class="lbl">Expt Preparation Time</span>
+        <span class="val">{{requestedData.expected_preparation_time}}</span>
+      </div>
+      <div class="cell">
+        <span class="lbl">Expt Packing Time</span>
+        <span class="val">{{requestedData.expected_packing_time}}</span>
+      </div>
+      <div class="cell">
+        <span class="lbl">Expt Dispatch Time</span>
+        <span class="val">{{requestedData.expected_dispatch_time}}</span>
+      </div>
+      <div class="cell">
+        <span class="lbl">Expt Reach Time</span>
+        <span class="val">{{requestedData.expected_reach_time}}</span>
+      </div>
+    </div>
+    <div class="details__foot">
+      <ion-button color="primary" size="small" shape="round" fill="outline" (click)="setDriveModal(true)">Driver Detail <ion-icon name="create-outline" slot="end"></ion-icon></ion-button>
+    </div>
+  </ion-card>
+  <ion-card class="item-card" *ngFor="let dat of orderArr;let i = index" [ngClass]="{'err': dat.err, 'is-packed': dat.is_packed}">
+    <div class="item-card__accent"></div>
+    <div class="item-card__body">
+      <div class="item-card__head">
+        <div class="idx">{{i+1}}</div>
+        <div class="name">{{dat.item_name}}</div>
+        <img class="veg" [src]="dat.cat_image" *ngIf="dat.cat_image">
+      </div>
+
+      <div class="item-card__meta">        
+        <span class="meta"><ion-icon name="pie-chart-outline"></ion-icon> Requested: {{dat.ttl_portion}} {{dat.uom}}</span>
+        <span class="meta meta--left"><ion-icon name="cube-outline"></ion-icon> Left: {{dat.ttl_left_portion}} {{dat.uom}}</span>
+      </div>
+
+      <div class="item-card__chips" *ngIf="dat.qr_data.length > 0">
+        <span class="chip-label">Packed Qty:</span>
+        <span class="qty-chip" *ngFor="let val of dat.qr_data" (click)="setOpen(val,dat, true)">{{val.dispatch_qty}} {{val.uom}}</span>
+      </div>
+
+      <div class="item-card__actions">
+        <div class="temp-box">
+          <label>Temperature</label>
+          <ion-input type="number" [(ngModel)]="dat.temperature" (change)="changeTemp(dat)" [ngClass]="{'succ': dat.is_temperature}"></ion-input>
+        </div>
+        <ion-button *ngIf="!dat.is_packed" (click)="presentActionSheet1(dat)" size="small" color="primary" class="ion-text-capitalize action-btn">LINK</ion-button>
+        <ion-button *ngIf="dat.is_packed" size="small" color="success" class="ion-text-capitalize action-btn">
+          <ion-icon name="checkmark-outline" slot="start"></ion-icon> Packed
+        </ion-button>
+      </div>
+    </div>
+  </ion-card>
+</ion-content>
+
+<ion-footer *ngIf="!requestedData.hidePack" class="ion-padding-start ion-padding-end">
+  <ion-button expand="block" [disabled]="isPacking" (click)="finalPack()">Pack</ion-button>
+</ion-footer>
+
+<ion-modal [isOpen]="isModalOpen" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.5, 0.85]" handleBehavior="cycle" (willDismiss)="onWillDismiss()">
+  <ng-template>
+    <ion-header class="pk-head">
+      <ion-toolbar>
+        <ion-title>Packing Details</ion-title>
+        <ion-buttons slot="end">
+          <ion-button class="ion-text-capitalize" (click)="setOpen({}, {}, false)">Close</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="pk-modal">
+      <!-- Recipe + packed qty hero -->
+      <div class="pk-hero">
+        <div class="pk-hero__info">
+          <span class="lbl">Recipe</span>
+          <span class="name">{{packCambro.item_name}}</span>
+        </div>
+        <div class="pk-hero__qty">
+          <span class="lbl">PACKED</span>
+          <span class="val">{{packCambro.dispatch_qty}}</span>
+          <span class="uom" *ngIf="packCambro.uom">{{packCambro.uom}}</span>
+        </div>
+      </div>
+
+      <!-- Packing info -->
+      <div class="pk-card">
+        <div class="pk-row">
+          <span class="k"><ion-icon name="receipt-outline"></ion-icon> Order ID</span>
+          <span class="v">{{packCambro.order_id}}</span>
+        </div>
+        <div class="pk-row">
+          <span class="k"><ion-icon name="cube-outline"></ion-icon> Packing Type</span>
+          <span class="v"><span class="tag">{{packCambro.key}}</span></span>
+        </div>
+        <div class="pk-row">
+          <span class="k">
+            <ion-icon [name]="packCambro.key === 'Cambro Box' ? 'barcode-outline' : 'key-outline'"></ion-icon>
+            {{packCambro.key === 'Cambro Box' ? 'Barcode No' : 'Identify Key'}}
+          </span>
+          <span class="v mono">{{packCambro.val}}</span>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="isDriverModal" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.25, 0.5, 0.9]" handleBehavior="cycle" (willDismiss)="onWillDismissDriver()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Driver Detail</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="setDriveModal(false)">Close</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="driver_modal">
+      <div class="drv-section">
+        <div class="drv-section__title">Selected Driver</div>
+        <ion-item lines="none" class="drv-item current">
+          <ion-thumbnail slot="start">
+            <img [src]="basicDetails.driver_img" onError="src = 'assets/img/person_img.png'">
+          </ion-thumbnail>
+          <ion-label class="ion-text-wrap">
+            <h3>{{basicDetails.driver_name}}</h3>
+            <p><ion-icon name="call-outline"></ion-icon> {{basicDetails.driver_mobile}}</p>
+            <p><ion-icon name="mail-outline"></ion-icon> {{basicDetails.driver_email}}</p>
+            <p><ion-icon name="car-outline"></ion-icon> {{basicDetails.driver_vehicle_type}} {{basicDetails.driver_vehicle_no}}</p>
+          </ion-label>
+        </ion-item>
+      </div>
+
+      <div class="drv-section">
+        <div class="drv-section__title">Change Driver</div>
+
+        <ng-container *ngIf="driverArr.length > 0; else noDriver">
+          <ion-radio-group [(ngModel)]="selectedDriver" mode="md">
+            <ion-item lines="none" class="drv-item" *ngFor="let dat of driverArr">
+              <ion-avatar slot="start">
+                <img [src]="dat.driver_img" onError="src = 'assets/img/person_img.png'">
+              </ion-avatar>
+              <ion-label class="ion-text-wrap">
+                <h3>{{dat.driver_name}} <span class="id">#{{dat.driver_id}}</span></h3>
+                <p><ion-icon name="call-outline"></ion-icon> {{dat.mobile}}</p>
+                <p><ion-icon name="mail-outline"></ion-icon> {{dat.email}}</p>
+                <p><ion-icon name="car-outline"></ion-icon> {{dat.vehicle_type}} {{dat.vehicle_no}}</p>
+              </ion-label>
+              <ion-radio slot="end" [(ngModel)]="dat.driver_id"></ion-radio>
+            </ion-item>
+          </ion-radio-group>
+          <ion-button expand="block" class="change-btn" (click)="changeDriver()">Change Driver</ion-button>
+        </ng-container>
+
+        <ng-template #noDriver>
+          <div class="drv-empty">
+            <ion-icon name="people-outline"></ion-icon>
+            <p>No other driver available to change.</p>
+          </div>
+        </ng-template>
+      </div>
+    </ion-content>
+  </ng-template>
+
+</ion-modal>

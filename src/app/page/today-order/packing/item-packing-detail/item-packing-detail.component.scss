@@ -1,0 +1,294 @@
+ion-content {
+  --background: #f4f5fb;
+}
+
+/* ===== Recipe header summary ===== */
+.rp-head {
+  background: var(--ion-color-primary);
+  color: #fff;
+  padding: 16px;
+  border-radius: 0 0 20px 20px;
+
+  &__top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex: 0 0 auto;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+    ion-icon { font-size: 26px; color: #fff; }
+  }
+
+  &__info { flex: 1; min-width: 0; }
+  .meal { font-size: 11px; letter-spacing: 0.5px; opacity: 0.7; }
+  .rname { font-size: 22px; font-weight: 800; line-height: 1.15; }
+  .sub { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+}
+
+.rp-progress {
+  margin-top: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px;
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13px;
+
+    b { font-size: 20px; font-weight: 800; }
+    .pct { font-size: 18px; font-weight: 800; }
+  }
+
+  .bar { margin-top: 8px; background: rgba(255, 255, 255, 0.25); }
+  .bar__fill { background: #fff; }
+}
+
+/* ===== Bulk temperature (header ke andar) ===== */
+.rp-temp {
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    opacity: 0.8;
+    margin-bottom: 6px;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  ion-input {
+    flex: 0 0 84px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    min-height: 38px;
+    --color: #fff;
+    --placeholder-color: rgba(255, 255, 255, 0.6);
+    --placeholder-opacity: 1;
+    --padding-top: 6px;
+    --padding-bottom: 6px;
+  }
+
+  .unit { font-size: 14px; font-weight: 700; opacity: 0.85; }
+
+  ion-button {
+    flex: 1;
+    margin: 0;
+    height: 38px;
+    font-weight: 700;
+    --border-radius: 10px;
+  }
+
+  &__hint { margin-top: 6px; font-size: 11px; opacity: 0.7; }
+}
+
+/* ===== Per-site temperature override ===== */
+.site-temp {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  label {
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 600;
+    color: #555;
+  }
+
+  ion-input {
+    flex: 0 0 92px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    min-height: 36px;
+    --padding-top: 6px;
+    --padding-bottom: 6px;
+  }
+  ion-input.succ { border-color: var(--ion-color-success); }
+
+  .tick { color: #20b26c; font-size: 17px; }
+}
+
+/* ===== shared bar ===== */
+.bar {
+  height: 7px;
+  border-radius: 4px;
+  background: #eceef6;
+  overflow: hidden;
+
+  &__fill { height: 100%; border-radius: 4px; background: var(--ion-color-primary); }
+}
+
+/* ===== Status filter chips ===== */
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.chip {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #e2e4f0;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #40465f;
+
+  &.on {
+    background: var(--ion-color-primary);
+    border-color: var(--ion-color-primary);
+    color: #fff;
+  }
+}
+
+/* ===== Site cards ===== */
+.site-card {
+  position: relative;
+  margin: 6px 12px;
+  border-radius: 16px;
+  overflow: hidden;
+
+  &__accent {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 5px;
+    background: #E8830C;
+  }
+  &.pending &__accent { background: #9aa0bd; }
+  &.partial &__accent { background: #E8830C; }
+  &.packed &__accent { background: #20b26c; }
+
+  &__body { padding: 14px 14px 14px 18px; }
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__title { min-width: 0; }
+  .name {
+    font-size: 17px;
+    font-weight: 700;
+    color: #101340;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    .ok { color: #20b26c; font-size: 18px; }
+  }
+  .sub {
+    font-size: 12px;
+    color: var(--ion-color-medium);
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    ion-icon { font-size: 13px; }
+    .k { font-weight: 600; color: #40465f; }
+  }
+}
+
+.status-chip {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #fdeede;
+  color: #E8830C;
+
+  &.pending { background: #eef0f6; color: #6b7280; }
+  &.packed { background: #e4f6ec; color: #20b26c; }
+}
+
+.qty-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.qty-box {
+  flex: 1;
+  background: #f4f5fb;
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: center;
+
+  .lbl { display: block; font-size: 10px; letter-spacing: 0.4px; color: var(--ion-color-medium); }
+  .val { font-size: 18px; font-weight: 800; color: #101340; }
+  .val.packed { color: #E8830C; }
+  .val.left { color: #E8830C; }
+}
+
+.site-card {
+  .qty-row + .bar { margin-top: 12px; }
+
+  &__foot {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .cambros {
+    font-size: 12px;
+    color: var(--ion-color-medium);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    ion-icon { font-size: 15px; }
+  }
+
+  .actions {
+    display: flex;
+    gap: 6px;
+    ion-button { --border-radius: 10px; margin: 0; }
+  }
+}
+
+.item-card.packed .bar__fill,
+.site-card.packed .bar__fill { background: #20b26c; }
+
+/* ===== Empty ===== */
+.empty {
+  padding-top: 90px;
+  text-align: center;
+  color: var(--ion-color-medium);
+
+  ion-icon { font-size: 46px; }
+}

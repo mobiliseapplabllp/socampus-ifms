@@ -1,0 +1,102 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Recipe Packing</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Meal type selector (live — getMealType) -->
+  <div class="meal-select">
+    <div class="meal-select__icon"><ion-icon name="restaurant-outline"></ion-icon></div>
+    <div class="meal-select__body">
+      <span class="meal-select__label">MEAL TYPE</span>
+      <ion-select interface="action-sheet" mode="ios" placeholder="Select Meal Type"
+        [(ngModel)]="selectedMealType" (ionChange)="onMealTypeChange()">
+        <ion-select-option *ngFor="let m of mealTypeArr" [value]="m.value">{{m.label}}</ion-select-option>
+      </ion-select>
+    </div>
+  </div>
+
+  <!-- Dispatch readiness (API-1 summary) -->
+  <ion-card class="readiness">
+    <div class="readiness__info">
+      <span class="readiness__lbl">DISPATCH READINESS</span>
+      <span class="readiness__pct">{{summary.readiness_percent || 0}}%</span>
+      <span class="readiness__sub">
+        {{summary.packed_qty || 0}} of {{summary.total_qty || 0}} prepared
+        <ng-container *ngIf="summary.time_left_min"> · <ion-icon name="time-outline"></ion-icon> ~{{summary.time_left_min}} min left</ng-container>
+      </span>
+    </div>
+    <div class="gauge" [style.--p]="summary.readiness_percent || 0">
+      <div class="gauge__inner"><ion-icon name="trending-up-outline"></ion-icon></div>
+    </div>
+  </ion-card>
+
+  <!-- Stat tiles -->
+  <div class="stat-row">
+    <div class="stat">
+      <ion-icon name="time-outline" class="stat__ico pending"></ion-icon>
+      <div class="stat__num">{{summary.pending_count || 0}}</div>
+      <div class="stat__lbl">Pending</div>
+    </div>
+    <div class="stat">
+      <ion-icon name="flash-outline" class="stat__ico active"></ion-icon>
+      <div class="stat__num">{{summary.active_count || 0}}</div>
+      <div class="stat__lbl">Active</div>
+    </div>
+    <div class="stat">
+      <ion-icon name="checkmark-circle-outline" class="stat__ico done"></ion-icon>
+      <div class="stat__num">{{summary.done_count || 0}}</div>
+      <div class="stat__lbl">Done</div>
+    </div>
+  </div>
+
+  <!-- Items header + search -->
+  <div class="items-head">
+    <h3>Items ({{filteredItems.length}})</h3>
+    <ion-searchbar class="items-search" mode="ios" placeholder="Search" [(ngModel)]="searchText"></ion-searchbar>
+  </div>
+
+  <!-- Status filter chips -->
+  <div class="chips">
+    <button class="chip" [class.active]="statusFilter === 'all'" (click)="setStatusFilter('all')">All</button>
+    <button class="chip" [class.active]="statusFilter === 'pending'" (click)="setStatusFilter('pending')">Pending</button>
+    <button class="chip" [class.active]="statusFilter === 'in_progress'" (click)="setStatusFilter('in_progress')">In Progress</button>
+    <button class="chip" [class.active]="statusFilter === 'completed'" (click)="setStatusFilter('completed')">Done</button>
+  </div>
+
+  <!-- Item cards -->
+  <ion-card *ngFor="let item of filteredItems" class="item-card" [ngClass]="item.status" (click)="openItem(item)">
+    <div class="item-card__accent"></div>
+    <div class="item-card__body">
+      <div class="item-card__head">
+        <img class="thumb" [src]="item.image_url" *ngIf="item.image_url">
+        <div class="item-card__title">
+          <div class="name">{{item.recipe_name}}</div>
+          <div class="sub">{{item.sites_count}} site(s) · {{item.recipe_code}}</div>
+        </div>
+        <span class="status-chip" [ngClass]="item.status">{{item.status}}</span>
+      </div>
+
+      <div class="item-card__qty">
+        <span class="big">{{item.prepared || 0}}</span>
+        <span class="of"> / {{item.total || 0}}</span>
+        <span class="left" [class.zero]="!item.left">{{item.left || 0}} left</span>
+      </div>
+
+      <div class="bar">
+        <div class="bar__fill" [style.width.%]="item.progress_pct || 0"></div>
+      </div>
+    </div>
+  </ion-card>
+
+  <!-- Empty -->
+  <div *ngIf="filteredItems.length === 0" class="empty">
+    <ion-icon name="cube-outline"></ion-icon>
+    <p *ngIf="!selectedMealType">Select a meal type to load recipes.</p>
+    <p *ngIf="selectedMealType">No recipes found.</p>
+  </div>
+</ion-content>

@@ -18,6 +18,7 @@ import { ActionableComponent } from './actionable/actionable.component';
 import { FillQusComponent } from './fill-qus/fill-qus.component';
 import { ClosePmComponent } from './close-pm/close-pm.component';
 import { HoldPpmComponent } from './hold-ppm/hold-ppm.component';
+import { DowntimeComponent } from './downtime/downtime.component';
 
 @NgModule({
   imports: [
@@ -39,7 +40,8 @@ import { HoldPpmComponent } from './hold-ppm/hold-ppm.component';
     ActionableComponent,
     FillQusComponent,
     ClosePmComponent,
-    HoldPpmComponent
+    HoldPpmComponent,
+    DowntimeComponent
   ]
 })
 export class PmCalPageModule {}

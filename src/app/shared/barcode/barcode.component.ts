@@ -27,7 +27,7 @@ export class BarcodeComponent  implements OnInit {
       setTimeout(() => {
         this.common.setBarcode(this.barcodeNo);
         this.navCtrl.pop();
-      }, 1000);
+      }, 2000);
     }
   }
 

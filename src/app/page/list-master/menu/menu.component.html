@@ -6,6 +6,6 @@
     <span class="ms-icon">
       <img class="ms-glyph" [src]="val.icon_path" [alt]="val.smnu_desc">
     </span>
-    <span class="ms-label">{{ val.smnu_desc }}</span>
+    <span class="ms-label">{{ val.smnu_desc | substring: '10' }}</span>
   </button>
 </div>

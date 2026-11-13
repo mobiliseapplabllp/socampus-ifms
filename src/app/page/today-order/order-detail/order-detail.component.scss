@@ -1,0 +1,145 @@
+/* ---------- Top summary card (light primary tint) ---------- */
+.details {
+  border-radius: 14px;
+  margin: 12px;
+  background: linear-gradient(135deg, #eef1fe, #e5ebff);
+  border: 1px solid rgba(13, 31, 154, 0.10);
+  box-shadow: 0 3px 12px rgba(13, 31, 154, 0.08);
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 10px;
+    padding: 16px;
+  }
+
+  .cell {
+    display: flex;
+    flex-direction: column;
+
+    &.full {
+      grid-column: 1 / -1;
+    }
+
+    .lbl {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(4, 14, 81, 0.55);
+      margin-bottom: 2px;
+    }
+    .val {
+      font-size: 16px;
+      font-weight: 700;
+      color: #040E51;
+    }
+  }
+}
+
+/* ---------- Recipe item cards (match theme) ---------- */
+.item-card {
+  position: relative;
+  margin: 10px 12px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(13, 31, 154, 0.09);
+  overflow: hidden;
+
+  &__accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background: linear-gradient(180deg, #0D1F9A, #040E51);
+  }
+
+  &.is-picked .item-card__accent {
+    background: linear-gradient(180deg, #2dd36f, #28ba62);
+  }
+
+  &__body {
+    padding: 12px 14px 12px 20px;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .idx {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--ion-color-primary);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .name {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 700;
+      color: #040E51;
+      line-height: 1.2;
+    }
+    .veg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    margin: 8px 0 0 32px;
+
+    .meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #555;
+      background: #f2f3f9;
+      padding: 4px 9px;
+      border-radius: 8px;
+
+      ion-icon {
+        font-size: 14px;
+        color: #0D1F9A;
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: 12px 0 0 32px;
+
+    .act-btn {
+      --border-radius: 8px;
+      height: 36px;
+      min-width: 96px;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0;
+    }
+  }
+}
+
+.item-card.err {
+  box-shadow: 0 0 0 1.5px var(--ion-color-danger), 0 2px 12px rgba(13, 31, 154, 0.09);
+}
+
+/* ---------- Footer submit button ---------- */
+ion-footer ion-button {
+  --border-radius: 10px;
+  height: 46px;
+  font-weight: 600;
+}

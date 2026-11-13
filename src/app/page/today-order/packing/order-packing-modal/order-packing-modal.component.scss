@@ -1,0 +1,203 @@
+ion-content {
+  --background: #f4f5fb;
+}
+
+/* ===== Recipe summary header ===== */
+.rp-head {
+  background: var(--ion-color-primary);
+  color: #fff;
+  padding: 16px;
+  border-radius: 0 0 20px 20px;
+
+  .rname {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .sub {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    ion-icon { font-size: 13px; }
+  }
+}
+
+.qty-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.qty-box {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 8px 6px;
+  text-align: center;
+
+  .lbl {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.4px;
+    opacity: 0.75;
+  }
+  .val {
+    font-size: 20px;
+    font-weight: 800;
+    em { font-size: 11px; font-weight: 600; font-style: normal; opacity: 0.8; margin-left: 3px; }
+  }
+}
+
+.bar {
+  height: 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  margin-top: 12px;
+
+  &__fill { height: 100%; border-radius: 4px; background: #fff; }
+}
+
+/* ===== Cards ===== */
+.card {
+  margin: 12px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 2px 10px rgba(16, 19, 64, 0.06);
+
+  &__title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--ion-color-medium);
+    margin-bottom: 10px;
+  }
+}
+
+.info {
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid #f0f1f7;
+
+    &:last-child { border-bottom: 0; }
+  }
+
+  .k {
+    font-size: 13px;
+    color: var(--ion-color-medium);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    ion-icon { font-size: 15px; }
+  }
+
+  .v {
+    font-size: 15px;
+    font-weight: 700;
+    color: #101340;
+    text-align: right;
+    word-break: break-all;
+  }
+}
+
+/* ===== Input field ===== */
+.field {
+  display: block;
+  margin-top: 14px;
+
+  &__lbl {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #40465f;
+    margin-bottom: 6px;
+    i { color: var(--ion-color-danger); font-style: normal; }
+  }
+
+  &__box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #e2e4f0;
+    border-radius: 12px;
+    background: #f8f9fd;
+    padding-right: 12px;
+
+    ion-input { flex: 1; }
+  }
+
+  &__unit {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ion-color-medium);
+    flex: 0 0 auto;
+  }
+
+  ion-input {
+    --padding-start: 14px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    --background: transparent;
+    font-size: 18px;
+    font-weight: 700;
+    color: #101340;
+  }
+
+  // standalone input (identify key) keeps its own border
+  > ion-input {
+    border: 1px solid #e2e4f0;
+    border-radius: 12px;
+    background: #f8f9fd;
+    font-size: 15px;
+    font-weight: 600;
+  }
+}
+
+/* ===== Note ===== */
+.note {
+  margin-top: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  background: #fdeede;
+  border-radius: 10px;
+  padding: 9px 11px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #8a5312;
+
+  ion-icon {
+    font-size: 16px;
+    color: #E8830C;
+    flex: 0 0 auto;
+    margin-top: 1px;
+  }
+  b { font-weight: 800; }
+}
+
+/* ===== Footer ===== */
+.foot {
+  background: #f4f5fb;
+  padding: 10px 14px calc(10px + var(--ion-safe-area-bottom, 0px));
+
+  &::before { display: none; } // kill ion-footer hairline
+
+  ion-button {
+    --border-radius: 24px;
+    height: 46px;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+  }
+}

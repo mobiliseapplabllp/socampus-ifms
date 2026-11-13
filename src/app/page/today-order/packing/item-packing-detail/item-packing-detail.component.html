@@ -1,0 +1,114 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{basicDetails.recipe_name || requestedData.recipe_name || 'Recipe'}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Recipe header summary -->
+  <div class="rp-head">
+    <div class="rp-head__top">
+      <div class="thumb">
+        <img [src]="basicDetails.recipe_image_url" *ngIf="basicDetails.recipe_image_url">
+        <ion-icon *ngIf="!basicDetails.recipe_image_url" name="restaurant-outline"></ion-icon>
+      </div>
+      <div class="rp-head__info">
+        <div class="meal">{{basicDetails.meal_type_name}}</div>
+        <div class="rname">{{basicDetails.recipe_name}}</div>
+        <div class="sub">{{basicDetails.sites_count || 0}} site(s) · {{basicDetails.total || 0}} total</div>
+      </div>
+    </div>
+
+    <div class="rp-progress">
+      <div class="rp-progress__row">
+        <span><b>{{basicDetails.packed || 0}}</b> of {{basicDetails.total || 0}} packed</span>
+        <span class="pct">{{basicDetails.packed_pct || 0}}%</span>
+      </div>
+      <div class="bar"><div class="bar__fill" [style.width.%]="basicDetails.packed_pct || 0"></div></div>
+    </div>
+
+    <!-- Bulk temperature — ek recipe ek hi batch se, isliye ek value saare sites pe -->
+    <div class="rp-temp">
+      <label>Temperature</label>
+      <div class="rp-temp__row">
+        <ion-input type="number" placeholder="--" [(ngModel)]="bulkTemp" (ionChange)="changeBulkTemp()"></ion-input>
+        <span class="unit">&deg;C</span>
+        <ion-button size="small" color="light" class="ion-text-capitalize" (click)="applyTempToAll()">
+          <ion-icon name="thermometer-outline" slot="start"></ion-icon> Apply to all
+        </ion-button>
+      </div>
+      <div class="rp-temp__hint">Sets on all {{siteArr.length || 0}} site(s) &middot; -20 to 100&deg;</div>
+    </div>
+  </div>
+
+  <!-- Status filter chips -->
+  <div class="chips">
+    <button class="chip" [class.on]="statusFilter === 'all'" (click)="setStatusFilter('all')">All</button>
+    <button class="chip" [class.on]="statusFilter === 'pending'" (click)="setStatusFilter('pending')">Pending ({{counts.pending || 0}})</button>
+    <button class="chip" [class.on]="statusFilter === 'partial'" (click)="setStatusFilter('partial')">Partial ({{counts.partial || 0}})</button>
+    <button class="chip" [class.on]="statusFilter === 'packed'" (click)="setStatusFilter('packed')">Done ({{counts.packed || 0}})</button>
+  </div>
+
+  <!-- Site cards -->
+  <ion-card *ngFor="let site of filteredSites" class="site-card" [ngClass]="site.status">
+    <div class="site-card__accent"></div>
+    <div class="site-card__body">
+      <div class="site-card__head">
+        <div class="site-card__title">
+          <div class="name">
+            {{site.site_name}}
+            <ion-icon *ngIf="site.status === 'packed'" name="checkmark-circle" class="ok"></ion-icon>
+          </div>
+          <div class="sub"><ion-icon name="receipt-outline"></ion-icon> Site Code: {{site.site_code}}</div>
+          <div class="sub"><span class="k">Order Id:</span> {{site.order_id}}</div>
+        </div>
+        <span class="status-chip" [ngClass]="site.status">{{site.status}}</span>
+      </div>
+
+      <div class="qty-row">
+        <div class="qty-box">
+          <span class="lbl">REQUESTED</span>
+          <span class="val">{{site.requested}} {{site.uom}}</span>
+        </div>
+        <div class="qty-box">
+          <span class="lbl">PACKED</span>
+          <span class="val packed">{{site.packed}} {{site.uom}}</span>
+        </div>
+        <div class="qty-box">
+          <span class="lbl">LEFT</span>
+          <span class="val left">{{site.left}} {{site.uom}}</span>
+        </div>
+      </div>
+
+      <div class="bar">
+        <div class="bar__fill" [style.width.%]="site.requested ? (site.packed / site.requested) * 100 : 0"></div>
+      </div>
+
+      <div class="site-temp">
+        <label>Temperature</label>
+        <ion-input type="number" placeholder="--" [(ngModel)]="site.temperature"
+          (ionChange)="changeTemp(site)" (change)="updateTemperature(site)"
+          [ngClass]="{'succ': site.is_temperature}"></ion-input>
+        <ion-icon class="tick" name="checkmark-circle" *ngIf="site.is_temperature"></ion-icon>
+      </div>
+
+      <div class="site-card__foot">
+        <span class="cambros"><ion-icon name="cube-outline"></ion-icon> {{site.cambros_linked || 0}} cambros linked</span>
+        <div class="actions">
+          <ion-button size="small" fill="outline" class="ion-text-capitalize" (click)="viewOrder(site)">View</ion-button>
+          <ion-button size="small" *ngIf="site.status !== 'packed'" class="ion-text-uppercase" (click)="presentActionSheet1(site)">
+            <ion-icon name="scan-outline" slot="start"></ion-icon> Link
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </ion-card>
+
+  <div *ngIf="filteredSites.length === 0" class="empty">
+    <ion-icon name="location-outline"></ion-icon>
+    <p>No sites found.</p>
+  </div>
+</ion-content>

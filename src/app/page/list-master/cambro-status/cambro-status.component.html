@@ -1,0 +1,96 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button></ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">Cambro Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="4">CPU</ion-col>
+      <ion-col>{{data.cpu_desc || 'NA'}}</ion-col>
+    </ion-row>
+    <ion-row *ngIf="data.availability_status !== 'Available' ">
+      <ion-col size="4">Site</ion-col>
+      <ion-col>{{data.pc_desc || 'NA'}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="4">Cambro No</ion-col>
+      <ion-col>{{data.ext_asset_id || 'NA'}}</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="4">Cambro Size</ion-col>
+      <ion-col>{{data.cambro_size || 'NA'}}</ion-col>
+    </ion-row>
+    <div *ngIf="data.availability_status !== 'Available' ">
+      <ion-row >
+        <ion-col size="4">Temperature</ion-col>
+        <ion-col>{{data.temperature || 'NA'}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="4">Item Code</ion-col>
+        <ion-col>{{data.item_code || 'NA'}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="4">Item Name</ion-col>
+        <ion-col>{{data.item_name || 'NA'}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="4">Meal Type</ion-col>
+        <ion-col>{{data.type_desc }}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="4">Order ID</ion-col>
+        <ion-col>{{data.order_id || 'NA'}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="4">Order Date</ion-col>
+        <ion-col>{{data.order_date || 'NA'}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="4">Order Status</ion-col>
+        <ion-col>{{data.order_status || 'NA'}}</ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="4">Cambro Status</ion-col>
+        <ion-col>{{data.availability_status || 'NA'}}</ion-col>
+      </ion-row>
+    </div>
+
+  </ion-grid>
+  <div class="container" *ngIf="data.availability_status !== 'Available' ">
+    <div *ngFor="let dat of ticketTransaction" class="step" [ngClass]="{'active': dat.class === 'active', 'completed': dat.class !== 'active', 'animate__animated animate__fadeInDown': dat.sideright}" [hidden]="!dat.sideright">
+      <div class="v-stepper" >
+        <div class="circle"></div>
+        <div class="line"></div>
+      </div>
+      <div class="content" >
+        <p style="margin-bottom:0px;margin-top:0px;font-size:14px;color:var(--ion-color-primary);">{{dat.status}}</p>
+        <p style="margin-top:0px;font-size:12px;color:var(--ion-color-medium);height:15px;">
+          <span *ngIf="dat.time !== '00:00:00'">{{dat.time}}</span>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="data.availability_status === 'Available' "><!---->
+    <ion-row>
+      <ion-col class="ion-text-center ion-padding">
+        <ion-text color="primary" style="font-size:17px">
+          {{data.cambro_msg}}
+        </ion-text>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <img src="assets/img/lunch-box.gif" style="width:70%;height:auto">
+      </ion-col>
+    </ion-row>
+  </div>
+</ion-content>
+<ion-footer class="ion-no-border">
+  <ion-toolbar class="ion-padding-start ion-padding-end">
+    <ion-button expand="block" (click)="close(null, false)" color="danger">Close <ion-icon name="close-outline" slot="end"></ion-icon> </ion-button>
+  </ion-toolbar>
+</ion-footer>

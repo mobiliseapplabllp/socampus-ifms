@@ -1,0 +1,186 @@
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { LoadingController, ModalController, NavController } from '@ionic/angular';
+import { CommonService } from 'src/app/provider/common/common.service';
+import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
+import { environment } from 'src/environments/environment';
+import { DriverDetailComponent } from './driver-detail/driver-detail.component';
+import { LaunchNavigator } from '@awesome-cordova-plugins/launch-navigator/ngx';
+
+@Component({
+  selector: 'app-today-order',
+  templateUrl: './today-order.page.html',
+  styleUrls: ['./today-order.page.scss'],
+})
+export class TodayOrderPage implements OnInit {
+  todayOrder: any = [];
+  id: any;
+  loading: any;
+  isApiHit!: boolean;
+  constructor(
+    private router: Router,
+    private activeRoute: ActivatedRoute,
+    private httpTo: TodayOrderService,
+    private loadingController: LoadingController,
+    private common: CommonService,
+    private modalCtrl: ModalController,
+    private launchNavigator: LaunchNavigator,
+    private navCtrl: NavController
+  ) { }
+
+  ngOnInit() {
+    this.id = this.activeRoute.snapshot.paramMap.get('id'); // id == 1 for driver dispatch and 2 for site receive and 4 for cpu
+  }
+
+  ionViewDidEnter() {
+    this.getDriverTodayOrder(this.id)
+  }
+
+  getDriverTodayOrder(id: string) {
+    this.todayOrder = [];
+    this.presentLoading().then(preLoad => {
+      this.httpTo.getTodayOrderDriver(id).subscribe({
+        next:(data) => {
+          if (data.status) {
+            this.todayOrder = data.data;
+          } else {
+            this.common.presentToast(data.msg , 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.isApiHit = true;
+          this.dismissloading();
+        }
+      })
+    })
+  }
+
+  async openDriverModal(dat: any) {
+    console.log('my site');
+    const modal = await this.modalCtrl.create({
+      component: DriverDetailComponent,
+      cssClass: 'my-modal2',
+      componentProps: { requestedData: dat }
+    });
+    modal.present();
+  }
+
+  openGoogleMap(lat: any, lng: any) {
+    console.log(lat);
+    if (!lat || !lng) {
+      alert('Latitude and Longitude not availabe');
+      return;
+    }
+    this.launchNavigator.navigate([parseFloat(lat), parseFloat(lng)], {
+      start: [28.65137795955116, 77.27685944140623]
+    }).catch(err => {
+      alert(JSON.stringify(err));
+    });
+  }
+
+
+  async presentLoading(msg?: any) {
+    this.loading = await this.loadingController.create({
+      cssClass: 'my-custom-class',
+      message: 'Please Wait...',
+    });
+    await this.loading.present();
+  }
+
+  async dismissloading() {
+    if (this.loading) {
+      this.loading.dismiss();
+    }
+  }
+
+  orderReached(data: any) {
+    if (data.ord_status === 9) {
+      this.common.presentToast('Order Already Reached on site', 'warning');
+      return;
+    }
+    this.presentLoading().then(preLoad => {
+      this.httpTo.orderReached(data.order_id).subscribe({
+        next:(res) => {
+          if (res.status) {
+            this.common.presentToast(res.msg,'success');
+            data.ord_status = 9;
+            data.order_status_label = 'Reached on site';
+          } else {
+            this.common.presentToast(res.msg, 'warning')
+          }
+        },
+        error:() => {
+          this.common.presentToast(environment.errMsg, 'danger');
+          this.dismissloading();
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+  }
+
+  challan(dat: any) {
+    console.log(dat)
+    var obj: any = {
+      data: dat.order_id
+    }
+    if (this.id === '1') {
+      obj.req_for = 'driver'
+    } else if (this.id === '2') {
+      obj.req_for = 'site'
+    }
+    this.presentLoading().then(preLoad => {
+      this.httpTo.viewPdf(obj).subscribe({
+        next:(data) => {
+          console.log(data);
+          if (data.status) {
+            this.common.openImg(data.data.url, data.data.blob_type);
+          } else {
+            this.common.presentToast(data.msg, 'warning');
+          }
+        },
+        error:() => {
+          this.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete:() => {
+          this.dismissloading();
+        }
+      })
+    })
+
+    console.log(obj);
+  }
+
+
+
+  viewBox(data: any) {
+    if (this.id === '4') {
+      this.router.navigate(['/today-order/order-detail'], { // 4 cpu
+        queryParams: {
+          data: JSON.stringify(data),
+        }
+      });
+    } else if (this.id === '2') {
+      this.router.navigate(['/today-order/order-received'], { //2 site recivie
+        queryParams: {
+          data: JSON.stringify(data),
+        }
+      });
+    }
+  }
+
+  history() {
+    this.router.navigateByUrl('/today-order/order-history');
+  }
+
+  orderReceived() {
+    this.router.navigateByUrl('/today-order/order-received');
+  }
+
+}

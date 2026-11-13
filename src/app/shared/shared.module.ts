@@ -14,6 +14,7 @@ import { AssetPlantComponent } from '../page/add-asset/asset-plant/asset-plant.c
 import { FloorComponent } from './floor/floor.component';
 import { LocationComponent } from './location/location.component';
 import { DeviceGroupComponent } from './device-group/device-group.component';
+import { CpuSiteComponent } from './cpu-site/cpu-site.component';
 import { BuildingComponent } from './building/building.component';
 import { PhotoViewComponent } from './photo-view/photo-view.component';
 import { VideoComponent } from './video/video.component';
@@ -40,6 +41,7 @@ import { PermissionGuideComponent } from './permission-guide/permission-guide.co
     FloorComponent,
     LocationComponent,
     DeviceGroupComponent,
+    CpuSiteComponent,
     BuildingComponent,
     PhotoViewComponent,
     VideoComponent,
@@ -73,6 +75,7 @@ import { PermissionGuideComponent } from './permission-guide/permission-guide.co
     FloorComponent,
     LocationComponent,
     DeviceGroupComponent,
+    CpuSiteComponent,
     BuildingComponent,
     PhotoViewComponent,
     VideoComponent,

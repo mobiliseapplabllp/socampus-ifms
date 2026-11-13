@@ -268,14 +268,14 @@ export class MeterPage implements OnInit {
     }
   }
 
-  async presentActionSheet(val: any, data: any, type: any) {
-    let obj: any = [];
-    if (val === 1) {
-      obj = ['camera', 'gallery'];
-    } else {
-      obj = ['camera'];
-    }
-    this.camera.selectImage(['camera', 'gallery'], (blob: Blob) => {
+  async presentActionSheet(obj: any, data: any, type: any) {
+    // let obj: any = [];
+    // if (val === 1) {
+    //   obj = ['camera', 'gallery'];
+    // } else {
+    //   obj = ['camera'];
+    // }
+    this.camera.selectImage(obj, (blob: Blob) => {
       this.readImg(blob, data ,type)
     });
   }

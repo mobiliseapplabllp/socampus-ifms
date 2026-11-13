@@ -115,6 +115,11 @@ ion-segment-button {
   margin-bottom:20px
 }
 
+// selected option ka is_correct 0 ho to hara ki jagah laal - isliye .selectedRadioButton ke baad hi rehna chahiye
+.wrongRadioButton {
+  border:2px solid var(--ion-color-danger) !important;
+}
+
 
 .radioButton {
   border:2px solid var(--ion-color-primary);
@@ -132,6 +137,14 @@ ion-segment-button {
   --height: 50%;
   --border-radius: 5px;
   padding: 25px;
+}
+
+// pm-report ka Add Downtime modal - web jaisa chhota dialog, full screen nahi
+.downtime-modal {
+  --width: 90%;
+  --max-width: 420px;
+  --height: 300px;
+  --border-radius: 12px;
 }
 
 .my-modal-bottom {

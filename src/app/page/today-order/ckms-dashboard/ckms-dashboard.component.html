@@ -1,0 +1,155 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="isFilter = !isFilter"><ion-icon name="funnel-outline"></ion-icon></ion-button>
+      <ion-button id="dashboard-date"><ion-icon name="calendar-outline"></ion-icon></ion-button>
+    </ion-buttons>
+    <ion-popover trigger="dashboard-date" >
+      <ng-template>
+        <ion-datetime #popoverDatetime max="2099" presentation="date" size="cover" [max]="todayDate" (ionChange)="changeDateComponent($event)"></ion-datetime>
+      </ng-template>
+    </ion-popover>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-slides [options]="slideBanner" style="padding-top:10px">
+    <ion-slide *ngFor="let dat of dateArr" style="padding:0px">
+      <div style="width:40px;height:70px;border-radius: 20px;" [ngClass]="{'black': dat.isSelect, 'medium': !dat.isSelect}" (click)="changeDate(dat)">
+        <section style="width:40px;height:35px;padding:2px !important">
+          <span class="center" style="height:35px;width:100%;border-radius: 20px;font-size:11px;font-weight: 550;" [ngClass]="{'white': dat.isSelect, 'dark': !dat.isSelect}">
+            {{dat.day}}
+          </span>
+        </section>
+        <section style="width:100%;height:35px;font-size:14px;font-weight: 550;" class="center" [ngClass]="{'text-white': dat.isSelect}">
+          {{dat.date}}
+        </section>
+      </div>
+    </ion-slide>
+  </ion-slides>
+  <ion-row *ngIf="isFilter">
+    <ion-col size="5" >
+      <section class="inputbox" style="padding-right:0px">
+        <ion-text color="primary">Select Site </ion-text>
+        <ion-item lines="none" (click)="openCkmsSite()">
+          <ion-input type="text" placeholder="Site" [(ngModel)]="pc_id_desc" readonly></ion-input>
+        </ion-item>
+      </section>
+    </ion-col>
+    <ion-col size="5">
+      <section class="inputbox" style="padding-left:0px">
+        <ion-text color="primary">Meal Type </ion-text>
+        <ion-item lines="none">
+          <ion-select interface="action-sheet" [(ngModel)]="type_id" placeholder="Placeholder">
+            <ion-select-option *ngFor="let dat of mealType" [value]="dat.value">{{dat.label}}</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </section>
+    </ion-col>
+    <ion-col size="2" class="center">
+      <ion-button shape="round" fill="outline" (click)="search()">
+        <ion-icon name="search-outline"></ion-icon>
+      </ion-button>
+    </ion-col>
+  </ion-row>
+  <br>
+  <ion-segment [(ngModel)]='segment' scrollable="true" mode="md">
+    <ion-segment-button value="preparing" class="ion-text-capitalize"> Preparing ({{orderConfirm.length}})</ion-segment-button>
+    <ion-segment-button value="packed" class="ion-text-capitalize">Packed ({{orderPack.length}})</ion-segment-button>
+    <ion-segment-button value="dispatched" class="ion-text-capitalize">Dispatched ({{orderDispatch.length}})</ion-segment-button>
+    <ion-segment-button value="received" class="ion-text-capitalize">Received ({{orderReceived.length}})</ion-segment-button>
+  </ion-segment>
+  <div [ngSwitch]='segment'>
+    <div *ngSwitchCase= "'preparing'">
+      <ion-card *ngFor="let dat of orderConfirm" class="cards">
+        <ion-row>
+          <ion-col size="1" class="ion-text-center">
+            <div style="height:100%;width:5px;border-radius: 5px;background-color: #040E51; margin:auto"></div>
+          </ion-col>
+          <ion-col size="6" style="display: flex;align-items: center;">
+            <div>
+              <p><ion-text class="key">Order ID:</ion-text> <ion-text class="value">{{dat.order_id}}</ion-text> </p>
+              <p><ion-text class="key">Picking Time:</ion-text>   </p>
+              <p><ion-text class="key">PC Id:</ion-text> <ion-text class="value">{{dat.pc_id}}-{{dat.pc_desc}}</ion-text> </p>
+            </div>
+          </ion-col>
+          <ion-col size="5" style="display: flex;align-items: center;">
+            <div>
+              <ion-button size="small" class="ion-text-capitalize" color="success" (click)="openConfirmPage(dat)">View Items <ion-icon name="arrow-forward-outline" slot="end"></ion-icon> </ion-button>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-card>
+    </div>
+    <div *ngSwitchCase= "'packed'">
+      <ion-card *ngFor="let dat of orderPack" class="cards">
+        <ion-row>
+          <ion-col size="1" class="ion-text-center">
+            <div style="height:100%;width:5px;border-radius: 5px;background-color: #040E51; margin:auto"></div>
+          </ion-col>
+          <ion-col size="6" style="display: flex;align-items: center;">
+            <div>
+              <p><ion-text class="key">Order ID:</ion-text> <ion-text class="value">{{dat.order_id}}</ion-text> </p>
+              <p><ion-text class="key">Total Items:</ion-text> <ion-text class="value">{{dat.total_items}}</ion-text>  </p>
+              <p><ion-text class="key">Type:</ion-text> <ion-text class="value">{{dat.type_desc}}</ion-text>  </p>
+              <p><ion-text class="key">PC Name:</ion-text> <ion-text class="value">{{dat.pc_id}}-{{dat.pc_desc}}</ion-text> </p>
+            </div>
+          </ion-col>
+          <ion-col size="5" style="display: flex;align-items: center;">
+            <div>
+              <ion-button size="small" class="ion-text-capitalize" color="success" (click)="orderDetails(dat)">View Items <ion-icon name="arrow-forward-outline" slot="end"></ion-icon> </ion-button>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-card>
+    </div>
+    <div *ngSwitchCase= "'dispatched'">
+      <ion-card *ngFor="let dat of orderDispatch" class="cards">
+        <ion-row>
+          <ion-col size="1" class="ion-text-center">
+            <div style="height:100%;width:5px;border-radius: 5px;background-color: #040E51; margin:auto"></div>
+          </ion-col>
+          <ion-col size="6" style="display: flex;align-items: center;">
+            <div>
+              <p><ion-text class="key">Order ID:</ion-text> <ion-text class="value">{{dat.order_id}}</ion-text> </p>
+              <p><ion-text class="key">Total Items:</ion-text> <ion-text class="value">{{dat.total_items}}</ion-text>  </p>
+              <p><ion-text class="key">Type:</ion-text> <ion-text class="value">{{dat.type_desc}}</ion-text>  </p>
+              <p><ion-text class="key">PC Name:</ion-text> <ion-text class="value">{{dat.pc_id}}-{{dat.pc_desc}}</ion-text> </p>
+            </div>
+          </ion-col>
+          <ion-col size="5" style="display: flex;align-items: center;">
+            <div>
+              <ion-button size="small" class="ion-text-capitalize" color="success" (click)="orderDetails(dat)">View Items <ion-icon name="arrow-forward-outline" slot="end"></ion-icon> </ion-button>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-card>
+    </div>
+    <div *ngSwitchCase= "'received'">
+      <ion-card *ngFor="let dat of orderReceived" class="cards">
+        <ion-row>
+          <ion-col size="1" class="ion-text-center">
+            <div style="height:100%;width:5px;border-radius: 5px;background-color: #040E51; margin:auto"></div>
+          </ion-col>
+          <ion-col size="6" style="display: flex;align-items: center;">
+            <div>
+              <p><ion-text class="key">Order ID:</ion-text> <ion-text class="value">{{dat.order_id}}</ion-text> </p>
+              <p><ion-text class="key">Total Items:</ion-text> <ion-text class="value">{{dat.total_items}}</ion-text>  </p>
+              <p><ion-text class="key">Type:</ion-text> <ion-text class="value">{{dat.type_desc}}</ion-text>  </p>
+              <p><ion-text class="key">PC Name:</ion-text> <ion-text class="value">{{dat.pc_id}}-{{dat.pc_desc}}</ion-text> </p>
+            </div>
+          </ion-col>
+          <ion-col size="5" style="display: flex;align-items: center;">
+            <div>
+              <ion-button size="small" class="ion-text-capitalize" color="success" (click)="orderDetails(dat)">View Items <ion-icon name="arrow-forward-outline" slot="end"></ion-icon> </ion-button>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-card>
+    </div>
+  </div>
+
+</ion-content>

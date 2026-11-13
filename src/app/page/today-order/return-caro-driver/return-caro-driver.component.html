@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Return Cambro {{type}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-card *ngFor="let dat of returnDetails" (click)="openDetails(dat)">
+    <ion-row>
+      <ion-col size="6">
+        <ion-text color="primary">Site Description</ion-text><br>
+        <ion-text color="medium">{{dat.pc_desc}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">PC ID</ion-text><br>
+        <ion-text color="medium">{{dat.pc_id}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">Return ID</ion-text><br>
+        <ion-text color="medium">{{dat.return_id}}</ion-text>
+      </ion-col>
+      <ion-col size="6">
+        <ion-text color="primary">CPU ID</ion-text><br>
+        <ion-text color="medium">{{dat.cpu_pc_id}}</ion-text>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+
+</ion-content>

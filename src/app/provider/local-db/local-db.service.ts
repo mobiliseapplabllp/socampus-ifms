@@ -1,5 +1,4 @@
 import Dexie, { Table } from 'dexie';
-
 export interface checklist {
   schedule_id: any,
   offline_save: any
