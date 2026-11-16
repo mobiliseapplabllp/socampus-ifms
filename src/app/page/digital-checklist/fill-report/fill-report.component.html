@@ -25,11 +25,11 @@
   <input #videoFileInput type="file" accept="video/*" class="fill-report-hidden-file" (change)="onVideoFileSelected($event)">
 
   <ng-template #numericScalar let-val="val" let-dat="dat">
-    <ion-item class="fill-report-input-item" [ngClass]="{ redBorder: val.isNotFill && !isScalarAnswerValid(val) }">
+    <ion-item class="fill-report-input-item" [ngClass]="{ redBorder: val.isNotFill && !isScalarAnswerValid(val), 'fill-report-input-item--out-of-range': isOutOfRange(val) }">
       <ion-label position="floating">{{ numericScalarLabel(val) }}</ion-label>
       <ion-input type="number" inputmode="decimal" step="any" [(ngModel)]="val.q_value" (ionChange)="onScalarAnswerChange(val)" [disabled]="!isEditable(dat)"></ion-input>
     </ion-item>
-    <div class="fill-report-hint" *ngIf="getNumericHint(val)">
+    <div class="fill-report-hint" [class.fill-report-hint--out-of-range]="isOutOfRange(val)" *ngIf="getNumericHint(val)">
       <ion-icon name="information-circle-outline"></ion-icon>
       <span>{{ getNumericHint(val) }}</span>
     </div>

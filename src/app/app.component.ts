@@ -696,10 +696,22 @@ export class AppComponent {
    * server haan na kahe. Naam purana rakha hai taaki baaki jagah ka code na toote.
    */
   private revertPunchToggleAfterFailure(type: string) {
-    this.punchBusy = false;
+    // zone.run: location plugin ka jawab Angular zone ke bahar aa sakta hai, tab button
+    // bina iske disabled + spinner me atka reh jaata
+    this.zone.run(() => {
+      this.punchBusy = false;
+    });
   }
 
   async punchInOutApi(type: string) {
+    if (this.punchBusy) {
+      return;
+    }
+    // Popup me Punch In / Punch Out dabate hi button band + spinner. Pehle ye location
+    // milne ke baad lagta tha, to GPS ke 3-5 second (iOS par zyada) app atki hui lagti
+    // thi aur button dobara dab sakta tha
+    this.punchBusy = true;
+
     let latitude: number;
     let longitude: number;
 
@@ -735,7 +747,6 @@ export class AppComponent {
       actionType: 'REGULAR',
       userId: this.userInfo.id,
     };
-    this.punchBusy = true;
     this.common.presentLoading().then(() => {
       this.listMaster.punchIn(payload).subscribe({
         next: (res: any) => {

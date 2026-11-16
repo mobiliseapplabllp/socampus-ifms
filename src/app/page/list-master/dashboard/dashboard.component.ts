@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { IonSlides } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
 import { ListMasterService } from 'src/app/provider/list-master/list-master.service';
 
@@ -9,6 +10,7 @@ import { ListMasterService } from 'src/app/provider/list-master/list-master.serv
 })
 export class DashboardComponent  implements OnInit {
   @Input() eventChange: any
+  @ViewChild('mySlider') slider?: IonSlides;
   breakdown : any = {};
   pms: any = {};
   indent: any = {};
@@ -83,6 +85,29 @@ export class DashboardComponent  implements OnInit {
         ]
       }
     ];
+    this.refreshLoopCopies();
+  }
+
+  /**
+   * loop: true par Swiper pehle/aakhri card ki HTML copy banata hai (aakhri ke baad
+   * jo "pehla" card dikhta hai wo yahi copy hoti hai). Copy Angular ki nahi hoti, to
+   * data baad me aane par usme purani value (0) reh jaati thi aur touch karne par hi
+   * asli card dikhta tha. Isliye naya data lagne ke baad copies dobara banwate hain.
+   */
+  private refreshLoopCopies(): void {
+    // setTimeout: pehle Angular asli cards me nayi value likh de, phir unki copy bane
+    setTimeout(async () => {
+      try {
+        const swiper = await this.slider?.getSwiper();
+        if (!swiper || !swiper.params?.loop) {
+          return;
+        }
+        swiper.loopCreate(); // purani copies hata kar asli cards se nayi banata hai
+        swiper.update();
+      } catch {
+        // Swiper abhi taiyar nahi - copies init par hi sahi ban jayengi
+      }
+    });
   }
 
   /** Swiper ko wahi card dobara na banana pade */

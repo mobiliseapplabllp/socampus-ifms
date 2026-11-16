@@ -7,61 +7,53 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-card *ngFor="let dat of pendingData">
-    <ion-card-header color="primary" style="padding:10px">
-      <ion-row class="ion-no-padding">
-        <ion-col size="12">Stock Adjust No : {{dat.order_no}}</ion-col>
-      </ion-row>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-row>
-        <ion-col size="6">
-          <ion-text color="primary">Stock ID</ion-text><br>
-          <ion-text color="medium">{{dat.order_no}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Site Name</ion-text><br>
-          <ion-text color="medium">{{dat.pc_name}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Warehouse</ion-text><br>
-          <ion-text color="medium">{{dat.wh_name}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Requested By</ion-text><br>
-          <ion-text
-            color="medium">{{dat.created_by_name}}{{dat.created_by_lname}}({{dat.created_by_username}})</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Requested At</ion-text><br>
-          <ion-text color="medium">{{dat.created_at}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Remark</ion-text><br>
-          <ion-text color="medium">{{dat.remarks}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Material Details</ion-text><br>
-          <ion-button fill="outline" color="primary" size="small" (click)="openMaterialModal(dat)">View
-            <ion-icon name="eye-outline"></ion-icon>
-          </ion-button>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="6">
-          <ion-button size="block" shape="round" fill="outline" color="danger"
-            (click)="presentAlertConfirm(dat, '2', 'Reject')">Reject <ion-icon name="close-outline"
-              slot="end"></ion-icon> </ion-button>
-        </ion-col>
-        <ion-col size="6">
-          <ion-button size="block" shape="round" fill="solid" color="success"
-            (click)="presentAlertConfirm(dat, '1', 'Approve')">Approve <ion-icon name="checkmark-outline"
-              slot="end"></ion-icon> </ion-button>
-        </ion-col>
-      </ion-row>
-    </ion-card-content>
-  </ion-card>
+<ion-content class="apv-content">
+  <div class="apv-card" *ngFor="let dat of pendingData">
+    <div class="apv-card__header">
+      <div class="apv-card__ticket">
+        <ion-icon name="cube-outline"></ion-icon>
+        <span>Stock Adjust #{{dat.order_no}}</span>
+      </div>
+    </div>
+
+    <div class="apv-card__body">
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Site Name</span>
+        <span class="apv-field__value">{{dat.pc_name || '—'}}</span>
+      </div>
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Warehouse</span>
+        <span class="apv-field__value">{{dat.wh_name || '—'}}</span>
+      </div>
+      <div class="apv-field">
+        <span class="apv-field__label">Requested By</span>
+        <span class="apv-field__value">{{dat.created_by_name}} {{dat.created_by_lname}} ({{dat.created_by_username}})</span>
+      </div>
+      <div class="apv-field">
+        <span class="apv-field__label">Requested At</span>
+        <span class="apv-field__value">{{dat.created_at || '—'}}</span>
+      </div>
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Remark</span>
+        <span class="apv-field__value">{{dat.remarks || '—'}}</span>
+      </div>
+      <button type="button" class="apv-attach" (click)="openMaterialModal(dat)">
+        <ion-icon name="eye-outline"></ion-icon>
+        <span>View Material Details</span>
+      </button>
+    </div>
+
+    <div class="apv-card__actions">
+      <ion-button expand="block" shape="round" fill="outline" color="danger" class="ion-text-capitalize" (click)="presentAlertConfirm(dat, '2', 'Reject')">
+        <ion-icon name="close-outline" slot="start"></ion-icon>
+        Reject
+      </ion-button>
+      <ion-button expand="block" shape="round" fill="solid" color="success" class="ion-text-capitalize" (click)="presentAlertConfirm(dat, '1', 'Approve')">
+        <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+        Approve
+      </ion-button>
+    </div>
+  </div>
 
   <ion-modal [isOpen]="isMaterialModalOpen" class="center-modal">
     <ng-template>
@@ -74,29 +66,23 @@
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding">
-        <ion-card *ngFor="let mat of materialData">
-          <ion-card-content>
-            <ion-row>
-              <ion-col size="6">
-                <b>Material Name : </b><br>
-                {{mat?.mtrl_name}}
-              </ion-col>
-              <ion-col size="6">
-                <b>Qty: </b>
-               <strong> {{mat?.receipt_qty}}</strong> 
-              </ion-col>
-              <!-- <ion-col size="6">
-                <b>Description : </b><br>
-                {{mat?.mtrl_desc}}
-              </ion-col> -->
-              <ion-col size="6">
-                <b>Type : </b>
-                {{mat?.type}}
-              </ion-col>
-            </ion-row>
-          </ion-card-content>
-        </ion-card>
+      <ion-content class="apv-content">
+        <div class="apv-card" *ngFor="let mat of materialData">
+          <div class="apv-card__body">
+            <div class="apv-field apv-field--full">
+              <span class="apv-field__label">Material Name</span>
+              <span class="apv-field__value">{{mat?.mtrl_name || '—'}}</span>
+            </div>
+            <div class="apv-field">
+              <span class="apv-field__label">Qty</span>
+              <span class="apv-field__value">{{mat?.receipt_qty}}</span>
+            </div>
+            <div class="apv-field">
+              <span class="apv-field__label">Type</span>
+              <span class="apv-field__value">{{mat?.type || '—'}}</span>
+            </div>
+          </div>
+        </div>
       </ion-content>
     </ng-template>
   </ion-modal>

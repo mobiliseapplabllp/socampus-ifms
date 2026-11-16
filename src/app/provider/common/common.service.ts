@@ -68,7 +68,7 @@ export class CommonService {
       message: msg,
       duration: 3000,
       color: clr,
-      position: 'top'
+      position: 'bottom'
     });
     toast.present();
   }

@@ -6,52 +6,56 @@
     <ion-title>PPM PTW Approval({{pendingData.length}})</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content>
-  <ion-card *ngFor="let dat of pendingData">
-    <ion-card-header color="primary" style="padding:10px">
-      <ion-row class="ion-no-padding">
-        <ion-col size="4">Wo No: #{{dat.wo_id}}</ion-col>
-        <ion-col size="8" class="ion-text-right ion-padding-end">{{dat.ptwcreateddate}}</ion-col>
-      </ion-row>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-row>
-        <ion-col size="6">
-          <ion-text color="primary">Site Name</ion-text><br>
-          <ion-text color="medium">{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Logged By</ion-text><br>
-          <ion-text color="medium">{{dat.createdby}}</ion-text>
-        </ion-col>
-        <ion-col size="6" *ngIf="dat.ext_asset_id">
-          <ion-text color="primary">Asset ID</ion-text><br>
-          <ion-text color="medium">{{dat.ext_asset_id}}</ion-text>
-        </ion-col>
-        <ion-col size="6" *ngIf="dat.ext_asset_id">
-          <ion-text color="primary">Group Desc</ion-text><br>
-          <ion-text color="medium">{{dat.grp_desc}}</ion-text>
-        </ion-col>
-        <ion-col size="6" *ngIf="dat.ext_asset_id">
-          <ion-text color="primary">Manufacturer</ion-text><br>
-          <ion-text color="medium">{{dat.mnfctrer_desc}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Remark</ion-text><br>
-          <ion-text color="medium">{{dat.ptw_remark}}</ion-text>
-          <ion-button fill="clear" color="danger" (click)="openDoc(dat.ptw_attach)">
-            <ion-icon name="attach-outline"></ion-icon>
-          </ion-button>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="6">
-          <ion-button size="block" shape="round" fill="outline" color="danger"  (click)="presentAlertConfirm(dat, '0', 'Reject')">Reject <ion-icon name="close-outline" slot="end"></ion-icon> </ion-button>
-        </ion-col>
-        <ion-col size="6">
-          <ion-button size="block" shape="round" fill="solid" color="success"  (click)="presentAlertConfirm(dat, '1', 'Approve')">Approve <ion-icon name="checkmark-outline" slot="end"></ion-icon> </ion-button>
-        </ion-col>
-      </ion-row>
-    </ion-card-content>
-  </ion-card>
+<ion-content class="apv-content">
+  <div class="apv-card" *ngFor="let dat of pendingData">
+    <div class="apv-card__header">
+      <div class="apv-card__ticket">
+        <ion-icon name="construct-outline"></ion-icon>
+        <span>WO #{{dat.wo_id}}</span>
+      </div>
+      <span class="apv-card__meta" *ngIf="dat.ptwcreateddate">{{dat.ptwcreateddate}}</span>
+    </div>
+
+    <div class="apv-card__body">
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Site Name</span>
+        <span class="apv-field__value">{{dat.pc_ext_id}} {{dat.pc_desc}}</span>
+      </div>
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Logged By</span>
+        <span class="apv-field__value">{{dat.createdby || '—'}}</span>
+      </div>
+      <div class="apv-field" *ngIf="dat.ext_asset_id">
+        <span class="apv-field__label">Asset ID</span>
+        <span class="apv-field__value">{{dat.ext_asset_id}}</span>
+      </div>
+      <div class="apv-field" *ngIf="dat.ext_asset_id">
+        <span class="apv-field__label">Group Desc</span>
+        <span class="apv-field__value">{{dat.grp_desc || '—'}}</span>
+      </div>
+      <div class="apv-field apv-field--full" *ngIf="dat.ext_asset_id">
+        <span class="apv-field__label">Manufacturer</span>
+        <span class="apv-field__value">{{dat.mnfctrer_desc || '—'}}</span>
+      </div>
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Remark</span>
+        <span class="apv-field__value">{{dat.ptw_remark || '—'}}</span>
+      </div>
+      <button type="button" class="apv-attach" *ngIf="dat.ptw_attach" (click)="openDoc(dat.ptw_attach)">
+        <ion-icon name="attach-outline"></ion-icon>
+        <span>View Attachment</span>
+      </button>
+    </div>
+
+    <div class="apv-card__actions">
+      <ion-button expand="block" shape="round" fill="outline" color="danger" class="ion-text-capitalize" (click)="presentAlertConfirm(dat, '0', 'Reject')">
+        <ion-icon name="close-outline" slot="start"></ion-icon>
+        Reject
+      </ion-button>
+      <ion-button expand="block" shape="round" fill="solid" color="success" class="ion-text-capitalize" (click)="presentAlertConfirm(dat, '1', 'Approve')">
+        <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+        Approve
+      </ion-button>
+    </div>
+  </div>
 </ion-content>

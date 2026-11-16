@@ -6,57 +6,58 @@
     <ion-title>PTW Approval({{pendingList.length}})</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content>
-  <ion-card *ngFor="let dat of pendingList">
-    <ion-card-header color="primary">Ticket id: {{dat.tkts_id}}</ion-card-header>
-    <ion-card-content>
-      <ion-row>
-        <ion-col size="6">
-          <ion-text color="primary">Complaint Type</ion-text><br>
-          <ion-text color="medium">{{dat.issue_desc}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Site Name</ion-text><br>
-          <ion-text color="medium">{{dat.pc_ext_id}} {{dat.pc_desc}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Barcode</ion-text><br>
-          <ion-text color="medium">{{dat.ext_asset_id}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Logged By</ion-text><br>
-          <ion-text color="medium">{{dat.logged_by_name}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Loged ON</ion-text><br>
-          <ion-text color="medium">{{dat.created_at}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Ticket ID</ion-text><br>
-          <ion-text color="medium">{{dat.tkts_id}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">Complaint Remark</ion-text><br>
-          <ion-text color="medium">{{dat.remark}}</ion-text>
-        </ion-col>
-        <ion-col size="6">
-          <ion-text color="primary">PTW Remark</ion-text><br>
-          <ion-text color="medium">{{dat.ptw_remark}}</ion-text>
-        </ion-col>
-        <ion-col *ngIf="dat.ptw_attach">
-          <ion-button color="secondary" shape="round" fill="clear" (click)="openDoc(dat.ptw_attach, dat.ptw_attach_blob_type)">View <ion-icon name="attach-outline" slot="end"></ion-icon> </ion-button>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="6">
-          <ion-button size="block" shape="round" fill="outline" color="danger"  (click)="presentAlertConfirm(dat, '0', 'Reject')">Reject <ion-icon name="close-outline" slot="end"></ion-icon> </ion-button>
-        </ion-col>
-        <ion-col size="6">
-          <ion-button size="block" shape="round" fill="solid" color="success"  (click)="presentAlertConfirm(dat, '1', 'Approve')">Approve <ion-icon name="checkmark-outline" slot="end"></ion-icon> </ion-button>
-        </ion-col>
-      </ion-row>
-    </ion-card-content>
-  </ion-card>
+<ion-content class="apv-content">
+  <div class="apv-card" *ngFor="let dat of pendingList">
+    <div class="apv-card__header">
+      <div class="apv-card__ticket">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <span>Ticket #{{dat.tkts_id}}</span>
+      </div>
+      <span class="apv-card__type" *ngIf="dat.issue_desc">{{dat.issue_desc}}</span>
+    </div>
+
+    <div class="apv-card__body">
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Site Name</span>
+        <span class="apv-field__value">{{dat.pc_ext_id}} {{dat.pc_desc}}</span>
+      </div>
+      <div class="apv-field">
+        <span class="apv-field__label">Logged By</span>
+        <span class="apv-field__value">{{dat.logged_by_name || '—'}}</span>
+      </div>
+      <div class="apv-field">
+        <span class="apv-field__label">Logged On</span>
+        <span class="apv-field__value">{{dat.created_at || '—'}}</span>
+      </div>
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Barcode</span>
+        <span class="apv-field__value">{{dat.ext_asset_id || '—'}}</span>
+      </div>
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Complaint Remark</span>
+        <span class="apv-field__value">{{dat.remark || '—'}}</span>
+      </div>
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">PTW Remark</span>
+        <span class="apv-field__value">{{dat.ptw_remark || '—'}}</span>
+      </div>
+      <button type="button" class="apv-attach" *ngIf="dat.ptw_attach" (click)="openDoc(dat.ptw_attach, dat.ptw_attach_blob_type)">
+        <ion-icon name="attach-outline"></ion-icon>
+        <span>View Attachment</span>
+      </button>
+    </div>
+
+    <div class="apv-card__actions">
+      <ion-button expand="block" shape="round" fill="outline" color="danger" class="ion-text-capitalize" (click)="presentAlertConfirm(dat, '0', 'Reject')">
+        <ion-icon name="close-outline" slot="start"></ion-icon>
+        Reject
+      </ion-button>
+      <ion-button expand="block" shape="round" fill="solid" color="success" class="ion-text-capitalize" (click)="presentAlertConfirm(dat, '1', 'Approve')">
+        <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+        Approve
+      </ion-button>
+    </div>
+  </div>
   <!-- <ion-segment  [(ngModel)]='segmentStatus' (ionChange)="changeSegment($event)">
     <ion-segment-button value="pending">
       <ion-label>Pending </ion-label>

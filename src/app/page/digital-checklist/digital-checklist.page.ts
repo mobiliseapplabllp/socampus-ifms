@@ -56,6 +56,10 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
 
   assignCheckList: any[] = [];
   attendedCheckList: any[] = [];
+  // Toggle se pehle ki poori list — assignCheckList/attendedCheckList inhi se filter hokar banti hain
+  private allAssignCheckList: any[] = [];
+  private allAttendedCheckList: any[] = [];
+  showInfinity = true;
   dateArr: CalendarDay[] = [];
 
   isInternet = false;
@@ -233,8 +237,7 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
           this.router.navigateByUrl('/list-master/offline-data');
           return;
         }
-        this.assignCheckList = [];
-        this.attendedCheckList = [];
+        this.clearChecklists();
         this.clearFetchedDate(this.selectedDate);
         this.common.presentLoading('Deleteing Data from Local Database').then(() => {
           db.checklist.where('schedule_date').equals(this.selectedDate).delete().then(() => {
@@ -428,21 +431,39 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
       if (!matchUser) {
         return true;
       }
-      // Live app ke liye assign_to me single id hi aati rahegi; comma-separated list
-      // backend ab assign_to_all me bhejta hai. Purani cached/offline rows me
-      // assign_to_all nahi hoga, isliye fallback assign_to par.
-      const assignIds = String(row.assign_to_all || row.assign_to || '').split(',').map(id => id.trim());
+      // assign_to me single id aati hai, assign_to_all me comma-separated list.
+      // Dono ko split karke union se match karte hain — user kisi ek me bhi ho to row dikhegi.
+      // Purani cached/offline rows me assign_to_all nahi hoga, tab sirf assign_to chalega.
+      const assignIds = `${row.assign_to_all ?? ''},${row.assign_to ?? ''}`
+        .split(',')
+        .map(id => id.trim())
+        .filter(id => id !== '');
       return assignIds.includes(userId);
     };
 
-    this.assignCheckList = data.filter(row => row.schedule_status === 'assigned' && isAssignedToUser(row));
-    this.attendedCheckList = data.filter(row => row.schedule_status !== 'assigned' && isAssignedToUser(row));
-    console.log(this.assignCheckList);
+    this.allAssignCheckList = data.filter(row => row.schedule_status === 'assigned' && isAssignedToUser(row));
+    this.allAttendedCheckList = data.filter(row => row.schedule_status !== 'assigned' && isAssignedToUser(row));
     if (sortAssigned) {
-      this.assignCheckList.sort(
+      this.allAssignCheckList.sort(
         (a, b) => new Date(a.sch_dateTime).getTime() - new Date(b.sch_dateTime).getTime(),
       );
     }
+    this.applyInfinityFilter();
+    console.log(this.assignCheckList);
+  }
+
+  /** "Show Infinity Checklist" toggle: OFF par no-expiry rows dono tabs se chhup jaati hain. */
+  applyInfinityFilter() {
+    const isVisible = (row: any) => this.showInfinity || Number(row.is_no_expiry) !== 1;
+    this.assignCheckList = this.allAssignCheckList.filter(isVisible);
+    this.attendedCheckList = this.allAttendedCheckList.filter(isVisible);
+  }
+
+  private clearChecklists() {
+    this.allAssignCheckList = [];
+    this.allAttendedCheckList = [];
+    this.assignCheckList = [];
+    this.attendedCheckList = [];
   }
 
   /**
@@ -513,8 +534,7 @@ export class DigitalChecklistPage implements OnInit, OnDestroy {
     this.slides.slideTo(slideIndex);
     this.dateArr.forEach(d => (d.isSelect = d.date === day.date));
     this.selectedDate = day.fulldate;
-    this.assignCheckList = [];
-    this.attendedCheckList = [];
+    this.clearChecklists();
     this.loadChecklistForDate(this.selectedDate);
   }
 

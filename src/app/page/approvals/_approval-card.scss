@@ -1,0 +1,141 @@
+// Approvals ke saare andar wale pages (PTW, PPM PTW, Hold, Stock, Indent) ka common card look.
+// Har page ki scss isko `@import '../approval-card';` se leti hai.
+
+.apv-content {
+  --background: #f4f6fb;
+}
+
+.apv-empty {
+  margin: 48px 24px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ion-color-medium);
+}
+
+.apv-card {
+  margin: 14px 12px;
+  border: 1px solid rgba(38, 88, 156, 0.14);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(20, 40, 80, 0.08);
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 14px;
+    background: rgba(38, 88, 156, 0.07);
+    border-bottom: 1px solid rgba(38, 88, 156, 0.12);
+  }
+
+  &__ticket {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ion-color-primary);
+    word-break: break-word;
+
+    ion-icon {
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+  }
+
+  // Header ke right me chhota pill (jaise complaint type)
+  &__type {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid rgba(38, 88, 156, 0.2);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ion-color-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 50%;
+  }
+
+  // Header ke right me saada text (jaise date)
+  &__meta {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ion-color-medium-shade);
+    white-space: nowrap;
+  }
+
+  &__body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 12px;
+    padding: 14px;
+  }
+
+  &__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 10px 14px 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+    ion-button {
+      margin: 0;
+      font-weight: 600;
+    }
+  }
+}
+
+.apv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+
+  &__label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--ion-color-medium);
+  }
+
+  &__value {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--ion-color-dark);
+    word-break: break-word;
+  }
+}
+
+// Card ke andar chhota pill button (View Attachment, View Materials)
+.apv-attach {
+  grid-column: 1 / -1;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid rgba(38, 88, 156, 0.3);
+  border-radius: 999px;
+  background: rgba(38, 88, 156, 0.06);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+
+  ion-icon {
+    font-size: 16px;
+  }
+}

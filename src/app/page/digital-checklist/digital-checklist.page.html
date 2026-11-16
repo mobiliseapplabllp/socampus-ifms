@@ -48,11 +48,21 @@
           <ion-label>Attended(<ion-text color="danger">{{attendedCheckList.length}}</ion-text>)</ion-label>
         </ion-segment-button>
       </ion-segment>
-    </div>    
+    </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding-start ion-padding-end">
+  <!-- Sirf pill, header ke theek neeche right me tika hua - apni koi patti/background nahi,
+       cards iske neeche se scroll hote hain -->
+  <div slot="fixed" class="infinity-toggle">
+    <div class="infinity-toggle__pill">
+      <ion-label>No Expiry Checklist</ion-label>
+      <ion-toggle [(ngModel)]="showInfinity" (ionChange)="applyInfinityFilter()" color="primary" mode="md"></ion-toggle>
+    </div>
+  </div>
+  <!-- Pill ke liye jagah, taaki pehla card uske neeche na chhupe -->
+  <div class="infinity-toggle-spacer"></div>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
     <ion-fab-button fill="clear" color="primary" (click)="openBarcode()">
       <ion-icon name="qr-code-outline"></ion-icon>

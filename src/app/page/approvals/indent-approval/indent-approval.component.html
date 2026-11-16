@@ -7,85 +7,62 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-card *ngFor="let dat of pendingData">
-    <ion-card-header color="primary" style="padding:10px">
-      <ion-row class="ion-no-padding">
-        <ion-col size="12">
-          MR No : {{dat?.rqst_no}}
-        </ion-col>
-      </ion-row>
-    </ion-card-header>
-  
-    <ion-card-content>
-      <ion-row>
-        <ion-col size="6">
-          <ion-text color="primary">Site Name :</ion-text><br>
-          <ion-text color="medium">{{dat?.pc_name}}</ion-text>
-        </ion-col>
+<ion-content class="apv-content">
+  <div class="apv-card" *ngFor="let dat of pendingData">
+    <div class="apv-card__header">
+      <div class="apv-card__ticket">
+        <ion-icon name="clipboard-outline"></ion-icon>
+        <span>MR #{{dat?.rqst_no}}</span>
+      </div>
+    </div>
 
+    <div class="apv-card__body">
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Site Name</span>
+        <span class="apv-field__value">{{dat?.pc_name || '—'}}</span>
+      </div>
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Warehouse</span>
+        <span class="apv-field__value">{{dat?.wh_desc || '—'}}</span>
+      </div>
+      <div class="apv-field">
+        <span class="apv-field__label">Requested By</span>
+        <span class="apv-field__value">{{dat?.requestor_name}} {{dat?.requestor_lname}} ({{dat?.requestor_username}})</span>
+      </div>
+      <div class="apv-field">
+        <span class="apv-field__label">Requested At</span>
+        <span class="apv-field__value">{{dat?.created_at || '—'}}</span>
+      </div>
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Material</span>
+        <span class="apv-field__value">{{dat?.mtrl_desc || '—'}}</span>
+      </div>
+      <div class="apv-field">
+        <span class="apv-field__label">Qty</span>
+        <span class="apv-field__value">{{dat?.qty}} {{dat?.uom_desc}}</span>
+      </div>
+      <div class="apv-field">
+        <span class="apv-field__label">Txn ID</span>
+        <span class="apv-field__value">{{dat?.txn_id || '—'}}</span>
+      </div>
+      <div class="apv-field apv-field--full">
+        <span class="apv-field__label">Remark</span>
+        <span class="apv-field__value">{{dat?.remark || '—'}}</span>
+      </div>
+    </div>
 
-        
-        
-  
-        <ion-col size="6">
-          <ion-text color="primary">Warehouse :</ion-text><br>
-          <ion-text color="medium">{{dat?.wh_desc}}</ion-text>
-        </ion-col>
-  
-        <ion-col size="6">
-          <ion-text color="primary">Requested By :</ion-text><br>
-          <ion-text color="medium">
-            {{dat?.requestor_name}} {{dat?.requestor_lname}}
-            ({{dat?.requestor_username}})
-          </ion-text>
-        </ion-col>
-  
-        <ion-col size="6">
-          <ion-text color="primary">Requested At :</ion-text><br>
-          <ion-text color="medium">{{dat?.created_at}}</ion-text>
-        </ion-col>
-  
-        <ion-col size="6">
-          <ion-text color="primary">Remark :</ion-text><br>
-          <ion-text color="medium">{{dat?.remark}}</ion-text>
-        </ion-col>
-  
-        <ion-col size="6">
-          <ion-text color="primary">Material :</ion-text><br>
-          <ion-text color="medium">{{dat?.mtrl_desc}}</ion-text>
-        </ion-col>
-  
-        <ion-col size="6">
-          <ion-text color="primary">Qty :</ion-text><br>
-          <ion-text color="medium">{{dat?.qty}} {{dat?.uom_desc}}</ion-text>
-        </ion-col>
+    <div class="apv-card__actions">
+      <ion-button expand="block" shape="round" fill="outline" color="danger" class="ion-text-capitalize" (click)="presentAlertConfirm(dat, '0', 'Reject')">
+        <ion-icon name="close-outline" slot="start"></ion-icon>
+        Reject
+      </ion-button>
+      <ion-button expand="block" shape="round" fill="solid" color="success" class="ion-text-capitalize" (click)="presentAlertConfirm(dat, '1', 'Approve')">
+        <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+        Approve
+      </ion-button>
+    </div>
+  </div>
 
-        <ion-col size="6">
-          <ion-text color="primary">Txn ID :</ion-text><br>
-          <ion-text color="medium">{{dat?.txn_id}}</ion-text>
-        </ion-col>
-  
-  
-      </ion-row>
-  
-      <ion-row>
-        <ion-col size="6">
-          <ion-button size="block" shape="round" fill="outline" color="danger"(click)="presentAlertConfirm(dat, '0', 'Reject')">Reject
-           <ion-icon name="close-outline" slot="end"></ion-icon>
-          </ion-button>
-        </ion-col>
-  
-        <ion-col size="6">
-          <ion-button size="block" shape="round" fill="solid" color="success" (click)="presentAlertConfirm(dat, '1', 'Approve')"> Approve
-            <ion-icon name="checkmark-outline" slot="end"></ion-icon>
-          </ion-button>
-        </ion-col>
-      </ion-row>
-  
-    </ion-card-content>
-  </ion-card>
-  
 <!-- 
   <ion-modal [isOpen]="isMaterialModalOpen" class="center-modal">
     <ng-template>

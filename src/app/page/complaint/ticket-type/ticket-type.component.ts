@@ -260,11 +260,12 @@ export class TicketTypeComponent  implements OnInit {
         this.httpCommon.dismissloading();
         if (data.status) {
           this.issueType = data.data;
+          
           if (this.allData.issue_desc === 'Service') {
             setTimeout(() => {
               this.ticketForm.get('issue_type')?.setValue(2);
             }, 100)
-          } else if (this.allData.issue_desc === 'Assets') {
+          } else if (this.allData.issue_desc === 'Asset' || this.allData.issue_desc === 'Assets') {
             setTimeout(() => {
               this.ticketForm.get('issue_type')?.setValue(1);
               if (!this.allData.ext_asset_id) {

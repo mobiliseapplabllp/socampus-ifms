@@ -7,23 +7,19 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="approvals-content">
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
-  <ion-grid>
-    <ion-row  style="padding:2px;margin:0px !important;">
-      <ion-col *ngFor="let val of approvalsList" size="4" style="margin:3px 0px">
-        <ion-card style="margin:0px; min-height: 80px;width:100%; box-shadow:1px 1px 8px #26589c;border-radius: 10px;position: relative;" (click)="openPage(val)">
-          <span *ngIf="val.count > 0" style="position:absolute;background-color: var(--ion-color-danger);padding:3px;border-radius: 4px;top:5px;right:5px;color:var(--ion-color-dark)">{{val.count}}</span>
-          <div style="height:60px;width:100%" class="center">
-            <ion-img [src]="val.icon" style="height:35px;width:35px"></ion-img>
-          </div>
-          <div style="min-height:20px;width:100%" class="center">
-            <ion-text color="primary" style="font-weight: 500;"> {{val.label}}</ion-text>
-          </div>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+
+  <div class="approval-grid">
+    <button type="button" class="approval-tile ion-activatable" *ngFor="let val of approvalsList" (click)="openPage(val)">
+      <span class="approval-tile__badge" *ngIf="val.count > 0">{{ val.count > 99 ? '99+' : val.count }}</span>
+      <span class="approval-tile__icon">
+        <img [src]="val.icon" alt="">
+      </span>
+      <span class="approval-tile__label">{{ val.label }}</span>
+      <ion-ripple-effect></ion-ripple-effect>
+    </button>
+  </div>
 </ion-content>

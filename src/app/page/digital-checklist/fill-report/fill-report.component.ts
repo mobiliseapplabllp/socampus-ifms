@@ -94,7 +94,7 @@ const I18N_LABELS: Record<string, I18nLabels> = {
     ticketId: 'Ticket ID',
     enterValue: 'Enter value',
     temperature: 'Temperature',
-    allowedRange: 'Allowed range',
+    allowedRange: 'Recommended range',
     date: 'Date',
     dateTime: 'Date & time',
     selectDate: 'Select Date',
@@ -127,7 +127,7 @@ const I18N_LABELS: Record<string, I18nLabels> = {
     ticketId: 'टिकट आईडी',
     enterValue: 'मान दर्ज करें',
     temperature: 'तापमान',
-    allowedRange: 'अनुमत सीमा',
+    allowedRange: 'अनुशंसित सीमा',
     date: 'तिथि',
     dateTime: 'तिथि और समय',
     selectDate: 'तिथि चुनें',
@@ -160,7 +160,7 @@ const I18N_LABELS: Record<string, I18nLabels> = {
     ticketId: 'టికెట్ ID',
     enterValue: 'విలువ నమోదు చేయండి',
     temperature: 'ఉష్ణోగ్రత',
-    allowedRange: 'అనుమతించిన పరిధి',
+    allowedRange: 'సిఫార్సు చేసిన పరిధి',
     date: 'తేదీ',
     dateTime: 'తేదీ & సమయం',
     selectDate: 'తేదీని ఎంచుకోండి',
@@ -193,7 +193,7 @@ const I18N_LABELS: Record<string, I18nLabels> = {
     ticketId: 'டிக்கெட் ID',
     enterValue: 'மதிப்பை உள்ளிடவும்',
     temperature: 'வெப்பநிலை',
-    allowedRange: 'அனுமதிக்கப்பட்ட வரம்பு',
+    allowedRange: 'பரிந்துரைக்கப்பட்ட வரம்பு',
     date: 'தேதி',
     dateTime: 'தேதி & நேரம்',
     selectDate: 'தேதியைத் தேர்ந்தெடுக்கவும்',
@@ -226,7 +226,7 @@ const I18N_LABELS: Record<string, I18nLabels> = {
     ticketId: 'ಟಿಕೆಟ್ ID',
     enterValue: 'ಮೌಲ್ಯವನ್ನು ನಮೂದಿಸಿ',
     temperature: 'ತಾಪಮಾನ',
-    allowedRange: 'ಅನುಮತಿಸಲಾದ ವ್ಯಾಪ್ತಿ',
+    allowedRange: 'ಶಿಫಾರಸು ಮಾಡಿದ ವ್ಯಾಪ್ತಿ',
     date: 'ದಿನಾಂಕ',
     dateTime: 'ದಿನಾಂಕ & ಸಮಯ',
     selectDate: 'ದಿನಾಂಕ ಆಯ್ಕೆಮಾಡಿ',
@@ -259,7 +259,7 @@ const I18N_LABELS: Record<string, I18nLabels> = {
     ticketId: 'ടിക്കറ്റ് ID',
     enterValue: 'മൂല്യം നൽകുക',
     temperature: 'താപനില',
-    allowedRange: 'അനുവദനീയ പരിധി',
+    allowedRange: 'ശുപാർശ ചെയ്യുന്ന പരിധി',
     date: 'തീയതി',
     dateTime: 'തീയതി & സമയം',
     selectDate: 'തീയതി തിരഞ്ഞെടുക്കുക',
@@ -292,7 +292,7 @@ const I18N_LABELS: Record<string, I18nLabels> = {
     ticketId: 'तिकीट आयडी',
     enterValue: 'मूल्य प्रविष्ट करा',
     temperature: 'तापमान',
-    allowedRange: 'अनुमत श्रेणी',
+    allowedRange: 'शिफारस केलेली श्रेणी',
     date: 'तारीख',
     dateTime: 'तारीख आणि वेळ',
     selectDate: 'तारीख निवडा',
@@ -325,7 +325,7 @@ const I18N_LABELS: Record<string, I18nLabels> = {
     ticketId: 'ટિકિટ ID',
     enterValue: 'મૂલ્ય દાખલ કરો',
     temperature: 'તાપમાન',
-    allowedRange: 'મંજૂર શ્રેણી',
+    allowedRange: 'ભલામણ કરેલ શ્રેણી',
     date: 'તારીખ',
     dateTime: 'તારીખ અને સમય',
     selectDate: 'તારીખ પસંદ કરો',
@@ -358,7 +358,7 @@ const I18N_LABELS: Record<string, I18nLabels> = {
     ticketId: 'টিকিট ID',
     enterValue: 'মান লিখুন',
     temperature: 'তাপমাত্রা',
-    allowedRange: 'অনুমোদিত পরিসীমা',
+    allowedRange: 'প্রস্তাবিত পরিসীমা',
     date: 'তারিখ',
     dateTime: 'তারিখ ও সময়',
     selectDate: 'তারিখ নির্বাচন করুন',
@@ -391,7 +391,7 @@ const I18N_LABELS: Record<string, I18nLabels> = {
     ticketId: 'ଟିକେଟ୍ ID',
     enterValue: 'ମୂଲ୍ୟ ପ୍ରବେଶ କରନ୍ତୁ',
     temperature: 'ତାପମାତ୍ରା',
-    allowedRange: 'ଅନୁମତିପ୍ରାପ୍ତ ପରିସର',
+    allowedRange: 'ସୁପାରିଶ କରାଯାଇଥିବା ପରିସର',
     date: 'ତାରିଖ',
     dateTime: 'ତାରିଖ ଏବଂ ସମୟ',
     selectDate: 'ତାରିଖ ବାଛନ୍ତୁ',
@@ -913,9 +913,6 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   getNumericHint(val: any): string {
-    if (this.questionKind(val) === 'temperature') {
-      return '';
-    }
     const r = this.parseNumericRange(val);
     if (!r) {
       return '';
@@ -935,15 +932,20 @@ export class FillReportComponent implements OnInit, OnDestroy, ViewWillEnter {
     return n >= r.min && n <= r.max;
   }
 
-  isScalarAnswerValid(val: any): boolean {
+  /**
+   * Value bhari hai aur recommended range ke bahar hai. Khali value ya bina range ke question par false.
+   * Range sirf salah hai: iske bahar hone par input ka rang badalta hai, submit nahi rukta.
+   */
+  isOutOfRange(val: any): boolean {
     const k = this.questionKind(val);
-    if (!this.hasScalarAnswer(val)) {
+    if (k !== 'number' && k !== 'temperature') {
       return false;
     }
-    if (k === 'number') {
-      return this.isNumberInRange(val);
-    }
-    return true;
+    return this.hasScalarAnswer(val) && !this.isNumberInRange(val);
+  }
+
+  isScalarAnswerValid(val: any): boolean {
+    return this.hasScalarAnswer(val);
   }
 
   onScalarAnswerChange(val: any, _ev?: any) {

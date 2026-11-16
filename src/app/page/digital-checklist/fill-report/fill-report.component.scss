@@ -171,6 +171,20 @@ ion-text {
     font-size: 14px;
     color: var(--ion-color-primary);
   }
+
+  &--out-of-range {
+    color: #b26a00;
+
+    ion-icon {
+      color: #b26a00;
+    }
+  }
+}
+
+// Value recommended range ke bahar hai: sirf halka amber rang, error nahi (submit chalta hai)
+.fill-report-input-item--out-of-range {
+  --background: #fff6e0;
+  border-color: rgba(255, 196, 9, 0.7);
 }
 
 .fill-report-options {
