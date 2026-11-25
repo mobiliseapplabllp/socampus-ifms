@@ -16,12 +16,13 @@ export const environment = {
   // referUrl: 'https://socampus.mobilisepro.com/',
   // liveLocationUrl: 'https://socampus.mobilisepro.com/be/api/gps-mobile/ping',
   // isProd: true,  
-  url: 'https://socampusstagingnew.mobilisepro.com/be/api/', // ios k liye abhi proxy server lagega
-  url1: 'https://socampusstagingnew.mobilisepro.com/',
-  url2: 'https://socampusstagingnew.mobilisepro.com/',
-  ssoUrl: 'https://socampusstagingnew.mobilisepro.com/',
-  referUrl: 'https://socampusstagingnew.mobilisepro.com/',
-  liveLocationUrl: 'https://socampusstagingnew.mobilisepro.com/be/api/gps-mobile/ping',
+  // https://socampusifms.mobilisepro.com/#/auth?login=true
+  url: 'https://socampusifms.mobilisepro.com/be/api/', // ios k liye abhi proxy server lagega
+  url1: 'https://socampusifms.mobilisepro.com/',
+  url2: 'https://socampusifms.mobilisepro.com/',
+  ssoUrl: 'https://socampusifms.mobilisepro.com/',
+  referUrl: 'https://socampusifms.mobilisepro.com/',
+  liveLocationUrl: 'https://socampusifms.mobilisepro.com/be/api/gps-mobile/ping',
   isProd: false,  
   // url: 'https://mobileapproxyprod.mobilisepro.com/https://socampusdev.mobilisepro.com/be/api/', // ios k liye abhi proxy server lagega
   // url1: 'https://mobileapproxyprod.mobilisepro.com/https://socampusdev.mobilisepro.com/',
