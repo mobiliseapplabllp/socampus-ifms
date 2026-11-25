@@ -39,7 +39,7 @@ export class ComplaintCardsComponent  implements OnInit {
 
   /** Is ticket par trip ho sakti hai */
   private get tripAllowed(): boolean {
-    return Number(this.data?.gps_mobile_allow) === 1;
+    return Number(this.data?.gps_trip_btn) === 1;
   }
 
   private get tripState(): string {
@@ -125,11 +125,11 @@ export class ComplaintCardsComponent  implements OnInit {
       this.httpComplaint.getSpecificTicket(this.data.tkts_id).subscribe({
         next:(data) => {
           if (data.status) {            
-            if (data.data.complaint_type_cfrm === 0 && data.data.canDoTktConfirmationWork) {
+            if (data.data.complaint_type_cfrm === 0 && data.data.canDoTktConfirmationWork) {              
               this.openTicketTypeModal(data);
-            } else if (data.data?.pc_hse_conf.travel_allow === 1 && !data.data?.pc_hse_conf.travel_data && data.data.canWork) {
+            } else if (data.data?.pc_hse_conf.travel_allow === 1 && !data.data?.pc_hse_conf.travel_data && data.data.canWork) {              
               this.travelModal();
-            } else if (data.data.canWork){
+            } else if (data.data.canWork){              
               this.openTicketWork(data);
             } else {
               this.common.presentToast(`You can't work on this Ticket`, 'warning');
