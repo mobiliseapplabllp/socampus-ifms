@@ -92,6 +92,26 @@ const routes: Routes = [
     path: 'location-qr',
     loadChildren: () => import('./page/location-qr/location-qr.module').then( m => m.LocationQrPageModule)
   },
+  {
+    path: 'space-mgt',
+    loadChildren: () => import('./page/space-mgt/space-mgt.module').then( m => m.SpaceMgtPageModule)
+  },
+  {
+    path: 'parking-mgt',
+    loadChildren: () => import('./page/parking-mgt/parking-mgt.module').then( m => m.ParkingMgtPageModule)
+  },
+  {
+    path: 'visitor-mgt',
+    loadChildren: () => import('./page/visitor-mgt/visitor-mgt.module').then( m => m.VisitorMgtPageModule)
+  },
+  {
+    path: 'key-mgt',
+    loadChildren: () => import('./page/key-mgt/key-mgt.module').then( m => m.KeyMgtPageModule)
+  },
+  {
+    path: 'mailroom-mgt',
+    loadChildren: () => import('./page/mailroom-mgt/mailroom-mgt.module').then( m => m.MailroomMgtPageModule)
+  },
 ];
 
 @NgModule({

@@ -72,6 +72,11 @@
   </button>
 
   <app-dashboard [eventChange]="eventChange" ></app-dashboard>
+  <ion-button (click)="testRoute('/space-mgt')">Space Mgt</ion-button>
+  <ion-button (click)="testRoute('/parking-mgt')">Parking Mgt</ion-button>
+  <ion-button (click)="testRoute('/visitor-mgt')">visitor Mgt</ion-button>
+  <ion-button (click)="testRoute('/key-mgt')">Key Mgt</ion-button>
+  <ion-button (click)="testRoute('/mailroom-mgt')">Mailroom Mgt</ion-button>  
   <app-menu [didEnter]="didEnter"></app-menu>
   <app-pending-task [eventChange]="eventChange" [didEnter]="didEnter"  *ngIf="isInternet"></app-pending-task>
 </ion-content>
