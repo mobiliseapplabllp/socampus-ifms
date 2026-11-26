@@ -17,6 +17,7 @@ import { cordovaInstance } from '@awesome-cordova-plugins/core';
 // CKMS - cambro QR scan
 import { TodayOrderService } from 'src/app/provider/today-order/today-order.service';
 import { CambroStatusComponent } from './cambro-status/cambro-status.component';
+import { SpaceMgtService } from 'src/app/provider/space-mgt/space-mgt.service';
 @Component({
   selector: 'app-list-master',
   templateUrl: './list-master.page.html',
@@ -42,6 +43,8 @@ export class ListMasterPage implements OnInit {
   /** CKMS - QR se cambro status dekhna hai (barcode page se wapas aane par) */
   isScanQr!: boolean;
   loading: any;
+  /** Space Mgt - FMS SSO chal raha hai, double tap par dobara na chale */
+  isFmsLoading = false;
   constructor(
     private common: CommonService,
     private alertController: AlertController,
@@ -54,7 +57,8 @@ export class ListMasterPage implements OnInit {
     private httpComplaint: ComplaintService,
     private httpTo: TodayOrderService,
     private loadingController: LoadingController,
-    private iab: InAppBrowser,) {
+    private iab: InAppBrowser,
+    private httpSpace: SpaceMgtService,) {
     const user = localStorage.getItem('user');
     if (user) {
       this.userData = JSON.parse(user);
@@ -419,6 +423,50 @@ export class ListMasterPage implements OnInit {
 
   testRoute(url: string) {
     this.router.navigateByUrl(url);
+  }
+
+  // Space Management (embassy ke facility booking jaisa):
+  // Step 1: app backend se handoff token (sirf 2 min chalta hai), turant step 2.
+  spaceMgt() {
+    if (this.isFmsLoading) { return; }
+    this.isFmsLoading = true;
+    this.common.presentLoading().then(() => {
+      this.httpSpace.ssoInitiate().subscribe({
+        next: (data: any) => {
+          if (data?.status && data?.token) {
+            this.fmsValidate(data.token);
+          } else {
+            this.fmsFail(data?.msg);
+          }
+        },
+        error: () => this.fmsFail()
+      });
+    });
+  }
+
+  // Step 2: FMS se asli token + user. token2 FMS ki saari APIs me jaata hai.
+  fmsValidate(ssoToken: string) {
+    this.httpSpace.ssoValidate(ssoToken).subscribe({
+      next: (data: any) => {
+        const row = data?.data || data;
+        if (row?.token) {
+          this.isFmsLoading = false;
+          this.common.dismissloading();
+          localStorage.setItem('token2', row.token);
+          localStorage.setItem('fmsUser', JSON.stringify(row.user || {}));
+          this.router.navigateByUrl('/space-mgt');
+        } else {
+          this.fmsFail(data?.msg);
+        }
+      },
+      error: () => this.fmsFail()
+    });
+  }
+
+  fmsFail(msg?: string) {
+    this.isFmsLoading = false;
+    this.common.dismissloading();
+    this.common.presentToast(msg || 'FMS login failed', 'danger');
   }
 
   async openSosModal() {

@@ -1,0 +1,675 @@
+// Embassy (facility-booking) se liya hua design.
+// Wahan ye colors theme/variables.scss me aur picker / section-card wale styles
+// global.scss me the — yahan sirf isi page ke liye rakhe hain, taaki baaki app par asar na pade.
+// ion-modal par bhi vars lagaye hain kyunki modal open hone par page ke bahar render hota hai.
+:host,
+ion-modal {
+  --app-surface: linear-gradient(to left, #dcdff1 0%, #edeef7 45%, #ffffff 100%);
+  --app-violet: #4f6bff;   --app-violet-rgb: 79,107,255;
+  --app-teal:   #10b981;   --app-teal-rgb: 16,185,129;
+  --app-amber:  #f59e0b;   --app-amber-rgb: 245,158,11;
+}
+
+ion-content.surface-content {
+  --background: var(--app-surface);
+}
+
+// ================= Picker modal (embassy global.scss) =================
+.picker-header {
+  // The same --app-surface wash the pages use, painted once on the header so
+  // the title row and the search row share one continuous surface. Painting
+  // them separately left the two out of step and produced a washed-out band
+  // behind the searchbar.
+  background: var(--app-surface);
+
+  // Material draws the header shadow with a ::after pseudo-element; it would cut
+  // a line straight across the modal.
+  box-shadow: none;
+  margin-bottom: -1px;
+
+  &::after {
+    display: none;
+  }
+
+  ion-toolbar.picker-toolbar {
+    --background: transparent;
+    --color: #0f172a;
+    --border-width: 0;
+    --min-height: 56px;
+    --padding-start: 16px;
+    --padding-end: 8px;
+  }
+
+  .picker-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    padding: 4px 0;
+
+    ion-icon { font-size: 20px; color: var(--ion-color-primary); }
+  }
+
+  .close-btn {
+    --color: var(--ion-color-primary);
+    --background: rgba(var(--ion-color-primary-rgb), 0.08);
+    --border-radius: 50%;
+    --padding-start: 0;
+    --padding-end: 0;
+    width: 36px;
+    height: 36px;
+
+    ion-icon { font-size: 18px; }
+  }
+
+  // Transparent — the header's gradient shows through, so there is no seam.
+  .search-wrap {
+    background: transparent;
+    padding: 0 12px 14px;
+  }
+
+  .picker-search {
+    --background: #ffffff;
+    --border-radius: 14px;
+    // A white field on a light surface needs an edge, not just a shadow — the
+    // first stop is a 1px ring, the second the lift.
+    --box-shadow: 0 0 0 1px #e2e6f3, 0 4px 12px -6px rgba(15, 23, 42, 0.18);
+    --color: #0f172a;
+    --placeholder-color: #64748b;
+    --icon-color: var(--ion-color-primary);
+    padding: 0;
+    min-height: 44px;
+  }
+}
+
+ion-content.picker-content {
+  --background: var(--app-surface);
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 8px;
+  --padding-bottom: 16px;
+}
+
+// Offline pickers read from Dexie, so an empty list usually means the master
+// data has never been synced — say that rather than showing a blank sheet.
+.picker-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px;
+  text-align: center;
+
+  ion-icon { font-size: 48px; margin-bottom: 12px; color: #cbd5e1; }
+  p { margin: 0; font-size: 14.5px; font-weight: 600; color: #64748b; }
+  span { margin-top: 4px; font-size: 12px; color: #94a3b8; }
+}
+
+.picker-item {
+  --background: #ffffff;
+  --background-activated: rgba(var(--ion-color-primary-rgb), 0.06);
+  --background-hover: rgba(var(--ion-color-primary-rgb), 0.05);
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --inner-padding-end: 8px;
+  --min-height: 58px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  // Firmer than a hairline — the rows sit on a tinted surface now, not white.
+  border: 1px solid #e2e6f3;
+  box-shadow: 0 2px 6px -3px rgba(15, 23, 42, 0.06);
+
+  .picker-icon-wrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: rgba(var(--ion-color-primary-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+
+    ion-icon {
+      font-size: 18px;
+      color: var(--ion-color-primary);
+    }
+  }
+
+  ion-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #0f172a;
+    white-space: normal;
+  }
+
+  .picker-arrow {
+    font-size: 16px;
+    color: #cbd5e1;
+  }
+
+  &:active { transform: scale(0.99); }
+}
+
+// ================= Section card / info grid / footer (embassy global.scss) =================
+.section-card {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  border-radius: 18px;
+  margin: 14px 12px;
+  padding: 0;
+  border: 1px solid #e2e6f3;
+  box-shadow: 0 6px 18px -8px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 12px;
+
+    .section-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      ion-icon { font-size: 20px; }
+    }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+  }
+
+  &.theme-indigo .section-icon { background: rgba(var(--ion-color-primary-rgb), 0.12); ion-icon { color: var(--ion-color-primary); } }
+  &.theme-violet .section-icon { background: rgba(var(--app-violet-rgb), 0.12);        ion-icon { color: var(--app-violet); } }
+  &.theme-teal   .section-icon { background: rgba(var(--app-teal-rgb), 0.12);          ion-icon { color: var(--app-teal); } }
+  &.theme-amber  .section-icon { background: rgba(var(--app-amber-rgb), 0.14);         ion-icon { color: var(--app-amber); } }
+
+  ion-card-content {
+    padding: 0 10px 14px !important;
+  }
+
+  ion-card-content ion-row {
+    --ion-grid-column-padding: 4px;
+    ion-col { padding: 4px !important; }
+  }
+
+  ion-card-content section.inputbox {
+    margin-bottom: 4px;
+  }
+}
+
+// Compact label/value rows inside themed cards
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  padding: 10px 14px 12px;
+
+  .info-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    // Long free-text values (remarks, descriptions) read badly in a half column.
+    &.span-2 { grid-column: 1 / -1; }
+  }
+
+  .info-k {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  .info-v {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+    word-break: break-word;
+  }
+}
+
+// Reusable footer + gradient submit button (forms across the app)
+.app-footer ion-toolbar {
+  --background: #ffffff;
+  --border-color: #eef0f6;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+}
+
+.submit-btn {
+  --background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--app-violet) 100%);
+  --background-activated: linear-gradient(135deg, var(--ion-color-primary-shade) 0%, var(--app-violet) 100%);
+  --border-radius: 12px;
+  --box-shadow: 0 8px 18px -6px rgba(var(--ion-color-primary-rgb), 0.4);
+  text-transform: none;
+  font-weight: 600;
+}
+
+
+// ================= Facility list =================
+.fb-caret { font-size: 16px; color: #94a3b8; }
+.fb-arrow { font-size: 16px; color: #cbd5e1; flex-shrink: 0; }
+
+.fb-count {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--app-teal);
+  background: rgba(var(--app-teal-rgb), 0.12);
+}
+
+.fb-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+
+  ion-spinner { width: 20px; height: 20px; }
+}
+
+.fb-item {
+  margin: 0 4px 10px;
+  border: 1px solid #e8ecf6;
+  border-radius: 14px;
+  background: #fbfcff;
+  overflow: hidden;
+
+  &:last-child { margin-bottom: 2px; }
+
+  .fb-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 12px 0;
+  }
+
+  .fb-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(var(--app-teal-rgb), 0.12);
+
+    ion-icon { font-size: 18px; color: var(--app-teal); }
+  }
+
+  .fb-head {
+    flex: 1;
+    min-width: 0;
+
+    h4 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+    }
+
+    .fb-type { font-size: 11.5px; font-weight: 600; color: #64748b; }
+  }
+
+  .info-grid { padding: 8px 12px 12px; }
+}
+
+// ================= Meal times / pantry menu =================
+ion-modal .section-card { margin: 12px 0; }
+
+.fb-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 14px 10px;
+}
+
+.fb-chip {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #92400e;
+  background: rgba(var(--app-amber-rgb), 0.14);
+
+  small { font-size: 10.5px; font-weight: 600; opacity: 0.8; }
+}
+
+.fb-menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-top: 1px solid #f1f4fa;
+
+  &:first-child { border-top: 0; }
+
+  .fb-menu-left {
+    min-width: 0;
+
+    h5 { margin: 0; font-size: 13.5px; font-weight: 700; color: #0f172a; }
+    span { font-size: 11px; font-weight: 600; color: #64748b; }
+  }
+
+  .fb-price { flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--app-violet); }
+}
+
+.fb-none {
+  margin: 0;
+  padding: 14px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+// ================= Booking modal =================
+.fb-hero {
+  padding: 14px 4px 12px;
+  border-bottom: 1px solid #e4e9f5;
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  .fb-seats {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+
+    ion-icon { font-size: 16px; }
+  }
+}
+
+.fb-sec {
+  padding: 14px 4px 4px;
+
+  .fb-sec-title {
+    margin: 0 0 10px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+  }
+}
+
+.fb-daterow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .fb-datebox { width: 170px; margin-bottom: 6px; }
+  .fb-cal { font-size: 17px; color: var(--ion-color-primary); }
+  .fb-oh { font-size: 12px; font-weight: 600; color: #64748b; padding-bottom: 4px; }
+}
+
+.fb-rules,
+.fb-slotinfo {
+  margin: 4px 0 2px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.fb-slotinfo { margin: 0 0 12px; color: #94a3b8; }
+
+// Slot aur chair ka tile ek hi design ka hai
+.fb-slots,
+.fb-chairs {
+  display: grid;
+  gap: 8px;
+}
+
+.fb-slots { grid-template-columns: repeat(4, 1fr); }
+.fb-chairs { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+.fb-slot,
+.fb-chair {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 2px;
+  border-radius: 12px;
+  border: 1.5px solid #dbe2f0;
+  background: #ffffff;
+  transition: all 0.15s ease;
+
+  ion-icon { font-size: 16px; }
+  b { font-size: 13.5px; font-weight: 700; color: #0f172a; }
+  small { font-size: 10px; font-weight: 600; color: #94a3b8; }
+
+  // available
+  &.sl-free,
+  &.ch-free {
+    border-color: rgba(var(--app-teal-rgb), 0.45);
+
+    small, ion-icon { color: var(--app-teal); }
+  }
+
+  // selected / your pick
+  &.sl-on,
+  &.ch-pick {
+    border-color: var(--ion-color-primary);
+    background: rgba(var(--ion-color-primary-rgb), 0.08);
+    box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.12);
+
+    b, small, ion-icon { color: var(--ion-color-primary); }
+  }
+
+  // full / past / taken
+  &.sl-off,
+  &.ch-taken {
+    border-color: #e6eaf3;
+    background: #f3f5fa;
+
+    b { color: #a3adbf; }
+    small, ion-icon { color: #b6bfcf; }
+  }
+}
+
+.fb-chair { padding: 12px 4px; border-radius: 14px; gap: 3px; }
+
+.fb-legend,
+.fb-chairhead {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+
+  .lg {
+    padding: 4px 11px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1.5px solid transparent;
+  }
+
+  .lg-free { border-color: rgba(var(--app-teal-rgb), 0.45); color: var(--app-teal); }
+  .lg-on { background: var(--ion-color-primary); color: #ffffff; }
+  .lg-off { background: #f3f5fa; color: #a3adbf; }
+}
+
+.fb-chairhead {
+  margin: 0 0 12px;
+
+  .fb-free { font-size: 12px; font-weight: 800; color: #0f172a; margin-right: 2px; }
+}
+
+// Info banner — blue, aur chair claim hone par green
+.fb-note,
+.fb-ok {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.3);
+  background: rgba(var(--ion-color-primary-rgb), 0.06);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.45;
+
+  ion-icon { font-size: 18px; color: var(--ion-color-primary); flex-shrink: 0; }
+}
+
+.fb-ok {
+  border-color: rgba(var(--app-teal-rgb), 0.35);
+  background: rgba(var(--app-teal-rgb), 0.08);
+
+  ion-icon { color: var(--app-teal); }
+}
+
+// ================= Your booking =================
+.fb-err { border-color: var(--ion-color-danger) !important; }
+
+.fb-errtext {
+  margin: 4px 0 0;
+  padding-left: 2px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ion-color-danger);
+  line-height: 1.45;
+}
+
+.fb-seatchip {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f8a5f;
+  background: rgba(var(--app-teal-rgb), 0.14);
+}
+
+.fb-guests {
+  margin-top: 14px;
+
+  h4 { margin: 0 0 6px; font-size: 13.5px; font-weight: 800; color: #0f172a; }
+  .fb-guestnote { margin: 0; font-size: 11.5px; font-weight: 600; color: #94a3b8; line-height: 1.5; }
+  ion-col { padding: 0 !important; }
+}
+
+.fb-bookedfor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
+
+  b {
+    padding: 5px 11px;
+    border-radius: 10px;
+    background: #eef1f8;
+    color: #334155;
+    font-size: 12px;
+  }
+}
+
+ion-footer.app-footer ion-row { width: 100%; }
+
+// ================= Date calendar + confirmed dialog =================
+ion-modal.fb-date-modal,
+ion-modal.fb-done-modal {
+  --width: 330px;
+  --height: auto;
+  --border-radius: 18px;
+  --box-shadow: 0 20px 50px -18px rgba(15, 23, 42, 0.5);
+
+  ion-datetime { --background: #ffffff; border-radius: 18px; }
+}
+
+ion-modal.fb-done-modal { --width: 310px; --border-radius: 20px; }
+
+.fb-done {
+  position: relative;
+  padding: 26px 20px 18px;
+  text-align: center;
+  background: #ffffff;
+
+  .fb-done-close {
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    --color: #94a3b8;
+    --padding-start: 6px;
+    --padding-end: 6px;
+  }
+
+  .fb-done-tick {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--app-teal-rgb), 0.14);
+
+    ion-icon { font-size: 30px; color: var(--app-teal); }
+  }
+
+  h3 { margin: 0 0 14px; font-size: 18px; font-weight: 800; color: #0f172a; }
+
+  .fb-done-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-top: 1px dashed #e2e6f3;
+    border-bottom: 1px dashed #e2e6f3;
+
+    span { font-size: 12.5px; font-weight: 600; color: #64748b; }
+    b { font-size: 15px; font-weight: 800; color: #0f172a; }
+  }
+
+  p {
+    margin: 12px 0 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #64748b;
+    line-height: 1.5;
+  }
+}

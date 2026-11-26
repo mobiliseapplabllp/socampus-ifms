@@ -43,12 +43,28 @@ export class TokenInterceptor implements HttpInterceptor {
     // }
 
 
+  // FMS: Bearer token2. SSO validate wali call me abhi token2 hota hi nahi —
+  // wo handoff token body me bhejti hai, isliye usme Authorization nahi lagate.
+  private withFmsHeaders(request: HttpRequest<any>): HttpRequest<any> {
+    const fmsToken = localStorage.getItem('token2');
+    let headers = request.headers.set('Accept', 'application/json');
+    if (fmsToken && request.url !== environment.fmsUrl + 'api/sso/embassy/validate') {
+      headers = headers.set('Authorization', `Bearer ${fmsToken}`);
+    }
+    return request.clone({ headers });
+  }
+
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // AI Studio is a third party API - it has its own X-API-Key, so do not leak
     // our Authorization/Referer1 headers to it (they also break CORS preflight).
     // web par URL cors-proxy prefix ke saath aata hai, isliye startsWith nahi - includes
     if (request.url.includes(environment.aiStudioUrl)) {
       return next.handle(request);
+    }
+    // Space Management (FMS) — alag backend, alag token (embassy jaisa).
+    // FMS par sirf Bearer token2 jaata hai, token1 / Referer1 nahi.
+    if (request.url.startsWith(environment.fmsUrl)) {
+      return next.handle(this.withFmsHeaders(request));
     }
     if (!localStorage.getItem('token1')) {
       const mod = request.clone({
