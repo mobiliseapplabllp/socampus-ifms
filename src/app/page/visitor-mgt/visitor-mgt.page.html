@@ -7,6 +7,614 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="ion-padding vms-content">
 
+  <!-- Primary actions -->
+  <div class="action-group">
+    <div class="ag-row">
+      <!-- QR-based Approval - abhi ke liye band hai -->
+      <!-- <button class="ag-btn outline" (click)="openQrApproval()">
+        <ion-icon name="qr-code-outline"></ion-icon> QR-based Approval
+      </button> -->
+      <button class="ag-btn outline" (click)="openCreate()">
+        <ion-icon name="add"></ion-icon> Create Invite
+      </button>
+      <button class="ag-btn outline" (click)="openGroupInvite()">
+        <ion-icon name="people-outline"></ion-icon> Group Invite
+      </button>
+    </div>
+  </div>
+
+  <div class="search-box"  >
+    <ion-icon name="search-outline"></ion-icon>
+    <input type="text" [(ngModel)]="searchText" (ngModelChange)="onSearchChange()" placeholder="Search invites by visitor name, email, company, or host..." />
+  </div>
+
+  <div class="filter-row">
+    <span class="app-chip"
+          *ngFor="let f of filters"
+          [class.is-active]="f === activeFilter"
+          (click)="setFilter(f)">
+      {{ f }}
+    </span>
+  </div>
+
+  <app-vms-skeleton *ngIf="loading" variant="list" [count]="5"></app-vms-skeleton>
+
+  <ng-container *ngIf="!loading">
+  <div class="invite-card" *ngFor="let inv of filteredInvites; trackBy: trackById">
+    <div class="ic-head">
+      <img *ngIf="hasFacePhoto(inv)" class="ic-avatar-img" [src]="inv.face_photo" [alt]="inv.visitor_name" />
+      <div *ngIf="!hasFacePhoto(inv)" class="ic-avatar">{{ visitorInitials(inv.visitor_name) }}</div>
+      <div class="ic-id">
+        <div class="ic-name-row">
+          <span class="ic-name">{{ inv.visitor_name }}</span>
+          <span class="app-chip" [ngClass]="statusClass(inv.status)">{{ statusLabel(inv.status) }}</span>
+          <span class="app-chip chip-email" *ngIf="hasEmailSent(inv)">
+            <ion-icon name="mail-outline"></ion-icon> Email Sent
+          </span>
+        </div>
+      </div>
+      <button class="ic-icon-btn delete" (click)="confirmDelete(inv)">
+        <ion-icon name="trash-outline"></ion-icon>
+      </button>
+    </div>
+
+    <div class="ic-meta">
+      <div class="ic-meta-col">
+        <div class="ic-meta-lbl">Host</div>
+        <div class="ic-meta-val">{{ inv.host_name || '—' }}</div>
+      </div>
+      <div class="ic-meta-col">
+        <div class="ic-meta-lbl">Site</div>
+        <div class="ic-meta-val">{{ inv.site_name || '—' }}</div>
+      </div>
+      <div class="ic-meta-col">
+        <div class="ic-meta-lbl">Date & Time</div>
+        <div class="ic-meta-val">{{ formatDateTime(inv.visit_date_time) }}</div>
+      </div>
+    </div>
+
+    <div class="ic-actions">
+      <button class="ic-btn" (click)="showQR(inv)">
+        <ion-icon name="qr-code-outline"></ion-icon> QR
+      </button>
+
+      <button *ngIf="isCheckedIn(inv)" class="ic-btn checkout" (click)="confirmCheckout(inv)">
+        <ion-icon name="log-out-outline"></ion-icon> Check out
+      </button>
+
+      <ng-container *ngIf="!isCancelled(inv) && !isCheckedIn(inv) && !isCheckedOut(inv)">
+        <button class="ic-btn" (click)="resend(inv)">
+          <ion-icon name="send-outline"></ion-icon> Resend
+        </button>
+        <button class="ic-btn" (click)="openEdit(inv)">
+          <ion-icon name="create-outline"></ion-icon> Edit
+        </button>
+        <button class="ic-btn danger" (click)="cancelInvite(inv)">
+          <ion-icon name="close-outline"></ion-icon> Cancel
+        </button>
+      </ng-container>
+    </div>
+  </div>
+
+  </ng-container>
+
+  <div class="empty-state" *ngIf="!loading && filteredInvites.length === 0">
+    <div class="icon-circle"><ion-icon name="mail-outline"></ion-icon></div>
+    <div class="title">No invites yet</div>
+    <div class="subtitle">Tap "Create New Invite" to pre-register a visitor with a calendar invite.</div>
+  </div>
+
+  <div class="bottom-spacer"></div>
 </ion-content>
+
+<!-- Create Invite FAB hata diya - ab upar action buttons me hai -->
+<!-- <button class="create-fab" (click)="openCreate()">
+  <ion-icon name="add"></ion-icon>
+  <span>Create Invite</span>
+</button> -->
+
+<!-- ===== Create / Edit Invite Modal ===== -->
+<ion-modal
+  class="invite-modal"
+  [isOpen]="modalOpen"
+  [initialBreakpoint]="0.95"
+  [breakpoints]="[0, 0.95]"
+  [handle]="true"
+  (didDismiss)="modalOpen = false">
+  <ng-template>
+    <div class="im-sheet">
+      <div class="im-header">
+        <div>
+          <div class="im-title">{{ modalMode === 'edit' ? 'Edit Invite' : 'Create New Invite' }}</div>
+          <div class="im-sub">{{ modalMode === 'edit' ? 'Update invite details' : 'Pre-register a visitor and notify them via email.' }}</div>
+        </div>
+        <button class="im-close" (click)="closeModal()">
+          <ion-icon name="close"></ion-icon>
+        </button>
+      </div>
+
+      <div class="im-body">
+        <div class="im-field">
+          <div class="im-label">Visitor Name <span class="req">*</span></div>
+          <input class="im-input" type="text" [(ngModel)]="form.visitorName" placeholder="Alice Thompson" />
+        </div>
+
+        <div class="im-field">
+          <div class="im-label">Visitor Email <span class="req">*</span></div>
+          <input class="im-input" type="email" [(ngModel)]="form.visitorEmail" placeholder="alice@example.com" />
+        </div>
+
+        <div class="im-grid-2">
+          <div class="im-field">
+            <div class="im-label">Company</div>
+            <input class="im-input" type="text" [(ngModel)]="form.visitorCompany" placeholder="Innovation Labs" />
+          </div>
+          <div class="im-field">
+            <div class="im-label">Phone</div>
+            <input class="im-input" type="tel" [(ngModel)]="form.visitorPhone" placeholder="+1 555..." />
+            <div class="im-hint ok" *ngIf="form.visitorPhone && phoneValid">
+              <ion-icon name="checkmark-circle"></ion-icon> Valid ({{ phoneDigits }} digits)
+            </div>
+            <div class="im-hint err" *ngIf="form.visitorPhone && !phoneValid">
+              <ion-icon name="alert-circle"></ion-icon> Enter a valid phone number
+            </div>
+          </div>
+        </div>
+
+        <div class="im-field">
+          <div class="im-label">Visitor Type</div>
+          <ion-item lines="none" class="sel-item">
+            <ion-select interface="action-sheet" mode="ios" [(ngModel)]="form.visitorTypeId" placeholder="Optional">
+              <ion-select-option value="">Optional</ion-select-option>
+              <ion-select-option *ngFor="let o of visitorTypeOptions" [value]="o.id">
+                {{ o.name }}{{ o.code ? ' (' + o.code + ')' : '' }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+        <div class="im-grid-2">
+          <div class="im-field">
+            <div class="im-label">Site <span class="req">*</span></div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="form.siteId" (ionChange)="onSiteChange()" placeholder="Select site">
+                <ion-select-option *ngFor="let o of siteOptions" [value]="o.id">{{ o.name }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+          <div class="im-field">
+            <div class="im-label">Host <span class="req">*</span></div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="form.hostId" [disabled]="!form.siteId" placeholder="Select host">
+                <ion-select-option *ngFor="let o of hostOptions" [value]="o.id">{{ o.name }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+        </div>
+        <div class="im-note" *ngIf="form.siteId">Only hosts mapped to the selected site are shown.</div>
+
+        <div class="im-grid-2">
+          <div class="im-field">
+            <div class="im-label">Building <span class="req">*</span></div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="form.buildingId" (ionChange)="onBuildingChange()" [disabled]="!form.siteId" placeholder="Select building">
+                <ion-select-option *ngFor="let o of buildingOptions" [value]="o.id">{{ o.name }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+          <div class="im-field">
+            <div class="im-label">Location Type</div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="form.locationType" (ionChange)="onLocationTypeChange()" [disabled]="!form.buildingId" placeholder="Optional">
+                <ion-select-option *ngFor="let o of locationTypeOptions" [value]="o.value">{{ o.label }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+        </div>
+
+        <!-- Floor (needed for Floor type AND Meeting Room type) -->
+        <div class="im-field" *ngIf="form.locationType === 'floor' || form.locationType === 'meeting_room'">
+          <div class="im-label">Floor <span class="req">*</span></div>
+          <ion-item lines="none" class="sel-item">
+            <ion-select interface="action-sheet" mode="ios" [(ngModel)]="form.floorId" (ionChange)="onFloorChange()" placeholder="Select floor">
+              <ion-select-option *ngFor="let o of floorOptions" [value]="o.id">{{ o.name }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+        <!-- Meeting Room (belongs to a floor) -->
+        <div class="im-field" *ngIf="form.locationType === 'meeting_room'">
+          <div class="im-label">Meeting Room <span class="req">*</span></div>
+          <ion-item lines="none" class="sel-item">
+            <ion-select interface="action-sheet" mode="ios" [(ngModel)]="form.meetingRoomId" [disabled]="!form.floorId" placeholder="Select meeting room">
+              <ion-select-option *ngFor="let o of meetingRoomOptions" [value]="o.id">{{ o.name }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+        <!-- Parking Zone (site-level) -->
+        <div class="im-field" *ngIf="form.locationType === 'parking'">
+          <div class="im-label">Parking Zone <span class="req">*</span></div>
+          <ion-item lines="none" class="sel-item">
+            <ion-select interface="action-sheet" mode="ios" [(ngModel)]="form.parkingZoneId" placeholder="Select parking zone">
+              <ion-select-option *ngFor="let o of parkingZoneOptions" [value]="o.id">{{ o.name }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+        <div class="im-grid-2">
+          <div class="im-field">
+            <div class="im-label">Visit Date & Time <span class="req">*</span></div>
+            <div class="im-tz" *ngIf="siteTimezone">Time shown in site TZ: {{ siteTimezone }}</div>
+            <ion-item lines="none" class="dt-item" button="true" detail="false" (click)="openDatePicker()">
+              <ion-icon name="calendar-number-outline" slot="start"></ion-icon>
+              <ion-input type="text" readonly placeholder="dd/mm/yyyy, --:--"
+                         [value]="form.visitDateTime | date:'dd/MM/yyyy, h:mm a'"></ion-input>
+            </ion-item>
+            <ion-popover [isOpen]="dtPickerOpen" (didDismiss)="dtPickerOpen = false" class="vms-datetime-popover with-time">
+              <ng-template>
+                <ion-datetime
+                  #inviteDt
+                  mode="ios"
+                  presentation="date-time"
+                  [(ngModel)]="form.visitDateTime"
+                  [showDefaultButtons]="false"
+                  (click)="onDatetimeTap($event, inviteDt)">
+                  <ion-buttons slot="buttons">
+                    <ion-button color="medium" (click)="dtPickerOpen = false">Cancel</ion-button>
+                    <ion-button color="primary" (click)="confirmDatePick(inviteDt)">Done</ion-button>
+                  </ion-buttons>
+                </ion-datetime>
+              </ng-template>
+            </ion-popover>
+          </div>
+          <div class="im-field">
+            <div class="im-label">Duration (min)</div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="form.visitDuration" placeholder="60">
+                <ion-select-option *ngFor="let d of durationOptions" [value]="d">{{ d }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+        </div>
+
+        <div class="im-field">
+          <div class="im-label-row">
+            <div class="im-label">Purpose of Visit <span class="req">*</span></div>
+            <button class="ai-btn" (click)="suggestPurpose()">
+              <ion-icon name="sparkles-outline"></ion-icon> Suggest with AI
+            </button>
+          </div>
+          <ion-item lines="none" class="sel-item">
+            <ion-select interface="action-sheet" mode="ios" [(ngModel)]="form.purpose" placeholder="Choose from visit purposes...">
+              <ion-select-option *ngFor="let p of visitPurposeOptions" [value]="p.name">{{ p.name }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <div class="im-purpose-chip" *ngIf="form.purpose">{{ form.purpose }}</div>
+        </div>
+
+        <div class="im-field">
+          <div class="im-label">Custom Message</div>
+          <textarea class="im-input" rows="2" [(ngModel)]="form.customMessage" placeholder="Personal message to the visitor..."></textarea>
+        </div>
+
+        <div class="im-field">
+          <div class="im-label">Additional Instructions</div>
+          <textarea class="im-input" rows="2" [(ngModel)]="form.additionalInstructions" placeholder="Parking, what to bring, security..."></textarea>
+        </div>
+
+        <!-- Policies applied at this site -->
+        <div class="im-policies" *ngIf="sitePolicies.length">
+          <div class="im-policies-head">
+            <ion-icon name="shield-checkmark-outline"></ion-icon> Policies applied at this site
+          </div>
+          <div class="policy-row" *ngFor="let p of sitePolicies">
+            <div class="policy-info">
+              <div class="policy-name">{{ p.name || p.title || 'Policy' }}</div>
+              <div class="policy-sub">
+                <span *ngIf="p.is_required || p.required">Required to proceed</span>
+                <span *ngIf="(p.is_required || p.required) && (p.document_url || p.documentUrl || p.attachment_url || p.file_url)"> · </span>
+                <span *ngIf="p.document_url || p.documentUrl || p.attachment_url || p.file_url">Document attached</span>
+              </div>
+            </div>
+            <button class="policy-view" (click)="openPolicyDoc(p)">
+              <ion-icon name="eye-outline"></ion-icon> View
+            </button>
+          </div>
+        </div>
+
+        <div class="im-toggle-row">
+          <div class="im-toggle-info">
+            <div class="im-toggle-title">Send email immediately</div>
+            <div class="im-toggle-sub">With invite link & QR</div>
+          </div>
+          <ion-toggle mode="ios" [(ngModel)]="form.sendEmail"></ion-toggle>
+        </div>
+
+        <div class="im-toggle-row">
+          <div class="im-toggle-info">
+            <div class="im-toggle-title">Include calendar invite</div>
+            <div class="im-toggle-sub">Attach as .ics file</div>
+          </div>
+          <ion-toggle mode="ios" [(ngModel)]="form.includeCalendar"></ion-toggle>
+        </div>
+      </div>
+
+      <div class="im-footer">
+        <button class="im-btn ghost" (click)="closeModal()">Cancel</button>
+        <button class="im-btn primary" (click)="submitForm()" [disabled]="submitting">
+          <ion-icon [name]="modalMode === 'edit' ? 'save-outline' : 'send-outline'"></ion-icon>
+          {{ modalMode === 'edit' ? 'Save Changes' : 'Create Invite' }}
+        </button>
+      </div>
+      <br>
+      <br>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- ===== QR Modal ===== -->
+<ion-modal class="qr-modal" [isOpen]="qrOpen" (didDismiss)="qrOpen = false">
+  <ng-template>
+    <div class="qr-sheet">
+      <div class="qr-header">
+        <div class="qr-title">Invite QR Code</div>
+        <button class="im-close" (click)="closeQR()"><ion-icon name="close"></ion-icon></button>
+      </div>
+      <div class="qr-body">
+        <img *ngIf="qrInvite?.qr_code" [src]="qrImageUrl()" alt="QR" class="qr-img" />
+        <div class="qr-name">{{ qrInvite?.visitor_name }}</div>
+        <div class="qr-sub">{{ qrInvite?.qr_code }}</div>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- ===== QR-based Visitor Approval Modal ===== -->
+<ion-modal class="qra-modal" [isOpen]="qrApprovalOpen"
+  [initialBreakpoint]="0.75" [breakpoints]="[0, 0.75, 0.95]" [handle]="true"
+  (didDismiss)="qrApprovalOpen = false">
+  <ng-template>
+    <div class="qra-sheet">
+      <div class="qra-header">
+        <div class="qra-title">QR-based Visitor Approval</div>
+        <button class="im-close" (click)="closeQrApproval()"><ion-icon name="close"></ion-icon></button>
+      </div>
+
+      <ion-segment class="qra-seg" mode="ios" [value]="qrSegment" (ionChange)="onQrSegmentChange($event)">
+        <ion-segment-button value="poster">
+          <ion-icon name="print-outline"></ion-icon>
+          <ion-label>Print Poster</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="pending">
+          <ion-label>Pending Requests</ion-label>
+          <ion-badge *ngIf="pendingRequests.length" class="qra-badge">{{ pendingRequests.length }}</ion-badge>
+        </ion-segment-button>
+      </ion-segment>
+
+      <div class="qra-body">
+        <!-- Print Poster -->
+        <ng-container *ngIf="qrSegment === 'poster'">
+          <p class="qra-help">Print this QR code and tape it at your reception. Visitors scan it to open the registration form on their phone.</p>
+
+          <div class="qra-field">
+            <div class="qra-label">Site</div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="qrSelectedSite" placeholder="Select site">
+                <ion-select-option *ngFor="let s of qrSites" [value]="s.id">{{ s.name }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+
+          <div class="qra-qr-wrap">
+            <img [src]="qrApprovalImageUrl()" alt="QR" class="qra-qr" />
+            <a class="qra-link" (click)="openFormLink()">
+              Click here to open the form <ion-icon name="open-outline"></ion-icon>
+            </a>
+          </div>
+
+          <div class="qra-actions">
+            <button class="qra-btn dark" (click)="printPoster()">
+              <ion-icon name="print-outline"></ion-icon> Print
+            </button>
+            <button class="qra-btn outline" (click)="downloadPng()">
+              <ion-icon name="download-outline"></ion-icon> Download PNG
+            </button>
+          </div>
+        </ng-container>
+
+        <!-- Pending Requests -->
+        <ng-container *ngIf="qrSegment === 'pending'">
+          <div class="loading-state" *ngIf="qrLoadingPending"><ion-spinner name="crescent"></ion-spinner></div>
+
+          <div class="pr-card" *ngFor="let r of pendingRequests">
+            <div class="pr-head">
+              <img *ngIf="r.photo_data" [src]="r.photo_data" class="pr-photo" />
+              <div *ngIf="!r.photo_data" class="pr-photo placeholder">{{ visitorInitials(r.visitor_name) }}</div>
+              <div class="pr-id">
+                <div class="pr-name">{{ r.visitor_name }}</div>
+                <div class="pr-sub">{{ r.visitor_email }}</div>
+              </div>
+              <span class="app-chip chip-yellow">Pending</span>
+            </div>
+            <div class="pr-meta">
+              <div><ion-icon name="business-outline"></ion-icon> {{ r.organization_name || '—' }}</div>
+              <div *ngIf="r.visitor_phone"><ion-icon name="call-outline"></ion-icon> {{ r.visitor_phone }}</div>
+              <div *ngIf="r.purpose"><ion-icon name="briefcase-outline"></ion-icon> {{ r.purpose }}</div>
+            </div>
+          </div><br><br><br>
+
+          <div class="empty-state" *ngIf="!qrLoadingPending && pendingRequests.length === 0">
+            <div class="icon-circle"><ion-icon name="checkmark-done-outline"></ion-icon></div>
+            <div class="title">No pending requests</div>
+            <div class="subtitle">New visitor requests will appear here for approval.</div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- ===== Group Invite Modal ===== -->
+<ion-modal class="invite-modal" [isOpen]="groupInviteOpen"
+  [initialBreakpoint]="0.95" [breakpoints]="[0, 0.95]" [handle]="true"
+  (didDismiss)="groupInviteOpen = false">
+  <ng-template>
+    <div class="im-sheet">
+      <div class="im-header">
+        <div>
+          <div class="im-title">Group Invite</div>
+          <div class="im-sub">One visit, multiple visitors. Fill the shared details once — each visitor gets their own email and QR code.</div>
+        </div>
+        <button class="im-close" (click)="closeGroupInvite()"><ion-icon name="close"></ion-icon></button>
+      </div>
+
+      <div class="im-body">
+        <div class="im-grid-2">
+          <div class="im-field">
+            <div class="im-label">Site <span class="req">*</span></div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="groupForm.siteId" (ionChange)="onGroupSiteChange()" placeholder="Pick a site">
+                <ion-select-option *ngFor="let o of siteOptions" [value]="o.id">{{ o.name }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+          <div class="im-field">
+            <div class="im-label">Host <span class="req">*</span></div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="groupForm.hostId" [disabled]="!groupForm.siteId" placeholder="Pick a site first">
+                <ion-select-option *ngFor="let o of hostOptions" [value]="o.id">{{ o.name }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+        </div>
+
+        <div class="im-grid-3">
+          <div class="im-field">
+            <div class="im-label">Building <span class="req">*</span></div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="groupForm.buildingId" (ionChange)="onGroupBuildingChange()" [disabled]="!groupForm.siteId" placeholder="Pick a building">
+                <ion-select-option *ngFor="let o of buildingOptions" [value]="o.id">{{ o.name }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+          <div class="im-field">
+            <div class="im-label">Floor</div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="groupForm.floorId" (ionChange)="onGroupFloorChange()" [disabled]="!groupForm.buildingId" placeholder="Pick a floor">
+                <ion-select-option *ngFor="let o of floorOptions" [value]="o.id">{{ o.name }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+          <div class="im-field">
+            <div class="im-label">Location</div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="groupForm.meetingRoomId" [disabled]="!groupForm.floorId" placeholder="Pick a location">
+                <ion-select-option *ngFor="let o of meetingRoomOptions" [value]="o.id">{{ o.name }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+        </div>
+
+        <div class="im-grid-2">
+          <div class="im-field">
+            <div class="im-label">Visit Date & Time <span class="req">*</span></div>
+            <div class="im-tz" *ngIf="siteTimezone">Time shown in site TZ: {{ siteTimezone }}</div>
+            <ion-item lines="none" class="dt-item" button="true" detail="false" (click)="openDatePicker()">
+              <ion-icon name="calendar-number-outline" slot="start"></ion-icon>
+              <ion-input type="text" readonly placeholder="dd/mm/yyyy, --:--"
+                         [value]="groupForm.visitDateTime | date:'dd/MM/yyyy, h:mm a'"></ion-input>
+            </ion-item>
+            <ion-popover [isOpen]="dtPickerOpen" (didDismiss)="dtPickerOpen = false" class="vms-datetime-popover with-time">
+              <ng-template>
+                <ion-datetime #groupDt mode="ios" presentation="date-time"
+                  [(ngModel)]="groupForm.visitDateTime" [showDefaultButtons]="false"
+                  (click)="onDatetimeTap($event, groupDt)">
+                  <ion-buttons slot="buttons">
+                    <ion-button color="medium" (click)="dtPickerOpen = false">Cancel</ion-button>
+                    <ion-button color="primary" (click)="confirmDatePick(groupDt)">Done</ion-button>
+                  </ion-buttons>
+                </ion-datetime>
+              </ng-template>
+            </ion-popover>
+          </div>
+          <div class="im-field">
+            <div class="im-label">Duration (min)</div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="groupForm.visitDuration" placeholder="60">
+                <ion-select-option *ngFor="let d of durationOptions" [value]="d">{{ d }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+        </div>
+
+        <div class="im-grid-2">
+          <div class="im-field">
+            <div class="im-label">Purpose <span class="req">*</span></div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="groupForm.purpose" placeholder="Pick a purpose">
+                <ion-select-option *ngFor="let p of visitPurposeOptions" [value]="p.name">{{ p.name }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+          <div class="im-field">
+            <div class="im-label">Visitor Type</div>
+            <ion-item lines="none" class="sel-item">
+              <ion-select interface="action-sheet" mode="ios" [(ngModel)]="groupForm.visitorTypeId" placeholder="Default">
+                <ion-select-option value="">Default</ion-select-option>
+                <ion-select-option *ngFor="let o of visitorTypeOptions" [value]="o.id">{{ o.name }}{{ o.code ? ' (' + o.code + ')' : '' }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+        </div>
+
+        <!-- Visitors -->
+        <div class="gv-head">
+          <div class="im-label">Visitors ({{ groupValidVisitors.length }} of max {{ maxGroupVisitors }})</div>
+          <button class="gv-add" (click)="addGroupVisitor()">
+            <ion-icon name="add"></ion-icon> Add visitor
+          </button>
+        </div>
+        <div class="gv-row" *ngFor="let v of groupVisitors; let i = index; trackBy: trackByIndex">
+          <input class="im-input" type="text" [(ngModel)]="v.name" placeholder="Full name" />
+          <input class="im-input" type="email" [(ngModel)]="v.email" placeholder="email@example.com" />
+          <button class="gv-del" (click)="removeGroupVisitor(i)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="im-field">
+          <div class="im-label">Custom Message (Optional)</div>
+          <textarea class="im-input" rows="2" [(ngModel)]="groupForm.customMessage" placeholder="Greeting that appears in every visitor's email"></textarea>
+        </div>
+
+        <div class="im-field">
+          <div class="im-label">Additional Instructions (Optional)</div>
+          <textarea class="im-input" rows="2" [(ngModel)]="groupForm.additionalInstructions" placeholder="Parking, what to bring, security..."></textarea>
+        </div>
+
+        <div class="im-toggle-row">
+          <div class="im-toggle-info">
+            <div class="im-toggle-title">Send email invitation to each visitor</div>
+          </div>
+          <ion-toggle mode="ios" [(ngModel)]="groupForm.sendEmail"></ion-toggle>
+        </div>
+        <div class="im-toggle-row">
+          <div class="im-toggle-info">
+            <div class="im-toggle-title">Include calendar invite (.ics file)</div>
+          </div>
+          <ion-toggle mode="ios" [(ngModel)]="groupForm.includeCalendar"></ion-toggle>
+        </div>
+      </div>
+
+      <div class="im-footer">
+        <button class="im-btn primary" (click)="sendGroupInvite()" [disabled]="groupSubmitting">
+          <ion-icon name="send-outline"></ion-icon> Send Group Invite ({{ groupValidVisitors.length }})
+        </button>
+      </div>
+      <div class="im-footer">
+        <button class="im-btn ghost" (click)="closeGroupInvite()">Cancel</button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

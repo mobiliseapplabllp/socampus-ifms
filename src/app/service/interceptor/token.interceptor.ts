@@ -66,6 +66,23 @@ export class TokenInterceptor implements HttpInterceptor {
     if (request.url.startsWith(environment.fmsUrl)) {
       return next.handle(this.withFmsHeaders(request));
     }
+    // ===================== VMS (Visitor Management) - START =====================
+    // VMS module ka part. VMS (Atithi) APIs ka apna token hai: `vms_token`.
+    // Ye token VMS page khulte hi `sso/atithi` se aata hai (VmsService.ssoLogin).
+    // - VMS APIs me IFMS ka token1/Referer1 nahi bhejna
+    // - VMS ka 401 aane par IFMS se logout nahi karna
+    // Note: `sso/atithi` khud IFMS API hai, wo neeche normal IFMS flow (token1) se jaata hai.
+    if (request.url.includes(environment.vmsUrl)) {
+      const vmsToken = localStorage.getItem('vms_token');
+      if (!vmsToken) {
+        return next.handle(request);
+      }
+      const vmsReq = request.clone({
+        headers: request.headers.set('Authorization', `Bearer ${vmsToken}`).set('Accept', 'application/json')
+      });
+      return next.handle(vmsReq);
+    }
+    // ===================== VMS (Visitor Management) - END =======================
     if (!localStorage.getItem('token1')) {
       const mod = request.clone({
         headers: request.headers.set('Referer1', environment.referUrl).set('X-API-Source', 'Mobile')

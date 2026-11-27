@@ -46,6 +46,9 @@ export const environment = {
   source: 'Mobile',
   LARAVEL_KEY: '8+Fjns9RCg2HJfhHCirTe6FE3NCHSq+W3014tuKBZH4=',
   aiStudioUrl: 'https://apisuite-aistudio.onmobilise.com/v1/',
+  // VMS (Atithi) - visitor management APIs
+  vmsUrl: 'https://atithidev.onmobilise.com/api',
+  vmsPortalUrl: 'https://atithi.onmobilise.com',
   aiStudioWebProxy: '',
   aiStudioEnv: 'UAT',
   aiStudioKey: 'sk_uat_563438c3bbc50ee36bf2102360e8d9f2ee3df435123f75e3a9c0e7e8f7208afd'
