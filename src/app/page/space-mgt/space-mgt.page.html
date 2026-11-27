@@ -7,6 +7,358 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="surface-content">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- ===== STEP 1 : Site ===== -->
+  <ion-card class="section-card theme-violet">
+    <div class="section-header">
+      <div class="section-icon"><ion-icon name="business-outline"></ion-icon></div>
+      <h3>Site</h3>
+    </div>
+    <ion-card-content class="ion-no-padding">
+      <section class="inputbox" (click)="openPicker()">
+        <ion-text color="primary">Site <ion-text color="danger">*</ion-text></ion-text>
+        <ion-item lines="none">
+          <ion-input type="text" [value]="site_name" placeholder="Tap to select site" readonly></ion-input>
+          <ion-icon name="chevron-down-outline" slot="end" class="fb-caret"></ion-icon>
+        </ion-item>
+      </section>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- ===== STEP 2 : Facilities ===== -->
+  <ion-card class="section-card theme-teal" *ngIf="site_id">
+    <div class="section-header">
+      <div class="section-icon"><ion-icon name="layers-outline"></ion-icon></div>
+      <h3>Facilities <span class="fb-count" *ngIf="!isLoading">{{facilityArr.length}}</span></h3>
+    </div>
+    <ion-card-content class="ion-no-padding">
+
+      <div class="fb-loading" *ngIf="isLoading">
+        <ion-spinner name="lines-sharp"></ion-spinner>
+        <span>Loading facilities...</span>
+      </div>
+
+      <div class="fb-item" *ngFor="let dat of facilityArr" (click)="openFacility(dat)">
+        <div class="fb-top">
+          <div class="fb-icon"><ion-icon name="easel-outline"></ion-icon></div>
+          <div class="fb-head">
+            <h4>{{dat.name || dat.facility_name || '-'}}</h4>
+            <span class="fb-type" *ngIf="dat.type || dat.category">{{dat.type || dat.category}}</span>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="fb-arrow"></ion-icon>
+        </div>
+        <div class="info-grid">
+          <div class="info-cell" *ngIf="dat.capacity">
+            <span class="info-k">Capacity</span>
+            <span class="info-v">{{dat.capacity}}</span>
+          </div>
+          <div class="info-cell" *ngIf="dat.id">
+            <span class="info-k">Facility Id</span>
+            <span class="info-v">{{dat.id}}</span>
+          </div>
+          <div class="info-cell span-2" *ngIf="dat.location || dat.block">
+            <span class="info-k">Location</span>
+            <span class="info-v">{{dat.location || dat.block}}</span>
+          </div>
+          <div class="info-cell span-2" *ngIf="dat.description">
+            <span class="info-k">Description</span>
+            <span class="info-v">{{dat.description}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="picker-empty" *ngIf="!isLoading && facilityArr.length === 0">
+        <ion-icon name="layers-outline"></ion-icon>
+        <p>No Facility Found</p>
+        <span>Is site par koi facility available nahi hai</span>
+      </div>
+
+    </ion-card-content>
+  </ion-card>
+
+  <!-- site select hone se pahle -->
+  <div class="picker-empty" *ngIf="!site_id">
+    <ion-icon name="business-outline"></ion-icon>
+    <p>Select a Site</p>
+    <span>Site select karne par facilities dikhengi</span>
+  </div>
 
 </ion-content>
+
+<!-- ===== STEP 3 : Facility detail + booking ===== -->
+<ion-modal [isOpen]="isDetailOpen" (willDismiss)="closeDetail()">
+  <ng-template>
+    <ion-header class="picker-header">
+      <ion-toolbar class="picker-toolbar">
+        <div class="picker-title">
+          <ion-icon name="easel-outline"></ion-icon>
+          <span>Facility</span>
+        </div>
+        <ion-buttons slot="end">
+          <ion-button class="close-btn" (click)="closeDetail()">
+            <ion-icon slot="icon-only" name="close"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="picker-content">
+
+      <!-- Facility name + seats -->
+      <div class="fb-hero">
+        <h2>{{facility.name || facility.facility_name || '-'}}</h2>
+        <div class="fb-seats">
+          <ion-icon name="people-outline"></ion-icon>
+          <span>Seats {{capacity}}</span>
+        </div>
+      </div>
+
+      <!-- ===== Pick a time ===== -->
+      <div class="fb-sec">
+        <h3 class="fb-sec-title">Pick a time</h3>
+
+        <div class="fb-daterow">
+          <section class="inputbox fb-datebox" (click)="isDateOpen = true">
+            <ion-text color="primary">Date</ion-text>
+            <ion-item lines="none">
+              <ion-input type="text" [value]="bookDate | date:'dd MMM yyyy'" readonly></ion-input>
+              <ion-icon name="calendar-outline" slot="end" class="fb-cal"></ion-icon>
+            </ion-item>
+          </section>
+          <span class="fb-oh" *ngIf="openTime">Operating hours: {{openTime}}–{{closeTime}}</span>
+        </div>
+
+        <p class="fb-rules" *ngIf="rulesText()">Booking rules: {{rulesText()}}.</p>
+        <p class="fb-slotinfo" *ngIf="openTime">{{openTime}} – {{closeTime}} · {{slotMinutes}}-min slots</p>
+
+        <div class="fb-loading" *ngIf="isSlotLoading">
+          <ion-spinner name="lines-sharp"></ion-spinner>
+          <span>Loading slots...</span>
+        </div>
+
+        <div class="fb-slots" *ngIf="!isSlotLoading">
+          <div class="fb-slot" *ngFor="let dat of slotArr" [ngClass]="slotClass(dat)" (click)="selectSlot(dat)">
+            <b>{{dat.start}}</b>
+            <small>{{dat.note}}</small>
+          </div>
+        </div>
+
+        <p class="fb-none" *ngIf="!isSlotLoading && slotArr.length === 0">No slot available on this date</p>
+
+        <div class="fb-legend" *ngIf="slotArr.length">
+          <span class="lg lg-free">Available</span>
+          <span class="lg lg-on">Selected</span>
+          <span class="lg lg-off">Full / Past</span>
+        </div>
+
+        <div class="fb-note" *ngIf="selectedSlot">
+          <ion-icon name="calendar-number-outline"></ion-icon>
+          <span><b>{{selectedSlot.start}}–{{selectedSlot.end}}</b> is open on {{bookDate}}.</span>
+        </div>
+
+        <div class="fb-note" *ngIf="!selectedSlot && facility.min_advance_minutes">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <span>This facility requires booking at least {{facility.min_advance_minutes}} minute(s) in advance.</span>
+        </div>
+      </div>
+
+      <!-- ===== Pick your chair ===== -->
+      <div class="fb-sec" *ngIf="selectedSlot && chairArr.length">
+        <h3 class="fb-sec-title">Pick your chair</h3>
+
+        <div class="fb-chairhead">
+          <span class="fb-free">{{seatsFree}} of {{capacity}} chairs free</span>
+          <span class="lg lg-free">available</span>
+          <span class="lg lg-off">taken</span>
+          <span class="lg lg-on">your pick</span>
+        </div>
+
+        <div class="fb-chairs">
+          <div class="fb-chair" *ngFor="let dat of chairArr" [ngClass]="chairClass(dat)" (click)="selectChair(dat)">
+            <ion-icon name="ellipse"></ion-icon>
+            <b>{{dat.label || dat.id}}</b>
+            <small>{{isTaken(dat) ? 'Taken' : (isPicked(dat) ? 'Your pick' : 'Available')}}</small>
+          </div>
+        </div>
+
+        <div class="fb-ok" *ngIf="selectedDesks.length">
+          <ion-icon name="checkmark-circle"></ion-icon>
+          <span>You've claimed <b>{{selectedDesks.length}}</b> chair (<b>{{deskLabels()}}</b>). They'll be locked to you once you confirm.</span>
+        </div>
+      </div>
+
+      <!-- ===== Your booking ===== -->
+      <div class="fb-sec">
+        <h3 class="fb-sec-title">Your booking</h3>
+
+        <section class="inputbox">
+          <ion-text color="primary">Title <ion-text color="danger">*</ion-text></ion-text>
+          <ion-item lines="none" [class.fb-err]="isSubmit && !title">
+            <ion-input type="text" [(ngModel)]="title" placeholder="Title"></ion-input>
+          </ion-item>
+          <p class="fb-errtext" *ngIf="isSubmit && !title">Title is required — describe the booking so approvers and your team can identify it.</p>
+        </section>
+
+        <section class="inputbox">
+          <ion-text color="primary">Remarks</ion-text>
+          <ion-item lines="none">
+            <ion-textarea [(ngModel)]="remarks" placeholder="Remarks" rows="3"></ion-textarea>
+          </ion-item>
+        </section>
+
+        <div class="fb-seatchip" *ngIf="selectedSlot">
+          {{seatsTaken}} of {{capacity}} chairs taken<span *ngIf="selectedDesks.length"> · {{selectedDesks.length}} picked</span> · up to {{capacity - 1}} guests
+        </div>
+
+        <!-- Pahli chair ke alawa har chair ka guest -->
+        <div class="fb-guests" *ngIf="selectedDesks.length">
+          <h4>Guests for the other {{guestArr.length}} chair</h4>
+
+          <p class="fb-guestnote" *ngIf="guestArr.length === 0">You've only claimed your own chair so far. Pick more chairs above to add guests.</p>
+
+          <ion-row *ngFor="let dat of guestArr">
+            <ion-col size="12">
+              <section class="inputbox">
+                <ion-text color="primary">Guest for {{dat.label}} <ion-text color="danger">*</ion-text></ion-text>
+                <ion-item lines="none" [class.fb-err]="isSubmit && !dat.email">
+                  <ion-input type="email" [(ngModel)]="dat.email" placeholder="Guest email"></ion-input>
+                </ion-item>
+              </section>
+            </ion-col>
+            <ion-col size="12">
+              <section class="inputbox">
+                <ion-text color="primary">Name (optional)</ion-text>
+                <ion-item lines="none">
+                  <ion-input type="text" [(ngModel)]="dat.name" placeholder="Name"></ion-input>
+                </ion-item>
+              </section>
+            </ion-col>
+          </ion-row>
+        </div>
+
+        <div class="fb-bookedfor">
+          <span>Booked for:</span>
+          <b>{{userData.department_name || 'No department on file'}}</b>
+        </div>
+      </div>
+
+      <!-- Pantry menu / meal times (jin facility par hote hain) -->
+      <ion-card class="section-card theme-amber" *ngIf="mealArr.length">
+        <div class="section-header">
+          <div class="section-icon"><ion-icon name="time-outline"></ion-icon></div>
+          <h3>Meal Times <span class="fb-count">{{mealArr.length}}</span></h3>
+        </div>
+        <ion-card-content class="ion-no-padding">
+          <div class="fb-chip-row">
+            <span class="fb-chip" *ngFor="let dat of mealArr">
+              {{nameOf(dat) || dat.meal_time}}
+              <small *ngIf="dat.start_time">{{dat.start_time}} - {{dat.end_time}}</small>
+            </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="section-card theme-violet" *ngIf="menuArr.length">
+        <div class="section-header">
+          <div class="section-icon"><ion-icon name="restaurant-outline"></ion-icon></div>
+          <h3>Pantry Menu <span class="fb-count">{{menuArr.length}}</span></h3>
+        </div>
+        <ion-card-content class="ion-no-padding">
+          <div class="fb-menu" *ngFor="let dat of menuArr">
+            <div class="fb-menu-left">
+              <h5>{{nameOf(dat) || dat.item_name || '-'}}</h5>
+              <span *ngIf="dat.category || dat.meal_time">{{dat.category || dat.meal_time}}</span>
+            </div>
+            <span class="fb-price" *ngIf="dat.price || dat.price === 0">₹ {{dat.price}}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+    </ion-content>
+
+    <ion-footer class="app-footer">
+      <ion-toolbar>
+        <ion-row>
+          <ion-col size="5">
+            <ion-button expand="block" shape="round" fill="outline" color="medium" (click)="closeDetail()">Cancel</ion-button>
+          </ion-col>
+          <ion-col size="7">
+            <ion-button expand="block" shape="round" class="submit-btn" [disabled]="!selectedSlot" (click)="confirmBooking()">Confirm Booking</ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-toolbar>
+    </ion-footer>
+
+  </ng-template>
+</ion-modal>
+
+<!-- ===== Date calendar ===== -->
+<ion-modal class="fb-date-modal" [isOpen]="isDateOpen" (willDismiss)="isDateOpen = false">
+  <ng-template>
+    <ion-datetime presentation="date" size="cover" mode="md" [min]="minDate" [max]="maxDate"
+      [value]="bookDate" (ionChange)="changeDate($event)" [showDefaultButtons]="false"></ion-datetime>
+  </ng-template>
+</ion-modal>
+
+<!-- ===== Booking confirmed ===== -->
+<ion-modal class="fb-done-modal" [isOpen]="isDoneOpen" (willDismiss)="isDoneOpen = false">
+  <ng-template>
+    <div class="fb-done">
+      <ion-button class="fb-done-close" fill="clear" (click)="closeDone()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+      <div class="fb-done-tick"><ion-icon name="checkmark"></ion-icon></div>
+      <h3>Booking confirmed</h3>
+      <div class="fb-done-row">
+        <span>Booking ID</span>
+        <b>{{bookingId}}</b>
+      </div>
+      <p>You're all set. Create another booking or close this screen.</p>
+      <ion-row>
+        <ion-col size="6">
+          <ion-button expand="block" shape="round" fill="outline" (click)="newBooking()">New Booking</ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button expand="block" shape="round" class="submit-btn" (click)="closeDone()">Done</ion-button>
+        </ion-col>
+      </ion-row>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- ===== Site picker ===== -->
+<ion-modal [isOpen]="isPickerOpen" (willDismiss)="closePicker()">
+  <ng-template>
+    <ion-header class="picker-header">
+      <ion-toolbar class="picker-toolbar">
+        <div class="picker-title">
+          <ion-icon name="business-outline"></ion-icon>
+          <span>Select Site ({{pickerArrCopy.length}})</span>
+        </div>
+        <ion-buttons slot="end">
+          <ion-button class="close-btn" (click)="closePicker()">
+            <ion-icon slot="icon-only" name="close"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+      <div class="search-wrap">
+        <ion-searchbar class="picker-search" mode="md" (ionInput)="searchPicker($event)" placeholder="Search site..."></ion-searchbar>
+      </div>
+    </ion-header>
+    <ion-content class="picker-content">
+      <ion-item class="picker-item" *ngFor="let dat of pickerArr" (click)="selectPicker(dat)" button detail="false" lines="none">
+        <div class="picker-icon-wrap" slot="start"><ion-icon name="business-outline"></ion-icon></div>
+        <ion-label>{{nameOf(dat)}}</ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end" class="picker-arrow"></ion-icon>
+      </ion-item>
+      <div class="picker-empty" *ngIf="pickerArr.length === 0">
+        <ion-icon name="search-outline"></ion-icon>
+        <p>No Record Found</p>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

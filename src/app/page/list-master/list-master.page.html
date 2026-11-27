@@ -72,7 +72,7 @@
   </button>
 
   <app-dashboard [eventChange]="eventChange" ></app-dashboard>
-  <ion-button (click)="testRoute('/space-mgt')">Space Mgt</ion-button>
+  <ion-button [disabled]="isFmsLoading" (click)="spaceMgt()">Space Mgt</ion-button>
   <ion-button (click)="testRoute('/parking-mgt')">Parking Mgt</ion-button>
   <ion-button (click)="testRoute('/visitor-mgt')">visitor Mgt</ion-button>
   <ion-button (click)="testRoute('/key-mgt/tabs/home')">Key Mgt</ion-button>
