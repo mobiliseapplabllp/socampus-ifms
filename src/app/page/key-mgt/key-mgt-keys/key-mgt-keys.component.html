@@ -1,0 +1,431 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/list-master"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Keys</ion-title>
+    <!-- <ion-buttons slot="end">
+      <ion-button expand="block" (click)="activeFilter ? clearFilter() : filterSelect.open()">
+        <ion-icon [name]="activeFilter ? 'close-outline' : 'filter-outline'" slot="start"></ion-icon>
+        {{ activeFilter ? 'Clear' : 'Filter' }}
+      </ion-button>
+    </ion-buttons> -->
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [(ngModel)]='status' (ionChange)="changeSegment($event)">
+      <ion-segment-button value="assigned_key" class="ion-text-capitalize">
+        <ion-label>Assignments ({{totalAss === 0 ? '' : totalAss }})</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="add_key" class="ion-text-capitalize">
+        <ion-label>Keys ({{totalKey === 0 ? '' : totalKey}})</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-searchbar (ionChange)="search($event)" [(ngModel)]="searchVal" debounce="1500" mode="md"></ion-searchbar>
+  <!-- <ion-select #filterSelect interface="action-sheet" style="display:none;" (ionChange)="filterData($event)" mode="ios">
+    <ion-select-option value="available"> Available </ion-select-option>
+    <ion-select-option value="assigned"> Assigned </ion-select-option>
+    <ion-select-option value="issued"> Issued </ion-select-option>
+    <ion-select-option value="lost"><ion-icon name="alert-circle-outline"></ion-icon> Lost </ion-select-option>
+  </ion-select> -->
+  <div [ngSwitch]='status'>
+    <div *ngSwitchCase="'assigned_key'">
+      <ion-card *ngFor="let dat of assignKeyData; let i = index">
+        <ion-item lines="none">
+          <ion-avatar slot="start" class="center">
+            <ion-icon name="key" size="large" color="primary"></ion-icon>
+          </ion-avatar>
+          <ion-label class="ion-text-wrap">
+            <h3>K No - {{dat.keyNo}} ({{dat.key_name}})</h3>
+            <p>{{dat.block_name}} {{dat.building_name}} {{dat.floor_name}} {{dat.location_name}} </p>
+            <p>Assign Status : <ion-text
+                [color]="dat.assignment_status === 'returned' ? 'success': dat.assignment_status === 'assigned' ? 'primary' : dat.assignment_status === 'active' ? 'primary' : 'danger'  "
+                class="ion-text-capitalize">{{dat.assignment_status === 'active' ? 'Assigned' : dat.assignment_status }}</ion-text> </p>
+            <p>Key Status : <ion-text
+                [color]="dat.key_status === 'available' ? 'success': dat.key_status === 'lost' ? 'danger' : 'primary'  "
+                class="ion-text-capitalize">{{dat.key_status}}</ion-text> </p>
+            <p>Room No: {{dat.room_no}}</p>
+          </ion-label>
+          <ion-buttons slot="end">
+            <ion-button id="popover-action-{{dat.id}}">
+              <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+            </ion-button>
+            <ion-popover trigger="popover-action-{{dat.id}}" [dismissOnSelect]="true" [backdropDismiss]="true">
+              <ng-template>
+                <ion-content>
+                  <ion-list>
+                    <ion-item button (click)="openDetails(dat)">
+                      <ion-icon name="eye-outline" slot="start"></ion-icon> View Details
+                    </ion-item>
+                    <ion-item (click)="history(dat)">
+                      <ion-icon name="timer-outline" slot="start"></ion-icon> Key Assign History
+                    </ion-item>
+                    <ion-item (click)="openRoute('key-mgt/mark-return',dat)"
+                      *ngIf="dat.key_status === 'assigned' "><!--*ngIf="dat.key_status === 'assigned' "-->
+                      <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon> Mark As Returned
+                    </ion-item>
+                    <ion-item (click)="recoverLost(dat)" *ngIf="dat.key_status === 'lost' ">
+                      <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon> Recover Lost Key
+                    </ion-item>
+                    <ion-item (click)="openRoute('/key-mgt/lostkey-report',dat)"
+                      *ngIf="dat.key_status === 'available' || dat.key_status === 'assigned'  ">
+                      <ion-icon name="Warning-outline" color="danger" slot="start"></ion-icon> <ion-text
+                        color="danger">Report Lost</ion-text>
+                    </ion-item>
+                  </ion-list>
+                </ion-content>
+              </ng-template>
+            </ion-popover>
+          </ion-buttons>
+        </ion-item>
+      </ion-card>
+      <ion-infinite-scroll threshold="100px" (ionInfinite)="infiniteScroll($event)" *ngIf="canLoadData">
+        <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
+      </ion-infinite-scroll>
+      <br>
+      <br>
+    </div>
+    <div *ngSwitchCase="'add_key'">
+      <ion-card *ngFor="let dat of addKeyData">
+        <ion-item lines="none">
+          <ion-avatar slot="start" class="center">
+            <ion-icon name="key" size="large" color="primary"></ion-icon>
+          </ion-avatar>
+          <ion-label class="ion-text-wrap">
+            <h3>K No {{dat.id}} ({{dat.key_name}})</h3>
+            <p>{{dat.block_name}} {{dat.building_name}} {{dat.floor_name}} {{dat.location_name}} </p>
+            <p>Key Status : <ion-text
+                [color]="dat.status === 'available' ? 'success': dat.status === 'lost' ? 'danger' : 'primary'  "
+                class="ion-text-capitalize">{{dat.status}}</ion-text> </p>
+            <p>Room No: {{dat.room_no}}</p>
+          </ion-label>
+          <ion-buttons slot="end">
+            <ion-button id="popover-action1-{{dat.id}}">
+              <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+            </ion-button>
+            <ion-popover trigger="popover-action1-{{dat.id}}" [dismissOnSelect]="true" [backdropDismiss]="true">
+              <ng-template>
+                <ion-content>
+                  <ion-list>
+                    <ion-item (click)="editKey(dat)">
+                      <ion-icon name="eye-outline" slot="start"></ion-icon> Edit Key
+                    </ion-item>
+                    <ion-item (click)="openLocationHis(dat)"><!--(click)=" isModalOpenLocationHistory = true"-->
+                      <ion-icon name="timer-outline" slot="start"></ion-icon> Location History
+                    </ion-item>
+                    <ion-item (click)="assignKey(dat)" *ngIf="dat.status === 'available' ">
+                      <ion-icon name="person-add-outline" slot="start"> </ion-icon> Assign
+                    </ion-item>
+                  </ion-list>
+                </ion-content>
+              </ng-template>
+            </ion-popover>
+          </ion-buttons>
+        </ion-item>
+      </ion-card>
+
+      <ion-infinite-scroll threshold="100px" (ionInfinite)="infiniteScroll1($event)" *ngIf="canLoadData">
+        <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."> </ion-infinite-scroll-content>
+      </ion-infinite-scroll>
+      <br>
+      <br>
+      <br>
+      <!-- <section>
+        <ion-card *ngFor="let dat of addKeyData">
+          <ion-row>
+            <ion-col size="2">
+              <ion-avatar style="margin-top: 20px; ">
+                <ion-icon name="key" size="large" color="primary"></ion-icon>
+              </ion-avatar>
+            </ion-col>
+            <ion-col size="8">
+              <ion-row>
+                <ion-col size="8">
+                  <ion-text color="dark">
+                    <h3 class="ion-no-margin"><strong>K No - {{dat.key_no}}</strong></h3>
+                  </ion-text>
+                </ion-col>
+                <ion-col size="4">
+                  <ion-chip [color]="dat.key_status === 'available' ? 'success' :  dat.key_status === 'lost' ? 'danger' :  dat.key_status === 'assigned' ? 'warning' : 'medium'" style="margin-top: 0%;">
+                    <ion-label>{{dat.key_status}}</ion-label>
+                  </ion-chip>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="12">
+                  <ion-text color="medium">
+                    <p class="ion-no-margin"> <ion-icon name="location"
+                        size="small"></ion-icon>{{dat.block_name}}{{dat.building_name}}{{dat.floor_name}}{{dat.location_name}}
+                    </p>
+                  </ion-text>
+                </ion-col>
+              </ion-row>
+            </ion-col>
+            <ion-col size="2" style="margin-top: 7px;">
+              <ion-button fill="clear" color="medium" id="popover-action-{{dat.id}}">
+                <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+              </ion-button>
+              <ion-popover trigger="popover-action-{{dat.id}}" [dismissOnSelect]="true" [backdropDismiss]="true">
+                <ng-template>
+                  <ion-content>
+                    <ion-list>
+                      <ion-item><ion-icon name="eye-outline"></ion-icon>Edit </ion-item>
+                      <ion-item><ion-icon name="timer-outline"></ion-icon>View History</ion-item>
+                    </ion-list>
+                  </ion-content>
+                </ng-template>
+              </ion-popover>
+            </ion-col>
+          </ion-row>
+        </ion-card>
+      </section> -->
+    </div>
+  </div>
+  <br><br>
+</ion-content>
+
+<ion-modal [isOpen]="isModalOpenLocationHistory" (didDismiss)="closeModalLocationHis()" [initialBreakpoint]="0.9"
+  mode="ios" [handle]="false" class="custom-modal">
+  <ng-template>
+    <div class="custom-close-btn" (click)="closeModalLocationHis()">✕</div>
+    <ion-content>
+      <div class="modal-wrapper">
+        <div class="modal-content" style="padding: 16px;overflow:scroll">
+          <ion-card *ngFor="let dat of locationHisArr" class="ion-padding">
+            <fieldset style="border-radius: 6px;">
+              <legend>Previous Location</legend>
+              <ion-row>
+                <ion-col size="6">
+                  <ion-text color="dark">Key Name</ion-text><br>
+                  <ion-text>{{dat.previous_key_name}}</ion-text>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-text color="dark">Room No</ion-text><br>
+                  <ion-text>{{dat.previous_room_no}}</ion-text>
+                </ion-col>
+
+                <ion-col size="6">
+                  <ion-text color="dark">Site Name</ion-text><br>
+                  <ion-text>{{dat.previous_site_name}}</ion-text>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-text color="dark">Block Name</ion-text><br>
+                  <ion-text>{{dat.previous_block_name}}</ion-text>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-text color="dark">Bulding</ion-text><br>
+                  <ion-text>{{dat.previous_building_name}}</ion-text>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-text color="dark">Floor</ion-text><br>
+                  <ion-text>{{dat.previous_floor_name}}</ion-text>
+                </ion-col>
+                <ion-col size="12">
+                  <ion-text color="dark">Location</ion-text><br>
+                  <ion-text>{{dat.previous_location_name}}</ion-text>
+                </ion-col>
+                <ion-col size="12">
+                  <ion-text color="dark">Remark</ion-text><br>
+                  <ion-text>{{dat.previous_remarks}}</ion-text>
+                </ion-col>
+              </ion-row>
+            </fieldset>
+
+            <fieldset style="border-radius: 6px;">
+              <legend>Current Location</legend>
+              <ion-row>
+                <ion-col size="6">
+                  <ion-text color="dark">Key Name</ion-text><br>
+                  <ion-text [color]="dat.previous_key_name === dat.new_key_name ? 'medium':'danger' ">{{dat.new_key_name}}</ion-text>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-text color="dark">Room No</ion-text><br>
+                  <ion-text [color]="dat.previous_room_no === dat.new_room_no ? 'medium':'danger' ">{{dat.new_room_no}}</ion-text>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-text color="dark">Site Name</ion-text><br>
+                  <ion-text [color]="dat.previous_site_name === dat.new_site_name ? 'medium':'danger' ">{{dat.new_site_name}}</ion-text>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-text color="dark">Block Name</ion-text><br>
+                  <ion-text [color]="dat.previous_block_name === dat.new_block_name ? 'medium':'danger' ">{{dat.new_block_name}}</ion-text>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-text color="dark">Bulding</ion-text><br>
+                  <ion-text [color]="dat.previous_building_name === dat.new_building_name ? 'medium':'danger' ">{{dat.new_building_name}}</ion-text>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-text color="dark">Floor</ion-text><br>
+                  <ion-text [color]="dat.previous_floor_name === dat.new_floor_name ? 'medium':'danger' ">{{dat.new_floor_name}}</ion-text>
+                </ion-col>
+                <ion-col size="12">
+                  <ion-text color="dark">Location</ion-text><br>
+                  <ion-text [color]="dat.previous_location_name === dat.new_location_name ? 'medium':'danger' ">{{dat.new_location_name}}</ion-text>
+                </ion-col>
+                <ion-col size="12">
+                  <ion-text color="dark">Remark</ion-text><br>
+                  <ion-text [color]="dat.previous_remarks === dat.new_remarks ? 'medium':'danger' ">{{dat.new_remarks}}</ion-text>
+                </ion-col>
+              </ion-row>
+            </fieldset>
+
+            <ion-item lines="none">
+              <ion-label class="ion-text-wrap">
+                <h4><b>Change By : </b> {{dat?.changedBy?.first_name}} {{dat?.changedBy?.last_name}}</h4>
+                <p>{{dat.updated_at}}</p>
+              </ion-label>
+            </ion-item>
+
+          </ion-card>
+          <br>
+          <br>
+          <br>
+          <br>
+        </div>
+      </div>
+
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+
+<ion-modal [isOpen]="isModalOpen" class="my-modal" (willDismiss)="closeModal()" [initialBreakpoint]="1" [breakpoints]="[1]" mode="md">
+  <ng-template>
+    <!-- <div class="custom-close-btn" (click)="closeModal()">✕</div> -->
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-title></ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <div class="modal-wrapper">
+        <!-- <div class="modal-content" style="padding: 16px;"> -->
+          <section>
+            <ion-text color="dark">
+              <h4 style="margin-bottom: 12px;"><strong>KEY INFORMATION</strong></h4>
+            </ion-text>
+            <ion-row>
+              <ion-col size="6">
+                <ion-text color="medium">Key Name</ion-text><br>
+                <ion-text color="dark">{{selectedData?.key_name || 'N/A'}}</ion-text>
+              </ion-col>
+              <ion-col size="6">
+                <ion-text color="medium">Key Number</ion-text><br>
+                <ion-text color="dark">{{selectedData?.key_no ? selectedData?.key_no : selectedData?.keyNo}}
+                </ion-text>
+              </ion-col>
+              <!-- <ion-col size="6">
+                <ion-text color="medium">Room No</ion-text><br>
+                <ion-text color="dark">{{selectedData?.key?.room_no}}
+                </ion-text>
+              </ion-col> -->
+              <ion-col size="6">
+                <ion-text color="medium">Key Location</ion-text><br>
+                <ion-text color="dark">{{selectedData?.location_name ? selectedData?.location_name : selectedData?.location }}</ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>              
+              <ion-col size="12">
+                <ion-text color="medium">Site Name</ion-text><br>
+                <ion-text color="dark">{{selectedData?.site_name || 'N/A'}}
+                </ion-text>
+              </ion-col>
+            </ion-row>
+          </section>
+          <section>
+            <ion-text color="dark">
+              <h4 style="margin-bottom: 12px;"><strong>Requester Details </strong></h4>
+            </ion-text>
+            <ion-row>
+              <ion-col size="6">
+                <ion-text color="medium">Requester Type</ion-text><br>
+                <ion-text color="dark" class="ion-text-capitalize">{{selectedData?.requester_type || 'N/A'}}</ion-text>
+              </ion-col>
+              <ion-col size="6">
+                <ion-text color="medium">Phone Number</ion-text><br>
+                <ion-text color="dark">{{selectedData?.person_phone || 'N/A'}}
+                </ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="6">
+                <ion-text color="medium">Name Of Person </ion-text><br>
+                <ion-text color="dark">{{selectedData?.person_name || 'N/A'}}</ion-text>
+              </ion-col>
+              <ion-col size="6">
+                <ion-text color="medium">Email Id</ion-text><br>
+                <ion-text color="dark">{{selectedData?.person_email || 'N/A'}}
+                </ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="6">
+                <ion-text color="medium">Department </ion-text><br>
+                <ion-text color="dark">{{selectedData?.departmentInfo?.dept_desc || 'N/A'}}</ion-text>
+              </ion-col>
+              <ion-col size="6">
+                <ion-text color="medium">Issued By</ion-text><br>
+                <!-- <ion-text color="dark">{{selectedData?.assigned_by_name || 'N/A'}}</ion-text> -->
+                <ion-text color="dark">{{selectedData?.status === 'lost' ? 'N/A'  : selectedData?.assigned_by_name || 'N/A'}}</ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="6">
+                <ion-text color="medium">Return Date & Time </ion-text><br>
+                <ion-text color="dark">{{selectedData?.expected_return_at || 'N/A'}}
+                </ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="12">
+                <ion-text color="medium">Remarks </ion-text><br>
+                <ion-text color="dark">{{selectedData?.notes || 'N/A'}}</ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="6" *ngIf="selectedData.id_photo_url"> 
+                <img [src]="selectedData?.id_photo_url" style="width:100%;height:100px" (click)="imageView(selectedData.id_photo_url)">
+              </ion-col>
+              <ion-col size="6" *ngIf="selectedData.requester_photo_url"> 
+                <img [src]="selectedData?.requester_photo_url" style="width:100%;height:100px" (click)="imageView(selectedData.requester_photo_url)">
+              </ion-col>
+            </ion-row>            
+          </section>
+          <section *ngIf="selectedData.is_on_behalf === 1">
+            <ion-text color="dark">
+              <h4 style="margin-bottom: 12px;"><strong>Authorized Person</strong></h4>
+            </ion-text>
+            <ion-row>
+              <ion-col size="6">
+                <ion-text color="medium">Phone No</ion-text><br>
+                <ion-text color="dark">{{selectedData?.auth_person_phone || 'N/A'}}</ion-text>
+              </ion-col>
+              <ion-col size="6">
+                <ion-text color="medium">Name</ion-text><br>
+                <ion-text color="dark">{{selectedData?.auth_person_name || 'N/A'}}
+                </ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="12">
+                <ion-text color="medium">Email Id </ion-text><br>
+                <ion-text color="dark">{{selectedData?.auth_person_email || '--'}}</ion-text>
+              </ion-col>
+            </ion-row>
+          </section>
+        <!-- </div> -->
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

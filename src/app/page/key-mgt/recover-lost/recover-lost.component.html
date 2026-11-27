@@ -1,0 +1,43 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Recover Lost ({{req_data.key_name}})</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal(null, 'false')">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <section class="inputbox">
+    <ion-text color="primary">
+      <strong>Recover Date & Time</strong>
+      <ion-text color="danger">*</ion-text>
+    </ion-text>
+    <ion-item lines="none" ><!--id="recover-lost-date"-->
+      <ion-input type="text" [value]="lost_date | date:'dd MMM yyyy, hh:mm a'" placeholder="Select Date & Time"
+        readonly>
+      </ion-input>
+    </ion-item>
+    <ion-popover trigger="recover-lost-date" mode="md">
+      <ng-template>
+        <ion-datetime presentation="date-time" size="cover" [(ngModel)]="lost_date" [showDefaultButtons]="true" [max]="currentDate">
+        </ion-datetime>
+      </ng-template>
+    </ion-popover>
+  </section>
+
+  <section class="inputbox">
+    <ion-text color="primary" >Recovery Notes <ion-text color="danger">*</ion-text></ion-text>
+    <ion-item lines="none">
+      <ion-textarea rows="4" placeholder="Enter Remark Here" [(ngModel)]="remark"></ion-textarea>
+    </ion-item>
+  </section>
+
+  <ion-row>
+    <ion-col>
+      <ion-button expand="block" (click)="submit()">Submit</ion-button>
+    </ion-col>
+  </ion-row>
+
+</ion-content>

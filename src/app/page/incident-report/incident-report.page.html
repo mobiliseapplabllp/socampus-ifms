@@ -1,0 +1,121 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Incident Report</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="forms">
+    <ion-card>
+      <ion-card-header color="primary"><b>Basic Details</b></ion-card-header>
+      <ion-card-content class="ion-no-padding">
+        <ion-row>
+          <ion-col size="12">
+            <ion-item (click)="openSiteModal()" [class.error]="isInvalid('site_id_desc')">
+              <ion-label color="primary" position="floating">Site <ion-text color="danger">*</ion-text></ion-label>
+              <ion-input type="text" formControlName="site_id_desc" readonly></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">
+            <ion-item id="incident-date" [class.error]="isInvalid('incident_date')">
+              <ion-label color="primary" position="floating">Incident Date <ion-text color="danger">*</ion-text></ion-label>
+              <ion-input type="text" [value]="formatValue('incident_date', 'DD-MM-YYYY')" placeholder="Select Date" readonly></ion-input>
+            </ion-item>
+            <ion-popover trigger="incident-date" mode="md">
+              <ng-template>
+                <ion-datetime presentation="date" size="cover" [max]="maxDate" formControlName="incident_date" [showDefaultButtons]="true"></ion-datetime>
+              </ng-template>
+            </ion-popover>
+          </ion-col>
+          <ion-col size="6">
+            <ion-item id="incident-time" [class.error]="isInvalid('incident_time')">
+              <ion-label color="primary" position="floating">Incident Time <ion-text color="danger">*</ion-text></ion-label>
+              <ion-input type="text" [value]="formatValue('incident_time', 'hh:mm A')" placeholder="Select Time" readonly></ion-input>
+            </ion-item>
+            <ion-popover trigger="incident-time" mode="md">
+              <ng-template>
+                <ion-datetime presentation="time" size="cover" formControlName="incident_time" [showDefaultButtons]="true"></ion-datetime>
+              </ng-template>
+            </ion-popover>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="12">
+            <ion-item [class.error]="isInvalid('incident_type')">
+              <ion-label color="primary" position="floating">Incident Type <ion-text color="danger">*</ion-text></ion-label>
+              <ion-select interface="action-sheet" mode="ios" formControlName="incident_type">
+                <ion-select-option *ngFor="let type of incidentTypes" [value]="type">{{type}}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+          <ion-col size="12">
+            <ion-item (click)="openDepartmentModal()" [class.error]="isInvalid('dept_id_desc')">
+              <ion-label color="primary" position="floating">Department where it happened <ion-text color="danger">*</ion-text></ion-label>
+              <ion-input type="text" formControlName="dept_id_desc" readonly></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">
+            <ion-item [class.error]="isInvalid('reported_by')">
+              <ion-label color="primary" position="floating">Reported by (name) <ion-text color="danger">*</ion-text></ion-label>
+              <ion-input type="text" formControlName="reported_by"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="6">
+            <ion-item>
+              <ion-label color="primary" position="floating">Severity</ion-label>
+              <ion-select interface="action-sheet" mode="ios" formControlName="severity">
+                <ion-select-option *ngFor="let sev of severityList" [value]="sev">{{sev}}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header color="primary"><b>What Happened</b></ion-card-header>
+      <ion-card-content class="ion-no-padding">
+        <ion-row>
+          <ion-col size="12">
+            <ion-item>
+              <ion-label color="primary" position="floating">Exact Location</ion-label>
+              <ion-input type="text" formControlName="exact_location" placeholder="Building, floor, area"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="12">
+            <ion-item [class.error]="isInvalid('description')">
+              <ion-label color="primary" position="floating">Description <ion-text color="danger">*</ion-text></ion-label>
+              <ion-textarea formControlName="description" rows="4" [autoGrow]="true"></ion-textarea>
+            </ion-item>
+          </ion-col>
+          <ion-col size="12">
+            <ion-item>
+              <ion-label color="primary" position="floating">Immediate Action Taken</ion-label>
+              <ion-textarea formControlName="action_taken" rows="4" [autoGrow]="true"></ion-textarea>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+      </ion-card-content>
+    </ion-card>
+  </form>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-row>
+      <ion-col size="4">
+        <ion-button expand="block" fill="outline" color="medium" (click)="cancel()">Cancel</ion-button>
+      </ion-col>
+      <ion-col size="8">
+        <ion-button expand="block" color="primary" (click)="submit()">Submit and create report</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-footer>

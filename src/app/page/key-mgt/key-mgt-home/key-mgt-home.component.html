@@ -1,0 +1,214 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/list-master"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Key Management</ion-title>    
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col style="padding-left: 10px;">
+        <ion-text>Keys Overview</ion-text>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">
+        <ion-card class="card-box">
+          <!-- <ion-item lines="none" color="none">
+            <ion-thumbnail slot="start" class="center" style="background-color: #1578b0;border-radius: 10px;height:40px;width:40px">
+              <ion-icon name="time-outline" color="light" size="large"></ion-icon>
+            </ion-thumbnail>
+            <ion-label>
+              <p>Total</p>
+              <h2>{{(summaryArr?.keyStatus?.total || 0)}}</h2>
+            </ion-label>            
+          </ion-item> -->
+          <ion-item lines="none">
+            <ion-thumbnail slot="start" class="center" style="background-color: #2d8f56;;;border-radius: 10px;height:40px;width:40px">
+              <ion-icon name="time-outline" color="light" size="large"></ion-icon>
+            </ion-thumbnail>
+            <ion-label>
+              <p>Available</p>
+              <h2>{{summaryArr?.keyStatus?.available || 0 }}</h2>
+            </ion-label>            
+          </ion-item>
+          
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card class="card-box">
+          <ion-item lines="none">
+            <ion-thumbnail slot="start" class="center" style="background-color: #1578b0;border-radius: 10px;height:40px;width:40px">
+              <ion-icon name="time-outline" color="light" size="large"></ion-icon>
+            </ion-thumbnail>
+            <ion-label>
+              <p>Issued </p>
+              <h2>{{summaryArr?.keyStatus?.assigned || 0}}</h2>
+            </ion-label>            
+          </ion-item>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">
+        <ion-card class="card-box">
+          <ion-item lines="none">
+            <ion-thumbnail slot="start" class="center" style="background-color: #e0a73c;;;border-radius: 10px;height:40px;width:40px">
+              <ion-icon name="time-outline" color="light" size="large"></ion-icon>
+            </ion-thumbnail>
+            <ion-label>
+              <p>Overdue</p>
+              <h2>{{summaryArr?.overdueAssignments}}</h2>
+            </ion-label>            
+          </ion-item>
+        </ion-card>
+      </ion-col>
+      
+      <ion-col size="6">
+        <ion-card class="card-box">
+          <ion-item lines="none" color="none">
+            <ion-thumbnail slot="start" class="center" style="background-color: #d4511a ;border-radius: 10px;height:40px;width:40px">
+              <ion-icon name="time-outline" color="light" size="large"></ion-icon>
+            </ion-thumbnail>
+            <ion-label>
+              <p>Lost</p>
+              <h2>{{(summaryArr?.keyStatus?.lost || 0)}}</h2>
+            </ion-label>            
+          </ion-item>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col style="padding-left: 10px;">Recent Assignments</ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-card class="recent" *ngFor="let dat of recent"> 
+          <ion-row>
+            <ion-col size="6">
+              <ion-chip [color]="dat.event_type === 'lost' ? 'danger': dat.event_type === 'returned' ? 'success' : dat.event_type === 'assigned' ? 'primary': 'tertiary'  " class="ion-text-capitalize">{{dat.event_type}}</ion-chip>
+            </ion-col>            
+          </ion-row>
+          <ion-item>
+            <ion-avatar slot="start" class="center">              
+              <ion-icon name="calendar-outline"></ion-icon>
+            </ion-avatar>
+            <ion-label> Date & Time </ion-label>
+            <ion-text slot="end">{{ dat.event_type === 'assigned' ? dat.assigned_at  : dat.event_type === 'returned' ? dat.returned_at  :  dat.event_type === 'recovered' ? dat.date_time_found : dat.date_time_lost  }}</ion-text>
+          </ion-item>
+          <ion-item>
+            <ion-avatar slot="start" class="center">              
+              <ion-icon name="key-outline"></ion-icon>
+            </ion-avatar>
+            <ion-label> Key Name </ion-label>
+            <ion-text slot="end">{{dat.key_name}}</ion-text>
+          </ion-item>
+          <ion-item>
+            <ion-avatar slot="start" class="center">              
+              <ion-icon name="person-circle-outline"></ion-icon>
+            </ion-avatar>
+            <ion-label> Issue By </ion-label>
+            <ion-text slot="end">{{dat.assigned_by_name}}</ion-text>
+          </ion-item>
+          <ion-item *ngIf="dat.event_type === 'assigned' || dat.event_type === 'returned'  ">
+            <ion-avatar slot="start" class="center">              
+              <ion-icon name="person-add-outline"></ion-icon>
+            </ion-avatar>
+            <ion-label> Assigned </ion-label>
+            <ion-text slot="end">{{dat.assigned_to}}</ion-text>
+          </ion-item>
+          <!-- <ion-item *ngIf="dat.event_type === 'returned' || dat.event_type === 'assigned' ">
+            <ion-avatar slot="start" class="center">              
+              <ion-icon name="people-outline"></ion-icon>
+            </ion-avatar>
+            <ion-label> Authorized </ion-label>
+            <ion-text slot="end">{{dat.auth_person_name}}</ion-text>
+          </ion-item> -->
+          <ion-item lines="none">
+            <ion-avatar slot="start" class="center">              
+              <ion-icon name="location-outline"></ion-icon>
+            </ion-avatar>
+            <ion-label> Location </ion-label>
+            <ion-text slot="end">{{dat.location_name}}</ion-text>
+          </ion-item>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- <section class="ion-padding">
+    <ion-text>
+      <h4>Recent Activity</h4>
+    </ion-text>
+    <ion-card class="card3">
+      <ion-row>
+        <ion-col size="4">
+          <ion-chip color="success" class="ion-text-start">Returned</ion-chip>
+        </ion-col>
+        <ion-col size="8">
+          <ion-item style="margin-left:11% !important;" lines="none"> <ion-icon name="calendar-outline"
+              size="small"></ion-icon>12Aug2001 06:45PM</ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-icon name="person-outline"></ion-icon>
+          <ion-label><strong> Issued To : </strong> Aman Tygi </ion-label>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-icon name="person-add-outline"></ion-icon>
+          <ion-label><strong> Authorized by : </strong> Aman Tygi </ion-label>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-icon name="briefcase-outline"></ion-icon>
+          <ion-label><strong> Department : </strong> Aman Tygi </ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+    <ion-card class="card3">
+      <ion-row>
+        <ion-col size="4">
+          <ion-chip color="danger" class="ion-text-start">Returned</ion-chip>
+        </ion-col>
+        <ion-col size="8">
+          <ion-item style="margin-left:11% !important;" lines="none"> <ion-icon name="calendar-outline"
+              size="small"></ion-icon>12Aug2001 06:45PM</ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-icon name="person-outline"></ion-icon>
+          <ion-label><strong> Issued To : </strong> Aman Tygi </ion-label>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-icon name="person-add-outline"></ion-icon>
+          <ion-label><strong> Authorized by : </strong> Aman Tygi </ion-label>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-icon name="briefcase-outline"></ion-icon>
+          <ion-label><strong> Department : </strong> Aman Tygi </ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+  </section> -->
+  <br>
+  <br>
+  <br>
+</ion-content>

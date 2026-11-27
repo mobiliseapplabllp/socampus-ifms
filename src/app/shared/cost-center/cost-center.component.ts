@@ -10,6 +10,7 @@ export class CostCenterComponent  implements OnInit {
   loading: any;
   allCostCenter: any = [];
   allCostCenterCopy: any = [];
+  isKey!: boolean;
   constructor(
     private loadingController: LoadingController,
     private httpComplaint: ComplaintService,
@@ -32,7 +33,7 @@ export class CostCenterComponent  implements OnInit {
 
   getCostCenter() {
     this.presentLoading().then(preLoad => {
-      this.httpComplaint.getCostCenter().subscribe(data => {
+      this.httpComplaint.getCostCenter(this.isKey).subscribe(data => {
         this.dismissloading();
         if (data.status) {
           this.allCostCenter = data.data;

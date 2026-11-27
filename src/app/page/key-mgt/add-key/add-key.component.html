@@ -1,0 +1,110 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{header}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <form [formGroup]="forms">
+    <ion-text>
+      <h4>Key Identification</h4>
+    </ion-text>
+
+    <ion-row>
+      <ion-col size="6">
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Key Name</strong> <ion-text color="danger">*</ion-text> </ion-text>
+          <ion-item lines="none" [ngClass]="{'error': submitted && forms.controls['keyName'].invalid}">
+            <ion-input type="text" formControlName="keyName" placeholder="Key Name"></ion-input>
+          </ion-item>
+        </section>
+      </ion-col>
+      <ion-col size="6">
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Room No</strong> <ion-text color="danger">*</ion-text> </ion-text>
+          <ion-item lines="none" [ngClass]="{'error': submitted && forms.controls['roomNumber'].invalid}">
+            <ion-input type="text" formControlName="roomNumber" placeholder="Room No"></ion-input>
+          </ion-item>
+        </section>
+      </ion-col>
+    </ion-row>
+    
+    
+
+    <!-- <section class="inputbox">
+      <ion-text color="primary"><strong>Key Number</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none">
+        <ion-input type="text" placeholder="Key Number"></ion-input>
+      </ion-item>
+    </section> -->
+
+    <ion-text>
+      <h4>Location Information</h4>
+    </ion-text>
+
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Site Name</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" (click)="openSiteModal()" [ngClass]="{'error': submitted && forms.controls['siteId_desc'].invalid}">
+        <ion-input formControlName="siteId_desc" placeholder="Select Site"></ion-input>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Block Name</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" (click)="openBlock()" [ngClass]="{'error': submitted && forms.controls['blockId_desc'].invalid}">
+        <ion-input type="text" formControlName="blockId_desc" placeholder="Select Block"></ion-input>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Building Name</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" (click)="openBuilding()" [ngClass]="{'error': submitted && forms.controls['buildingId_desc'].invalid}">
+        <ion-input type="text" formControlName="buildingId_desc" placeholder="Select Building"> </ion-input>
+      </ion-item>
+    </section>
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Floor</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" (click)="openFloorModal()" [ngClass]="{'error': submitted && forms.controls['floorId_desc'].invalid}">
+        <ion-input type="text" formControlName="floorId_desc" placeholder="Select Floor"></ion-input>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Complete Location</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" (click)="openLocationModal()" [ngClass]="{'error': submitted && forms.controls['locationId_desc'].invalid}">
+        <ion-input type="text"  formControlName="locationId_desc" placeholder="Location details "></ion-input>
+      </ion-item>
+    </section>
+
+    <ion-text>
+      <h4>Additional Information</h4>
+    </ion-text>
+
+    <section class="inputbox">
+      <ion-text color="primary">
+        <strong>Remark</strong>
+      </ion-text>
+      <ion-item lines="none">
+        <ion-textarea placeholder="Add Remark" formControlName="remarks" autoGrow="true" rows="5">
+        </ion-textarea>
+      </ion-item>
+    </section>
+
+    <ion-item>
+      <ion-checkbox slot="start" formControlName="require_auth_temp" (ionChange)="changeCheckBox($event)"></ion-checkbox>
+      <ion-label class="ion-text-wrap">
+        This key requires Authorized Person details to be filled
+      </ion-label>
+    </ion-item>
+
+    <section>
+      <ion-row>        
+        <ion-col size="12"> 
+          <ion-button expand="block"  mode="md" color="primary" (click)="submitCondition()">Submit</ion-button>
+        </ion-col>
+      </ion-row>
+    </section>
+  </form>
+</ion-content>

@@ -1,0 +1,30 @@
+::ng-deep .custom-modal {
+    --overflow: visible !important;
+  }
+  
+  ::ng-deep .custom-modal .ion-page {
+    position: relative !important;
+    overflow: visible !important;
+  }
+  
+  ::ng-deep .custom-close-btn {
+    position: absolute !important;
+    top: -8% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 60px !important;
+    height: 60px !important;
+    background: white !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important;
+    font-size: 24px !important;
+    color: #000 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  ::ng-deep .custom-close-btn:active {
+    transform: translateX(-50%) scale(0.9) !important;
+  }

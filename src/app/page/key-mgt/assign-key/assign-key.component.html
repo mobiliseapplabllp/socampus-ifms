@@ -1,0 +1,309 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Assign Key</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <form [formGroup]="forms">
+    <ion-text>
+      <h4>Key Information</h4>
+    </ion-text>
+    <ion-row>
+      <ion-col size="12">
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Key Name</strong> <ion-text color="danger">*</ion-text> </ion-text>
+          <ion-item lines="none" (click)="openAvailKey()"
+            [ngClass]="{'error': submitted && forms.controls['key_id_desc'].invalid}">
+            <ion-input type="text" formControlName="key_id_desc" placeholder="Select Key" readonly></ion-input>
+          </ion-item>
+        </section>
+      </ion-col>
+      <ion-col size="12" *ngIf="forms.value.site_name">
+        <ion-card style="margin: 0px">
+          <ion-row>
+            <ion-col size="6">
+              <ion-text>Room No</ion-text><br>
+              <ion-text color="dark">{{forms.value.room_no}}</ion-text>
+            </ion-col>
+            <ion-col size="6">
+              <ion-text>Key No </ion-text><br>
+              <ion-text color="dark">{{forms.value.key_no}}</ion-text>
+            </ion-col>
+            <ion-col size="6">
+              <ion-text>Location</ion-text><br>
+              <ion-text color="dark">{{forms.value.key_loc}}</ion-text>
+            </ion-col>
+            <ion-col size="6">
+              <ion-text>Site</ion-text><br>
+              <ion-text color="dark">{{forms.value.site_name}}</ion-text>
+            </ion-col>
+          </ion-row>                    
+        </ion-card>
+      </ion-col>
+      <!-- <ion-col size="6">
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Key Number</strong> <ion-text color="danger">*</ion-text> </ion-text>
+          <ion-item lines="none" color="none" class="disable">
+            <ion-input type="text" formControlName="key_no" placeholder="Key No" readonly></ion-input>
+          </ion-item>
+        </section>
+      </ion-col>
+      <ion-col size="6">
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Key Location</strong> <ion-text color="danger">*</ion-text> </ion-text>
+          <ion-item lines="none" color="none" class="disable">
+            <ion-input type="text" formControlName="key_loc" placeholder="Key Location" readonly></ion-input>
+          </ion-item>
+        </section>
+      </ion-col>
+      <ion-col size="6">
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Site Name</strong> <ion-text color="danger">*</ion-text> </ion-text>
+          <ion-item lines="none" color="none" class="disable">
+            <ion-input type="text" formControlName="site_name" placeholder="Site Name" readonly></ion-input>
+          </ion-item>
+        </section>
+      </ion-col> -->
+    </ion-row>
+
+    <ion-text>
+      <h4>Requester Details</h4>
+    </ion-text>
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Requester Type</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" [ngClass]="{'error': submitted && forms.controls['requester_type'].invalid}">
+        <ion-select interface="action-sheet" mode="ios" placeholder="Select" formControlName="requester_type">
+          <ion-select-option value="internal">Internal</ion-select-option>
+          <ion-select-option value="external">External</ion-select-option>
+          <ion-select-option value="vendor">Vendor</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Phone No</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none"
+        [ngClass]="{'error': submitted && forms.controls['person_phone'].invalid}">
+        <ion-input type="tel" maxlength="10" formControlName="person_phone" [readonly]="forms.value.person_phone_status !== ''" placeholder="Enter number"></ion-input>
+        <ion-buttons slot="end">
+          <ion-button fill="outline" shape="round" (click)="sendOtp('1')">{{ forms.value.person_phone_status !== '' ? 'ReSend': 'Send'  }}</ion-button>          
+          <ion-button fill="outline" shape="round" (click)="clear('1')" color="danger" *ngIf="forms.value.person_phone_status !== ''">Clear</ion-button>
+        </ion-buttons>
+      </ion-item>
+    </section>
+
+    <section class="inputbox" *ngIf="forms.value.person_phone_status">
+      <ion-text color="primary"><strong>Verify OTP</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" [disabled]="forms.value.person_phone_status == 'otp_verified' ">
+        <ion-input type="tel" maxlength="4" formControlName="person_phone_otp" placeholder="Verify OTP"></ion-input>
+        <ion-buttons slot="end">
+          <ion-button fill="outline" shape="round" (click)="verifyOtp('1')">Verify</ion-button>
+        </ion-buttons>
+      </ion-item>
+    </section>
+
+    <!-- <ion-row>
+      <ion-col class="ion-text-center">
+        <ng-otp-input [config]="otpConfig"></ng-otp-input>
+      </ion-col>
+    </ion-row> -->
+
+    <ion-row>
+      <ion-col size="6">
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Name of Person</strong> <ion-text color="danger">*</ion-text> </ion-text>
+          <ion-item lines="none" [ngClass]="{'error': submitted && forms.controls['person_name'].invalid}">
+            <ion-input type="text" formControlName="person_name" placeholder="Enter Name"></ion-input>
+          </ion-item>
+        </section>
+      </ion-col>
+      <ion-col size="6">
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Email ID</strong> </ion-text>
+          <ion-item lines="none">
+            <ion-input type="text" formControlName="person_email" placeholder="Email ID"></ion-input>
+          </ion-item>
+        </section>
+      </ion-col>
+      <ion-col size="6">
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Department</strong> <ion-text color="danger">*</ion-text> </ion-text>
+          <ion-item lines="none" (click)="openDepartment()"
+            [ngClass]="{'error': submitted && forms.controls['department_desc'].invalid}">
+            <ion-input type="text" formControlName="department_desc" placeholder="Department" readonly></ion-input>
+          </ion-item>
+        </section>
+      </ion-col>
+      <ion-col size="6">
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Issued By</strong> <ion-text color="danger">*</ion-text> </ion-text>
+          <ion-item lines="none" color="none" class="disable">
+            <ion-input type="text" formControlName="issue_by" readonly></ion-input>
+          </ion-item>
+        </section>
+      </ion-col>
+    </ion-row>
+
+    <section class="inputbox">
+      <ion-text color="primary">
+        <strong>Return Date & Time</strong>
+        <ion-text color="danger">*</ion-text>
+      </ion-text>
+      <ion-item lines="none" id="return-date-picker"
+        [ngClass]="{'error': submitted && forms.controls['expected_return_at'].invalid}">
+        <ion-input type="text" [value]="forms.get('expected_return_at')?.value | date:'dd MMM yyyy, hh:mm a'"
+          placeholder="Select Date & Time" readonly>
+        </ion-input>
+      </ion-item>
+      <ion-popover trigger="return-date-picker" mode="md">
+        <ng-template>
+          <ion-datetime presentation="date-time" size="cover" [value]="forms.get('expected_return_at')?.value"
+            (ionChange)="onDateChange($event)" [showDefaultButtons]="true" [min]="currentDate" (ionChange)="changeDate($event)">
+          </ion-datetime>
+        </ng-template>
+      </ion-popover>
+    </section>
+    <!-- <section class="inputbox">
+  <ion-text color="primary">
+    <strong>Return Date & Time</strong>
+    <ion-text color="danger">*</ion-text>
+  </ion-text>
+
+  <ion-item
+    lines="none"
+    id="return-date-picker"
+    [ngClass]="{'error': submitted && forms.controls['expected_return_at'].invalid}">
+
+    <ion-input
+      type="text"
+      [value]="forms.get('expected_return_at')?.value | date:'dd MMM yyyy, hh:mm a'"
+      placeholder="Select Date & Time"
+      readonly>
+    </ion-input>
+
+  </ion-item>
+
+  <ion-popover
+  trigger="return-date-picker"
+  mode="ios"
+  side="bottom"
+  alignment="center"
+  cssClass="full-width-datetime"
+  show-backdrop="true">
+
+  <ng-template>
+    <ion-datetime
+      presentation="date-time"
+      preferWheel="true"
+      [showDefaultButtons]="true"
+      doneText="OK"
+      cancelText="Cancel"
+      [value]="forms.get('expected_return_at')?.value"
+      [min]="currentDate"
+      (ionChange)="onDateChange($event)">
+    </ion-datetime>
+  </ng-template>
+</ion-popover>
+</section> -->
+
+
+
+    <section class="inputbox">
+      <ion-text color="primary">
+        <strong>Remark</strong>
+      </ion-text>
+      <ion-item lines="none">
+        <ion-textarea placeholder="Enter your remark" formControlName="notes" autoGrow="true" rows="5">
+        </ion-textarea>
+      </ion-item>
+    </section>
+
+    <ion-row>
+      <ion-col size="6">
+        <ion-button expand="block" [fill]="forms.value.id_photo ? 'solid' : 'outline'" shape="round" (click)="presentActionSheet('1')" [color]="forms.value.id_photo ? 'success' : 'primary' ">ID Photo</ion-button>
+      </ion-col>
+      <ion-col size="6">
+        <ion-button expand="block" [fill]="forms.value.requester_photo ? 'solid' : 'outline'" shape="round" (click)="presentActionSheet('2')" [color]="forms.value.requester_photo ? 'success' : 'primary' ">Requester Photo</ion-button>
+      </ion-col>
+    </ion-row>
+
+    <!-- <section class="inputbox">
+      <ion-text color="primary"><strong>ID Photo</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" class="input-photo">
+        <ion-input type="text" placeholder="ID Photo" readonly></ion-input>
+        <ion-icon name="camera-outline" slot="end" size="large" color="dark"> </ion-icon>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Requester Photo</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" class="input-photo">
+        <ion-input type="text" placeholder="ID Photo" readonly></ion-input>
+        <ion-icon name="camera-outline" slot="end" size="large" color="dark"> </ion-icon>
+      </ion-item>
+    </section> -->
+    <ion-radio-group formControlName="is_on_behalf" (ionChange)="handleOnBehalfChange()">
+      <ion-row [ngClass]="{'error': submitted && forms.controls['is_on_behalf'].invalid}">
+        <ion-col size="6">
+          <ion-item lines="none" [disabled]="isKeyReq">
+            <ion-radio slot="start" value="0" mode="md"></ion-radio>
+            <ion-label>My Self</ion-label>
+          </ion-item>
+        </ion-col>
+        <ion-col size="6">
+          <ion-item lines="none">
+            <ion-radio slot="start" value="1" mode="md"></ion-radio>
+            <ion-label>Behalf Of</ion-label>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-radio-group>
+
+    <div *ngIf="forms.value.is_on_behalf === '1' ">
+      <section class="inputbox">
+        <ion-text color="primary"><strong>Phone No</strong> <ion-text color="danger">*</ion-text> </ion-text>
+        <ion-item lines="none"
+          [ngClass]="{'error': submitted && forms.controls['auth_person_phone'].invalid}">
+          <ion-input type="tel" maxlength="10" formControlName="auth_person_phone" [readonly]="forms.value.auth_person_phone_status !== ''"
+            placeholder="Enter Phone"></ion-input>
+          <ion-buttons slot="end">
+            <ion-button fill="outline" shape="round" (click)="sendOtp('2')">{{ forms.value.auth_person_phone_status !== '' ? 'ReSend': 'Send'  }}</ion-button>
+            <ion-button fill="outline" shape="round" (click)="clear('2')" color="danger" *ngIf="forms.value.auth_person_phone_status !== ''">Clear</ion-button>
+          </ion-buttons>
+        </ion-item>
+      </section>
+
+      <section class="inputbox" *ngIf="forms.value.auth_person_phone_status">
+        <ion-text color="primary"><strong>Verify OTP</strong> <ion-text color="danger">*</ion-text> </ion-text>
+        <ion-item lines="none" [disabled]="forms.value.auth_person_phone_status == 'otp_verified' ">
+          <ion-input type="tel" maxlength="4" formControlName="auth_person_phone_otp"
+            placeholder="Verify OTP"></ion-input>
+          <ion-buttons slot="end">
+            <ion-button fill="outline" shape="round" (click)="verifyOtp('2')">Verify</ion-button>
+          </ion-buttons>
+        </ion-item>
+      </section>
+      <section class="inputbox">
+        <ion-text color="primary"><strong>Name</strong> <ion-text color="danger">*</ion-text> </ion-text>
+        <ion-item lines="none" [ngClass]="{'error': submitted && forms.controls['auth_person_name'].invalid}">
+          <ion-input type="text" formControlName="auth_person_name" placeholder="Enter Name"></ion-input>
+        </ion-item>
+      </section>
+      <section class="inputbox">
+        <ion-text color="primary"><strong>Email</strong></ion-text>
+        <ion-item lines="none">
+          <ion-input type="text" formControlName="auth_person_email" placeholder="Enter Email"></ion-input>
+        </ion-item>
+      </section>
+    </div>
+  </form>
+</ion-content>
+<ion-footer>
+  <ion-toolbar class="ion-padding-start ion-padding-end">
+    <ion-button expand="block" mode="md" color="primary" class="ion-text-capitalize"
+      (click)="submit()">Submit</ion-button>
+  </ion-toolbar>
+</ion-footer>

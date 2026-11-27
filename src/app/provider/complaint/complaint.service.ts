@@ -168,7 +168,10 @@ export class ComplaintService {
     return this.https.post(environment.url + 'complaints/add_ticket_multiple_action', form);
   }
 
-  getCostCenter() : Observable<any> {
+  getCostCenter(isKey?: boolean) : Observable<any> {
+    if (isKey) {
+      return this.https.get(environment.url + 'shared/get-user-pc-code-by-key-enable', {});
+    }
     return this.https.post(environment.url + 'shared/get-user-pc-code', {});
   }
 

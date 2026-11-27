@@ -65,8 +65,8 @@ export class MyAssetGetService {
     return this.https.get(environment.url + 'assets/settings/get_floor?status=1');
   }
 
-  getLocation(floor_id: any): Observable<any> {
-    return this.https.get(environment.url + 'shared/get-locations-list/' +  floor_id)
+  getLocation(floor_id: any, isKey?: boolean): Observable<any> {
+    return this.https.get(environment.url + 'shared/get-locations-list/' +  floor_id + (isKey ? '?key=true' : ''))
     // return this.https.get(environment.url + 'setups/organisation/get_locations_list/' +  floor_id)
   }
 

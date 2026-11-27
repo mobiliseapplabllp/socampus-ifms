@@ -1,0 +1,72 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title (click)="test()">Mark Return Key</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <form [formGroup]="forms1">
+
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Key Name</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" color="none" class="disable">
+        <ion-input type="text" formControlName="key_name" placeholder="Key Name" readonly></ion-input>
+      </ion-item>
+    </section>
+
+
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Assign To</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" color="none" class="disable">
+        <ion-input type="text" formControlName="assign_to" placeholder="Assign To" readonly></ion-input>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text color="primary">
+        <strong>Return Date & Time </strong>
+        <ion-text color="danger">*</ion-text>
+      </ion-text>
+      <ion-item lines="none" ><!--id="return-date-picker"-->
+        <ion-input type="text" [value]="forms1.value.return_date | date:'dd MMM yyyy, hh:mm a'"
+          placeholder="Select Date & Time" readonly>
+        </ion-input>
+      </ion-item>
+      <ion-popover trigger="return-date-picker" mode="md">
+        <ng-template>
+          <ion-datetime presentation="date-time" size="cover" formControlName="return_date" [max]="currentDate" [showDefaultButtons]="true" (ionChange)="changeDate($event)">
+          </ion-datetime>
+        </ng-template>
+      </ion-popover>
+    </section>
+
+
+    <!-- <section class="inputbox">
+      <ion-text color="primary"><strong>Return Condition</strong> <ion-text color="danger">*</ion-text> </ion-text>
+      <ion-item lines="none" >
+        <ion-input type="text" formControlName="return_condition" placeholder="Return Condition"></ion-input>
+      </ion-item>
+    </section> -->
+
+    <section class="inputbox">
+      <ion-text color="primary">
+        <strong>Remark</strong>
+      </ion-text>
+      <ion-item lines="none">
+        <ion-textarea type="text" placeholder="Remark" type="text" formControlName="remark" autoGrow="true" rows="5">
+        </ion-textarea>
+      </ion-item>
+    </section>
+
+    <section>
+      <ion-row>
+        <!-- <ion-col size="4"><ion-button   fill="outline" expand="block" (click)="clearForm()">Clear</ion-button></ion-col> [disabled]="forms1.status !== 'VALID' "-->
+        <ion-col size="12">
+          <ion-button expand="block" class="ion-text-capitalize" [disabled]="forms1.status !== 'VALID' " (click)="onSubmit()">Submit</ion-button>
+        </ion-col>
+      </ion-row>
+    </section>
+  </form>
+</ion-content>

@@ -112,6 +112,10 @@ const routes: Routes = [
     path: 'mailroom-mgt',
     loadChildren: () => import('./page/mailroom-mgt/mailroom-mgt.module').then( m => m.MailroomMgtPageModule)
   },
+  {
+    path: 'incident-report',
+    loadChildren: () => import('./page/incident-report/incident-report.module').then( m => m.IncidentReportPageModule)
+  },
 ];
 
 @NgModule({

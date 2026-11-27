@@ -13,6 +13,7 @@ export class LocationComponent  implements OnInit {
   myLocation: any = [];
   myLocationCopy: any = [];
   loading: any;
+  isKey!: boolean;
   constructor(
     private httpCommon: CommonService,
     private loadingController: LoadingController,
@@ -32,7 +33,7 @@ export class LocationComponent  implements OnInit {
 
   getLocation() {
     this.presentLoading().then(preLoad => {
-      this.httpAsset.getLocation(this.floor_id).subscribe({
+      this.httpAsset.getLocation(this.floor_id, this.isKey).subscribe({
         next:(data) => {
           if (data.status) {
             this.myLocation = data.data;

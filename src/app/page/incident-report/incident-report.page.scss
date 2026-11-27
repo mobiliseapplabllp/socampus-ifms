@@ -1,0 +1,17 @@
+ion-card {
+  margin: 10px;
+
+  ion-card-content ion-col {
+    padding: 0;
+  }
+}
+
+ion-item.error {
+  --border-color: var(--ion-color-danger);
+  --border-width: 0 0 2px 0;
+}
+
+ion-select {
+  width: 100%;
+  max-width: 100%;
+}

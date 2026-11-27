@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-key-mgt',
@@ -7,9 +8,16 @@ import { Component, OnInit } from '@angular/core';
 })
 export class KeyMgtPage implements OnInit {
 
-  constructor() { }
+  constructor(
+    private router : Router,
+  ) { }
 
   ngOnInit() {
   }
 
+  openRoute(url: string) {
+    this.router.navigateByUrl(url);
+  }
+
+ 
 }
