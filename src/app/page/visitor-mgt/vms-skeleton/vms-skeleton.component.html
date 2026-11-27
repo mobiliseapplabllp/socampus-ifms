@@ -1,0 +1,52 @@
+<!-- Dashboard layout: hero + stat tiles + chart cards -->
+<ng-container *ngIf="variant === 'dashboard'">
+  <div class="sk-card sk-hero">
+    <ion-skeleton-text [animated]="true" class="sk-line" style="width: 38%; height: 13px;"></ion-skeleton-text>
+    <ion-skeleton-text [animated]="true" class="sk-line" style="width: 58%; height: 26px; margin-top: 10px;"></ion-skeleton-text>
+    <div class="sk-hero-stats">
+      <ion-skeleton-text [animated]="true" class="sk-hero-stat" *ngFor="let x of [0,1,2]"></ion-skeleton-text>
+    </div>
+  </div>
+
+  <div class="sk-chips">
+    <ion-skeleton-text [animated]="true" class="sk-chip" *ngFor="let x of [0,1,2]"></ion-skeleton-text>
+  </div>
+
+  <div class="sk-grid">
+    <div class="sk-card sk-tile" *ngFor="let x of [0,1,2,3]">
+      <div class="sk-tile-head">
+        <ion-skeleton-text [animated]="true" class="sk-line" style="width: 45%; height: 11px;"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" class="sk-tile-icon"></ion-skeleton-text>
+      </div>
+      <ion-skeleton-text [animated]="true" class="sk-line" style="width: 40%; height: 22px; margin-top: 12px;"></ion-skeleton-text>
+      <ion-skeleton-text [animated]="true" class="sk-line" style="width: 60%; height: 10px; margin-top: 10px;"></ion-skeleton-text>
+    </div>
+  </div>
+
+  <div class="sk-card sk-chart" *ngFor="let x of [0,1]">
+    <ion-skeleton-text [animated]="true" class="sk-line" style="width: 50%; height: 14px;"></ion-skeleton-text>
+    <ion-skeleton-text [animated]="true" class="sk-line" style="width: 70%; height: 10px; margin-top: 8px;"></ion-skeleton-text>
+    <ion-skeleton-text [animated]="true" class="sk-block"></ion-skeleton-text>
+  </div>
+</ng-container>
+
+<!-- Rows layout: plain divided shimmer rows (sits inside a card, e.g. a table) -->
+<ng-container *ngIf="variant === 'rows'">
+  <div class="sk-tablerow" *ngFor="let r of rows">
+    <ion-skeleton-text [animated]="true" class="sk-line" style="width: 42%; height: 13px;"></ion-skeleton-text>
+    <ion-skeleton-text [animated]="true" class="sk-line" style="width: 72%; height: 10px; margin-top: 8px;"></ion-skeleton-text>
+  </div>
+</ng-container>
+
+<!-- List layout: repeated avatar + lines rows -->
+<ng-container *ngIf="variant === 'list'">
+  <div class="sk-card sk-row" *ngFor="let r of rows">
+    <ion-skeleton-text [animated]="true" class="sk-avatar"></ion-skeleton-text>
+    <div class="sk-row-body">
+      <ion-skeleton-text [animated]="true" class="sk-line" style="width: 55%; height: 13px;"></ion-skeleton-text>
+      <ion-skeleton-text [animated]="true" class="sk-line" style="width: 82%; height: 11px; margin-top: 9px;"></ion-skeleton-text>
+      <ion-skeleton-text [animated]="true" class="sk-line" style="width: 45%; height: 11px; margin-top: 6px;"></ion-skeleton-text>
+    </div>
+    <ion-skeleton-text [animated]="true" class="sk-pill"></ion-skeleton-text>
+  </div>
+</ng-container>

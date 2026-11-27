@@ -45,6 +45,9 @@ export const environment = {
   source: 'Mobile',
   LARAVEL_KEY: '8+Fjns9RCg2HJfhHCirTe6FE3NCHSq+W3014tuKBZH4=',
   aiStudioUrl: 'https://apisuite-aistudio.onmobilise.com/v1/',
+  // VMS (Atithi) - visitor management APIs
+  vmsUrl: 'https://atithidev.onmobilise.com/api',
+  vmsPortalUrl: 'https://atithi.onmobilise.com',
   // sirf browser ke liye - native CapacitorHttp seedha aiStudioUrl par jaata hai
   aiStudioWebProxy: 'http://0.0.0.0:8080/',
   aiStudioEnv: 'UAT',

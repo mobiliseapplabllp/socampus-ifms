@@ -1,0 +1,114 @@
+:host {
+  display: block;
+}
+
+/* glassy placeholder card matching the app's real cards */
+.sk-card {
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+/* skeleton shimmer tone, theme-aware */
+ion-skeleton-text {
+  --background: rgba(148, 163, 184, 0.18);
+  --background-rgb: 148, 163, 184;
+  border-radius: 7px;
+  margin: 0;
+}
+:host-context(body.dark) ion-skeleton-text {
+  --background: rgba(255, 255, 255, 0.08);
+  --background-rgb: 255, 255, 255;
+}
+
+.sk-line { display: block; }
+
+/* ---- hero ---- */
+.sk-hero {
+  background: linear-gradient(150deg, #2a3142 0%, #141923 100%);
+  border: none;
+}
+.sk-hero ion-skeleton-text {
+  --background: rgba(255, 255, 255, 0.16);
+  --background-rgb: 255, 255, 255;
+}
+.sk-hero-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-top: 18px;
+}
+.sk-hero-stat {
+  height: 56px;
+  border-radius: 16px;
+}
+
+/* ---- chips ---- */
+.sk-chips {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 14px;
+}
+.sk-chip {
+  width: 84px;
+  height: 32px;
+  border-radius: 999px;
+}
+
+/* ---- stat tiles ---- */
+.sk-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.sk-tile { padding: 15px; margin-bottom: 0; }
+.sk-tile-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sk-tile-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+}
+
+/* ---- chart blocks ---- */
+.sk-chart { margin-top: 12px; }
+.sk-block {
+  display: block;
+  width: 100%;
+  height: 120px;
+  border-radius: 14px;
+  margin-top: 14px;
+}
+
+/* ---- plain table rows (no card wrapper) ---- */
+.sk-tablerow {
+  padding: 13px 14px;
+  border-top: 1px solid var(--app-border);
+}
+.sk-tablerow:first-child { border-top: none; }
+
+/* ---- list rows ---- */
+.sk-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.sk-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sk-row-body { flex: 1; min-width: 0; }
+.sk-pill {
+  width: 56px;
+  height: 22px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
