@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/doc-mgt"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{title}} ({{total}})</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km">
+  <ion-refresher slot="fixed" (ionRefresh)="reload($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <ion-searchbar mode="md" debounce="800" placeholder="Search number, title, tags" [value]="searchVal" (ionChange)="search($event)"></ion-searchbar>
+
+  <div class="km-page">
+    <app-doc-skeleton *ngIf="loading" [count]="5"></app-doc-skeleton>
+    <div class="km-card km-row" *ngFor="let dat of documents" (click)="openDetail(dat)">
+      <div class="km-row__icon"><ion-icon name="document-text-outline"></ion-icon></div>
+      <div class="km-row__body">
+        <h3>{{dat.title}}</h3>
+        <p><ion-icon name="pricetag-outline"></ion-icon><span>{{dat.doc_number}} · v{{dat.version_label}}</span></p>
+        <p><ion-icon name="folder-outline"></ion-icon><span>{{dat.category_name}} · {{dat.plant_name}}</span></p>
+        <div class="km-row__chips">
+          <ion-chip [color]="dms.statusColor(dat.status)">{{dms.statusLabel(dat.status)}}</ion-chip>
+          <ion-chip color="danger" *ngIf="dat.expiry_state === 'expired'">Expired</ion-chip>
+          <ion-chip color="warning" *ngIf="dat.expiry_state === 'expiring'">Expiring</ion-chip>
+        </div>
+      </div>
+      <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
+    </div>
+    <div class="km-empty" *ngIf="loaded && !loading && !documents.length">
+      <ion-icon name="document-text-outline"></ion-icon>
+      No documents found
+    </div>
+    <ion-infinite-scroll threshold="100px" (ionInfinite)="infiniteScroll($event)" *ngIf="canLoadData">
+      <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+  </div>
+</ion-content>

@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/doc-mgt"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Approvals</ion-title>
+  </ion-toolbar>
+  <ion-toolbar class="km-segment">
+    <ion-segment [(ngModel)]="bucket" (ionChange)="changeBucket()" mode="ios" scrollable="true">
+      <ion-segment-button *ngFor="let b of buckets" [value]="b.key">
+        <ion-label>{{b.label}} ({{counts[b.key] || 0}})</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page">
+    <app-doc-skeleton *ngIf="!loaded" [count]="4"></app-doc-skeleton>
+    <div class="km-card" *ngFor="let row of tasks" (click)="openDetail(row)">
+      <div class="km-row">
+        <div class="km-row__icon"><ion-icon name="checkbox-outline"></ion-icon></div>
+        <div class="km-row__body">
+          <h3>{{row.title}}</h3>
+          <p><ion-icon name="pricetag-outline"></ion-icon><span>{{row.doc_number}} · v{{row.version_label}}</span></p>
+          <p><ion-icon name="git-branch-outline"></ion-icon><span>{{row.step_label}}</span></p>
+          <p><ion-icon name="person-outline"></ion-icon><span>Submitted by {{row.submitted_by}}</span></p>
+          <p *ngIf="row.task.due_at"><ion-icon name="alarm-outline"></ion-icon><span>Due {{row.task.due_at | date: 'dd MMM yyyy'}}</span></p>
+          <div class="km-row__chips">
+            <ion-chip [color]="stateColor(row.task.state)" class="ion-text-capitalize">{{dms.statusLabel(row.task.state)}}</ion-chip>
+            <ion-chip color="danger" *ngIf="row.overdue">Overdue</ion-chip>
+            <ion-chip color="medium" *ngIf="!row.overdue && row.task.state === 'pending' && row.days_left !== null">{{row.days_left}} day(s) left</ion-chip>
+          </div>
+        </div>
+      </div>
+      <ion-row class="doc-actions" *ngIf="canAct(row)">
+        <ion-col><ion-button expand="block" size="small" color="success" (click)="act(row, 'approve', $event)">Approve</ion-button></ion-col>
+        <ion-col><ion-button expand="block" size="small" fill="outline" color="warning" (click)="act(row, 'request_changes', $event)">Changes</ion-button></ion-col>
+        <ion-col><ion-button expand="block" size="small" fill="outline" color="danger" (click)="act(row, 'reject', $event)">Reject</ion-button></ion-col>
+      </ion-row>
+    </div>
+    <div class="km-empty" *ngIf="loaded && !tasks.length">
+      <ion-icon name="checkmark-done-outline"></ion-icon>
+      No tasks here
+    </div>
+  </div>
+</ion-content>

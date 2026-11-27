@@ -1,0 +1,576 @@
+/* ---------------------------------------------------------------------------
+   Key Management module ka design.
+   Sab rules .km class ke andar scoped hain, isliye baaki app par asar nahi hota.
+   Global isliye rakha hai taaki modals (jo page ke bahar render hote hain) par bhi
+   lage aur har component ke style budget me duplicate na ho.
+   --------------------------------------------------------------------------- */
+.km {
+  --km-bg: #f4f6fb;
+  --km-card: #ffffff;
+  --km-line: #e6e9f2;
+  --km-ink: #1c2238;
+  --km-muted: #7b8299;
+  --km-field: #f7f8fc;
+  --km-radius: 16px;
+  --km-shadow: 0 4px 16px rgba(28, 34, 56, 0.06);
+}
+
+ion-content.km {
+  --background: var(--km-bg);
+}
+
+.km {
+  .km-page {
+    padding: 16px 16px 48px;
+  }
+
+  /* ---------- cards ---------- */
+  .km-card,
+  ion-card {
+    background: var(--km-card);
+    border-radius: var(--km-radius);
+    box-shadow: var(--km-shadow);
+    border: 1px solid var(--km-line);
+    color: var(--km-ink);
+  }
+
+  .km-card {
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .km-section-title {
+    margin: 20px 2px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--km-muted);
+  }
+
+  .km-section-title:first-child {
+    margin-top: 4px;
+  }
+
+  /* ---------- status chips ---------- */
+  ion-chip {
+    height: 24px;
+    min-height: 24px;
+    margin: 0;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- label / value pairs ---------- */
+  .km-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--km-muted);
+    margin-bottom: 2px;
+  }
+
+  .km-value {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--km-ink);
+    word-break: break-word;
+  }
+
+  ion-text.km-value.ion-color-danger {
+    color: var(--ion-color-danger);
+  }
+
+  ion-text.km-value.ion-color-medium {
+    color: var(--km-ink);
+  }
+
+  .km-fields {
+    ion-col {
+      padding: 6px 4px;
+    }
+  }
+
+  /* ---------- icon + text rows ---------- */
+  .km-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 13px;
+    color: var(--km-muted);
+
+    ion-icon {
+      flex: 0 0 auto;
+      font-size: 16px;
+      color: var(--ion-color-primary);
+    }
+
+    b {
+      margin-left: auto;
+      text-align: right;
+      font-weight: 600;
+      color: var(--km-ink);
+    }
+  }
+
+  .km-empty {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--km-muted);
+    font-size: 13px;
+
+    ion-icon {
+      display: block;
+      margin: 0 auto 8px;
+      font-size: 36px;
+      opacity: 0.5;
+    }
+  }
+
+  /* ---------- home: hero + stat tiles ---------- */
+  .km-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-radius: 20px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-tint, #3e4ca1));
+    box-shadow: 0 10px 24px rgba(40, 56, 151, 0.28);
+
+    p {
+      margin: 0;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.85;
+    }
+
+    h1 {
+      margin: 4px 0 0;
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    ion-icon {
+      font-size: 54px;
+      opacity: 0.25;
+    }
+  }
+
+  .km-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .km-stat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--km-card);
+    border: 1px solid var(--km-line);
+    border-radius: var(--km-radius);
+    box-shadow: var(--km-shadow);
+
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--km-ink);
+    }
+
+    p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--km-muted);
+    }
+  }
+
+  .km-stat__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 24px;
+    color: var(--km-tone);
+    background: var(--km-tone-soft);
+  }
+
+  .km-stat--success { --km-tone: #1f9d57; --km-tone-soft: rgba(31, 157, 87, 0.12); }
+  .km-stat--primary { --km-tone: var(--ion-color-primary); --km-tone-soft: rgba(40, 56, 151, 0.12); }
+  .km-stat--warning { --km-tone: #c98a12; --km-tone-soft: rgba(224, 167, 60, 0.18); }
+  .km-stat--danger  { --km-tone: #d4511a; --km-tone-soft: rgba(212, 81, 26, 0.12); }
+
+  /* ---------- activity / history cards ---------- */
+  .km-activity__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .km-activity__date {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--km-muted);
+  }
+
+  .km-activity__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--km-ink);
+
+    ion-icon {
+      color: var(--ion-color-primary);
+    }
+  }
+
+  .km-panel {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    background: var(--km-field);
+    border: 1px solid var(--km-line);
+  }
+
+  .km-panel__title {
+    margin: 0 4px 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ion-color-primary);
+  }
+
+  /* ---------- list rows ---------- */
+  .km-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    ion-buttons {
+      margin: -6px -8px 0 0;
+    }
+  }
+
+  .km-row__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 22px;
+    color: var(--ion-color-primary);
+    background: rgba(40, 56, 151, 0.1);
+  }
+
+  .km-row__body {
+    flex: 1 1 auto;
+    min-width: 0;
+
+    h3 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--km-ink);
+    }
+
+    p {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      margin: 2px 0;
+      font-size: 12.5px;
+      color: var(--km-muted);
+
+      ion-icon {
+        flex: 0 0 auto;
+        margin-top: 2px;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .km-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .km-photo {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid var(--km-line);
+  }
+
+  /* ---------- search ---------- */
+  ion-searchbar {
+    --background: var(--km-card);
+    --border-radius: 14px;
+    --box-shadow: var(--km-shadow);
+    padding: 12px 16px 4px;
+  }
+}
+
+/* ---------- segment toolbar (Keys tab) ---------- */
+ion-toolbar.km-segment {
+  --background: #fff;
+  --border-width: 0;
+  padding: 8px 12px;
+
+  ion-segment {
+    background: #eef0f7;
+    border-radius: 12px;
+    padding: 4px;
+  }
+
+  ion-segment-button {
+    --border-radius: 9px;
+    --indicator-color: #fff;
+    --indicator-box-shadow: 0 2px 6px rgba(28, 34, 56, 0.12);
+    --indicator-height: 100%;
+    --color: #7b8299;
+    --color-checked: var(--ion-color-primary);
+    --border-width: 0;
+    min-height: 36px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  /* Zyada options wala segment (scrollable): barabar chaudai ki jagah alag-alag pills,
+     har pill apne text jitna chauda, aur side me scroll hota hai */
+  ion-segment.segment-scrollable {
+    display: flex;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 0 4px;
+    background: transparent;
+    border-radius: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    ion-segment-button {
+      flex: 0 0 auto;
+      min-width: max-content;
+      margin: 0;
+      --padding-start: 14px;
+      --padding-end: 14px;
+      --border-radius: 999px;
+      --background: #eef0f7;
+      --background-checked: var(--ion-color-primary);
+      --indicator-color: transparent;
+      --indicator-box-shadow: none;
+      --color: #5b6380;
+      --color-checked: #fff;
+      border-radius: 999px;
+      min-height: 34px;
+
+      /* Ionic chune hue button ko peeche (z-index -1) bhejta hai; pill ka rang dikhne ke liye wapas upar */
+      &.segment-button-checked {
+        z-index: 0;
+      }
+
+      /* iOS mode me buttons ke beech ki line */
+      &::before {
+        display: none;
+      }
+
+      ion-label {
+        margin: 0;
+        overflow: visible;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+/* ---------- forms: existing section.inputbox markup ka naya look ---------- */
+.km.km-form,
+.km .km-form {
+  form > ion-text h4,
+  > ion-text h4 {
+    margin: 22px 2px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--km-muted);
+  }
+
+  form > ion-text:first-child h4 {
+    margin-top: 4px;
+  }
+
+  section.inputbox {
+    margin-bottom: 12px;
+
+    > ion-text {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--km-ink);
+
+      strong {
+        font-weight: 600;
+      }
+    }
+
+    > ion-text.ion-color-danger {
+      margin-top: 2px;
+      color: var(--ion-color-danger);
+    }
+
+    ion-item {
+      --background: var(--km-card);
+      --padding-start: 12px;
+      --inner-padding-end: 8px;
+      --min-height: 46px;
+      margin: 6px 0 0;
+      border: 1px solid var(--km-line);
+      border-radius: 12px;
+      background-color: var(--km-card);
+      font-size: 14px;
+      font-weight: 500;
+      overflow: hidden;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    ion-item.item-has-focus {
+      border-color: var(--ion-color-primary);
+      box-shadow: 0 0 0 3px rgba(40, 56, 151, 0.12);
+    }
+
+    ion-item.error {
+      border-color: var(--ion-color-danger);
+    }
+
+    ion-item.disable {
+      --background: #eceff5;
+      background-color: #eceff5;
+      color: var(--km-muted);
+    }
+
+    ion-item ion-button {
+      --border-radius: 999px;
+      height: 30px;
+      font-size: 12px;
+      text-transform: none;
+    }
+  }
+
+  /* read-only info cards (label upar, value neeche) */
+  ion-card {
+    margin: 0 0 4px;
+    padding: 8px 10px;
+
+    ion-col {
+      padding: 6px 4px;
+    }
+
+    ion-col > ion-text {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--km-muted);
+    }
+
+    ion-col > ion-text.ion-color-dark {
+      font-size: 14px;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--km-ink);
+    }
+  }
+
+  /* radio / checkbox rows */
+  ion-radio-group ion-row {
+    margin: 12px 0;
+    border-radius: 12px;
+
+    ion-item {
+      --background: var(--km-card);
+      --min-height: 46px;
+      border: 1px solid var(--km-line);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+  }
+
+  form > ion-item {
+    --background: var(--km-card);
+    margin: 4px 0 12px;
+    border: 1px solid var(--km-line);
+    border-radius: 12px;
+    font-size: 13px;
+  }
+
+  ion-button[expand="block"] {
+    --border-radius: 12px;
+    min-height: 46px;
+    font-weight: 600;
+    text-transform: none;
+  }
+}
+
+ion-footer.km ion-toolbar {
+  --background: #fff;
+  --border-width: 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  box-shadow: 0 -4px 16px rgba(28, 34, 56, 0.08);
+
+  ion-button {
+    --border-radius: 12px;
+    min-height: 46px;
+    font-weight: 600;
+    text-transform: none;
+  }
+}
+
+/* ---------- key picker list ---------- */
+.km .km-pick {
+  --background: transparent;
+  --padding-start: 16px;
+  --inner-padding-end: 12px;
+  --min-height: 56px;
+  font-size: 14px;
+  font-weight: 600;
+
+  .km-row__icon {
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    margin-right: 12px;
+    font-size: 18px;
+  }
+}

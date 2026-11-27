@@ -1,64 +1,47 @@
 .center-fab-list {
-	left: 50% !important;
-	transform: translateX(-50%) !important;
-	align-items: center;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  align-items: center;
 
-	ion-button {
-		min-width: 140px;
-		/* aap change kar sakte ho */
-		text-align: center;
-	}
+  ion-button {
+    min-width: 170px;
+    height: 42px;
+    --border-radius: 999px;
+    --box-shadow: 0 6px 16px rgba(28, 34, 56, 0.2);
+    font-weight: 600;
+    text-transform: none;
+  }
 }
 
 ion-tabs {
-	ion-fab {
-		margin-bottom: env(safe-area-inset-bottom);
+  ion-fab {
+    /* tab bar ke upar aadha bahar nikla hua */
+    bottom: calc(env(safe-area-inset-bottom) + 26px);
 
-		/* fix notch ios*/
-		ion-fab-button {
-			--box-shadow: none;
-		}
-	}
+    ion-fab-button {
+      --box-shadow: 0 0 0 5px #fff, 0 8px 20px rgba(40, 56, 151, 0.35);
+    }
+  }
 
-	ion-tab-bar {
-		--border: 0;
-		--background: transparent;
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		width: 100%;
+  ion-tab-bar {
+    --background: #fff;
+    --border: 0;
+    height: 62px;
+    box-shadow: 0 -4px 16px rgba(28, 34, 56, 0.08);
 
-		&:after {
-			content: " ";
-			width: 100%;
-			bottom: 0;
-			background: var(--ion-color-primary);
-			height: env(safe-area-inset-bottom);
-			position: absolute;
-		}
+    ion-tab-button {
+      --color: #7b8299;
+      --color-selected: var(--ion-color-primary);
+      font-size: 11px;
+      font-weight: 600;
 
-		ion-tab-button {
-			--background: var(--ion-color-primary);
-		}
+      ion-icon {
+        font-size: 22px;
+      }
+    }
 
-		ion-tab-button.comments {
-			margin-right: 0px;
-			border-top-right-radius: 18px;
-		}
-
-		ion-tab-button.notifs {
-			margin-left: 0px;
-			border-top-left-radius: 18px;
-		}
-
-		svg {
-			width: 72px;
-			margin-top: 19px;
-
-			path {
-				fill: var(--ion-color-primary);
-			}
-		}
-	}
+    .tab-spacer {
+      flex: 0 0 84px;
+    }
+  }
 }

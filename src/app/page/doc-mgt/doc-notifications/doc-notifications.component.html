@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/doc-mgt"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Notifications</ion-title>
+    <ion-buttons slot="end" *ngIf="hasUnread">
+      <ion-button (click)="markAll()">Mark all read</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page">
+    <app-doc-skeleton *ngIf="!loaded" [count]="5"></app-doc-skeleton>
+    <div class="km-card km-row" [class.doc-unread]="!dat.read_at" *ngFor="let dat of notifications" (click)="open(dat)">
+      <div class="km-row__icon"><ion-icon [name]="icon(dat.type)"></ion-icon></div>
+      <div class="km-row__body">
+        <h3>{{dat.title}}</h3>
+        <p><span>{{dat.body}}</span></p>
+        <p><ion-icon name="time-outline"></ion-icon><span>{{dat.created_at | date: 'dd MMM yyyy, hh:mm a'}}</span></p>
+      </div>
+    </div>
+    <div class="km-empty" *ngIf="loaded && !notifications.length">
+      <ion-icon name="notifications-outline"></ion-icon>
+      No notifications
+    </div>
+  </div>
+</ion-content>

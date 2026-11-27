@@ -1,0 +1,75 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/incident-report"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{incident?.incident_code || 'Incident Detail'}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km">
+  <div class="km-page" *ngIf="incident">
+    <div class="km-card km-row">
+      <div class="km-row__icon"><ion-icon name="document-text-outline"></ion-icon></div>
+      <div class="km-row__body">
+        <h3>{{incident.incident_code}}</h3>
+        <p><ion-icon name="business-outline"></ion-icon><span>{{httpIncident.siteName(incident)}}</span></p>
+        <div class="km-row__chips">
+          <ion-chip [color]="httpIncident.severityColor(incident.severity)">{{incident.severity}}</ion-chip>
+          <ion-chip color="medium">{{incident.type_desc}}</ion-chip>
+        </div>
+      </div>
+    </div>
+
+    <div class="km-section-title">Basic Details</div>
+    <div class="km-card">
+      <ion-row class="km-fields">
+        <ion-col size="6">
+          <span class="km-label">Incident Date</span>
+          <span class="km-value">{{incident.incident_date | date: 'dd MMM yyyy'}}</span>
+        </ion-col>
+        <ion-col size="6">
+          <span class="km-label">Incident Time</span>
+          <span class="km-value">{{incident.incident_time | slice:0:5}}</span>
+        </ion-col>
+        <ion-col size="6">
+          <span class="km-label">Department</span>
+          <span class="km-value">{{incident.dept_desc || 'N/A'}}</span>
+        </ion-col>
+        <ion-col size="6">
+          <span class="km-label">Reported By</span>
+          <span class="km-value">{{incident.reported_by || 'N/A'}}</span>
+        </ion-col>
+        <ion-col size="12">
+          <span class="km-label">Exact Location</span>
+          <span class="km-value">{{incident.location || 'N/A'}}</span>
+        </ion-col>
+      </ion-row>
+    </div>
+
+    <div class="km-section-title">What Happened</div>
+    <div class="km-card">
+      <ion-row class="km-fields">
+        <ion-col size="12">
+          <span class="km-label">Description</span>
+          <span class="km-value incident-text">{{incident.description || 'N/A'}}</span>
+        </ion-col>
+        <ion-col size="12">
+          <span class="km-label">Immediate Action Taken</span>
+          <span class="km-value incident-text">{{incident.immediate_action_taken || 'N/A'}}</span>
+        </ion-col>
+      </ion-row>
+    </div>
+
+    <ng-container *ngIf="incident.attachment">
+      <div class="km-section-title">Attachment</div>
+      <ion-button expand="block" fill="outline" class="incident-btn" (click)="viewAttachment()">
+        <ion-icon slot="start" name="attach-outline"></ion-icon>View attachment
+      </ion-button>
+    </ng-container>
+
+    <div class="km-meta" style="margin-top:12px">
+      <ion-icon name="time-outline"></ion-icon><span>Reported on</span><b>{{incident.created_at}}</b>
+    </div>
+  </div>
+</ion-content>

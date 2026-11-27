@@ -78,6 +78,8 @@
   <ion-button (click)="testRoute('/key-mgt/tabs/home')">Key Mgt</ion-button>
   <ion-button (click)="testRoute('/mailroom-mgt')">Mailroom Mgt</ion-button>  
   <ion-button (click)="testRoute('/incident-report')">Incident Report</ion-button>  
+  <ion-button (click)="testRoute('/doc-mgt')">Document Mgt</ion-button>  
+  <ion-button (click)="testRoute('/feedback')">Feedback</ion-button>  
   <app-menu [didEnter]="didEnter"></app-menu>
   <app-pending-task [eventChange]="eventChange" [didEnter]="didEnter"  *ngIf="isInternet"></app-pending-task>
 </ion-content>

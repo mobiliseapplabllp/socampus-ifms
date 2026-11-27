@@ -6,113 +6,107 @@
     <ion-title> Key History</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content>
-  <ion-card style="background-color: rgb(245, 245, 245);">
-    <ion-row>
-      <ion-col size="6">
-        <ion-text color="dark">Key Name</ion-text><br>
-        <ion-text color="dark">{{req_data.key_name}}</ion-text><br>
-      </ion-col>
-      <ion-col size="6">
-        <ion-text color="dark">Location</ion-text><br>
-        <ion-text color="dark">{{req_data.location}}</ion-text><br>
-      </ion-col>
-    </ion-row>    
-  </ion-card>
-  <ion-card *ngFor="let dat of recent">
-    <ion-row>
-      <ion-col size="6">
+<ion-content class="km">
+  <div class="km-page">
+    <div class="km-card km-row">
+      <div class="km-row__icon"><ion-icon name="key"></ion-icon></div>
+      <ion-row class="km-fields" style="flex:1">
+          <ion-col size="6">
+            <span class="km-label">Key Name</span>
+            <span class="km-value">{{req_data.key_name}}</span>
+          </ion-col>
+          <ion-col size="6">
+            <span class="km-label">Location</span>
+            <span class="km-value">{{req_data.location}}</span>
+          </ion-col>
+      </ion-row>
+    </div>
+
+    <div class="km-section-title">Timeline</div>
+    <div class="km-card" *ngFor="let dat of recent">
+      <div class="km-activity__head">
         <ion-chip [color]="dat.status === 'Issued' ? 'primary' : dat.status === 'Returned' ? 'success' : dat.status === 'Recovered' ? 'tertiary': 'danger' "><b>{{dat.status}}</b> </ion-chip>
-      </ion-col>
-      <ion-col size="6" class="ion-text-right">
-        <ion-button fill="clear" *ngIf="dat.status !== 'Lost' ">          
+        <span class="km-activity__date" *ngIf="dat.status !== 'Lost' ">
+          <ion-icon name="calendar-outline"></ion-icon>
           <ion-text *ngIf="dat.status !== 'Recovered'">{{dat.assigned_at | date: 'dd MMM, yyyy H:mm'}} </ion-text>
           <ion-text *ngIf="dat.status === 'Recovered'">{{dat.date_time_found | date: 'dd MMM, yyyy H:mm'}} </ion-text>
-        </ion-button>         
-        <ion-button fill="clear" *ngIf="dat.status === 'Lost' ">{{dat?.lost_history?.date_time_lost | date: 'dd MMM, yyyy H:mm'}} </ion-button>         
-      </ion-col>
-    </ion-row>
-    <ion-grid *ngIf="dat.status === 'Recovered' " >
-      <ion-row>
-        <ion-col>
-          <ion-text color="dark">Recovered Notes</ion-text><br>
-          <ion-text>{{dat?.return_condition}}</ion-text>
-        </ion-col>
+        </span>
+        <span class="km-activity__date" *ngIf="dat.status === 'Lost' ">
+          <ion-icon name="calendar-outline"></ion-icon>
+          {{dat?.lost_history?.date_time_lost | date: 'dd MMM, yyyy H:mm'}}
+        </span>
+      </div>
+
+      <ion-row class="km-fields" *ngIf="dat.status === 'Recovered' ">
+          <ion-col size="12">
+            <span class="km-label">Recovered Notes</span>
+            <span class="km-value">{{dat?.return_condition}}</span>
+          </ion-col>
       </ion-row>
-    </ion-grid>
-    <ion-grid *ngIf="dat.status === 'Lost' " >
-      <ion-row>
-        <ion-col>
-          <ion-text color="dark">Last Seen Location</ion-text><br>
-          <ion-text>{{dat?.lost_history?.last_seen_location}}</ion-text>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col>
-          <ion-text color="dark">Responsible Person</ion-text><br>
-          <ion-text>{{dat?.lost_history?.responsible_person_name}}</ion-text>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col>
-          <ion-text color="dark">Mobile</ion-text><br>
-          <ion-text>{{dat?.lost_history?.responsible_person_mobile}}</ion-text>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col>
-          <ion-text color="dark">Incident Description</ion-text><br>
-          <ion-text>{{dat?.lost_history?.incident_description}}</ion-text>
-        </ion-col>
-      </ion-row>
-      <!-- <ion-row>
-        <ion-col>
-          <ion-text color="dark">Date</ion-text><br>
-          <ion-text>{{dat?.lost_history?.date_time_lost}}</ion-text>
-        </ion-col>
-      </ion-row> -->
-    </ion-grid>
-    <ion-grid *ngIf="dat.status === 'Issued' || dat.status === 'Returned'  ">
-      <fieldset style="border-radius: 6px;">
-        <legend>Issue Details</legend>
-        <ion-row>
-          <ion-col size="6">
-            <ion-text color="dark">Issue To</ion-text><br>
-            <ion-text>{{dat.issued_to}}</ion-text>
+
+      <ion-row class="km-fields" *ngIf="dat.status === 'Lost' ">
+          <ion-col size="12">
+            <span class="km-label">Last Seen Location</span>
+            <span class="km-value">{{dat?.lost_history?.last_seen_location}}</span>
           </ion-col>
           <ion-col size="6">
-            <ion-text color="dark">Issue By</ion-text><br>
-            <ion-text>{{dat.issued_by}}</ion-text>
-          </ion-col>          
+            <span class="km-label">Responsible Person</span>
+            <span class="km-value">{{dat?.lost_history?.responsible_person_name}}</span>
+          </ion-col>
           <ion-col size="6">
-            <ion-text color="dark">Department</ion-text><br>
-            <ion-text>{{dat.department}}</ion-text>
+            <span class="km-label">Mobile</span>
+            <span class="km-value">{{dat?.lost_history?.responsible_person_mobile}}</span>
           </ion-col>
           <ion-col size="12">
-            <ion-text color="dark">Remark</ion-text><br>
-            <ion-text>{{dat.notes}}</ion-text>
+            <span class="km-label">Incident Description</span>
+            <span class="km-value">{{dat?.lost_history?.incident_description}}</span>
           </ion-col>
-        </ion-row>
-      </fieldset>
+      </ion-row>
 
-      <fieldset style="border-radius: 6px;" *ngIf="dat.is_on_behalf === 1 ">
-        <legend>Behalf Of</legend>
-        <ion-row>
+      <ng-container *ngIf="dat.status === 'Issued' || dat.status === 'Returned'  ">
+        <div class="km-panel" style="margin-top:0">
+          <p class="km-panel__title">Issue Details</p>
+          <ion-row class="km-fields">
           <ion-col size="6">
-            <ion-text color="dark">Name</ion-text><br>
-            <ion-text>{{dat.auth_person_name}}</ion-text>
+            <span class="km-label">Issue To</span>
+            <span class="km-value">{{dat.issued_to}}</span>
           </ion-col>
           <ion-col size="6">
-            <ion-text color="dark">Email</ion-text><br>
-            <ion-text>{{dat.auth_person_email}}</ion-text>
+            <span class="km-label">Issue By</span>
+            <span class="km-value">{{dat.issued_by}}</span>
           </ion-col>
           <ion-col size="6">
-            <ion-text color="dark">Phone</ion-text><br>
-            <ion-text>{{dat.auth_person_phone}}</ion-text>
-          </ion-col>          
-        </ion-row>
-      </fieldset>
-    </ion-grid>
-  </ion-card>
-
+            <span class="km-label">Department</span>
+            <span class="km-value">{{dat.department}}</span>
+          </ion-col>
+          <ion-col size="12">
+            <span class="km-label">Remark</span>
+            <span class="km-value">{{dat.notes}}</span>
+          </ion-col>
+          </ion-row>
+        </div>
+        <div class="km-panel" *ngIf="dat.is_on_behalf === 1 ">
+          <p class="km-panel__title">Behalf Of</p>
+          <ion-row class="km-fields">
+          <ion-col size="6">
+            <span class="km-label">Name</span>
+            <span class="km-value">{{dat.auth_person_name}}</span>
+          </ion-col>
+          <ion-col size="6">
+            <span class="km-label">Email</span>
+            <span class="km-value">{{dat.auth_person_email}}</span>
+          </ion-col>
+          <ion-col size="6">
+            <span class="km-label">Phone</span>
+            <span class="km-value">{{dat.auth_person_phone}}</span>
+          </ion-col>
+          </ion-row>
+        </div>
+      </ng-container>
+    </div>
+    <div class="km-empty" *ngIf="!recent?.length">
+      <ion-icon name="time-outline"></ion-icon>
+      No history found
+    </div>
+  </div>
 </ion-content>

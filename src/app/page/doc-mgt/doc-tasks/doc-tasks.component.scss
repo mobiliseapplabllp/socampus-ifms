@@ -1,0 +1,13 @@
+.doc-actions {
+  margin-top: 10px;
+
+  ion-col {
+    padding: 0 4px;
+  }
+
+  ion-button {
+    --border-radius: 10px;
+    font-weight: 600;
+    text-transform: none;
+  }
+}

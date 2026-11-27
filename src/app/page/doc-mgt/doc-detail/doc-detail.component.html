@@ -1,0 +1,204 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/doc-mgt"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{doc?.doc_number || 'Document'}}</ion-title>
+    <ion-buttons slot="end" *ngIf="detail">
+      <ion-button (click)="toggleFavourite()">
+        <ion-icon slot="icon-only" [name]="detail.is_favourite ? 'star' : 'star-outline'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar class="km-segment" *ngIf="detail">
+    <ion-segment [(ngModel)]="tab" (ionChange)="loadTab()" mode="ios">
+      <ion-segment-button value="info"><ion-label>Info</ion-label></ion-segment-button>
+      <ion-segment-button value="versions"><ion-label>Versions</ion-label></ion-segment-button>
+      <ion-segment-button value="workflow"><ion-label>History</ion-label></ion-segment-button>
+      <ion-segment-button value="comments"><ion-label>Comments</ion-label></ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km">
+  <ion-refresher slot="fixed" (ionRefresh)="load(false, $event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page" *ngIf="!detail">
+    <app-doc-skeleton [count]="4"></app-doc-skeleton>
+  </div>
+
+  <div class="km-page" *ngIf="detail" [ngSwitch]="tab">
+    <app-doc-skeleton *ngIf="tabLoading" [count]="3"></app-doc-skeleton>
+
+    <!-- ================= INFO ================= -->
+    <ng-container *ngSwitchCase="'info'">
+      <div class="km-card km-row">
+        <div class="km-row__icon"><ion-icon name="document-text-outline"></ion-icon></div>
+        <div class="km-row__body">
+          <h3>{{doc.title}}</h3>
+          <p *ngIf="doc.description"><span>{{doc.description}}</span></p>
+          <div class="km-row__chips">
+            <ion-chip [color]="dms.statusColor(doc.status)">{{dms.statusLabel(doc.status)}}</ion-chip>
+            <ion-chip color="medium" *ngIf="version">v{{version.label}}</ion-chip>
+            <ion-chip color="medium" class="ion-text-capitalize">{{doc.confidentiality}}</ion-chip>
+          </div>
+        </div>
+      </div>
+
+      <div class="km-card" *ngIf="version?.file">
+        <div class="km-meta">
+          <ion-icon name="attach-outline"></ion-icon>
+          <span class="doc-file-name">{{version.file.name}}</span>
+          <b>{{fileSize(version.file.size)}}</b>
+        </div>
+        <ion-button expand="block" class="doc-btn" (click)="viewFile()" *ngIf="perm.can_view">
+          <ion-icon slot="start" name="eye-outline"></ion-icon>View file
+        </ion-button>
+      </div>
+
+      <ion-button expand="block" color="success" class="doc-btn" (click)="submitForReview()" *ngIf="perm.can_submit">
+        <ion-icon slot="start" name="send-outline"></ion-icon>Submit for review
+      </ion-button>
+
+      <div class="km-card" *ngIf="doc.checked_out_by">
+        <div class="km-meta">
+          <ion-icon name="lock-closed-outline"></ion-icon><span>Checked out by</span><b>{{dms.refName('users', doc.checked_out_by)}}</b>
+        </div>
+      </div>
+
+      <div class="km-section-title">Details</div>
+      <div class="km-card">
+        <ion-row class="km-fields">
+        <ion-col size="6">
+          <span class="km-label">Category</span>
+          <span class="km-value">{{detail.category?.name || 'N/A'}}</span>
+        </ion-col>
+        <ion-col size="6">
+          <span class="km-label">Type</span>
+          <span class="km-value">{{detail.type?.name || 'N/A'}}</span>
+        </ion-col>
+        <ion-col size="6">
+          <span class="km-label">Plant / Site</span>
+          <span class="km-value">{{dms.refName('plants', doc.plant_id) || 'N/A'}}</span>
+        </ion-col>
+        <ion-col size="6">
+          <span class="km-label">Department</span>
+          <span class="km-value">{{dms.refName('departments', doc.dept_id) || 'N/A'}}</span>
+        </ion-col>
+        <ion-col size="6">
+          <span class="km-label">Owner</span>
+          <span class="km-value">{{dms.refName('users', doc.owner_id) || 'N/A'}}</span>
+        </ion-col>
+        <ion-col size="6">
+          <span class="km-label">Effective Date</span>
+          <span class="km-value">{{(doc.effective_date | date: 'dd MMM yyyy') || 'N/A'}}</span>
+        </ion-col>
+        <ion-col size="6">
+          <span class="km-label">Review Due</span>
+          <span class="km-value">{{(doc.review_due_date | date: 'dd MMM yyyy') || 'N/A'}}</span>
+        </ion-col>
+        <ion-col size="6">
+          <span class="km-label">Expiry Date</span>
+          <span class="km-value">{{(doc.expiry_date | date: 'dd MMM yyyy') || 'N/A'}}</span>
+        </ion-col>
+        <ion-col size="12" *ngIf="doc.tags?.length">
+          <span class="km-label">Tags</span>
+          <div class="km-row__chips" style="margin-top:4px">
+            <ion-chip color="primary" *ngFor="let tag of doc.tags">{{tag}}</ion-chip>
+          </div>
+        </ion-col>
+        </ion-row>
+      </div>
+
+      <ng-container *ngIf="metaFields.length">
+        <div class="km-section-title">Additional Information</div>
+        <div class="km-card">
+          <ion-row class="km-fields">
+            <ion-col size="6" *ngFor="let f of metaFields">
+              <span class="km-label">{{f.label}}</span>
+              <span class="km-value">{{f.value}}</span>
+            </ion-col>
+          </ion-row>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <!-- ================= VERSIONS ================= -->
+    <ng-container *ngSwitchCase="'versions'">
+      <div class="km-card" [hidden]="tabLoading" *ngFor="let v of versions">
+        <div class="km-activity__head">
+          <div class="km-row__chips" style="margin:0">
+            <ion-chip color="primary">v{{v.label}}</ion-chip>
+            <ion-chip [color]="dms.statusColor(v.status)">{{dms.statusLabel(v.status)}}</ion-chip>
+          </div>
+          <span class="km-activity__date">{{v.created_at | date: 'dd MMM yyyy'}}</span>
+        </div>
+        <div class="km-meta">
+          <ion-icon name="attach-outline"></ion-icon><span class="doc-file-name">{{v.file?.name}}</span><b>{{fileSize(v.file?.size)}}</b>
+        </div>
+        <div class="km-meta" *ngIf="v.change_reason">
+          <ion-icon name="create-outline"></ion-icon><span>{{v.change_reason}}</span>
+        </div>
+        <ion-button expand="block" fill="outline" size="small" class="doc-btn" (click)="viewFile(v)" *ngIf="perm.can_view">
+          <ion-icon slot="start" name="eye-outline"></ion-icon>View this version
+        </ion-button>
+      </div>
+      <div class="km-empty" *ngIf="!tabLoading && !versions.length">
+        <ion-icon name="layers-outline"></ion-icon>
+        No versions found
+      </div>
+    </ng-container>
+
+    <!-- ================= HISTORY ================= -->
+    <ng-container *ngSwitchCase="'workflow'">
+      <div class="km-card" [hidden]="tabLoading" *ngFor="let t of timeline">
+        <div class="km-activity__head">
+          <ion-chip [color]="dms.toneColor(t.tone)">{{t.action}}</ion-chip>
+          <span class="km-activity__date">{{t.at | date: 'dd MMM yyyy, hh:mm a'}}</span>
+        </div>
+        <div class="km-meta">
+          <ion-icon name="person-outline"></ion-icon><span>{{t.actor}}</span><b *ngIf="t.step">{{t.step}}</b>
+        </div>
+        <div class="km-meta" *ngIf="t.comment">
+          <ion-icon name="chatbubble-outline"></ion-icon><span>{{t.comment}}</span>
+        </div>
+      </div>
+      <div class="km-empty" *ngIf="!tabLoading && !timeline.length">
+        <ion-icon name="git-branch-outline"></ion-icon>
+        No approval history yet
+      </div>
+    </ng-container>
+
+    <!-- ================= COMMENTS ================= -->
+    <ng-container *ngSwitchCase="'comments'">
+      <div class="km-card" [hidden]="tabLoading" *ngFor="let c of comments">
+        <div class="km-activity__head">
+          <b class="doc-author">{{c.author}}</b>
+          <span class="km-activity__date">{{c.created_at | date: 'dd MMM yyyy, hh:mm a'}}</span>
+        </div>
+        <span class="km-value doc-comment">{{c.body}}</span>
+        <div class="km-row__chips" *ngIf="c.version_label">
+          <ion-chip color="medium">v{{c.version_label}}</ion-chip>
+        </div>
+      </div>
+      <div class="km-empty" *ngIf="!tabLoading && !comments.length">
+        <ion-icon name="chatbubbles-outline"></ion-icon>
+        No comments yet
+      </div>
+    </ng-container>
+  </div>
+</ion-content>
+
+<ion-footer class="km" *ngIf="detail && tab === 'comments' && perm.can_comment">
+  <ion-toolbar class="ion-padding-start ion-padding-end">
+    <div class="doc-comment-box">
+      <ion-textarea [(ngModel)]="commentText" rows="1" [autoGrow]="true" placeholder="Write a comment"></ion-textarea>
+      <ion-button (click)="addComment()" [disabled]="sending">
+        <ion-spinner name="crescent" *ngIf="sending"></ion-spinner>
+        <ion-icon slot="icon-only" name="send" *ngIf="!sending"></ion-icon>
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>

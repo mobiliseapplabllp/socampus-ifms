@@ -26,6 +26,7 @@ export class AssignKeyComponent implements OnInit {
     containerClass: 'custom-otp-container'
   };
   submitted = false;
+  otpRequired = true; // backend flag (masters.otp_required)
   currentDate = moment().format('YYYY-MM-DDTHH:mm');
   req_data: any = [];
   constructor(
@@ -42,6 +43,7 @@ export class AssignKeyComponent implements OnInit {
   ngOnInit() {
     this.userData = JSON.parse(localStorage.getItem('user')!);
     this.initForm();
+    this.getMasters();
     this.activeRoute.queryParams.subscribe((res: any) => {
       if (res.data) {
         this.req_data = JSON.parse(res.data);
@@ -71,6 +73,7 @@ export class AssignKeyComponent implements OnInit {
       person_phone: ['', Validators.required],
       person_phone_status: [''],
       person_phone_otp: [''],
+      otp_token: [''],
       person_name: ['', Validators.required],
       person_email: [''],
       department: ['', Validators.required],
@@ -84,6 +87,7 @@ export class AssignKeyComponent implements OnInit {
       auth_person_phone: [''],
       auth_person_phone_status: [''],
       auth_person_phone_otp: [''],
+      auth_otp_token: [''],
     });
     this.handleOnBehalfChange();
   }
@@ -104,68 +108,87 @@ export class AssignKeyComponent implements OnInit {
     });
   }
 
+  getMasters() {
+    this.httpKey.getMasters().subscribe({
+      next: (res: any) => {
+        if (res?.status && res.data && res.data.otp_required !== undefined) {
+          this.otpRequired = !!res.data.otp_required;
+        }
+      },
+      error: () => { }
+    });
+  }
+
   submit() {
     this.submitted = true;    
     if (this.forms.invalid) {
       this.common.presentToast('Please Fill All Mandatory Fields', 'warning');
       return;
     }
-
-    if (!this.forms.value.is_on_behalf) {
+    const v = this.forms.value;
+    if (!v.is_on_behalf) {
       this.common.presentToast('Please Select My Self or On Behalf', 'warning');
       return;
     }
-
-    if (this.forms.value.is_on_behalf === '1' && this.forms.value.auth_person_phone_status !== 'otp_verified') {
+    if (this.otpRequired && v.is_on_behalf === '1' && v.auth_person_phone_status !== 'otp_verified') {
       this.common.presentToast('Please Verify On Behalf Person Phone', 'warning');
       return
     }
-
-    if (this.forms.value.person_phone_status !== 'otp_verified') {
+    if (this.otpRequired && v.person_phone_status !== 'otp_verified') {
       this.common.presentToast('Please Verify Phone', 'warning');
       return
     }
-
-    if (!this.forms.value.id_photo) {
+    if (!v.id_photo) {
       this.common.presentToast('ID Photo is Required', 'warning');
       return
     }
-
-    if (!this.forms.value.requester_photo) {
+    if (!v.requester_photo) {
       this.common.presentToast('Requester ID is Required', 'warning');
       return
     }
 
+    // Backend field names (POST key-management/assign, multipart)
+    const type = String(v.requester_type);
+    const fields: any = {
+      key_id: v.key_id,
+      on_behalf: v.is_on_behalf,
+      requester_type: type.charAt(0).toUpperCase() + type.slice(1),
+      person_name: v.person_name,
+      department: v.department_desc,
+      phone: v.person_phone,
+      email: v.person_email,
+      expected_return: moment(v.expected_return_at).toISOString(),
+      remarks: v.notes,
+      otp_token: v.otp_token
+    };
+    if (v.is_on_behalf === '1') {
+      fields.auth_name = v.auth_person_name;
+      fields.auth_phone = v.auth_person_phone;
+      fields.auth_email = v.auth_person_email;
+      fields.auth_otp_token = v.auth_otp_token;
+    }
     const formData = new FormData();
-    for (const key in this.forms.value) {
-      const value = this.forms.value[key];
-      if (value) {
-        formData.delete(key);
-        if (value instanceof Blob) {
-          const randomName = `image_${Date.now()}_${Math.floor(Math.random() * 1000)}.jpg`;
-          formData.append(key, value, randomName);
-        } else {
-          formData.append(key, value);
-        }
+    for (const key in fields) {
+      if (fields[key] !== undefined && fields[key] !== null && fields[key] !== '') {
+        formData.append(key, fields[key]);
       }
     }
+    formData.append('id_photo', v.id_photo, `image_${Date.now()}_1.jpg`);
+    formData.append('requester_photo', v.requester_photo, `image_${Date.now()}_2.jpg`);
+
     this.common.presentLoading().then(preLoad => {
       this.httpKey.assignKey(formData).subscribe({
         next: (data: any) => {
           if (data.status) {
             this.httpKey.setHomePageStatus(true);
-            this.common.presentToast(data.message, 'success');
+            this.common.presentToast(data.msg || 'Key Assigned Successfully', 'success');
             this.navCtrl.pop();
           } else {
-            this.common.presentToast(data.message, 'warning');
+            this.common.presentToast(data.msg || 'Key Not Assigned', 'warning');
           }
         },
-        error: (err: any) => {
+        error: () => {
           this.common.dismissloading();
-          if (err.status === 400) {
-            this.common.presentToast(err.error.message, 'warning');
-            return;
-          }
           this.common.presentToast(environment.errMsg, 'danger');
         },
         complete: () => {
@@ -281,7 +304,7 @@ export class AssignKeyComponent implements OnInit {
     this.common.presentLoading().then(() => {
       this.httpKey.sendOtp({ phone }).subscribe({
         next: (res: any) => {
-          this.common.presentToast(res.message, res.status ? 'success' : 'warning');
+          this.common.presentToast(res.msg, res.status ? 'success' : 'warning');
           if (res.status) {
             this.forms.get(statusCtrl)?.setValue('otp_sent');
           }
@@ -309,8 +332,10 @@ export class AssignKeyComponent implements OnInit {
     this.common.presentLoading().then(() => {
       this.httpKey.verifyOtp(obj).subscribe({
         next: (res: any) => {
-          this.common.presentToast(res.message, res.status ? 'success' : 'warning');
+          this.common.presentToast(res.msg, res.status ? 'success' : 'warning');
           if (res.status) {
+            const tokenCtrl = type === '1' ? 'otp_token' : 'auth_otp_token';
+            this.forms.get(tokenCtrl)?.setValue(res.data?.otp_token || '');
             this.forms.get(statusCtrl)?.setValue('otp_verified');
           }
         },
@@ -335,6 +360,7 @@ export class AssignKeyComponent implements OnInit {
       this.forms.get('person_phone')?.setValue('');
       this.forms.get('person_phone_status')?.setValue('');
       this.forms.get('person_phone_otp')?.setValue('');
+      this.forms.get('otp_token')?.setValue('');
     } else {
       // auth_person_phone: [''],
       // auth_person_phone_status: [''],
@@ -342,6 +368,7 @@ export class AssignKeyComponent implements OnInit {
       this.forms.get('auth_person_phone')?.setValue('');
       this.forms.get('auth_person_phone_status')?.setValue('');
       this.forms.get('auth_person_phone_otp')?.setValue('');
+      this.forms.get('auth_otp_token')?.setValue('');
     }
   }
 

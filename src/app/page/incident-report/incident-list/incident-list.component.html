@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/incident-report"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Incident Register ({{total}})</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km">
+  <ion-refresher slot="fixed" (ionRefresh)="reload($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <ion-searchbar mode="md" debounce="800" placeholder="Search code, reporter, description" (ionChange)="search($event)"></ion-searchbar>
+
+  <div class="km-page">
+    <div class="km-card km-row" *ngFor="let dat of incidents" (click)="openDetail(dat)">
+      <div class="km-row__icon"><ion-icon name="document-text-outline"></ion-icon></div>
+      <div class="km-row__body">
+        <h3>{{dat.incident_code}}</h3>
+        <p><ion-icon name="business-outline"></ion-icon><span>{{httpIncident.siteName(dat)}}</span></p>
+        <p><ion-icon name="calendar-outline"></ion-icon><span>{{dat.incident_date | date: 'dd MMM yyyy'}} {{dat.incident_time | slice:0:5}}</span></p>
+        <p><ion-icon name="person-outline"></ion-icon><span>{{dat.reported_by}} · {{dat.dept_desc}}</span></p>
+        <div class="km-row__chips">
+          <ion-chip [color]="httpIncident.severityColor(dat.severity)">{{dat.severity}}</ion-chip>
+          <ion-chip color="medium">{{dat.type_desc}}</ion-chip>
+        </div>
+      </div>
+      <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
+    </div>
+    <div class="km-empty" *ngIf="loaded && !incidents.length">
+      <ion-icon name="document-text-outline"></ion-icon>
+      No incidents found
+    </div>
+    <ion-infinite-scroll threshold="100px" (ionInfinite)="infiniteScroll($event)" *ngIf="canLoadData">
+      <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+  </div>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button color="primary" (click)="openAdd()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

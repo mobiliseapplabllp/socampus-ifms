@@ -170,7 +170,7 @@ export class ComplaintService {
 
   getCostCenter(isKey?: boolean) : Observable<any> {
     if (isKey) {
-      return this.https.get(environment.url + 'shared/get-user-pc-code-by-key-enable', {});
+      return this.https.post(environment.url + 'shared/get-user-pc-code', { req_for: 'allPcs', app_path: 'key-management' });
     }
     return this.https.post(environment.url + 'shared/get-user-pc-code', {});
   }

@@ -1,0 +1,34 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/doc-mgt"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Categories</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page">
+    <app-doc-skeleton *ngIf="!loaded" [count]="5"></app-doc-skeleton>
+    <div class="km-card doc-cat" *ngFor="let root of tree">
+      <ion-item button detail="true" lines="none" (click)="openCategory(root)">
+        <div class="km-row__icon" slot="start"><ion-icon name="folder-outline"></ion-icon></div>
+        <ion-label class="ion-text-wrap"><b>{{root.category.name}}</b></ion-label>
+        <ion-badge slot="end" color="primary">{{root.count}}</ion-badge>
+      </ion-item>
+      <ion-item class="doc-cat__child" button detail="true" lines="none" *ngFor="let child of root.children" (click)="openCategory(child)">
+        <ion-icon slot="start" name="return-down-forward-outline" color="medium"></ion-icon>
+        <ion-label class="ion-text-wrap">{{child.category.name}}</ion-label>
+        <ion-badge slot="end" color="medium">{{child.count}}</ion-badge>
+      </ion-item>
+    </div>
+    <div class="km-empty" *ngIf="loaded && !tree.length">
+      <ion-icon name="folder-outline"></ion-icon>
+      No categories found
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,23 @@
+:host {
+  display: block;
+}
+
+.sk-icon {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  border-radius: 12px;
+}
+
+.sk-line {
+  height: 11px;
+  margin: 8px 0 0;
+  border-radius: 6px;
+}
+
+.sk-line--title {
+  width: 75%;
+  height: 14px;
+  margin-top: 2px;
+}

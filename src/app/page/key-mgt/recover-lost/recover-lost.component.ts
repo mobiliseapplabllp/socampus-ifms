@@ -41,18 +41,18 @@ export class RecoverLostComponent  implements OnInit {
     }
     
     const obj = {
-      recoveredAt: this.lost_date,
-      recoveryNotes: this.remark
+      recovered_at: moment(this.lost_date).toISOString(),
+      notes: this.remark
     }
      
     this.common.presentLoading().then(preLoad => {      
-      this.httpKey.recoverLostKey(this.req_data.id, obj).subscribe({
+      this.httpKey.recoverLostKey(this.httpKey.asgnId(this.req_data), obj).subscribe({
         next:(data: any) => {          
-          if (data.assignment.status) {
-            this.common.presentToast('Key Recover Successfully', 'success');
+          if (data.status) {
+            this.common.presentToast(data.msg || 'Key Recover Successfully', 'success');
             this.closeModal(null,  'true');
           } else {
-            this.common.presentToast(environment.errMsg, 'danger');
+            this.common.presentToast(data.msg || environment.errMsg, 'warning');
           }
         },
         error:() => {

@@ -53,7 +53,7 @@ export class LostkeyReportComponent implements OnInit {
       lostDateTime: [moment().format('YYYY-MM-DDTH:mm:ss'), Validators.required],
       floorId_desc: ['', Validators.required],
       lostKey_person: ['', Validators.required],
-      phone: [''],
+      phone: ['', Validators.required],
       email_id: ['', [Validators.email]],
       description: ['', Validators.required],
     });
@@ -85,33 +85,22 @@ export class LostkeyReportComponent implements OnInit {
     }
 
     const payload = {
-      keyId: this.req_data.key_id,
-      reportType: 'lost',
-      dateTimeLost: this.forms.value.lostDateTime,
-      discoveredDateTime: this.forms.value.discoveredDateTime,
-      lastSeenLocation: this.forms.value.floorId_desc,
-      responsiblePersonName: this.forms.value.lostKey_person,
-      responsiblePersonMobile: this.forms.value.phone,
-      responsiblePersonEmail: this.forms.value.email_id,
-      incidentDescription: this.forms.value.description,
-      description: this.forms.value.description,
-      source: 'Mobile',
+      lost_at: moment(this.forms.value.lostDateTime).toISOString(),
+      last_seen: this.forms.value.floorId_desc,
+      resp_name: this.forms.value.lostKey_person,
+      resp_phone: this.forms.value.phone,
+      resp_email: this.forms.value.email_id || '',
+      description: this.forms.value.description
     };
-    Object.keys(payload).forEach((key) => {
-      const value = payload[key as keyof typeof payload];
-      if ( value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
-        delete payload[key as keyof typeof payload];
-      }
-    });
     this.httpCommon.presentLoading().then(preLoad => {
-      this.httpKey.reportLostKey(payload).subscribe({
+      this.httpKey.reportLostKey(this.httpKey.asgnId(this.req_data), payload).subscribe({
         next: (data: any) => {
           if (data.status) {
             this.httpKey.setHomePageStatus(true);
-            this.httpCommon.presentToast(data.message || 'Submitted Successfully', 'success');
+            this.httpCommon.presentToast(data.msg || 'Submitted Successfully', 'success');
             this.navCtrl.pop();
           } else {
-            this.httpCommon.presentToast(data.message || 'Not Submitted', 'warning');
+            this.httpCommon.presentToast(data.msg || 'Not Submitted', 'warning');
           }          
         },
         error: (error) => {          
@@ -125,7 +114,6 @@ export class LostkeyReportComponent implements OnInit {
         },
         complete: () => {
           this.httpCommon.dismissloading();
-          this.navCtrl.pop();         
         }
       });
     })

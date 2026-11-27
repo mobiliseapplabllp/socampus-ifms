@@ -54,7 +54,11 @@ export class KeyMgtHomeComponent  implements OnInit {
     this.common.presentLoading().then(preLoad => {
       this.httpKeys.getSummary().subscribe({
         next:(data: any) => {          
-          this.summaryArr = data;
+          const d = data?.data || {};
+          this.summaryArr = {
+            keyStatus: { total: d.total, available: d.available, assigned: d.issued, lost: d.lost },
+            overdueAssignments: d.overdue
+          };
         },
         error:() => {
           this.common.dismissloading();
@@ -71,7 +75,7 @@ export class KeyMgtHomeComponent  implements OnInit {
     this.httpKeys.getRecentHistory().subscribe({
       next:(data: any) => {        
         if (data.status) {
-          this.recent = data.data;
+          this.recent = (data.data || []).slice(0, 5);
         } else {
           this.common.presentToast(data.msg, 'warning');
         }

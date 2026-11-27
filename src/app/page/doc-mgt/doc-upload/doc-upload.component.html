@@ -1,0 +1,163 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/doc-mgt"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Upload Document</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding km km-form">
+  <app-doc-skeleton *ngIf="!ready" [count]="5"></app-doc-skeleton>
+  <ng-container *ngIf="ready">
+  <ion-text>
+    <h4>File</h4>
+  </ion-text>
+  <input type="file" #fileInput hidden [accept]="acceptAttr" (change)="onFile($event)">
+  <ion-button expand="block" [fill]="file ? 'solid' : 'outline'" [color]="file ? 'success' : 'primary'" (click)="fileInput.click()">
+    <ion-icon slot="start" [name]="file ? 'checkmark-circle-outline' : 'cloud-upload-outline'"></ion-icon>
+    <span class="doc-file">{{ file ? file.name : 'Choose file' }}</span>
+  </ion-button>
+  <p class="doc-hint">Allowed: {{allowedExt.join(', ')}} · max {{maxSizeMb}} MB</p>
+
+  <ion-text>
+    <h4>Document Details</h4>
+  </ion-text>
+
+  <section class="inputbox">
+    <ion-text><strong>Category</strong> <ion-text color="danger">*</ion-text></ion-text>
+    <ion-item lines="none" (click)="pick('category')" [ngClass]="{'error': submitted && !form.category_id}">
+      <ion-input type="text" [value]="form.category_name" placeholder="Select category" readonly></ion-input>
+      <ion-icon name="chevron-down-outline" slot="end" size="small" color="medium"></ion-icon>
+    </ion-item>
+  </section>
+
+  <section class="inputbox">
+    <ion-text><strong>Title</strong> <ion-text color="danger">*</ion-text></ion-text>
+    <ion-item lines="none" [ngClass]="{'error': submitted && !form.title}">
+      <ion-input type="text" [(ngModel)]="form.title" placeholder="Document title"></ion-input>
+    </ion-item>
+  </section>
+
+  <section class="inputbox">
+    <ion-text><strong>Plant / Site</strong> <ion-text color="danger">*</ion-text></ion-text>
+    <ion-item lines="none" (click)="pick('plant')" [ngClass]="{'error': submitted && !form.plant_id}">
+      <ion-input type="text" [value]="form.plant_name" placeholder="Select plant / site" readonly></ion-input>
+      <ion-icon name="chevron-down-outline" slot="end" size="small" color="medium"></ion-icon>
+    </ion-item>
+  </section>
+
+  <p class="doc-hint" *ngIf="previewLoading">
+    <ion-spinner name="dots" class="doc-spin"></ion-spinner> Getting document number...
+  </p>
+  <ion-card *ngIf="preview?.number && !previewLoading">
+    <ion-row>
+      <ion-col size="8">
+        <ion-text>Document number (preview)</ion-text><br>
+        <ion-text color="dark">{{preview.number}}</ion-text>
+      </ion-col>
+      <ion-col size="4">
+        <ion-text>Version</ion-text><br>
+        <ion-text color="dark">{{preview.label}}</ion-text>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+
+  <section class="inputbox" *ngIf="types.length">
+    <ion-text><strong>Document Type</strong></ion-text>
+    <ion-item lines="none">
+      <ion-select interface="action-sheet" mode="ios" placeholder="Select type" [(ngModel)]="form.type_id" (ionChange)="changeType()">
+        <ion-select-option *ngFor="let t of types" [value]="t.id">{{t.name}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </section>
+
+  <section class="inputbox">
+    <ion-text><strong>Department</strong></ion-text>
+    <ion-item lines="none" (click)="pick('dept')">
+      <ion-input type="text" [value]="form.dept_name" placeholder="Select department" readonly></ion-input>
+      <ion-icon name="chevron-down-outline" slot="end" size="small" color="medium"></ion-icon>
+    </ion-item>
+  </section>
+
+  <section class="inputbox">
+    <ion-text><strong>Description</strong></ion-text>
+    <ion-item lines="none">
+      <ion-textarea [(ngModel)]="form.description" rows="3" [autoGrow]="true" placeholder="Short description"></ion-textarea>
+    </ion-item>
+  </section>
+
+  <section class="inputbox">
+    <ion-text><strong>Confidentiality</strong></ion-text>
+    <ion-item lines="none">
+      <ion-select interface="action-sheet" mode="ios" placeholder="Select" [(ngModel)]="form.confidentiality" class="ion-text-capitalize">
+        <ion-select-option *ngFor="let c of confidentialityList" [value]="c" class="ion-text-capitalize">{{c | titlecase}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </section>
+
+  <ion-row>
+    <ion-col size="6" class="ion-no-padding" style="padding-right:6px">
+      <section class="inputbox">
+        <ion-text><strong>Effective Date</strong></ion-text>
+        <ion-item lines="none">
+          <ion-input type="date" [(ngModel)]="form.effective_date"></ion-input>
+        </ion-item>
+      </section>
+    </ion-col>
+    <ion-col size="6" class="ion-no-padding" style="padding-left:6px">
+      <section class="inputbox">
+        <ion-text><strong>Review Due</strong></ion-text>
+        <ion-item lines="none">
+          <ion-input type="date" [(ngModel)]="form.review_due_date"></ion-input>
+        </ion-item>
+      </section>
+    </ion-col>
+  </ion-row>
+
+  <section class="inputbox">
+    <ion-text><strong>Expiry Date</strong> <ion-text color="danger" *ngIf="category?.requires_expiry">*</ion-text></ion-text>
+    <ion-item lines="none" [ngClass]="{'error': submitted && category?.requires_expiry && !form.expiry_date}">
+      <ion-input type="date" [(ngModel)]="form.expiry_date"></ion-input>
+    </ion-item>
+  </section>
+
+  <section class="inputbox">
+    <ion-text><strong>Tags</strong></ion-text>
+    <ion-item lines="none">
+      <ion-input type="text" [(ngModel)]="form.tags" placeholder="Comma separated, e.g. boiler, safety"></ion-input>
+    </ion-item>
+  </section>
+
+  <ng-container *ngIf="fields.length">
+    <ion-text>
+      <h4>Additional Information</h4>
+    </ion-text>
+    <section class="inputbox" *ngFor="let f of fields" [ngSwitch]="fieldKind(f)">
+      <ion-text><strong>{{f.label}}</strong> <ion-text color="danger" *ngIf="f.required">*</ion-text></ion-text>
+      <ion-item lines="none" [ngClass]="{'error': submitted && f.required && !meta[f.key]}">
+        <ion-select *ngSwitchCase="'select'" interface="action-sheet" mode="ios" placeholder="Select" [(ngModel)]="meta[f.key]">
+          <ion-select-option *ngFor="let opt of f.options" [value]="optValue(opt)">{{optLabel(opt)}}</ion-select-option>
+        </ion-select>
+        <ion-input *ngSwitchCase="'date'" type="date" [(ngModel)]="meta[f.key]"></ion-input>
+        <ion-input *ngSwitchCase="'number'" type="number" [(ngModel)]="meta[f.key]"></ion-input>
+        <ion-textarea *ngSwitchCase="'textarea'" rows="3" [autoGrow]="true" [(ngModel)]="meta[f.key]"></ion-textarea>
+        <ion-input *ngSwitchDefault type="text" [(ngModel)]="meta[f.key]"></ion-input>
+      </ion-item>
+    </section>
+  </ng-container>
+
+  <section class="inputbox">
+    <ion-text><strong>Change Reason</strong></ion-text>
+    <ion-item lines="none">
+      <ion-input type="text" [(ngModel)]="form.change_reason" placeholder="Initial upload"></ion-input>
+    </ion-item>
+  </section>
+  </ng-container>
+</ion-content>
+
+<ion-footer class="km" *ngIf="ready">
+  <ion-toolbar class="ion-padding-start ion-padding-end">
+    <ion-button expand="block" color="primary" (click)="submit()">Upload document</ion-button>
+  </ion-toolbar>
+</ion-footer>

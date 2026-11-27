@@ -116,6 +116,14 @@ const routes: Routes = [
     path: 'incident-report',
     loadChildren: () => import('./page/incident-report/incident-report.module').then( m => m.IncidentReportPageModule)
   },
+  {
+    path: 'doc-mgt',
+    loadChildren: () => import('./page/doc-mgt/doc-mgt.module').then( m => m.DocMgtPageModule)
+  },
+  {
+    path: 'feedback',
+    loadChildren: () => import('./page/feedback/feedback.module').then( m => m.FeedbackPageModule)
+  },
 ];
 
 @NgModule({

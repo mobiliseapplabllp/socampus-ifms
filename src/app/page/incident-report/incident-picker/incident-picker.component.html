@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>{{title}} ({{filtered.length}})</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal(null, false)">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar mode="md" (ionChange)="search($event)" debounce="300"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="km">
+  <ion-item class="km-pick" button detail="false" *ngFor="let item of filtered" (click)="closeModal(item, true)">
+    <ion-label class="ion-text-wrap">{{item.label}}</ion-label>
+  </ion-item>
+  <div class="km-empty" *ngIf="!filtered.length">No data found</div>
+</ion-content>

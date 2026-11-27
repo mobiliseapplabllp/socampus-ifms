@@ -23,6 +23,7 @@ export class KeyMgtKeysComponent implements OnInit {
   assignKeyData: any = []  
   addKeyData: any = []
   addKeyDataCopy: any = [];
+  assignKeyDataCopy: any = [];
   locationHisArr: any = [];
   totalAss = 0;
   totalKey = 0
@@ -87,10 +88,10 @@ export class KeyMgtKeysComponent implements OnInit {
   openDetails(item: any) {       
     this.selectedData = item; 
     this.httpCommon.presentLoading().then(preLoad => {
-      this.httpKey.viewKey(item.id).subscribe({
+      this.httpKey.viewKey(this.httpKey.asgnId(item)).subscribe({
         next:(data: any) => {          
           if (data.status) {     
-            this.selectedData = data.assignment;                   
+            this.selectedData = data.data;                   
             this.isModalOpen = true;            
           } else {
             this.isModalOpen = true;            
@@ -145,36 +146,27 @@ export class KeyMgtKeysComponent implements OnInit {
     });
   }
 
+  // Backend me search / pagination nahi hai, isliye list par local filter lagta hai
   search(ev: any) {
+    const val = String(ev.target.value || '').toLowerCase();
+    this.searchVal = val;
+    const match = (row: any) => !val || JSON.stringify(row).toLowerCase().includes(val);
     if (this.status === 'assigned_key') {
-      this.page = 1;    
-      this.assignKeyData = [];
-      this.canLoadData = false;
-      let val = ev.target.value || '';
-      this.getAssignedKeys(val);
-    } else {      
-      this.page = 1;    
-      this.addKeyData = [];
-      this.canLoadData = false;
-      let val = ev.target.value || '';
-      this.getAddKeys(val);
+      this.assignKeyData = this.assignKeyDataCopy.filter(match);
+    } else {
+      this.addKeyData = this.addKeyDataCopy.filter(match);
     }
-    
   }
 
   getAssignedKeys(val: string, ev?: any) {    
     this.httpCommon.presentLoading().then(preLoad => {
-      this.httpKey.getAssignKeys(val,this.page).subscribe({
+      this.httpKey.getAssignKeys().subscribe({
         next: (res: any) => {
           if (res.status) {
-            this.assignKeyData = [...this.assignKeyData, ...res.data];
-            this.totalAss = res?.meta?.total;                  
-            if (this.totalAss > this.page * 10) {              
-              this.page++;
-              this.canLoadData = true;
-            } else {              
-              this.canLoadData = false;
-            }                        
+            this.assignKeyDataCopy = res.data || [];
+            this.assignKeyData = this.assignKeyDataCopy;
+            this.totalAss = this.assignKeyDataCopy.length;
+            this.canLoadData = false;
           } else {
             this.httpCommon.presentToast(res.msg || 'Data Not Found', 'warning');
           }          
@@ -198,17 +190,13 @@ export class KeyMgtKeysComponent implements OnInit {
 
   getAddKeys(val: string, ev?: any) {    
     this.httpCommon.presentLoading().then(preLoad => {
-      this.httpKey.getAddKeys(val, this.page).subscribe({
+      this.httpKey.getAddKeys().subscribe({
         next: (data: any) => {
           if (data.status) {
-            this.addKeyData = [...this.addKeyData, ...data.data];  
-            this.totalKey = data?.meta?.total;
-            if (this.totalKey > this.page * 10) {              
-              this.page++;
-              this.canLoadData = true;
-            } else {              
-              this.canLoadData = false;
-            }            
+            this.addKeyDataCopy = data.data || [];
+            this.addKeyData = this.addKeyDataCopy;
+            this.totalKey = this.addKeyDataCopy.length;
+            this.canLoadData = false;
           } else {
             this.httpCommon.presentToast(data.msg || 'Data not Found', 'warning');
           }          
@@ -242,7 +230,7 @@ export class KeyMgtKeysComponent implements OnInit {
       this.httpKey.getLocationHistory(keyId).subscribe({
         next:(data: any) => {          
           if (data.status) {
-            this.locationHisArr = data.history;
+            this.locationHisArr = data.data || [];
           } else {
             this.httpCommon.presentToast(data.msg || 'Data Not Found', 'warning');
           }

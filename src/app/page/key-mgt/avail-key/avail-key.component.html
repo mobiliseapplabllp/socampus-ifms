@@ -1,17 +1,26 @@
 <ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Select Key</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal(null, 'false')">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
   <ion-toolbar>
-    <ion-searchbar></ion-searchbar>
+    <ion-searchbar mode="md"></ion-searchbar>
   </ion-toolbar>
 </ion-header>
-<ion-content>
+<ion-content class="km">
   <ion-virtual-scroll [items]="availKey" approxItemHeight="320px">
-    <ion-item *virtualItem="let item; let itemBounds = bounds;" (click)="closeModal(item, 'true')">
-      {{item.key_name}} ({{item.code}})
+    <ion-item class="km-pick" button detail="false" *virtualItem="let item; let itemBounds = bounds;" (click)="closeModal(item, 'true')">
+      <div class="km-row__icon" slot="start"><ion-icon name="key-outline"></ion-icon></div>
+      <ion-label>{{item.key_name}} ({{item.code}})</ion-label>
     </ion-item>
   </ion-virtual-scroll>
 </ion-content>
-<ion-footer>
+<ion-footer class="km">
   <ion-toolbar class="ion-padding-start ion-padding-end">
-    <ion-button expand="block" (click)="closeModal(null, 'false')" class="ion-text-capitalize">Close</ion-button>
+    <ion-button expand="block" fill="outline" (click)="closeModal(null, 'false')" class="ion-text-capitalize">Close</ion-button>
   </ion-toolbar>
 </ion-footer>

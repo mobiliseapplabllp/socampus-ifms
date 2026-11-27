@@ -1,0 +1,96 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/list-master"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Documents</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="open('/doc-mgt/notifications')">
+        <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
+        <ion-badge color="danger" class="doc-badge" *ngIf="unread">{{unread}}</ion-badge>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page">
+    <ion-searchbar class="doc-search" mode="md" placeholder="Search documents" readonly (click)="openList({ focus: 1, title: 'Search' })"></ion-searchbar>
+
+    <div class="km-section-title">Overview</div>
+    <div class="km-stats" *ngIf="!loaded">
+      <div class="km-stat" *ngFor="let i of [1, 2, 3, 4]">
+        <ion-skeleton-text animated class="doc-sk-icon"></ion-skeleton-text>
+        <div style="flex:1">
+          <ion-skeleton-text animated style="width:40%;height:18px"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width:80%"></ion-skeleton-text>
+        </div>
+      </div>
+    </div>
+    <div class="km-stats">
+      <div class="km-stat" [ngClass]="'km-stat--' + kpiTone(kpi.key)" *ngFor="let kpi of kpis" (click)="openKpi(kpi)">
+        <div class="km-stat__icon"><ion-icon [name]="kpiIcon(kpi.key)"></ion-icon></div>
+        <div>
+          <h2>{{kpi.count}}</h2>
+          <p>{{kpi.label}}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="km-section-title">Browse</div>
+    <div class="km-card doc-links">
+      <ion-item button detail="true" lines="full" (click)="open('/doc-mgt/categories')">
+        <ion-icon slot="start" name="folder-outline" color="primary"></ion-icon>
+        <ion-label>Categories</ion-label>
+      </ion-item>
+      <ion-item button detail="true" lines="full" (click)="openList({ latest_only: 1, title: 'All Documents' })">
+        <ion-icon slot="start" name="documents-outline" color="primary"></ion-icon>
+        <ion-label>All Documents</ion-label>
+      </ion-item>
+      <ion-item button detail="true" lines="full" (click)="openList({ mine: 1, title: 'My Documents' })">
+        <ion-icon slot="start" name="person-outline" color="primary"></ion-icon>
+        <ion-label>My Documents</ion-label>
+      </ion-item>
+      <ion-item button detail="true" lines="full" (click)="openList({ mode: 'favourites', title: 'Favourites' })">
+        <ion-icon slot="start" name="star-outline" color="primary"></ion-icon>
+        <ion-label>Favourites</ion-label>
+      </ion-item>
+      <ion-item button detail="true" lines="none" (click)="open('/doc-mgt/tasks')">
+        <ion-icon slot="start" name="checkmark-done-outline" color="primary"></ion-icon>
+        <ion-label>Approvals</ion-label>
+        <ion-badge slot="end" color="danger" *ngIf="pendingTasks">{{pendingTasks}}</ion-badge>
+      </ion-item>
+    </div>
+
+    <div class="km-section-title">Recently Accessed</div>
+    <app-doc-skeleton *ngIf="!loaded" [count]="3"></app-doc-skeleton>
+    <div class="km-card km-row" *ngFor="let dat of recent" (click)="openDetail(dat)">
+      <div class="km-row__icon"><ion-icon name="document-text-outline"></ion-icon></div>
+      <div class="km-row__body">
+        <h3>{{dat.title}}</h3>
+        <p><ion-icon name="pricetag-outline"></ion-icon><span>{{dat.doc_number}} · v{{dat.version_label}}</span></p>
+        <p><ion-icon name="folder-outline"></ion-icon><span>{{dat.category_name}} · {{dat.plant_name}}</span></p>
+        <div class="km-row__chips">
+          <ion-chip [color]="dms.statusColor(dat.status)">{{dms.statusLabel(dat.status)}}</ion-chip>
+          <ion-chip color="danger" *ngIf="dat.expiry_state === 'expired'">Expired</ion-chip>
+          <ion-chip color="warning" *ngIf="dat.expiry_state === 'expiring'">Expiring</ion-chip>
+        </div>
+      </div>
+      <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
+    </div>
+    <div class="km-empty" *ngIf="loaded && !recent.length">
+      <ion-icon name="document-text-outline"></ion-icon>
+      No recent documents
+    </div>
+  </div>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button color="primary" (click)="open('/doc-mgt/upload')">
+      <ion-icon name="cloud-upload-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

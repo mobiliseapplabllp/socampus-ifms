@@ -204,13 +204,8 @@ export class AddKeyComponent implements OnInit {
       return;
     }  
 
-    const formData = new FormData();
-    for (var key in this.forms.value) {
-      formData.delete(key);
-      formData.append(key, this.forms.value[key]);
-    }
     this.common.presentLoading().then(preLoad => {
-      this.httpKeys.addKey(this.forms.value).subscribe({
+      this.httpKeys.addKey(this.buildPayload('Available')).subscribe({
         next:(data: any) => {          
           if (data?.status === true) {
             this.httpKeys.setHomePageStatus(true);
@@ -239,8 +234,7 @@ export class AddKeyComponent implements OnInit {
   }
 
   updateKey() {    
-    let updateVal = this.forms.value;
-    updateVal.status = this.req_data.status;    
+    const updateVal = this.buildPayload(this.req_data.status || 'Available');
     this.common.presentLoading().then(preLoad => {
       this.httpKeys.updateKeys(this.req_data.id, updateVal).subscribe({
         next:(data: any) => {          
@@ -262,6 +256,23 @@ export class AddKeyComponent implements OnInit {
       });
     })
     
+  }
+
+  // Backend body: snake_case, status = Available | Maintenance | Retired
+  buildPayload(status: string) {
+    const v = this.forms.value;
+    return {
+      key_name: v.keyName,
+      room_no: v.roomNumber,
+      site_id: v.siteId,
+      block_id: v.blockId,
+      building_id: v.buildingId,
+      floor_id: v.floorId,
+      location_id: v.locationId,
+      status: status,
+      require_auth: v.require_auth == 1,
+      remarks: v.remarks || ''
+    };
   }
 
   changeCheckBox(ev: any) {

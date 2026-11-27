@@ -1,0 +1,164 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="back()" *ngIf="step === 'options' || (step === 'rating' && categories.length > 1)">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+      <ion-back-button defaultHref="/list-master" *ngIf="step === 'location' || step === 'category' || (step === 'rating' && categories.length <= 1)"></ion-back-button>
+    </ion-buttons>
+    <ion-title [class.fb-head]="step !== 'location'">{{ step !== 'location' && category ? category.cat_desc : 'Feedback' }}</ion-title>
+    <ion-buttons slot="end" *ngIf="step !== 'location'">
+      <ion-button (click)="changeLocation()">
+        <ion-icon slot="icon-only" name="location-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km" [class.fb-kiosk]="step !== 'location'" (click)="touch()">
+  <div class="km-page">
+
+    <!-- ================= LOCATION ================= -->
+    <ng-container *ngIf="step === 'location'">
+      <div class="fb-loading" *ngIf="loading && token && !form">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Opening feedback form...</p>
+      </div>
+
+      <ng-container *ngIf="!(loading && token && !form)">
+        <div class="km-section-title">Select location</div>
+        <div class="km-card fb-levels">
+          <ion-item button detail="false" [lines]="last ? 'none' : 'full'" *ngFor="let level of levels; let last = last" (click)="pick(level)">
+            <ion-label>
+              <p>{{labels[level]}}</p>
+              <h3 [class.fb-placeholder]="!loc[level]">{{ loc[level] || 'Select ' + labels[level] }}</h3>
+            </ion-label>
+            <ion-icon slot="end" name="chevron-down-outline" color="medium"></ion-icon>
+          </ion-item>
+        </div>
+        <ion-button expand="block" class="fb-btn" (click)="start()" [disabled]="loading || !loc.location_id">
+          <ion-spinner name="crescent" *ngIf="loading"></ion-spinner>
+          <span *ngIf="!loading">Start feedback</span>
+        </ion-button>
+      </ng-container>
+    </ng-container>
+
+    <!-- location line -->
+    <div class="fb-where" *ngIf="step !== 'location' && form">
+      <img *ngIf="form.location?.logo" [src]="form.location.logo" alt="">
+      <span class="fb-where__icon" *ngIf="!form.location?.logo"><ion-icon name="location-outline"></ion-icon></span>
+      <div class="fb-where__text">
+        <b>{{placeName}}</b>
+        <span>{{placeSub}}</span>
+      </div>
+    </div>
+
+    <!-- ================= CATEGORY ================= -->
+    <ng-container *ngIf="step === 'category'">
+      <div class="fb-panel">
+      <h2 class="fb-title">What would you like to rate?</h2>
+      <p class="fb-sub">Choose one to continue</p>
+      <div class="fb-tiles">
+        <button type="button" class="fb-tile" *ngFor="let cat of categories" (click)="pickCategory(cat)">
+          <span class="fb-tile__box">
+            <img *ngIf="isImage(cat.icon_url)" [src]="cat.icon_url" alt="">
+            <ion-icon *ngIf="!isImage(cat.icon_url)" [name]="iconName(cat.icon_url, 'feedback')"></ion-icon>
+          </span>
+          <span>{{cat.cat_desc}}</span>
+        </button>
+      </div>
+      </div>
+    </ng-container>
+
+    <!-- ================= SMILEYS ================= -->
+    <ng-container *ngIf="step === 'rating'">
+      <div class="fb-panel fb-panel--rate">
+      <h2 class="fb-title">How was your experience?</h2>
+      <p class="fb-sub">Tap a face to rate</p>
+      <div class="fb-faces">
+        <button type="button" class="fb-face" *ngFor="let r of form?.ratings" (click)="pickRating(r)" [style.color]="face(r.value).color">
+          <span class="fb-face__box">
+            <svg class="fb-smiley" viewBox="0 0 64 64" aria-hidden="true">
+              <circle cx="32" cy="32" r="26"></circle>
+              <circle class="fb-smiley__eye" cx="23" cy="26" r="2.6"></circle>
+              <circle class="fb-smiley__eye" cx="41" cy="26" r="2.6"></circle>
+              <path [attr.d]="mouth(r.value)"></path>
+            </svg>
+          </span>
+          <span class="fb-face__label">{{r.label}}</span>
+        </button>
+      </div>
+      </div>
+    </ng-container>
+
+    <!-- ================= OPTIONS ================= -->
+    <ng-container *ngIf="step === 'options'">
+      <div class="fb-picked" [style.color]="face(rating.value).color" (click)="back()">
+        <svg class="fb-smiley" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="26"></circle>
+          <circle class="fb-smiley__eye" cx="23" cy="26" r="2.6"></circle>
+          <circle class="fb-smiley__eye" cx="41" cy="26" r="2.6"></circle>
+          <path [attr.d]="mouth(rating.value)"></path>
+        </svg>
+        <b>{{rating.label}}</b>
+        <small>Change</small>
+      </div>
+
+      <div class="fb-panel">
+      <h2 class="fb-title">{{prompt}}</h2>
+      <p class="fb-sub">Tap to select · you can choose more than one</p>
+      <div class="fb-tiles">
+        <button type="button" class="fb-tile" [class.fb-tile--on]="isSelected(opt)" *ngFor="let opt of options" (click)="toggle(opt)">
+          <span class="fb-tile__box">
+            <span class="fb-tile__ring"><ion-icon name="checkmark" *ngIf="isSelected(opt)"></ion-icon></span>
+            <img *ngIf="isImage(opt.icon_url)" [src]="opt.icon_url" alt="">
+            <ion-icon *ngIf="!isImage(opt.icon_url)" [name]="iconName(opt.icon_url, 'other')"></ion-icon>
+          </span>
+          <span>{{opt.q_desc}}</span>
+        </button>
+        <button type="button" class="fb-tile" [class.fb-tile--on]="otherOpen" (click)="otherOpen = !otherOpen">
+          <span class="fb-tile__box">
+            <span class="fb-tile__ring"><ion-icon name="checkmark" *ngIf="otherOpen"></ion-icon></span>
+            <ion-icon [name]="iconName('preset:other', 'other')"></ion-icon>
+          </span>
+          <span>Other</span>
+        </button>
+      </div>
+      </div>
+
+      <div class="km-card fb-box" *ngIf="otherOpen">
+        <ion-textarea [(ngModel)]="otherText" rows="3" [autoGrow]="true" maxlength="500" placeholder="Tell us more" (ionInput)="touch()"></ion-textarea>
+      </div>
+
+      <div class="km-card fb-contact">
+        <ion-item button detail="false" lines="none" (click)="contactOpen = !contactOpen">
+          <ion-icon slot="start" name="person-circle-outline" color="primary"></ion-icon>
+          <ion-label>Add contact details (optional)</ion-label>
+          <ion-icon slot="end" [name]="contactOpen ? 'chevron-up-outline' : 'chevron-down-outline'" color="medium"></ion-icon>
+        </ion-item>
+        <div class="fb-contact__fields" *ngIf="contactOpen">
+          <ion-input [(ngModel)]="contact.name" maxlength="150" placeholder="Name" (ionInput)="touch()"></ion-input>
+          <ion-input [(ngModel)]="contact.phone_no" type="tel" maxlength="20" placeholder="Phone number" (ionInput)="touch()"></ion-input>
+          <ion-input [(ngModel)]="contact.email" type="email" maxlength="150" placeholder="Email" (ionInput)="touch()"></ion-input>
+          <ion-input [(ngModel)]="contact.emp_code" maxlength="50" placeholder="Employee code" (ionInput)="touch()"></ion-input>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ================= THANK YOU ================= -->
+    <div class="fb-thanks" *ngIf="step === 'thanks'">
+      <div class="fb-thanks__icon"><ion-icon name="checkmark-circle"></ion-icon></div>
+      <h2>{{thanksMsg}}</h2>
+      <p>Your response has been recorded.</p>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer class="km" *ngIf="step === 'options'">
+  <ion-toolbar class="ion-padding-start ion-padding-end">
+    <ion-button expand="block" color="primary" (click)="submit()" [disabled]="submitting">
+      <ion-spinner name="crescent" *ngIf="submitting"></ion-spinner>
+      <span *ngIf="!submitting">Submit feedback</span>
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

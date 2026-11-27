@@ -1,0 +1,22 @@
+.doc-cat {
+  padding: 4px 0;
+  overflow: hidden;
+
+  ion-item {
+    --background: transparent;
+    font-size: 14px;
+  }
+
+  .km-row__icon {
+    width: 40px;
+    flex: 0 0 40px;
+    height: 40px;
+    margin-right: 12px;
+  }
+
+  .doc-cat__child {
+    --padding-start: 28px;
+    --min-height: 42px;
+    font-size: 13px;
+  }
+}

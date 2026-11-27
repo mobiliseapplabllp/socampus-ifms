@@ -37,7 +37,7 @@ export class KeyHistoryComponent implements OnInit {
     this.httpCommon.presentLoading().then(preLoad => {
       this.httpKey.assignKeyHis(this.keyId).subscribe({
         next: (data: any) => {          
-          this.recent = data.history;
+          this.recent = data?.data || [];
         },
         error: (error) => {          
           this.httpCommon.dismissloading();

@@ -58,20 +58,19 @@ export class MarkReturnComponent implements OnInit {
       this.httpCommon.presentToast('Please Select Return Date & time', 'warning');
       return;
     }      
+    // Backend me return condition ka alag field nahi hai, isliye remarks me jod diya
     const payload = {
-      assignmentId: this.req_data.assignment_id || this.req_data.id,
-      returnedAt: this.forms1.value.return_date,
-      returnCondition: this.forms1.value.return_condition,
-      notes: this.forms1.value.remark
+      returned_at: moment(this.forms1.value.return_date).toISOString(),
+      remarks: [this.forms1.value.return_condition, this.forms1.value.remark].filter(v => !!v).join(' - ')
     };
 
     this.httpCommon.presentLoading('Submitting...');
 
-    this.httpKey.markReturnKey(this.req_data.key_id, payload).subscribe({
+    this.httpKey.markReturnKey(this.httpKey.asgnId(this.req_data), payload).subscribe({
       next: (data: any) => {
         if (data.status) {
           this.httpKey.setHomePageStatus(true);
-          this.httpCommon.presentToast('Request Submit Successfully', 'success');
+          this.httpCommon.presentToast(data.msg || 'Request Submit Successfully', 'success');
           this.navCtrl.pop();
         } else {
           this.httpCommon.presentToast(data.msg || 'Not Submitted', 'warning');

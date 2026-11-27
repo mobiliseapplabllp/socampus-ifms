@@ -1,17 +1,13 @@
-ion-card {
-  margin: 10px;
+.incident-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-  ion-card-content ion-col {
-    padding: 0;
+  a {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ion-color-primary);
   }
-}
-
-ion-item.error {
-  --border-color: var(--ion-color-danger);
-  --border-width: 0 0 2px 0;
-}
-
-ion-select {
-  width: 100%;
-  max-width: 100%;
 }

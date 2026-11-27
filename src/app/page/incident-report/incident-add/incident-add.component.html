@@ -1,0 +1,139 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/incident-report"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Report an Incident</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding km km-form">
+  <form [formGroup]="forms">
+    <ion-text>
+      <h4>Basic Details</h4>
+    </ion-text>
+
+    <section class="inputbox">
+      <ion-text><strong>Site</strong> <ion-text color="danger">*</ion-text></ion-text>
+      <ion-item lines="none" (click)="openSiteModal()" [ngClass]="{'error': isInvalid('pc_desc')}">
+        <ion-input type="text" formControlName="pc_desc" placeholder="Select site" readonly></ion-input>
+        <ion-icon name="chevron-down-outline" slot="end" size="small" color="medium"></ion-icon>
+      </ion-item>
+    </section>
+
+    <ion-row>
+      <ion-col size="6" class="ion-no-padding" style="padding-right:6px">
+        <section class="inputbox">
+          <ion-text><strong>Incident Date</strong> <ion-text color="danger">*</ion-text></ion-text>
+          <ion-item lines="none" id="incident-date" [ngClass]="{'error': isInvalid('incident_date')}">
+            <ion-input type="text" [value]="formatValue('incident_date', 'DD-MM-YYYY')" placeholder="Select date" readonly></ion-input>
+          </ion-item>
+          <ion-popover trigger="incident-date" mode="md">
+            <ng-template>
+              <ion-datetime presentation="date" size="cover" [max]="maxDate" formControlName="incident_date" [showDefaultButtons]="true"></ion-datetime>
+            </ng-template>
+          </ion-popover>
+        </section>
+      </ion-col>
+      <ion-col size="6" class="ion-no-padding" style="padding-left:6px">
+        <section class="inputbox">
+          <ion-text><strong>Incident Time</strong> <ion-text color="danger">*</ion-text></ion-text>
+          <ion-item lines="none" id="incident-time" [ngClass]="{'error': isInvalid('incident_time')}">
+            <ion-input type="text" [value]="formatValue('incident_time', 'hh:mm A')" placeholder="Select time" readonly></ion-input>
+          </ion-item>
+          <ion-popover trigger="incident-time" mode="md">
+            <ng-template>
+              <ion-datetime presentation="time" size="cover" formControlName="incident_time" [showDefaultButtons]="true"></ion-datetime>
+            </ng-template>
+          </ion-popover>
+        </section>
+      </ion-col>
+    </ion-row>
+
+    <section class="inputbox">
+      <ion-text><strong>Incident Type</strong> <ion-text color="danger">*</ion-text></ion-text>
+      <ion-item lines="none" [ngClass]="{'error': isInvalid('incident_type_id')}">
+        <ion-select interface="action-sheet" mode="ios" placeholder="Select type" formControlName="incident_type_id">
+          <ion-select-option *ngFor="let type of incidentTypes" [value]="type.value">{{type.label}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text><strong>Department where it happened</strong> <ion-text color="danger">*</ion-text></ion-text>
+      <ion-item lines="none" (click)="openDepartmentModal()" [ngClass]="{'error': isInvalid('department_desc')}">
+        <ion-input type="text" formControlName="department_desc" placeholder="Select department" readonly></ion-input>
+        <ion-icon name="chevron-down-outline" slot="end" size="small" color="medium"></ion-icon>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text><strong>Reported by (name)</strong> <ion-text color="danger">*</ion-text></ion-text>
+      <ion-item lines="none" [ngClass]="{'error': isInvalid('reported_by')}">
+        <ion-input type="text" formControlName="reported_by" placeholder="Name"></ion-input>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text><strong>Severity</strong> <ion-text color="danger">*</ion-text></ion-text>
+      <ion-item lines="none">
+        <ion-select interface="action-sheet" mode="ios" formControlName="severity">
+          <ion-select-option *ngFor="let sev of httpIncident.severityList" [value]="sev">{{sev}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </section>
+
+    <ion-text>
+      <h4>What Happened</h4>
+    </ion-text>
+
+    <section class="inputbox">
+      <ion-text><strong>Exact Location</strong></ion-text>
+      <ion-item lines="none">
+        <ion-input type="text" formControlName="location" placeholder="Building, floor, area"></ion-input>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text><strong>Description</strong> <ion-text color="danger">*</ion-text></ion-text>
+      <ion-item lines="none" [ngClass]="{'error': isInvalid('description')}">
+        <ion-textarea formControlName="description" rows="4" [autoGrow]="true" placeholder="What happened"></ion-textarea>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text><strong>Immediate Action Taken</strong></ion-text>
+      <ion-item lines="none">
+        <ion-textarea formControlName="immediate_action_taken" rows="4" [autoGrow]="true" placeholder="Action taken"></ion-textarea>
+      </ion-item>
+    </section>
+
+    <ion-text>
+      <h4>Attachment</h4>
+    </ion-text>
+    <ion-row>
+      <ion-col [size]="attachment ? 8 : 12" class="ion-no-padding">
+        <ion-button expand="block" [fill]="attachment ? 'solid' : 'outline'" [color]="attachment ? 'success' : 'primary'" (click)="attachPhoto()">
+          <ion-icon slot="start" [name]="attachment ? 'checkmark-circle-outline' : 'camera-outline'"></ion-icon>
+          {{ attachment ? 'Photo attached' : 'Attach photo (optional)' }}
+        </ion-button>
+      </ion-col>
+      <ion-col size="4" class="ion-no-padding" style="padding-left:8px" *ngIf="attachment">
+        <ion-button expand="block" fill="outline" color="danger" (click)="removePhoto()">Remove</ion-button>
+      </ion-col>
+    </ion-row>
+  </form>
+</ion-content>
+
+<ion-footer class="km">
+  <ion-toolbar class="ion-padding-start ion-padding-end">
+    <ion-row>
+      <ion-col size="4">
+        <ion-button expand="block" fill="outline" color="medium" (click)="cancel()">Cancel</ion-button>
+      </ion-col>
+      <ion-col size="8">
+        <ion-button expand="block" color="primary" (click)="submit()">Submit and create report</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-footer>

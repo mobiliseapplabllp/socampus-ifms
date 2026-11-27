@@ -25,7 +25,7 @@ export class AvailKeyComponent  implements OnInit {
     this.common.presentLoading().then(preLoad => {
       this.httpKey.availKey().subscribe({
         next:(data: any) => {
-          this.availKey = data?.keys;
+          this.availKey = (data?.data || []).filter((k: any) => String(k.status || '').toLowerCase() === 'available');
         },
         error:() => {
           this.common.dismissloading();

@@ -4,34 +4,26 @@
       <ion-icon name="add-outline"></ion-icon>
     </ion-fab-button>
     <ion-fab-list side="top" class="center-fab-list">
-      <ion-button size="small" expand="block" shape="round" (click)="openRoute('/key-mgt/assign-key')">Assign Key</ion-button>
-      <ion-button size="small" expand="block" shape="round" (click)="openRoute('/key-mgt/add-key')">Add Key</ion-button>
+      <ion-button size="small" expand="block" shape="round" (click)="openRoute('/key-mgt/assign-key')">
+        <ion-icon slot="start" name="person-add-outline"></ion-icon>Assign Key
+      </ion-button>
+      <ion-button size="small" expand="block" shape="round" (click)="openRoute('/key-mgt/add-key')">
+        <ion-icon slot="start" name="key-outline"></ion-icon>Add Key
+      </ion-button>
     </ion-fab-list>
   </ion-fab>
 
   <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="home" color="danger" >
-      <ion-icon name="nuclear-outline" color="light"></ion-icon>
-      <ion-label>
-        <ion-text color="light">Home</ion-text>
-      </ion-label>
-    </ion-tab-button>
-    <ion-tab-button tab="home" color="danger" class="comments">      
+    <ion-tab-button tab="home">
+      <ion-icon name="grid-outline"></ion-icon>
+      <ion-label>Home</ion-label>
     </ion-tab-button>
 
-    <svg height="50" viewBox="0 0 100 50" width="100" xmlns="http://www.w3.org/2000/svg">
-      <path d="M100 0v50H0V0c.543 27.153 22.72 49 50 49S99.457 27.153 99.99 0h.01z" fill="red" fill-rule="evenodd">
-      </path>
-    </svg>
+    <div class="tab-spacer"></div>
 
-    <ion-tab-button tab="keys" color="prime" class="notifs">      
-    </ion-tab-button>
-
-    <ion-tab-button tab="keys" color="prime">
-      <ion-icon name="business-outline" color="light"></ion-icon>
-      <ion-label>
-        <ion-text color="light">Keys</ion-text>
-      </ion-label>
+    <ion-tab-button tab="keys">
+      <ion-icon name="key-outline"></ion-icon>
+      <ion-label>Keys</ion-label>
     </ion-tab-button>
   </ion-tab-bar>
 </ion-tabs>

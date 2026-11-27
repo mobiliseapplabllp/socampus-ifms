@@ -1,0 +1,43 @@
+.doc-btn {
+  --border-radius: 12px;
+  min-height: 44px;
+  margin: 10px 0 12px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.km-card .doc-btn {
+  margin-bottom: 0;
+}
+
+.doc-file-name {
+  word-break: break-all;
+}
+
+.doc-author {
+  font-size: 14px;
+}
+
+.doc-comment {
+  font-weight: 500;
+  white-space: pre-line;
+}
+
+.doc-comment-box {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+
+  ion-textarea {
+    --background: #f4f6fb;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    border-radius: 12px;
+    margin: 0;
+  }
+
+  ion-button {
+    min-height: 44px;
+    margin: 0;
+  }
+}
