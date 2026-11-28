@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { KeysService } from 'src/app/provider/keys/keys.service';
 import { environment } from 'src/environments/environment';
 import { CommonService } from 'src/app/provider/common/common.service';
-import { NavigationEnd, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { RecoverLostComponent } from '../recover-lost/recover-lost.component';
 import { ModalController } from '@ionic/angular';
 import { ImageViewComponent } from 'src/app/shared/image-view/image-view.component';
-import { Subscription } from 'rxjs';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-key-mgt-keys',
@@ -30,7 +30,6 @@ export class KeyMgtKeysComponent implements OnInit {
   page = 1;
   canLoadData = false;
   searchVal!: string;
-  routerSub!: Subscription;
   constructor(
     private httpKey: KeysService,
     private httpCommon: CommonService,
@@ -39,50 +38,47 @@ export class KeyMgtKeysComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.routerSub = this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd && event.url.includes('/tabs/keys')) {        
-        let status = this.httpKey.getHomePageStatus();                
-        if (status) {
-          this.canLoadData = false;            
-          this.loadPage();         
-          this.httpKey.setHomePageStatus(false); 
-        }
-      }
-    });
   }
 
-  ngOnDestroy() {
-    if (this.routerSub) {
-      this.routerSub.unsubscribe();
-    }
-  }
-
-  loadPage() {
-    const value = this.status;
-    this.page = 1;    
-    if (value === 'assigned_key') {      
-      this.assignKeyData = [];
-      this.getAssignedKeys('');
-      return
-    }
-    if (value === 'add_key') {
-      this.addKeyData = [];
-      this.getAddKeys('');
-      return;
-    }    
-  }
-
-  ionViewDidEnter() {    
-    
-  }
-
-  handleRefresh(event: any) {
-    event.target.complete();     
+  // Tab par har baar aane par (pehli baar, tab switch, ya assign / return screen se wapas)
+  // dono list load hoti hain, isliye segment badalne par dobara API call ki zaroorat nahi.
+  ionViewWillEnter() {
     this.loadPage();
   }
 
-  changeSegment(ev: any) {    
-    this.loadPage()
+  loadPage() {
+    this.page = 1;
+    this.canLoadData = false;
+    this.httpCommon.presentLoading().then(preLoad => {
+      forkJoin([this.httpKey.getAssignKeys(), this.httpKey.getAddKeys()]).subscribe({
+        next: ([asgn, keys]: any[]) => {
+          this.assignKeyDataCopy = asgn?.status ? (asgn.data || []) : [];
+          this.addKeyDataCopy = keys?.status ? (keys.data || []) : [];
+          this.totalAss = this.assignKeyDataCopy.length;
+          this.totalKey = this.addKeyDataCopy.length;
+          this.applySearch();
+        },
+        error: () => {
+          this.httpCommon.dismissloading();
+          this.httpCommon.presentToast(environment.errMsg, 'danger');
+        },
+        complete: () => {
+          this.httpCommon.dismissloading();
+        }
+      });
+    });
+  }
+
+  handleRefresh(event: any) {
+    event.target.complete();
+    this.loadPage();
+  }
+
+  // ionChange ngModel update hone se pehle fire ho sakta hai, isliye value event se lete hain
+  changeSegment(ev: any) {
+    if (ev?.detail?.value) {
+      this.status = ev.detail.value;
+    }
   }
 
   openDetails(item: any) {       
@@ -148,14 +144,15 @@ export class KeyMgtKeysComponent implements OnInit {
 
   // Backend me search / pagination nahi hai, isliye list par local filter lagta hai
   search(ev: any) {
-    const val = String(ev.target.value || '').toLowerCase();
-    this.searchVal = val;
+    this.searchVal = String(ev.target.value || '');
+    this.applySearch();
+  }
+
+  applySearch() {
+    const val = String(this.searchVal || '').toLowerCase();
     const match = (row: any) => !val || JSON.stringify(row).toLowerCase().includes(val);
-    if (this.status === 'assigned_key') {
-      this.assignKeyData = this.assignKeyDataCopy.filter(match);
-    } else {
-      this.addKeyData = this.addKeyDataCopy.filter(match);
-    }
+    this.assignKeyData = this.assignKeyDataCopy.filter(match);
+    this.addKeyData = this.addKeyDataCopy.filter(match);
   }
 
   getAssignedKeys(val: string, ev?: any) {    
@@ -222,7 +219,7 @@ export class KeyMgtKeysComponent implements OnInit {
   openLocationHis(dat: any) {    
     this.locationHisArr = [];
     this.isModalOpenLocationHistory = true;    
-    this.getLocationHistory(dat.id);
+    this.getLocationHistory(dat.key_id);
   }
 
   getLocationHistory(keyId: number) {

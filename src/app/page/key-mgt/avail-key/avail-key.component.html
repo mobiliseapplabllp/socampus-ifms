@@ -15,7 +15,7 @@
   <ion-virtual-scroll [items]="availKey" approxItemHeight="320px">
     <ion-item class="km-pick" button detail="false" *virtualItem="let item; let itemBounds = bounds;" (click)="closeModal(item, 'true')">
       <div class="km-row__icon" slot="start"><ion-icon name="key-outline"></ion-icon></div>
-      <ion-label>{{item.key_name}} ({{item.code}})</ion-label>
+      <ion-label>{{item.key_name}} ({{item.key_no}})</ion-label>
     </ion-item>
   </ion-virtual-scroll>
 </ion-content>

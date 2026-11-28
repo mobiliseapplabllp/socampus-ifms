@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { BarcodeScanner, SupportedFormat } from '@capacitor-community/barcode-scanner';
 import { ModalController, NavController, Platform } from '@ionic/angular';
 import { CommonService } from 'src/app/provider/common/common.service';
+import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-barcode',
   templateUrl: './barcode.component.html',
@@ -13,14 +14,25 @@ export class BarcodeComponent  implements OnInit {
   constructor(
     private navCtrl: NavController,
     private platform: Platform,
-    private common: CommonService
+    private common: CommonService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() { }
 
+  // `/barcode?formats=all` -> parcel ke barcode bhi (Code 128, EAN, Data Matrix, PDF417 ...).
+  // Default sirf QR, jaisa pehle tha.
+  private get allFormats(): boolean {
+    return this.route.snapshot.queryParamMap.get('formats') === 'all';
+  }
+
   ionViewDidEnter() {
     if (this.platform.is('capacitor')) {
       this.startScan();
+    } else if (this.allFormats) {
+      // browser (development) me camera scan nahi hota - code haath se daal do
+      this.common.setBarcode((prompt('Enter the code (browser test)') || '').trim());
+      this.navCtrl.pop();
     } else {
       let random = 'https://socampusdev.mobilisepro.com/#/complaint-qr-code/eyJpdiI6IkluWTJscHlKVnFaeTBOVXpzVHQ0cUE9PSIsInZhbHVlIjoidWFuRlcxTXF3aGhsMzNZbDJueWt3Zz09IiwibWFjIjoiZjU4MTQ1YTg0ZTdmNzljNDliMmIxNTlhZTY1NTY0ZWEzOTQ5ODQ5ZTFlMmM1YmRmMjE1NzczOTEzNTIwOThmNyIsInRhZyI6IiJ9';
       this.barcodeNo = random;
@@ -47,7 +59,8 @@ export class BarcodeComponent  implements OnInit {
         BarcodeScanner.prepare();
         BarcodeScanner.hideBackground();
         document.querySelector('body')?.classList.add('scanner-active');
-        const result = await BarcodeScanner.startScan({ targetedFormats: [SupportedFormat.QR_CODE] });
+        const result = await BarcodeScanner.startScan(
+          this.allFormats ? {} : { targetedFormats: [SupportedFormat.QR_CODE] });
         if (result.hasContent) {
           this.barcodeNo = result.content
           this.common.setBarcode(this.barcodeNo);

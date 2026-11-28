@@ -1,0 +1,120 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/somart"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ placed ? 'Order Placed' : 'Cart' }}</ion-title>
+    <ion-buttons slot="end" *ngIf="!placed && sm.cart.length">
+      <ion-button (click)="empty()"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<!-- success -->
+<ion-content class="km sm" *ngIf="placed">
+  <div class="sm-center">
+    <ion-icon name="checkmark-circle" color="success"></ion-icon>
+    <p>Your order has been placed</p>
+    <h2 style="margin:0;color:var(--km-ink)">{{ placed.order_no }}</h2>
+    <p>It is waiting for approval.</p>
+    <div class="sm-buttons">
+      <ion-button fill="outline" (click)="back()">Continue shopping</ion-button>
+      <ion-button (click)="viewOrder()">View order</ion-button>
+    </div>
+  </div>
+</ion-content>
+
+<ion-content class="km sm" *ngIf="!placed">
+  <div class="km-page">
+    <div class="km-empty" *ngIf="!sm.cart.length">
+      <ion-icon name="cart-outline"></ion-icon>
+      Your cart is empty
+    </div>
+
+    <ng-container *ngIf="sm.cart.length">
+      <div class="km-section-title">Items ({{ sm.cart.length }})</div>
+      <div class="km-card" *ngFor="let l of sm.cart">
+        <div class="sm-product">
+          <div class="sm-product__body">
+            <h3>{{ l.name }}</h3>
+            <p>{{ l.sku }} · {{ l.uom }}</p>
+            <div class="sm-product__foot">
+              <span class="sm-price" *ngIf="l.price > 0">₹{{ l.qty * l.price | number: '1.0-2' }}</span>
+              <span class="sm-price sm-price--ask" *ngIf="!(l.price > 0)">Price on request</span>
+              <div class="sm-stepper">
+                <button type="button" (click)="minus(l)">−</button>
+                <input type="number" inputmode="decimal" [value]="l.qty" (change)="setQty(l, $any($event.target).value)">
+                <button type="button" (click)="plus(l)">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="km-form">
+          <section class="inputbox" style="margin:8px 0 0">
+            <ion-item lines="none">
+              <ion-input type="text" maxlength="255" [(ngModel)]="l.remark" (ionBlur)="remarkChanged()" placeholder="Remark for this item (optional)"></ion-input>
+            </ion-item>
+          </section>
+        </div>
+      </div>
+
+      <div class="km-section-title">Deliver to</div>
+      <div class="km-card">
+        <h3 class="km-activity__title"><ion-icon name="business-outline"></ion-icon>{{ sm.site?.name || 'No site selected' }}</h3>
+        <div class="sm-center" style="padding:12px" *ngIf="addressLoading"><ion-spinner name="crescent" color="primary"></ion-spinner></div>
+        <ng-container *ngIf="address">
+          <div class="km-meta" *ngIf="address.customer"><ion-icon name="briefcase-outline"></ion-icon><span>Client</span><b>{{ address.customer }}</b></div>
+          <div class="km-meta"><ion-icon name="location-outline"></ion-icon><span>{{ addressText }}</span></div>
+          <div class="km-meta" *ngIf="address.cost_centre_code"><ion-icon name="wallet-outline"></ion-icon><span>Cost centre</span><b>{{ address.cost_centre_code }} {{ address.cost_centre }}</b></div>
+        </ng-container>
+      </div>
+
+      <div class="km-section-title">Order details</div>
+      <div class="km-form">
+        <form>
+          <ion-row>
+            <ion-col size="6">
+              <section class="inputbox">
+                <ion-text color="primary"><strong>Order Type</strong></ion-text>
+                <ion-item lines="none">
+                  <ion-select interface="action-sheet" mode="ios" name="order_type" [(ngModel)]="f.order_type">
+                    <ion-select-option *ngFor="let t of orderTypes" [value]="t">{{ t }}</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </section>
+            </ion-col>
+            <ion-col size="6">
+              <section class="inputbox">
+                <ion-text color="primary"><strong>Required By</strong></ion-text>
+                <ion-item lines="none"><ion-input type="date" name="required_by" [min]="today" [(ngModel)]="f.required_by"></ion-input></ion-item>
+              </section>
+            </ion-col>
+          </ion-row>
+          <section class="inputbox">
+            <ion-text color="primary"><strong>PO Number</strong></ion-text>
+            <ion-item lines="none"><ion-input type="text" name="po_no" [(ngModel)]="f.po_no" placeholder="Optional"></ion-input></ion-item>
+          </section>
+          <section class="inputbox">
+            <ion-text color="primary"><strong>Remarks</strong></ion-text>
+            <ion-item lines="none"><ion-textarea name="remarks" [(ngModel)]="f.remarks" autoGrow="true" rows="2" placeholder="Optional"></ion-textarea></ion-item>
+          </section>
+        </form>
+      </div>
+
+      <div class="sm-note">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <span>Every order goes to your site approver before it is dispatched.</span>
+      </div>
+      <div style="height:80px"></div>
+    </ng-container>
+  </div>
+</ion-content>
+
+<ion-footer class="km" *ngIf="!placed && sm.cart.length">
+  <ion-toolbar class="ion-padding-start ion-padding-end">
+    <div class="sm sm-total" style="padding:0 4px 6px">
+      <span>Order value</span><span>₹{{ sm.cartTotal | number: '1.0-2' }}</span>
+    </div>
+    <ion-button expand="block" mode="md" (click)="place()">Place order</ion-button>
+  </ion-toolbar>
+</ion-footer>

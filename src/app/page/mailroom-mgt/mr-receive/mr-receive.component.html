@@ -1,0 +1,171 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/mailroom-mgt/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Receive Package</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<!-- success -->
+<ion-content class="km mr" *ngIf="done">
+  <div class="km-page">
+    <div class="mr-center" style="padding-bottom:16px">
+      <ion-icon name="checkmark-circle" color="success"></ion-icon>
+      <p>{{ doneMessage }}</p>
+    </div>
+    <div class="km-card">
+      <app-mr-code [value]="done.qrCode" [big]="true" label="Write or print this code on the package"></app-mr-code>
+    </div>
+    <div class="km-card">
+      <div class="km-meta"><ion-icon name="barcode-outline"></ion-icon><span>Tracking</span><b>{{ done.trackingNumber }}</b></div>
+      <div class="km-meta"><ion-icon name="flag-outline"></ion-icon><span>Status</span><b>{{ done.status }}</b></div>
+      <div class="km-meta"><ion-icon name="file-tray-stacked-outline"></ion-icon><span>Storage</span><b>{{ done.storageLocation || 'Not assigned' }}</b></div>
+    </div>
+  </div>
+</ion-content>
+<ion-footer class="km" *ngIf="done">
+  <ion-toolbar class="ion-padding-start ion-padding-end">
+    <ion-row>
+      <ion-col size="6"><ion-button expand="block" fill="outline" (click)="view()">View package</ion-button></ion-col>
+      <ion-col size="6"><ion-button expand="block" (click)="reset()">Receive next</ion-button></ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-footer>
+
+<!-- form -->
+<ion-content class="ion-padding km km-form mr" *ngIf="!done">
+  <form>
+    <ion-text><h4>Package</h4></ion-text>
+
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Tracking Number</strong> <ion-text color="danger">*</ion-text></ion-text>
+      <ion-item lines="none" [ngClass]="{'error': submitted && !f.trackingNumber}">
+        <ion-input type="text" name="trackingNumber" [(ngModel)]="f.trackingNumber" (ionBlur)="onTracking()"
+          placeholder="Scan or type"></ion-input>
+        <ion-buttons slot="end" *ngIf="scanEnabled">
+          <ion-button fill="outline" shape="round" (click)="scan()">
+            <ion-icon slot="start" name="scan-outline"></ion-icon>Scan
+          </ion-button>
+        </ion-buttons>
+      </ion-item>
+    </section>
+
+    <div class="mr-warning" *ngFor="let d of duplicates">
+      <ion-icon name="warning-outline"></ion-icon>
+      <span>This tracking number was already received on {{ d.receivedTime | date: 'dd MMM yyyy' }} for
+        {{ d.recipientName }} – {{ d.status }}. You can still continue.</span>
+    </div>
+
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Carrier</strong></ion-text>
+      <ion-item lines="none">
+        <ion-select interface="action-sheet" mode="ios" placeholder="Unknown" name="carrierId"
+          [(ngModel)]="f.carrierId" (ionChange)="onCarrierPick()">
+          <ion-select-option value="">Unknown</ion-select-option>
+          <ion-select-option *ngFor="let c of mr.carriers" [value]="c.id">{{ c.name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </section>
+
+    <section class="inputbox">
+      <ion-text color="primary"><strong>Recipient</strong> <ion-text color="danger">*</ion-text></ion-text>
+      <ion-item lines="none" (click)="pickRecipient()" [ngClass]="{'error': submitted && !recipient}">
+        <ion-input type="text" name="recipientName" [ngModel]="recipient?.name" placeholder="Search recipient" readonly></ion-input>
+        <ion-icon slot="end" name="search-outline" color="medium"></ion-icon>
+      </ion-item>
+      <ion-text color="medium" *ngIf="recipient">
+        {{ recipient.department }} <span *ngIf="recipient.deskLocation">· {{ recipient.building }} {{ recipient.floor }} {{ recipient.deskLocation }}</span>
+      </ion-text>
+    </section>
+
+    <section class="inputbox" *ngIf="mr.packageTypes.length">
+      <ion-text color="primary"><strong>Package Type</strong></ion-text>
+      <ion-item lines="none">
+        <ion-select interface="action-sheet" mode="ios" name="packageType" [(ngModel)]="f.packageType" (ionChange)="onTypeChange()">
+          <ion-select-option *ngFor="let t of mr.packageTypes" [value]="t.name">{{ t.name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </section>
+
+    <ng-container *ngIf="photoEnabled">
+      <ion-text><h4>Photos <ion-text color="danger" *ngIf="photoRequired">*</ion-text></h4></ion-text>
+      <div class="mr-photos" *ngIf="f.photos.length">
+        <div *ngFor="let ph of f.photos; let i = index">
+          <img [src]="ph" (click)="ui.viewImage(ph)" alt="Package photo">
+          <ion-icon name="close-circle" (click)="removePhoto(i)"></ion-icon>
+        </div>
+      </div>
+      <ion-row>
+        <ion-col size="6">
+          <ion-button expand="block" fill="outline" shape="round" [disabled]="!canAddPhoto" (click)="addPhoto()">
+            <ion-icon slot="start" name="camera-outline"></ion-icon>Package photo
+          </ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button expand="block" shape="round" [fill]="f.labelPhoto ? 'solid' : 'outline'"
+            [color]="f.labelPhoto ? 'success' : 'primary'" (click)="addLabelPhoto()">
+            <ion-icon slot="start" name="pricetag-outline"></ion-icon>Label photo
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ng-container>
+
+    <ng-container *ngIf="canPickStorage">
+      <ion-text><h4>Storage</h4></ion-text>
+      <section class="inputbox">
+        <ion-item lines="none">
+          <ion-input type="text" name="storage" [ngModel]="storage?.code" (click)="pickStorage()" readonly
+            [placeholder]="autoStorage ? 'Auto-assign' : 'Not assigned'"></ion-input>
+          <ion-buttons slot="end" *ngIf="storage">
+            <ion-button fill="outline" shape="round" color="danger" (click)="storage = null">Clear</ion-button>
+          </ion-buttons>
+        </ion-item>
+      </section>
+    </ng-container>
+
+    <ion-text><h4>Handling</h4></ion-text>
+    <div class="mr-toggles">
+      <ion-item lines="none"><ion-label>Fragile</ion-label><ion-toggle slot="end" name="fragile" [(ngModel)]="f.fragile"></ion-toggle></ion-item>
+      <ion-item lines="none"><ion-label>Perishable</ion-label><ion-toggle slot="end" name="perishable" [(ngModel)]="f.perishable"></ion-toggle></ion-item>
+      <ion-item lines="none"><ion-label>Needs refrigeration</ion-label><ion-toggle slot="end" name="refrigeration" [(ngModel)]="f.requiresRefrigeration"></ion-toggle></ion-item>
+      <ion-item lines="none"><ion-label>High value</ion-label><ion-toggle slot="end" name="highValue" [(ngModel)]="f.isHighValue"></ion-toggle></ion-item>
+      <ion-item lines="none"><ion-label>Signature required</ion-label><ion-toggle slot="end" name="signature" [(ngModel)]="f.requiresSignature"></ion-toggle></ion-item>
+    </div>
+
+    <ion-button expand="block" fill="clear" (click)="moreOpen = !moreOpen">
+      <ion-icon slot="start" [name]="moreOpen ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>More details
+    </ion-button>
+
+    <ng-container *ngIf="moreOpen">
+      <ion-row>
+        <ion-col size="6">
+          <section class="inputbox">
+            <ion-text color="primary"><strong>Sender Name</strong></ion-text>
+            <ion-item lines="none"><ion-input type="text" name="senderName" [(ngModel)]="f.senderName" placeholder="Sender"></ion-input></ion-item>
+          </section>
+        </ion-col>
+        <ion-col size="6">
+          <section class="inputbox">
+            <ion-text color="primary"><strong>Sender Company</strong></ion-text>
+            <ion-item lines="none"><ion-input type="text" name="senderCompany" [(ngModel)]="f.senderCompany" placeholder="Company"></ion-input></ion-item>
+          </section>
+        </ion-col>
+      </ion-row>
+      <section class="inputbox">
+        <ion-text color="primary"><strong>Weight (kg)</strong></ion-text>
+        <ion-item lines="none"><ion-input type="number" inputmode="decimal" name="weight" [(ngModel)]="f.weight" placeholder="0.00"></ion-input></ion-item>
+      </section>
+      <section class="inputbox">
+        <ion-text color="primary"><strong>Notes</strong></ion-text>
+        <ion-item lines="none"><ion-textarea name="notes" [(ngModel)]="f.notes" autoGrow="true" rows="3" placeholder="Notes"></ion-textarea></ion-item>
+      </section>
+    </ng-container>
+  </form>
+  <div style="height:100px"></div>
+</ion-content>
+<ion-footer class="km" *ngIf="!done">
+  <ion-toolbar class="ion-padding-start ion-padding-end">
+    <ion-button expand="block" mode="md" (click)="submit()">Receive package</ion-button>
+  </ion-toolbar>
+</ion-footer>

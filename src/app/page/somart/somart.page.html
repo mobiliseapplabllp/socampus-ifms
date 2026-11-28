@@ -1,0 +1,157 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/list-master"></ion-back-button>
+    </ion-buttons>
+    <ion-title>SoMart</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km sm">
+  <ion-refresher slot="fixed" (ionRefresh)="load(true, $event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="sm-center" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Loading catalogue...</p>
+  </div>
+  <div class="sm-center" *ngIf="errorMsg">
+    <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+    <p>{{ errorMsg }}</p>
+    <ion-button shape="round" (click)="load(true)">Try again</ion-button>
+  </div>
+
+  <ng-container *ngIf="!loading && !errorMsg">
+    <div class="km-page" style="padding-bottom:0">
+      <div class="sm-actions">
+        <button type="button" *ngIf="sm.can('MY_ORDERS')" (click)="open('/somart/orders')">
+          <ion-icon name="receipt-outline"></ion-icon><span>My Orders</span>
+        </button>
+        <button type="button" *ngIf="sm.can('APPROVALS') && approver" (click)="open('/somart/approvals')">
+          <ion-icon name="checkmark-done-circle-outline"></ion-icon><span>Approvals</span>
+          <ion-badge color="danger" *ngIf="pendingApprovals">{{ pendingApprovals }}</ion-badge>
+        </button>
+        <button type="button" *ngIf="sm.can('UPDATES')" (click)="open('/somart/updates')">
+          <ion-icon name="notifications-outline"></ion-icon><span>Updates</span>
+        </button>
+      </div>
+
+      <div class="km-form" *ngIf="sm.sites.length">
+        <section class="inputbox" style="margin-bottom:0">
+          <ion-text color="primary"><strong>Ordering for site</strong></ion-text>
+          <ion-item lines="none">
+            <ion-select interface="action-sheet" mode="ios" [value]="sm.pcId" (ionChange)="onSiteChange($event)">
+              <ion-select-option *ngFor="let s of sm.sites" [value]="s.pc_id">{{ s.name }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </section>
+      </div>
+    </div>
+
+    <ion-searchbar [(ngModel)]="search" (ionChange)="applyFilter()" debounce="300" mode="md"
+      placeholder="Search item, code, brand"></ion-searchbar>
+
+    <div class="sm-chips">
+      <ion-chip [color]="inStockOnly ? 'success' : 'medium'" [outline]="!inStockOnly" (click)="inStockOnly = !inStockOnly; applyFilter()">
+        In stock
+      </ion-chip>
+      <ion-chip *ngFor="let c of siteCategories" [color]="groupId === c.id ? 'primary' : 'medium'" [outline]="groupId !== c.id" (click)="setGroup(c.id)">
+        {{ c.name }}
+      </ion-chip>
+    </div>
+
+    <div class="km-page" style="padding-top:4px">
+      <div class="km-card sm-product sm-tap" *ngFor="let p of visible" (click)="detail = p">
+        <div class="sm-thumb">
+          <img *ngIf="sm.image(p.mtrl_id) as src; else noImg" [src]="src" [alt]="p.name">
+          <ng-template #noImg><ion-icon name="cube-outline"></ion-icon></ng-template>
+        </div>
+        <div class="sm-product__body">
+          <h3>{{ p.name }}</h3>
+          <p>{{ p.sku }}<span *ngIf="p.make"> · {{ p.make }}</span> · {{ p.uom }}</p>
+          <p class="sm-stock" [ngClass]="stockClass(p)">{{ stockText(p) }}</p>
+          <div class="sm-product__foot">
+            <span class="sm-price" *ngIf="p.price > 0">₹{{ p.price | number: '1.0-2' }}<s *ngIf="p.discount > 0">₹{{ p.mrp | number: '1.0-2' }}</s></span>
+            <span class="sm-price sm-price--ask" *ngIf="!(p.price > 0)">Price on request</span>
+            <ng-container *ngIf="sm.can('CART')">
+              <ion-button class="sm-add" size="small" fill="outline" *ngIf="!sm.qtyOf(p.mtrl_id)" (click)="add(p, $event)">Add</ion-button>
+              <div class="sm-stepper" *ngIf="sm.qtyOf(p.mtrl_id)" (click)="$event.stopPropagation()">
+                <button type="button" (click)="minus(p)">−</button>
+                <input type="number" inputmode="decimal" [value]="sm.qtyOf(p.mtrl_id)" (change)="typed(p, $event)">
+                <button type="button" (click)="add(p)">+</button>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div class="km-empty" *ngIf="!filtered.length">
+        <ion-icon name="search-outline"></ion-icon>
+        No items found
+      </div>
+
+      <ion-infinite-scroll threshold="200px" (ionInfinite)="more($event)" *ngIf="shown < filtered.length">
+        <ion-infinite-scroll-content loadingSpinner="bubbles"></ion-infinite-scroll-content>
+      </ion-infinite-scroll>
+      <div style="height:40px"></div>
+    </div>
+  </ng-container>
+</ion-content>
+
+<ion-footer class="sm-cartbar" *ngIf="sm.cartCount && sm.can('CART')">
+  <ion-toolbar>
+    <div class="sm-cartbar__row">
+      <span>{{ sm.cartCount }} item{{ sm.cartCount > 1 ? 's' : '' }} · ₹{{ sm.cartTotal | number: '1.0-2' }}</span>
+      <ion-button size="small" (click)="open('/somart/cart')">View cart</ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>
+
+<!-- product detail -->
+<ion-modal [isOpen]="!!detail" (didDismiss)="detail = null" [initialBreakpoint]="0.75" [breakpoints]="[0, 0.75, 1]">
+  <ng-template>
+    <ion-content class="km sm">
+      <div class="km-page" *ngIf="detail as p">
+        <div class="sm-thumb" style="width:100%;height:200px;flex:none;margin-bottom:12px">
+          <img *ngIf="sm.image(p.mtrl_id) as src; else noImg2" [src]="src" [alt]="p.name" style="object-fit:contain">
+          <ng-template #noImg2><ion-icon name="cube-outline"></ion-icon></ng-template>
+        </div>
+        <h3 class="km-activity__title">{{ p.name }}</h3>
+        <span class="sm-price" *ngIf="p.price > 0">₹{{ p.price | number: '1.0-2' }}
+          <s *ngIf="p.discount > 0">₹{{ p.mrp | number: '1.0-2' }}</s>
+          <small *ngIf="p.discount > 0">₹{{ p.discount | number: '1.0-2' }} off</small>
+        </span>
+        <span class="sm-price sm-price--ask" *ngIf="!(p.price > 0)">Price on request</span>
+
+        <div class="km-card sm-gap">
+          <div class="km-meta"><ion-icon name="barcode-outline"></ion-icon><span>Code</span><b>{{ p.sku }}</b></div>
+          <div class="km-meta" *ngIf="p.make"><ion-icon name="pricetag-outline"></ion-icon><span>Brand</span><b>{{ p.make }}</b></div>
+          <div class="km-meta"><ion-icon name="grid-outline"></ion-icon><span>Category</span><b>{{ p.group }}</b></div>
+          <div class="km-meta"><ion-icon name="scale-outline"></ion-icon><span>Unit</span><b>{{ p.uom }}</b></div>
+        </div>
+
+        <div class="km-section-title">Stock by site</div>
+        <div class="km-card">
+          <div class="km-meta" *ngFor="let s of p.sites">
+            <ion-icon name="business-outline"></ion-icon><span>{{ s.site }}</span><b>{{ s.qty }} {{ p.uom }}</b>
+          </div>
+          <div class="km-empty" *ngIf="!p.sites?.length">No stock information</div>
+        </div>
+        <p class="sm-stock sm-stock--out" *ngIf="sm.siteStock(p) <= 0">
+          Out of stock at your site. You can still order it; stock is checked at dispatch.
+        </p>
+
+        <div class="sm-product__foot" *ngIf="sm.can('CART')">
+          <span></span>
+          <ion-button class="sm-add" *ngIf="!sm.qtyOf(p.mtrl_id)" (click)="add(p)">Add to cart</ion-button>
+          <div class="sm-stepper" *ngIf="sm.qtyOf(p.mtrl_id)">
+            <button type="button" (click)="minus(p)">−</button>
+            <input type="number" inputmode="decimal" [value]="sm.qtyOf(p.mtrl_id)" (change)="typed(p, $event)">
+            <button type="button" (click)="add(p)">+</button>
+          </div>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

@@ -1,0 +1,84 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/somart/orders"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Receive {{ dcNo }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km sm">
+  <div class="km-page">
+    <div class="sm-center" *ngIf="loading"><ion-spinner name="crescent" color="primary"></ion-spinner></div>
+    <div class="sm-center" *ngIf="errorMsg">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <p>{{ errorMsg }}</p>
+    </div>
+
+    <ng-container *ngIf="dc">
+      <div class="km-card">
+        <div class="km-meta"><ion-icon name="receipt-outline"></ion-icon><span>Order</span><b>{{ orderNo }}</b></div>
+        <div class="km-meta"><ion-icon name="calendar-outline"></ion-icon><span>Dispatched</span><b>{{ sm.dt(dc.dispatched_at) | date: 'dd/MM/yyyy, h:mm a' }}</b></div>
+        <div class="km-meta" *ngIf="dc.vehicle_no"><ion-icon name="bus-outline"></ion-icon><span>Vehicle</span><b>{{ dc.vehicle_no }}</b></div>
+        <div class="km-meta" *ngIf="dc.driver_name"><ion-icon name="person-outline"></ion-icon><span>Driver</span><b>{{ dc.driver_name }} {{ dc.driver_phone }}</b></div>
+        <div class="km-meta" *ngIf="dc.remarks"><ion-icon name="chatbox-outline"></ion-icon><span>{{ dc.remarks }}</span></div>
+      </div>
+
+      <div class="km-section-title">Items</div>
+      <div class="km-card km-form" *ngFor="let l of lines; let i = index">
+        <h3 class="km-activity__title"><ion-icon name="cube-outline"></ion-icon>{{ l.name }}</h3>
+        <div class="km-meta"><ion-icon name="car-outline"></ion-icon><span>Dispatched</span><b>{{ l.qty }} {{ l.uom }}</b></div>
+        <ion-row>
+          <ion-col size="6">
+            <section class="inputbox">
+              <ion-text color="primary"><strong>Received</strong> <ion-text color="danger">*</ion-text></ion-text>
+              <ion-item lines="none" [ngClass]="{'error': l.received > l.qty || l.received < 0}">
+                <ion-input type="number" inputmode="decimal" min="0" [max]="l.qty" [name]="'rec' + i" [(ngModel)]="l.received"></ion-input>
+              </ion-item>
+              <ion-text color="danger" *ngIf="short(l) > 0">Short: {{ short(l) }} {{ l.uom }}</ion-text>
+            </section>
+          </ion-col>
+          <ion-col size="6">
+            <section class="inputbox">
+              <ion-text color="primary"><strong>Lot / Batch No.</strong> <ion-text color="danger" *ngIf="l.received > 0">*</ion-text></ion-text>
+              <ion-item lines="none" [ngClass]="{'error': submitted && l.received > 0 && !l.lot}">
+                <ion-input type="text" maxlength="30" [name]="'lot' + i" [(ngModel)]="l.lot" [disabled]="!(l.received > 0)" placeholder="Lot no."></ion-input>
+              </ion-item>
+            </section>
+          </ion-col>
+          <ion-col size="12">
+            <section class="inputbox" style="margin-bottom:0">
+              <ion-text color="primary"><strong>Expiry Date</strong></ion-text>
+              <ion-item lines="none">
+                <ion-input type="date" [min]="today" [name]="'exp' + i" [(ngModel)]="l.expiry" [disabled]="!(l.received > 0)"></ion-input>
+              </ion-item>
+            </section>
+          </ion-col>
+        </ion-row>
+      </div>
+
+      <div class="km-form">
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Receive Into Warehouse</strong> <ion-text color="danger">*</ion-text></ion-text>
+          <ion-item lines="none" [ngClass]="{'error': submitted && !whId}">
+            <ion-select interface="action-sheet" mode="ios" placeholder="Select warehouse" [(ngModel)]="whId">
+              <ion-select-option *ngFor="let w of dc.site_warehouses" [value]="w.wh_id">{{ w.wh }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-text color="danger" *ngIf="!dc.site_warehouses?.length">No warehouse is set up for this site.</ion-text>
+        </section>
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Remark</strong></ion-text>
+          <ion-item lines="none"><ion-textarea [(ngModel)]="remark" maxlength="1000" autoGrow="true" rows="2" placeholder="Optional"></ion-textarea></ion-item>
+        </section>
+      </div>
+      <div style="height:80px"></div>
+    </ng-container>
+  </div>
+</ion-content>
+
+<ion-footer class="km" *ngIf="dc">
+  <ion-toolbar class="ion-padding-start ion-padding-end">
+    <ion-button expand="block" mode="md" (click)="submit()">Mark received</ion-button>
+  </ion-toolbar>
+</ion-footer>

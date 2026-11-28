@@ -50,6 +50,9 @@ export const environment = {
   // VMS (Atithi) - visitor management APIs
   vmsUrl: 'https://atithidev.onmobilise.com/api',
   vmsPortalUrl: 'https://atithi.onmobilise.com',
+  // Mail Room Management API base, e.g. 'https://mailroom.example.com/api/v1'.
+  // Khaali chhodne par base `sso/mailroom` ke url ke origin se banta hai (origin + '/api/v1').
+  mailroomUrl: '',
   // sirf browser ke liye - native CapacitorHttp seedha aiStudioUrl par jaata hai
   aiStudioWebProxy: 'http://0.0.0.0:8080/',
   aiStudioEnv: 'UAT',

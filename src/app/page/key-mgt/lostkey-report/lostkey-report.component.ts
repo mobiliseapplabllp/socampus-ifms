@@ -35,10 +35,10 @@ export class LostkeyReportComponent implements OnInit {
   setData(data: any) {
     this.forms.patchValue({
       keyName: data.key_name || '',
-      keyNumber: data.keyNo || '',
-      floorName: data.floor || '',
-      blockName: data.block || '',
-      buildingId_desc: data.building || ''
+      keyNumber: data.key_no || '',
+      floorName: data.floor_name || '',
+      blockName: data.block_name || '',
+      buildingId_desc: data.building_name || ''
     });
     this.initialData = this.forms.value;
   }
@@ -58,11 +58,11 @@ export class LostkeyReportComponent implements OnInit {
       description: ['', Validators.required],
     });
     this.forms.get('keyName')?.setValue(this.req_data.key_name);
-    this.forms.get('keyNumber')?.setValue(this.req_data.keyNo);
-    this.forms.get('floorName')?.setValue(this.req_data.floor);
+    this.forms.get('keyNumber')?.setValue(this.req_data.key_no);
+    this.forms.get('floorName')?.setValue(this.req_data.floor_name);
 
-    this.forms.get('blockName')?.setValue(this.req_data.block);
-    this.forms.get('buildingId_desc')?.setValue(this.req_data.building);
+    this.forms.get('blockName')?.setValue(this.req_data.block_name);
+    this.forms.get('buildingId_desc')?.setValue(this.req_data.building_name);
   }
 
   setLostDate(event: any) {

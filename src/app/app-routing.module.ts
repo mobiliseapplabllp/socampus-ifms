@@ -113,6 +113,10 @@ const routes: Routes = [
     loadChildren: () => import('./page/mailroom-mgt/mailroom-mgt.module').then( m => m.MailroomMgtPageModule)
   },
   {
+    path: 'somart',
+    loadChildren: () => import('./page/somart/somart.module').then( m => m.SomartPageModule)
+  },
+  {
     path: 'incident-report',
     loadChildren: () => import('./page/incident-report/incident-report.module').then( m => m.IncidentReportPageModule)
   },

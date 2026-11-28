@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 // Backend: Laravel, prefix /api/key-management
@@ -53,15 +54,36 @@ export class KeysService {
 
   // params (sab optional): site_id, status (Issued | Returned | Lost | Recovered), assigned_to, date_from, date_to ...
   getAssignKeys(params: any = {}): Observable<any> {
-    return this.https.get(this.base + 'assignments', { params });
+    return this.https.get(this.base + 'assignments', { params }).pipe(map(res => this.flattenRes(res)));
   }
 
   getRecentHistory(): Observable<any> {
-    return this.https.get(this.base + 'assignments');
+    return this.https.get(this.base + 'assignments').pipe(map(res => this.flattenRes(res)));
   }
 
   viewKey(asgnId: any): Observable<any> {
-    return this.https.get(this.base + 'assignments/' + asgnId);
+    return this.https.get(this.base + 'assignments/' + asgnId).pipe(map(res => this.flattenRes(res)));
+  }
+
+  // Assignment row me key ki detail nested `key` object me aati hai
+  // (key_no, key_name, room_no, site_name, block_name, building_name, floor_name, location_name).
+  // Unhe row par flat kar dete hain taaki har screen seedha dat.key_name padh sake.
+  // `status` / `remarks` assignment ke hi rehte hain, key ka status `key_status` me milta hai.
+  private flattenAssignment(row: any): any {
+    if (!row || typeof row !== 'object' || !row.key) {
+      return row;
+    }
+    return { ...row.key, ...row, key_status: row.key.status };
+  }
+
+  private flattenRes(res: any): any {
+    if (!res || !res.data) {
+      return res;
+    }
+    const data = Array.isArray(res.data)
+      ? res.data.map((row: any) => this.flattenAssignment(row))
+      : this.flattenAssignment(res.data);
+    return { ...res, data };
   }
 
   // multipart/form-data
@@ -98,7 +120,7 @@ export class KeysService {
     return this.https.post(this.base + 'otp/verify', body);
   }
 
-  // Row ka assignment id (backend field ka naam confirm hona baaki hai)
+  // Row ka assignment id - backend `asgn_id` bhejta hai
   asgnId(row: any): any {
     return row?.asgn_id ?? row?.assignment_id ?? row?.id;
   }

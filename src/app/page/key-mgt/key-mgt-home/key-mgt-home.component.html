@@ -55,18 +55,18 @@
     <div class="km-section-title">Recent Assignments</div>
     <div class="km-card" *ngFor="let dat of recent">
       <div class="km-activity__head">
-        <ion-chip [color]="dat.event_type === 'lost' ? 'danger': dat.event_type === 'returned' ? 'success' : dat.event_type === 'assigned' ? 'primary': 'tertiary'  " class="ion-text-capitalize">{{dat.event_type}}</ion-chip>
+        <ion-chip [color]="dat.status === 'Lost' ? 'danger': dat.status === 'Returned' ? 'success' : dat.status === 'Issued' ? 'primary': 'tertiary'  " class="ion-text-capitalize">{{dat.status}}</ion-chip>
         <span class="km-activity__date">
           <ion-icon name="calendar-outline"></ion-icon>
-          {{ dat.event_type === 'assigned' ? dat.assigned_at  : dat.event_type === 'returned' ? dat.returned_at  :  dat.event_type === 'recovered' ? dat.date_time_found : dat.date_time_lost  }}
+          {{ (dat.status === 'Returned' && dat.actual_return ? dat.actual_return : dat.issue_date) | date: 'dd MMM yyyy, h:mm a' }}
         </span>
       </div>
       <h3 class="km-activity__title"><ion-icon name="key-outline"></ion-icon>{{dat.key_name}}</h3>
       <div class="km-meta">
-        <ion-icon name="person-circle-outline"></ion-icon><span>Issue By</span><b>{{dat.assigned_by_name}}</b>
+        <ion-icon name="person-circle-outline"></ion-icon><span>Issue By</span><b>{{dat.issued_by}}</b>
       </div>
-      <div class="km-meta" *ngIf="dat.event_type === 'assigned' || dat.event_type === 'returned'  ">
-        <ion-icon name="person-add-outline"></ion-icon><span>Assigned</span><b>{{dat.assigned_to}}</b>
+      <div class="km-meta">
+        <ion-icon name="person-add-outline"></ion-icon><span>Assigned</span><b>{{dat.person_name}}</b>
       </div>
       <div class="km-meta">
         <ion-icon name="location-outline"></ion-icon><span>Location</span><b>{{dat.location_name}}</b>

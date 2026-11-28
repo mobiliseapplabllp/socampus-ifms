@@ -1,0 +1,138 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/mailroom-mgt/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Package</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km mr">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page">
+    <div class="mr-center" *ngIf="loading"><ion-spinner name="crescent" color="primary"></ion-spinner></div>
+    <div class="mr-center" *ngIf="errorMsg">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <p>{{ errorMsg }}</p>
+    </div>
+
+    <ng-container *ngIf="p">
+      <div class="km-card">
+        <div class="km-activity__head">
+          <ion-chip [color]="mr.statusColor(p.status)">{{ p.status }}</ion-chip>
+          <span class="km-activity__date"><ion-icon name="time-outline"></ion-icon>{{ p.receivedTime | date: 'dd MMM yyyy, h:mm a' }}</span>
+        </div>
+        <h3 class="km-activity__title"><ion-icon name="barcode-outline"></ion-icon>{{ p.trackingNumber }}</h3>
+        <div class="km-meta"><ion-icon name="airplane-outline"></ion-icon><span>Carrier</span><b>{{ p.carrier }}</b></div>
+        <div class="km-meta"><ion-icon name="cube-outline"></ion-icon><span>Type</span><b>{{ p.packageType }}</b></div>
+        <div class="km-meta"><ion-icon name="file-tray-stacked-outline"></ion-icon><span>Storage</span><b>{{ p.storageLocation || 'Not assigned' }}</b></div>
+        <div class="km-meta"><ion-icon name="mail-outline"></ion-icon><span>Recipient notified</span><b>{{ p.recipientNotified ? 'Yes' : 'No' }}</b></div>
+        <div class="km-meta" *ngIf="p.deliveryRound"><ion-icon name="walk-outline"></ion-icon><span>Delivery round</span><b>{{ p.deliveryRound.name }}</b></div>
+        <div class="km-row__chips">
+          <ion-chip color="warning" *ngIf="p.fragile">Fragile</ion-chip>
+          <ion-chip color="warning" *ngIf="p.perishable">Perishable</ion-chip>
+          <ion-chip color="tertiary" *ngIf="p.requiresRefrigeration">Refrigerated</ion-chip>
+          <ion-chip color="danger" *ngIf="p.isHighValue">High value</ion-chip>
+          <ion-chip color="primary" *ngIf="p.requiresSignature">Signature required</ion-chip>
+        </div>
+        <div class="mr-buttons">
+          <ion-button size="small" fill="outline" (click)="track()">
+            <ion-icon slot="start" name="open-outline"></ion-icon>Track
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="km-card" *ngIf="p.qrCode">
+        <app-mr-code [value]="p.qrCode"></app-mr-code>
+      </div>
+
+      <div class="km-section-title">Recipient</div>
+      <div class="km-card">
+        <h3 class="km-activity__title"><ion-icon name="person-outline"></ion-icon>{{ p.recipientName }}</h3>
+        <div class="km-meta" *ngIf="p.recipientEmail"><ion-icon name="mail-outline"></ion-icon><span>Email</span><b>{{ p.recipientEmail }}</b></div>
+        <div class="km-meta" *ngIf="p.recipientPhone"><ion-icon name="call-outline"></ion-icon><span>Phone</span>
+          <b><a [href]="'tel:' + p.recipientPhone">{{ p.recipientPhone }}</a></b></div>
+        <div class="km-meta" *ngIf="p.recipientDepartment"><ion-icon name="business-outline"></ion-icon><span>Department</span><b>{{ p.recipientDepartment }}</b></div>
+        <div class="km-meta" *ngIf="p.recipientDeskLocation"><ion-icon name="location-outline"></ion-icon><span>Desk</span>
+          <b>{{ p.recipientBuilding }} {{ p.recipientFloor }} {{ p.recipientDeskLocation }}</b></div>
+        <div class="km-meta" *ngIf="p.recipient?.alternateRecipient"><ion-icon name="people-outline"></ion-icon><span>Alternate</span><b>{{ p.recipient.alternateRecipient }}</b></div>
+        <div class="km-meta" *ngIf="p.recipient?.deliveryInstructions"><ion-icon name="information-circle-outline"></ion-icon><span>{{ p.recipient.deliveryInstructions }}</span></div>
+      </div>
+
+      <ng-container *ngIf="p.senderName || p.senderCompany || p.weight || p.notes">
+        <div class="km-section-title">Details</div>
+        <div class="km-card">
+          <div class="km-meta" *ngIf="p.senderName || p.senderCompany"><ion-icon name="send-outline"></ion-icon><span>Sender</span><b>{{ p.senderName }} {{ p.senderCompany }}</b></div>
+          <div class="km-meta" *ngIf="p.weight"><ion-icon name="scale-outline"></ion-icon><span>Weight</span><b>{{ p.weight }} kg</b></div>
+          <div class="km-meta" *ngIf="p.notes"><ion-icon name="document-text-outline"></ion-icon><span>{{ p.notes }}</span></div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="p.status === 'Delivered'">
+        <div class="km-section-title">Hand-over</div>
+        <div class="km-card">
+          <div class="km-meta"><ion-icon name="checkmark-done-outline"></ion-icon><span>Delivered</span><b>{{ p.deliveredTime | date: 'dd MMM yyyy, h:mm a' }}</b></div>
+          <div class="km-meta"><ion-icon name="person-circle-outline"></ion-icon><span>Delivered by</span><b>{{ p.deliveredBy }}</b></div>
+          <div class="km-meta" *ngIf="p.collectedByName"><ion-icon name="hand-left-outline"></ion-icon><span>Collected by</span>
+            <b>{{ p.collectedByName }}<span *ngIf="p.collectedByType && p.collectedByType !== 'self'"> ({{ p.collectedByType }})</span></b></div>
+          <div class="km-meta" *ngIf="p.pickupVerifiedBy"><ion-icon name="shield-checkmark-outline"></ion-icon><span>Verified by</span><b class="ion-text-capitalize">{{ p.pickupVerifiedBy }}</b></div>
+          <div class="km-meta" *ngIf="p.pickupOverrideReason"><ion-icon name="warning-outline"></ion-icon><span>{{ p.pickupOverrideReason }}</span></div>
+          <img class="mr-signature" *ngIf="p.pickupSignature" [src]="p.pickupSignature" alt="Signature">
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="p.photos?.length || p.labelPhoto">
+        <div class="km-section-title">Photos</div>
+        <div class="km-card">
+          <div class="mr-photos">
+            <div *ngFor="let ph of p.photos"><img [src]="ph" (click)="ui.viewImage(ph)" alt="Package photo"></div>
+            <div *ngIf="p.labelPhoto"><img [src]="p.labelPhoto" (click)="ui.viewImage(p.labelPhoto)" alt="Label photo"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="canManage || canResend">
+        <div class="km-section-title">Actions</div>
+        <div class="km-card">
+          <div class="mr-buttons" style="margin-top:0">
+            <ion-button size="small" fill="outline" *ngIf="canManage && !released" (click)="store()">
+              <ion-icon slot="start" name="file-tray-stacked-outline"></ion-icon>{{ p.storageLocation ? 'Move' : 'Store' }}
+            </ion-button>
+            <ion-button size="small" fill="outline" *ngIf="canManage && !released" (click)="notify()">
+              <ion-icon slot="start" name="mail-outline"></ion-icon>{{ p.recipientNotified ? 'Remind' : 'Notify' }}
+            </ion-button>
+            <ion-button size="small" fill="outline" *ngIf="canResend && p.hasPickupCode" (click)="resend()">
+              <ion-icon slot="start" name="key-outline"></ion-icon>Resend code
+            </ion-button>
+            <ion-button size="small" fill="outline" color="danger" *ngIf="canManage" (click)="exception()">
+              <ion-icon slot="start" name="warning-outline"></ion-icon>Damaged / Returned / Lost
+            </ion-button>
+          </div>
+        </div>
+      </ng-container>
+
+      <div class="km-section-title">Timeline</div>
+      <div class="km-card">
+        <ul class="mr-timeline">
+          <li *ngFor="let t of timeline" [class.mr-timeline--email]="t.kind === 'email'">
+            {{ t.summary }}
+            <small>{{ t.at | date: 'dd MMM yyyy, h:mm a' }} · {{ t.user }}</small>
+          </li>
+        </ul>
+        <div class="km-empty" *ngIf="!timeline.length">No history yet</div>
+      </div>
+      <div style="height:80px"></div>
+    </ng-container>
+  </div>
+</ion-content>
+
+<ion-footer class="km" *ngIf="canDeliver">
+  <ion-toolbar class="ion-padding-start ion-padding-end">
+    <ion-button expand="block" (click)="deliver()">
+      <ion-icon slot="start" name="hand-left-outline"></ion-icon>Hand over
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

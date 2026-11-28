@@ -1,0 +1,50 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/somart"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Orders</ion-title>
+  </ion-toolbar>
+  <ion-toolbar class="km-segment">
+    <ion-segment [(ngModel)]="scope" (ionChange)="setScope()" mode="ios">
+      <ion-segment-button value="mine"><ion-label>My orders</ion-label></ion-segment-button>
+      <ion-segment-button value="site"><ion-label>Site orders</ion-label></ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km sm">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-searchbar [(ngModel)]="search" (ionChange)="reload()" debounce="500" mode="md" placeholder="Order no., site, placed by"></ion-searchbar>
+
+  <div class="sm-chips">
+    <ion-chip *ngFor="let s of states" [color]="state === s ? 'primary' : 'medium'" [outline]="state !== s" (click)="setState(s)">
+      {{ sm.stateLabel(s) }}<span *ngIf="counts[s] !== undefined"> ({{ counts[s] }})</span>
+    </ion-chip>
+  </div>
+
+  <div class="km-page" style="padding-top:4px">
+    <div class="sm-center" *ngIf="loading"><ion-spinner name="crescent" color="primary"></ion-spinner></div>
+
+    <div class="km-card sm-tap" *ngFor="let o of list" (click)="open(o)">
+      <div class="km-activity__head">
+        <ion-chip [color]="sm.stateColor(o.dispatch_state)">{{ sm.stateLabel(o.dispatch_state) }}</ion-chip>
+        <span class="km-activity__date"><ion-icon name="calendar-outline"></ion-icon>{{ sm.dt(o.created_at) | date: 'dd/MM/yyyy' }}</span>
+      </div>
+      <h3 class="km-activity__title"><ion-icon name="receipt-outline"></ion-icon>{{ o.order_no }}</h3>
+      <div class="km-meta"><ion-icon name="business-outline"></ion-icon><span>{{ o.site_name }}</span></div>
+      <div class="km-meta" *ngIf="scope === 'site'"><ion-icon name="person-outline"></ion-icon><span>Placed by</span><b>{{ o.placed_by_name }}</b></div>
+      <div class="km-meta"><ion-icon name="cube-outline"></ion-icon><span>{{ o.item_count || o.lines_total }} item(s)</span><b>₹{{ sm.num(o.total_amt) | number: '1.0-2' }}</b></div>
+      <div class="km-meta" *ngIf="o.pending_text"><ion-icon name="hourglass-outline"></ion-icon><span>Pending</span><b>{{ o.pending_text }}</b></div>
+      <div class="km-meta" *ngIf="o.dc_count"><ion-icon name="car-outline"></ion-icon><span>Challans</span><b>{{ o.dc_count }}</b></div>
+    </div>
+
+    <div class="km-empty" *ngIf="!loading && !list.length">
+      <ion-icon name="receipt-outline"></ion-icon>
+      No orders found
+    </div>
+  </div>
+</ion-content>

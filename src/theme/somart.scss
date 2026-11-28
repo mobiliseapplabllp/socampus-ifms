@@ -1,0 +1,227 @@
+/* ---------------------------------------------------------------------------
+   SoMart module ka design. Cards / rows / forms ke liye common .km styles,
+   yahan sirf SoMart ki apni cheezein. Sab .sm ke andar scoped.
+   --------------------------------------------------------------------------- */
+.sm {
+  .sm-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--km-muted);
+    font-size: 14px;
+
+    > ion-icon { font-size: 48px; }
+    p { margin: 0; }
+  }
+
+  .sm-tap { cursor: pointer; }
+  .sm-gap { margin-top: 12px; }
+
+  /* home: shortcuts */
+  .sm-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+
+    button {
+      position: relative;
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 4px;
+      border: 1px solid var(--km-line);
+      border-radius: 14px;
+      background: var(--km-card);
+      box-shadow: var(--km-shadow);
+      color: var(--km-ink);
+      font-size: 12px;
+      font-weight: 600;
+
+      ion-icon { font-size: 22px; color: var(--ion-color-primary); }
+      ion-badge { position: absolute; top: 6px; right: 10px; font-size: 10px; }
+    }
+  }
+
+  /* category chips */
+  .sm-chips {
+    display: flex;
+    gap: 8px;
+    padding: 4px 16px 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+    ion-chip { flex: 0 0 auto; height: 30px; min-height: 30px; font-weight: 600; }
+  }
+
+  /* product card */
+  .sm-product {
+    display: flex;
+    gap: 12px;
+
+    h3 { margin: 0 0 2px; font-size: 14px; font-weight: 700; color: var(--km-ink); }
+    p { margin: 0; font-size: 12px; color: var(--km-muted); }
+  }
+
+  .sm-thumb {
+    flex: 0 0 72px;
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    border: 1px solid var(--km-line);
+    background: var(--km-field);
+    overflow: hidden;
+    font-size: 30px;
+    color: var(--km-muted);
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  .sm-product__body { flex: 1 1 auto; min-width: 0; }
+
+  .sm-product__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .sm-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--km-ink);
+
+    s { margin-left: 6px; font-size: 12px; font-weight: 500; color: var(--km-muted); }
+    small { margin-left: 4px; font-size: 11px; font-weight: 600; color: #1f9d57; }
+  }
+
+  .sm-price--ask { font-size: 13px; color: var(--km-muted); }
+
+  .sm-stock { font-size: 11px; font-weight: 700; }
+  .sm-stock--in { color: #1f9d57; }
+  .sm-stock--low { color: #c98a12; }
+  .sm-stock--out { color: #d4511a; }
+
+  /* qty stepper */
+  .sm-stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--ion-color-primary);
+    border-radius: 999px;
+    overflow: hidden;
+
+    button {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      color: var(--ion-color-primary);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 48px;
+      height: 32px;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--km-ink);
+    }
+  }
+
+  .sm-add {
+    --border-radius: 999px;
+    height: 32px;
+    margin: 0;
+    font-weight: 600;
+    text-transform: none;
+  }
+
+  /* totals */
+  .sm-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--km-ink);
+  }
+
+  /* line items */
+  .sm-line {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--km-line);
+    font-size: 13px;
+    color: var(--km-ink);
+
+    &:last-child { border-bottom: 0; }
+    > div { display: flex; justify-content: space-between; gap: 8px; }
+    b { font-weight: 600; }
+    small { display: block; margin-top: 2px; color: var(--km-muted); }
+  }
+
+  .sm-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+
+    ion-button { --border-radius: 999px; margin: 0; text-transform: none; font-weight: 600; }
+  }
+
+  /* timeline */
+  .sm-timeline {
+    margin: 0;
+    padding: 0 0 0 14px;
+    list-style: none;
+    border-left: 2px solid var(--km-line);
+
+    li { position: relative; padding: 0 0 14px 12px; font-size: 13px; color: var(--km-ink); }
+    li::before {
+      content: '';
+      position: absolute;
+      left: -20px;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--ion-color-primary);
+    }
+    small { display: block; margin-top: 2px; color: var(--km-muted); }
+  }
+
+  .sm-note {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #8a5a00;
+    background: rgba(224, 167, 60, 0.18);
+
+    ion-icon { flex: 0 0 auto; font-size: 18px; }
+  }
+}
+
+/* cart bar (catalogue ke neeche) */
+ion-footer.sm-cartbar ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: #fff;
+  padding: 6px 16px;
+
+  .sm-cartbar__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 600; }
+  ion-button { --border-radius: 999px; --background: #fff; --color: var(--ion-color-primary); margin: 0; font-weight: 700; text-transform: none; }
+}

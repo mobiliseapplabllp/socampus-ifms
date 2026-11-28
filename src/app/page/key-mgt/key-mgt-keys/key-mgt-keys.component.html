@@ -27,23 +27,23 @@
       <div class="km-card km-row" *ngFor="let dat of assignKeyData; let i = index">
         <div class="km-row__icon"><ion-icon name="key"></ion-icon></div>
         <div class="km-row__body">
-          <h3>K No - {{dat.keyNo}} ({{dat.key_name}})</h3>
+          <h3>{{dat.key_no}} ({{dat.key_name}})</h3>
           <p><ion-icon name="location-outline"></ion-icon><span>{{dat.block_name}} {{dat.building_name}} {{dat.floor_name}} {{dat.location_name}}</span></p>
           <p><ion-icon name="business-outline"></ion-icon><span>Room No: {{dat.room_no}}</span></p>
           <div class="km-row__chips">
             <ion-chip
-              [color]="dat.assignment_status === 'returned' ? 'success': dat.assignment_status === 'assigned' ? 'primary' : dat.assignment_status === 'active' ? 'primary' : 'danger'  "
-              class="ion-text-capitalize">Assign: {{dat.assignment_status === 'active' ? 'Assigned' : dat.assignment_status }}</ion-chip>
+              [color]="dat.status === 'Returned' ? 'success': dat.status === 'Issued' ? 'primary' : dat.status === 'Recovered' ? 'tertiary' : 'danger'  "
+              class="ion-text-capitalize">Assign: {{dat.status}}</ion-chip>
             <ion-chip
-              [color]="dat.key_status === 'available' ? 'success': dat.key_status === 'lost' ? 'danger' : 'primary'  "
+              [color]="dat.key_status === 'Available' ? 'success': dat.key_status === 'Lost' ? 'danger' : 'primary'  "
               class="ion-text-capitalize">Key: {{dat.key_status}}</ion-chip>
           </div>
         </div>
         <ion-buttons>
-          <ion-button id="popover-action-{{dat.id}}">
+          <ion-button id="popover-action-{{dat.asgn_id}}">
             <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
           </ion-button>
-          <ion-popover trigger="popover-action-{{dat.id}}" [dismissOnSelect]="true" [backdropDismiss]="true">
+          <ion-popover trigger="popover-action-{{dat.asgn_id}}" [dismissOnSelect]="true" [backdropDismiss]="true">
             <ng-template>
               <ion-content>
                 <ion-list>
@@ -54,14 +54,14 @@
                     <ion-icon name="timer-outline" slot="start"></ion-icon> Key Assign History
                   </ion-item>
                   <ion-item (click)="openRoute('key-mgt/mark-return',dat)"
-                    *ngIf="dat.key_status === 'assigned' ">
+                    *ngIf="dat.status === 'Issued' ">
                     <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon> Mark As Returned
                   </ion-item>
-                  <ion-item (click)="recoverLost(dat)" *ngIf="dat.key_status === 'lost' ">
+                  <ion-item (click)="recoverLost(dat)" *ngIf="dat.status === 'Lost' ">
                     <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon> Recover Lost Key
                   </ion-item>
                   <ion-item (click)="openRoute('/key-mgt/lostkey-report',dat)"
-                    *ngIf="dat.key_status === 'available' || dat.key_status === 'assigned'  ">
+                    *ngIf="dat.status === 'Issued' ">
                     <ion-icon name="warning-outline" color="danger" slot="start"></ion-icon> <ion-text
                       color="danger">Report Lost</ion-text>
                   </ion-item>
@@ -84,20 +84,20 @@
       <div class="km-card km-row" *ngFor="let dat of addKeyData">
         <div class="km-row__icon"><ion-icon name="key"></ion-icon></div>
         <div class="km-row__body">
-          <h3>K No {{dat.id}} ({{dat.key_name}})</h3>
+          <h3>{{dat.key_no}} ({{dat.key_name}})</h3>
           <p><ion-icon name="location-outline"></ion-icon><span>{{dat.block_name}} {{dat.building_name}} {{dat.floor_name}} {{dat.location_name}}</span></p>
           <p><ion-icon name="business-outline"></ion-icon><span>Room No: {{dat.room_no}}</span></p>
           <div class="km-row__chips">
             <ion-chip
-              [color]="dat.status === 'available' ? 'success': dat.status === 'lost' ? 'danger' : 'primary'  "
+              [color]="dat.status === 'Available' ? 'success': dat.status === 'Lost' ? 'danger' : 'primary'  "
               class="ion-text-capitalize">Key: {{dat.status}}</ion-chip>
           </div>
         </div>
         <ion-buttons>
-          <ion-button id="popover-action1-{{dat.id}}">
+          <ion-button id="popover-action1-{{dat.key_id}}">
             <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
           </ion-button>
-          <ion-popover trigger="popover-action1-{{dat.id}}" [dismissOnSelect]="true" [backdropDismiss]="true">
+          <ion-popover trigger="popover-action1-{{dat.key_id}}" [dismissOnSelect]="true" [backdropDismiss]="true">
             <ng-template>
               <ion-content>
                 <ion-list>
@@ -107,7 +107,7 @@
                   <ion-item (click)="openLocationHis(dat)">
                     <ion-icon name="timer-outline" slot="start"></ion-icon> Location History
                   </ion-item>
-                  <ion-item (click)="assignKey(dat)" *ngIf="dat.status === 'available' ">
+                  <ion-item (click)="assignKey(dat)" *ngIf="dat.status === 'Available' ">
                     <ion-icon name="person-add-outline" slot="start"> </ion-icon> Assign
                   </ion-item>
                 </ion-list>
@@ -250,11 +250,11 @@
               </ion-col>
               <ion-col size="6">
                 <span class="km-label">Key Number</span>
-                <span class="km-value">{{selectedData?.key_no ? selectedData?.key_no : selectedData?.keyNo}}</span>
+                <span class="km-value">{{selectedData?.key_no || 'N/A'}}</span>
               </ion-col>
               <ion-col size="6">
                 <span class="km-label">Key Location</span>
-                <span class="km-value">{{selectedData?.location_name ? selectedData?.location_name : selectedData?.location }}</span>
+                <span class="km-value">{{selectedData?.location_name || 'N/A'}}</span>
               </ion-col>
               <ion-col size="12">
                 <span class="km-label">Site Name</span>
@@ -272,7 +272,7 @@
               </ion-col>
               <ion-col size="6">
                 <span class="km-label">Phone Number</span>
-                <span class="km-value">{{selectedData?.person_phone || 'N/A'}}</span>
+                <span class="km-value">{{selectedData?.phone || 'N/A'}}</span>
               </ion-col>
               <ion-col size="6">
                 <span class="km-label">Name Of Person</span>
@@ -280,23 +280,23 @@
               </ion-col>
               <ion-col size="6">
                 <span class="km-label">Email Id</span>
-                <span class="km-value">{{selectedData?.person_email || 'N/A'}}</span>
+                <span class="km-value">{{selectedData?.email || 'N/A'}}</span>
               </ion-col>
               <ion-col size="6">
                 <span class="km-label">Department</span>
-                <span class="km-value">{{selectedData?.departmentInfo?.dept_desc || 'N/A'}}</span>
+                <span class="km-value">{{selectedData?.department || 'N/A'}}</span>
               </ion-col>
               <ion-col size="6">
                 <span class="km-label">Issued By</span>
-                <span class="km-value">{{selectedData?.status === 'lost' ? 'N/A'  : selectedData?.assigned_by_name || 'N/A'}}</span>
+                <span class="km-value">{{selectedData?.issued_by || 'N/A'}}</span>
               </ion-col>
               <ion-col size="12">
                 <span class="km-label">Return Date & Time</span>
-                <span class="km-value">{{selectedData?.expected_return_at || 'N/A'}}</span>
+                <span class="km-value">{{selectedData?.expected_return ? (selectedData?.expected_return | date: 'dd MMM yyyy, h:mm a') : 'N/A'}}</span>
               </ion-col>
               <ion-col size="12">
                 <span class="km-label">Remarks</span>
-                <span class="km-value">{{selectedData?.notes || 'N/A'}}</span>
+                <span class="km-value">{{selectedData?.remarks || 'N/A'}}</span>
               </ion-col>
               <ion-col size="6" *ngIf="selectedData.id_photo_url">
                 <img class="km-photo" [src]="selectedData?.id_photo_url" (click)="imageView(selectedData.id_photo_url)">
@@ -307,21 +307,21 @@
           </ion-row>
         </div>
 
-        <ng-container *ngIf="selectedData.is_on_behalf === 1">
+        <ng-container *ngIf="selectedData?.auth_name">
           <div class="km-section-title">Authorized Person</div>
           <div class="km-card">
             <ion-row class="km-fields">
               <ion-col size="6">
                 <span class="km-label">Phone No</span>
-                <span class="km-value">{{selectedData?.auth_person_phone || 'N/A'}}</span>
+                <span class="km-value">{{selectedData?.auth_phone || 'N/A'}}</span>
               </ion-col>
               <ion-col size="6">
                 <span class="km-label">Name</span>
-                <span class="km-value">{{selectedData?.auth_person_name || 'N/A'}}</span>
+                <span class="km-value">{{selectedData?.auth_name || 'N/A'}}</span>
               </ion-col>
               <ion-col size="12">
                 <span class="km-label">Email Id</span>
-                <span class="km-value">{{selectedData?.auth_person_email || '--'}}</span>
+                <span class="km-value">{{selectedData?.auth_email || '--'}}</span>
               </ion-col>
             </ion-row>
           </div>

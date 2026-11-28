@@ -49,9 +49,10 @@ export class AssignKeyComponent implements OnInit {
         this.req_data = JSON.parse(res.data);
         this.isKeyReq = this.req_data.require_auth == 1 ? true : false
         this.forms.get('key_id_desc')?.setValue(this.req_data.key_name);
-        this.forms.get('key_id')?.setValue(this.req_data.id);
-        this.forms.get('key_no')?.setValue(this.req_data.code);
-        this.forms.get('key_loc')?.setValue(this.req_data.location.location_desc);
+        this.forms.get('key_id')?.setValue(this.req_data.key_id);
+        this.forms.get('key_no')?.setValue(this.req_data.key_no);
+        this.forms.get('room_no')?.setValue(this.req_data.room_no);
+        this.forms.get('key_loc')?.setValue(this.req_data.location_name);
         this.forms.get('site_name')?.setValue(this.req_data.site_name);
         this.forms.get('is_on_behalf')?.setValue('');
       }
@@ -122,7 +123,28 @@ export class AssignKeyComponent implements OnInit {
   submit() {
     this.submitted = true;    
     if (this.forms.invalid) {
-      this.common.presentToast('Please Fill All Mandatory Fields', 'warning');
+      // Toast me batate hain kaun sa field khali hai, warna pata nahi chalta form kyu ruk raha hai
+      const labels: any = {
+        key_id: 'Key Name',
+        key_id_desc: 'Key Name',
+        requester_type: 'Requester Type',
+        person_phone: 'Phone No',
+        person_name: 'Name of Person',
+        department: 'Department',
+        department_desc: 'Department',
+        expected_return_at: 'Return Date & Time',
+        is_on_behalf: 'My Self / Behalf Of',
+        auth_person_name: 'Behalf Of - Name',
+        auth_person_phone: 'Behalf Of - Phone No'
+      };
+      const missing: string[] = [];
+      Object.keys(this.forms.controls).forEach(name => {
+        const label = labels[name] || name;
+        if (this.forms.controls[name].invalid && !missing.includes(label)) {
+          missing.push(label);
+        }
+      });
+      this.common.presentToast('Please Fill: ' + missing.join(', '), 'warning');
       return;
     }
     const v = this.forms.value;
@@ -143,7 +165,7 @@ export class AssignKeyComponent implements OnInit {
       return
     }
     if (!v.requester_photo) {
-      this.common.presentToast('Requester ID is Required', 'warning');
+      this.common.presentToast('Requester Photo is Required', 'warning');
       return
     }
 
@@ -228,8 +250,8 @@ export class AssignKeyComponent implements OnInit {
       if (disModal.role === 'true') {        
         this.isKeyReq = disModal.data.require_auth == 1 ? true : false
         this.forms.get('key_id_desc')?.setValue(disModal.data.key_name);
-        this.forms.get('key_id')?.setValue(disModal.data.id);
-        this.forms.get('key_no')?.setValue(disModal.data.code);
+        this.forms.get('key_id')?.setValue(disModal.data.key_id);
+        this.forms.get('key_no')?.setValue(disModal.data.key_no);
         this.forms.get('room_no')?.setValue(disModal.data.room_no);
         
         this.forms.get('key_loc')?.setValue(disModal.data.location_name);

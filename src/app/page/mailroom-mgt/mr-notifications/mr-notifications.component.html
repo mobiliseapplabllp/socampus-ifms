@@ -1,0 +1,36 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/mailroom-mgt/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Notifications</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="unread" (click)="readAll()"><ion-icon slot="icon-only" name="checkmark-done-outline"></ion-icon></ion-button>
+      <ion-button *ngIf="items.length" (click)="clearRead()"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km mr">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page">
+    <div class="mr-center" *ngIf="loading"><ion-spinner name="crescent" color="primary"></ion-spinner></div>
+
+    <div class="km-card km-row mr-tap" *ngFor="let n of items" [class.mr-unread]="!n.readAt" (click)="open(n)">
+      <div class="km-row__icon"><ion-icon [name]="icon(n.type)"></ion-icon></div>
+      <div class="km-row__body">
+        <h3>{{ n.title }}</h3>
+        <p><span>{{ n.message }}</span></p>
+        <p><ion-icon name="time-outline"></ion-icon><span>{{ n.createdAt | date: 'dd MMM yyyy, h:mm a' }}</span></p>
+      </div>
+    </div>
+
+    <div class="km-empty" *ngIf="!loading && !items.length">
+      <ion-icon name="notifications-off-outline"></ion-icon>
+      No notifications
+    </div>
+  </div>
+</ion-content>

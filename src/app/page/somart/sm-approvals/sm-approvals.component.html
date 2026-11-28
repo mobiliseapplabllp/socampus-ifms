@@ -1,0 +1,63 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/somart"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Approvals</ion-title>
+  </ion-toolbar>
+  <ion-toolbar class="km-segment">
+    <ion-segment [(ngModel)]="status" (ionChange)="changeTab()" mode="ios">
+      <ion-segment-button value="Pending"><ion-label>Pending</ion-label></ion-segment-button>
+      <ion-segment-button value="Actioned"><ion-label>Decided by me</ion-label></ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km sm">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page">
+    <div class="sm-center" *ngIf="loading"><ion-spinner name="crescent" color="primary"></ion-spinner></div>
+
+    <div class="sm-note" *ngIf="!loading && !approver">
+      <ion-icon name="information-circle-outline"></ion-icon>
+      <span>You are not an approver for any site.</span>
+    </div>
+
+    <div class="km-card" *ngFor="let o of list">
+      <div class="km-activity__head">
+        <ion-chip [color]="sm.stateColor(o.approval_status)">{{ o.approval_status }}</ion-chip>
+        <span class="km-activity__date"><ion-icon name="calendar-outline"></ion-icon>{{ sm.dt(o.created_at) | date: 'dd/MM/yyyy, h:mm a' }}</span>
+      </div>
+      <h3 class="km-activity__title"><ion-icon name="receipt-outline"></ion-icon>{{ o.order_no }}</h3>
+      <div class="km-meta"><ion-icon name="business-outline"></ion-icon><span>{{ o.site_name }}</span></div>
+      <div class="km-meta"><ion-icon name="person-outline"></ion-icon><span>Placed by</span><b>{{ o.placed_by_name }}</b></div>
+      <div class="km-meta" *ngIf="o.required_by"><ion-icon name="calendar-outline"></ion-icon><span>Required by</span><b>{{ o.required_by | date: 'dd/MM/yyyy' }}</b></div>
+      <div class="km-meta"><ion-icon name="cash-outline"></ion-icon><span>{{ o.items?.length || 0 }} item(s)</span><b>₹{{ sm.num(o.total_amt) | number: '1.0-2' }}</b></div>
+      <div class="km-meta" *ngIf="o.remarks"><ion-icon name="document-text-outline"></ion-icon><span>{{ o.remarks }}</span></div>
+      <div class="km-meta" *ngIf="o.approval_remark"><ion-icon name="chatbox-outline"></ion-icon><span>{{ o.approval_remark }}</span></div>
+
+      <div class="km-panel" *ngIf="openId === o.order_id">
+        <div class="sm-line" *ngFor="let it of o.items">
+          <div><b>{{ it.item_name }}</b><b>₹{{ sm.num(it.amount) | number: '1.0-2' }}</b></div>
+          <small>{{ sm.num(it.qty) }} {{ it.uom }} × ₹{{ sm.num(it.price) | number: '1.0-2' }}</small>
+        </div>
+      </div>
+
+      <div class="sm-buttons">
+        <ion-button size="small" fill="clear" (click)="toggle(o)">{{ openId === o.order_id ? 'Hide items' : 'View items' }}</ion-button>
+        <ng-container *ngIf="o.approval_status === 'Pending'">
+          <ion-button size="small" fill="outline" color="danger" (click)="reject(o)">Reject</ion-button>
+          <ion-button size="small" color="success" (click)="approve(o)">Approve</ion-button>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="km-empty" *ngIf="!loading && !list.length">
+      <ion-icon name="checkmark-done-circle-outline"></ion-icon>
+      {{ status === 'Pending' ? 'Nothing waiting for your approval' : 'No decisions yet' }}
+    </div>
+  </div>
+</ion-content>

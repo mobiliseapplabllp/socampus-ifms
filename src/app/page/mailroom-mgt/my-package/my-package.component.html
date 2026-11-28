@@ -1,0 +1,189 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/list-master"></ion-back-button>
+    </ion-buttons>
+    <ion-title>My Package</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="signOut()"><ion-icon slot="icon-only" name="log-out-outline"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar class="km-segment" *ngIf="data && !data.homeSitePending">
+    <ion-segment [(ngModel)]="tab" mode="ios" [scrollable]="true">
+      <ion-segment-button value="open"><ion-label>Packages ({{ data.openPackages?.length || 0 }})</ion-label></ion-segment-button>
+      <ion-segment-button value="history"><ion-label>History</ion-label></ion-segment-button>
+      <ion-segment-button value="expected"><ion-label>Expected</ion-label></ion-segment-button>
+      <ion-segment-button value="prefs"><ion-label>Preferences</ion-label></ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km mr">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page">
+    <div class="mr-center" *ngIf="loading"><ion-spinner name="crescent" color="primary"></ion-spinner></div>
+    <div class="mr-center" *ngIf="errorMsg">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <p>{{ errorMsg }}</p>
+      <ion-button shape="round" (click)="load()">Try again</ion-button>
+    </div>
+
+    <!-- home site pehle chunni hai -->
+    <ng-container *ngIf="data?.homeSitePending">
+      <div class="km-section-title">Choose your home site</div>
+      <div class="km-card km-row mr-tap" *ngFor="let s of data.homeOptions" (click)="chooseHome(s)">
+        <div class="km-row__icon"><ion-icon name="business-outline"></ion-icon></div>
+        <div class="km-row__body">
+          <h3>{{ s.name }}</h3>
+          <p *ngIf="s.city">{{ s.city }}</p>
+        </div>
+        <ion-icon class="mr-chevron" name="chevron-forward-outline"></ion-icon>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="data && !data.homeSitePending" [ngSwitch]="tab">
+
+      <ng-container *ngSwitchCase="'open'">
+        <div class="km-card" *ngFor="let p of data.openPackages">
+          <div class="km-activity__head">
+            <ion-chip [color]="mr.statusColor(p.status)">{{ statusText(p.status) }}</ion-chip>
+            <span class="km-activity__date"><ion-icon name="time-outline"></ion-icon>{{ p.receivedTime | date: 'dd MMM, h:mm a' }}</span>
+          </div>
+          <h3 class="km-activity__title"><ion-icon name="cube-outline"></ion-icon>{{ p.carrier }} · {{ p.packageType }}</h3>
+          <div class="km-meta"><ion-icon name="barcode-outline"></ion-icon><span>Tracking</span><b>{{ p.trackingNumber }}</b></div>
+          <div class="km-meta" *ngIf="p.storageLocation"><ion-icon name="file-tray-stacked-outline"></ion-icon><span>Storage</span><b>{{ p.storageLocation }}</b></div>
+          <div class="km-meta" *ngIf="p.requiresSignature"><ion-icon name="create-outline"></ion-icon><span>Signature needed at pickup</span></div>
+          <div class="mr-pickup" *ngIf="p.pickupCode">
+            <span>Pickup code</span>
+            <b>{{ p.pickupCode }}</b>
+          </div>
+          <app-mr-code *ngIf="p.qrCode" [value]="p.qrCode" [big]="true" label="Show this at the mailroom"></app-mr-code>
+        </div>
+        <div class="km-empty" *ngIf="!data.openPackages?.length">
+          <ion-icon name="cube-outline"></ion-icon>
+          No packages waiting for you
+        </div>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'history'">
+        <div class="km-card" *ngFor="let p of data.history">
+          <div class="km-activity__head">
+            <ion-chip [color]="mr.statusColor(p.status)">{{ p.status }}</ion-chip>
+            <span class="km-activity__date" *ngIf="p.deliveredTime"><ion-icon name="time-outline"></ion-icon>{{ p.deliveredTime | date: 'dd MMM yyyy, h:mm a' }}</span>
+          </div>
+          <h3 class="km-activity__title"><ion-icon name="cube-outline"></ion-icon>{{ p.carrier }}</h3>
+          <div class="km-meta"><ion-icon name="barcode-outline"></ion-icon><span>Tracking</span><b>{{ p.trackingNumber }}</b></div>
+          <div class="km-meta" *ngIf="p.collectedByName"><ion-icon name="hand-left-outline"></ion-icon><span>Collected by</span><b>{{ p.collectedByName }}</b></div>
+          <div class="km-meta" *ngIf="p.deliveredBy"><ion-icon name="person-circle-outline"></ion-icon><span>Handed over by</span><b>{{ p.deliveredBy }}</b></div>
+        </div>
+        <div class="km-empty" *ngIf="!data.history?.length">
+          <ion-icon name="time-outline"></ion-icon>
+          No history yet
+        </div>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'expected'">
+        <ion-button expand="block" shape="round" (click)="openExpected()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>Pre-register a delivery
+        </ion-button>
+        <div class="km-card mr-gap" *ngFor="let e of data.expectedDeliveries">
+          <div class="km-activity__head">
+            <ion-chip color="primary">Expected</ion-chip>
+            <span class="km-activity__date"><ion-icon name="calendar-outline"></ion-icon>{{ mr.dateOnly(e.expectedDate) | date: 'dd MMM yyyy' }}</span>
+          </div>
+          <h3 class="km-activity__title"><ion-icon name="airplane-outline"></ion-icon>{{ e.carrier }}</h3>
+          <div class="km-meta" *ngIf="e.trackingNumber"><ion-icon name="barcode-outline"></ion-icon><span>Tracking</span><b>{{ e.trackingNumber }}</b></div>
+          <div class="km-meta" *ngIf="e.description"><ion-icon name="document-text-outline"></ion-icon><span>{{ e.description }}</span></div>
+        </div>
+        <div class="km-empty" *ngIf="!data.expectedDeliveries?.length">
+          <ion-icon name="calendar-outline"></ion-icon>
+          No expected deliveries
+        </div>
+      </ng-container>
+
+      <div *ngSwitchCase="'prefs'" class="km-form">
+        <div class="km-card">
+          <div class="km-meta"><ion-icon name="person-outline"></ion-icon><span>Name</span><b>{{ data.recipient?.name }}</b></div>
+          <div class="km-meta"><ion-icon name="mail-outline"></ion-icon><span>Email</span><b>{{ data.recipient?.email }}</b></div>
+          <div class="km-meta" *ngIf="data.homeSite"><ion-icon name="business-outline"></ion-icon><span>Home site</span><b>{{ data.homeSite.name }}</b></div>
+        </div>
+        <form>
+          <section class="inputbox">
+            <ion-text color="primary"><strong>Phone</strong></ion-text>
+            <ion-item lines="none"><ion-input type="tel" name="phone" [(ngModel)]="prefs.phone" placeholder="Phone number"></ion-input></ion-item>
+          </section>
+          <section class="inputbox">
+            <ion-text color="primary"><strong>Alternate Recipient</strong></ion-text>
+            <ion-item lines="none"><ion-input type="text" name="alternate" [(ngModel)]="prefs.alternateRecipient" placeholder="Who may collect for you"></ion-input></ion-item>
+          </section>
+          <section class="inputbox">
+            <ion-text color="primary"><strong>Delivery Instructions</strong></ion-text>
+            <ion-item lines="none"><ion-textarea name="instructions" [(ngModel)]="prefs.deliveryInstructions" autoGrow="true" rows="3"></ion-textarea></ion-item>
+          </section>
+          <section class="inputbox">
+            <ion-text color="primary"><strong>Email Language</strong></ion-text>
+            <ion-item lines="none">
+              <ion-select interface="action-sheet" mode="ios" name="language" [(ngModel)]="prefs.preferredLanguage">
+                <ion-select-option value="en">English</ion-select-option>
+                <ion-select-option value="hi">Hindi</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </section>
+          <div class="mr-toggles">
+            <ion-item lines="none"><ion-label>Email notifications</ion-label><ion-toggle slot="end" name="emailOn" [(ngModel)]="prefs.emailOn"></ion-toggle></ion-item>
+          </div>
+          <ion-button expand="block" (click)="savePrefs()">Save preferences</ion-button>
+        </form>
+      </div>
+    </ng-container>
+  </div>
+</ion-content>
+
+<ion-modal [isOpen]="expectedOpen" (didDismiss)="expectedOpen = false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Pre-register Delivery</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="expectedOpen = false"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding km km-form mr">
+      <form>
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Carrier</strong> <ion-text color="danger">*</ion-text></ion-text>
+          <ion-item lines="none">
+            <ion-select interface="action-sheet" mode="ios" placeholder="Select" name="carrier" [(ngModel)]="form.carrier">
+              <ion-select-option *ngFor="let c of carriers" [value]="c.name">{{ c.name }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </section>
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Expected Date</strong> <ion-text color="danger">*</ion-text></ion-text>
+          <ion-item lines="none"><ion-input type="date" name="expectedDate" [(ngModel)]="form.expectedDate"></ion-input></ion-item>
+        </section>
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Tracking Number</strong></ion-text>
+          <ion-item lines="none"><ion-input type="text" name="trackingNumber" [(ngModel)]="form.trackingNumber" placeholder="If known"></ion-input></ion-item>
+        </section>
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Description</strong></ion-text>
+          <ion-item lines="none"><ion-input type="text" name="description" [(ngModel)]="form.description" placeholder="What are you expecting"></ion-input></ion-item>
+        </section>
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Notes</strong></ion-text>
+          <ion-item lines="none"><ion-textarea name="notes" [(ngModel)]="form.notes" autoGrow="true" rows="2"></ion-textarea></ion-item>
+        </section>
+      </form>
+    </ion-content>
+    <ion-footer class="km">
+      <ion-toolbar class="ion-padding-start ion-padding-end">
+        <ion-button expand="block" mode="md" (click)="saveExpected()">Save</ion-button>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>

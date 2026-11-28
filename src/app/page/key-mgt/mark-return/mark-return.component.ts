@@ -45,7 +45,7 @@ export class MarkReturnComponent implements OnInit {
   initForm() {
     this.forms1 = this.formbuilder.group({
       key_name: [this.req_data.key_name],
-      assign_to: [this.req_data.assigned_to || this.req_data.assign_to],
+      assign_to: [this.req_data.person_name],
       return_date: [this.currentDate, Validators.required],
       return_condition: [''],
       remark: [''],

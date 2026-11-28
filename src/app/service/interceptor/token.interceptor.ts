@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { App } from '@capacitor/app';
 import { environment } from 'src/environments/environment';
+import { MailroomSession } from 'src/app/provider/mailroom/mailroom-session';
 
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
@@ -72,6 +73,13 @@ export class TokenInterceptor implements HttpInterceptor {
     // - VMS APIs me IFMS ka token1/Referer1 nahi bhejna
     // - VMS ka 401 aane par IFMS se logout nahi karna
     // Note: `sso/atithi` khud IFMS API hai, wo neeche normal IFMS flow (token1) se jaata hai.
+    // Mail Room Management — alag backend, apne do tokens (staff / portal) + X-Property-Id.
+    // IFMS ka token1 yahan nahi jaata, aur Mailroom ka 401 IFMS se logout nahi karta
+    // (MailroomService 401 par SSO dobara chala kar request retry karta hai).
+    // Note: `sso/mailroom` khud IFMS API hai, wo neeche normal IFMS flow (token1) se jaata hai.
+    if (MailroomSession.isMailroomUrl(request.url)) {
+      return next.handle(request.clone({ setHeaders: MailroomSession.headersFor(request.url) }));
+    }
     if (request.url.includes(environment.vmsUrl)) {
       const vmsToken = localStorage.getItem('vms_token');
       if (!vmsToken) {

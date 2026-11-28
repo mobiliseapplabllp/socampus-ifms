@@ -1,0 +1,101 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/mailroom-mgt/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Desk Delivery</ion-title>
+    <ion-buttons slot="end" *ngIf="canManage">
+      <ion-button (click)="openCreate()"><ion-icon slot="icon-only" name="add-outline"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar class="km-segment">
+    <ion-segment [(ngModel)]="tab" (ionChange)="changeTab()" mode="ios">
+      <ion-segment-button value="open"><ion-label>Active</ion-label></ion-segment-button>
+      <ion-segment-button value="closed"><ion-label>Finished</ion-label></ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km mr">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page">
+    <div class="mr-center" *ngIf="loading"><ion-spinner name="crescent" color="primary"></ion-spinner></div>
+
+    <div class="km-card km-row mr-tap" *ngFor="let r of list" (click)="open(r)">
+      <div class="km-row__icon"><ion-icon name="walk-outline"></ion-icon></div>
+      <div class="km-row__body">
+        <h3>{{ r.name }}</h3>
+        <p><ion-icon name="person-outline"></ion-icon><span>{{ r.runner?.name || 'No runner assigned' }}</span></p>
+        <p *ngIf="r.notes"><ion-icon name="document-text-outline"></ion-icon><span>{{ r.notes }}</span></p>
+        <div class="mr-bar"><span [style.width.%]="r.total ? (r.delivered / r.total) * 100 : 0"></span></div>
+        <div class="km-row__chips">
+          <ion-chip [color]="color(r.status)" class="ion-text-capitalize">{{ label(r.status) }}</ion-chip>
+          <ion-chip color="medium">{{ r.delivered || 0 }} / {{ r.total || 0 }} delivered</ion-chip>
+        </div>
+      </div>
+      <ion-icon class="mr-chevron" name="chevron-forward-outline"></ion-icon>
+    </div>
+
+    <div class="km-empty" *ngIf="!loading && !list.length">
+      <ion-icon name="walk-outline"></ion-icon>
+      No delivery rounds
+    </div>
+  </div>
+</ion-content>
+
+<ion-modal [isOpen]="createOpen" (didDismiss)="createOpen = false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>New Round</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="createOpen = false"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding km km-form mr">
+      <form>
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Round Name</strong></ion-text>
+          <ion-item lines="none"><ion-input type="text" name="name" [(ngModel)]="form.name" placeholder="Auto name if left empty"></ion-input></ion-item>
+        </section>
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Runner</strong></ion-text>
+          <ion-item lines="none">
+            <ion-select interface="action-sheet" mode="ios" placeholder="Assign later" name="runnerId" [(ngModel)]="form.runnerId">
+              <ion-select-option value="">Assign later</ion-select-option>
+              <ion-select-option *ngFor="let u of runners" [value]="u.id">{{ u.name }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </section>
+        <section class="inputbox">
+          <ion-text color="primary"><strong>Notes</strong></ion-text>
+          <ion-item lines="none"><ion-textarea name="notes" [(ngModel)]="form.notes" autoGrow="true" rows="2" placeholder="Notes for the runner"></ion-textarea></ion-item>
+        </section>
+        <ion-text><h4>Packages ({{ picked.size }} selected)</h4></ion-text>
+      </form>
+
+      <div class="mr-center" *ngIf="loadingCandidates"><ion-spinner name="crescent" color="primary"></ion-spinner></div>
+      <div class="km-card km-row mr-tap" *ngFor="let p of candidates" [class.mr-selected]="picked.has(p.id)" (click)="toggle(p)">
+        <div class="km-row__icon"><ion-icon [name]="picked.has(p.id) ? 'checkbox' : 'square-outline'"></ion-icon></div>
+        <div class="km-row__body">
+          <h3>{{ p.recipientName }}</h3>
+          <p><ion-icon name="location-outline"></ion-icon><span>{{ p.recipientBuilding }} {{ p.recipientFloor }} {{ p.recipientDeskLocation }}</span></p>
+          <p><ion-icon name="barcode-outline"></ion-icon><span>{{ p.trackingNumber }} · {{ p.status }}</span></p>
+        </div>
+      </div>
+      <div class="km-empty" *ngIf="!loadingCandidates && !candidates.length">
+        <ion-icon name="cube-outline"></ion-icon>No packages available for a round
+      </div>
+      <div style="height:80px"></div>
+    </ion-content>
+    <ion-footer class="km">
+      <ion-toolbar class="ion-padding-start ion-padding-end">
+        <ion-button expand="block" mode="md" [disabled]="!picked.size" (click)="create()">Create round</ion-button>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>

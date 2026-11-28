@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/somart"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Updates</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km sm">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page">
+    <div class="sm-center" *ngIf="loading"><ion-spinner name="crescent" color="primary"></ion-spinner></div>
+
+    <div class="km-card km-row sm-tap" *ngFor="let h of items" (click)="open(h)">
+      <div class="km-row__icon"><ion-icon [name]="icon(h.action)"></ion-icon></div>
+      <div class="km-row__body">
+        <h3>{{ h.order_no }} · {{ h.action }}</h3>
+        <p><ion-icon name="person-outline"></ion-icon><span>{{ h.action_by_name }}</span></p>
+        <p *ngIf="h.remark"><ion-icon name="chatbox-outline"></ion-icon><span>{{ h.remark }}</span></p>
+        <p><ion-icon name="time-outline"></ion-icon><span>{{ sm.dt(h.action_at) | date: 'dd/MM/yyyy, h:mm a' }}</span></p>
+      </div>
+    </div>
+
+    <div class="km-empty" *ngIf="!loading && !items.length">
+      <ion-icon name="notifications-off-outline"></ion-icon>
+      No updates on your recent orders
+    </div>
+  </div>
+</ion-content>

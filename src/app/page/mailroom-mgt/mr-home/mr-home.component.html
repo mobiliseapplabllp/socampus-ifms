@@ -1,0 +1,106 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/list-master"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mail Room</ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="mr-bell" (click)="open('/mailroom-mgt/notifications')">
+        <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
+        <ion-badge color="danger" *ngIf="unread">{{ unread > 99 ? '99+' : unread }}</ion-badge>
+      </ion-button>
+      <ion-button (click)="menu()">
+        <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="km mr">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="km-page">
+    <div class="km-hero">
+      <div>
+        <p>Received today<span *ngIf="mr.propertyName"> · {{ mr.propertyName }}</span></p>
+        <h1>{{ stats?.todayPackages || 0 }}</h1>
+      </div>
+      <ion-icon name="file-tray-full"></ion-icon>
+    </div>
+
+    <div class="mr-actions" *ngIf="actions.length">
+      <button type="button" *ngFor="let a of actions" (click)="a.run()">
+        <ion-icon [name]="a.icon"></ion-icon>
+        <span>{{ a.label }}</span>
+      </button>
+    </div>
+
+    <div class="mr-center" *ngIf="loading">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+    </div>
+
+    <ng-container *ngIf="stats">
+      <div class="km-section-title">Today</div>
+      <div class="km-stats">
+        <div class="km-stat km-stat--primary" (click)="open('/mailroom-mgt/packages?mode=live')">
+          <div class="km-stat__icon"><ion-icon name="cube-outline"></ion-icon></div>
+          <div><h2>{{ stats.awaitingPickup || 0 }}</h2><p>In mailroom</p></div>
+        </div>
+        <div class="km-stat km-stat--success">
+          <div class="km-stat__icon"><ion-icon name="checkmark-done-outline"></ion-icon></div>
+          <div><h2>{{ stats.deliveredToday || 0 }}</h2><p>Delivered today</p></div>
+        </div>
+        <div class="km-stat km-stat--warning" (click)="open('/mailroom-mgt/packages?mode=live&storage=none')">
+          <div class="km-stat__icon"><ion-icon name="help-buoy-outline"></ion-icon></div>
+          <div><h2>{{ stats.unassignedCount || 0 }}</h2><p>No storage</p></div>
+        </div>
+        <div class="km-stat km-stat--danger" (click)="open('/mailroom-mgt/packages?mode=live&overdue=1')">
+          <div class="km-stat__icon"><ion-icon name="alarm-outline"></ion-icon></div>
+          <div><h2>{{ stats.overdueCount || 0 }}</h2><p>Overdue</p></div>
+        </div>
+        <div class="km-stat km-stat--warning" (click)="open('/mailroom-mgt/packages?mode=live&aging=3')">
+          <div class="km-stat__icon"><ion-icon name="hourglass-outline"></ion-icon></div>
+          <div><h2>{{ stats.agingPackagesCount || 0 }}</h2><p>Over 3 days</p></div>
+        </div>
+        <div class="km-stat km-stat--primary">
+          <div class="km-stat__icon"><ion-icon name="mail-unread-outline"></ion-icon></div>
+          <div><h2>{{ stats.notNotifiedCount || 0 }}</h2><p>Not notified</p></div>
+        </div>
+      </div>
+
+      <div class="km-card mr-gap" *ngIf="stats.storageUtilization as su">
+        <div class="km-meta">
+          <ion-icon name="server-outline"></ion-icon><span>Storage used</span>
+          <b>{{ su.totalOccupied || 0 }} / {{ su.totalCapacity || 0 }} ({{ su.utilizationPercent || 0 }}%)</b>
+        </div>
+        <div class="mr-bar"><span [style.width.%]="su.utilizationPercent || 0"
+            [class.mr-bar--warn]="su.utilizationPercent >= 75" [class.mr-bar--full]="su.utilizationPercent >= 100"></span></div>
+        <div class="km-meta" *ngIf="stats.expectedToday">
+          <ion-icon name="calendar-outline"></ion-icon><span>Expected today</span><b>{{ stats.expectedToday }}</b>
+        </div>
+        <div class="km-meta" *ngIf="stats.avgPickupTime">
+          <ion-icon name="time-outline"></ion-icon><span>Average pickup time</span><b>{{ stats.avgPickupTime }}</b>
+        </div>
+      </div>
+
+      <div class="km-section-title">Recent packages</div>
+      <div class="km-card km-row mr-tap" *ngFor="let p of stats.recentPackages" (click)="openPackage(p.id)">
+        <div class="km-row__icon"><ion-icon name="cube-outline"></ion-icon></div>
+        <div class="km-row__body">
+          <h3>{{ p.recipientName }}</h3>
+          <p><ion-icon name="barcode-outline"></ion-icon><span>{{ p.trackingNumber }} · {{ p.carrier }}</span></p>
+          <p><ion-icon name="time-outline"></ion-icon><span>{{ p.receivedTime | date: 'dd MMM, h:mm a' }}<span *ngIf="p.storageLocation"> · {{ p.storageLocation }}</span></span></p>
+          <div class="km-row__chips">
+            <ion-chip [color]="mr.statusColor(p.status)">{{ p.status }}</ion-chip>
+          </div>
+        </div>
+      </div>
+      <div class="km-empty" *ngIf="!stats.recentPackages?.length">
+        <ion-icon name="cube-outline"></ion-icon>
+        No recent packages
+      </div>
+    </ng-container>
+  </div>
+</ion-content>

@@ -1,12 +1,59 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
+      <ion-back-button defaultHref="/list-master"></ion-back-button>
     </ion-buttons>
-    <ion-title>Mailroom Management</ion-title>
+    <ion-title>Mail Room Management</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="km mr">
+  <div class="km-page" [ngSwitch]="state">
 
+    <div *ngSwitchCase="'loading'" class="mr-center">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Signing you in...</p>
+    </div>
+
+    <div *ngSwitchCase="'error'" class="mr-center">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <p>{{ errorMsg }}</p>
+      <ion-button shape="round" (click)="start()">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>Try again
+      </ion-button>
+    </div>
+
+    <ng-container *ngSwitchCase="'choose'">
+      <div class="km-section-title">Choose panel</div>
+      <div class="km-card km-row mr-tap" (click)="openStaff()">
+        <div class="km-row__icon"><ion-icon name="file-tray-full-outline"></ion-icon></div>
+        <div class="km-row__body">
+          <h3>Mail Room Panel</h3>
+          <p>Receive, store and hand over packages</p>
+        </div>
+        <ion-icon class="mr-chevron" name="chevron-forward-outline"></ion-icon>
+      </div>
+      <div class="km-card km-row mr-tap" (click)="openMyPackage()">
+        <div class="km-row__icon"><ion-icon name="cube-outline"></ion-icon></div>
+        <div class="km-row__body">
+          <h3>My Package</h3>
+          <p>Your parcels, pickup codes and history</p>
+        </div>
+        <ion-icon class="mr-chevron" name="chevron-forward-outline"></ion-icon>
+      </div>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'site'">
+      <div class="km-section-title">Select site</div>
+      <div class="km-card km-row mr-tap" *ngFor="let site of mr.properties" (click)="pickSite(site)">
+        <div class="km-row__icon"><ion-icon name="business-outline"></ion-icon></div>
+        <div class="km-row__body">
+          <h3>{{ site.name }}</h3>
+          <p *ngIf="site.tenantName">{{ site.tenantName }}</p>
+        </div>
+        <ion-icon class="mr-chevron" name="chevron-forward-outline"></ion-icon>
+      </div>
+    </ng-container>
+
+  </div>
 </ion-content>
