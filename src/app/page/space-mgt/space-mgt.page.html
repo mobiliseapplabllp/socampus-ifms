@@ -12,14 +12,23 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <!-- ===== STEP 1 : Site ===== -->
+  <!-- ===== STEP 1 + 2 : Organisation & Site (ek hi card) ===== -->
   <ion-card class="section-card theme-violet">
     <div class="section-header">
       <div class="section-icon"><ion-icon name="business-outline"></ion-icon></div>
-      <h3>Site</h3>
+      <h3>Organisation & Site</h3>
     </div>
     <ion-card-content class="ion-no-padding">
-      <section class="inputbox" (click)="openPicker()">
+      <section class="inputbox" (click)="openPicker('org')">
+        <ion-text color="primary">Organisation <ion-text color="danger">*</ion-text></ion-text>
+        <ion-item lines="none">
+          <ion-input type="text" [value]="organisation_name" placeholder="Tap to select organisation" readonly></ion-input>
+          <ion-icon name="chevron-down-outline" slot="end" class="fb-caret"></ion-icon>
+        </ion-item>
+      </section>
+
+      <!-- Site field organisation select hone ke baad -->
+      <section class="inputbox" *ngIf="organisation_id" (click)="openPicker('site')">
         <ion-text color="primary">Site <ion-text color="danger">*</ion-text></ion-text>
         <ion-item lines="none">
           <ion-input type="text" [value]="site_name" placeholder="Tap to select site" readonly></ion-input>
@@ -29,7 +38,7 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- ===== STEP 2 : Facilities ===== -->
+  <!-- ===== STEP 3 : Facilities ===== -->
   <ion-card class="section-card theme-teal" *ngIf="site_id">
     <div class="section-header">
       <div class="section-icon"><ion-icon name="layers-outline"></ion-icon></div>
@@ -80,8 +89,15 @@
     </ion-card-content>
   </ion-card>
 
+  <!-- organisation select hone se pahle -->
+  <div class="picker-empty" *ngIf="!organisation_id">
+    <ion-icon name="git-network-outline"></ion-icon>
+    <p>Select an Organisation</p>
+    <span>Organisation select karne par sites dikhengi</span>
+  </div>
+
   <!-- site select hone se pahle -->
-  <div class="picker-empty" *ngIf="!site_id">
+  <div class="picker-empty" *ngIf="organisation_id && !site_id">
     <ion-icon name="business-outline"></ion-icon>
     <p>Select a Site</p>
     <span>Site select karne par facilities dikhengi</span>
@@ -330,14 +346,14 @@
   </ng-template>
 </ion-modal>
 
-<!-- ===== Site picker ===== -->
+<!-- ===== Picker (Organisation / Site) ===== -->
 <ion-modal [isOpen]="isPickerOpen" (willDismiss)="closePicker()">
   <ng-template>
     <ion-header class="picker-header">
       <ion-toolbar class="picker-toolbar">
         <div class="picker-title">
-          <ion-icon name="business-outline"></ion-icon>
-          <span>Select Site ({{pickerArrCopy.length}})</span>
+          <ion-icon [name]="pickerType === 'org' ? 'git-network-outline' : 'business-outline'"></ion-icon>
+          <span>Select {{pickerType === 'org' ? 'Organisation' : 'Site'}} ({{pickerArrCopy.length}})</span>
         </div>
         <ion-buttons slot="end">
           <ion-button class="close-btn" (click)="closePicker()">
@@ -346,12 +362,12 @@
         </ion-buttons>
       </ion-toolbar>
       <div class="search-wrap">
-        <ion-searchbar class="picker-search" mode="md" (ionInput)="searchPicker($event)" placeholder="Search site..."></ion-searchbar>
+        <ion-searchbar class="picker-search" mode="md" (ionInput)="searchPicker($event)" [placeholder]="pickerType === 'org' ? 'Search organisation...' : 'Search site...'"></ion-searchbar>
       </div>
     </ion-header>
     <ion-content class="picker-content">
       <ion-item class="picker-item" *ngFor="let dat of pickerArr" (click)="selectPicker(dat)" button detail="false" lines="none">
-        <div class="picker-icon-wrap" slot="start"><ion-icon name="business-outline"></ion-icon></div>
+        <div class="picker-icon-wrap" slot="start"><ion-icon [name]="pickerType === 'org' ? 'git-network-outline' : 'business-outline'"></ion-icon></div>
         <ion-label>{{nameOf(dat)}}</ion-label>
         <ion-icon name="chevron-forward-outline" slot="end" class="picker-arrow"></ion-icon>
       </ion-item>

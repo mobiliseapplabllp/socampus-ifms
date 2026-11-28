@@ -15,6 +15,10 @@ export class SpaceMgtPage implements OnInit {
   tenant_id: any = '';
   organisation_id: any = '';
 
+  // Organisation (site se pahle select hoti hai)
+  orgArr: any = [];
+  organisation_name = '';
+
   // Site
   siteArr: any = [];
   site_id: any = '';
@@ -24,7 +28,8 @@ export class SpaceMgtPage implements OnInit {
   facilityArr: any = [];
   isLoading = false;
 
-  // Picker
+  // Picker — ek hi picker Organisation aur Site dono ke liye
+  pickerType: 'org' | 'site' = 'site';
   isPickerOpen = false;
   pickerArr: any = [];
   pickerArrCopy: any = [];
@@ -77,11 +82,29 @@ export class SpaceMgtPage implements OnInit {
       this.userData = JSON.parse(user);
     }
     this.tenant_id = this.userData.tenant_id;
-    this.organisation_id = this.userData.organisation_id;
-    this.getSites();
+    this.getOrganisations();
   }
 
-  // ---------------- STEP 1 : Site list ----------------
+  // ---------------- STEP 1 : Organisation list ----------------
+
+  getOrganisations() {
+    this.common.presentLoading().then(preLoad => {
+      this.httpSpace.getOrganisations(this.tenant_id).subscribe({
+        next: (data: any) => {
+          this.orgArr = this.listOf(data);
+        },
+        error: () => {
+          this.common.dismissloading();
+          this.common.presentToast(environment.errMsg, 'danger');
+        },
+        complete: () => {
+          this.common.dismissloading();
+        }
+      });
+    });
+  }
+
+  // ---------------- STEP 2 : Site list (selected organisation ki) ----------------
 
   getSites() {
     this.common.presentLoading().then(preLoad => {
@@ -466,11 +489,13 @@ export class SpaceMgtPage implements OnInit {
     this.isDetailOpen = false;
   }
 
-  // ---------------- Site picker ----------------
+  // ---------------- Picker (Organisation / Site) ----------------
 
-  openPicker() {
-    this.pickerArr = this.siteArr;
-    this.pickerArrCopy = this.siteArr;
+  openPicker(type: 'org' | 'site' = 'site') {
+    this.pickerType = type;
+    const list = type === 'org' ? this.orgArr : this.siteArr;
+    this.pickerArr = list;
+    this.pickerArrCopy = list;
     this.isPickerOpen = true;
   }
 
@@ -485,9 +510,22 @@ export class SpaceMgtPage implements OnInit {
   }
 
   selectPicker(dat: any) {
+    this.closePicker();
+
+    // Organisation select — purani site / facilities hata ke nayi org ki sites lao
+    if (this.pickerType === 'org') {
+      this.organisation_id = dat.id;
+      this.organisation_name = this.nameOf(dat);
+      this.site_id = '';
+      this.site_name = '';
+      this.siteArr = [];
+      this.facilityArr = [];
+      this.getSites();
+      return;
+    }
+
     this.site_id = dat.id;
     this.site_name = this.nameOf(dat);
-    this.closePicker();
     this.getFacilities();
   }
 
@@ -514,7 +552,7 @@ export class SpaceMgtPage implements OnInit {
   }
 
   nameOf(dat: any) {
-    return (dat?.name || dat?.site_name || dat?.title || '') + '';
+    return (dat?.name || dat?.site_name || dat?.organisation_name || dat?.title || '') + '';
   }
 
   // 09:00:00 -> 09:00
@@ -542,8 +580,10 @@ export class SpaceMgtPage implements OnInit {
     event.target.complete();
     if (this.site_id) {
       this.getFacilities();
-    } else {
+    } else if (this.organisation_id) {
       this.getSites();
+    } else {
+      this.getOrganisations();
     }
   }
 
