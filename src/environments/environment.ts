@@ -42,7 +42,8 @@ export const environment = {
   db: 'socampuseng.db',
   db_location: 'default',
   // Space Management (FMS) — sso/initiate ke baad saari space APIs yahan jaati hain (token2)
-  fmsUrl: 'https://fms.onmobilise.com/',
+  // fmsUrl: 'https://fms.onmobilise.com/',
+  fmsUrl: 'https://fmsdev.onmobilise.com/',
   errMsg: 'Internal Server Error Please try again!!!',
   source: 'Mobile',
   LARAVEL_KEY: '8+Fjns9RCg2HJfhHCirTe6FE3NCHSq+W3014tuKBZH4=',
